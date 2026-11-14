@@ -1,9 +1,9 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useState } from 'react'
 
 import { requestComposerSubmit } from '@/app/chat/composer/focus'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { GenerateButton } from '@/components/ui/generate-button'
 import { SplitButton } from '@/components/ui/split-button'
 import { Textarea } from '@/components/ui/textarea'
@@ -135,7 +135,7 @@ export function ReviewShipBar() {
           disabled={!canCommit}
           onTrigger={id => runCommit(id as CommitAction)}
           onValueChange={id => $reviewCommitDefault.set(id as CommitAction)}
-          primaryIcon={<Codicon name="check" size={ICON} />}
+          primaryIcon={<AppIcon name="check" size={ICON} />}
           value={commitDefault}
           variant="default"
         />
@@ -168,7 +168,7 @@ export function ReviewShipBar() {
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name="git-pull-request" size={ICON} />
+              <AppIcon name="git-pull-request" size={ICON} />
             </Button>
           </span>
         </Tip>

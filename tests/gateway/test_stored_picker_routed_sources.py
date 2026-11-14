@@ -32,7 +32,7 @@ async def _finished_cron_run(authority, db, tmp_path):
     """A cron fire through the owner's own path, then settled the way a finished run books it."""
     from cron import jobs
     from gateway import session_cron
-    from hermes_state_runtime import cancel_session_input
+    from agent_state_runtime import cancel_session_input
     with jobs.use_cron_store(tmp_path / 'cron'):
         job = jobs.create_job(prompt='report', schedule='every 1h', deliver='local', model='m')
         receipt = await session_cron.operation(authority, 'submit', {'job_id': job['id'], 'request_id': 'fire',
@@ -107,7 +107,7 @@ async def test_a_compressed_messaging_conversation_is_listed_under_its_lineage_r
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('platform', ['irc', 'line', 'google_chat'])
+@pytest.mark.parametrize('platform', ['line', 'line', 'google_chat'])
 async def test_a_bundled_plugin_platform_conversation_is_listed_and_resumes(tmp_path, monkeypatch, platform):
     """Plugin platforms are ``Platform`` pseudo-members that enum iteration never yields; the cold mount
     resolves them by label, so the listing must offer the same rows."""

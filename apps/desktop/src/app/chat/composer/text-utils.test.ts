@@ -121,10 +121,10 @@ describe('detectTrigger', () => {
   })
 
   it('only treats a KNOWN kind as a scope', () => {
-    // `@teknium1:` is a handle with a colon, not a directive — inventing a
+    // `@RAWx18:` is a handle with a colon, not a directive — inventing a
     // scope for it would make Backspace eat the whole word.
-    expect(detectTrigger('@teknium1:')?.scope).toBeUndefined()
-    expect(detectTrigger('@teknium1:')?.value).toBe('teknium1:')
+    expect(detectTrigger('@RAWx18:')?.scope).toBeUndefined()
+    expect(detectTrigger('@RAWx18:')?.value).toBe('RAWx18:')
     expect(detectTrigger('@localhost:8080')?.scope).toBeUndefined()
   })
 

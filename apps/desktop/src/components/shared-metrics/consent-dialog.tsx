@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { ChevronDown } from '@noone/ui/icons'
 import { useEffect, useId, useMemo, useState } from 'react'
 
 import { DocsLink } from '@/components/onboarding/flow'
@@ -12,7 +13,6 @@ import {
   preventCloseButtonAutoFocus
 } from '@/components/ui/dialog'
 import { useI18n } from '@/i18n'
-import { ChevronDown } from '@/lib/icons'
 import { $tourActive } from '@/lib/tour/tour-active'
 import { cn } from '@/lib/utils'
 import { notifyError } from '@/store/notifications'

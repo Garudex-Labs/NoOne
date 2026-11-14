@@ -14,7 +14,7 @@ from typing import Any, Dict, NamedTuple, Optional, Tuple
 
 from agent.error_classifier import FailoverReason
 from agent.stream_max_lifetime import StreamLifetimeExceeded
-from hermes_constants import display_hermes_home
+from agent_constants import display_agent_home
 
 # Failure codes minted by loop sites that are not provider verdicts (see module docstring).
 SITE_FAILURE_CODES = frozenset({
@@ -112,7 +112,7 @@ def failed_turn_notice(turn_messages: Any) -> str:
 
 def provider_label_for(provider: Any) -> str:
     """Human-friendly provider name for chat copy (``"OpenRouter"``, ``"Nous Portal"``…)."""
-    from hermes_cli.models import provider_label
+    from agent_cli.models import provider_label
 
     return provider_label(str(provider or ""))
 
@@ -207,7 +207,7 @@ def is_max_iteration_handoff(result: Any) -> bool:
 _NEXT_STEPS_RETRY = "Wait a minute and send /retry, or switch models with /model."
 _NEXT_STEPS_LOOP = (
     "Your message is saved. Send `continue` to try again, or start a new session with /new. "
-    "If it happens again, run `hermes doctor` and share the error details."
+    "If it happens again, run `noone doctor` and share the error details."
 )
 
 # Lead sentence per classifier reason once retries and fallback are exhausted.
@@ -229,11 +229,11 @@ _EXHAUSTED_FIRST_ATTEMPT_LEADS: dict[str, str] = {
 _NONRETRYABLE_COPY: dict[str, str] = {
     FailoverReason.model_not_found.value: (
         "Model '{model}' isn't available on {label}. Pick a different model with /model "
-        "(or `hermes model` in a terminal).{prefix_hint}"
+        "(or `noone model` in a terminal).{prefix_hint}"
     ),
     FailoverReason.format_error.value: (
         "{label} rejected this request as malformed, so the model didn't answer. Start a clean "
-        "session with /new or switch models with /model; if it keeps happening, run `hermes doctor`."
+        "session with /new or switch models with /model; if it keeps happening, run `noone doctor`."
     ),
     FailoverReason.role_alternation.value: (
         "{label} requires user and assistant turns to strictly alternate and rejected this "
@@ -271,7 +271,7 @@ _AUTH_COPY: dict[str, str] = {
     "oauth": "{label} rejected your sign-in, so the model can't be reached. Sign in again: `{relogin}`.",
     "api_key": (
         "{label} rejected your API key, so the model can't be reached. Update it in "
-        "Settings → Providers, or run `hermes setup` in a terminal."
+        "Settings → Providers, or run `noone setup` in a terminal."
     ),
 }
 
@@ -409,7 +409,7 @@ _SITE_COPY: dict[str, str] = {**_FAILURE_CODE_COPY, **_ONE_OFF_COPY}
 
 def site_copy(code: str, **fields: Any) -> str:
     """Chat copy for a failure code or one-off loop outcome; unknown fields default to empty strings."""
-    fields.setdefault("home", display_hermes_home())
+    fields.setdefault("home", display_agent_home())
     return _SITE_COPY[code].format_map(_Defaults(fields))
 
 
@@ -454,14 +454,12 @@ def limit_reset_copy(resets_at: float, now: Optional[float] = None) -> str:
 
 def oauth_relogin_command(provider: Any) -> str:
     """The exact re-login command for a rejected OAuth grant, naming the provider slug and the active
-    named profile: a profile's credentials are its own (93889b770da), so a bare ``hermes auth`` from
+    named profile: a profile's credentials are its own (93889b770da), so a bare ``noone auth`` from
     the root profile re-signs the wrong store and the goal judge, reading a bare 401, guesses which
     service revoked the token (#114012)."""
-    from hermes_constants import profile_cli_selector
+    from agent_constants import profile_cli_selector
 
     slug = str(provider or "").strip().lower()
-    if slug == "nous":
-        return f"hermes {profile_cli_selector()}portal"
     if _login_owned_by_external_cli(slug):
         # `auth add` refuses a plugin with no auth_handler; the model flow runs the vendor CLI's login.
         return f"hermes {profile_cli_selector()}model"
@@ -469,17 +467,17 @@ def oauth_relogin_command(provider: Any) -> str:
 
 
 def _login_owned_by_external_cli(slug: str) -> bool:
-    from hermes_cli.auth_plugin_providers import plugin_auth_handler, plugin_profile
+    from agent_cli.auth_plugin_providers import plugin_auth_handler, plugin_profile
 
     return getattr(plugin_profile(slug), "auth_type", "") == "external_process" and plugin_auth_handler(slug) is None
 
 
 def relogin_command_hint(provider: Any) -> str:
     """Re-sign-in command for a rejected credential on surfaces that may not know the provider:
-    the exact OAuth command for a known OAuth slug, ``hermes auth add <slug>`` for a known API-key
+    the exact OAuth command for a known OAuth slug, ``noone auth add <slug>`` for a known API-key
     slug, and the ``<provider>`` placeholder when the slug is unknown — always carrying the
     ``-p <profile>`` selector so a profile user never re-signs the ROOT store (#114012)."""
-    from hermes_constants import profile_cli_selector
+    from agent_constants import profile_cli_selector
 
     slug = str(provider or "").strip().lower()
     if not slug:
@@ -507,7 +505,7 @@ def nonretryable_copy(
         f"'{prefix_suggestion}'?"
         if prefix_suggestion else ""
     )
-    body = template.format(label=label, model=model, home=display_hermes_home(), prefix_hint=prefix_hint,
+    body = template.format(label=label, model=model, home=display_agent_home(), prefix_hint=prefix_hint,
                            relogin=oauth_relogin_command(provider))
     return f"{body}\n\nProvider said: {summary}"
 

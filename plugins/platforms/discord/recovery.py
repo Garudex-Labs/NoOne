@@ -11,7 +11,7 @@ from contextlib import suppress
 from pathlib import Path
 from typing import Any, Callable
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class DiscordRecoveryStore:
     def __init__(self, hermes_home: Path | None = None) -> None:
         self._lock = threading.Lock()
         self._initialized = False
-        self._hermes_home = Path(hermes_home or get_hermes_home())
+        self._hermes_home = Path(hermes_home or get_agent_home())
 
     def path(self) -> Path:
         directory = self._hermes_home / "gateway"
@@ -53,28 +53,28 @@ class DiscordRecoveryStore:
             return default
 
     def _initialize(self, conn: sqlite3.Connection) -> None:
-        from hermes_state_wal import apply_wal_with_fallback
-        apply_wal_with_fallback(conn, db_label="discord_recovery.db")
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS discord_messages (
-                message_id TEXT PRIMARY KEY, channel_id TEXT, thread_id TEXT, parent_channel_id TEXT,
-                author_id TEXT, created_at TEXT, status TEXT NOT NULL,
-                replied INTEGER NOT NULL DEFAULT 0, emoji_ack INTEGER NOT NULL DEFAULT 0,
-                outage_response INTEGER NOT NULL DEFAULT 0, response_message_id TEXT,
-                attempts INTEGER NOT NULL DEFAULT 0, last_attempt_at TEXT, last_error TEXT,
-                updated_at TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS discord_recovery_scans (
-                scan_id TEXT PRIMARY KEY, started_at TEXT NOT NULL, completed_at TEXT, status TEXT NOT NULL,
-                channels TEXT NOT NULL, window_seconds REAL NOT NULL, limit_count INTEGER NOT NULL,
-                scanned INTEGER NOT NULL DEFAULT 0, missed INTEGER NOT NULL DEFAULT 0,
-                dispatched INTEGER NOT NULL DEFAULT 0, error TEXT
-            );
-            CREATE TABLE IF NOT EXISTS discord_recovery_cursors (
-                channel_id TEXT PRIMARY KEY, last_message_id TEXT NOT NULL, updated_at TEXT NOT NULL
-            );
-        """)
-        cutoff = (dt.datetime.now(dt.UTC) - dt.timedelta(days=_RETENTION_DAYS)).isoformat()
-        conn.execute("DELETE FROM discord_messages WHERE updated_at < ?", (cutoff,))
-        conn.execute("DELETE FROM discord_recovery_scans WHERE COALESCE(completed_at, started_at) < ?", (cutoff,))
-        conn.execute("DELETE FROM discord_recovery_cursors WHERE updated_at < ?", (cutoff,))
+            from agent_state_wal import apply_wal_with_fallback
+            apply_wal_with_fallback(conn, db_label="discord_recovery.db")
+            conn.executescript("""
+                CREATE TABLE IF NOT EXISTS discord_messages (
+                    message_id TEXT PRIMARY KEY, channel_id TEXT, thread_id TEXT, parent_channel_id TEXT,
+                    author_id TEXT, created_at TEXT, status TEXT NOT NULL,
+                    replied INTEGER NOT NULL DEFAULT 0, emoji_ack INTEGER NOT NULL DEFAULT 0,
+                    outage_response INTEGER NOT NULL DEFAULT 0, response_message_id TEXT,
+                    attempts INTEGER NOT NULL DEFAULT 0, last_attempt_at TEXT, last_error TEXT,
+                    updated_at TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS discord_recovery_scans (
+                    scan_id TEXT PRIMARY KEY, started_at TEXT NOT NULL, completed_at TEXT, status TEXT NOT NULL,
+                    channels TEXT NOT NULL, window_seconds REAL NOT NULL, limit_count INTEGER NOT NULL,
+                    scanned INTEGER NOT NULL DEFAULT 0, missed INTEGER NOT NULL DEFAULT 0,
+                    dispatched INTEGER NOT NULL DEFAULT 0, error TEXT
+                );
+                CREATE TABLE IF NOT EXISTS discord_recovery_cursors (
+                    channel_id TEXT PRIMARY KEY, last_message_id TEXT NOT NULL, updated_at TEXT NOT NULL
+                );
+            """)
+            cutoff = (dt.datetime.now(dt.UTC) - dt.timedelta(days=_RETENTION_DAYS)).isoformat()
+            conn.execute("DELETE FROM discord_messages WHERE updated_at < ?", (cutoff,))
+            conn.execute("DELETE FROM discord_recovery_scans WHERE COALESCE(completed_at, started_at) < ?", (cutoff,))
+            conn.execute("DELETE FROM discord_recovery_cursors WHERE updated_at < ?", (cutoff,))

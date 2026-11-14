@@ -1,12 +1,12 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertTriangle, ExternalLink } from '@noone/ui/icons'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
-import { AlertTriangle, ExternalLink } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { $corruptSessionStores } from '@/store/session'
 
@@ -56,10 +56,10 @@ export function SidebarBlankState({ onNewProject }: { onNewProject: () => void }
   return (
     <div className="grid min-h-0 flex-1 place-items-center px-4 text-center">
       <div className="flex flex-col items-center gap-2">
-        <Codicon className="text-(--ui-text-quaternary)" name="root-folder" size="1.25rem" />
+        <AppIcon className="text-(--ui-text-quaternary)" name="root-folder" size="1.25rem" />
         <p className="text-xs text-(--ui-text-tertiary)">{s.noSessions}</p>
         <Button className="mt-0.5 text-(--ui-text-secondary)" onClick={onNewProject} size="sm" variant="ghost">
-          <Codicon name="add" size="0.75rem" />
+          <AppIcon name="add" size="0.75rem" />
           {s.projects.newButton}
         </Button>
       </div>
@@ -79,7 +79,7 @@ export function SidebarPinnedEmptyState({ archived, filtered }: { archived: bool
   return (
     <div className="flex min-h-7 items-center gap-1.5 rounded-lg pl-2 text-[0.75rem] text-(--ui-text-tertiary)">
       <span className="grid w-3.5 shrink-0 place-items-center text-(--ui-text-quaternary)">
-        <Codicon name="pin" size="0.75rem" />
+        <AppIcon name="pin" size="0.75rem" />
       </span>
       <span>{filtered || archived ? t.sidebar.noFilterMatches : t.sidebar.shiftClickHint}</span>
     </div>
@@ -95,10 +95,10 @@ export function SidebarLoadErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="grid min-h-16 place-items-center rounded-lg px-2 text-center">
       <div className="flex flex-col items-center gap-2">
-        <Codicon className="text-(--ui-text-quaternary)" name="error" size="1rem" />
+        <AppIcon className="text-(--ui-text-quaternary)" name="error" size="1rem" />
         <p className="text-xs text-(--ui-text-tertiary)">{t.sidebar.projectLoadFailed}</p>
         <Button className="mt-0.5 text-(--ui-text-secondary)" onClick={onRetry} size="sm" variant="ghost">
-          <Codicon name="refresh" size="0.75rem" />
+          <AppIcon name="refresh" size="0.75rem" />
           {t.common.retry}
         </Button>
       </div>
@@ -107,7 +107,7 @@ export function SidebarLoadErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 const SESSION_STORAGE_RECOVERY_URL =
-  'https://hermes-agent.nousresearch.com/docs/user-guide/session-storage-recovery#when-the-three-steps-do-not-work'
+  'https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/session-storage-recovery.md#when-the-three-steps-do-not-work'
 
 interface SidebarStorageCorruptNoticeProps {
   openRecoveryGuide?: (url: string) => void

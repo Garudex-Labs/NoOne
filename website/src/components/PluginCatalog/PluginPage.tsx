@@ -1,11 +1,14 @@
 import React from "react";
-import Layout from "@theme/Layout";
-import Link from "@docusaurus/Link";
-import Head from "@docusaurus/Head";
+
+import { appText } from '../../application-identity';
+import Icon from "../../components/Icon";
+import Layout from "../DocLayout";
+import { DocLink as Link } from "../DocLink";
+import { PageHead as Head } from "../DocLink";
+
 import {
-  type CatalogPlugin,
-  SUBMIT_PLUGIN_URL,
   authorPagePath,
+  type CatalogPlugin,
   categoryOf,
   desktopInstallLink,
   docsHref,
@@ -14,6 +17,7 @@ import {
   pinUrl,
   repoUrl,
   splitDisclosure,
+  SUBMIT_PLUGIN_URL,
   tierOf,
 } from "./catalog";
 import CopyButton from "./CopyButton";
@@ -81,7 +85,7 @@ export default function PluginPage({ data }: { data: PluginPageData }) {
     : null;
   const added = formatDate(plugin.addedAt);
   const updated = formatDate(plugin.updatedAt);
-  const metaDescription = (prose || plugin.description || `${plugin.name} — a Hermes Agent plugin`).slice(0, 160);
+  const metaDescription = (prose || plugin.description || `${plugin.name} — a ${appText('{app_name}')} plugin`).slice(0, 160);
 
   return (
     <Layout title={`${plugin.name} · Plugin Catalog`} description={metaDescription}>
@@ -111,14 +115,14 @@ export default function PluginPage({ data }: { data: PluginPageData }) {
           <div className={styles.heroBody}>
             <div className={styles.titleRow}>
               <span className={styles.heroIcon} aria-hidden="true" title={category.label}>
-                {category.icon}
+                <Icon name={category.icon} />
               </span>
               <h1 className={styles.title}>{plugin.name}</h1>
               <span
                 className={styles.tierPill}
                 style={{ color: tier.color, background: tier.bg, borderColor: tier.border }}
               >
-                {tier.icon} {tier.label}
+                <Icon name={tier.icon} /> {tier.label}
               </span>
               {plugin.version && (
                 <span className={styles.versionPill} title={`Version ${plugin.version} at ${plugin.sha}`}>
@@ -162,10 +166,9 @@ export default function PluginPage({ data }: { data: PluginPageData }) {
               <a
                 className={styles.installBtn}
                 href={desktopInstallLink(plugin.name)}
-                title="Opens the Install Plugin dialog in Hermes Desktop at the reviewed version. No app? Use the install command."
+                title={appText("Opens the Install Plugin dialog in {app_name} Desktop at the reviewed version. No app? Use the install command.")}
               >
-                Open in Hermes Desktop
-              </a>
+                {appText("Open in {app_name} Desktop\n              ")}</a>
               <div className={styles.installCmd}>
                 <code>{plugin.installCommand}</code>
                 <CopyButton text={plugin.installCommand} />
@@ -249,7 +252,7 @@ export default function PluginPage({ data }: { data: PluginPageData }) {
                 {plugin.version && <Fact label="Version"><code>{plugin.version}</code></Fact>}
                 {plugin.subdir && <Fact label="Path in repo"><code>{plugin.subdir}</code></Fact>}
                 <Fact label="Requires">
-                  <code>hermes {plugin.requiresHermes || "(any version)"}</code>
+                  <code>plugin API {plugin.requiresHermes || "(any version)"}</code>
                 </Fact>
                 <Fact label="Platforms">
                   {plugin.platforms?.length ? plugin.platforms.map(platformLabel).join(", ") : "Linux, macOS, Windows"}

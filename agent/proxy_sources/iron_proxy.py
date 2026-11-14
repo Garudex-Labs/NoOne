@@ -147,8 +147,8 @@ class TokenMapping:
 
 
 def _proxy_state_dir_ro() -> Path:  # without creating it (status probes, pidfile reads)
-    from hermes_constants import get_hermes_home
-    return get_hermes_home() / "proxy"
+    from agent_constants import get_agent_home
+    return get_agent_home() / "proxy"
 
 
 def _proxy_state_dir() -> Path:
@@ -321,7 +321,7 @@ def _yaml():
     """Shared YAML helpers or None (not a hard requirement for proxy discovery)."""
 
     try:
-        import hermes_yaml as yaml
+        import agent_yaml as yaml
         return yaml
     except ImportError:
         return None

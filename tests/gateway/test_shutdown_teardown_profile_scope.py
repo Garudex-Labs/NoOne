@@ -18,7 +18,7 @@ import pytest
 from agent import secret_scope
 from gateway.config import GatewayConfig
 from gateway.run import GatewayRunner
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 
 def _runner(profile_homes: dict[str, Path]) -> GatewayRunner:
@@ -43,7 +43,7 @@ def _recording_agent(seen: dict):
 
         def on_session_end(self, messages):
             seen["scope"] = secret_scope.current_secret_scope()
-            seen["home"] = get_hermes_home()
+            seen["home"] = get_agent_home()
 
     def shutdown_memory_provider(messages=None):
         _Provider().on_session_end(messages)

@@ -53,7 +53,7 @@ def _consumer(stream_deltas_enabled):
 
 def test_stream_capable_consumer_still_warns(caplog):
     """Control: a consumer that CAN receive final deltas keeps the diagnostic
-    (the wecom ack-timeout case it was written for)."""
+    (an acknowledgement-timeout case it was written for)."""
     caplog = _run_mark_streamed_delivery(_consumer(True), caplog)
     assert any("possible duplicate send" in r.message for r in caplog.records)
 

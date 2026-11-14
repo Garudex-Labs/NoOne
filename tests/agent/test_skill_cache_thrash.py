@@ -15,7 +15,7 @@ def _make_skill(parent: Path, name: str) -> None:
 def test_cache_survives_platform_empty_string_none_flapping(tmp_path):
     """When platform flaps between "" and None, both share the same cache slot.
 
-    Regression for #104849: `_set_session_context` in `tui_gateway/server.py`
+    Regression for #104849: `_set_session_context` in `agent_backend/server.py`
     pins the platform to an empty string (`platform=""`), and
     `_resolve_skill_commands_platform()` normalizes that `""` to `None` in
     some request contexts. A single-slot cache treating them as distinct keys
@@ -71,7 +71,7 @@ def test_cache_creates_multiple_slots_for_distinct_platform_or_home(tmp_path):
     """
     import os
     import agent.skill_commands as sc_mod
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     profile_a = tmp_path / "profile_a"
     profile_b = tmp_path / "profile_b"
@@ -95,42 +95,42 @@ def test_cache_creates_multiple_slots_for_distinct_platform_or_home(tmp_path):
         patch("agent.skill_commands.scan_skill_commands", side_effect=counting_scan),
     ):
         # Scan profile A, platform 'telegram'
-        token = set_hermes_home_override(profile_a)
+        token = set_agent_home_override(profile_a)
         try:
             with patch.dict(os.environ, {"HERMES_PLATFORM": "telegram"}):
                 cmds_a_telegram = get_skill_commands()
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         assert "/a-skill" in cmds_a_telegram
         assert scan_count == 1  # First scan
 
         # Switch to profile B, same platform 'telegram' — different home → rescan
-        token = set_hermes_home_override(profile_b)
+        token = set_agent_home_override(profile_b)
         try:
             with patch.dict(os.environ, {"HERMES_PLATFORM": "telegram"}):
                 cmds_b_telegram = get_skill_commands()
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         assert "/b-skill" in cmds_b_telegram
         assert scan_count == 2  # New (platform, home) key → second scan
 
         # Switch to profile A, platform 'discord' — different platform → rescan
-        token = set_hermes_home_override(profile_a)
+        token = set_agent_home_override(profile_a)
         try:
             with patch.dict(os.environ, {"HERMES_PLATFORM": "discord"}):
                 cmds_a_discord = get_skill_commands()
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         assert "/a-skill" in cmds_a_discord
         assert scan_count == 3  # New platform key → third scan
 
         # Back to profile A, telegram — cache hit from the first scan
-        token = set_hermes_home_override(profile_a)
+        token = set_agent_home_override(profile_a)
         try:
             with patch.dict(os.environ, {"HERMES_PLATFORM": "telegram"}):
                 cmds_a_telegram_again = get_skill_commands()
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         # Same (platform='telegram', home=profile_a) as call 1 → cache hit
         assert cmds_a_telegram_again is cmds_a_telegram
         assert scan_count == 3  # No rescan
@@ -143,7 +143,7 @@ def test_cache_keys_project_as_third_dimension(tmp_path):
     """
     import agent.skill_commands as sc_mod
     from agent import skill_utils
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     repo_a = tmp_path / "repo-a"
     repo_b = tmp_path / "repo-b"
@@ -173,7 +173,7 @@ def test_cache_keys_project_as_third_dimension(tmp_path):
         scan_count += 1
         return original_scan(*args, **kwargs)
 
-    token = set_hermes_home_override(home)
+    token = set_agent_home_override(home)
     try:
         with (
             patch.object(sc_mod, "_skill_commands_by_key", {}),
@@ -200,7 +200,7 @@ def test_cache_keys_project_as_third_dimension(tmp_path):
             assert get_skill_commands() is cmds_b
             assert scan_count == 2
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def test_reload_invalidates_every_identity_slot(tmp_path):
@@ -208,7 +208,7 @@ def test_reload_invalidates_every_identity_slot(tmp_path):
     any (platform, home, project) identity, so every cached view must rescan."""
     import os
     import agent.skill_commands as sc_mod
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
     from agent.skill_commands import reload_skills
 
     profile_a = tmp_path / "profile_a"
@@ -222,22 +222,22 @@ def test_reload_invalidates_every_identity_slot(tmp_path):
 
     with patch.object(sc_mod, "_skill_commands_by_key", {}):
         for profile, expected in ((profile_a, "/a-skill"), (profile_b, "/b-skill")):
-            token = set_hermes_home_override(profile)
+            token = set_agent_home_override(profile)
             try:
                 assert expected in get_skill_commands()
             finally:
-                reset_hermes_home_override(token)
+                reset_agent_home_override(token)
         assert len(sc_mod._skill_commands_by_key) == 2
 
         # Add a skill to profile A, then reload from A: BOTH slots must drop.
         _make_skill(profile_a / "skills", "a-second-skill")
-        token = set_hermes_home_override(profile_a)
+        token = set_agent_home_override(profile_a)
         try:
             result = reload_skills()
             assert "/a-second-skill" in {item["name"] for item in result["added"]} or \
                 result["added"], result
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         # reload_skills() repopulated ONLY the current (A) slot with a fresh view
         # (it saw the skill added after the original scan); B's stale slot is gone.
         slots = sc_mod._skill_commands_by_key
@@ -245,8 +245,8 @@ def test_reload_invalidates_every_identity_slot(tmp_path):
         (a_cmds,) = slots.values()
         assert "/a-skill" in a_cmds and "/a-second-skill" in a_cmds
         # The next lookup from B rescans and still sees its own view.
-        token = set_hermes_home_override(profile_b)
+        token = set_agent_home_override(profile_b)
         try:
             assert "/b-skill" in get_skill_commands()
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)

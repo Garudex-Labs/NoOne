@@ -1,35 +1,43 @@
 ---
 title: "Osint Investigation — Follow the money via public records and sanctions data"
-sidebar_label: "Osint Investigation"
+sidebarTitle: "Osint Investigation"
 description: "Follow the money via public records and sanctions data"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Osint Investigation
+# Osint Investigation {#osint-investigation}
 
 Follow the money via public records and sanctions data.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/osint-investigation` |
+| Source | Optional — install with `noone skills install official/research/osint-investigation` |
 | Path | `optional-skills/research/osint-investigation` |
 | Version | `0.1.0` |
-| Author | Hermes Agent (adapted from ShinMegamiBoson/OpenPlanter, MIT) |
+| Author | {{app-name}} (adapted from ShinMegamiBoson/OpenPlanter, MIT) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `osint`, `investigation`, `public-records`, `sec`, `sanctions`, `corporate-registry`, `property`, `courts`, `due-diligence`, `journalism` |
 | Related skills | [`domain-intel`](../../optional/research/research-domain-intel.md), [`arxiv`](../../bundled/research/research-arxiv.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# OSINT Investigation — Public Records Cross-Reference
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# OSINT Investigation — Public Records Cross-Reference {#osint-investigation--public-records-cross-reference}
 
 Investigative framework for public-records OSINT: government contracts,
 corporate filings, lobbying, sanctions, offshore leaks, property records,
@@ -46,7 +54,7 @@ Adapted from the MIT-licensed ShinMegamiBoson/OpenPlanter project; expanded
 to cover identity / property / litigation / archives / news sources that
 the original didn't address.
 
-## When to use this skill
+## When to use this skill {#when-to-use-this-skill}
 
 Use when the user asks for:
 
@@ -75,12 +83,12 @@ Do NOT use this skill for:
   DEMO_KEY tier). For federal donations, point users at
   https://www.fec.gov/data/ directly.
 
-## Workflow
+## Workflow {#workflow}
 
 The agent runs scripts via the `terminal` tool. `SKILL_DIR` is the directory
 holding this SKILL.md.
 
-### 1. Identify which sources apply
+### 1. Identify which sources apply {#1-identify-which-sources-apply}
 
 Read the data-source wiki entries to plan the investigation:
 
@@ -109,7 +117,7 @@ cross-reference keys, data quality, acquisition, legal, references.
 The **cross-reference potential** section maps join keys between sources — read
 those first to pick the right pair.
 
-### 2. Acquire data
+### 2. Acquire data {#2-acquire-data}
 
 Each source has a stdlib-only fetch script in `SKILL_DIR/scripts/`:
 
@@ -186,7 +194,7 @@ sources that support them (`SEC_USER_AGENT`, `SENATE_LDA_TOKEN`,
 429 responses immediately with the upstream's quota message so the user
 knows to slow down or supply a key.
 
-### 3. Resolve entities across sources
+### 3. Resolve entities across sources {#3-resolve-entities-across-sources}
 
 Normalize names and find matches between two CSV files:
 
@@ -209,7 +217,7 @@ Three matching tiers with explicit confidence:
 Output `cross_links.csv` columns: `match_type, confidence, left_name,
 right_name, left_normalized, right_normalized, left_row, right_row`.
 
-### 4. Statistical timing correlation (optional)
+### 4. Statistical timing correlation (optional) {#4-statistical-timing-correlation-optional}
 
 Test whether two time series cluster suspiciously close together — e.g.
 lobbying filings near contract awards — using a permutation test:
@@ -233,7 +241,7 @@ independent of award dates. One-tailed p-value = fraction of permutations
 with mean nearest-award distance ≤ observed. Minimum 3 events per (payer,
 vendor) pair to run the test.
 
-### 5. Build the findings JSON (evidence chain)
+### 5. Build the findings JSON (evidence chain) {#5-build-the-findings-json-evidence-chain}
 
 ```bash
 python SKILL_DIR/scripts/build_findings.py \
@@ -246,7 +254,7 @@ Every finding has `id, title, severity, confidence, summary, evidence[], sources
 Each evidence item points back to a specific row in a source CSV. The user (or a
 follow-up agent) can verify every claim against its source.
 
-## Confidence and evidence discipline
+## Confidence and evidence discipline {#confidence-and-evidence-discipline}
 
 This is the load-bearing rule of the skill. Tell the user:
 
@@ -260,7 +268,7 @@ This is the load-bearing rule of the skill. Tell the user:
 - All data sources here are public records. They may still contain
   inaccuracies, stale info, or redactions (GDPR, sealed records).
 
-## Adding a new data source
+## Adding a new data source {#adding-a-new-data-source}
 
 Use the template:
 
@@ -273,7 +281,7 @@ Fill in all 9 sections. Write a `fetch_<source>.py` script in `scripts/` that
 uses stdlib only and writes a normalized CSV. Update the source list in the
 "When to use" section above.
 
-## Tools and their limits
+## Tools and their limits {#tools-and-their-limits}
 
 - `entity_resolution.py` does NOT use external fuzzy libraries (no rapidfuzz,
   no jellyfish). Token-bag matching is the upper bound here. If you need
@@ -283,7 +291,7 @@ uses stdlib only and writes a normalized CSV. Update the source list in the
 - `fetch_*.py` scripts use `urllib.request` and respect `Retry-After`. Heavy
   bulk usage may still violate ToS — read each source's legal section first.
 
-## Legal note
+## Legal note {#legal-note}
 
 All Phase-1 sources are public records. Bulk acquisition is permitted under
 their respective access terms (FOIA, public records law, ICIJ explicit

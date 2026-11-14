@@ -19,7 +19,7 @@ vi.mock('@/store/gateway', () => ({
   requestGatewayForAgent: vi.fn()
 }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   getHermesConfig: vi.fn(),
   getProfiles: vi.fn(),
   hermesApi: vi.fn(),

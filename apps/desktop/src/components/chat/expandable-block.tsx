@@ -1,10 +1,10 @@
 'use client'
 
+import { ChevronDown } from '@noone/ui/icons'
 import { type ReactNode, useCallback, useRef, useState } from 'react'
 
 import { useResizeObserver } from '@/hooks/use-resize-observer'
 import { hostHas } from '@/lib/host-capabilities'
-import { ChevronDown } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 interface ExpandableBlockProps {

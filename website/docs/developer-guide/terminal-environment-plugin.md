@@ -1,6 +1,6 @@
-# Terminal Environment Provider Plugins
+# Terminal Environment Provider Plugins {#terminal-environment-provider-plugins}
 
-Hermes runs shell commands through a pluggable set of **terminal backends**.
+{{app-name}} runs shell commands through a pluggable set of **terminal backends**.
 The built-in backends (local, Docker, Modal, Daytona, Vercel Sandbox, SSH)
 live in the core repo under `tools/environments/`. The official
 [Singularity/Apptainer plugin](https://github.com/NousResearch/hermes-official-plugins/tree/main/singularity)
@@ -12,16 +12,16 @@ exactly like a built-in one via `terminal.backend` in `config.yaml`.
 This page mirrors the [Browser Provider Plugins](./browser-provider-plugin.md)
 guide — same registration flow, same scope semantics.
 
-## What a provider controls
+## What a provider controls {#what-a-provider-controls}
 
 A registered backend automatically participates in every core surface:
 
 | Surface | Driven by |
 |---|---|
 | Command dispatch (`terminal`, `execute_code`, file tools) | `create_environment()` |
-| `hermes setup` backend picker | `display_name`, `description`, `setup_instructions()`, `post_setup()` |
+| `noone setup` backend picker | `display_name`, `description`, `setup_instructions()`, `post_setup()` |
 | Dashboard terminal-backend picker (probe status) | `probe()` |
-| `hermes status` / `hermes doctor` | `doctor_checks()` |
+| `noone status` / `noone doctor` | `doctor_checks()` |
 | System-prompt environment hints | `is_remote`, `env_description` |
 | Dangerous-command approval skipping | `skip_container_guards` |
 | Container path/cwd handling | `is_container` |
@@ -35,7 +35,7 @@ Declaring these flags on the provider closes the classic "new backend missed
 classification site N" bug class — the core consults the registry at each
 site instead of a hardcoded list of names.
 
-## Minimal provider
+## Minimal provider {#minimal-provider}
 
 ```python title="~/.hermes/plugins/acmebox/__init__.py"
 from agent.terminal_env_provider import TerminalEnvironmentProvider
@@ -99,11 +99,11 @@ kind: backend
 Enable it, select it, run:
 
 ```bash
-hermes plugins enable acmebox
-hermes config set terminal.backend acmebox
+noone plugins enable acmebox
+noone config set terminal.backend acmebox
 ```
 
-## Rules
+## Rules {#rules}
 
 - **Reserved names.** Registrations that collide with a built-in backend name
   (`local`, `docker`, `modal`, `managed_modal`, `daytona`, `vercel_sandbox`,
@@ -122,7 +122,7 @@ hermes config set terminal.backend acmebox
   spawned subprocess unconditionally, like the built-in `MODAL_*` /
   `DAYTONA_API_KEY` handling.
 
-## Environment object contract
+## Environment object contract {#environment-object-contract}
 
 `create_environment()` returns an object satisfying the same duck-typed
 interface as `tools.environments.base.BaseEnvironment`:
@@ -134,10 +134,10 @@ interface as `tools.environments.base.BaseEnvironment`:
 Subclassing `BaseEnvironment` is recommended (you inherit the shared file-sync
 and background-process plumbing) but not required.
 
-## Background processes and `cleanup()`
+## Background processes and `cleanup()` {#background-processes-and-cleanup}
 
 A background command (`terminal(background=true)`) on a non-local backend is
-polled through the environment object that spawned it. When Hermes tears that
+polled through the environment object that spawned it. When {{app-name}} tears that
 environment down (`cleanup()` on session close, idle reaping, or eviction after
 a connection failure), it marks those processes `lost` so their pollers stop.
 It does that only after `cleanup()` returned without raising (or reported the
@@ -160,7 +160,7 @@ It also applies to duck-typed environments that don't declare the attribute. So
 raise from `cleanup()` only while the sandbox may still be live; once it is
 destroyed, log any later failure (snapshot bookkeeping, client shutdown) instead.
 
-## File tools and the host filesystem
+## File tools and the host filesystem {#file-tools-and-the-host-filesystem}
 
 `read_file`, `write_file`, `patch` and `search_files` go through your
 environment's `execute()`, so they see exactly the files your commands see.
@@ -184,20 +184,20 @@ class AcmeJailEnvironment(LocalEnvironment):
 ```
 
 Leave it unset on backends that don't subclass `LocalEnvironment`; the default
-is `False`. Hermes v0.22.5 and earlier ignore the attribute and use the host
+is `False`. {{app-name}} v0.22.5 and earlier ignore the attribute and use the host
 fast path for every `LocalEnvironment` subclass, so pin `requires_hermes` past
 that.
 
-## Images
+## Images {#images}
 
 Your backend reads its own image setting (a `config_schema` key, or a
-`terminal.<name>_image` key you document). Hermes passes `image=` only for a
+`terminal.<name>_image` key you document). {{app-name}} passes `image=` only for a
 per-task override: a batch run (`batch_runner.py`) giving each prompt its own
 container registers it as `<name>_image` for the active backend, and that value
 reaches `create_environment(image=...)`. Otherwise `image` is `""`; fall back to
 your setting.
 
-## Starting directory
+## Starting directory {#starting-directory}
 
 Without `default_cwd`, a plugin backend starts in `/root`, and a host-looking
 `terminal.cwd` is replaced by `/root` when `is_container` is set. Return an
@@ -210,7 +210,7 @@ absolute in-sandbox path to start somewhere else:
 ```
 
 When the home directory is only known once the sandbox is up, return `"~"`
-instead. Hermes then passes `cwd="~"` to `create_environment()` (it never
+instead. {{app-name}} then passes `cwd="~"` to `create_environment()` (it never
 expands it on the host), and your environment sets `self.cwd` to the absolute
 home it resolved:
 
@@ -222,7 +222,7 @@ class AcmeBoxEnvironment(BaseEnvironment):
         super().__init__(cwd=cwd, timeout=timeout)
 ```
 
-Hermes keeps `~` as the backend default, so every new sandbox resolves its
+{{app-name}} keeps `~` as the backend default, so every new sandbox resolves its
 own home, and records the path each environment resolved on that environment.
 Commands can also arrive with `cwd="~"`; `BaseEnvironment` already `cd`s
 there correctly. A `cd` anywhere under that home is kept for later commands
@@ -231,9 +231,9 @@ sandbox path like `/home/acme/project` would be discarded as if it were a
 host path.
 
 `default_cwd` is read on every command, so keep it cheap (no network calls).
-Relative paths are ignored, because Hermes would anchor them on the host.
+Relative paths are ignored, because {{app-name}} would anchor them on the host.
 
-## Bot Desktop and `computer_use`
+## Bot Desktop and `computer_use` {#bot-desktop-and-computer_use}
 
 The screen, `computer_use` and the browser follow the terminal into Docker and
 SSH sandboxes (and the Singularity plugin's) by spawning long-lived processes there with stdin and
@@ -244,7 +244,7 @@ stdout left open. A plugin backend can opt in the same way:
 2. Give the environment an `exec_prefix(*, user=None, interactive=True)` method.
    It returns a local argv that runs whatever follows it inside the sandbox,
    with stdin and stdout open (the shape of `docker exec -i <container>`), or
-   `None` when it can't right now. Hermes appends `bash -c <script>` as
+   `None` when it can't right now. {{app-name}} appends `bash -c <script>` as
    separate words, so the client must pass them through unchanged and the
    sandbox needs `bash`. `user` names the account to run as; ignore it if your
    backend can't switch users. Return a list, not a single command string.
@@ -268,7 +268,7 @@ boundary, so creating the environment refuses with a message naming
 `plugins.isolation: in_process` (before the host starts a sandbox), and Bot
 Desktop refuses a `supports_streams` backend the same way.
 
-## Session isolation semantics
+## Session isolation semantics {#session-isolation-semantics}
 
 If your sandbox is **resumed by name** (a durable VM the backend re-attaches
 to), set `session_isolated_when_nonpersistent = True`. With
@@ -277,14 +277,14 @@ sandbox identity instead of sharing one — without this, two independent
 ephemeral runs could attach one live VM and delete it out from under each
 other.
 
-## Hosted scopes
+## Hosted scopes {#hosted-scopes}
 
-A hosted deployment runs many tenants' agents in one Hermes process, and each
+A hosted deployment runs many tenants' agents in one {{app-name}} process, and each
 agent's commands, code, background processes and files live in that agent's
 own remote sandbox. A backend that provides those sandboxes sets
-`serves_hosted_scopes = True`. With a hosted `hermes_scope.Scope` bound
-(a tenant other than `local`), Hermes refuses every backend without it, the
-built-ins included, so nothing a hosted agent runs ever runs on the Hermes host.
+`serves_hosted_scopes = True`. With a hosted `agent_scope.Scope` bound
+(a tenant other than `local`), {{app-name}} refuses every backend without it, the
+built-ins included, so nothing a hosted agent runs ever runs on the {{app-name}} host.
 
 **Identity.** The sandbox is the agent's, not the task's or the session's:
 `SandboxIdentity(scope.tenant, scope.agent)` from
@@ -295,7 +295,7 @@ additionally receives `scope=` (the bound scope) and `sandbox=` (the
 identity), and `task_id` is `sandbox.key`. Create or resume the sandbox that
 `sandbox` names and nothing else.
 
-**The guard.** Hermes wraps the environment you return in
+**The guard.** {{app-name}} wraps the environment you return in
 `ScopedEnvironment`. Every call made through it first checks that the bound
 scope names the same agent, and raises `CrossAgentHandleRefused` otherwise
 (including when no scope is bound), then passes that scope to your method as
@@ -341,7 +341,7 @@ def stop_process(self, name, *, scope): ...                          # -> bool
 ```
 
 `ProcessStream` (from `sandbox_scope`) holds byte pipes `stdin` and `stdout`
-and a `poll()` that returns the exit status or `None`. The stream Hermes hands
+and a `poll()` that returns the exit status or `None`. The stream {{app-name}} hands
 back wraps yours: every pipe operation and `poll()` checks the bound scope, so
 a stream acquired by one agent is refused to any other holder. A later call in the same
 session attaches with the `ProcessRef` from the first stream; a reference that
@@ -353,10 +353,10 @@ and network isolation between sandboxes, are yours.
 
 **Credentials** reach a hosted sandbox as broker references
 (`sandbox_scope.CredentialRef`), never as values from the secret store. No
-broker exists yet, so Hermes passes none.
+broker exists yet, so {{app-name}} passes none.
 
 **Conformance.** `tools/environments/sandbox_conformance.py` holds the
-isolation checks Hermes runs against its recording stub backend
+isolation checks {{app-name}} runs against its recording stub backend
 (`tests/tools/test_sandbox_scope_conformance.py`): A's tools only address A's
 sandbox; a handle naming another agent is refused; no file tool or media read
 touches the host filesystem (checked with a planted host file and symlink, an

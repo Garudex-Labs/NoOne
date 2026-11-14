@@ -6,8 +6,8 @@
 { inputs, ... }: {
   perSystem = { pkgs, lib, self', ... }:
     let
-      hermes-agent = self'.packages.default;
-      hermesVenv = hermes-agent.hermesVenv;
+      noone = self'.packages.default;
+      hermesVenv = noone.hermesVenv;
 
       configMergeScript = pkgs.callPackage ./configMergeScript.nix { };
 
@@ -37,7 +37,7 @@
                 fsType = "ext4";
               };
             }
-            { services.hermes-agent = settings; }
+            { services.noone = settings; }
           ];
         };
 
@@ -54,7 +54,7 @@
                 stateVersion = "24.11";
               };
             }
-            { services.hermes-agent = settings; }
+            { services.noone = settings; }
           ];
         };
 
@@ -77,17 +77,17 @@
               };
             }
             {
-              programs.hermes-agent = programs;
-              services.hermes-agent = services;
+              programs.noone = programs;
+              services.noone = services;
             }
           ];
         };
 
       # The option names that each module defines under
-      # services.hermes-agent. The internal names that the module system adds
+      # services.noone. The internal names that the module system adds
       # are not in the list.
       moduleOptionNames =
-        eval: lib.attrNames (lib.filterAttrs (n: _: !lib.hasPrefix "_" n) eval.options.services.hermes-agent);
+        eval: lib.attrNames (lib.filterAttrs (n: _: !lib.hasPrefix "_" n) eval.options.services.noone);
 
       # These options belong to one module by design. The check does not
       # compare the two lists against each other, because that test only
@@ -113,7 +113,7 @@
         export HOME=$TMPDIR
         ${hermesVenv}/bin/python3 -c '
 import json, sys
-from hermes_cli.config import DEFAULT_CONFIG
+from agent_cli.config import DEFAULT_CONFIG
 
 def leaf_paths(d, prefix=""):
     paths = []
@@ -186,11 +186,11 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         # The dev shell's HERMES_PYTHON must carry its own dependencies: the
         # TUI and the test runner launch it with PYTHONPATH replaced or cleared.
         dev-venv-self-contained = pkgs.runCommand "hermes-dev-venv-self-contained" { } ''
-          venv=${hermes-agent.devVenv}
+          venv=${noone.devVenv}
           env -i "$venv/bin/python3" -c '
           import sys, ruamel.yaml, openai, httpx, pytest
           assert sys.prefix == "'"$venv"'", sys.prefix
-          assert sys.base_prefix == "${hermes-agent.pmPython}", sys.base_prefix
+          assert sys.base_prefix == "${noone.pmPython}", sys.base_prefix
           '
           env -i "$venv/bin/pytest" --version
           # Native dev commands survive alongside the re-shebanged scripts.
@@ -204,7 +204,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         # On Linux the runtime checks below already depend on the package,
         # but this ensures darwin builders also build it during flake check.
         build-package = pkgs.runCommand "hermes-build-package" { } ''
-          echo "PASS: package built at ${hermes-agent}"
+          echo "PASS: package built at ${noone}"
           mkdir -p $out
           echo "ok" > $out/result
         '';
@@ -220,7 +220,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
 
           desktop = Path('${self'.packages.desktop}/share')
           dist = desktop / 'hermes-desktop/dist'
-          launcher = desktop / 'icons/hicolor/1024x1024/apps/hermes.png'
+          launcher = desktop / 'icons/hicolor/1024x1024/apps/agent.png'
           for path in [launcher, dist / 'apple-touch-icon.png',
                        dist / 'nous-girl.png', dist / 'nous-girl-dark.png',
                        Path('${self'.packages.web}/favicon.ico')]:
@@ -303,15 +303,15 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
 
             failures =
               lib.optional (names != [
-                "hermes-agent"
+                "noone"
                 "hermes-backend"
-              ]) "expected hermes-agent + hermes-backend processes, got: ${toString names}"
+              ]) "expected noone + hermes-backend processes, got: ${toString names}"
               ++ lib.optional (
-                !lib.hasInfix "bin/hermes gateway" (argvOf "hermes-agent")
-              ) "gateway process does not run `hermes gateway`: ${argvOf "hermes-agent"}"
+                !lib.hasInfix "bin/noone gateway" (argvOf "noone")
+              ) "gateway process does not run `noone gateway`: ${argvOf "noone"}"
               ++ lib.optional (
-                !lib.hasInfix "bin/hermes serve" (argvOf "hermes-backend")
-              ) "backend process does not run `hermes serve`: ${argvOf "hermes-backend"}"
+                !lib.hasInfix "bin/noone serve" (argvOf "hermes-backend")
+              ) "backend process does not run `noone serve`: ${argvOf "hermes-backend"}"
               ++ lib.optional (
                 !lib.hasInfix "--no-open" (argvOf "hermes-backend")
               ) "backend must pass --no-open so a service never opens a browser"
@@ -320,7 +320,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
               ) "gateway and backend must share one HERMES_HOME"
               ++ lib.optional (
                 cfg.home.sessionVariables.HERMES_HOME or null != "/home/hermes-check/.hermes"
-              ) "programs.hermes-agent.enable must export HERMES_HOME for interactive shells"
+              ) "programs.noone.enable must export HERMES_HOME for interactive shells"
               ++ lib.optional (
                 !lib.hasInfix "hermes-config-merge" activation
               ) "activation must deep-merge config.yaml, not overwrite it"
@@ -485,7 +485,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             # that the launcher pins. These must be the same store path: a
             # second Hermes runtime beside the services is the fault that
             # `programs.enable` plus a plain desktop package would give.
-            agentPackages = builtins.filter (p: (p.pname or "") == "hermes-agent") cfg.home.packages;
+            agentPackages = builtins.filter (p: (p.pname or "") == "noone") cfg.home.packages;
 
             # The backend of the service, as the unit or the agent runs it.
             backendArgvList =
@@ -662,11 +662,11 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             cases = [
               {
                 value = true;
-                expect = "programs.hermes-agent.enable = true;";
+                expect = "programs.noone.enable = true;";
               }
               {
                 value = false;
-                expect = "programs.hermes-agent.enable = false;";
+                expect = "programs.noone.enable = false;";
               }
             ];
 
@@ -765,21 +765,21 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             units = lib.filterAttrs (n: _: lib.hasPrefix "hermes" n) cfg.systemd.services;
             names = lib.attrNames units;
             execOf = name: units.${name}.serviceConfig.ExecStart;
-            activation = cfg.system.activationScripts."hermes-agent-setup".text;
+            activation = cfg.system.activationScripts."noone-setup".text;
 
             failures =
               lib.optional (names != [
-                "hermes-agent"
+                "noone"
                 "hermes-backend"
-              ]) "expected hermes-agent + hermes-backend units, got: ${toString names}"
+              ]) "expected noone + hermes-backend units, got: ${toString names}"
               ++ lib.optional (
-                !lib.hasInfix "bin/hermes gateway" (execOf "hermes-agent")
-              ) "gateway unit does not run `hermes gateway`: ${execOf "hermes-agent"}"
+                !lib.hasInfix "bin/noone gateway" (execOf "noone")
+              ) "gateway unit does not run `noone gateway`: ${execOf "noone"}"
               ++ lib.optional (
-                !lib.hasInfix "bin/hermes dashboard" (execOf "hermes-backend")
-              ) "backend unit does not run `hermes dashboard`: ${execOf "hermes-backend"}"
+                !lib.hasInfix "bin/noone dashboard" (execOf "hermes-backend")
+              ) "backend unit does not run `noone dashboard`: ${execOf "hermes-backend"}"
               ++ lib.optional (
-                units.hermes-agent.environment.HERMES_HOME != units.hermes-backend.environment.HERMES_HOME
+                units.noone.environment.HERMES_HOME != units.hermes-backend.environment.HERMES_HOME
               ) "gateway and backend must share one HERMES_HOME"
               ++ lib.optional (
                 !lib.hasInfix "/var/lib/hermes/.hermes/SOUL.md" activation
@@ -858,7 +858,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
 
             failures =
               # The default must not change.
-              lib.optional (!lib.hasInfix "bin/hermes serve --host 127.0.0.1" direct)
+              lib.optional (!lib.hasInfix "bin/noone serve --host 127.0.0.1" direct)
                 "without waitFor the backend must exec hermes directly, got: ${direct}"
               ++ lib.optional (lib.hasInfix "hermes-backend-launch" direct)
                 "without waitFor the backend must not use the launcher"
@@ -880,7 +880,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
                 "the interface launcher must poll backend.interfaceName"
               ++ lib.optional (!lib.hasInfix "_timeout=30" interfaceScript)
                 "the launcher must use backend.waitTimeout"
-              ++ lib.optional (!lib.hasInfix "bin/hermes dashboard" interfaceScript)
+              ++ lib.optional (!lib.hasInfix "bin/noone dashboard" interfaceScript)
                 "the launcher must keep backend.mode"
 
               # The assertions reject what cannot work.
@@ -929,12 +929,12 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             configOf = settings: (evalNixosModule ({ enable = true; } // settings)).config;
 
             managed = configOf { };
-            gateway = managed.systemd.services.hermes-agent;
+            gateway = managed.systemd.services.noone;
             gatewayUser = gateway.serviceConfig.User;
 
             # The operator declares the user themselves. Nothing here knows
             # whether they lingered it, so nothing may assume a bus.
-            unmanaged = (configOf { createUser = false; }).systemd.services.hermes-agent;
+            unmanaged = (configOf { createUser = false; }).systemd.services.noone;
 
             failures =
               lib.optional (!((managed.users.users.${gatewayUser}.linger or false) == true))
@@ -1036,7 +1036,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           let
             common = import ./moduleCommon.nix { inherit lib; };
             cfgFor = mode: {
-              package = hermes-agent;
+              package = noone;
               extraPythonPackages = [ ];
               extraDependencyGroups = [ ];
               extraArgs = [ ];
@@ -1103,12 +1103,12 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         package-contents = pkgs.runCommand "hermes-package-contents" { } ''
           set -e
           echo "=== Checking binaries ==="
-          test -x ${hermes-agent}/bin/hermes || (echo "FAIL: hermes binary missing"; exit 1)
-          test -x ${hermes-agent}/bin/hermes-agent || (echo "FAIL: hermes-agent binary missing"; exit 1)
+          test -x ${noone}/bin/hermes || (echo "FAIL: hermes binary missing"; exit 1)
+          test -x ${noone}/bin/noone || (echo "FAIL: noone binary missing"; exit 1)
           echo "PASS: All binaries present"
 
           echo "=== Checking version ==="
-          ${hermes-agent}/bin/hermes --version 2>&1 | grep -qi "hermes" || (echo "FAIL: version check"; exit 1)
+          ${noone}/bin/noone --version 2>&1 | grep -qi "hermes" || (echo "FAIL: version check"; exit 1)
           echo "PASS: Version check"
 
           echo "=== All checks passed ==="
@@ -1119,17 +1119,17 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         # Exercise every declared command and the environment delivered by
         # makeWrapper, plus the shared assembler's store-reference contract.
         entry-points-sync = pkgs.runCommand "hermes-entry-points-sync" { } ''
-          ${hermes-agent.python}/bin/python3 ${./tests/agent-references.py} \
-            ${hermes-agent} ${../pyproject.toml} ${hermes-agent.agentInputsFile}
+          ${noone.python}/bin/python3 ${./tests/agent-references.py} \
+            ${noone} ${../pyproject.toml} ${noone.agentInputsFile}
           mkdir -p $out
         '';
 
         # A pre-existing CLI install must not override the package's backend.
         desktop-backend = pkgs.runCommand "hermes-desktop-backend" {
-          nativeBuildInputs = [ hermes-agent.python pkgs.cage ];
+          nativeBuildInputs = [ noone.python pkgs.cage ];
         } ''
           python3 ${./tests/desktop-backend.py} \
-            ${self'.packages.desktop}/bin/hermes-desktop ${hermes-agent}/bin/hermes
+            ${self'.packages.desktop}/bin/hermes-desktop ${noone}/bin/hermes
           mkdir -p $out
         '';
 
@@ -1138,9 +1138,9 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           set -e
           export HOME=$(mktemp -d)
 
-          echo "=== Checking hermes --help ==="
-          ${hermes-agent}/bin/hermes --help 2>&1 | grep -q "gateway" || (echo "FAIL: gateway subcommand missing"; exit 1)
-          ${hermes-agent}/bin/hermes --help 2>&1 | grep -q "config" || (echo "FAIL: config subcommand missing"; exit 1)
+          echo "=== Checking noone --help ==="
+          ${noone}/bin/noone --help 2>&1 | grep -q "gateway" || (echo "FAIL: gateway subcommand missing"; exit 1)
+          ${noone}/bin/noone --help 2>&1 | grep -q "config" || (echo "FAIL: config subcommand missing"; exit 1)
           echo "PASS: All subcommands accessible"
 
           echo "=== All CLI checks passed ==="
@@ -1152,25 +1152,25 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         bundled-skills = pkgs.runCommand "hermes-bundled-skills" { } ''
           set -e
           echo "=== Checking bundled skills ==="
-          test -d ${hermes-agent}/share/hermes-agent/skills || (echo "FAIL: skills directory missing"; exit 1)
+          test -d ${noone}/share/noone/skills || (echo "FAIL: skills directory missing"; exit 1)
           echo "PASS: skills directory exists"
 
           # -L: skills/ is a symlink to the filtered source store path
-          SKILL_COUNT=$(find -L ${hermes-agent}/share/hermes-agent/skills -name "SKILL.md" | wc -l)
+          SKILL_COUNT=$(find -L ${noone}/share/noone/skills -name "SKILL.md" | wc -l)
           test "$SKILL_COUNT" -gt 0 || (echo "FAIL: no SKILL.md files found in skills directory"; exit 1)
           echo "PASS: $SKILL_COUNT bundled skills found"
 
-          grep -q "HERMES_BUNDLED_SKILLS" ${hermes-agent}/bin/hermes || \
+          grep -q "HERMES_BUNDLED_SKILLS" ${noone}/bin/hermes || \
             (echo "FAIL: HERMES_BUNDLED_SKILLS not in wrapper"; exit 1)
           echo "PASS: HERMES_BUNDLED_SKILLS set in wrapper"
 
           # Optional skills ship via the wrapper too (pythonSrc excludes
           # them from the wheel, so the env var is the only path in nix).
-          test -d ${hermes-agent}/share/hermes-agent/optional-skills || \
+          test -d ${noone}/share/noone/optional-skills || \
             (echo "FAIL: optional-skills directory missing"; exit 1)
-          OPT_COUNT=$(find -L ${hermes-agent}/share/hermes-agent/optional-skills -name "SKILL.md" | wc -l)
+          OPT_COUNT=$(find -L ${noone}/share/noone/optional-skills -name "SKILL.md" | wc -l)
           test "$OPT_COUNT" -gt 0 || (echo "FAIL: no SKILL.md files in optional-skills"; exit 1)
-          grep -q "HERMES_OPTIONAL_SKILLS" ${hermes-agent}/bin/hermes || \
+          grep -q "HERMES_OPTIONAL_SKILLS" ${noone}/bin/hermes || \
             (echo "FAIL: HERMES_OPTIONAL_SKILLS not in wrapper"; exit 1)
           echo "PASS: $OPT_COUNT optional skills found, HERMES_OPTIONAL_SKILLS set in wrapper"
 
@@ -1183,14 +1183,14 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         bundled-plugins = pkgs.runCommand "hermes-bundled-plugins" { } ''
           set -e
           echo "=== Checking bundled plugins ==="
-          test -d ${hermes-agent}/share/hermes-agent/plugins || (echo "FAIL: plugins directory missing"; exit 1)
+          test -d ${noone}/share/noone/plugins || (echo "FAIL: plugins directory missing"; exit 1)
           echo "PASS: plugins directory exists"
 
-          test -f ${hermes-agent}/share/hermes-agent/plugins/platforms/irc/plugin.yaml || \
-            (echo "FAIL: irc plugin manifest missing"; exit 1)
-          echo "PASS: irc plugin manifest present"
+          test -f ${noone}/share/noone/plugins/platforms/a2a/plugin.yaml || \
+            (echo "FAIL: a2a plugin manifest missing"; exit 1)
+          echo "PASS: a2a plugin manifest present"
 
-          grep -q "HERMES_BUNDLED_PLUGINS" ${hermes-agent}/bin/hermes || \
+          grep -q "HERMES_BUNDLED_PLUGINS" ${noone}/bin/hermes || \
             (echo "FAIL: HERMES_BUNDLED_PLUGINS not in wrapper"; exit 1)
           echo "PASS: HERMES_BUNDLED_PLUGINS set in wrapper"
 
@@ -1205,18 +1205,18 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         bundled-locales = pkgs.runCommand "hermes-bundled-locales" { } ''
           set -e
           echo "=== Checking bundled locales ==="
-          test -d ${hermes-agent}/share/hermes-agent/locales || (echo "FAIL: locales directory missing"; exit 1)
+          test -d ${noone}/share/noone/locales || (echo "FAIL: locales directory missing"; exit 1)
           echo "PASS: locales directory exists"
 
           # -L: locales/ is a symlink to the source store path
-          LOC_COUNT=$(find -L ${hermes-agent}/share/hermes-agent/locales -name "*.yaml" | wc -l)
+          LOC_COUNT=$(find -L ${noone}/share/noone/locales -name "*.yaml" | wc -l)
           test "$LOC_COUNT" -ge 16 || (echo "FAIL: expected >=16 catalogs, found $LOC_COUNT"; exit 1)
           echo "PASS: $LOC_COUNT locale catalogs found"
 
-          test -f ${hermes-agent}/share/hermes-agent/locales/en.yaml || (echo "FAIL: en.yaml missing"; exit 1)
+          test -f ${noone}/share/noone/locales/en.yaml || (echo "FAIL: en.yaml missing"; exit 1)
           echo "PASS: en.yaml present"
 
-          grep -q "HERMES_BUNDLED_LOCALES" ${hermes-agent}/bin/hermes || \
+          grep -q "HERMES_BUNDLED_LOCALES" ${noone}/bin/hermes || \
             (echo "FAIL: HERMES_BUNDLED_LOCALES not in wrapper"; exit 1)
           echo "PASS: HERMES_BUNDLED_LOCALES set in wrapper"
 
@@ -1224,7 +1224,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           # symlink + HERMES_BUNDLED_LOCALES (not via wheel data-files).
           # Verify the wrapper override resolves real strings.
           export HOME=$(mktemp -d)
-          RENDERED=$(cd "$HOME" && HERMES_BUNDLED_LOCALES=${hermes-agent}/share/hermes-agent/locales \
+          RENDERED=$(cd "$HOME" && HERMES_BUNDLED_LOCALES=${noone}/share/noone/locales \
             ${hermesVenv}/bin/python3 -c "from agent import i18n; print(i18n.t('gateway.reset.header_default', lang='en'))")
           echo "rendered: $RENDERED"
           test "$RENDERED" != "gateway.reset.header_default" || (echo "FAIL: i18n returned the raw key with HERMES_BUNDLED_LOCALES set"; exit 1)
@@ -1241,19 +1241,19 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         bundled-mcps = pkgs.runCommand "hermes-bundled-mcps" { } ''
           set -e
           echo "=== Checking bundled optional-mcps ==="
-          test -d ${hermes-agent}/share/hermes-agent/optional-mcps || (echo "FAIL: optional-mcps directory missing"; exit 1)
+          test -d ${noone}/share/noone/optional-mcps || (echo "FAIL: optional-mcps directory missing"; exit 1)
           echo "PASS: optional-mcps directory exists"
 
-          MANIFEST_COUNT=$(find -L ${hermes-agent}/share/hermes-agent/optional-mcps -name "manifest.yaml" | wc -l)
+          MANIFEST_COUNT=$(find -L ${noone}/share/noone/optional-mcps -name "manifest.yaml" | wc -l)
           test "$MANIFEST_COUNT" -gt 0 || (echo "FAIL: no manifest.yaml files found"; exit 1)
           echo "PASS: $MANIFEST_COUNT catalog manifests found"
 
-          grep -q "HERMES_OPTIONAL_MCPS" ${hermes-agent}/bin/hermes || \
+          grep -q "HERMES_OPTIONAL_MCPS" ${noone}/bin/hermes || \
             (echo "FAIL: HERMES_OPTIONAL_MCPS not in wrapper"; exit 1)
           echo "PASS: HERMES_OPTIONAL_MCPS set in wrapper"
 
           export HOME=$(mktemp -d)
-          CATALOG=$(cd "$HOME" && ${hermes-agent}/bin/hermes mcp catalog 2>/dev/null || true)
+          CATALOG=$(cd "$HOME" && ${noone}/bin/hermes mcp catalog 2>/dev/null || true)
           echo "catalog output: $CATALOG"
           test -n "$CATALOG" || (echo "FAIL: hermes mcp catalog returned empty"; exit 1)
           echo "PASS: mcp catalog resolves entries"
@@ -1263,45 +1263,16 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           echo "ok" > $out/result
         '';
 
-        # Verify bundled TUI is present and compiled
-        bundled-tui = pkgs.runCommand "hermes-bundled-tui" { } ''
-          set -e
-          echo "=== Checking bundled TUI ==="
-          test -d ${hermes-agent}/ui-tui || (echo "FAIL: ui-tui directory missing"; exit 1)
-          echo "PASS: ui-tui directory exists"
-
-          test -f ${hermes-agent}/ui-tui/dist/entry.js || (echo "FAIL: compiled entry.js missing"; exit 1)
-          echo "PASS: compiled entry.js present"
-
-          # The compiled TUI runs these on HERMES_PYTHON; the Python package lives in another
-          # store path, so they must ship beside entry.js (#139208).
-          for helper in gateway_bootstrap.py clipboard_image.py; do
-            test -f ${hermes-agent}/ui-tui/dist/scripts/$helper || \
-              (echo "FAIL: TUI helper $helper missing"; exit 1)
-          done
-          echo "PASS: TUI Python helpers present"
-
-          # self-contained bundle; no runtime node_modules expected
-
-          grep -q "HERMES_TUI_DIR" ${hermes-agent}/bin/hermes || \
-            (echo "FAIL: HERMES_TUI_DIR not in wrapper"; exit 1)
-          echo "PASS: HERMES_TUI_DIR set in wrapper"
-
-          echo "=== All bundled TUI checks passed ==="
-          mkdir -p $out
-          echo "ok" > $out/result
-        '';
-
         # Verify HERMES_NODE is set in wrapper and points to Node 26+
         # (Hermes pins its toolchain to Node 26 everywhere)
         hermes-node = pkgs.runCommand "hermes-node-version" { } ''
           set -e
           echo "=== Checking HERMES_NODE in wrapper ==="
-          grep -q "HERMES_NODE" ${hermes-agent}/bin/hermes || \
+          grep -q "HERMES_NODE" ${noone}/bin/hermes || \
             (echo "FAIL: HERMES_NODE not set in wrapper"; exit 1)
           echo "PASS: HERMES_NODE present in wrapper"
 
-          HERMES_NODE=$(sed -n "s/^export HERMES_NODE='\(.*\)'/\1/p" ${hermes-agent}/bin/hermes)
+          HERMES_NODE=$(sed -n "s/^export HERMES_NODE='\(.*\)'/\1/p" ${noone}/bin/hermes)
           test -x "$HERMES_NODE" || (echo "FAIL: HERMES_NODE=$HERMES_NODE not executable"; exit 1)
           echo "PASS: HERMES_NODE executable at $HERMES_NODE"
 
@@ -1332,8 +1303,8 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           }
 
           echo "=== Checking HERMES_MANAGED guards ==="
-          check_blocked "config set" ${hermes-agent}/bin/hermes config set model foo
-          check_blocked "config edit" ${hermes-agent}/bin/hermes config edit
+          check_blocked "config set" ${noone}/bin/noone config set model foo
+          check_blocked "config edit" ${noone}/bin/noone config edit
 
           echo "=== All guard checks passed ==="
           mkdir -p $out
@@ -1345,7 +1316,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           # Built with the lock-derived interpreter, so this check fails
           # loudly if the package set and the lock drift apart.
           testPkg = pythonLock.interpreter.pkgs.pyfiglet;
-          hermesWithExtra = hermes-agent.override {
+          hermesWithExtra = noone.override {
             extraPythonPackages = [ testPkg ];
           };
         in pkgs.runCommand "hermes-extra-python-packages" { } ''
@@ -1361,7 +1332,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           echo "PASS: test package path found in wrapper"
 
           echo "=== Checking base package has no PYTHONPATH ==="
-          if grep -q "PYTHONPATH" ${hermes-agent}/bin/hermes; then
+          if grep -q "PYTHONPATH" ${noone}/bin/hermes; then
             echo "FAIL: base package should not have PYTHONPATH"; exit 1
           fi
           echo "PASS: base package clean"
@@ -1372,7 +1343,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
         '';
 
         # Extras ADD to what a package ships, through both entry points:
-        # `pkgs.hermes-agent.override { ... }` (the documented overlay path)
+        # `pkgs.noone.override { ... }` (the documented overlay path)
         # and the modules' extraPythonPackages / extraDependencyGroups.
         # Replacing semantics rebuilt the default package as `minimal` and
         # dropped every provider group. Each case asserts a positive effect
@@ -1384,23 +1355,23 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           newGroup = "google-meet";
           path = drv: builtins.unsafeDiscardStringContext drv.drvPath;
           modulePackage = settings:
-            (evalHomeModule ({ enable = true; } // settings)).config.programs.hermes-agent.package;
+            (evalHomeModule ({ enable = true; } // settings)).config.programs.noone.package;
 
           viaModulePlugin = modulePackage { extraPythonPackages = [ testPkg ]; };
           viaModuleGroup = modulePackage { extraDependencyGroups = [ newGroup ]; };
           viaModuleShipped = modulePackage { extraDependencyGroups = [ "anthropic" ]; };
-          viaOverlayGroup = hermes-agent.override { extraDependencyGroups = [ newGroup ]; };
+          viaOverlayGroup = noone.override { extraDependencyGroups = [ newGroup ]; };
           # No `or [ ]`: appending to prev.extraDependencyGroups is a shape users already write.
-          viaFunctionGroup = hermes-agent.override (prev: {
+          viaFunctionGroup = noone.override (prev: {
             extraDependencyGroups = prev.extraDependencyGroups ++ [ newGroup ];
           });
-          viaOverlayShipped = hermes-agent.override { extraDependencyGroups = [ "messaging" ]; };
+          viaOverlayShipped = noone.override { extraDependencyGroups = [ "messaging" ]; };
 
           # A custom `package` that already carries extras of its own: the
           # module's extras must land on top of them, not replace them.
           testPkg2 = pythonLock.interpreter.pkgs.tabulate;
           newGroup2 = "ddgs";
-          customPackage = hermes-agent.override {
+          customPackage = noone.override {
             extraDependencyGroups = [ newGroup ];
             extraPythonPackages = [ testPkg ];
           };
@@ -1409,7 +1380,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             extraDependencyGroups = [ newGroup2 ];
             extraPythonPackages = [ testPkg2 ];
           };
-          bothExtras = hermes-agent.override {
+          bothExtras = noone.override {
             extraDependencyGroups = [ newGroup newGroup2 ];
             extraPythonPackages = [ testPkg testPkg2 ];
           };
@@ -1417,7 +1388,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
           cases = [
             {
               what = "module extraPythonPackages reaches the package (wrapper PYTHONPATH)";
-              ok = path viaModulePlugin != path hermes-agent;
+              ok = path viaModulePlugin != path noone;
             }
             {
               what = "module extraPythonPackages keeps the default sealed venv";
@@ -1498,7 +1469,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
 
         # Verify extraDependencyGroups passes through to python.nix
         extra-dependency-groups = let
-          hermesWithGroups = hermes-agent.override {
+          hermesWithGroups = noone.override {
             extraDependencyGroups = [ "exa" ];
           };
         in pkgs.runCommand "hermes-extra-dependency-groups" { } ''
@@ -1540,7 +1511,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             configFiles = common.mkConfigFiles {
               inherit pkgs;
               cfg = {
-                package = hermes-agent;
+                package = noone;
                 extraPythonPackages = [ ];
                 extraDependencyGroups = [ ];
                 configFile = null;
@@ -1554,7 +1525,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             export HOME=$(mktemp -d) HERMES_HOME=$(mktemp -d)
             ${configMergeScript} ${configFiles.generated} "$HERMES_HOME/config.yaml"
             ${hermesVenv}/bin/python3 -c '
-            from hermes_cli.config import check_config_version
+            from agent_cli.config import check_config_version
             current, latest = check_config_version(raise_on_parse_error=True)
             assert current == latest, f"generated config.yaml reads as v{current}, package is v{latest}"
             print(f"PASS: generated config.yaml is at v{current}")
@@ -1639,7 +1610,7 @@ json.dump(sorted(leaf_paths(DEFAULT_CONFIG)), sys.stdout, indent=2)
             ${configMergeScript} ${nixSettings} "$hermes_home/config.yaml"
             ${hermesVenv}/bin/python3 -c '
 import json, sys
-from hermes_cli.config import load_config
+from agent_cli.config import load_config
 json.dump(load_config(), sys.stdout, default=str)
 '
           }

@@ -10,11 +10,8 @@ import pytest
 
 from gateway.config import PlatformConfig
 from gateway.platforms.base import SendResult
-from plugins.platforms.buzz.adapter import BuzzAdapter
 from plugins.platforms.discord.adapter import DiscordAdapter
 from plugins.platforms.google_chat.adapter import GoogleChatAdapter
-from plugins.platforms.matrix.adapter import MatrixAdapter
-from plugins.platforms.wecom.adapter import WeComAdapter
 
 
 @pytest.fixture(params=[None, False, True, "override"])
@@ -26,37 +23,12 @@ def policy(request, tmp_path, monkeypatch):
         if setting == "override":
             display["platforms"] = {
                 name: {"suppress_warning_notifications": True}
-                for name in ("matrix", "google_chat", "discord", "wecom", "buzz", "mattermost", "feishu", "telegram")
+                for name in ( "google_chat", "discord",   "mattermost",  "telegram")
             }
         (tmp_path / "config.yaml").write_text(json.dumps({"display": display}))
     return setting is True or setting == "override"
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize("caption", [None, "Error: this is the requested caption"])
-async def test_matrix_download_diagnostic_not_caption_is_suppressed(policy, caption, monkeypatch, caplog):
-    adapter = MatrixAdapter(PlatformConfig())
-    frames = []
-
-    async def record(room, event_type, content):
-        frames.append(content)
-        return "$sent"
-
-    adapter._client = SimpleNamespace(send_message_event=record)
-    adapter._download_external_media_with_cap = AsyncMock(side_effect=RuntimeError("download fixture"))
-    monkeypatch.setattr("tools.url_safety.is_safe_url", lambda url: True)
-    result = await adapter.send_image("!room", "https://example.invalid/image?token=private", caption, "$reply", {"thread_id": "$thread"})
-    if policy:
-        assert [f["body"] for f in frames] == ([caption] if caption else [])
-        assert not result.success and result.message_id is None
-        if frames:
-            assert frames[0]["m.relates_to"]["event_id"] == "$thread"
-    else:
-        from agent.i18n import t
-        notice = t("platform.matrix.media.image_download_failed")
-        assert [f["body"] for f in frames] == [f"{caption}\n{notice}" if caption else notice]
-        assert result.success and result.message_id == "$sent"
-    assert "failed to download image" in caplog.text
 
 
 @pytest.mark.asyncio
@@ -127,48 +99,15 @@ async def test_discord_rejected_media_preserves_caption_without_fake_receipt(pol
     assert "large" in caplog.text
 
 
-@pytest.mark.asyncio
-async def test_wecom_rejected_media_keeps_caption_and_failed_result(policy):
-    adapter = WeComAdapter(PlatformConfig())
-    frames = []
-
-    async def record(command, body, **kwargs):
-        frames.append(body)
-        return {"errcode": 0, "headers": {"req_id": "sent"}}
-
-    adapter._send_request = record
-    adapter._prepare_outbound_media = AsyncMock(return_value={"rejected": True, "reject_reason": "fixture rejection"})
-    result = await adapter.send_document("chat", "fixture.pdf", caption="Error: requested caption")
-    assert not result.success and result.error == "fixture rejection"
-    assert [f["markdown"]["content"] for f in frames] == (["Error: requested caption"] if policy else ["⚠️ fixture rejection"])
 
 
-@pytest.mark.asyncio
-async def test_buzz_missing_upload_fallback_and_real_upload_receipts(policy, tmp_path):
-    adapter = BuzzAdapter(PlatformConfig(extra={"cli_path": "fixture-buzz"}))
-    adapter._mention_pubkeys_for = AsyncMock(return_value=[])
-    frames = []
-
-    async def record(args, content, *extra):
-        frames.append((args, content))
-        return 0, json.dumps({"event_id": "a" * 64, "accepted": True}), ""
-
-    adapter._run_message_send = record
-    result = await adapter.send_image_file("chat", str(tmp_path / "missing.png"), caption="requested caption")
-    assert frames[0][1] == ("requested caption" if policy else "requested caption\n⚠️ Couldn't deliver the image attachment.")
-    assert result.success is (not policy)
-    path = tmp_path / "image.png"
-    path.write_bytes(b"fixture")
-    result = await adapter.send_image_file("chat", str(path), caption="⚠️ user caption")
-    assert result.success and result.message_id == "a" * 64
-    assert "--file" in frames[-1][0] and frames[-1][1] == "⚠️ user caption"
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("lane", ["send", "edit"])
 async def test_discord_long_send_and_final_edit_deliver_every_chunk_without_a_notice(policy, lane):
     """Past ``MAX_SPLIT_MESSAGES`` Discord delivers the whole text with no truncation notice, under
-    every warning policy (Teknium's ruling on PR #153476: Discord never cuts a reply off)."""
+    every warning policy (The design rule on PR #153476: Discord never cuts a reply off)."""
     adapter = DiscordAdapter(PlatformConfig())
     frames = []
 
@@ -194,23 +133,6 @@ async def test_discord_long_send_and_final_edit_deliver_every_chunk_without_a_no
     assert len(frames) > adapter.MAX_SPLIT_MESSAGES
 
 
-@pytest.mark.asyncio
-async def test_wecom_downgrade_preserves_native_upload_and_caption(policy):
-    adapter = WeComAdapter(PlatformConfig())
-    frames = []
-
-    async def record(cmd, body, **kwargs):
-        frames.append((cmd, body))
-        return {"errcode": 0, "body": {"upload_id": "upload", "media_id": "media"}, "headers": {"req_id": "sent"}}
-
-    adapter._send_request = record
-    adapter._load_outbound_media = AsyncMock(return_value=(b"fixture", "audio/ogg", "voice.ogg"))
-    result = await adapter.send_voice("chat", "voice.ogg", caption="Error: user caption")
-    assert result.success
-    assert any(body.get("file", {}).get("media_id") == "media" for _, body in frames)
-    text = [body["markdown"]["content"] for _, body in frames if "markdown" in body]
-    assert text[0] == "Error: user caption"
-    assert len(text) == (1 if policy else 2)
 
 
 @pytest.mark.asyncio
@@ -273,30 +195,6 @@ async def test_mattermost_thread_fallback_keeps_requested_result(policy, caplog)
     assert "falling back to flat channel" in caplog.text
 
 
-@pytest.mark.asyncio
-async def test_feishu_downgrade_keeps_attachment_and_caption(policy, tmp_path):
-    from plugins.platforms.feishu.adapter import FeishuAdapter
-
-    adapter = FeishuAdapter(PlatformConfig())
-    frames = []
-    path = tmp_path / "animation.gif"
-    path.write_bytes(b"fixture")
-    adapter._download_remote_document = AsyncMock(return_value=(str(path), path.name))
-
-    def upload(request):
-        return SimpleNamespace(success=lambda: True, code=0, data=SimpleNamespace(file_key="file-key"))
-
-    async def send_raw(**kwargs):
-        frames.append(kwargs)
-        return SimpleNamespace(success=lambda: True, code=0, data=SimpleNamespace(message_id="sent"))
-
-    adapter._client = SimpleNamespace(im=SimpleNamespace(v1=SimpleNamespace(file=SimpleNamespace(create=upload))))
-    adapter._send_raw_message = send_raw
-    result = await adapter.send_animation("chat", "https://example.invalid/animation.gif", caption="Warning: requested caption")
-    assert result.success
-    assert "file-key" in frames[0]["payload"]
-    assert "Warning: requested caption" in frames[0]["payload"]
-    assert ("GIF downgraded to file" in frames[0]["payload"]) is (not policy)
 
 
 @pytest.mark.asyncio

@@ -73,7 +73,7 @@ test('a healthy local install opens straight to chat on every launch: no setup c
         if (launch === 2) {
           // A usable install the Desktop bootstrap never stamped (a CLI install from before the
           // marker, or one whose marker was lost): usability, not the marker, decides.
-          fs.rmSync(path.join(facts.checkout, '.hermes-bootstrap-complete'), { force: true })
+          fs.rmSync(path.join(facts.checkout, '.agent-bootstrap-complete'), { force: true })
         }
 
         const installer = startInstallerSampler(facts)
@@ -120,7 +120,7 @@ test('a healthy local install opens straight to chat on every launch: no setup c
           })
           .toEqual([])
         const stopped = stopInstallGateway(facts)
-        expect(stopped.code, `hermes gateway stop\n${stopped.output}`).toBe(0)
+        expect(stopped.code, `noone gateway stop\n${stopped.output}`).toBe(0)
         await expect
           .poll(() => installProcesses(facts).map(p => `${p.pid} ${p.cmdline.slice(0, 160)}`), {
             timeout: 30_000,

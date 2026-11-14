@@ -37,12 +37,10 @@ jobs:
         with:
           command: python -m scripts.ci.python_packages ascii-guard==2.3.0 ruamel.yaml==0.18.17
 
-      - name: Extract skill metadata and regenerate per-skill docs pages + catalogs
+      - name: Regenerate per-skill documentation and navigation
         run: just docs-generate
 
       - name: Committed skill docs match the generator
-        # GitHub renders the committed copies, so a regeneration that changes anything
-        # means the published catalogs/pages are stale. Fix: `just docs-generate` and commit.
         run: just docs-check-generated
 
       - name: Check cross-page links resolve on GitHub and on the site
@@ -51,8 +49,11 @@ jobs:
       - name: Lint docs diagrams
         run: just docs-lint-diagrams
 
-      - name: Build Docusaurus
-        # Build only the default (en) locale in CI — the full bilingual
-        # build runs in deploy-site.yml on push-to-main / release.
-        # Same pattern Docusaurus uses internally (build:fast --locale en).
+      - name: Test documentation publishing helpers
+        run: npm test --prefix website
+
+      - name: Validate documentation
         run: just docs-build
+
+      - name: Check routes, anchors, imports and redirects
+        run: npm run check:links --prefix website

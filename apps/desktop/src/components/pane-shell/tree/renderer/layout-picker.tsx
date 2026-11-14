@@ -9,10 +9,10 @@
  */
 
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { type ReactNode, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Input } from '@/components/ui/input'
 import { useContributions } from '@/contrib/react/use-contributions'
 import type { Contribution } from '@/contrib/types'
@@ -124,7 +124,7 @@ function PresetCard({ preset }: { preset: Contribution }) {
           onPointerDown={e => e.stopPropagation()}
           type="button"
         >
-          <Codicon name="close" size="0.7rem" />
+          <AppIcon name="close" size="0.7rem" />
         </button>
       )}
     </div>
@@ -223,7 +223,7 @@ export function LayoutPicker() {
               size="sm"
               variant="ghost"
             >
-              <Codicon name="add" size="0.875rem" />
+              <AppIcon name="add" size="0.875rem" />
               {t.zones.newGridLayout}
             </Button>
           </section>
@@ -261,7 +261,7 @@ export function LayoutPicker() {
             </form>
           ) : (
             <Button className="self-start" onClick={() => setSaving(true)} size="inline" variant="text">
-              <Codicon name="save" size="0.8125rem" />
+              <AppIcon name="save" size="0.8125rem" />
               {t.zones.saveCurrentAs}
             </Button>
           )}

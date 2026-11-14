@@ -1,11 +1,11 @@
-# Shared bundle builds
+# Shared bundle builds {#shared-bundle-builds}
 
-Hermes separates dependency preparation, product builds, and distribution
+{{app-name}} separates dependency preparation, product builds, and distribution
 packaging. The compiler and agent-assembly interfaces live in
-[`scripts/build/README.md`](https://github.com/NousResearch/hermes-agent/blob/main/scripts/build/README.md). These are current
+[`scripts/build/README.md`](https://github.com/Garudex-Labs/NoOne/blob/main/scripts/build/README.md). These are current
 interfaces, not proof that every distribution passed native acceptance.
 
-## Providers, products, and distributions
+## Providers, products, and distributions {#providers-products-and-distributions}
 
 | Layer | Responsibility | Implementation |
 |---|---|---|
@@ -22,7 +22,6 @@ bytes, dependency selections, or Python environments across targets.
 | Product | Implementation | Inputs |
 |---|---|---|
 | Icons | `scripts/generate_icons.py` | Artwork and a Python with the runtime dependencies |
-| TUI | `scripts/build/tui.mjs` | Prepared TUI workspace |
 | Dashboard | `scripts/build/web.mjs` | Prepared web workspace and generated icons |
 | Desktop UI | `scripts/build/desktop.mjs` | Prepared desktop workspace, icons, stamp, and native bindings |
 | Runnable agent | `scripts/build/agent.py` | Code, interpreter, dependencies, independent PM runtime, resources, and selected frontends |
@@ -31,10 +30,10 @@ The desktop UI compiler does not depend on the dashboard. A bundled desktop
 selects an agent with TUI and dashboard products. A light desktop does not
 select an agent payload.
 
-## Build and packaging entrypoints
+## Build and packaging entrypoints {#build-and-packaging-entrypoints}
 
 Source updates and source UI launches use the same dependency provider and
-product builders. `hermes_cli/source_build.py` selects the workspace union,
+product builders. `agent_cli/source_build.py` selects the workspace union,
 prepares it once, then invokes the shared recipes. An update builds TUI and
 web, plus the local desktop app when one was present before the update.
 Desktop packaging still belongs to the local desktop adapter.
@@ -66,7 +65,7 @@ utilities, and (except for light) the application and independent PM environment
 Only then does it compile products, assemble the payload, and package Electron.
 MSIX metadata, signing, notarization, and package formats remain adapter work.
 
-### Split desktop preparation and consumption
+### Split desktop preparation and consumption {#split-desktop-preparation-and-consumption}
 
 The one-command build and CI use the same preparation operation. To stop before
 product compilation and packaging:
@@ -89,7 +88,7 @@ the clean checkout and prepared inputs, then fails on stale or missing inputs
 instead of installing them. Bundled and Store builds may consume the same
 preparation for a stable tag; light and commit builds cannot switch to Store.
 Product builds still run each time. Native staging exposes `prepare_native` and
-`finish_native` to this composition; `hermes pm bundle` remains a complete
+`finish_native` to this composition; `noone pm bundle` remains a complete
 native staging command, not the desktop preparation interface.
 
 Windows and macOS release jobs use **restore → prepare → save → build**. The
@@ -129,12 +128,12 @@ explicit input/output contracts in the builder README.
 a temporary snapshot of that same revision. Explicit frontend products must
 come from the selected revision.
 
-`hermes pm bundle --out /work/agent-payload --ref HEAD` stages native tools,
+`noone pm bundle --out /work/agent-payload --ref HEAD` stages native tools,
 the application environment, and the agent. That PM command does not build
 frontends. `pnpm --dir apps/desktop run payload` uses the stage driver
 that includes them. Neither command creates an Electron installer.
 
-### Split PM Bundle preparation and assembly
+### Split PM Bundle preparation and assembly {#split-pm-bundle-preparation-and-assembly}
 
 PM Bundle uses the same isolated tool bootstrap and native preparation slice,
 without installing desktop workspaces, icons, Electron bindings or packagers:
@@ -154,7 +153,7 @@ separate; preparation claims a previously absent work directory. Without
 or path arguments and validates the native receipt before assembly; it never
 bootstraps or repairs dependencies. The receipt and lock are output siblings
 (`agent-payload.prepared.json`, `agent-payload.prepare.lock`), not shipped files.
-Assembly deliberately supplies no frontend products, as with `hermes pm bundle`.
+Assembly deliberately supplies no frontend products, as with `noone pm bundle`.
 
 The `payload-test` producer on the existing cache action selects only `tools`,
 `python/runtime` and `native`. It excludes source `node_modules`, pnpm stores,
@@ -179,7 +178,7 @@ the TUI workspace, calls the shared TUI builder, and passes that product to
 The CLI contracts are in `scripts/bundles/desktop.py`,
 `scripts/bundles/stage.py`, `pm/cli.py`, and `scripts/termux/build.py`.
 
-## Shared agent and launcher contract
+## Shared agent and launcher contract {#shared-agent-and-launcher-contract}
 
 `AgentInputs` supplies explicit paths and a placement mode:
 
@@ -208,7 +207,7 @@ explicit interpreter, source, and dependency paths. Structural assembly does
 not replace target-native launch tests. A manifest alone does not prove that
 a relocated or signed artifact runs.
 
-## Independent PM runtime
+## Independent PM runtime {#independent-pm-runtime}
 
 PM dependencies come from `pm/pyproject.toml` and `pm/uv.lock`, not the
 application dependency graph. The application environment and `pm-runtime`
@@ -233,7 +232,7 @@ uses the same provider as source setup and CI. Live PM retains plugin
 admission, generation selection, and transaction state. Both paths use
 `pm.environment.PythonEnvironment` for explicit uv environment construction.
 
-## Distribution boundaries and output paths
+## Distribution boundaries and output paths {#distribution-boundaries-and-output-paths}
 
 | Distribution | Selected products | Current output layout |
 |---|---|---|
@@ -248,9 +247,9 @@ admission, generation selection, and transaction state. Both paths use
 
 Native payloads contain `hermes-agent`, `tools`, `venv`, `pm-runtime`, `bin`,
 `uv-cache`, and their manifests/facts. Copied frontend assets live at
-`hermes-agent/hermes_cli/tui_dist/` and `hermes-agent/hermes_cli/web_dist/`;
+`hermes-agent/agent_cli_dist/` and `hermes-agent/agent_cli/web_dist/`;
 desktop bundles also carry the Webapp at `hermes-agent/apps/desktop/dist-webapp/`,
-which `hermes webapp` serves as shipped and never rebuilds.
+which `noone webapp` serves as shipped and never rebuilds.
 The TUI asset directory contains `entry.js` and module-mode package metadata.
 The `tools` store ships a user install's pinned PM tools, except Chromium on
 macOS: the browser tool installs it into the writable store on first use. It is left out
@@ -258,8 +257,8 @@ because Squirrel.Mac before Electron 44.7 cannot download an update ZIP of 1 GiB
 or more, and v0.22.0 ships Electron 40.
 
 Docker keeps its existing TUI product at `/opt/hermes/ui-tui` and web output
-at `/opt/hermes/hermes_cli/web_dist`. The assembler also plants its shared TUI
-asset layout beneath `hermes_cli/tui_dist`. Venv command symlinks preserve the
+at `/opt/hermes/agent_cli/web_dist`. The assembler also plants its shared TUI
+asset layout beneath `agent_cli_dist`. Venv command symlinks preserve the
 paths used by s6 and the privilege-drop shim.
 
 The Docker frontend stage owns pnpm workspace dependencies and compilation. The
@@ -275,9 +274,9 @@ consume the assembler's command map and retain their PATH and extra-Python
 collision policies.
 
 **Nix wheel policy:** `nix/python.nix:128–135` sets `HERMES_NIX_BUILD=1` only
-for the Hermes derivation. `setup.py:34–72` rejects general Hermes wheel/sdist
+for the {{app-name}} derivation. `setup.py:34–72` rejects general {{app-name}} wheel/sdist
 builds. The shared assembler uses the installed Nix code without another copy.
-Other providers use source-layout code and metadata, not a public Hermes wheel.
+Other providers use source-layout code and metadata, not a public {{app-name}} wheel.
 
 Termux retains bionic wheel compilation, offline installation, native library
 paths, and its fixed prefix. Its installed root contains `app`, `tools`,
@@ -290,14 +289,14 @@ suites are `hermes-stable` and `hermes-canary`. Package files publish before
 signed metadata. [Stable release admission](stable-releases.md) coordinates
 acceptance and publication across distributions.
 
-## Public artifact handoffs
+## Public artifact handoffs {#public-artifact-handoffs}
 
 The desktop release workflow downloads and installs each supported bundled
 format on a fresh native runner, then runs the same composer/provider/reply
 check as install-e2e. Windows universal assembly stages bytes before the smoke;
 its canary feed is published separately only after both native smoke matrices
 pass. macOS feed publication and stable candidate acceptance are likewise gated.
-See [install and chat acceptance](https://github.com/NousResearch/hermes-agent/blob/main/tests/install/README.md#post-build-artifact-smoke)
+See [install and chat acceptance](https://github.com/Garudex-Labs/NoOne/blob/main/tests/install/README.md#post-build-artifact-smoke)
 for covered formats, checkpoint evidence and the Store/Linux/no-upload limits.
 
 `scripts.releases.handoff fetch --public-base URL` downloads a staged artifact
@@ -313,7 +312,7 @@ cannot replace an existing verified destination. Receipt files are saved only
 after all selected artifacts verify. Selection of one desktop format must still
 reject missing or ambiguous matches before installation.
 
-## Cache ownership
+## Cache ownership {#cache-ownership}
 
 PM binary download archives and the native uv wheel cache have different
 consumers. They are not interchangeable cleanup targets.
@@ -374,7 +373,7 @@ Default-branch canary dispatch retains default-branch cache scope; changing a
 checkout SHA does not change the workflow ref's cache scope. See GitHub's
 [cache access contract](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#controlling-cache-access-with-cache-mode).
 
-## Pinned binary inputs
+## Pinned binary inputs {#pinned-binary-inputs}
 
 `python -m scripts.ci.archive_inputs` preserves every HTTPS artifact in
 `pm/lock.json`, across all targets, plus the Termux runtime-library and license
@@ -410,7 +409,7 @@ not cover its prefix. This covers PM binary pins and Termux runtime inputs,
 not unpinned apt packages, OCI images, language-package registries, or native
 Electron/SDK archives independently downloaded by their build tools.
 
-## Verification boundary
+## Verification boundary {#verification-boundary}
 
 The checks below distinguish product tests from distribution acceptance.
 Signed installers and Android device execution require their native runners.
@@ -428,7 +427,7 @@ Focused helper tests cannot establish all of these requirements:
 - Native Electron bindings and final signed launchers on each target.
 - PM isolation after native payload relocation.
 - Retained-cache offline reconstruction of a mutable application environment.
-- Docker non-root CLI/TUI/web/browser behavior and every image layer's contents.
+- Docker non-root CLI/web/browser behavior and every image layer's contents.
 - Actual Nix package execution through reference-based wrappers.
 - Fresh network-disabled Termux package installation and Android device behavior.
 

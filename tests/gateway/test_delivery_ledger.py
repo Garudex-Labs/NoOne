@@ -17,13 +17,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from agent_cli.database_migrations import UnsupportedDatabaseSchema
 from gateway import delivery_ledger as dl
 
 
 @pytest.fixture(autouse=True)
 def _fresh_db(tmp_path, monkeypatch):
     """Isolated state.db per test (autouse HERMES_HOME isolation already
-    redirects get_hermes_home; make the redirect explicit and per-test)."""
+    redirects get_agent_home; make the redirect explicit and per-test)."""
     home = tmp_path / ".hermes"
     home.mkdir()
     monkeypatch.setattr(dl, "_db_path", lambda: home / "state.db")
@@ -95,8 +96,8 @@ def _orphan(oid):
         )
 
 
-class TestSchemaMigration:
-    def test_adds_adapter_profile_to_existing_ledger(self):
+class TestSchemaInitialization:
+    def test_unversioned_ledger_is_refused_without_conversion(self):
         conn = sqlite3.connect(dl._db_path())
         try:
             conn.execute(
@@ -116,14 +117,25 @@ class TestSchemaMigration:
                     last_error TEXT
                 )"""
             )
-            dl._initialize_schema(conn)
-            columns = {
-                row[1] for row in conn.execute("PRAGMA table_info(delivery_obligations)")
-            }
+            conn.execute(
+                "INSERT INTO delivery_obligations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                ("legacy", "session", "slack", "chat", None, "retained reply", "pending", 0, 1, 1, 42, 1, None),
+            )
+            conn.commit()
+            before = list(conn.iterdump())
+            with pytest.raises(UnsupportedDatabaseSchema, match="historical delivery_ledger"):
+                dl._initialize_schema(conn)
+            assert list(conn.iterdump()) == before
         finally:
             conn.close()
 
-        assert "adapter_profile" in columns
+    def test_current_ledger_reopens_with_adapter_profile(self):
+        _record(adapter_profile="ops")
+        with dl._connect() as conn:
+            assert conn.execute(
+                "SELECT adapter_profile, content, state FROM delivery_obligations WHERE obligation_id=?",
+                ("ob-1",),
+            ).fetchone() == ("ops", "the final answer", "pending")
 
 
 class TestStateMachine:

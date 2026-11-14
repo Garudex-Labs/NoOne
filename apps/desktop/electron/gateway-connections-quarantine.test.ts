@@ -64,7 +64,7 @@ test('every quarantined entry survives the import past the cap, and later writes
   assert.deepEqual(kept(), all)
 
   const env = { HERMES_HOME: root, HOME: dir, PATH: process.env.PATH, PYTHONPATH: repo }
-  const script = 'from hermes_cli import gateway_connections as g\ng.set_launch_mode("primary")'
+  const script = 'from agent_cli import gateway_connections as g\ng.set_launch_mode("primary")'
   await promisify(execFile)(python, ['-c', script], { env })
   assert.deepEqual(kept(), all)
 })

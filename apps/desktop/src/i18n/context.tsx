@@ -1,8 +1,11 @@
-import { applyDocumentLocale, isRecord } from '@hermes/shared/i18n'
 import { useStore } from '@nanostores/react'
+import { $appName, applyAppIdentity, withAppIdentity } from '@noone/shared/application-identity'
+import { applyDocumentLocale, isRecord } from '@noone/shared/i18n'
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 
-import { getHermesConfigRecord, type HermesConfigRecord, retainConfigReadOrigin, saveHermesConfig } from '@/hermes'
+import { type AgentConfigRecord, getHermesConfigRecord, retainConfigReadOrigin, saveHermesConfig } from '@/agent-client'
+import { hostHas } from '@/lib/host-capabilities'
+import { isTransparentWindow } from '@/lib/transparent-windows'
 
 import { TRANSLATIONS } from './catalog'
 import {
@@ -18,8 +21,8 @@ import { $requestedLocale, setRuntimeI18nLocale } from './runtime'
 import type { Locale, Translations } from './types'
 
 export interface I18nConfigClient {
-  getConfig: () => Promise<HermesConfigRecord>
-  saveConfig: (config: HermesConfigRecord) => Promise<{ ok: boolean }>
+  getConfig: () => Promise<AgentConfigRecord>
+  saveConfig: (config: AgentConfigRecord) => Promise<{ ok: boolean }>
 }
 
 const defaultConfigClient: I18nConfigClient = {
@@ -44,11 +47,11 @@ const defaultConfigClient: I18nConfigClient = {
   }
 }
 
-export function getConfigDisplayLanguage(config: HermesConfigRecord): unknown {
+export function getConfigDisplayLanguage(config: AgentConfigRecord): unknown {
   return isRecord(config.display) ? config.display.language : undefined
 }
 
-export function withConfigDisplayLanguage(config: HermesConfigRecord, locale: Locale): HermesConfigRecord {
+export function withConfigDisplayLanguage(config: AgentConfigRecord, locale: Locale): AgentConfigRecord {
   const display = isRecord(config.display) ? config.display : {}
 
   return retainConfigReadOrigin(
@@ -68,6 +71,7 @@ function toError(error: unknown): Error {
 }
 
 export interface I18nContextValue {
+  appName: string
   configLoadError: Error | null
   isLoadingConfig: boolean
   isSavingLocale: boolean
@@ -78,6 +82,7 @@ export interface I18nContextValue {
 }
 
 const I18nContext = createContext<I18nContextValue>({
+  appName: $appName.get(),
   configLoadError: null,
   isLoadingConfig: false,
   isSavingLocale: false,
@@ -113,6 +118,12 @@ export function I18nProvider({
   // Registered languages (plugin packs, backend `.desktop.yaml`) change the
   // catalog without a locale change; the version keys re-resolution.
   const registryVersion = useStore($appLocaleVersion)
+  const appName = useStore($appName)
+  useEffect(() => {
+    // Browser status titles and transparent windows have their own owner.
+    if (!hostHas('tabTitleStatus') && !isTransparentWindow()) {document.title = appName}
+    window.hermesDesktop?.setApplicationName?.(appName)
+  }, [appName])
   // The language THIS scope's config asked for (what $requestedLocale was last
   // set to from here). A ref, not the atom: another provider's or an earlier
   // scope's ask must never be promoted into this one.
@@ -155,6 +166,8 @@ export function I18nProvider({
       return
     }
 
+    applyAppIdentity(null)
+
     let cancelled = false
     let retryTimer: ReturnType<typeof setTimeout> | null = null
     let retryCount = 0
@@ -175,6 +188,10 @@ export function I18nProvider({
       return configClient
         .getConfig()
         .then(async config => {
+          if (!cancelled) {
+            applyAppIdentity(config)
+          }
+
           if (cancelled || userLocaleRef.current) {
             return
           }
@@ -282,18 +299,19 @@ export function I18nProvider({
 
   const value = useMemo<I18nContextValue>(
     () => ({
+      appName,
       configLoadError,
       isLoadingConfig,
       isSavingLocale,
       locale,
       saveError,
       setLocale,
-      t: resolveTranslations(locale)
+      t: withAppIdentity(resolveTranslations(locale), appName)
     }),
     // `registryVersion` is the registry's change token: a pack landing after
     // first paint re-resolves `t` without a locale change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [configLoadError, isLoadingConfig, isSavingLocale, locale, registryVersion, saveError, setLocale]
+    [appName, configLoadError, isLoadingConfig, isSavingLocale, locale, registryVersion, saveError, setLocale]
   )
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>

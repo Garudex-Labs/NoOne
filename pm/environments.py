@@ -1,7 +1,7 @@
 """Dependency-environment layout: where a project's venv generations live, which one
 is selected, and the interpreter inside any venv. Shared by PM and pre-import launchers.
 
-Only stdlib and hermes_constants: environment selection must work before
+Only stdlib and agent_constants: environment selection must work before
 any dependency from that environment has been imported.
 """
 from __future__ import annotations
@@ -14,7 +14,7 @@ import re
 import shlex
 from pathlib import Path
 
-from hermes_constants import get_default_hermes_root, project_venv_dir
+from agent_constants import get_default_agent_root, project_venv_dir
 
 
 def install_key(project_root: Path) -> str:
@@ -24,10 +24,10 @@ def install_key(project_root: Path) -> str:
 
 def dependency_home_root() -> Path:
     """Scope dependency state like a process launched in the active home."""
-    from hermes_constants import get_default_hermes_root, get_hermes_home_override
+    from agent_constants import get_default_agent_root, get_agent_home_override
 
-    override = get_hermes_home_override()
-    return get_default_hermes_root(home=override) if override else get_default_hermes_root()
+    override = get_agent_home_override()
+    return get_default_agent_root(home=override) if override else get_default_agent_root()
 
 
 def installs_root() -> Path:
@@ -55,7 +55,7 @@ def owning_home_root(project_root: Path) -> Path | None:
     and it execs the owner's store Python. With no live launcher to ask, the root the checkout
     sits in outranks the platform default.
     """
-    from hermes_constants import _get_platform_default_hermes_home
+    from agent_constants import _get_platform_default_hermes_home
 
     root = Path(project_root).resolve()
     key = install_key(root)
@@ -74,7 +74,7 @@ def owning_home_root(project_root: Path) -> Path | None:
 
 def _launcher_bound_root(project_root: Path, candidates: list[Path]) -> Path | None:
     """The candidate whose ``tools/`` holds the live interpreter the checkout's launcher execs."""
-    from hermes_cli._launchers import _launcher_python
+    from agent_cli._launchers import _launcher_python
 
     local = project_root / ".hermes" / "bin"
     for name in (("hermes.exe", "hermes.cmd") if os.name == "nt" else ("hermes",)):
@@ -106,7 +106,7 @@ def runtime_facts_path(project_root: Path) -> Path:
     return install_state_dir(project_root) / "facts.json"
 
 
-# The files that decide the dependency set. `scripts/run-in-hermes-env` re-syncs
+# The files that decide the dependency set. `scripts/run-in-agent-env` re-syncs
 # when any of them differs in mtime from its stamp under activation_inputs_dir.
 ACTIVATION_INPUTS = ("uv.lock", "pyproject.toml", "setup.py", "pm/lock.json")
 
@@ -246,7 +246,7 @@ def store_root(project_root: Path, *, honor_runtime_override: bool = True) -> Pa
                 return _unstamped_store(root)
             value = data.get("runtimeDir") if isinstance(data, dict) else None
             return Path(value).resolve() if value else _unstamped_store(root)
-    return get_default_hermes_root() / "tools"
+    return get_default_agent_root() / "tools"
 
 
 def _unstamped_store(project_root: Path) -> Path:
@@ -257,7 +257,7 @@ def _unstamped_store(project_root: Path) -> Path:
     with the home. The checkout's own launchers exec the owner's interpreter, so a borrowing
     launch resolves the same one (#123238).
     """
-    return (owning_home_root(project_root) or get_default_hermes_root()) / "tools"
+    return (owning_home_root(project_root) or get_default_agent_root()) / "tools"
 
 
 def flush_before_selecting() -> None:
@@ -444,7 +444,7 @@ def running_from_selected_environment(project_root: Path) -> bool:
 
 
 class NoCommittedEnvironment(RuntimeError):
-    """PM's store Python with no committed generation: no retry fixes it, only `hermes pm repair`."""
+    """PM's store Python with no committed generation: no retry fixes it, only `noone pm repair`."""
 
 
 def _require_own_dependencies(project_root: Path) -> None:
@@ -471,7 +471,7 @@ def activate_dependencies(project_root: Path) -> None:
 
     state = install_state_dir(project_root)
     if state.is_dir():
-        from hermes_cli.runtime_state import runtime_lock, recover_publication, lease_generation
+        from agent_cli.runtime_state import runtime_lock, recover_publication, lease_generation
         # The lock's holder may be another profile's backend running a full dependency rebuild;
         # this process only reads the committed selection, so it proceeds without waiting rather
         # than leaving the backend unbound (see runtime_lock).
@@ -536,7 +536,7 @@ def activation_environment(project_root: Path) -> dict[str, str]:
     environment = committed_venv(project_root)
     env.pop("PYTHONHOME", None)
     env.pop("VIRTUAL_ENV", None)
-    # Nothing committed: the child's own hermes_bootstrap decides (a bare store Python refuses),
+    # Nothing committed: the child's own agent_bootstrap decides (a bare store Python refuses),
     # rather than inheriting the pre-PM in-tree venv from here.
     env["PYTHONPATH"] = os.pathsep.join([str(project_root.resolve()),
                                          *([str(site_packages(environment))] if environment else [])])

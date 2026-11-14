@@ -130,7 +130,7 @@ def test_timeout_falls_back_to_a_new_message_when_the_card_cannot_be_edited(pend
     adapter = _PlainAdapter() if text_fallback else _ButtonAdapter(editable=False)
     _runner(adapter)._approval_notify_sync(dict(pending_entry.data))  # what notify_cb receives
     if text_fallback:
-        # The plain-text prompt is an interim approval prompt (Telegram pushes it, WeCom routes it
+        # The plain-text prompt is an interim approval prompt (Telegram pushes it, native streams route it
         # via the control lane), never ``notify``: A2A resolves the caller's task on that marker.
         assert adapter.send_metadata == [{"thread_id": "t1", "is_approval_prompt": True, "_interim_send": True}]
 

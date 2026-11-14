@@ -1,18 +1,17 @@
 ---
-sidebar_position: 12
 title: "Batch Processing"
 description: "Generate agent trajectories at scale — parallel processing, checkpointing, and toolset distributions"
 ---
 
-# Batch Processing
+# Batch Processing {#batch-processing}
 
-Batch processing lets you run the Hermes agent across hundreds or thousands of prompts in parallel, generating structured trajectory data. This is primarily used for **training data generation** — producing ShareGPT-format trajectories with tool usage statistics that can be used for fine-tuning or evaluation.
+Batch processing lets you run the {{app-name}} agent across hundreds or thousands of prompts in parallel, generating structured trajectory data. This is primarily used for **training data generation** — producing ShareGPT-format trajectories with tool usage statistics that can be used for fine-tuning or evaluation.
 
-## Overview
+## Overview {#overview}
 
 The batch runner (`batch_runner.py`) processes a JSONL dataset of prompts, running each through a full agent session with tool access. Each prompt gets its own isolated environment. The output is structured trajectory data with full conversation history, tool call statistics, and reasoning coverage metrics.
 
-## Quick Start
+## Quick Start {#quick-start}
 
 ```bash
 # Basic batch run
@@ -34,11 +33,19 @@ python batch_runner.py \
 python batch_runner.py --list_distributions
 ```
 
-:::tip Predictable cost at scale
-Batch runs spin up many concurrent agent sessions, each making model calls and tool calls. A [Nous Portal](./tool-gateway.md) subscription bundles model access plus web search, image gen, TTS, and cloud browsers under one bill — useful when you want stable cost-per-trajectory without juggling rate limits across five vendor accounts. Set up with `hermes setup --portal`, then point `--model` at a Nous model.
-:::
+<Tip>
 
-## Dataset Format
+<div className="doc-callout-title">
+
+Predictable cost at scale
+
+</div>
+
+Batch runs spin up many concurrent agent sessions, each making model calls and tool calls. A [Nous Portal](./tool-gateway.md) subscription bundles model access plus web search, image gen, TTS, and cloud browsers under one bill — useful when you want stable cost-per-trajectory without juggling rate limits across five vendor accounts. Set up with `noone setup --portal`, then point `--model` at a Nous model.
+
+</Tip>
+
+## Dataset Format {#dataset-format}
 
 The input dataset is a JSONL file (one JSON object per line). Each entry must have a `prompt` field:
 
@@ -52,7 +59,7 @@ Entries can optionally include:
 - `image` or `docker_image`: A container image to use for this prompt's sandbox (works with Docker, Modal, Daytona and plugin backends such as Singularity)
 - `cwd`: Working directory override for the task's terminal session
 
-## Configuration Options
+## Configuration Options {#configuration-options}
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -70,7 +77,7 @@ Entries can optionally include:
 | `--max_samples` | all | Only process first N samples from dataset |
 
 
-### Provider Routing (OpenRouter)
+### Provider Routing (OpenRouter) {#provider-routing-openrouter}
 
 | Parameter | Description |
 |-----------|-------------|
@@ -79,14 +86,14 @@ Entries can optionally include:
 | `--providers_order` | Comma-separated preferred provider order |
 | `--provider_sort` | Sort by `"price"`, `"throughput"`, or `"latency"` |
 
-### Reasoning Control
+### Reasoning Control {#reasoning-control}
 
 | Parameter | Description |
 |-----------|-------------|
 | `--reasoning_effort` | Reasoning effort: `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max`, `ultra` |
 | `--reasoning_disabled` | Completely disable reasoning/thinking tokens |
 
-### Advanced Options
+### Advanced Options {#advanced-options}
 
 | Parameter | Description |
 |-----------|-------------|
@@ -94,13 +101,13 @@ Entries can optionally include:
 | `--log_prefix_chars` | Characters to show in log previews (default: 100) |
 | `--prefill_messages_file` | Path to JSON file with prefill messages for few-shot priming |
 
-## Toolset Distributions
+## Toolset Distributions {#toolset-distributions}
 
 Each prompt gets a randomly sampled set of toolsets from a **distribution**. This ensures training data covers diverse tool combinations. Use `--list_distributions` to see all available distributions.
 
 In the current implementation, distributions assign a probability to **each individual toolset**. The sampler flips each toolset independently, then guarantees that at least one toolset is enabled. This is different from a hand-authored table of prebuilt combinations.
 
-## Output Format
+## Output Format {#output-format}
 
 All output goes to `data/<run_name>/`:
 
@@ -114,7 +121,7 @@ data/my_run/
 └── statistics.json       # Aggregate tool usage stats
 ```
 
-### Trajectory Format
+### Trajectory Format {#trajectory-format}
 
 Each line in `trajectories.jsonl` is a JSON object:
 
@@ -150,7 +157,7 @@ Each line in `trajectories.jsonl` is a JSON object:
 
 The `conversations` field uses a ShareGPT-like format with `from` and `value` fields. Tool stats are normalized to include all possible tools with zero defaults, ensuring consistent schema across entries for HuggingFace datasets compatibility.
 
-## Checkpointing
+## Checkpointing {#checkpointing}
 
 The batch runner has robust checkpointing for fault tolerance:
 
@@ -159,7 +166,7 @@ The batch runner has robust checkpointing for fault tolerance:
 - **Failed prompts:** Only successfully completed prompts are marked as done — failed prompts will be retried on resume
 - **Batch merging:** On completion, all batch files (including from previous runs) are merged into a single `trajectories.jsonl`
 
-### How Resume Works
+### How Resume Works {#how-resume-works}
 
 1. Scan all `batch_*.jsonl` files for completed prompts (by content matching)
 2. Filter the dataset to exclude already-completed prompts
@@ -167,7 +174,7 @@ The batch runner has robust checkpointing for fault tolerance:
 4. Process only the remaining prompts
 5. Merge all batch files (old + new) into final output
 
-## Quality Filtering
+## Quality Filtering {#quality-filtering}
 
 The batch runner applies automatic quality filtering:
 
@@ -175,7 +182,7 @@ The batch runner applies automatic quality filtering:
 - **Corrupted entry filter:** Entries with hallucinated tool names (not in the valid tool list) are filtered out during the final merge
 - **Reasoning statistics:** Tracks percentage of turns with/without reasoning across the entire run
 
-## Statistics
+## Statistics {#statistics}
 
 After completion, the runner prints comprehensive statistics:
 
@@ -186,9 +193,9 @@ After completion, the runner prints comprehensive statistics:
 
 Statistics are also saved to `statistics.json` for programmatic analysis.
 
-## Use Cases
+## Use Cases {#use-cases}
 
-### Training Data Generation
+### Training Data Generation {#training-data-generation}
 
 Generate diverse tool-use trajectories for fine-tuning:
 
@@ -203,7 +210,7 @@ python batch_runner.py \
     --max_turns=15
 ```
 
-### Model Evaluation
+### Model Evaluation {#model-evaluation}
 
 Evaluate how well a model uses tools across standardized prompts:
 
@@ -217,7 +224,7 @@ python batch_runner.py \
     --max_turns=10
 ```
 
-### Per-Prompt Container Images
+### Per-Prompt Container Images {#per-prompt-container-images}
 
 For benchmarks requiring specific environments, each prompt can specify its own container image:
 

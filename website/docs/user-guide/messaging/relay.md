@@ -1,17 +1,24 @@
 ---
-sidebar_position: 30
-title: "Hermes Relay"
-description: "Connect Hermes to messaging platforms through a relay connector that owns the platform credentials — enrollment, capabilities, config, and troubleshooting"
+title: "the agent Relay"
+description: "Connect the agent to messaging platforms through a relay connector that owns the platform credentials — enrollment, capabilities, config, and troubleshooting"
 ---
 
-# Hermes Relay (Connector)
+# {{app-name}} Relay (Connector) {#hermes-relay-connector}
 
-:::warning Experimental
+<Warning>
+
+<div className="doc-callout-title">
+
+Experimental
+
+</div>
+
 Relay is **experimental**. The wire contract, auth scheme, and configuration
 may change without a deprecation cycle while the system is being validated.
-:::
 
-Hermes Relay is not a chat platform itself — it is a **connector system** that
+</Warning>
+
+{{app-name}} Relay is not a chat platform itself — it is a **connector system** that
 lets your gateway front one or more real messaging platforms (Discord,
 Telegram, Slack, WhatsApp, …) **without holding any platform credentials**. A
 separate service, the *connector*, owns the platform bot tokens and sockets.
@@ -35,7 +42,7 @@ Key properties:
 The formal gateway ⇄ connector interface lives in the repository at
 `docs/relay-connector-contract.md`.
 
-## When to use Relay
+## When to use Relay {#when-to-use-relay}
 
 Relay is for deployments where a hosted or shared connector service manages
 the platform side — for example multi-tenant hosting where one shared bot
@@ -44,15 +51,15 @@ gateway machine. If you run your own bots directly, use the native platform
 adapters ([Telegram](./telegram.md),
 [Discord](./discord.md), etc.) instead.
 
-## Enrollment
+## Enrollment {#enrollment}
 
 A self-hosted gateway authenticates to the connector with a per-gateway
-secret. `hermes gateway enroll` redeems a **single-use enrollment token**
+secret. `noone gateway enroll` redeems a **single-use enrollment token**
 (minted by the connector when your tenant's route is provisioned and delivered
 with your gateway config) for that secret:
 
 ```bash
-hermes gateway enroll \
+noone gateway enroll \
   --token <enrollment-token> \
   --connector-url wss://connector.example.com/relay
 ```
@@ -88,13 +95,21 @@ Flags:
 | `--gateway-id` | Stable id for this gateway instance (used for kill-switch granularity). Defaults to `gw-<hostname>`. |
 | `--wake-url` | Optional reachable URL the connector pokes (payload-free GET) to wake this gateway when buffered work arrives while it is idle. Persisted as `GATEWAY_RELAY_WAKE_URL`. Without it the gateway still drains buffered messages whenever it next reconnects. |
 
-:::note Managed installs
-`hermes gateway enroll` refuses to run in managed/hosted installs — there the
+<Note>
+
+<div className="doc-callout-title">
+
+Managed installs
+
+</div>
+
+`noone gateway enroll` refuses to run in managed/hosted installs — there the
 hosting platform provisions the relay secret directly into the container
 environment.
-:::
 
-## Configuration
+</Note>
+
+## Configuration {#configuration}
 
 Relay activates when a connector relay URL is configured. To keep a profile off
 the relay even when the deployment injects a URL, disable the platform in
@@ -118,7 +133,7 @@ platforms:
 The verdict comes from the same files and merge the gateway loader uses (top-level
 or `gateway.platforms` block, managed overlay) and is applied at activation time.
 Restart the gateway after changing it; an open relay socket is not torn down.
-`hermes gateway enroll` remains available while runtime relay is disabled.
+`noone gateway enroll` remains available while runtime relay is disabled.
 
 | Setting | Where | Meaning |
 |---------|-------|---------|
@@ -132,7 +147,7 @@ Restart the gateway after changing it; an open relay socket is not torn down.
 | `GATEWAY_RELAY_BOT_IDS` | env | JSON map of per-platform bot identities, e.g. `{"discord": {"botId": "…"}}`. Paired with `GATEWAY_RELAY_PLATFORMS`. |
 | `gateway.idp.token_url` | `config.yaml` | When set, enrollment/provisioning authenticates against your own IdP instead of Nous Portal: OAuth2 client-credentials when `gateway.idp.client_id`/`client_secret` are also set; otherwise an ambient token endpoint (plain GET returning the token, raw or `{"access_token": …}`). |
 
-## Supported capabilities
+## Supported capabilities {#supported-capabilities}
 
 What actually works over a relay connection is negotiated at handshake: the
 connector advertises a `supported_ops` list, and the gateway only uses an
@@ -179,10 +194,10 @@ Multi-platform fronting is supported: one gateway can front several platforms
 (e.g. Discord *and* Telegram) over a single relay connection, with each
 outbound message tagged for the platform it targets.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 **Enrollment fails with 401** — the connector could not verify your identity
-token. Re-login with `hermes auth add nous` (or `hermes setup`) and retry.
+token. Re-login with `noone auth add nous` (or `noone setup`) and retry.
 
 **Enrollment fails with 403** — the enrollment token is invalid, expired,
 already used, or belongs to a different tenant. Enrollment tokens are
@@ -204,7 +219,7 @@ stops reconnecting and reports relay as disabled rather than retrying. A 4401
 not-yet-provisioned race and retried normally.
 
 **Nothing changed after enrolling** — the gateway reads `GATEWAY_RELAY_*` at
-startup. Restart it (`hermes gateway restart`).
+startup. Restart it (`noone gateway restart`).
 
 **Inbound attachments are missing and the log says a `/relay/media/` URL "is not on
 the relay origin"** — the gateway sends its bearer only to the origin of `GATEWAY_RELAY_URL`, but

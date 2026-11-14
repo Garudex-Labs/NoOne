@@ -10,11 +10,11 @@ from contextlib import contextmanager
 import pytest
 
 from agent.secret_scope import current_secret_scope, set_multiplex_active
-from hermes_cli import env_loader
-from hermes_constants import (
-    get_hermes_home,
-    reset_hermes_home_override,
-    set_hermes_home_override,
+from agent_cli import env_loader
+from agent_constants import (
+    get_agent_home,
+    reset_agent_home_override,
+    set_agent_home_override,
 )
 from tools import mcp_tool_discovery as discovery
 from tools.mcp_tool_config import _build_safe_env
@@ -33,13 +33,13 @@ def profile_home(tmp_path, monkeypatch):
     # process-wide; the VALUE must come from the active profile's scope.
     monkeypatch.setitem(env_loader._SECRET_SOURCES, TOKEN_NAME, "command")
 
-    home_token = set_hermes_home_override(str(home))
+    home_token = set_agent_home_override(str(home))
     set_multiplex_active(True)
     try:
         yield home
     finally:
         set_multiplex_active(False)
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
 
 
 @pytest.fixture
@@ -137,13 +137,13 @@ def _boot_scope(home):
     """The gateway's boot-time ``_profile_runtime_scope`` shape: home override plus a secret scope
     SNAPSHOT built now — before the profile's secret source may have answered."""
     from agent.secret_scope import build_profile_secret_scope, reset_secret_scope, set_secret_scope
-    home_token = set_hermes_home_override(str(home))
+    home_token = set_agent_home_override(str(home))
     token = set_secret_scope(build_profile_secret_scope(home), profile_home=str(home))
     try:
         yield
     finally:
         reset_secret_scope(token)
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
 
 
 def _connect_under_boot_scope(home, config):
@@ -190,7 +190,7 @@ def test_launch_profile_env_only_credential_survives_the_owner_rebuild(spawn_env
     import os
     from pathlib import Path
     from tools import mcp_tool_config as _config
-    from tui_gateway import launch_profile_policy
+    from agent_backend import launch_profile_policy
     launch_home = Path(os.environ["HERMES_HOME"])  # conftest's per-test process home
     (launch_home / ".env").write_text("", encoding="utf-8")
     monkeypatch.setenv(TOKEN_NAME, "tok-from-systemd")
@@ -264,11 +264,11 @@ def test_stdio_child_env_pins_active_profile_home(tmp_path, monkeypatch):
     monkeypatch.delenv("HERMES_HOME", raising=False)  # the failing condition: launch env has none
     home = tmp_path / "served"
     home.mkdir()
-    token = set_hermes_home_override(str(home))
+    token = set_agent_home_override(str(home))
     try:
-        assert _build_safe_env(None)["HERMES_HOME"] == str(get_hermes_home())
+        assert _build_safe_env(None)["HERMES_HOME"] == str(get_agent_home())
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
     # An explicit server ``env.HERMES_HOME`` still wins (merged after the pin).
     assert _build_safe_env({"HERMES_HOME": "/tmp/explicit"})["HERMES_HOME"] == "/tmp/explicit"

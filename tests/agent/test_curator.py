@@ -79,12 +79,12 @@ def test_bundled_skills_are_off_limits_unless_opted_in(curator_env, monkeypatch)
     the same reader flips with the key. Both loaders see the same answer (DEFAULT_CONFIG agrees)."""
     import importlib
     import tools.skill_usage as usage
-    from hermes_cli.config_defaults import DEFAULT_CONFIG
+    from agent_cli.config_defaults import DEFAULT_CONFIG
     importlib.reload(usage)  # the fixture pins _prune_builtins_enabled; reload restores the real reader
-    monkeypatch.setattr("hermes_cli.config.load_config", lambda: {"curator": {}})
+    monkeypatch.setattr("agent_cli.config.load_config", lambda: {"curator": {}})
     assert usage._prune_builtins_enabled() is False
     assert DEFAULT_CONFIG["curator"]["prune_builtins"] is False
-    monkeypatch.setattr("hermes_cli.config.load_config", lambda: {"curator": {"prune_builtins": True}})
+    monkeypatch.setattr("agent_cli.config.load_config", lambda: {"curator": {"prune_builtins": True}})
     assert usage._prune_builtins_enabled() is True
 
 
@@ -690,7 +690,7 @@ def test_state_atomic_write_no_tmp_leftovers(curator_env):
 
 
 def test_cli_pin_refuses_bundled_skill(curator_env):
-    from hermes_cli import curator as cli
+    from agent_cli import curator as cli
     skills_dir = curator_env["home"] / "skills"
     _write_skill(skills_dir, "ship-skill")
     (skills_dir / ".bundled_manifest").write_text(
@@ -708,7 +708,7 @@ def test_cli_pin_refuses_bundled_skill(curator_env):
 # curator review-model resolution (canonical auxiliary.curator slot)
 #
 # Curator was unified with the rest of the aux task system in Apr 2026 so
-# `hermes model` → auxiliary picker, the dashboard Models tab, and the full
+# `noone model` → auxiliary picker, the dashboard Models tab, and the full
 # per-task config (timeout, base_url, api_key, extra_body) all work for it.
 # Voscko report: curator.auxiliary.{provider,model} was advertised but never
 # read. Fix wires curator through auxiliary.curator with a legacy fallback.
@@ -864,15 +864,15 @@ def test_review_fork_forwards_runtime_pool_and_overrides(curator_env, monkeypatc
             pass
 
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "agent_cli.config.load_config",
         lambda: {"model": {"provider": "custom:hyper-charm", "default": "glm-5.2"}},
     )
     monkeypatch.setattr(
-        "hermes_cli.config.load_config_readonly",
+        "agent_cli.config.load_config_readonly",
         lambda: {"model": {"provider": "custom:hyper-charm", "default": "glm-5.2"}},
     )
     monkeypatch.setattr(
-        "hermes_cli.runtime_provider.resolve_runtime_provider",
+        "agent_cli.runtime_provider.resolve_runtime_provider",
         _fake_resolve_runtime_provider,
     )
     monkeypatch.setattr("run_agent.AIAgent", _StubAgent)
@@ -907,10 +907,10 @@ def test_review_fork_receives_configured_reasoning(curator_env, monkeypatch):
         def close(self):
             pass
 
-    monkeypatch.setattr("hermes_cli.config.load_config", lambda: cfg)
-    monkeypatch.setattr("hermes_cli.config.load_config_readonly", lambda: cfg)
+    monkeypatch.setattr("agent_cli.config.load_config", lambda: cfg)
+    monkeypatch.setattr("agent_cli.config.load_config_readonly", lambda: cfg)
     monkeypatch.setattr(
-        "hermes_cli.runtime_provider.resolve_runtime_provider",
+        "agent_cli.runtime_provider.resolve_runtime_provider",
         lambda **kwargs: {"provider": "openai-api", "api_key": "k", "base_url": "https://api.openai.com/v1",
                           "api_mode": "codex_responses"},
     )
@@ -929,15 +929,15 @@ def test_review_fork_uses_runtime_model_and_output_cap(curator_env, monkeypatch)
     captured = {}
 
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "agent_cli.config.load_config",
         lambda: {"model": {"provider": "custom:gateway", "default": "gateway"}},
     )
     monkeypatch.setattr(
-        "hermes_cli.config.load_config_readonly",
+        "agent_cli.config.load_config_readonly",
         lambda: {"model": {"provider": "custom:gateway", "default": "gateway"}},
     )
     monkeypatch.setattr(
-        "hermes_cli.runtime_provider.resolve_runtime_provider",
+        "agent_cli.runtime_provider.resolve_runtime_provider",
         lambda **_kwargs: {
             "provider": "custom",
             "model": "real-model-id",
@@ -1079,15 +1079,15 @@ def test_review_fork_seeds_shared_read_marks(curator_env, monkeypatch):
     from tools.skill_manager_guards import _background_review_read_paths
 
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "agent_cli.config.load_config",
         lambda: {"model": {"provider": "custom:gateway", "default": "gateway"}},
     )
     monkeypatch.setattr(
-        "hermes_cli.config.load_config_readonly",
+        "agent_cli.config.load_config_readonly",
         lambda: {"model": {"provider": "custom:gateway", "default": "gateway"}},
     )
     monkeypatch.setattr(
-        "hermes_cli.runtime_provider.resolve_runtime_provider",
+        "agent_cli.runtime_provider.resolve_runtime_provider",
         lambda **_kwargs: {
             "provider": "custom",
             "model": "m",
@@ -1128,7 +1128,7 @@ def test_threaded_llm_pass_keeps_callers_profile_scope(curator_env, tmp_path, mo
     """#125032: the daemon ``curator-review`` thread must inherit the caller's contextvars (home
     override + secret scope), else on a multiplexed gateway it runs unscoped against the ROOT home."""
     from agent import secret_scope as ss
-    from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
 
     c, root = curator_env["curator"], curator_env["home"]
     profile = tmp_path / "profiles" / "served"
@@ -1136,13 +1136,13 @@ def test_threaded_llm_pass_keeps_callers_profile_scope(curator_env, tmp_path, mo
     seen = {}
 
     def _pass(prefix, auto_summary, dry_run, before_names):
-        seen["home"] = get_hermes_home()
+        seen["home"] = get_agent_home()
         seen["secret"] = ss.get_secret("CURATOR_PROBE_KEY")
         return f"{prefix}{auto_summary}; llm: stub", c._llm_meta("stub")
 
     monkeypatch.setattr(c, "_consolidation_pass", _pass)
     ss.set_multiplex_active(True)
-    home_tok = set_hermes_home_override(profile)
+    home_tok = set_agent_home_override(profile)
     scope_tok = ss.set_secret_scope({"CURATOR_PROBE_KEY": "served"}, profile_home=str(profile))
     try:
         c.run_curator_review(synchronous=False, consolidate=True)
@@ -1151,7 +1151,7 @@ def test_threaded_llm_pass_keeps_callers_profile_scope(curator_env, tmp_path, mo
                 t.join(timeout=10.0)
     finally:
         ss.reset_secret_scope(scope_tok)
-        reset_hermes_home_override(home_tok)
+        reset_agent_home_override(home_tok)
         ss.set_multiplex_active(False)
 
     assert seen == {"home": profile, "secret": "served"}

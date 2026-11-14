@@ -1,6 +1,6 @@
 """A phone app's self-labelled chat continues in Desktop; a plugin platform sharing the label is untouched.
 
-The pre-authority ``hermes serve`` stored whatever ``source`` a client sent, so phone apps signed in
+The pre-authority ``noone serve`` stored whatever ``source`` a client sent, so phone apps signed in
 through the dashboard login left routeless rows labelled ``mobile``, ``ios`` and the like (#146814).
 They are the owner's chats: Desktop's resume adopts them as writable conversations, while a third-party
 WebUI's rows (its own agent writes them) still open read-only. The catalog plugin hermes-mobile
@@ -48,7 +48,7 @@ async def test_a_phone_apps_own_label_resumes_writable_and_a_webui_row_stays_rea
     # hermes-mobile installed registers Platform('mobile'): a routeless row with that label still adopts.
     from gateway.config import Platform
     Platform._add_pseudo_member('mobile')
-    from hermes_cli.sessions_adopt import adoptable_sessions
+    from agent_cli.sessions_adopt import adoptable_sessions
     offered = {row['id'] for row in adoptable_sessions(db.db_path)}
     assert {'phone-mobile', 'phone-ios'} <= offered and not offered & {'webui-row', 'teams-row', 'curator-row'}
     for i, sid in enumerate(('phone-mobile', 'phone-ios')):

@@ -5,7 +5,7 @@ payload. cua-driver 0.10.x marks `health_report` risk-unclassified (isError=true
 list_apps, CLI --version). Exit codes: 0 overall=="ok"; 1 degraded/failed; 2 binary missing / protocol error."""
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import json
 import os
 import platform as _platform_mod
@@ -15,7 +15,7 @@ import sys
 from contextlib import contextmanager, suppress
 from typing import Any, Callable, Dict, Iterator, List, Optional, Sequence, Tuple, Union
 
-from hermes_cli._subprocess_compat import windows_hide_flags
+from agent_cli._subprocess_compat import windows_hide_flags
 from tools.computer_use.permissions import _child_env as _sanitized_cua_env
 from tools.computer_use.permissions import stale_tcc_grant_hint
 
@@ -445,11 +445,7 @@ def run_doctor(driver_cmd: Optional[str] = None, *, include: Sequence[str] = (),
     except OSError as e:
         # The spawn itself failed (Windows: a venv interpreter denied `CreateProcess` on a binary under
         # `C:\Program Files\WindowsApps`, WinError 5). A traceback here hides the one fact the user needs.
-        print(f"cua-driver could not be started from {binary!r}: {e}\n"
-              "  The Hermes runtime interpreter cannot execute this binary; the tool may still work because the\n"
-              "  shell resolves a different copy on PATH. Fix: install cua-driver outside the protected directory\n"
-              "  (e.g. the upstream installer's default under your user profile) or point HERMES_CUA_DRIVER_CMD at\n"
-              "  a copy the runtime can execute, then re-run `hermes computer-use doctor`.", file=sys.stderr)
+        print(f"cua-driver could not be started from {binary!r}: {e}\n  The {app_text('{app_name}')} runtime interpreter cannot execute this binary; the tool may still work because the\n  shell resolves a different copy on PATH. Fix: install cua-driver outside the protected directory\n  (e.g. the upstream installer's default under your user profile) or point HERMES_CUA_DRIVER_CMD at\n  a copy the runtime can execute, then re-run `hermes computer-use doctor`.", file=sys.stderr)
         return 2
     except RuntimeError as e:
         print(f"cua-driver health_report failed: {e}", file=sys.stderr)

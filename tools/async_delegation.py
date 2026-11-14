@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-from hermes_constants import get_hermes_home, hermes_home_key
+from agent_constants import get_agent_home, agent_home_key
 from tools.daemon_pool import DaemonThreadPoolExecutor
 from tools.thread_context import propagate_context_to_thread
 from tools.async_delegation_worker import worker_ledger, require_ledger_owner
@@ -115,7 +115,7 @@ _STALL_FIELD_MAP = (("_stall_quiet_seconds", "stalled_after_quiet_seconds"),
 
 # ── Durable ledger (state.db / async_delegations) ───────────────────────────
 def _db_path():
-    return get_hermes_home() / "state.db"
+    return get_agent_home() / "state.db"
 
 
 def _connect() -> sqlite3.Connection:
@@ -127,12 +127,12 @@ def _connect() -> sqlite3.Connection:
 
 def open_state_db(path: Path, db_label: str) -> sqlite3.Connection:
     """A short-lived writer connection to a profile's ``state.db`` that never resurrects a removed named profile
-    (#123265) and keeps the file and its sidecars owner-only (0600, as ``hermes_state.SessionDB`` does)."""
-    from hermes_cli.sqlite_util import open_db
-    from hermes_constants import mkdir_under_hermes_home
-    from hermes_state import _secure_state_db_files
+    (#123265) and keeps the file and its sidecars owner-only (0600, as ``agent_state.SessionDB`` does)."""
+    from agent_cli.sqlite_util import open_db
+    from agent_constants import mkdir_under_agent_home
+    from agent_state import _secure_state_db_files
 
-    mkdir_under_hermes_home(path.parent)
+    mkdir_under_agent_home(path.parent)
     _secure_state_db_files(path, create_main=True)
     # wal=False: SessionDB owns state.db's journal mode (_initialize_schema applies the barriers).
     conn = open_db(path, db_label=db_label, busy_timeout_ms=10_000,
@@ -142,23 +142,17 @@ def open_state_db(path: Path, db_label: str) -> sqlite3.Connection:
 
 
 def _initialize_schema(conn: sqlite3.Connection) -> None:
-    from hermes_state_repair import apply_durability_barriers
-    from hermes_state_schema import reconcile_state_schema
+    from agent_state_repair import apply_durability_barriers
+    from agent_cli.database_migrations import initialize_database
     # Preserve the journal mode SessionDB configured on state.db: forcing WAL from
     # every short-lived connection collides with live transcript/FTS writers.
     apply_durability_barriers(conn)
-    # Single durable-shape authority: the canonical SCHEMA_SQL drives both
-    # table creation and column backfill (reconcile_state_schema replays the
-    # canonical DDL and reuses SessionDB's declarative reconciliation). This
-    # module previously carried its own CREATE TABLE + ALTER column list,
-    # which drifted from SCHEMA_SQL — same-name columns with different
-    # nullability/defaults depending on which authority touched the database
-    # first (#94691).
-    reconcile_state_schema(conn)
+    # Raw delegation opens initialize the same state component as SessionDB.
+    initialize_database(conn, "state")
 
 
 def _transaction():
-    from hermes_cli.sqlite_util import transaction
+    from agent_cli.sqlite_util import transaction
 
     return transaction(_connect())
 
@@ -402,7 +396,7 @@ def _replay_pending(conn, rows, target_queue, now: float, *, startup: bool = Fal
     """Put each pending ``(delegation_id, event_json, completed_at, dispatched_at)`` row on ``target_queue``
     stamped ``restored``, or terminally drop it past ``_MAX_COMPLETION_REPLAY_AGE_S``. Records the offer so
     the orphan sweep skips the row until the copy is handed back (``return_completion_offer``)."""
-    home, restored = hermes_home_key(get_hermes_home()), 0
+    home, restored = agent_home_key(get_agent_home()), 0
     for delegation_id, payload, completed_at, dispatched_at in rows:
         age_basis = completed_at or dispatched_at
         if age_basis and (now - age_basis) > _MAX_COMPLETION_REPLAY_AGE_S:
@@ -538,7 +532,7 @@ def sweep_orphaned_completions(target_queue, *, now: Optional[float] = None) -> 
         return 0  # never create a ledger just to sweep it
     recover_abandoned_delegations()
     now = time.time() if now is None else now
-    home = hermes_home_key(get_hermes_home())
+    home = agent_home_key(get_agent_home())
     from tools.process_registry import process_registry
     live = _queued_completion_ids(target_queue, process_registry.completion_queue)
     with _orphan_lock:
@@ -577,7 +571,7 @@ def sweep_orphaned_completions(target_queue, *, now: Optional[float] = None) -> 
 def maybe_sweep_orphaned_completions(target_queue, *, now: Optional[float] = None) -> int:
     """``sweep_orphaned_completions`` at most once per ``ORPHAN_SWEEP_INTERVAL_S`` per home (``now`` is
     monotonic), for delivery loops that tick far more often. Never raises into the loop."""
-    home = hermes_home_key(get_hermes_home())
+    home = agent_home_key(get_agent_home())
     now = time.monotonic() if now is None else now
     with _orphan_lock:
         last = _last_orphan_sweep.get(home)
@@ -855,7 +849,7 @@ def _get_executor(max_workers: int) -> ThreadPoolExecutor:
 def active_count(*, home: Optional[Path] = None) -> int:
     """Number of live async delegation UNITS (one per completion message: a task group or an ungrouped task);
     *home*: only the ones that profile dispatched."""
-    key = hermes_home_key(home) if home is not None else None
+    key = agent_home_key(home) if home is not None else None
     with _records_lock:
         return sum(1 for r in _records.values() if r.get("status") in _LIVE_STATES
                    and (key is None or r.get("_home") == key))
@@ -936,7 +930,7 @@ def _batch_status(combined: dict[str, Any]) -> str:
 
 
 def _dispatch(**kwargs) -> dict[str, Any]:
-    from hermes_cli.backend_retirement import retirement
+    from agent_cli.backend_retirement import retirement
 
     with retirement.work() as admitted:
         if not admitted:
@@ -982,7 +976,7 @@ def _dispatch_admitted(
         "_context": contextvars.copy_context(),
         # Stale-monitor bookkeeping (see _stale_monitor_loop).
         "_progress_token": None, "_progress_ts": dispatched_at, "_interrupted_at": None,
-        "_home": hermes_home_key(get_hermes_home())}  # the profile that dispatched it (``active_count(home=...)``)
+        "_home": agent_home_key(get_agent_home())}  # the profile that dispatched it (``active_count(home=...)``)
     with _records_lock:
         if any((field, record[field]) in _refused_by for field in _FENCED_FIELDS):
             return {"status": "rejected", "error": "This session was closed (exit or /new): no new background work."}
@@ -1018,7 +1012,7 @@ def _dispatch_admitted(
         finally:
             _finalize(delegation_id, result, status)
 
-    from hermes_cli.backend_retirement import retirement
+    from agent_cli.backend_retirement import retirement
 
     # The outer dispatch reservation prevents a freeze during this handoff. Retain a worker
     # reservation too: the stall monitor may finalize its registry record before it really exits.

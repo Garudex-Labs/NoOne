@@ -1,16 +1,15 @@
 ---
-sidebar_position: 13
 title: "Script-Only Cron Jobs (No LLM)"
 description: "Classic watchdog cron jobs that skip the LLM entirely — a script runs on schedule and its stdout gets delivered to your messaging platform. Memory alerts, disk alerts, CI pings, periodic health checks."
 ---
 
-# Script-Only Cron Jobs
+# Script-Only Cron Jobs {#script-only-cron-jobs}
 
 Sometimes you already know exactly what message you want to send. You don't need an agent to reason about it — you just need a script to run on a timer, and its output (if any) to land in Telegram / Discord / Slack / Signal.
 
-Hermes calls this **no-agent mode**. It's the cron system minus the LLM.
+{{app-name}} calls this **no-agent mode**. It's the cron system minus the LLM.
 
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```
    ┌──────────────────┐          ┌──────────────────┐
    │ scheduler tick   │  every   │ run script       │
@@ -24,14 +23,14 @@ Hermes calls this **no-agent mode**. It's the cron system minus the LLM.
                                  │ (telegram/disc…) │
                                  └──────────────────┘
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
 - **No LLM call.** Zero tokens, zero agent loop, zero model spend.
 - **Script is the job.** The script decides whether to alert. Emit output → message gets sent. Emit nothing → silent tick.
-- **Bash or Python.** `.sh` / `.bash` files run under `bash` from `PATH` when available, otherwise `/bin/bash`; any other extension runs under the current Python interpreter. A Python script can also pin a **user-managed venv** via `--interpreter` (see [Using your own Python environment](#using-your-own-python-environment)). Paths must resolve inside `~/.hermes/scripts/` (relative, absolute, or `~` forms are OK if they stay in that directory). Cron scripts do **not** inherit provider credentials from the Hermes process environment.
+- **Bash or Python.** `.sh` / `.bash` files run under `bash` from `PATH` when available, otherwise `/bin/bash`; any other extension runs under the current Python interpreter. A Python script can also pin a **user-managed venv** via `--interpreter` (see [Using your own Python environment](#using-your-own-python-environment)). Paths must resolve inside `~/.hermes/scripts/` (relative, absolute, or `~` forms are OK if they stay in that directory). Cron scripts do **not** inherit provider credentials from the {{app-name}} process environment.
 - **Same scheduler.** Lives in `cronjob` alongside LLM jobs — pausing, resuming, listing, logs, and delivery targeting all work the same way.
 
-## When to Use It
+## When to Use It {#when-to-use-it}
 
 Use no-agent mode for:
 
@@ -43,15 +42,15 @@ Use no-agent mode for:
 
 Use a normal (LLM-driven) cron job when you need the agent to **decide** what to say — summarize a long document, pick interesting items from a feed, draft a human-friendly message. The no-agent path is for cases where the script's stdout already IS the message.
 
-## Create One from Chat
+## Create One from Chat {#create-one-from-chat}
 
-The real win of no-agent mode is that the agent itself can set up the watchdog for you — no editor, no shell, no remembering CLI flags. You describe what you want, Hermes writes the script, schedules it, and tells you when it'll fire.
+The real win of no-agent mode is that the agent itself can set up the watchdog for you — no editor, no shell, no remembering CLI flags. You describe what you want, {{app-name}} writes the script, schedules it, and tells you when it'll fire.
 
-### Example transcript
+### Example transcript {#example-transcript}
 
 > **You:** ping me on telegram if RAM is over 85% every 5 minutes
 >
-> **Hermes:** *(writes `~/.hermes/scripts/memory-watchdog.sh`, then calls `cronjob(...)` with `no_agent=true`)*
+> **{{app-name}}:** *(writes `~/.hermes/scripts/memory-watchdog.sh`, then calls `cronjob(...)` with `no_agent=true`)*
 >
 > Set up. Runs every 5 min, alerts Telegram only when RAM is over 85%. Script: `memory-watchdog.sh`. Job ID: `abc123`.
 
@@ -83,29 +82,29 @@ cronjob(
 
 From that point on every tick is free: the scheduler runs the script, pipes its stdout to Telegram if non-empty, and never touches a model.
 
-### What the agent decides for you
+### What the agent decides for you {#what-the-agent-decides-for-you}
 
-When you phrase a request like "alert me when X" or "every N minutes check Y and tell me if Z", Hermes' `cronjob_manage` tool description tells it to reach for `no_agent=True` whenever the message content is fully determined by the script. It falls back to the normal LLM-driven path when the request needs reasoning (*"summarize the new issues"*, *"pick the most interesting headlines"*, *"draft a friendly reminder"*).
+When you phrase a request like "alert me when X" or "every N minutes check Y and tell me if Z", {{app-name}}' `cronjob_manage` tool description tells it to reach for `no_agent=True` whenever the message content is fully determined by the script. It falls back to the normal LLM-driven path when the request needs reasoning (*"summarize the new issues"*, *"pick the most interesting headlines"*, *"draft a friendly reminder"*).
 
 You don't have to specify `--no-agent` yourself. Just describe the behavior.
 
-### Managing watchdogs from chat
+### Managing watchdogs from chat {#managing-watchdogs-from-chat}
 
 The agent can pause, resume, edit, and remove jobs the same way it creates them:
 
 > **You:** stop the memory watchdog for tonight
 >
-> **Hermes:** *(calls `cronjob(action='pause', job_id='abc123')`)*
+> **{{app-name}}:** *(calls `cronjob(action='pause', job_id='abc123')`)*
 >
-> Paused. Resume with "turn it back on" or via `hermes cron resume abc123`.
+> Paused. Resume with "turn it back on" or via `noone cron resume abc123`.
 
 > **You:** change it to every 15 minutes
 >
-> **Hermes:** *(calls `cronjob(action='update', job_id='abc123', schedule='every 15m')`)*
+> **{{app-name}}:** *(calls `cronjob(action='update', job_id='abc123', schedule='every 15m')`)*
 
 The full lifecycle (create / list / update / pause / resume / run-now / remove) is available to the agent without you learning any CLI commands.
 
-## Create One from the CLI
+## Create One from the CLI {#create-one-from-the-cli}
 
 Prefer the shell? The CLI path gives you the same result with three commands:
 
@@ -123,21 +122,21 @@ EOF
 chmod +x ~/.hermes/scripts/memory-watchdog.sh
 
 # 2. Schedule it
-hermes cron create "every 5m" \
+noone cron create "every 5m" \
   --no-agent \
   --script memory-watchdog.sh \
   --deliver telegram \
   --name "memory-watchdog"
 
 # 3. Verify
-hermes cron list
-hermes cron run <job_id>    # fire it once to test
+noone cron list
+noone cron run <job_id>    # fire it once to test
 ```
 
 That's the whole thing. No prompt, no skill, no model.
 
 
-## How Script Output Maps to Delivery
+## How Script Output Maps to Delivery {#how-script-output-maps-to-delivery}
 
 | Script behavior | Result |
 |-----------------|--------|
@@ -149,7 +148,7 @@ That's the whole thing. No prompt, no skill, no model.
 
 The "silent when empty" behavior is the key to the classic watchdog pattern: the script is free to run every minute, but the channel only sees a message when something actually needs attention.
 
-## Script Rules
+## Script Rules {#script-rules}
 
 Scripts must resolve inside `~/.hermes/scripts/`. This is enforced at run time — relative names, absolute paths, and `~`-prefixed paths are accepted when the resolved target stays in that directory; path traversal and symlink escapes are rejected. The same directory is shared with the pre-check script gate used by LLM jobs.
 
@@ -162,9 +161,9 @@ Interpreter choice is by file extension:
 
 We intentionally do NOT honour `#!/...` shebangs — keeping the interpreter set explicit and small reduces the surface the scheduler trusts.
 
-### Using your own Python environment
+### Using your own Python environment {#using-your-own-python-environment}
 
-By default a Python cron script runs under Hermes' own Python environment, which only carries Hermes' own dependencies — so a script that imports `openpyxl`, a database driver, or any other package you installed would fail with `ModuleNotFoundError`.
+By default a Python cron script runs under {{app-name}}' own Python environment, which only carries {{app-name}}' own dependencies — so a script that imports `openpyxl`, a database driver, or any other package you installed would fail with `ModuleNotFoundError`.
 
 You can point the job at a **user-managed venv** instead with `--interpreter`:
 
@@ -174,39 +173,39 @@ uv venv ~/venvs/hermes-reporting --python 3.11
 uv pip install --python ~/venvs/hermes-reporting/bin/python openpyxl
 
 # 2. Schedule the job with that interpreter.
-hermes cron create "0 8 * * *" \
+noone cron create "0 8 * * *" \
   --no-agent \
   --script daily-report.py \
   --interpreter ~/venvs/hermes-reporting/bin/python \
   --deliver telegram
 ```
 
-Like `--model`, this is a user-owned setting: set it with `hermes cron create/edit`; the agent's `cronjob` tool can't.
+Like `--model`, this is a user-owned setting: set it with `noone cron create/edit`; the agent's `cronjob` tool can't.
 
 Rules:
 
-- The venv is **user-managed**. Hermes does not create, freeze, restore, or install packages into it — it just invokes the path you give.
+- The venv is **user-managed**. {{app-name}} does not create, freeze, restore, or install packages into it — it just invokes the path you give.
 - The path must be **absolute or `~`-prefixed** (e.g. `~/venvs/reporting/bin/python3`). Bare names like `python3` are rejected, because they are not stable across `PATH` changes.
 - It must be a **Python executable** (`python`, `python3`, `python3.12`, …), including a symlink's target — `/bin/bash` or other interpreters are refused.
 - Applies **only to Python scripts**. `.sh` / `.bash` always run under bash regardless.
 - The job-level setting applies to both `script` and `monitor_script` when they are Python files.
 - It is validated **at run time**, not at creation — a cron job is long-lived, and the venv may be rebuilt or moved between when you create the job and when it fires. A missing or non-executable interpreter produces a clear script failure that is delivered like any other error.
-- To clear it later: `hermes cron edit <job_id> --interpreter ""`.
+- To clear it later: `noone cron edit <job_id> --interpreter ""`.
 
-## Schedule Syntax
+## Schedule Syntax {#schedule-syntax}
 
 Same as all other cron jobs:
 
 ```bash
-hermes cron create "every 5m"        # interval
-hermes cron create "every 2h"
-hermes cron create "0 9 * * *"       # standard cron: 9am daily
-hermes cron create "30m"             # one-shot: run once in 30 minutes
+noone cron create "every 5m"        # interval
+noone cron create "every 2h"
+noone cron create "0 9 * * *"       # standard cron: 9am daily
+noone cron create "30m"             # one-shot: run once in 30 minutes
 ```
 
 See the [cron feature reference](../user-guide/features/cron.md) for the full syntax.
 
-## Delivery Targets
+## Delivery Targets {#delivery-targets}
 
 `--deliver` accepts everything the gateway knows about. Some common shapes:
 
@@ -222,21 +221,21 @@ See the [cron feature reference](../user-guide/features/cron.md) for the full sy
 
 No running gateway is required at script-run time for bot-token platforms (Telegram, Discord, Slack, Signal, SMS, WhatsApp) — the tool calls each platform's REST endpoint directly using the credentials already in `~/.hermes/.env` / `~/.hermes/config.yaml`.
 
-## Editing and Lifecycle
+## Editing and Lifecycle {#editing-and-lifecycle}
 
 ```bash
-hermes cron list                                    # see all jobs
-hermes cron pause <job_id>                          # stop firing, keep definition
-hermes cron resume <job_id>
-hermes cron edit <job_id> --schedule "every 10m"    # adjust cadence
-hermes cron edit <job_id> --agent                   # flip to LLM mode
-hermes cron edit <job_id> --no-agent --script …     # flip back
-hermes cron remove <job_id>                         # delete it
+noone cron list                                    # see all jobs
+noone cron pause <job_id>                          # stop firing, keep definition
+noone cron resume <job_id>
+noone cron edit <job_id> --schedule "every 10m"    # adjust cadence
+noone cron edit <job_id> --agent                   # flip to LLM mode
+noone cron edit <job_id> --no-agent --script …     # flip back
+noone cron remove <job_id>                         # delete it
 ```
 
 Everything that works on LLM jobs (pause, resume, manual trigger, delivery target changes) works on no-agent jobs too.
 
-## Worked Example: Disk Space Alert
+## Worked Example: Disk Space Alert {#worked-example-disk-space-alert}
 
 ```bash
 cat > ~/.hermes/scripts/disk-alert.sh <<'EOF'
@@ -251,7 +250,7 @@ df -h / /home 2>/dev/null | awk -v t="$THRESHOLD" '
 EOF
 chmod +x ~/.hermes/scripts/disk-alert.sh
 
-hermes cron create "*/15 * * * *" \
+noone cron create "*/15 * * * *" \
   --no-agent \
   --script disk-alert.sh \
   --deliver telegram \
@@ -260,17 +259,17 @@ hermes cron create "*/15 * * * *" \
 
 Silent when both filesystems are under 90%; fires exactly one line per over-threshold filesystem when one fills up.
 
-## Comparison with Other Patterns
+## Comparison with Other Patterns {#comparison-with-other-patterns}
 
 | Approach | What runs | When to use |
 |----------|-----------|-------------|
-| `cronjob --no-agent` (this page) | Your script on Hermes' schedule | Recurring watchdogs / alerts / metrics that don't need reasoning |
+| `cronjob --no-agent` (this page) | Your script on {{app-name}}' schedule | Recurring watchdogs / alerts / metrics that don't need reasoning |
 | `cronjob_manage` (default, LLM) | Agent with optional pre-check script | When the message content requires reasoning over data |
-| OS cron + `curl` to a [webhook subscription](../user-guide/messaging/webhooks.md) | Your script on the OS schedule | When Hermes might be unhealthy (the thing you're monitoring) |
+| OS cron + `curl` to a [webhook subscription](../user-guide/messaging/webhooks.md) | Your script on the OS schedule | When {{app-name}} might be unhealthy (the thing you're monitoring) |
 
-For critical system-health watchdogs that must fire *even when the gateway is down*, use OS-level cron with a plain `curl` to a Hermes webhook subscription (or any external alerting endpoint) — those run as independent OS processes and don't depend on Hermes being up. The in-gateway scheduler is the right choice when the thing being monitored is external.
+For critical system-health watchdogs that must fire *even when the gateway is down*, use OS-level cron with a plain `curl` to a {{app-name}} webhook subscription (or any external alerting endpoint) — those run as independent OS processes and don't depend on {{app-name}} being up. The in-gateway scheduler is the right choice when the thing being monitored is external.
 
-## Related
+## Related {#related}
 
 - [Automate Anything with Cron](./automate-with-cron.md) — LLM-driven cron patterns.
 - [Scheduled Tasks (Cron) reference](../user-guide/features/cron.md) — full schedule syntax, lifecycle, delivery routing.

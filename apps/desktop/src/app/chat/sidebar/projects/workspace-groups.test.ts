@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import type { HermesGitWorktree } from '@/global'
+import type { AgentGitWorktree } from '@/global'
 import { makeCwdSession } from '@/test/session-info'
-import type { ProjectInfo, SessionInfo } from '@/types/hermes'
+import type { ProjectInfo, SessionInfo } from '@/types/agent-client'
 
 import {
   baseName,
@@ -24,8 +24,8 @@ import {
   sortWorktreeGroups
 } from './workspace-groups'
 
-// The grouping itself now lives on the backend (tui_gateway/project_tree.py,
-// covered by tests/tui_gateway/test_project_tree.py). This file only covers the
+// The grouping itself now lives on the backend (agent_backend/project_tree.py,
+// covered by tests/agent_backend/test_project_tree.py). This file only covers the
 // thin render helpers the desktop still owns + the VISUAL worktree enhancer.
 
 const lane = (over: Partial<SidebarSessionGroup> & Pick<SidebarSessionGroup, 'id' | 'label'>): SidebarSessionGroup => ({
@@ -121,7 +121,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
       groups: [lane({ id: '/repo::branch::main', label: 'main', isMain: true, path: '/repo' })]
     }
 
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'feature', detached: false, isMain: false, locked: false, path: '/repo-wt-feature' }
     ]
 
@@ -139,7 +139,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
       groups: [lane({ id: '/repo::branch::main', label: 'main', isMain: true, path: '/repo' })]
     }
 
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'wt/t_aaaaaaaa', detached: false, isMain: false, locked: false, path: '/repo/.worktrees/t_aaaaaaaa' },
       { branch: 'wt/t_bbbbbbbb', detached: false, isMain: false, locked: false, path: '/repo/.worktrees/t_bbbbbbbb' }
     ]
@@ -162,7 +162,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
       ]
     }
 
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'main', detached: false, isMain: true, locked: false, path: '/repo' }
     ]
 
@@ -192,7 +192,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
       })
     ]
 
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'main', detached: false, isMain: false, locked: false, path: '/repo/.worktrees/main-mirror' }
     ]
 
@@ -202,7 +202,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
   })
 
   it('surfaces a user-named "New worktree" under .worktrees/ as its own lane', () => {
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       {
         branch: 'hermes/test-gui-stuff',
         detached: false,
@@ -241,7 +241,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
       ]
     }
 
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'main', detached: false, isMain: true, locked: false, path: '/repo' },
       { branch: 'bb/ci-affected-only', detached: false, isMain: false, locked: false, path: '/repo-ci' }
     ]
@@ -275,7 +275,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
     }
 
     // git now has `bb/attempts` at a sibling dir, not the stale `.worktrees` one.
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'bb/attempts', detached: false, isMain: false, locked: false, path: '/repo-pr-attempts' }
     ]
 
@@ -309,7 +309,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
       ]
     }
 
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'bb/feature', detached: false, isMain: false, locked: false, path: '/repo-feature' }
     ]
 
@@ -336,7 +336,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
       ]
     }
 
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: null, detached: true, isMain: false, locked: false, path: '/repo-ci' }
     ]
 
@@ -361,7 +361,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
     // The repo root is switched to a feature branch. The historical "main"
     // sessions fold into ONE home lane labeled by the live branch — no stale
     // "main" lane lingering beside it.
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'some-feature', detached: false, isMain: true, locked: false, path: '/repo' }
     ]
 
@@ -390,7 +390,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
       ]
     }
 
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'main', detached: false, isMain: true, locked: false, path: '/repo' }
     ]
 
@@ -422,7 +422,7 @@ describe('mergeRepoWorktreeGroups (visual enhancer)', () => {
       ]
     }
 
-    const discovered: HermesGitWorktree[] = [
+    const discovered: AgentGitWorktree[] = [
       { branch: 'bb/live', detached: false, isMain: true, locked: false, path: '/repo' }
     ]
 

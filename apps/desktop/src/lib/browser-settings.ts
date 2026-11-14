@@ -1,4 +1,4 @@
-import { LOCAL_CONNECTION_ID, normalizeBasePath } from '@hermes/shared'
+import { LOCAL_CONNECTION_ID, normalizeBasePath } from '@noone/shared'
 
 import { type BrowserHostGlobals, browserLaunchProfileOrDefault } from './platform'
 import { readKey, writeKey } from './storage'

@@ -1,20 +1,20 @@
 ---
 title: "Evaluating Llms Harness — lm-eval-harness: benchmark LLMs (MMLU, GSM8K, etc.)"
-sidebar_label: "Evaluating Llms Harness"
+sidebarTitle: "Evaluating Llms Harness"
 description: "lm-eval-harness: benchmark LLMs (MMLU, GSM8K, etc.)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Evaluating Llms Harness
+# Evaluating Llms Harness {#evaluating-llms-harness}
 
 lm-eval-harness: benchmark LLMs (MMLU, GSM8K, etc.).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/evaluating-llms-harness` |
+| Source | Optional — install with `noone skills install official/mlops/evaluating-llms-harness` |
 | Path | `optional-skills/mlops/evaluation/evaluating-llms-harness` |
 | Version | `1.0.1` |
 | Author | Orchestra Research |
@@ -23,19 +23,27 @@ lm-eval-harness: benchmark LLMs (MMLU, GSM8K, etc.).
 | Platforms | linux, macos |
 | Tags | `Evaluation`, `LM Evaluation Harness`, `Benchmarking`, `MMLU`, `HumanEval`, `GSM8K`, `EleutherAI`, `Model Quality`, `Academic Benchmarks`, `Industry Standard` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# lm-evaluation-harness - LLM Benchmarking
+<div className="doc-callout-title">
 
-## What's inside
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# lm-evaluation-harness - LLM Benchmarking {#lm-evaluation-harness---llm-benchmarking}
+
+## What's inside {#whats-inside}
 
 Evaluates LLMs across 60+ academic benchmarks (MMLU, HumanEval, GSM8K, TruthfulQA, HellaSwag). Use when benchmarking model quality, comparing models, reporting academic results, or tracking training progress. Industry standard used by EleutherAI, HuggingFace, and major labs. Supports HuggingFace, vLLM, APIs.
 
-## Quick start
+## Quick start {#quick-start}
 
 lm-evaluation-harness evaluates LLMs across 60+ academic benchmarks using standardized prompts and metrics.
 
@@ -58,9 +66,9 @@ lm_eval --model hf \
 lm-eval ls tasks
 ```
 
-## Common workflows
+## Common workflows {#common-workflows}
 
-### Workflow 1: Standard benchmark evaluation
+### Workflow 1: Standard benchmark evaluation {#workflow-1-standard-benchmark-evaluation}
 
 Evaluate model on core benchmarks (MMLU, GSM8K, HumanEval).
 
@@ -168,7 +176,7 @@ Results saved to `results/llama2-7b-eval.json`:
 }
 ```
 
-### Workflow 2: Track training progress
+### Workflow 2: Track training progress {#workflow-2-track-training-progress}
 
 Evaluate checkpoints during training.
 
@@ -266,7 +274,7 @@ plt.title("Training Progress")
 plt.savefig("training_curve.png")
 ```
 
-### Workflow 3: Compare multiple models
+### Workflow 3: Compare multiple models {#workflow-3-compare-multiple-models}
 
 Benchmark suite for model comparison.
 
@@ -354,7 +362,7 @@ Output:
 | microsoft/phi-2        | 0.560 | 0.613 | 0.682     | 0.447      |
 ```
 
-### Workflow 4: Evaluate with vLLM (faster inference)
+### Workflow 4: Evaluate with vLLM (faster inference) {#workflow-4-evaluate-with-vllm-faster-inference}
 
 Use vLLM backend for 5-10x faster evaluation.
 
@@ -398,7 +406,7 @@ lm_eval --model vllm \
   --batch_size auto
 ```
 
-## When to use vs alternatives
+## When to use vs alternatives {#when-to-use-vs-alternatives}
 
 **Use lm-evaluation-harness when:**
 - Benchmarking models for academic papers
@@ -413,7 +421,7 @@ lm_eval --model vllm \
 - **MT-Bench**: Conversational multi-turn evaluation
 - **Custom scripts**: Domain-specific evaluation
 
-## Common issues
+## Common issues {#common-issues}
 
 **Issue: Evaluation too slow**
 
@@ -482,17 +490,17 @@ lm_eval --model hf \
 Without this flag lm-eval refuses to run the task rather than silently skipping
 code execution.
 
-## Advanced topics
+## Advanced topics {#advanced-topics}
 
-**Benchmark descriptions**: See [references/benchmark-guide.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/evaluation/evaluating-llms-harness/references/benchmark-guide.md) for detailed description of all 60+ tasks, what they measure, and interpretation.
+**Benchmark descriptions**: See [references/benchmark-guide.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/evaluation/evaluating-llms-harness/references/benchmark-guide.md) for detailed description of all 60+ tasks, what they measure, and interpretation.
 
-**Custom tasks**: See [references/custom-tasks.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/evaluation/evaluating-llms-harness/references/custom-tasks.md) for creating domain-specific evaluation tasks.
+**Custom tasks**: See [references/custom-tasks.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/evaluation/evaluating-llms-harness/references/custom-tasks.md) for creating domain-specific evaluation tasks.
 
-**API evaluation**: See [references/api-evaluation.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/evaluation/evaluating-llms-harness/references/api-evaluation.md) for evaluating OpenAI, Anthropic, and other API models.
+**API evaluation**: See [references/api-evaluation.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/evaluation/evaluating-llms-harness/references/api-evaluation.md) for evaluating OpenAI, Anthropic, and other API models.
 
-**Multi-GPU strategies**: See [references/distributed-eval.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/evaluation/evaluating-llms-harness/references/distributed-eval.md) for data parallel and tensor parallel evaluation.
+**Multi-GPU strategies**: See [references/distributed-eval.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/evaluation/evaluating-llms-harness/references/distributed-eval.md) for data parallel and tensor parallel evaluation.
 
-## Hardware requirements
+## Hardware requirements {#hardware-requirements}
 
 - **GPU**: NVIDIA (CUDA 11.8+), works on CPU (very slow)
 - **VRAM**:
@@ -505,7 +513,7 @@ code execution.
   - MMLU (full): 2 hours
   - HumanEval: 20 minutes
 
-## Resources
+## Resources {#resources}
 
 - GitHub: https://github.com/EleutherAI/lm-evaluation-harness
 - Docs: https://github.com/EleutherAI/lm-evaluation-harness/tree/main/docs

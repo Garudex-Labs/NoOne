@@ -1,52 +1,60 @@
 ---
 title: "Fastmcp — Build, test, and deploy Python MCP servers"
-sidebar_label: "Fastmcp"
+sidebarTitle: "Fastmcp"
 description: "Build, test, and deploy Python MCP servers"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Fastmcp
+# Fastmcp {#fastmcp}
 
 Build, test, and deploy Python MCP servers.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mcp/fastmcp` |
+| Source | Optional — install with `noone skills install official/mcp/fastmcp` |
 | Path | `optional-skills/mcp/fastmcp` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `MCP`, `FastMCP`, `Python`, `Tools`, `Resources`, `Prompts`, `Deployment` |
 | Related skills | [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md), [`mcporter`](../../optional/mcp/mcp-mcporter.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# FastMCP
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# FastMCP {#fastmcp-1}
 
 Build MCP servers in Python with FastMCP, validate them locally, install them into MCP clients, and deploy them as HTTP endpoints.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use this skill when the task is to:
 
 - create a new MCP server in Python
 - wrap an API, database, CLI, or file-processing workflow as MCP tools
 - expose resources or prompts in addition to tools
-- smoke-test a server with the FastMCP CLI before wiring it into Hermes or another client
+- smoke-test a server with the FastMCP CLI before wiring it into {{app-name}} or another client
 - install a server into Claude Code, Claude Desktop, Cursor, or a similar MCP client
 - prepare a FastMCP server repo for HTTP deployment
 
-Use `native-mcp` when the server already exists and only needs to be connected to Hermes. Use `mcporter` when the goal is ad-hoc CLI access to an existing MCP server instead of building one.
+Use `native-mcp` when the server already exists and only needs to be connected to {{app-name}}. Use `mcporter` when the goal is ad-hoc CLI access to an existing MCP server instead of building one.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 Install FastMCP in the working environment first:
 
@@ -61,25 +69,25 @@ For the API template, install `httpx` if it is not already present:
 pip install httpx
 ```
 
-## Included Files
+## Included Files {#included-files}
 
-### Templates
+### Templates {#templates}
 
 - `templates/api_wrapper.py` - REST API wrapper with auth header support
 - `templates/database_server.py` - read-only SQLite query server
 - `templates/file_processor.py` - text-file inspection and search server
 
-### Scripts
+### Scripts {#scripts}
 
 - `scripts/scaffold_fastmcp.py` - copy a starter template and replace the server name placeholder
 
-### References
+### References {#references}
 
 - `references/fastmcp-cli.md` - FastMCP CLI workflow, installation targets, and deployment checks
 
-## Workflow
+## Workflow {#workflow}
 
-### 1. Pick the Smallest Viable Server Shape
+### 1. Pick the Smallest Viable Server Shape {#1-pick-the-smallest-viable-server-shape}
 
 Choose the narrowest useful surface area first:
 
@@ -90,7 +98,7 @@ Choose the narrowest useful surface area first:
 
 Prefer a thin server with good names, docstrings, and schemas over a large server with vague tools.
 
-### 2. Scaffold from a Template
+### 2. Scaffold from a Template {#2-scaffold-from-a-template}
 
 Copy a template directly or use the scaffold helper:
 
@@ -109,7 +117,7 @@ python ~/.hermes/skills/mcp/fastmcp/scripts/scaffold_fastmcp.py --list
 
 If copying manually, replace `__SERVER_NAME__` with a real server name.
 
-### 3. Implement Tools First
+### 3. Implement Tools First {#3-implement-tools-first}
 
 Start with `@mcp.tool` functions before adding resources or prompts.
 
@@ -135,7 +143,7 @@ Weak tool examples:
 - `process`
 - `do_thing`
 
-### 4. Add Resources and Prompts Only When They Help
+### 4. Add Resources and Prompts Only When They Help {#4-add-resources-and-prompts-only-when-they-help}
 
 Add `@mcp.resource` when the client benefits from fetching stable read-only content such as schemas, policy docs, or generated reports.
 
@@ -147,7 +155,7 @@ Do not turn every document into a prompt. Prefer:
 - resources for data/document retrieval
 - prompts for reusable LLM instructions
 
-### 5. Test the Server Before Integrating It Anywhere
+### 5. Test the Server Before Integrating It Anywhere {#5-test-the-server-before-integrating-it-anywhere}
 
 Use the FastMCP CLI for local validation:
 
@@ -173,7 +181,7 @@ fastmcp call http://127.0.0.1:8000/mcp search_resources query=router --json
 
 Always run at least one real `fastmcp call` against each new tool before claiming the server works.
 
-### 6. Install into a Client When Local Validation Passes
+### 6. Install into a Client When Local Validation Passes {#6-install-into-a-client-when-local-validation-passes}
 
 FastMCP can register the server with supported MCP clients:
 
@@ -185,12 +193,12 @@ fastmcp install cursor acme_server.py -e .
 
 Use `fastmcp discover` to inspect named MCP servers already configured on the machine.
 
-When the goal is Hermes integration, either:
+When the goal is {{app-name}} integration, either:
 
 - configure the server in `~/.hermes/config.yaml` using the `native-mcp` skill, or
 - keep using FastMCP CLI commands during development until the interface stabilizes
 
-### 7. Deploy After the Local Contract Is Stable
+### 7. Deploy After the Local Contract Is Stable {#7-deploy-after-the-local-contract-is-stable}
 
 For managed hosting, Prefect Horizon is the path FastMCP documents most directly. Before deployment:
 
@@ -206,9 +214,9 @@ Make sure the repo contains:
 
 For generic HTTP hosting, validate the HTTP transport locally first, then deploy on any Python-compatible platform that can expose the server port.
 
-## Common Patterns
+## Common Patterns {#common-patterns}
 
-### API Wrapper Pattern
+### API Wrapper Pattern {#api-wrapper-pattern}
 
 Use when exposing a REST or HTTP API as MCP tools.
 
@@ -227,7 +235,7 @@ Implementation notes:
 
 Start from `templates/api_wrapper.py`.
 
-### Database Pattern
+### Database Pattern {#database-pattern}
 
 Use when exposing safe query and inspection capabilities.
 
@@ -246,7 +254,7 @@ Implementation notes:
 
 Start from `templates/database_server.py`.
 
-### File Processor Pattern
+### File Processor Pattern {#file-processor-pattern}
 
 Use when the server needs to inspect or transform files on demand.
 
@@ -265,7 +273,7 @@ Implementation notes:
 
 Start from `templates/file_processor.py`.
 
-## Quality Bar
+## Quality Bar {#quality-bar}
 
 Before handing off a FastMCP server, verify all of the following:
 
@@ -276,9 +284,9 @@ Before handing off a FastMCP server, verify all of the following:
 - environment variables are documented
 - the tool surface is small enough to understand without guesswork
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
-### FastMCP command missing
+### FastMCP command missing {#fastmcp-command-missing}
 
 Install the package in the active environment:
 
@@ -287,7 +295,7 @@ pip install fastmcp
 fastmcp version
 ```
 
-### `fastmcp inspect` fails
+### `fastmcp inspect` fails {#fastmcp-inspect-fails}
 
 Check that:
 
@@ -295,7 +303,7 @@ Check that:
 - the FastMCP instance is named correctly in `<file.py:object>`
 - optional dependencies from the template are installed
 
-### Tool works in Python but not through CLI
+### Tool works in Python but not through CLI {#tool-works-in-python-but-not-through-cli}
 
 Run:
 
@@ -306,10 +314,10 @@ fastmcp call server.py your_tool_name --json
 
 This usually exposes naming mismatches, missing required arguments, or non-serializable return values.
 
-### Hermes cannot see the deployed server
+### {{app-name}} cannot see the deployed server {#hermes-cannot-see-the-deployed-server}
 
-The server-building part may be correct while the Hermes config is not. Load the `native-mcp` skill and configure the server in `~/.hermes/config.yaml`, then restart Hermes.
+The server-building part may be correct while the {{app-name}} config is not. Load the `native-mcp` skill and configure the server in `~/.hermes/config.yaml`, then restart {{app-name}}.
 
-## References
+## References {#references-1}
 
 For CLI details, install targets, and deployment checks, read `references/fastmcp-cli.md`.

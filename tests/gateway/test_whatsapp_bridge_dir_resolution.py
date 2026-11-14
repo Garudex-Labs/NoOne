@@ -34,7 +34,7 @@ def test_readonly_install_mirrors_to_hermes_home(tmp_path, monkeypatch):
         str(install_root / "gateway" / "platforms" / "whatsapp_common.py"),
     )
     monkeypatch.setattr(
-        "hermes_constants.get_hermes_home", lambda: hermes_home
+        "agent_constants.get_agent_home", lambda: hermes_home
     )
 
     # Simulate a read-only install tree. chmod(0o555) is unreliable under
@@ -74,7 +74,7 @@ def test_existing_mirror_is_refreshed_from_the_install_tree_and_keeps_its_deps(t
     (mirror / "bridge.js").write_text("// stale bridge\n")
 
     monkeypatch.setattr(whatsapp_common, "__file__", str(install_root / "gateway" / "platforms" / "whatsapp_common.py"))
-    monkeypatch.setattr("hermes_constants.get_hermes_home", lambda: hermes_home)
+    monkeypatch.setattr("agent_constants.get_agent_home", lambda: hermes_home)
     _real_touch = Path.touch
 
     def _fake_touch(self, *a, **kw):

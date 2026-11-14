@@ -22,7 +22,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from agent.runtime_scope import bind_state
-from hermes_scope import Principal, Scope
+from agent_scope import Principal, Scope
 from tests.tools.test_sandbox_scope_conformance import A, B
 from tests.tools.test_sandbox_scope_conformance import provider as _conformance_provider
 from tools.environments import sandbox_conformance as c
@@ -33,8 +33,8 @@ provider = _conformance_provider  # the recording-sandbox fixture, by its name
 def _local_scope() -> Scope:
     """The local install's scope, homed at the test's HERMES_HOME (a relative agent path would
     make ``bind_state`` stamp a home under the working directory)."""
-    from hermes_constants import get_hermes_home
-    return Scope("local", str(get_hermes_home()), Principal("local"))
+    from agent_constants import get_agent_home
+    return Scope("local", str(get_agent_home()), Principal("local"))
 
 
 def _png() -> bytes:
@@ -258,10 +258,10 @@ def test_the_memory_store_itself_never_touches_the_host_file_in_a_hosted_scope()
 
 
 def test_session_search_reads_no_host_history():
-    from hermes_constants import get_hermes_home
-    from hermes_state import SessionDB
+    from agent_constants import get_agent_home
+    from agent_state import SessionDB
     from tools.registry import registry
-    db = SessionDB(get_hermes_home() / "state.db")
+    db = SessionDB(get_agent_home() / "state.db")
     db.create_session("private-host-history", source="cli")
     db.append_message("private-host-history", role="user", content="HOST-HISTORY-PRIVATE")
     try:
@@ -273,10 +273,10 @@ def test_session_search_reads_no_host_history():
 
 
 def test_recall_never_opens_the_profile_state_db(monkeypatch):
-    import hermes_state_registry
+    import agent_state_registry
     from run_agent import AIAgent
     opened = []
-    monkeypatch.setattr(hermes_state_registry, "acquire", lambda *a, **k: opened.append(1) or object())
+    monkeypatch.setattr(agent_state_registry, "acquire", lambda *a, **k: opened.append(1) or object())
     agent = SimpleNamespace(_persist_disabled=False, _session_db=None)
     with bind_state(A):
         assert AIAgent._get_session_db_for_recall(agent) is None
@@ -285,7 +285,7 @@ def test_recall_never_opens_the_profile_state_db(monkeypatch):
 
 def test_web_extract_never_spills_to_host(provider, monkeypatch):
     import tools.web_tools as web
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     from tools.registry import registry
 
     async def safe(url):
@@ -300,7 +300,7 @@ def test_web_extract_never_spills_to_host(provider, monkeypatch):
     monkeypatch.setattr(web, "_extract_safe_urls", extract)
     with bind_state(A):
         result = registry.dispatch("web_extract", {"urls": ["https://example.org/round2-private"], "char_limit": 2000})
-    paths = list((get_hermes_home() / "cache" / "web").glob("*.md"))
+    paths = list((get_agent_home() / "cache" / "web").glob("*.md"))
     leaked = [str(p) for p in paths if "WEB-TENANT-CONTENT" in p.read_text()]
     assert not leaked, f"host web spill {leaked}; response={result[-500:]}"
     assert "not available to a hosted agent" in result
@@ -336,9 +336,9 @@ def test_video_is_not_materialized_on_host():
 
 def test_startup_context_reads_no_host_file(tmp_path, monkeypatch):
     from agent.prompt_builder import build_context_files_prompt, load_soul_md
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     (tmp_path / "AGENTS.md").write_text("HOST-STARTUP-PRIVATE")
-    (get_hermes_home() / "SOUL.md").write_text("HOST-SOUL-PRIVATE")
+    (get_agent_home() / "SOUL.md").write_text("HOST-SOUL-PRIVATE")
     with c._watch_host(tmp_path) as touched, bind_state(A):
         assert build_context_files_prompt(cwd=str(tmp_path), skip_soul=False) == ""
         assert load_soul_md() is None

@@ -1,10 +1,10 @@
 'use client'
 
+import { Check, Copy, Maximize, RefreshCw, X, ZoomIn, ZoomOut } from '@noone/ui/icons'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Tip } from '@/components/ui/tooltip'
-import { Check, Copy, Maximize, RefreshCw, X, ZoomIn, ZoomOut } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { FIT_MIN_SCALE, useZoomPan } from './use-zoom-pan'
@@ -130,7 +130,7 @@ function Toolbar({
   // on a tree that is gone.
   // The write below is a timer handle, and not a mirror of a reactive value.
   // It happens on unmount only, and it clears the handle this component owns.
-  // eslint-disable-next-line no-restricted-syntax
+  // eslint-disable-next-line no-restricted-syntax -- lifecycle or request bookkeeping, not a reactive atom mirror
   useEffect(() => {
     return () => {
       if (resetRef.current !== null) {

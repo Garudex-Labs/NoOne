@@ -1,6 +1,6 @@
-# Secrets
+# Secrets {#secrets}
 
-Hermes can pull API keys from external secret managers at process startup instead of storing them in `~/.hermes/.env`. The bootstrap token for the secret manager lives in `.env`; every other provider key (OpenAI, Anthropic, OpenRouter, etc.) can stay in the manager and rotate centrally.
+{{app-name}} can pull API keys from external secret managers at process startup instead of storing them in `~/.hermes/.env`. The bootstrap token for the secret manager lives in `.env`; every other provider key (OpenAI, Anthropic, OpenRouter, etc.) can stay in the manager and rotate centrally.
 
 Supported:
 
@@ -8,7 +8,7 @@ Supported:
 - [1Password](./onepassword) — `op://` references via the official `op` CLI; service-account or desktop session auth.
 - [Command helper](./command) — any CLI vault (`keepassxc-cli`, `secret-tool`, `pass`, custom scripts) via a user-configured helper that prints `KEY=VALUE` lines.
 
-## Multiple sources at once
+## Multiple sources at once {#multiple-sources-at-once}
 
 You can enable more than one secret source at the same time — for example a team Bitwarden project alongside a personal vault plugin. Sources compose per env var with a deterministic precedence ladder:
 
@@ -26,28 +26,28 @@ secrets:
     project_id: "..."
 ```
 
-Every credential injected by a source is labelled with its origin — setup flows and `hermes model` show `(from Bitwarden)` next to detected keys so you always know where a value came from.
+Every credential injected by a source is labelled with its origin — setup flows and `noone model` show `(from Bitwarden)` next to detected keys so you always know where a value came from.
 
-## Profiles and shared vaults
+## Profiles and shared vaults {#profiles-and-shared-vaults}
 
 Two orchestrator-level knobs make one shared vault safe across [profiles](../profiles):
 
-- **`secrets.preserve_existing`** — a list of env var names whose existing `.env` / shell value always wins, even against a source with `override_existing: true`. Use it for per-profile platform secrets (e.g. `FEISHU_APP_SECRET`) that intentionally differ across profiles while everything else rotates centrally:
+- **`secrets.preserve_existing`** — a list of env var names whose existing `.env` / shell value always wins, even against a source with `override_existing: true`. Use it for per-profile platform secrets (e.g. `LINE_CHANNEL_SECRET`) that intentionally differ across profiles while everything else rotates centrally:
 
   ```yaml
   secrets:
-    preserve_existing: [FEISHU_APP_SECRET, TELEGRAM_BOT_TOKEN]
+    preserve_existing: [LINE_CHANNEL_SECRET, TELEGRAM_BOT_TOKEN]
   ```
 
-- **Profile aliasing** (on by default, `secrets.profile_alias: false` to disable) — when Hermes runs under a named profile, a vault secret named `FOO_<PROFILE>` (credential-shaped suffixes only: `*_API_KEY`, `*_TOKEN`, `*_SECRET`, `*_KEY`, `*_PASSWORD`) also hydrates the canonical `FOO`. Store `TELEGRAM_BOT_TOKEN_MILLA` in the shared project and the `milla` profile's adapters — which read the fixed name `TELEGRAM_BOT_TOKEN` — get the right value automatically. A var the vault supplies directly under its canonical name always beats an alias.
+- **Profile aliasing** (on by default, `secrets.profile_alias: false` to disable) — when {{app-name}} runs under a named profile, a vault secret named `FOO_<PROFILE>` (credential-shaped suffixes only: `*_API_KEY`, `*_TOKEN`, `*_SECRET`, `*_KEY`, `*_PASSWORD`) also hydrates the canonical `FOO`. Store `TELEGRAM_BOT_TOKEN_MILLA` in the shared project and the `milla` profile's adapters — which read the fixed name `TELEGRAM_BOT_TOKEN` — get the right value automatically. A var the vault supplies directly under its canonical name always beats an alias.
 
 Both apply to every source — bundled and plugin — because they live in the orchestrator, not the backends.
 
-## Secrets in child processes
+## Secrets in child processes {#secrets-in-child-processes}
 
-Terminal commands, `execute_code` sandboxes and [`no_agent` cron scripts](../features/cron.md#giving-a-script-a-credential) run with a sanitized environment: Hermes-managed credentials are stripped, and only variables you declare in `terminal.env_passthrough` (or a loaded skill's `required_environment_variables`) are forwarded. A declared variable is forwarded with the **owning profile's** value — from that profile's `.env` or its secret sources — even when the profile is served by a multi-profile gateway or the Desktop/dashboard backend and its secrets never entered the process environment. A profile's declared value never reaches another profile's children, and the launch profile's `.env` credentials are dropped from children that run for a served profile. Provider credentials cannot be declared; see [Security → Credential scoping](../security.md).
+Terminal commands, `execute_code` sandboxes and [`no_agent` cron scripts](../features/cron.md#giving-a-script-a-credential) run with a sanitized environment: {{app-name}}-managed credentials are stripped, and only variables you declare in `terminal.env_passthrough` (or a loaded skill's `required_environment_variables`) are forwarded. A declared variable is forwarded with the **owning profile's** value — from that profile's `.env` or its secret sources — even when the profile is served by a multi-profile gateway or the Desktop/dashboard backend and its secrets never entered the process environment. A profile's declared value never reaches another profile's children, and the launch profile's `.env` credentials are dropped from children that run for a served profile. Provider credentials cannot be declared; see [Security → Credential scoping](../security.md).
 
-## Adding your own backend
+## Adding your own backend {#adding-your-own-backend}
 
 Third-party secret managers ship as standalone plugins, not core PRs. A backend subclasses `agent.secret_sources.base.SecretSource` (one required method: `fetch(cfg, home_path) -> FetchResult`) and registers via `ctx.register_secret_source(MySource())` in the plugin's `register(ctx)`. The orchestrator owns precedence, conflict handling, timeouts, and provenance — your source only fetches. Full guide with the contract rules, subprocess-safety helper, and conformance kit: [Building a Secret Source Plugin](../../developer-guide/secret-source-plugin.md).
 

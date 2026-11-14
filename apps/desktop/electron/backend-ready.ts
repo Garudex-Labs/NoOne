@@ -1,6 +1,8 @@
 import fs from 'node:fs'
 
-// `hermes serve` announces HERMES_BACKEND_READY; the legacy `hermes dashboard`
+import { appText } from '@noone/shared/application-identity'
+
+// `noone serve` announces HERMES_BACKEND_READY; the legacy `noone dashboard`
 // backend announces HERMES_DASHBOARD_READY. Accept either so the desktop spawn
 // works against both the headless backend and old/dashboard runtimes.
 const _READY_RE = /^HERMES_(?:BACKEND|DASHBOARD)_READY port=(\d+)/m
@@ -13,7 +15,7 @@ export const READY_IN_MERGED_OUTPUT_RE = /(?<!\w)HERMES_(?:BACKEND|DASHBOARD)_RE
 
 // The announcement clock starts the instant the backend process is spawned —
 // before uvicorn binds its socket. On a cold install the child must first
-// compile and import the whole `hermes_cli.main` → `web_server` → FastAPI/
+// compile and import the whole `agent_cli.main` → `web_server` → FastAPI/
 // uvicorn chain, and on Windows real-time AV (Defender) scans every freshly
 // written `.pyc`. That pre-bind cost can run 30-60s on a slow disk, so a tight
 // 45s deadline kills a *healthy but still-starting* backend and respawns it,
@@ -25,7 +27,7 @@ const DEFAULT_PORT_ANNOUNCE_TIMEOUT_MS = 90_000
 const MIN_PORT_ANNOUNCE_TIMEOUT_MS = 45_000
 
 // While the backend prints venv_sync's source-update completion banners it is
-// finishing an owed update tail BEFORE `hermes serve` starts, and that tail
+// finishing an owed update tail BEFORE `noone serve` starts, and that tail
 // legitimately runs minutes (dependency sync alone measured at ~19-22 min,
 // #122206) — far past the 90s cold-start budget, which is sized for imports
 // and AV scans, not repairs. Killing the child mid-repair and respawning it
@@ -112,7 +114,7 @@ function waitForDashboardPort(
     let buf = ''
     let done = false
     // #122206: the child is finishing an owed source-update completion
-    // (venv_sync banners) before `hermes serve` starts. While that repair is
+    // (venv_sync banners) before `noone serve` starts. While that repair is
     // visibly in progress the 90s deadline is re-armed, up to the total cap,
     // instead of killing a healthy repair mid-run.
     const startedAt = realNow()
@@ -133,7 +135,7 @@ function waitForDashboardPort(
           cleanup()
           reject(
             new Error(
-              `Timed out waiting for Hermes backend port announcement (${timeoutMs}ms)${deadline ? ' while an update completion was in progress' : ''}`
+              appText(`Timed out waiting for {app_name} backend port announcement (${timeoutMs}ms)${deadline ? ' while an update completion was in progress' : ''}`)
             )
           )
         },
@@ -170,7 +172,7 @@ function waitForDashboardPort(
         }
 
         // venv_sync's banner is the signal that an owed source-update tail is
-        // running ahead of `hermes serve` (#122206): re-arm the deadline so a
+        // running ahead of `noone serve` (#122206): re-arm the deadline so a
         // healthy multi-minute repair is not killed and re-run per boot.
         if (SOURCE_COMPLETION_BANNER_RE.test(line)) {
           completionInProgress = true
@@ -181,7 +183,7 @@ function waitForDashboardPort(
 
     function onExit(code, signal) {
       cleanup()
-      reject(new Error(`Hermes backend: exited before port announcement (${signal || code})${describeOutputTail()}`))
+      reject(new Error(appText(`{app_name} backend: exited before port announcement (${signal || code})${describeOutputTail()}`)))
     }
 
     function onError(err) {
@@ -269,7 +271,7 @@ function waitForDashboardReadyFile(
 
     function onExit(code, signal) {
       cleanup()
-      reject(new Error(`Hermes backend: exited before port announcement (${signal || code})${describeOutputTail()}`))
+      reject(new Error(appText(`{app_name} backend: exited before port announcement (${signal || code})${describeOutputTail()}`)))
     }
 
     function onError(err) {
@@ -279,7 +281,7 @@ function waitForDashboardReadyFile(
 
     const timer = setTimeout(() => {
       cleanup()
-      reject(new Error(`Timed out waiting for Hermes backend port announcement (${timeoutMs}ms)`))
+      reject(new Error(appText(`Timed out waiting for {app_name} backend port announcement (${timeoutMs}ms)`)))
     }, timeoutMs)
 
     child.on('exit', onExit)

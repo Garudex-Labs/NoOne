@@ -1,8 +1,8 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { createElement, type ReactNode } from 'react'
 
 import { ErrorBoundary } from '@/components/error-boundary'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ErrorState } from '@/components/ui/error-state'
 import { Tip } from '@/components/ui/tooltip'
 
@@ -46,7 +46,7 @@ export function ContribBoundary({ children, id, variant = 'pane' }: ContribBound
               onClick={reset}
               type="button"
             >
-              <Codicon name="warning" size="0.7rem" />
+              <AppIcon name="warning" size="0.7rem" />
               {id}
             </button>
           </Tip>
@@ -54,7 +54,7 @@ export function ContribBoundary({ children, id, variant = 'pane' }: ContribBound
           <div className="grid h-full place-items-center p-6">
             <ErrorState description={error.message} title={`“${id}” failed to render`}>
               <Button className="justify-self-center" onClick={reset} size="sm" variant="outline">
-                <Codicon name="refresh" size="0.8rem" />
+                <AppIcon name="refresh" size="0.8rem" />
                 Retry
               </Button>
             </ErrorState>

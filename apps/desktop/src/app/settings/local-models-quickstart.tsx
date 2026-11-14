@@ -1,9 +1,9 @@
+import { CheckCircle2, Cpu, Loader2, Pause, Zap } from '@noone/ui/icons'
 import type { ReactElement } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { CheckCircle2, Cpu, Loader2, Pause, Zap } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import type { LocalCatalogModel, LocalRuntimeJob } from '@/types/hermes'
+import type { LocalCatalogModel, LocalRuntimeJob } from '@/types/agent-client'
 
 import { downloadStatusText, LocalModelDownloadActions, ProgressBar } from './local-model-download-progress'
 import { type LocalModelsActionScope, runQuickstart, useLocalModelsActionScope } from './local-models-actions'

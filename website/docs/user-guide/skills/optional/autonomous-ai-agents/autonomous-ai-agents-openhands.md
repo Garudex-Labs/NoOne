@@ -1,41 +1,49 @@
 ---
 title: "Openhands — Delegate coding to OpenHands CLI (model-agnostic, LiteLLM)"
-sidebar_label: "Openhands"
+sidebarTitle: "Openhands"
 description: "Delegate coding to OpenHands CLI (model-agnostic, LiteLLM)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Openhands
+# Openhands {#openhands}
 
 Delegate coding to OpenHands CLI (model-agnostic, LiteLLM).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/autonomous-ai-agents/openhands` |
+| Source | Optional — install with `noone skills install official/autonomous-ai-agents/openhands` |
 | Path | `optional-skills/autonomous-ai-agents/openhands` |
 | Version | `0.1.0` |
-| Author | Tim Koepsel (xzessmedia), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `Coding-Agent`, `OpenHands`, `Model-Agnostic`, `LiteLLM` |
 | Related skills | [`claude-code`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code.md), [`codex`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-codex.md), [`opencode`](../../optional/autonomous-ai-agents/autonomous-ai-agents-opencode.md), [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# OpenHands CLI
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# OpenHands CLI {#openhands-cli}
 
 Delegate coding tasks to the [OpenHands CLI](https://github.com/All-Hands-AI/OpenHands) via the `terminal` tool. OpenHands is model-agnostic: any LiteLLM-supported provider (OpenAI, Anthropic, OpenRouter, DeepSeek, Ollama, vLLM, etc.).
 
-This skill is the headless-mode wrapper for batch / one-shot delegation. The interactive textual UI is not used from Hermes.
+This skill is the headless-mode wrapper for batch / one-shot delegation. The interactive textual UI is not used from {{app-name}}.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User wants a coding task delegated to OpenHands specifically.
 - User wants a coding agent that can run on a non-Anthropic / non-OpenAI provider (DeepSeek, Qwen, Ollama, vLLM, Nous, etc.) — sibling skills `claude-code` and `codex` are tied to one vendor.
@@ -43,7 +51,7 @@ This skill is the headless-mode wrapper for batch / one-shot delegation. The int
 
 For Claude-native, prefer `claude-code`. For OpenAI-native, prefer `codex`. For Hermes-native subagents, use `delegate_task`.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 1. Install upstream (requires Python 3.12+ and `uv`):
 
@@ -69,11 +77,11 @@ For Claude-native, prefer `claude-code`. For OpenAI-native, prefer `codex`. For 
    export OPENHANDS_SUPPRESS_BANNER=1
    ```
 
-## How to Run
+## How to Run {#how-to-run}
 
 Always invoke through the `terminal` tool. Always pass `--headless --json --override-with-envs --exit-without-confirmation` for automation.
 
-### One-shot task
+### One-shot task {#one-shot-task}
 
 ```
 terminal(
@@ -83,7 +91,7 @@ terminal(
 )
 ```
 
-### Background for long tasks
+### Background for long tasks {#background-for-long-tasks}
 
 ```
 terminal(command="<same as above>", workdir="/path/to/project", background=true, notify_on_complete=true)
@@ -91,7 +99,7 @@ process(action="poll", session_id="<id>")
 process(action="log", session_id="<id>")
 ```
 
-### Resume a previous conversation
+### Resume a previous conversation {#resume-a-previous-conversation}
 
 OpenHands prints `Conversation ID: <32-hex>` and a `Hint: openhands --resume <dashed-uuid>` line at the end of each run. Use the dashed form to resume:
 
@@ -102,7 +110,7 @@ terminal(
 )
 ```
 
-## Real Flag List
+## Real Flag List {#real-flag-list}
 
 Verified against `openhands --help` (CLI 1.16.0). Anything not in this table is not a flag — pass it via env var or settings file.
 
@@ -122,7 +130,7 @@ Verified against `openhands --help` (CLI 1.16.0). Anything not in this table is 
 
 **There is no `--model`, `--max-iterations`, `--workspace`, `--sandbox`, `--sandbox-type` flag.** Model is `LLM_MODEL`. Workspace is the `workdir` you pass to the `terminal` tool. Sandbox / runtime is the `RUNTIME` and `SANDBOX_VOLUMES` env vars.
 
-## JSON Event Schema
+## JSON Event Schema {#json-event-schema}
 
 With `--json --headless`, OpenHands emits JSONL — one JSON object per line, plus a handful of non-JSON status lines (`Initializing agent...`, `Agent is working`, `Agent finished`, the final summary box, `Goodbye!`, `Conversation ID:`, `Hint:`). Filter for lines starting with `{`.
 
@@ -135,7 +143,7 @@ Top-level `kind` field discriminates events:
 
 The cli prints all stderr from LiteLLM/Authlib first — see Pitfalls. Parse only stdout, line by line, ignoring lines that don't start with `{`.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **LiteLLM warnings on every invocation.** The CLI prints `bedrock-runtime` and `sagemaker-runtime` warnings to stderr because `botocore` isn't installed. Plus an Authlib deprecation. These are noise, not failures. Pipe stderr to `/dev/null` or filter it out before showing the user.
 - **Banner spam.** Without `OPENHANDS_SUPPRESS_BANNER=1`, every run starts with a multi-line `+--+` ASCII box advertising the SDK. Always export it.
@@ -148,7 +156,7 @@ The cli prints all stderr from LiteLLM/Authlib first — see Pitfalls. Parse onl
 - **`~/.openhands/conversations/<id>/` accumulates.** Each run persists a trajectory. Clean it up if running batches.
 - **Heavy install (~200 packages).** Use `uv tool install` (isolated venv) to avoid dependency conflicts with the active project.
 
-## Verification
+## Verification {#verification}
 
 ```
 terminal(
@@ -160,8 +168,8 @@ terminal(
 
 If the JSONL stream ends with a `FinishAction` whose `action.message` mentions `OPENHANDS_OK`, the install is working.
 
-## Related
+## Related {#related}
 
 - [OpenHands GitHub](https://github.com/All-Hands-AI/OpenHands)
 - [OpenHands CLI command reference](https://docs.openhands.dev/openhands/usage/cli/command-reference)
-- Sibling skills: `claude-code` (Anthropic-only), `codex` (OpenAI-only), `opencode` (multi-provider via OpenCode), `hermes-agent` (Hermes subagents via `delegate_task`).
+- Sibling skills: `claude-code` (Anthropic-only), `codex` (OpenAI-only), `opencode` (multi-provider via OpenCode), `hermes-agent` ({{app-name}} subagents via `delegate_task`).

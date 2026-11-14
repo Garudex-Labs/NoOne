@@ -192,12 +192,12 @@ def _send_imap_id(imap: imaplib.IMAP4) -> None:
         return
     try:
         try:
-            from hermes_cli.version_info import get_version_info
+            from agent_cli.version_info import get_version_info
             version = get_version_info().base_version
         except Exception:
             version = "0"
-        imap.xatom("ID", f'("name" "hermes-agent" "version" "{version}" '
-                         '"vendor" "NousResearch" "support-email" "noreply@nousresearch.com")')
+        imap.xatom("ID", f'("name" "agent-client" "version" "{version}" '
+                         '"vendor" "Garudex Labs" "support-email" "rawx18.dev@gmail.com")')
     except Exception as e:
         logger.debug("[Email] IMAP ID command not accepted: %s", e)
 
@@ -607,7 +607,7 @@ class EmailAdapter(BasePlatformAdapter):
         # Validate up front so a missing host is an actionable config error, not IMAP4_SSL("") raising ``[Errno 8]``.
         required = (("EMAIL_ADDRESS", self._address), ("EMAIL_PASSWORD", self._password), ("EMAIL_IMAP_HOST", self._imap_host), ("EMAIL_SMTP_HOST", self._smtp_host))
         if missing := [name for name, value in required if not value]:
-            message = f"Not configured — missing {', '.join(missing)}. Set it via `hermes gateway setup` (env) or platforms.email in config.yaml."
+            message = f"Not configured — missing {', '.join(missing)}. Set it via `noone gateway setup` (env) or platforms.email in config.yaml."
             # Non-retryable: a blank-but-present env var used to drive an indefinite retry loop that leaked until OOM.
             return self._fail("[Email] %s", message, "email_missing_configuration", message, retryable=False)
         if not self._probe_imap(is_reconnect) or not self._probe_smtp():
@@ -997,7 +997,7 @@ def _is_connected(config) -> bool:
     """Connected when an address is configured (PlatformConfig.extra or EMAIL_ADDRESS)."""
     if (getattr(config, "extra", {}) or {}).get("address"):
         return True
-    import hermes_cli.gateway as gateway_mod
+    import agent_cli.gateway as gateway_mod
     return bool((gateway_mod.get_env_value("EMAIL_ADDRESS") or "").strip())
 
 
@@ -1021,7 +1021,7 @@ def register(ctx) -> None:
         standalone_send=StandaloneSendPolicy(text_direct=True),
         name="email", label="Email", adapter_factory=EmailAdapter, check_fn=check_email_requirements, is_connected=_is_connected,
         dashboard_description="Talk to Hermes through an IMAP/SMTP mailbox.",
-        docs_url="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/",
+        docs_url="https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/index.md",
         dashboard_env_vars=("EMAIL_ADDRESS", "EMAIL_PASSWORD", "EMAIL_IMAP_HOST", "EMAIL_SMTP_HOST"),
         dashboard_required_env=("EMAIL_ADDRESS", "EMAIL_PASSWORD", "EMAIL_IMAP_HOST", "EMAIL_SMTP_HOST"),
         required_env=["EMAIL_ADDRESS", "EMAIL_PASSWORD", "EMAIL_SMTP_HOST"],

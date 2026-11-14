@@ -1,12 +1,12 @@
+import { type IconComponent } from '@noone/ui/icons'
 import { useEffect, useState } from 'react'
 
-import { deleteEnvVar, getEnvVars, revealEnvVar, setEnvVar } from '@/hermes'
+import { deleteEnvVar, getEnvVars, revealEnvVar, setEnvVar } from '@/agent-client'
 import { useI18n } from '@/i18n'
-import { type IconComponent } from '@/lib/icons'
 import { queryClient } from '@/lib/query-client'
 import { confirm } from '@/store/confirm'
 import { notify, notifyError } from '@/store/notifications'
-import type { EnvVarInfo } from '@/types/hermes'
+import type { EnvVarInfo } from '@/types/agent-client'
 
 import { asText, includesQuery, redactedValue, withoutKey } from './helpers'
 import { Pill } from './primitives'
@@ -91,7 +91,7 @@ export function useEnvCredentials(profile?: string): UseEnvCredentials {
     })()
 
     return () => void (cancelled = true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload per target profile; copy is stable
+     
   }, [profile])
 
   function patchVar(key: string, patch: Partial<Pick<EnvVarInfo, 'is_set' | 'redacted_value'>>) {

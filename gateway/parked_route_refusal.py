@@ -23,7 +23,7 @@ import logging
 import time
 from contextlib import contextmanager
 
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 logger = logging.getLogger(__name__)
 

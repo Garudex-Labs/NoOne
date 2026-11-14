@@ -1,20 +1,20 @@
 ---
 title: "Llama Cpp — llama.cpp local GGUF inference + HF Hub model discovery"
-sidebar_label: "Llama Cpp"
+sidebarTitle: "Llama Cpp"
 description: "llama.cpp local GGUF inference + HF Hub model discovery"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Llama Cpp
+# Llama Cpp {#llama-cpp}
 
 llama.cpp local GGUF inference + HF Hub model discovery.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/llama-cpp` |
+| Source | Optional — install with `noone skills install official/mlops/llama-cpp` |
 | Path | `optional-skills/mlops/inference/llama-cpp` |
 | Version | `2.1.2` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ llama.cpp local GGUF inference + HF Hub model discovery.
 | Platforms | linux, macos, windows |
 | Tags | `llama.cpp`, `GGUF`, `Quantization`, `Hugging Face Hub`, `CPU Inference`, `Apple Silicon`, `Edge Deployment`, `AMD GPUs`, `Intel GPUs`, `NVIDIA`, `URL-first` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# llama.cpp + GGUF
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# llama.cpp + GGUF {#llamacpp--gguf}
 
 Use this skill for local GGUF inference, quant selection, or Hugging Face repo discovery for llama.cpp.
 
-## When to use
+## When to use {#when-to-use}
 
 - Run local models on CPU, Apple Silicon, CUDA, ROCm, or Intel GPUs
 - Find the right GGUF for a specific Hugging Face repo
@@ -42,7 +50,7 @@ Use this skill for local GGUF inference, quant selection, or Hugging Face repo d
 - Enumerate available `.gguf` files and sizes for a repo
 - Decide between Q4/Q5/Q6/IQ variants for the user's RAM or VRAM
 
-## Model Discovery workflow
+## Model Discovery workflow {#model-discovery-workflow}
 
 Prefer URL workflows before asking for `hf`, Python, or custom scripts.
 
@@ -70,9 +78,9 @@ Prefer URL workflows before asking for `hf`, Python, or custom scripts.
    - exact-file fallback: `llama-server --hf-repo <repo> --hf-file <filename.gguf>`
 7. Only suggest conversion from Transformers weights if the repo does not already expose GGUF files.
 
-## Quick start
+## Quick start {#quick-start}
 
-### Install llama.cpp
+### Install llama.cpp {#install-llamacpp}
 
 ```bash
 # macOS / Linux (simplest)
@@ -90,7 +98,7 @@ cmake -B build
 cmake --build build --config Release
 ```
 
-### Run directly from the Hugging Face Hub
+### Run directly from the Hugging Face Hub {#run-directly-from-the-hugging-face-hub}
 
 ```bash
 llama-cli -hf bartowski/Llama-3.2-3B-Instruct-GGUF:Q8_0
@@ -100,7 +108,7 @@ llama-cli -hf bartowski/Llama-3.2-3B-Instruct-GGUF:Q8_0
 llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:Q8_0
 ```
 
-### Run an exact GGUF file from the Hub
+### Run an exact GGUF file from the Hub {#run-an-exact-gguf-file-from-the-hub}
 
 Use this when the tree API shows custom file naming or the exact HF snippet is missing.
 
@@ -111,7 +119,7 @@ llama-server \
     -c 4096
 ```
 
-### OpenAI-compatible server check
+### OpenAI-compatible server check {#openai-compatible-server-check}
 
 ```bash
 curl http://localhost:8080/v1/chat/completions \
@@ -123,11 +131,11 @@ curl http://localhost:8080/v1/chat/completions \
   }'
 ```
 
-## Python bindings (llama-cpp-python)
+## Python bindings (llama-cpp-python) {#python-bindings-llama-cpp-python}
 
 `pip install llama-cpp-python` (CUDA: `CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python --force-reinstall --no-cache-dir`; Metal: `CMAKE_ARGS="-DGGML_METAL=on" ...`).
 
-### Basic generation
+### Basic generation {#basic-generation}
 
 ```python
 from llama_cpp import Llama
@@ -143,7 +151,7 @@ out = llm("What is machine learning?", max_tokens=256, temperature=0.7)
 print(out["choices"][0]["text"])
 ```
 
-### Chat + streaming
+### Chat + streaming {#chat--streaming}
 
 ```python
 llm = Llama(
@@ -167,7 +175,7 @@ for chunk in llm("Explain quantum computing:", max_tokens=256, stream=True):
     print(chunk["choices"][0]["text"], end="", flush=True)
 ```
 
-### Embeddings
+### Embeddings {#embeddings}
 
 ```python
 llm = Llama(model_path="./model-q4_k_m.gguf", embedding=True, n_gpu_layers=35)
@@ -185,7 +193,7 @@ llm = Llama.from_pretrained(
 )
 ```
 
-## Choosing a quant
+## Choosing a quant {#choosing-a-quant}
 
 Use the Hub page first, generic heuristics second.
 
@@ -196,7 +204,7 @@ Use the Hub page first, generic heuristics second.
 - For multimodal repos, mention `mmproj-*.gguf` separately. The projector is not the main model file.
 - Do not normalize repo-native labels. If the page says `UD-Q4_K_M`, report `UD-Q4_K_M`.
 
-## Extracting available GGUFs from a repo
+## Extracting available GGUFs from a repo {#extracting-available-ggufs-from-a-repo}
 
 When the user asks what GGUFs exist, return:
 
@@ -217,7 +225,7 @@ Use the tree API for this step:
 
 For a repo like `unsloth/Qwen3.6-35B-A3B-GGUF`, the local-app page can show quant chips such as `UD-Q4_K_M`, `UD-Q5_K_M`, `UD-Q6_K`, and `Q8_0`, while the tree API exposes exact file paths such as `Qwen3.6-35B-A3B-UD-Q4_K_M.gguf` and `Qwen3.6-35B-A3B-Q8_0.gguf` with byte sizes. Use the tree API to turn a quant label into an exact filename.
 
-## Search patterns
+## Search patterns {#search-patterns}
 
 Use these URL shapes directly:
 
@@ -230,7 +238,7 @@ https://huggingface.co/api/models/<repo>/tree/main?recursive=true
 https://huggingface.co/<repo>/tree/main
 ```
 
-## Output format
+## Output format {#output-format}
 
 When answering discovery requests, prefer a compact structured result like:
 
@@ -246,16 +254,16 @@ Source URLs:
 - <tree API URL>
 ```
 
-## References
+## References {#references}
 
-- **[hub-discovery.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/llama-cpp/references/hub-discovery.md)** - URL-only Hugging Face workflows, search patterns, GGUF extraction, and command reconstruction
-- **[advanced-usage.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/llama-cpp/references/advanced-usage.md)** — speculative decoding, batched inference, grammar-constrained generation, LoRA, multi-GPU, custom builds, benchmark scripts
-- **[quantization.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/llama-cpp/references/quantization.md)** — quant quality tradeoffs, when to use Q4/Q5/Q6/IQ, model size scaling, imatrix
-- **[server.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/llama-cpp/references/server.md)** — direct-from-Hub server launch, OpenAI API endpoints, Docker deployment, NGINX load balancing, monitoring
-- **[optimization.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/llama-cpp/references/optimization.md)** — CPU threading, BLAS, GPU offload heuristics, batch tuning, benchmarks
-- **[troubleshooting.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/llama-cpp/references/troubleshooting.md)** — install/convert/quantize/inference/server issues, Apple Silicon, debugging
+- **[hub-discovery.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/llama-cpp/references/hub-discovery.md)** - URL-only Hugging Face workflows, search patterns, GGUF extraction, and command reconstruction
+- **[advanced-usage.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/llama-cpp/references/advanced-usage.md)** — speculative decoding, batched inference, grammar-constrained generation, LoRA, multi-GPU, custom builds, benchmark scripts
+- **[quantization.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/llama-cpp/references/quantization.md)** — quant quality tradeoffs, when to use Q4/Q5/Q6/IQ, model size scaling, imatrix
+- **[server.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/llama-cpp/references/server.md)** — direct-from-Hub server launch, OpenAI API endpoints, Docker deployment, NGINX load balancing, monitoring
+- **[optimization.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/llama-cpp/references/optimization.md)** — CPU threading, BLAS, GPU offload heuristics, batch tuning, benchmarks
+- **[troubleshooting.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/llama-cpp/references/troubleshooting.md)** — install/convert/quantize/inference/server issues, Apple Silicon, debugging
 
-## Resources
+## Resources {#resources}
 
 - **GitHub**: https://github.com/ggml-org/llama.cpp
 - **Hugging Face GGUF + llama.cpp docs**: https://huggingface.co/docs/hub/gguf-llamacpp

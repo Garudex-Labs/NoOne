@@ -1,5 +1,5 @@
 import React from "react";
-import RouteLink from "../RouteLink";
+import { DocLink as RouteLink } from "../DocLink";
 
 import styles from "./styles.module.css";
 

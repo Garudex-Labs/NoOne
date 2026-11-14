@@ -1,14 +1,13 @@
 ---
-sidebar_position: 8
 title: "Extending the CLI"
-description: "Build wrapper CLIs that extend the Hermes TUI with custom widgets, keybindings, and layout changes"
+description: "Build wrapper CLIs that extend the the agent TUI with custom widgets, keybindings, and layout changes"
 ---
 
-# Extending the CLI
+# Extending the CLI {#extending-the-cli}
 
-Hermes exposes protected extension hooks on `HermesCLI` so wrapper CLIs can add widgets, keybindings, and layout customizations without overriding the `run()` method or the TUI construction in `hermes_cli/cli_tui_mixin.py` (where these hooks are defined; `HermesCLI` in `cli.py` mixes it in). This keeps your extension decoupled from internal changes.
+{{app-name}} exposes protected extension hooks on `AgentCLI` so wrapper CLIs can add widgets, keybindings, and layout customizations without overriding the `run()` method or the TUI construction in `agent_cli/cli_input_mixin.py` (where these hooks are defined; `AgentCLI` in `cli.py` mixes it in). This keeps your extension decoupled from internal changes.
 
-## Extension points
+## Extension points {#extension-points}
 
 There are five extension seams available:
 
@@ -22,18 +21,18 @@ There are five extension seams available:
 
 The first three are new protected hooks. The last two already existed.
 
-## Quick start: a wrapper CLI
+## Quick start: a wrapper CLI {#quick-start-a-wrapper-cli}
 
 ```python
 #!/usr/bin/env python3
 """my_cli.py — Example wrapper CLI that extends Hermes."""
 
-from cli import HermesCLI
+from cli import AgentCLI
 from prompt_toolkit.layout import FormattedTextControl, Window
 from prompt_toolkit.filters import Condition
 
 
-class MyCLI(HermesCLI):
+class MyCLI(AgentCLI):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -81,9 +80,9 @@ source ./activate
 python my_cli.py
 ```
 
-## Hook reference
+## Hook reference {#hook-reference}
 
-### `_get_extra_tui_widgets()`
+### `_get_extra_tui_widgets()` {#_get_extra_tui_widgets}
 
 Returns a list of prompt_toolkit widgets to insert into the TUI layout. Widgets appear **between the spacer and the status bar** — above the input area but below the main output.
 
@@ -107,9 +106,9 @@ def _get_extra_tui_widgets(self):
     ]
 ```
 
-### `_register_extra_tui_keybindings(kb, *, input_area)`
+### `_register_extra_tui_keybindings(kb, *, input_area)` {#_register_extra_tui_keybindingskb--input_area}
 
-Called after Hermes registers its own keybindings and before the layout is built. Add your keybindings to `kb`.
+Called after {{app-name}} registers its own keybindings and before the layout is built. Add your keybindings to `kb`.
 
 ```python
 def _register_extra_tui_keybindings(self, kb, *, input_area):
@@ -135,7 +134,7 @@ def _register_extra_tui_keybindings(self, kb, *, input_area):
 
 **Avoid conflicts** with built-in keybindings: `Enter` (submit), `Escape Enter` (newline), `Ctrl-C` (interrupt), `Ctrl-D` (exit), `Tab` (auto-suggest accept). Function keys F2+ and Ctrl-combinations are generally safe.
 
-### `_build_tui_layout_children(**widgets)`
+### `_build_tui_layout_children(**widgets)` {#_build_tui_layout_childrenwidgets}
 
 Override this only when you need full control over widget ordering. Most extensions should use `_get_extra_tui_widgets()` instead.
 
@@ -170,7 +169,7 @@ The default implementation returns (any `None` widgets are filtered out):
 ]
 ```
 
-## Layout diagram
+## Layout diagram {#layout-diagram}
 
 The default layout from top to bottom:
 
@@ -183,7 +182,7 @@ The default layout from top to bottom:
 7. **Voice status** — recording indicator
 8. **Completions menu** — autocomplete suggestions
 
-## Tips
+## Tips {#tips}
 
 - **Invalidate the display** after state changes: call `self._invalidate()` to trigger a prompt_toolkit redraw.
 - **Access agent state**: `self.agent`, `self.model`, `self.conversation_history` are all available.

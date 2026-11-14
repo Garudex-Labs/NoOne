@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import type * as React from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { cn } from '@/lib/utils'
 
 /**
@@ -27,7 +27,7 @@ export function TitleMenuTrigger({
       {...props}
     >
       <span className="min-w-0 flex-1 truncate text-[0.75rem] font-medium leading-none">{children}</span>
-      <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.8125rem" />
+      <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.8125rem" />
     </Button>
   )
 }

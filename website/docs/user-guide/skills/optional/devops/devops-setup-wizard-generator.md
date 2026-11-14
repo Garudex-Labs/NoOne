@@ -1,34 +1,42 @@
 ---
 title: "Setup Wizard Generator — Generate a bash wizard guiding a human through manual setup"
-sidebar_label: "Setup Wizard Generator"
+sidebarTitle: "Setup Wizard Generator"
 description: "Generate a bash wizard guiding a human through manual setup"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Setup Wizard Generator
+# Setup Wizard Generator {#setup-wizard-generator}
 
 Generate a bash wizard guiding a human through manual setup.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/devops/setup-wizard-generator` |
+| Source | Optional — install with `noone skills install official/devops/setup-wizard-generator` |
 | Path | `optional-skills/devops/setup-wizard-generator` |
 | Version | `1.0.0` |
-| Author | Matt Pocock (mattpocock/skills, wizard) + Hermes Agent |
+| Author | Matt Pocock (mattpocock/skills, wizard) + {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `wizard`, `setup`, `onboarding`, `credentials`, `secrets`, `migration`, `bash`, `human-in-the-loop` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Setup Wizard Generator
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Setup Wizard Generator {#setup-wizard-generator-1}
 
 Generates an interactive bash **wizard**: a script that walks a human, step
 by step, through a manual procedure that is tedious to do by hand and tedious
@@ -38,7 +46,7 @@ secrets), confirms at every stage, and shows how many stages are left.
 
 Ported from mattpocock/skills' MIT-licensed `wizard` skill.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - Provisioning infrastructure or third-party services (Stripe, Supabase,
   DNS, OAuth apps) where only a human can click through the dashboard
@@ -48,14 +56,14 @@ Ported from mattpocock/skills' MIT-licensed `wizard` skill.
 
 Do NOT use for steps the agent can perform itself — do those directly.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - `bash`; `gh` CLI only if stages write GitHub secrets/variables
 - The library template: `templates/template.sh` in this skill's directory
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. Scope the procedure
+### 1. Scope the procedure {#1-scope-the-procedure}
 
 Work out every manual step the human must take and every value captured
 along the way. Read the repo first, don't ask cold:
@@ -72,7 +80,7 @@ captured value, you know (a) where the human gets it, (b) where it's written
 (`.env`, a GitHub secret, both, or nowhere), and (c) whether it's secret
 (hidden entry) or public.
 
-### 2. Map each stage's journey
+### 2. Map each stage's journey {#2-map-each-stages-journey}
 
 For each stage, write the precise path a human follows: which URL to open,
 what to do there, where the value is shown — e.g. "Dashboard → Developers →
@@ -80,7 +88,7 @@ API keys → Reveal test key → copy". Where you don't know the current UI or
 exact command, say so and check the docs or ask — never invent steps that
 may not exist.
 
-### 3. Author the wizard
+### 3. Author the wizard {#3-author-the-wizard}
 
 Copy `templates/template.sh` (from this skill's directory) to the target
 path. Replace the example stage with one `stage` per step, in dependency
@@ -101,7 +109,7 @@ A wizard is ephemeral by default: save it to a scratch or `scripts/` path,
 delete it when the job's done. Commit it only when the user wants a
 repeatable setup path living in the repo.
 
-### 4. Verify and hand off
+### 4. Verify and hand off {#4-verify-and-hand-off}
 
 - `bash -n <script>`; run `shellcheck` if available; `chmod +x <script>`.
 - Do NOT run it end-to-end yourself: it opens browsers and blocks on human
@@ -111,7 +119,7 @@ repeatable setup path living in the repo.
 - Tell the user how to run it. If it's repeatable, commit it and link it
   from the README.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 1. **Editing the library section.** Everything above the `STAGES` marker is
    the wizard library; author only below it.
@@ -124,7 +132,7 @@ repeatable setup path living in the repo.
 5. **One mega-stage.** Screen clearing per stage means a long stage scrolls
    critical instructions away; split it.
 
-## Verification
+## Verification {#verification}
 
 - [ ] Stage list confirmed with the user before authoring
 - [ ] `bash -n` passes; script is executable

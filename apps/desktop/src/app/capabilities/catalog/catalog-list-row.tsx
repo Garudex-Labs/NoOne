@@ -1,7 +1,8 @@
-import { Codicon } from '@/components/ui/codicon'
+import { AppIcon } from '@noone/ui/app-icon'
+import { Lock } from '@noone/ui/icons'
+
 import { RowButton } from '@/components/ui/row-button'
 import { useI18n } from '@/i18n'
-import { Lock } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { type CatalogEntry, type CatalogKind, catalogLabel } from './catalog-data'
@@ -44,7 +45,7 @@ export function CatalogListRow({
         className="absolute inset-0 rounded-md focus-visible:outline-2 focus-visible:outline-primary focus-visible:-outline-offset-2"
         onClick={() => onOpen(entry)}
       />
-      <Codicon
+      <AppIcon
         className="mt-0.5 shrink-0 text-(--ui-text-tertiary)"
         name={kind === 'plugins' ? 'extensions' : 'book'}
         size="1.1rem"
@@ -52,7 +53,7 @@ export function CatalogListRow({
       <span className="pointer-events-none min-w-0 flex-1">
         <span className="flex items-center gap-2">
           <span className="truncate text-[0.78rem] font-medium">{entry.name}</span>
-          {installed && <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="check" />}
+          {installed && <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="check" />}
           {entry.locked && (
             <span
               aria-label={t.skills.locked}

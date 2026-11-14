@@ -1,7 +1,7 @@
 # nix/devShell.nix — Dev shell that delegates setup to each package
 #
 # Each pnpm workspace package exposes passthru.packageJsonPath (e.g.
-# "ui-tui/package.json").  This file collects them all and passes the
+# "web/package.json").  This file collects them all and passes the
 # list to mkPnpmDevShellHook, which stamps all package.jsons at once,
 # then runs a single `pnpm install --lockfile-only` if any changed and
 # `pnpm install --frozen-lockfile` if the lockfile changed.

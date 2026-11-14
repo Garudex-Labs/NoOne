@@ -1,7 +1,7 @@
-# nix/desktop.nix — Hermes Desktop (Electron) app build + wrapper
+# nix/desktop.nix — native Desktop (Electron) app build + wrapper
 #
 # `hermesAgent` is the fully-built `.#default` package — it ships the
-# `hermes` binary with the venv, runtime PATH, bundled skills/plugins, etc.
+# `noone` binary with the venv, runtime PATH, bundled skills/plugins, etc.
 # already wired up.  We point the desktop at it via the existing
 # `HERMES_DESKTOP_HERMES` override env var, so the desktop's resolver
 # uses our fully wrapped binary before the mutable managed install.
@@ -32,8 +32,7 @@
 }:
 let
   wrapperEnv = {
-    # set HERMES_DESKTOP_HERMES to the absolute path of the nix-built `hermes`
-    # binary so the deployment override selects our fully wrapped hermes install.
+    # The retained deployment override selects the fully wrapped agent binary.
     HERMES_DESKTOP_HERMES = lib.getExe hermesAgent;
     ELECTRON_IS_DEV = "0";
   }
@@ -82,6 +81,11 @@ let
     dirs = [
       "apps/desktop"
       "apps/shared"
+    "apps/ui"
+    "agent_cli/data/ui"
+      "agent_cli/data/application_identity.json"
+      "scripts/build/application-identity.mjs"
+      "scripts/build/application-identity.d.mts"
       "scripts/build/desktop.mjs"
       "scripts/build/freshness.mjs"
       "scripts/build/frontend-common.mjs"
@@ -90,7 +94,7 @@ let
       "scripts/msix-shared.mjs"
       "scripts/release-content-types.json"
     ];
-    pname = "hermes-desktop-renderer";
+    pname = "agent-desktop-renderer";
 
     # node-gyp's build interpreter.
     nativeBuildInputs = [ python3 ];
@@ -199,13 +203,21 @@ stdenv.mkDerivation {
     # XDG launcher entry
     mkdir -p $out/share/applications $out/share/icons/hicolor/1024x1024/apps
     install -m 0644 ${generatedIcons}/apps/desktop/assets/icon.png \
-      $out/share/icons/hicolor/1024x1024/apps/hermes.png
+      $out/share/icons/hicolor/1024x1024/apps/agent.png
     export PYTHONPATH=$(mktemp -d)
-    cp ${../hermes_cli/linux_desktop_entry.py} "$PYTHONPATH/linux_desktop_entry.py"
+    cp ${../agent_cli/linux_desktop_entry.py} "$PYTHONPATH/linux_desktop_entry.py"
     export DESKTOP_EXEC="$out/bin/hermes-desktop"
-    export DESKTOP_ICON="$out/share/icons/hicolor/1024x1024/apps/hermes.png"
+    export DESKTOP_ICON="$out/share/icons/hicolor/1024x1024/apps/agent.png"
     entry_name=$(python3 -c 'from linux_desktop_entry import DESKTOP_ENTRY_NAME; print(DESKTOP_ENTRY_NAME)')
-    python3 -c 'import os; from linux_desktop_entry import render_desktop_entry; print(render_desktop_entry(os.environ["DESKTOP_EXEC"], os.environ["DESKTOP_ICON"]))' > "$out/share/applications/$entry_name"
+    python3 - "${../agent_cli/data/application_identity.json}" <<'PY' > "$out/share/applications/$entry_name"
+import json
+import os
+import sys
+from linux_desktop_entry import render_desktop_entry
+with open(sys.argv[1], encoding="utf-8-sig") as source:
+    name = json.load(source)["default_name"]
+print(render_desktop_entry(os.environ["DESKTOP_EXEC"], os.environ["DESKTOP_ICON"], app_name=name))
+PY
     runHook postInstall
   '';
 
@@ -214,8 +226,8 @@ stdenv.mkDerivation {
   };
 
   meta = with lib; {
-    description = "Native Electron desktop shell for Hermes Agent";
-    homepage = "https://github.com/NousResearch/hermes-agent";
+    description = "Native Electron desktop shell for the personal agent runtime";
+    homepage = "https://github.com/Garudex-Labs/NoOne";
     license = licenses.mit;
     platforms = platforms.unix;
     mainProgram = "hermes-desktop";

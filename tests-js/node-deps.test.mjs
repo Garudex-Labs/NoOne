@@ -23,7 +23,7 @@ function vendor(source, name, scripts) {
   writeFileSync(join(source, 'vendor', name, 'index.cjs'), `module.exports = '${name}'`)
 }
 
-// A real pnpm workspace and lockfile. tui-only and web-only are tarballs, which pnpm
+// A real pnpm workspace and lockfile. client-only and web-only are tarballs, which pnpm
 // stores and links like registry packages; web-only carries a dependency build. The
 // root postinstall counts pnpm installs. Build outputs stay out of the store, as
 // the repository's pnpm-workspace.yaml configures.
@@ -35,18 +35,18 @@ function fixture() {
   const env = { ...process.env, pnpm_config_offline: 'true', pnpm_config_store_dir: join(base, 'store'),
     pnpm_config_cache_dir: join(base, 'cache'), pnpm_config_state_dir: join(base, 'state') }
   vendor(source, 'root-only')
-  vendor(source, 'tui-only')
+  vendor(source, 'client-only')
   vendor(source, 'web-only', { install: `node -e "require('node:fs').writeFileSync('built', require('node:crypto').randomUUID())"` })
-  for (const name of ['tui-only', 'web-only']) {
+  for (const name of ['client-only', 'web-only']) {
     execFileSync(pnpmCommand(), ['pack', '--pack-destination', join(source, 'vendor')], { cwd: join(source, 'vendor', name), env, stdio: 'pipe' })
   }
   json(join(source, 'package.json'), { name: 'fixture', private: true, dependencies: { 'root-only': 'file:vendor/root-only' },
     scripts: { postinstall: `node -e "require('node:fs').appendFileSync('installs', 'x')"` } })
   writeFileSync(join(source, 'pnpm-workspace.yaml'), [
-    'packages:', '  - ui-tui', '  - web', '  - apps/desktop', 'sideEffectsCache: false',
+    'packages:', '  - fixture-client', '  - web', '  - apps/desktop', 'sideEffectsCache: false',
     'allowBuilds:', "  'web-only@file:vendor/web-only-1.0.0.tgz': true", '',
   ].join('\n'))
-  json(join(source, 'ui-tui/package.json'), { name: 'tui', version: '1.0.0', dependencies: { 'tui-only': 'file:../vendor/tui-only-1.0.0.tgz' } })
+  json(join(source, 'fixture-client/package.json'), { name: 'fixture-client', version: '1.0.0', dependencies: { 'client-only': 'file:../vendor/client-only-1.0.0.tgz' } })
   json(join(source, 'web/package.json'), { name: 'web', version: '1.0.0', dependencies: { 'web-only': 'file:../vendor/web-only-1.0.0.tgz' } })
   json(join(source, 'apps/desktop/package.json'), { name: 'desktop', version: '1.0.0', scripts: { postinstall: 'node -e "require(\'fs\').writeFileSync(\'electron-provisioned\',\'yes\')"' } })
   execFileSync(pnpmCommand(), ['install', '--lockfile-only'], { cwd: source, env, stdio: 'pipe' })
@@ -146,15 +146,15 @@ test('native toolchain admission rejects a changed compiler without breaking ord
 test('one locked preparation retains the requested union without provisioning desktop', () => {
   const { source, env } = fixture()
   const lock = readFileSync(join(source, 'pnpm-lock.yaml'))
-  prepareNodeDependencies({ source, workspaces: ['ui-tui', 'web', 'ui-tui'], env })
-  for (const [workspace, name] of [['ui-tui', 'tui-only'], ['web', 'web-only']]) {
+  prepareNodeDependencies({ source, workspaces: ['fixture-client', 'web', 'fixture-client'], env })
+  for (const [workspace, name] of [['fixture-client', 'client-only'], ['web', 'web-only']]) {
     expect(createRequire(join(source, workspace, 'package.json'))(name)).toBe(name)
   }
   expect(createRequire(join(source, 'package.json'))('root-only')).toBe('root-only')
   expect(existsSync(join(source, 'apps/desktop/node_modules'))).toBe(false)
   expect(existsSync(join(source, 'apps/desktop/electron-provisioned'))).toBe(false)
   expect(readFileSync(join(source, 'pnpm-lock.yaml'))).toEqual(lock)
-  execFileSync(process.execPath, cli(source, '--workspace', 'ui-tui', '--workspace', 'web'), { cwd: tmpdir(), env, stdio: 'pipe' })
+  execFileSync(process.execPath, cli(source, '--workspace', 'fixture-client', '--workspace', 'web'), { cwd: tmpdir(), env, stdio: 'pipe' })
   expect(createRequire(join(source, 'web/package.json'))('web-only')).toBe('web-only')
 }, 30000)
 
@@ -173,7 +173,7 @@ test('web-only selection excludes siblings and rejects stale locks without rewri
   const { source, env } = fixture()
   rmSync(join(source, 'apps/desktop'), { recursive: true })
   prepareNodeDependencies({ source, workspaces: ['web'], env })
-  expect(existsSync(join(source, 'ui-tui/node_modules'))).toBe(false)
+  expect(existsSync(join(source, 'fixture-client/node_modules'))).toBe(false)
   expect(existsSync(join(source, 'apps/desktop/electron-provisioned'))).toBe(false)
   const lock = readFileSync(join(source, 'pnpm-lock.yaml'))
   json(join(source, 'web/package.json'), { name: 'web', version: '1.0.0', dependencies: { 'web-only': '9.0.0' } })
@@ -183,21 +183,21 @@ test('web-only selection excludes siblings and rejects stale locks without rewri
 
 test('a restored completed install retains postinstall outputs only for matching inputs', () => {
   const { source, env } = fixture()
-  prepareNodeDependencies({ source, workspaces: ['ui-tui', 'web'], env, reuse: true })
+  prepareNodeDependencies({ source, workspaces: ['fixture-client', 'web'], env, reuse: true })
   const artifact = 'node_modules/postinstall-output'
   writeFileSync(join(source, artifact), 'built')
   const restored = join(mkdtempSync(join(tmpdir(), 'restored node union-')), 'source')
   roots.push(dirname(restored))
   cpSync(source, restored, { recursive: true, verbatimSymlinks: true })
-  prepareNodeDependencies({ source: restored, workspaces: ['web', 'ui-tui'], env, reuse: true })
+  prepareNodeDependencies({ source: restored, workspaces: ['web', 'fixture-client'], env, reuse: true })
   expect(readFileSync(join(restored, artifact), 'utf8')).toBe('built')
-  execFileSync(process.execPath, cli(restored, '--workspace', 'web', '--workspace', 'ui-tui', '--reuse'), { cwd: tmpdir(), env, stdio: 'pipe' })
+  execFileSync(process.execPath, cli(restored, '--workspace', 'web', '--workspace', 'fixture-client', '--reuse'), { cwd: tmpdir(), env, stdio: 'pipe' })
   expect(readFileSync(join(restored, artifact), 'utf8')).toBe('built')
   expect(createRequire(join(restored, 'web/package.json'))('web-only')).toBe('web-only')
 
   prepareNodeDependencies({ source: restored, workspaces: ['web'], env, reuse: true })
   expect(existsSync(join(restored, artifact))).toBe(false)
-  expect(existsSync(join(restored, 'ui-tui/node_modules'))).toBe(false)
+  expect(existsSync(join(restored, 'fixture-client/node_modules'))).toBe(false)
   writeFileSync(join(restored, artifact), 'built again')
   // Even an invalid manifest must reach pnpm, not hide behind a warm receipt.
   json(join(restored, 'web/package.json'), { name: 'web', version: '1.0.0', dependencies: { 'web-only': '9.0.0' } })
@@ -285,7 +285,7 @@ test('an npm-installed tree is removed before the first pnpm install', () => {
 // previous install must survive the failure, and a later online run must succeed.
 test('a failed install restores the previously installed trees', () => {
   const { source, env } = fixture()
-  const options = { source, workspaces: ['ui-tui', 'web'], reuse: true, env }
+  const options = { source, workspaces: ['fixture-client', 'web'], reuse: true, env }
   prepareNodeDependencies(options)
   const receipt = readFileSync(join(source, 'node_modules/.hermes-node-deps'))
   const lock = readFileSync(join(source, 'pnpm-lock.yaml'), 'utf8')
@@ -298,9 +298,9 @@ test('a failed install restores the previously installed trees', () => {
     .replace('snapshots:\n\n', 'snapshots:\n\n  picocolors@1.1.1: {}\n\n'))
   const dead = { ...env, pnpm_config_offline: 'false', pnpm_config_registry: 'http://127.0.0.1:9/',
     pnpm_config_fetch_retries: '0', pnpm_config_store_dir: join(dirname(source), 'empty-store') }
-  expect(() => execFileSync(process.execPath, cli(source, '--workspace', 'ui-tui', '--workspace', 'web', '--reuse'),
+  expect(() => execFileSync(process.execPath, cli(source, '--workspace', 'fixture-client', '--workspace', 'web', '--reuse'),
     { env: dead, stdio: 'pipe' })).toThrow(/ERR_PNPM_TARBALL_FETCH/)
-  for (const [workspace, name] of [['ui-tui', 'tui-only'], ['web', 'web-only']]) {
+  for (const [workspace, name] of [['fixture-client', 'client-only'], ['web', 'web-only']]) {
     expect(createRequire(join(source, workspace, 'package.json'))(name)).toBe(name)
   }
   expect(createRequire(join(source, 'package.json'))('root-only')).toBe('root-only')

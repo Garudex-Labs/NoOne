@@ -642,7 +642,7 @@ OPENROUTER_API_KEY=sk-or-v1-reallyLongSecretKeyValue12345678
 FIRECRAWL_API_KEY=fc-shortkey123456789012
 TELEGRAM_BOT_TOKEN=bot987654321:ABCDEfghij-KLMNopqrst_UVWXyz12345
 SHELL=/bin/bash
-USER=teknium"""
+USER=RAWx18"""
         result = redact_sensitive_text(env_dump)
         # Secrets should be masked
         assert "abc123def456" not in result
@@ -651,7 +651,7 @@ USER=teknium"""
         # Non-secrets should survive
         assert "HOME=/home/user" in result
         assert "SHELL=/bin/bash" in result
-        assert "USER=teknium" in result
+        assert "USER=RAWx18" in result
 
 
 class TestSecretCapturePayloadRedaction:
@@ -1685,7 +1685,7 @@ class TestRedactForEgress:
 
 
 class TestWebappLaunchLinks:
-    """``hermes webapp`` prints a link that signs a browser in as the user: one with the gateway's
+    """``noone webapp`` prints a link that signs a browser in as the user: one with the gateway's
     browser credential after ``#hermes-session=`` (what older gateways printed on macOS), or a one-use
     launch ticket after ``/webapp/launch#ticket=``. Either opens the user's Hermes until it is spent or
     replaced, so when Hermes runs the command through its terminal tool neither reaches the transcript.
@@ -1697,7 +1697,7 @@ class TestWebappLaunchLinks:
         from agent.redact import redact_terminal_output
 
         link = "http://127.0.0.1:9120/?profile=work#hermes-session=" + self.CREDENTIAL
-        out = redact_terminal_output(f"Open this link in your browser:\n  {link}\n", "hermes webapp")
+        out = redact_terminal_output(f"Open this link in your browser:\n  {link}\n", "noone webapp")
         assert self.CREDENTIAL not in out
         assert "http://127.0.0.1:9120/?profile=work#hermes-session=" in out
 
@@ -1705,7 +1705,7 @@ class TestWebappLaunchLinks:
         from agent.redact import redact_terminal_output
 
         link = "http://127.0.0.1:9120/webapp/launch#ticket=" + self.CREDENTIAL + "&query=%3Fprofile%3Dwork"
-        out = redact_terminal_output(f"Open this one-use link:\n  {link}\n", "hermes webapp --no-open")
+        out = redact_terminal_output(f"Open this one-use link:\n  {link}\n", "noone webapp --no-open")
         assert self.CREDENTIAL not in out
         assert "http://127.0.0.1:9120/webapp/launch#ticket=" in out and "&query=%3Fprofile%3Dwork" in out
         assert self.CREDENTIAL not in redact_sensitive_text(link)
@@ -1792,7 +1792,7 @@ class TestFlagAndKeyShapedCredentials:
         "      --secret stringArray      Secret file to expose to the build",
         "mysql [options] --password db_name",
         "--password[=password], -p[password]: use --password= or -p",
-        "hermes auth add openrouter --api-key sk-or-v1-xxx   # Add API key",
+        "noone auth add openrouter --api-key sk-or-v1-xxx   # Add API key",
         "For auth use `redis://:<password>@host:6379` or `redis://:${REDIS_PASSWORD}@host`.",
         "this.primaryKey = model.idField;\ndt.PrimaryKey = new DataColumn[] { dt.Columns[0] };",
         "var creds = new Creds { AccountKey = settings.StorageAccountKey };",

@@ -1,6 +1,6 @@
 """Harness: a named profile does not get a gateway of its own inside the container.
 
-Multiplex-only (#118273, #118433): ONE gateway per container serves every profile. ``hermes
+Multiplex-only (#118273, #118433): ONE gateway per container serves every profile. ``noone
 profile create`` still registers the profile's s6 slot (so ``--force`` has something to drive),
 but ``hermes -p <profile> gateway start`` without ``--force`` refuses, names the escape, and
 leaves the slot's want-state DOWN. ``--force`` is the only path to a second, supervised
@@ -82,7 +82,7 @@ def test_named_profile_gateway_start_refuses_without_force(
 ) -> None:
     start_container(built_image, container_name, cmd="sleep 120")
 
-    r = _sh(container_name, f"hermes profile create {PROFILE}")
+    r = _sh(container_name, f"noone profile create {PROFILE}")
     assert r.returncode == 0, f"profile create failed: {r.stderr}"
 
     # Profile create's s6-register hook still produces the slot (registered DOWN).
@@ -99,7 +99,7 @@ def test_named_profile_gateway_force_start_then_stop(
     built_image: str, container_name: str,
 ) -> None:
     start_container(built_image, container_name, cmd="sleep 120")
-    r = _sh(container_name, f"hermes profile create {PROFILE}")
+    r = _sh(container_name, f"noone profile create {PROFILE}")
     assert r.returncode == 0, f"profile create failed: {r.stderr}"
 
     r = _sh(container_name, f"hermes -p {PROFILE} gateway start --force", timeout=60)

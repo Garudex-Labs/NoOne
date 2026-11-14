@@ -54,7 +54,7 @@ _lock = threading.RLock()  # re-entrant: a card settle checks and resolves under
 _pending: dict[str, dict] = {}
 _session_approved: dict[str, set] = {}
 _session_yolo: set[str] = set()
-# Session keys whose launch YOLO (`hermes chat --yolo` session policy) was already seeded by
+# Session keys whose launch YOLO (`noone chat --yolo` session policy) was already seeded by
 # ``tools.approval_yolo.apply_launch_yolo``: once per boundary, so a later `/yolo` off sticks.
 _launch_yolo_applied: set[str] = set()
 _permanent_approved: set = set()
@@ -411,11 +411,11 @@ def _permanent_set() -> set:
     launch profile's "always" approvals must not pre-approve commands for a secondary, nor may a
     secondary's "always" choice be written back into the launch profile's config. Callers hold ``_lock``.
     """
-    from hermes_constants import get_hermes_home_override, hermes_home_key
-    if get_hermes_home_override() is None:
+    from agent_constants import get_agent_home_override, agent_home_key
+    if get_agent_home_override() is None:
         approved, key = _permanent_approved, ""
     else:
-        key = hermes_home_key()
+        key = agent_home_key()
         approved = _permanent_approved_by_home.setdefault(key, set())
     _sync_permanent_from_disk(approved, key)
     return approved
@@ -501,13 +501,13 @@ def _persist_choice(session_key: str, choice: str, keys: list[str]) -> None:
 
 def _read_permanent_allowlist() -> set:
     """``command_allowlist`` of the active profile's config as a set (empty on malformed input)."""
-    from hermes_cli.config import load_config_readonly
+    from agent_cli.config import load_config_readonly
     config = load_config_readonly()
     raw = config.get("command_allowlist")
     legacy = isinstance(raw, str)
     if legacy:
         # Old config-set versions serialized list values as scalar strings.
-        import hermes_yaml as yaml
+        import agent_yaml as yaml
         try:
             raw = yaml.safe_load(raw)
         except yaml.YAMLError:
@@ -532,8 +532,8 @@ _permanent_baseline_by_home: dict[str, set] = {}
 
 
 def _baseline_key() -> str:
-    from hermes_constants import get_hermes_home_override, hermes_home_key
-    return "" if get_hermes_home_override() is None else hermes_home_key()
+    from agent_constants import get_agent_home_override, agent_home_key
+    return "" if get_agent_home_override() is None else agent_home_key()
 
 
 def load_permanent_allowlist() -> set:
@@ -567,7 +567,7 @@ def save_permanent_allowlist(patterns: set):
     entries by editing ``command_allowlist`` in config.yaml.
     """
     try:
-        from hermes_cli.config import load_config, save_config
+        from agent_cli.config import load_config, save_config
         config = load_config()
         on_disk = set(config.get("command_allowlist", []) or [])
         with _lock:
@@ -728,7 +728,7 @@ _CRON_CTX = _Unattended(
 
 
 def _unattended_contexts() -> list[_Unattended]:
-    """Active unattended contexts in evaluation order: single-query first (``hermes chat -q``
+    """Active unattended contexts in evaluation order: single-query first (``noone chat -q``
     exports HERMES_INTERACTIVE=1 but nobody answers); cron beats a platform marker because
     cron binds the platform for delivery routing only."""
     contexts = []
@@ -1069,7 +1069,7 @@ def _human_decision(spec: _GateSpec, *, command: str, description: str,
 def _presence(approval_callback=None) -> tuple:
     """``(approval_callback, is_cli, is_gateway, is_ask)`` for the current context.
 
-    Single-query ``-q`` and cron clear the presence trio: ``hermes chat -q`` exports
+    Single-query ``-q`` and cron clear the presence trio: ``noone chat -q`` exports
     HERMES_INTERACTIVE=1 for sudo prompts, and a gateway sets HERMES_EXEC_ASK=1 at startup and
     passes its environ to every external cron worker (#110932) — in neither can a human answer
     the card, so the gate must resolve from ``approvals.<ctx>_mode`` instead of parking on a

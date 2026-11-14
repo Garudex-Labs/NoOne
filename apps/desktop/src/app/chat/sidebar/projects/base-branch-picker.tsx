@@ -1,8 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   Command,
   CommandEmpty,
@@ -13,7 +13,7 @@ import {
   CommandList
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import type { HermesGitBaseBranch } from '@/global'
+import type { AgentGitBaseBranch } from '@/global'
 import { useI18n } from '@/i18n'
 import type { GitOwnerRoute } from '@/lib/desktop-git'
 import { $repoStatus } from '@/store/coding-status'
@@ -41,7 +41,7 @@ export function BaseBranchPicker({
   const { t } = useI18n()
   const p = t.sidebar.projects
   const repoStatus = useStore($repoStatus)
-  const [branches, setBranches] = useState<HermesGitBaseBranch[]>([])
+  const [branches, setBranches] = useState<AgentGitBaseBranch[]>([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -136,12 +136,12 @@ export function BaseBranchPicker({
             size="inline"
             variant="text"
           >
-            <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="git-branch" size="0.8rem" />
+            <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="git-branch" size="0.8rem" />
             <span className="shrink-0">{parts.before}</span>
             <span className="shrink-0 text-primary underline-offset-4 decoration-current/20 group-hover:underline">
               {loading ? '...' : value}
             </span>
-            <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.75rem" />
+            <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.75rem" />
             <span className="shrink-0">{parts.after}</span>
           </Button>
         </PopoverTrigger>
@@ -167,7 +167,7 @@ export function BaseBranchPicker({
                     }}
                     value={branch.name}
                   >
-                    <Codicon
+                    <AppIcon
                       className="shrink-0 text-(--ui-text-tertiary)"
                       name={branch.isRemote ? 'repo' : 'git-branch'}
                       size="0.8rem"

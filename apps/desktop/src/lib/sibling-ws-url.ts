@@ -1,3 +1,4 @@
+import { resolveGatewayWsUrl } from '@noone/shared'
 /**
  * Sibling WebSocket URLs beside `/api/ws` for a (connection, profile) route.
  *
@@ -10,8 +11,7 @@
  * would be the wrong machine). One resolver so every sibling stream routes the
  * way chat does.
  */
-
-import { resolveGatewayWsUrl } from '@hermes/shared'
+import { appText } from '@noone/shared/application-identity'
 
 const RESOLVE_TIMEOUT_MS = 15_000
 
@@ -55,7 +55,7 @@ export async function resolveSiblingWsUrl(
   const desktop = window.hermesDesktop
 
   if (!desktop?.getConnection) {
-    throw new Error('Hermes Desktop connection bridge unavailable')
+    throw new Error(appText('{app_name} Desktop connection bridge unavailable'))
   }
 
   const connectionId = route.connectionId?.trim() || null

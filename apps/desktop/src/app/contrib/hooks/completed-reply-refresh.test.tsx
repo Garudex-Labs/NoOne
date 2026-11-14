@@ -1,18 +1,18 @@
 import { useAuiState } from '@assistant-ui/react'
-import type { GatewayEvent } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import type { GatewayEvent } from '@noone/shared'
 import { QueryClient } from '@tanstack/react-query'
 import { act, cleanup, render, screen } from '@testing-library/react'
 import { useCallback, useRef } from 'react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
+import { getLatestSessionMessages } from '@/agent-client'
 import { ChatRuntimeBoundary } from '@/app/chat'
 import { PRIMARY_SESSION_VIEW } from '@/app/chat/session-view'
 import { mergeOlderTranscriptPage } from '@/app/chat/transcript-backfill'
 import { useMessageStream } from '@/app/session/hooks/use-message-stream'
 import { useSessionStateCache } from '@/app/session/hooks/use-session-state-cache'
 import { stubThreadEnvironment } from '@/components/assistant-ui/test-utils'
-import { getLatestSessionMessages } from '@/hermes'
 import { chatMessageText, toChatMessages } from '@/lib/chat-messages'
 import { resetLiveSync } from '@/store/live-sync'
 import {
@@ -31,7 +31,7 @@ import {
   restoreSessionTodosFromSnapshot,
   setSessionTodos
 } from '@/store/todos'
-import type { SessionMessage } from '@/types/hermes'
+import type { SessionMessage } from '@/types/agent-client'
 
 import {
   hydrateStoredSessionTranscript,
@@ -40,7 +40,7 @@ import {
   useBackgroundSync
 } from './use-background-sync'
 
-vi.mock('@/hermes', async original => ({
+vi.mock('@/agent-client', async original => ({
   ...(await original<Record<string, unknown>>()),
   getLatestSessionMessages: vi.fn()
 }))

@@ -1,8 +1,9 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { Clipboard, FileText, FolderOpen, type IconComponent, ImageIcon, Link, MessageSquareText } from '@noone/ui/icons'
 import { useState } from 'react'
 
 import { composerPanelCard } from '@/components/chat/composer-dock'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -15,7 +16,6 @@ import {
 import { Kbd } from '@/components/ui/kbd'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { Clipboard, FileText, FolderOpen, type IconComponent, ImageIcon, Link, MessageSquareText } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { useComposerAttachmentProviders } from './contrib'
@@ -60,7 +60,7 @@ export function ContextMenu({
               type="button"
               variant="ghost"
             >
-              <Codicon name="add" size="0.875rem" />
+              <AppIcon name="add" size="0.875rem" />
             </Button>
           </DropdownMenuTrigger>
         </Tip>
@@ -101,7 +101,7 @@ export function ContextMenu({
               key={provider.key}
               onSelect={() => void provider.run({ insertText: onInsertText })}
             >
-              <Codicon name={provider.icon ?? 'plug'} size="0.875rem" />
+              <AppIcon name={provider.icon ?? 'plug'} size="0.875rem" />
               <span>{provider.label}</span>
             </DropdownMenuItem>
           ))}

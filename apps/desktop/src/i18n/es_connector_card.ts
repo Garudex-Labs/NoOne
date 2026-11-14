@@ -1,5 +1,6 @@
-import type { TranslationOverrides } from './define-locale'
+import { appText } from '@noone/shared/application-identity'
 
+import type { TranslationOverrides } from './define-locale'
 export const esConnectorCard: TranslationOverrides['connectors'] = {
   title: 'Conecta tus apps',
   connect: 'Conectar',
@@ -24,14 +25,14 @@ export const esConnectorCard: TranslationOverrides['connectors'] = {
   ownerMissing: 'Vuelve a abrir esta conversación para gestionar sus conexiones.',
   search: 'Buscar una app',
   empty: 'No hay apps que coincidan',
-  disclaimer: 'Conectar es opcional. Autoriza solo las apps que quieras que use Hermes.',
+  disclaimer: 'Conectar es opcional. Autoriza solo las apps que quieras que use {app_name}.',
   execution: 'Herramientas de conectores',
   setup: server => `Configurar ${server}`,
   openInBrowser: 'Abrir en el navegador',
   setupCancel: 'Cancelar',
   authorizedToolsUnavailable: 'Autorizado. Herramientas no disponibles.',
   required: 'Obligatorio',
-  namedAccount: (app: string, alias: string) => `Hermes llamó ${alias} a esta cuenta de ${app}.`,
+  namedAccount: (app: string, alias: string) => `${appText('{app_name}')} llamó ${alias} a esta cuenta de ${app}.`,
   renameAccount: 'Cambiar nombre',
   directory: {
     suggested: 'Sugeridas',

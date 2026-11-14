@@ -19,6 +19,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { atom, computed } from 'nanostores'
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 
+import { type ResolvedOwner, transcribeAudio } from '@/agent-client'
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { useModelControls } from '@/app/session/hooks/use-model-controls'
 import { blobToDataUrl } from '@/app/session/hooks/use-prompt-actions/utils'
@@ -37,7 +38,6 @@ import {
 } from '@/components/pane-shell/workspace-scope'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { type ResolvedOwner, transcribeAudio } from '@/hermes'
 import { useI18n } from '@/i18n'
 import type { ChatMessage } from '@/lib/chat-messages'
 import { NEW_SESSION_TITLE, sessionTitle } from '@/lib/chat-runtime'
@@ -72,7 +72,7 @@ import {
   type SessionTile,
   sessionTileDelegate
 } from '@/store/session-states'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 import type { SessionDragPayload } from './composer/inline-refs'
 import { type ComposerScope, ComposerScopeProvider } from './composer/scope'

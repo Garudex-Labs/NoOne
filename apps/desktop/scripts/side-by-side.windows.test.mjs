@@ -52,10 +52,10 @@ async function nativeProof() {
     ...['before-build', 'gen-msix-manifest', 'mac-sign', 'payload-digests', 'write-build-stamp', 'utils']
       .map(name => `apps/desktop/scripts/${name}.mjs`),
     'scripts/msix-shared.mjs', 'scripts/release-content-types.json', 'scripts/build/python.mjs',
-    'scripts/bundles/desktop_prepare.py', 'hermes_cli/release_channels.py', 'hermes_cli/__init__.py',
-    // desktop_prepare -> scripts.releases.versioning -> semver + hermes_cli.update_channel -> pm:
+    'scripts/bundles/desktop_prepare.py', 'agent_cli/release_channels.py', 'agent_cli/__init__.py',
+    // desktop_prepare -> scripts.releases.versioning -> semver + agent_cli.update_channel -> pm:
     // copy whole package trees so a new intra-package import cannot break the fixture.
-    'hermes_cli/update_channel.py', 'hermes_constants.py', 'scripts/releases', 'pm',
+    'agent_cli/update_channel.py', 'agent_constants.py', 'scripts/releases', 'pm',
   ]
   for (const file of copied) {
     fs.mkdirSync(path.dirname(path.join(work, file)), { recursive: true })

@@ -32,7 +32,7 @@ TTS_WIRE_ELEVENLABS = "elevenlabs-tts"
 
 def _client_direct_enabled() -> bool:
     try:
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         voice_cfg = load_config().get("voice") or {}
         if not isinstance(voice_cfg, dict):
             return True
@@ -79,7 +79,7 @@ def stt_hallucination_filter() -> dict[str, Any]:
 
 def _deepinfra_model(section: dict[str, Any], kind: str) -> Optional[str]:
     """Configured model, else the first catalog model of ``kind`` (stt/tts)."""
-    from hermes_cli.models import deepinfra_model_ids
+    from agent_cli.models import deepinfra_model_ids
     return section.get("model") or next(iter(deepinfra_model_ids(kind)), None)
 
 
@@ -120,7 +120,7 @@ def _resolve_stt_client_config() -> dict[str, Any]:
                        hallucination_filter=stt_hallucination_filter())
 
     def env_base_url(env_var: str, default: str) -> str:
-        from hermes_cli.config import get_env_value
+        from agent_cli.config import get_env_value
         return str(section.get("base_url") or get_env_value(env_var) or default).strip().rstrip("/")
 
     if provider in _STT_KEYED:
@@ -141,7 +141,7 @@ def _resolve_stt_client_config() -> dict[str, Any]:
     if provider == "xai":
         # API key only: an xAI OAuth bearer refreshes server-side mid-session and
         # would strand the client on the first 401.
-        from hermes_cli.config import get_env_value
+        from agent_cli.config import get_env_value
         api_key = str(get_env_value("XAI_API_KEY") or "").strip()
         if not api_key:
             return _relay("xai oauth (server-managed) or no credentials")
@@ -157,7 +157,7 @@ def _resolve_stt_client_config() -> dict[str, Any]:
         api_key = tt._resolve_provider_key("DEEPINFRA_API_KEY", "deepinfra")
         if not api_key:
             return _relay("no credentials")
-        from hermes_cli.models import deepinfra_base_url
+        from agent_cli.models import deepinfra_base_url
         model = _deepinfra_model(section, "stt")
         if not model:
             return _relay("no deepinfra stt model")
@@ -182,7 +182,7 @@ def _resolve_tts_client_config() -> dict[str, Any]:
     if provider == "openai":
         # Covers the direct-key, custom-base_url, and Nous-managed selections.
         try:
-            api_key, base_url, is_managed = tts_tool_openai._resolve_openai_audio_client_config()
+            api_key, base_url = tts_tool_openai._resolve_openai_audio_client_config()
         except ValueError as exc:
             return _relay(f"openai resolution failed: {exc}")
         oai = _section(tts_config, "openai")
@@ -191,8 +191,6 @@ def _resolve_tts_client_config() -> dict[str, Any]:
         base_url = config_base or base_url
         # The managed gateway only proxies MANAGED_OPENAI_TTS_MODELS — same
         # coercion text_to_speech applies server-side.
-        if is_managed and not config_base and model not in tts_tool_openai.MANAGED_OPENAI_TTS_MODELS:
-            model = tts_tool_openai.DEFAULT_OPENAI_MODEL
         speed_default = tts_config.get("speed", 1.0) if isinstance(tts_config, dict) else 1.0
         try:
             speed = float(oai.get("speed", speed_default))
@@ -216,7 +214,7 @@ def _resolve_tts_client_config() -> dict[str, Any]:
         api_key = tts._resolve_provider_key("DEEPINFRA_API_KEY", "deepinfra")
         if not api_key:
             return _relay("no credentials")
-        from hermes_cli.models import deepinfra_base_url
+        from agent_cli.models import deepinfra_base_url
         di = _section(tts_config, "deepinfra")
         model = _deepinfra_model(di, "tts")
         if not model:
@@ -231,7 +229,7 @@ def _resolve_tts_client_config() -> dict[str, Any]:
 def resolve_client_voice_config(client_direct: bool = True) -> dict[str, Any]:
     """Resolve both directions for the CURRENT profile scope.
 
-    Callers scope the profile via ``hermes_constants.set_hermes_home_override``
+    Callers scope the profile via ``agent_constants.set_agent_home_override``
     (the web server's ``_config_profile_scope``) before calling — identical to
     how ``/api/audio/transcribe`` scopes ``transcribe_recording``.
     ``client_direct=False`` is the serving surface's verdict (a browser tab):

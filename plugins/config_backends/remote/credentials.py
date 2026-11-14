@@ -51,36 +51,16 @@ def _idp_env() -> dict[str, str]:
 
 
 def credential_kind() -> str:
-    return "idp" if _idp_env()["token_url"] else "nous"
+    return "idp"
 
 
 def plane_token(home: Path) -> str:
-    """A fresh bearer for ``home``'s requests (re-resolved per request, contract §10.2)."""
-    return _idp_token() if credential_kind() == "idp" else _nous_token(home)
+    """Use only the operator's explicitly configured independent IdP grant."""
+    if not _idp_env()["token_url"]:
+        raise PlaneCredentialError("Remote configuration requires an explicit IdP token URL and client credentials.", retryable=False)
+    return _idp_token()
 
 
-def _nous_token(home: Path) -> str:
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
-
-    try:
-        from hermes_cli.auth import resolve_nous_access_token
-    except Exception as exc:
-        raise PlaneCredentialError(f"cannot load the Nous auth module: {exc}", retryable=False) from exc
-    token = set_hermes_home_override(home)  # auth.json is per profile home
-    scope_token = None
-    try:
-        scope_token = _bind_owner_secret_scope(home)  # inside the try: a failed build still resets the home
-        return resolve_nous_access_token()
-    except Exception as exc:
-        # A missing login or a revoked session needs a human; a refresh that hit the network can retry.
-        fatal = bool(getattr(exc, "relogin_required", False)) or getattr(exc, "code", None) == "nous_auth_missing"
-        raise PlaneCredentialError(
-            f"no Nous access token for {home} (auth.json): {exc}", retryable=not fatal) from exc
-    finally:
-        if scope_token is not None:
-            from agent.secret_scope import reset_secret_scope
-            reset_secret_scope(scope_token)
-        reset_hermes_home_override(token)
 
 
 def _bind_owner_secret_scope(home: Path):
@@ -97,7 +77,7 @@ def _bind_owner_secret_scope(home: Path):
     from agent.secret_scope import is_multiplex_active, set_secret_scope
     if not is_multiplex_active():
         return None  # single-profile: get_secret reads the process env, which is this profile's
-    from tui_gateway.launch_profile_policy import owner_secret_scope
+    from agent_backend.launch_profile_policy import owner_secret_scope
     return set_secret_scope(owner_secret_scope(home), profile_home=str(home))
 
 

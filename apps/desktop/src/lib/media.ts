@@ -1,7 +1,7 @@
-import { fileUrlToNativePath, LOCAL_CONNECTION_ID } from '@hermes/shared'
+import { fileUrlToNativePath, LOCAL_CONNECTION_ID } from '@noone/shared'
 
 import { capabilityScoped, hermesApi, type OwnerScope, sessionFileOwnerScope } from '@/api/client'
-import type { HermesConnection } from '@/global'
+import type { AgentConnection } from '@/global'
 import { translateNow } from '@/i18n'
 import { desktopFsCacheKey, isReadFileErrorResult, readDesktopFileDataUrl } from '@/lib/desktop-fs'
 import { hostHas } from '@/lib/host-capabilities'
@@ -204,7 +204,7 @@ export interface MediaImageDimensions {
 // of reserving a frame that collapses again.
 const imageDimensions = new LruCache<string, 'broken' | MediaImageDimensions>(512)
 
-export function mediaImageKey(path: string, connection: HermesConnection | null, owner?: OwnerScope): string {
+export function mediaImageKey(path: string, connection: AgentConnection | null, owner?: OwnerScope): string {
   // File reads ignore URL query/fragment, but callers can use them to identify
   // a new revision. Keep them in the geometry key while joining proven aliases.
   const revision = /^file:/i.test(path) ? (path.match(/[?#].*$/)?.[0] ?? '') : ''

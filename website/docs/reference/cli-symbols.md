@@ -1,17 +1,24 @@
 ---
 title: "CLI Symbols Glossary"
-description: "What every symbol in the Hermes terminal UI means — transcript markers, status-bar badges, overlay glyphs, and approval prompts."
+description: "What every symbol in the the agent terminal UI means — transcript markers, status-bar badges, overlay glyphs, and approval prompts."
 ---
 
-# CLI Symbols Glossary
+# CLI Symbols Glossary {#cli-symbols-glossary}
 
-The Hermes terminal interfaces speak a compact visual language: dots, chevrons, braille spinners, and status glyphs. This page is the decoder ring. It covers the [TUI](../user-guide/tui.md) (where most of these render) and notes the pieces shared with the [Classic CLI](../user-guide/cli.md).
 
-:::note Skins can restyle some of these
+<Note>
+
+<div className="doc-callout-title">
+
+Skins can restyle some of these
+
+</div>
+
 Glyphs marked *themeable* below are brand defaults — a [skin](../user-guide/features/skins.md) can override them (for example `tool_prefix` and the prompt symbol). Everything else is fixed in the renderer.
-:::
 
-## Transcript symbols
+</Note>
+
+## Transcript symbols {#transcript-symbols}
 
 What you see in the conversation flow while the agent works.
 
@@ -30,7 +37,7 @@ What you see in the conversation flow while the agent works.
 | `☐` / `☑` / `•` | Markdown task-list items (open / done) and plain list bullets. |
 | `▶` | Collapsed `<details>` summary inside rendered markdown. |
 
-## Status-bar symbols
+## Status-bar symbols {#status-bar-symbols}
 
 The single line at the bottom of the TUI. Segments appear only when relevant and drop off first on narrow terminals.
 
@@ -49,12 +56,12 @@ The single line at the bottom of the TUI. Segments appear only when relevant and
 | `● REC` | Voice mode is recording. |
 | `◉ STT` | Voice recording stopped; speech-to-text is transcribing. |
 | `◉ focus` | Focus view is on (reduced output). Pinned so it never drops off a narrow terminal. |
-| `♥` | Affection flash — Hermes noticed you being nice to it. |
+| `♥` | Affection flash — {{app-name}} noticed you being nice to it. |
 | `⚡` / `🔋` | Battery indicator (opt-in): plugged in / on battery, with percentage. |
 | `N bg` | N background terminal processes tracked in this session. |
 | `N live sessions` | Open TUI sessions in this process — click to open the session switcher. |
 
-## Notices
+## Notices {#notices}
 
 Short-lived status-bar notices carry their own leading glyph, set by severity:
 
@@ -65,7 +72,7 @@ Short-lived status-bar notices carry their own leading glyph, set by severity:
 | `⚠` | Warning (also used for credit warnings). |
 | `✕` | Error notice. |
 
-## Approval and confirmation prompts
+## Approval and confirmation prompts {#approval-and-confirmation-prompts}
 
 | Symbol | Meaning |
 |--------|---------|
@@ -74,7 +81,7 @@ Short-lived status-bar notices carry their own leading glyph, set by severity:
 | `🔐` | Sudo password prompt (input is masked). |
 | `🔑` | Credential/secret input prompt (input is masked). |
 
-## Subagents overlay (`/agents`)
+## Subagents overlay (`/agents`) {#subagents-overlay-agents}
 
 | Symbol | Meaning |
 |--------|---------|
@@ -88,7 +95,7 @@ Short-lived status-bar notices carry their own leading glyph, set by severity:
 | `⚡N` | N currently-active agents in a rollup row. |
 | `▁▂▃▄▅▆▇█` | Activity sparkline — recent event volume per branch. |
 
-## Session switcher (`Ctrl+X`)
+## Session switcher (`Ctrl+X`) {#session-switcher-ctrlx}
 
 | Symbol | Meaning |
 |--------|---------|
@@ -98,7 +105,7 @@ Short-lived status-bar notices carry their own leading glyph, set by severity:
 | `▶` | Working. |
 | `✎ draft` | The composer in that session holds an unsent draft. |
 
-## Pickers and hubs
+## Pickers and hubs {#pickers-and-hubs}
 
 | Symbol | Meaning |
 |--------|---------|
@@ -109,7 +116,7 @@ Short-lived status-bar notices carry their own leading glyph, set by severity:
 | `↑ N more` / `↓ N more` | More rows above/below the visible window of a list. |
 | `┃` | Scrollbar thumb on scrollable overlays. |
 
-## Goals
+## Goals {#goals}
 
 Goal lifecycle notices (from [goals](../user-guide/features/goals.md)) lead with their state:
 
@@ -119,8 +126,7 @@ Goal lifecycle notices (from [goals](../user-guide/features/goals.md)) lead with
 | `↻` | Goal continuing — another iteration was scheduled. |
 | `⏸` | Goal paused. |
 
-## See also
+## See also {#see-also}
 
-- [TUI](../user-guide/tui.md) — status line, details modes, busy-indicator styles
 - [Classic CLI](../user-guide/cli.md) — shared keybindings and slash commands
 - [Skins & Themes](../user-guide/features/skins.md) — which glyphs and colors you can customize

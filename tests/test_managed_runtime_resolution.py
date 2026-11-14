@@ -12,7 +12,7 @@ code has two failure modes:
   keep resolving it across reboots.
 
 The fix per call site is one of ``find_node_executable()``,
-``iter_hermes_node_dirs()``, ``resolve_uv()``, or ``ensure_uv()``. This test is
+``iter_agent_node_dirs()``, ``resolve_uv()``, or ``ensure_uv()``. This test is
 the ratchet that stops a new bare lookup from being added back.
 
 Reading source is normally banned (see AGENTS.md). It is the right tool here and
@@ -78,21 +78,14 @@ _ALLOWED: dict[tuple[str, str], str] = {
         "can only run what is on that subshell's PATH, which local.py populates "
         "with the managed dirs — so PATH is the correct question to ask here."
     ),
-    ("hermes_cli/main_tui_launch.py", "node"): (
-        "PM-composed launch context: `which(node)` runs against the PATH "
-        "pm.ensure('node'|'pnpm') just composed (store dirs first), not the ambient one."
-    ),
-    ("hermes_cli/main_tui_launch.py", "pnpm"): (
-        "Same PM-composed launch context as the node lookup above."
-    ),
-    ("hermes_cli/source_build.py", "node"): (
+    ("agent_cli/source_build.py", "node"): (
         "PM-composed build context: `which(node)` runs against the PATH pm's "
         "ensure('pnpm')/env_for('node') just composed, not the ambient one."
     ),
-    ("hermes_cli/source_build.py", "pnpm"): (
+    ("agent_cli/source_build.py", "pnpm"): (
         "Same PM-composed build context as the node lookup above."
     ),
-    ("hermes_cli/main_desktop.py", "pnpm"): (
+    ("agent_cli/main_desktop.py", "pnpm"): (
         "Desktop build resolves pnpm inside the PM-prepared build_env PATH."
     ),
     ("pm/workspace.py", "npm"): (
@@ -213,7 +206,7 @@ def _source_files() -> list[Path]:
     files: list[Path] = []
     # os.walk instead of Path.rglob: rglob raises FileNotFoundError when a
     # directory vanishes mid-scan — a sibling CI job's sdist extraction
-    # (hermes_agent-<version>/) gets created and deleted concurrently, and
+    # (agent_compat-<version>/) gets created and deleted concurrently, and
     # that TOCTOU failed this guard on runs 33531869442/33455779041-era
     # workspaces. os.walk tolerates vanishing dirs (onerror=None), and
     # pruning exempt/packaging dirs at the top level also skips their
@@ -267,7 +260,7 @@ def _resolution_sites() -> set[tuple[str, str, str]]:
     sites: set[tuple[str, str, str]] = set()
     for path in _source_files():
         rel = path.relative_to(REPO_ROOT).as_posix()
-        if rel == "hermes_platform" or rel.startswith("hermes_platform/"):
+        if rel == "agent_platform" or rel.startswith("agent_platform/"):
             continue
         try:
             source = path.read_text(encoding="utf-8")
@@ -300,12 +293,12 @@ def test_bare_which_and_known_path_tables_are_allowlisted():
     assert not unlisted, (
         "Unreviewed command resolution sites:\n"
         + _format_resolution_sites(unlisted)
-        + "\nuse a hermes_platform resolver or add a justified allowlist row"
+        + "\nuse a agent_platform resolver or add a justified allowlist row"
     )
 
 
 def test_resolution_allowlist_has_no_stale_rows():
-    """Remove bootstrap rows as their call sites move to hermes_platform."""
+    """Remove bootstrap rows as their call sites move to agent_platform."""
     stale = _resolution_allowlist() - _resolution_sites()
 
     assert not stale, (
@@ -330,8 +323,8 @@ def test_no_unreviewed_bare_managed_runtime_lookups():
         "— on an install that has a managed one.\n"
         "Use instead:\n"
         "  uv       -> managed_uv.resolve_uv() (lookup) or ensure_uv() (may install)\n"
-        "  node/npm -> hermes_constants.find_node_executable()\n"
-        "  PATH env -> hermes_constants.iter_hermes_node_dirs()\n"
+        "  node/npm -> agent_constants.find_node_executable()\n"
+        "  PATH env -> agent_constants.iter_agent_node_dirs()\n"
         "If PATH really is the right question, add the site to _ALLOWED with a "
         "reason."
     )
@@ -353,15 +346,15 @@ def test_allowlist_has_no_stale_entries():
     "helper",
     [
         "find_node_executable",
-        "iter_hermes_node_dirs",
-        "with_hermes_node_path",
+        "iter_agent_node_dirs",
+        "with_agent_node_path",
     ],
 )
 def test_managed_node_helpers_exist(helper):
     """The alternatives this guard points contributors at must be importable."""
-    import hermes_constants
+    import agent_constants
 
-    assert callable(getattr(hermes_constants, helper))
+    assert callable(getattr(agent_constants, helper))
 
 
 def test_managed_uv_helpers_exist():
@@ -369,7 +362,7 @@ def test_managed_uv_helpers_exist():
     exists only so the frozen historical updater fixture can import it, and
     its entry points route to relaunch instead of doing venv work. PM owns
     real uv resolution now; the module itself must keep the names live."""
-    from hermes_cli import managed_uv
+    from agent_cli import managed_uv
 
     assert callable(managed_uv.resolve_uv)
     assert callable(managed_uv.ensure_uv)

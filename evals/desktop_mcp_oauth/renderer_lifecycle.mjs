@@ -72,7 +72,7 @@ const bundle = await build({
   format: 'esm',
   platform: 'browser',
   jsx: 'automatic',
-  alias: { '@': repo + '/apps/desktop/src', '@hermes/shared': repo + '/apps/shared/src' },
+  alias: { '@': repo + '/apps/desktop/src', '@noone/shared': repo + '/apps/shared/src' },
   define: {
     'process.env.NODE_ENV': '"production"',
     'import.meta.env': '{}',
@@ -91,7 +91,7 @@ const server = http.createServer(async (req, res) => {
   )
 })
 await new Promise(r => server.listen(0, '127.0.0.1', r))
-// pm's Chromium: PLAYWRIGHT_BROWSERS_PATH (from `hermes pm env`) is where channel 'chromium' finds it.
+// pm's Chromium: PLAYWRIGHT_BROWSERS_PATH (from `noone pm env`) is where channel 'chromium' finds it.
 const browser = await chromium.launch({
   channel: 'chromium',
   headless: true,

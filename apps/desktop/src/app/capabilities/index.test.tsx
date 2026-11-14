@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router'
 import type * as ReactRouterDom from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as HermesApi from '@/hermes'
+import type * as AgentApi from '@/agent-client'
 import { queryClient } from '@/lib/query-client'
 import type * as HubActions from '@/store/hub-actions'
 
@@ -27,8 +27,8 @@ const getOfficialSkills = vi.fn()
 // whose import-time subscription calls setApiRequestProfile) and stub only the
 // calls we assert on. Args are forwarded so the per-profile scope arg is
 // observable.
-vi.mock('@/hermes', async importOriginal => ({
-  ...(await importOriginal<typeof HermesApi>()),
+vi.mock('@/agent-client', async importOriginal => ({
+  ...(await importOriginal<typeof AgentApi>()),
   getSkills: (profile?: null | string) => getSkills(profile),
   getToolsets: (profile?: null | string) => getToolsets(profile),
   setSkillEnabled: (name: string, enabled: boolean, profile?: null | string) => setSkillEnabled(name, enabled, profile),

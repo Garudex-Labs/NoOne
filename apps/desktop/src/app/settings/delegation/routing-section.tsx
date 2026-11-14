@@ -1,13 +1,13 @@
 import { useStore } from '@nanostores/react'
+import { AlertTriangle, Check, GitFork, Plug, SlidersHorizontal } from '@noone/ui/icons'
 import type { ReactNode } from 'react'
 
+import type { DelegationRouting, ProfileScope } from '@/agent-client'
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { DelegationRouting, ProfileScope } from '@/hermes'
 import { useI18n } from '@/i18n'
 import type { DelegationRoutingTranslations } from '@/i18n/types_delegation_routing'
-import { AlertTriangle, Check, GitFork, Plug, SlidersHorizontal } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { $settingsRequestProfile } from '@/store/settings-scope'
 

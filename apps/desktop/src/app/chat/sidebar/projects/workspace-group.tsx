@@ -1,10 +1,10 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import type * as React from 'react'
 
+import type { SessionInfo } from '@/agent-client'
 import { type NewSessionPlacement, type NewSessionSplitHandler, startNewSessionDrag } from '@/app/chat/new-session-drag'
-import { Codicon } from '@/components/ui/codicon'
 import { ProfileGlyph } from '@/components/ui/profile-glyph'
-import type { SessionInfo } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { displayPath } from '@/lib/display-path'
 import { useStoreSelector } from '@/lib/use-session-slice'
@@ -107,7 +107,7 @@ export function SidebarWorkspaceGroup({
   // Leading glyph: a home mark for the repo's primary checkout (labeled by its
   // live branch), a branch/kanban mark otherwise.
   const leadingIcon = (
-    <Codicon
+    <AppIcon
       className="shrink-0 text-(--ui-text-tertiary)"
       name={group.isKanban ? 'checklist' : group.isHome ? 'home' : 'git-branch'}
       size="0.75rem"

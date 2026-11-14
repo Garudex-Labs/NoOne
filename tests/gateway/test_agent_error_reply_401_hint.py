@@ -1,5 +1,5 @@
 """The gateway's 401 exception reply names the turn's provider and the failing profile's own
-sign-in (93889b770da: a bare ``hermes auth add <provider>`` from a named profile re-signs the
+sign-in (93889b770da: a bare ``noone auth add <provider>`` from a named profile re-signs the
 ROOT store — the loop #114012 measured)."""
 
 import asyncio

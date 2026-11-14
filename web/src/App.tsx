@@ -1,25 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentType,
-  type FocusEvent,
-  type MouseEvent,
-  type ReactNode,
-} from "react";
-import { createPortal } from "react-dom";
-import {
-  Routes,
-  Route,
-  NavLink,
-  Navigate,
-  useLocation,
-  useNavigate,
-} from "react-router";
+import { appText } from '@noone/shared/application-identity';
 import {
   Activity,
   BarChart3,
@@ -30,8 +9,8 @@ import {
   Database,
   Download,
   Eye,
-  FolderOpen,
   FileText,
+  FolderOpen,
   Globe,
   Heart,
   KeyRound,
@@ -55,28 +34,51 @@ import {
   Wrench,
   X,
   Zap,
-} from "lucide-react";
+} from "@noone/ui/icons";
+import { useBelowBreakpoint } from "@nous-research/ui/hooks/use-below-breakpoint";
 import { Button } from "@nous-research/ui/ui/components/button";
+import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { SelectionSwitcher } from "@nous-research/ui/ui/components/selection-switcher";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Typography } from "@nous-research/ui/ui/components/typography/index";
-import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
-import { cn } from "@/lib/utils";
-import { SidebarFooter } from "@/components/SidebarFooter";
-import { CockpitSidebarSlot } from "@/components/CockpitSidebarSlot";
-import { SidebarStatusStrip, gatewayLine } from "@/components/SidebarStatusStrip";
-import { useBelowBreakpoint } from "@nous-research/ui/hooks/use-below-breakpoint";
-import { useSidebarStatus } from "@/hooks/useSidebarStatus";
+import {
+  type ComponentType,
+  type FocusEvent,
+  lazy,
+  type MouseEvent,
+  type ReactNode,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
+import {
+  Navigate,
+  NavLink,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router";
+
 import { AuthWidget } from "@/components/AuthWidget";
-import { PageHeaderProvider } from "@/contexts/PageHeaderProvider";
-import { useProfileScope } from "@/contexts/useProfileScope";
-import { ProfileSwitcher } from "@/components/ProfileSwitcher";
-import { ProfileScopeBanner } from "@/components/ProfileScopeBanner";
+import { CockpitSidebarSlot } from "@/components/CockpitSidebarSlot";
 import { MemoryPressureBanner } from "@/components/MemoryPressureBanner";
 import { MultiplexStandaloneBanner } from "@/components/MultiplexStandaloneBanner";
+import { ProfileScopeBanner } from "@/components/ProfileScopeBanner";
+import { ProfileSwitcher } from "@/components/ProfileSwitcher";
 import { SharedMetricsConsentBanner } from "@/components/SharedMetricsConsentBanner";
-import { useSystemActions } from "@/contexts/useSystemActions";
+import { SidebarFooter } from "@/components/SidebarFooter";
+import { gatewayLine, SidebarStatusStrip } from "@/components/SidebarStatusStrip";
+import { PageHeaderProvider } from "@/contexts/PageHeaderProvider";
 import type { SystemAction } from "@/contexts/system-actions-context";
+import { useProfileScope } from "@/contexts/useProfileScope";
+import { useSystemActions } from "@/contexts/useSystemActions";
+import { useSidebarStatus } from "@/hooks/useSidebarStatus";
+import { cn } from "@/lib/utils";
 // Route pages are lazy-loaded so the initial dashboard shell does not pay for
 // every admin surface (and heavy deps like xterm) up front.
 const ConfigPage = lazy(() => import("@/pages/ConfigPage"));
@@ -102,14 +104,14 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useI18n } from "@/i18n";
 import type { Translations } from "@/i18n/types";
+import { api } from "@/lib/api";
+import type { StatusResponse, UpdateCheckResponse } from "@/lib/api";
+import { latchChatActivation } from "@/lib/chat-activation";
+import { isDashboardEmbeddedChatEnabled } from "@/lib/dashboard-flags";
+import { sharedGatewayProfiles, sharedGatewayRestartDescription } from "@/lib/shared-gateway";
 import { PluginPage, PluginSlot, usePlugins } from "@/plugins";
 import type { PluginManifest } from "@/plugins";
 import { useTheme } from "@/themes";
-import { isDashboardEmbeddedChatEnabled } from "@/lib/dashboard-flags";
-import { latchChatActivation } from "@/lib/chat-activation";
-import { sharedGatewayProfiles, sharedGatewayRestartDescription } from "@/lib/shared-gateway";
-import { api } from "@/lib/api";
-import type { StatusResponse, UpdateCheckResponse } from "@/lib/api";
 
 function RouteFallback({ label = "Loading…" }: { label?: string }) {
   return (
@@ -373,7 +375,7 @@ function buildRoutes(
 const SIDEBAR_COLLAPSED_KEY = "hermes-sidebar-collapsed";
 
 export default function App() {
-  const { t } = useI18n();
+  const { appName, t } = useI18n();
   const { pathname } = useLocation();
   const { profile } = useProfileScope();
   const { manifests, loading: pluginsLoading } = usePlugins(profile);
@@ -619,8 +621,7 @@ export default function App() {
                 <PluginSlot name="header-left" />
 
                 <Typography className="font-bold text-[1.125rem] leading-[0.95] tracking-[0.0525rem] text-midground uppercase">
-                  Hermes
-                  <br />
+                  {appText("{app_name}\n                  ", appName)}<br />
                   Agent
                 </Typography>
               </div>
@@ -992,12 +993,12 @@ function SidebarSystemActions({
     if (updateConfirmInfo?.behind && updateConfirmInfo.behind > 0) {
       const cmd = updateConfirmInfo.update_command;
       const n = updateConfirmInfo.behind;
-      return `This will run 'hermes update' (${cmd}) and pull ${n} new commit${n === 1 ? "" : "s"}. The gateway restarts when the update finishes; the current session keeps its prompt cache until then.`;
+      return `This will run 'noone update' (${cmd}) and pull ${n} new commit${n === 1 ? "" : "s"}. The gateway restarts when the update finishes; the current session keeps its prompt cache until then.`;
     }
-    const cmd = updateConfirmInfo?.update_command ?? "hermes update";
+    const cmd = updateConfirmInfo?.update_command ?? "noone update";
     return (
       t.status.updateHermesConfirmMessage ??
-      `This will run 'hermes update' (${cmd}) and restart the gateway when it finishes.`
+      `This will run 'noone update' (${cmd}) and restart the gateway when it finishes.`
     );
   }, [t.status.updateHermesConfirmMessage, updateConfirmInfo]);
 

@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import copy
 
-from hermes_constants import display_hermes_home
+from agent_constants import display_agent_home
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ def _api_server_base_url() -> str:
     except ValueError:
         port = 8642
     try:
-        from hermes_cli.config import cfg_get, load_config_readonly
+        from agent_cli.config import cfg_get, load_config_readonly
         host = str(cfg_get(load_config_readonly(), "platforms", "api_server", "extra", "host", default="") or "").strip()
     except Exception:
         host = ""
@@ -183,14 +183,14 @@ def _hand_off_primary_routed_run(job: dict[str, Any], extra_prompt: Optional[str
     routed = _primary_routed_delivery_platforms(job)
     if not routed:
         return None
-    from hermes_cli.cron import _builtin_gateway_liveness
+    from agent_cli.cron import _builtin_gateway_liveness
     alive = _builtin_gateway_liveness()
     if alive is not True:
         # None = the probe could not tell; a run queued for a ticker that may not exist is worse
         # than an honest refusal (nothing would ever pick it up).
         cause = ("Start the gateway — its ticker will deliver the job on schedule." if alive is False
                  else "Could not determine whether a gateway serves this profile; check "
-                      "`hermes cron status` and re-run.")
+                      "`noone cron status` and re-run.")
         return _dumps({
             "success": False,
             "error": (
@@ -347,12 +347,12 @@ def _run_claimed_job(job: dict[str, Any], extra_prompt: Optional[str] = None) ->
         fire_owner = str(claim.get("by") or "") if isinstance(claim, dict) else None
 
         # Inside the gateway process deliver on the loop that owns clients such as
-        # Matrix/aiohttp (a standalone asyncio.run() loop breaks them).
+        # async adapter transports (a standalone asyncio.run() loop breaks them).
         runner_ref = getattr(sys.modules.get("gateway.run"), "_gateway_runner_ref", None)
         # Manual runs invoked from a gateway agent execute outside the scheduler ticker, but they still
         # share the process with the live platform adapters. Calling those clients from run_one_job's
         # standalone asyncio.run() loop raises errors like "Timeout context manager should be used inside a
-        # task" and can break encrypted Matrix delivery (#61495 — salvaged from #63586 by @Fly-onlyone).
+        # task" and can break async message delivery (#61495 — salvaged from #63586 by @Fly-onlyone).
         runner = runner_ref() if callable(runner_ref) else None
         adapters = getattr(runner, "adapters", None) if runner is not None else None
         # ``runner.adapters`` is the LAUNCH profile's map; under multiplex the run executes with
@@ -360,9 +360,9 @@ def _run_claimed_job(job: dict[str, Any], extra_prompt: Optional[str] = None) ->
         # ticker (``tick_adapters_for``) does — fail closed, never the default bot (#124248). A
         # resolution error propagates to the ``except`` below and marks the run failed.
         if runner is not None and hasattr(runner, "_adapters_for_profile"):
-            from hermes_constants import get_hermes_home, profile_name_for_home
+            from agent_constants import get_agent_home, profile_name_for_home
 
-            profile = profile_name_for_home(get_hermes_home())
+            profile = profile_name_for_home(get_agent_home())
             adapters = runner._adapters_for_profile(profile)
             # A credentialless shared-bot satellite borrows the primary's bot for ROUTED targets
             # only — the same grant the ticker's ``tick_adapters_for`` makes, never the full map.
@@ -467,12 +467,12 @@ def _latest_job_output_excerpt(job_id: str, max_chars: int = 2000) -> Optional[s
 
 def _reap_stale_executions(job_name: str) -> None:
     """Reap execution rows left 'claimed'/'running' by a provably-dead owner (e.g. a prior
-    one-shot `hermes cron run` that died mid-run). The ticker does this at startup; one-shot
+    one-shot `noone cron run` that died mid-run). The ticker does this at startup; one-shot
     invocations have no such moment, so a stale claim would block every later manual run.
     Best-effort self-heal: must not block dispatch."""
     try:
         # Reap any execution row this job (or any job) left stranded 'claimed'/ 'running' by a dead owner
-        # process -- e.g. a PRIOR one-shot `hermes cron run` invocation whose dispatched runner died with
+        # process -- e.g. a PRIOR one-shot `noone cron run` invocation whose dispatched runner died with
         # the exiting process before writing a terminal status (issue #86721). Safe and cheap: provably-dead
         # owners (PID gone, or PID reused by a different process per its start time) are reaped, as is a
         # live owner whose claim is older than the derived stale bound (the process itself is not killed).
@@ -507,11 +507,11 @@ def _run_session_usage(job_id: str, execution_id: Optional[str]) -> dict[str, An
         return {}
     import sqlite3
 
-    from hermes_constants import get_hermes_home
-    from hermes_state import SessionDB
+    from agent_constants import get_agent_home
+    from agent_state import SessionDB
     # A missing or locked state.db costs the notice its usage line, never the completion.
     try:
-        db = SessionDB(db_path=get_hermes_home() / "state.db", read_only=True)
+        db = SessionDB(db_path=get_agent_home() / "state.db", read_only=True)
     except (sqlite3.Error, OSError):
         return {}
     try:
@@ -570,7 +570,7 @@ def _try_dispatch_background_run(
     ``{"claimed": True, "dispatched": False, ...}`` when the pool was full and it ran inline."""
     job_id = job["id"]
     job_name = str(job.get("name") or job_id)
-    # Reap BEFORE the async/sync branch: the one-shot `hermes cron run` path returns early
+    # Reap BEFORE the async/sync branch: the one-shot `noone cron run` path returns early
     # below, and this is the only moment it heals a stale claim left by a killed prior run (#113923).
     _reap_stale_executions(job_name)
 
@@ -583,7 +583,7 @@ def _try_dispatch_background_run(
         pass
 
     # Routing capture BEFORE the claim: no routable session = no durable consumer for a detached
-    # completion, so don't claim-and-dispatch (direct callers like `hermes cron run` exit right after).
+    # completion, so don't claim-and-dispatch (direct callers like `noone cron run` exit right after).
     session_key = _background_session_key(session_id)
     # CLI path: the approval contextvar is only bound during gateway/TUI turns. The CLI drain filters
     # completions by the durable agent session id (#64240), so stamp it as the key — an empty key would fail
@@ -1116,7 +1116,7 @@ def _cronjob_schema_overrides() -> dict:
     static schema is built once per process, but the multiplexed gateway serves every profile from
     that process, so a path baked in at import would name the launch profile's home (#95685)."""
     params = copy.deepcopy(CRONJOB_SCHEMA["parameters"])
-    params["properties"]["script"]["description"] = _script_description(display_hermes_home())
+    params["properties"]["script"]["description"] = _script_description(display_agent_home())
     return {"parameters": params}
 
 
@@ -1124,7 +1124,7 @@ CRONJOB_SCHEMA = {
     "name": "cronjob_manage",
     "description": """Schedule recurring or one-off agent tasks (cron jobs): create, list, edit, run. action='create' schedules a job from a prompt and/or skills; 'list' inspects jobs; 'update'/'pause'/'resume'/'remove' manage one by job_id (always list first — never guess job IDs); 'run' fires a job immediately in the BACKGROUND (returns a handle at once, outcome re-enters the conversation when done — do not wait or poll; optional 'prompt' adds transient context for that fire only); 'cancel' stops a job's LIVE run without touching its schedule (a no-op when nothing is in flight).
 
-Jobs run in a fresh session with no current-chat context, so prompts must be self-contained, and the agent's FINAL RESPONSE is what gets delivered — cron runs are autonomous and cannot ask questions. Jobs run on the main agent model (whatever `hermes model` is set to when they fire) unless the user pins one. Prefer updating an existing job over creating near-duplicates.""",
+Jobs run in a fresh session with no current-chat context, so prompts must be self-contained, and the agent's FINAL RESPONSE is what gets delivered — cron runs are autonomous and cannot ask questions. Jobs run on the main agent model (whatever `noone model` is set to when they fire) unless the user pins one. Prefer updating an existing job over creating near-duplicates.""",
     "parameters": {
         "type": "object",
         "properties": {
@@ -1140,7 +1140,7 @@ Jobs run in a fresh session with no current-chat context, so prompts must be sel
             },
             "pinned": {
                 "type": "boolean",
-                "description": "For create/update. ONLY set when the user explicitly asks to pin (or unpin) a job's model. pinned=true locks the CURRENT main agent model (and its provider) onto the job so later `hermes model` / `/model` changes never touch it; pinned=false releases the lock so the job follows the main agent model again. Never set it on your own initiative: by default jobs follow the main model."
+                "description": "For create/update. ONLY set when the user explicitly asks to pin (or unpin) a job's model. pinned=true locks the CURRENT main agent model (and its provider) onto the job so later `noone model` / `/model` changes never touch it; pinned=false releases the lock so the job follows the main agent model again. Never set it on your own initiative: by default jobs follow the main model."
             },
             "prompt": {
                 "type": "string",
@@ -1237,7 +1237,7 @@ def check_cronjob_requirements() -> bool:
 
 
 # Agent-facing arguments forwarded verbatim to cronjob(). model / provider / base_url are
-# intentionally NOT here: per-job inference pins are user-owned (dashboard, `hermes cron
+# intentionally NOT here: per-job inference pins are user-owned (dashboard, `noone cron
 # create/edit --model`, hand-edited jobs) — the agent must not point unattended spend at a
 # different model. Programmatic callers of cronjob() itself retain the parameters.
 _HANDLER_FORWARDED_ARGS = (

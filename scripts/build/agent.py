@@ -31,13 +31,8 @@ def _copy(source: Path, destination: Path, *, replace: bool = False) -> None:
 def plant_surfaces(repo: Path, frontends: dict[str, Path]) -> None:
     """Only explicit built products are accepted; no hunting in the source tree."""
     validate_frontends(frontends)
-    if "tui" in frontends:
-        tui = frontends["tui"]
-        destination = repo / "hermes_cli/tui_dist"
-        _copy(tui / "dist", destination, replace=True)
-        _copy(tui / "package.json", destination / "package.json")
     if "web" in frontends:
-        _copy(frontends["web"], repo / "hermes_cli/web_dist", replace=True)
+        _copy(frontends["web"], repo / "agent_cli/web_dist", replace=True)
     if "webapp" in frontends:
         _copy(frontends["webapp"], repo / "apps/desktop/dist-webapp", replace=True)
 
@@ -123,8 +118,7 @@ def assemble(inputs: AgentInputs, out: Path) -> dict:
         env = {**inputs.env, "HERMES_PYTHON": str(inputs.python), "HERMES_INSTALL_ROOT": str(repo)}
         links = {RESOURCE_ENV[name]: (path, repo / name) for name, path in inputs.resources.items()}
         for name, path in inputs.frontends.items():
-            key, destination = {"tui": ("HERMES_TUI_DIR", out / "ui-tui"),
-                                "web": ("HERMES_WEB_DIST", repo / "web_dist"),
+            key, destination = {"web": ("HERMES_WEB_DIST", repo / "web_dist"),
                                 "webapp": ("HERMES_WEBAPP_DIST", repo / "webapp_dist")}[name]
             links[key] = (path, destination)
         for key, (source, destination) in links.items():

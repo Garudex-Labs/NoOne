@@ -27,8 +27,8 @@ from gateway.media_repair import repair_explicit_computer_use_media_paths
 from gateway.platforms.base import BasePlatformAdapter
 from gateway.platforms.base_exec_approval import ea_default_reason_text
 from gateway.turn_context import TurnContext
-from hermes_cli.config import cfg_get
-from hermes_cli.plugins_dispatch import stream_held
+from agent_cli.config import cfg_get
+from agent_cli.plugins_dispatch import stream_held
 from utils import is_truthy_value
 
 if TYPE_CHECKING:  # string annotations only; never imported at runtime (cycle)
@@ -77,7 +77,7 @@ def _clarify_expired_notice() -> str:
 
 
 # run_conversation result keys the gateway projection carries verbatim so a finite viewer's
-# `-z --usage-file` ledger (hermes_cli/oneshot._USAGE_KEYS) reads what the in-process path did.
+# `-z --usage-file` ledger (agent_cli/oneshot._USAGE_KEYS) reads what the in-process path did.
 _LEDGER_PASSTHROUGH_KEYS = (
     "estimated_cost_usd", "cost_status", "cost_source", "cache_read_tokens", "cache_write_tokens",
     "reasoning_tokens", "total_tokens", "provider", "turn_exit_reason", "service_tier",
@@ -173,9 +173,9 @@ def _settle_api_runtime_lock(agent, result, captured):
 def _resolution_failure_reply(exc: Exception, platform: Platform) -> tuple[str, str, bool]:
     """``(chat text, failure_reason, retryable)`` for a model/credential resolution failure before the turn."""
     from agent.error_classifier import FailoverReason
-    from hermes_cli.auth import AuthError, is_rate_limited_auth_error
-    from hermes_cli.runtime_provider_custom import LocalRuntimeUnavailableError
-    from hermes_state_runtime import RuntimeStoreError
+    from agent_cli.auth import AuthError, is_rate_limited_auth_error
+    from agent_cli.runtime_provider_custom import LocalRuntimeUnavailableError
+    from agent_state_runtime import RuntimeStoreError
     auth_permanent = FailoverReason.auth_permanent.value
     if isinstance(exc, LocalRuntimeUnavailableError):
         # The chosen model is configured; its local server is down. Not a credential verdict, so
@@ -260,10 +260,10 @@ class TurnRunner(GatewayTurnProgressMixin, GatewaySessionAgentMixin):
         return False
 
     def _stamp_segment(self, generation, event_type, payload):
-        """The turn's wire identity on its reply frames (tui_gateway/stream_segments.py), so a viewer
+        """The turn's wire identity on its reply frames (agent_backend/stream_segments.py), so a viewer
         upserts a re-sent delta or seal instead of painting a second copy (#144609). The same
-        stamping rule as tui_gateway's ``_emit``, with one cursor per execution generation."""
-        from tui_gateway.stream_segments import TurnSegments, stamp_reply_frame
+        stamping rule as agent_backend's ``_emit``, with one cursor per execution generation."""
+        from agent_backend.stream_segments import TurnSegments, stamp_reply_frame
         segments = getattr(self, "_segments", None)
         if segments is None or segments[0] != generation:
             segments = self._segments = (generation, TurnSegments())
@@ -600,7 +600,7 @@ class TurnRunner(GatewayTurnProgressMixin, GatewaySessionAgentMixin):
     # ── blocking prompts from the agent thread (approval / clarify) ─────────────────────────
 
     def _close_native_stream_boundary(self, reason: str, placeholder: str | None = None, reopen: bool = False) -> bool:
-        """Native-streaming platforms (e.g. WeCom): an interrupting interaction (approval or clarify
+        """Native-streaming platforms : an interrupting interaction (approval or clarify
         prompt) must finalize the current stream first, or post-interaction output keeps updating the
         OLD bubble above the prompt. Runs on the agent thread; the consumer serializes via its queue."""
         sc = self._stream_consumer()
@@ -864,11 +864,11 @@ class TurnRunner(GatewayTurnProgressMixin, GatewaySessionAgentMixin):
             except Exception as e:
                 logger.warning("Button-based approval failed, falling back to text: %s", e)
         # Plain-text prompt with the adapter's typed prefix (e.g. `!approve`): typed "/" is blocked
-        # in Slack threads and reserved by Matrix clients.
+        # in Slack threads.
         msg = approval_text_prompt(adapter, ctx._status_chat_id, ctx.session_key or "", approval_data.get("request_id"),
                                    cmd, desc, getattr(adapter, "typed_command_prefix", "/"), **flags)
         try:
-            # Mark as approval prompt: WeCom routes it through the control lane and Telegram pushes it
+            # Mark as approval prompt: Native streams use the control lane and Telegram pushes it
             # in "important" mode (#132516). Never ``notify`` — A2A reads that as the turn-final reply.
             metadata = {**(ctx._status_thread_metadata or {}), "is_approval_prompt": True}
             fut = self._schedule(
@@ -1300,7 +1300,7 @@ class TurnRunner(GatewayTurnProgressMixin, GatewaySessionAgentMixin):
         from gateway.session_policy import bind_turn_workspace, policy_for_source, policy_scope, refused_turn_result
         from gateway.session_api_turn import api_policy_scope
         from gateway.session_authorities import active_authority
-        from hermes_state_runtime import RuntimeStoreError
+        from agent_state_runtime import RuntimeStoreError
         policy = policy_for_source(self._runner, self._ctx.source)
         with ExitStack() as scope:
             try:
@@ -1489,7 +1489,7 @@ class TurnRunner(GatewayTurnProgressMixin, GatewaySessionAgentMixin):
             # Most failed results name no provider; the error card's sign-in / update-key action needs it.
             "provider": getattr(agent, "provider", None) if agent else None,
             "context_length": (getattr(comp, "context_length", 0) or 0) if has_comp else 0,
-            # The rest of the `-z --usage-file` ledger (hermes_cli/oneshot._USAGE_KEYS): a finite
+            # The rest of the `-z --usage-file` ledger (agent_cli/oneshot._USAGE_KEYS): a finite
             # viewer reads the committed result over `prompt.receipt`, so the projection must keep
             # what the in-process one-shot took straight from `run_conversation`.
             **{key: result.get(key) for key in _LEDGER_PASSTHROUGH_KEYS if key in result},

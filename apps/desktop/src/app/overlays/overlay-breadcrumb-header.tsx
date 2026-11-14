@@ -1,7 +1,7 @@
+import { ChevronRight } from '@noone/ui/icons'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { ChevronRight } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { PAGE_INSET_X } from '../layout-constants'

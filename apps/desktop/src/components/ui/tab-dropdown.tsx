@@ -1,7 +1,8 @@
-import { compactNumber } from '@hermes/shared'
+import { compactNumber } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
+import type { IconComponent } from '@noone/ui/icons'
 import { Fragment } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { CountSkeleton } from '@/components/ui/skeleton'
 import { TextTab, TextTabMeta } from '@/components/ui/text-tab'
-import type { IconComponent } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 // A count badge beside a tab label. `null` = still loading (pulsing chip, not a
@@ -63,7 +63,7 @@ export function TabDropdown({
           {active?.icon && <TabDropdownIcon icon={active.icon} indent={active.indent} />}
           <span className="min-w-0 truncate">{active?.label}</span>
           {active?.meta !== undefined && <TextTabMeta>{tabMetaContent(active.meta)}</TextTabMeta>}
-          <Codicon className="text-muted-foreground" name="chevron-down" size="0.75rem" />
+          <AppIcon className="text-muted-foreground" name="chevron-down" size="0.75rem" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} className={cn('w-44', className)} sideOffset={6}>

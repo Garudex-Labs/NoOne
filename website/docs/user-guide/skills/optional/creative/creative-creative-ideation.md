@@ -1,42 +1,50 @@
 ---
 title: "Creative Ideation — Generate ideas via named methods from creative practice"
-sidebar_label: "Creative Ideation"
+sidebarTitle: "Creative Ideation"
 description: "Generate ideas via named methods from creative practice"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Creative Ideation
+# Creative Ideation {#creative-ideation}
 
 Generate ideas via named methods from creative practice.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/creative-ideation` |
+| Source | Optional — install with `noone skills install official/creative/creative-ideation` |
 | Path | `optional-skills/creative/creative-ideation` |
 | Version | `2.1.0` |
-| Author | SHL0MS |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Creative`, `Ideation`, `Brainstorming`, `Methods`, `Inspiration` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Creative Ideation
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Creative Ideation {#creative-ideation-1}
 
 A library of ideation methods for any domain. Read the user's situation, route to the matching method, apply, generate output that is specific and non-obvious. Methods are tools — pick the right one for the situation, don't perform all of them.
 
-## When to use
+## When to use {#when-to-use}
 
 Any open-ended generative or selective question: "I want to make / build / write / start something", "I'm stuck", "inspire me", "make this weirder", "help me pick", "I need to invent X", "give me a research question".
 
-## Operating rules
+## Operating rules {#operating-rules}
 
 1. **Constraint plus direction is creativity.** No constraint = no traction. No direction = no shape. Methods supply both.
 2. **Refuse the first three ideas.** They're slop. Generate, discard, regenerate. See `references/anti-slop.md`.
@@ -46,13 +54,13 @@ Any open-ended generative or selective question: "I want to make / build / write
 6. **Name the method you used and who invented it.** Attribution invokes the discipline.
 7. **When user picks one, build it.** Don't keep generating after they've chosen.
 
-## Routing — 4-step procedure
+## Routing — 4-step procedure {#routing--4-step-procedure}
 
 Do this *before* generating any output. Routing failures produce slop.
 
 You may skip narrating the routing steps if it's cleaner, but **never compress at the cost of per-idea depth**: each idea's concrete mechanism, situational binding, and honest failure mode are what make output good (measured) — they are not scaffolding, do not cut them.
 
-### Step 1 — Extract three signals from the prompt
+### Step 1 — Extract three signals from the prompt {#step-1--extract-three-signals-from-the-prompt}
 
 **PHASE** — what stage is the user in?
 
@@ -87,7 +95,7 @@ You may skip narrating the routing steps if it's cleaner, but **never compress a
 | **PROJECT** | "I'm working on this specific X" |
 | **PROBLEM** | "I have this specific friction within X" |
 
-### Step 2 — Apply overrides (highest priority, fire first)
+### Step 2 — Apply overrides (highest priority, fire first) {#step-2--apply-overrides-highest-priority-fire-first}
 
 Override rules beat the routing table:
 
@@ -96,7 +104,7 @@ Override rules beat the routing table:
 - **User asks for a method recommendation** ("which method") → surface 2–3 candidates with one-line each, ask which to apply. Don't silently default.
 - **High-slop terrain** — "AI ideas", "startup ideas", "habit tracker", "productivity / wellness / fitness / food / travel app" → force `references/methods/lateral-provocations.md` or `references/methods/pataphysics.md` over the obvious method. Refuse the first **5** ideas, not 3.
 
-### Step 3 — Route by phase first, then domain
+### Step 3 — Route by phase first, then domain {#step-3--route-by-phase-first-then-domain}
 
 **By phase (applies regardless of domain):**
 
@@ -135,7 +143,7 @@ Override rules beat the routing table:
 | PRODUCT (business, service) | `references/methods/jobs-to-be-done.md` |
 | Need to break a frame / find analogy | `references/methods/analogy-and-blending.md` |
 
-### Step 4 — Handle ambiguity and contradiction
+### Step 4 — Handle ambiguity and contradiction {#step-4--handle-ambiguity-and-contradiction}
 
 - **Multiple paths plausible** → pick the one closest to the user's actual phrasing. Don't pick the most interesting method to seem sophisticated.
 - **Genuinely ambiguous** → ask ONE clarifying question, don't silently guess. Examples: *"Are you generating ideas or picking between ones you have?"* / *"Is this for fiction, essay, or something else?"*
@@ -143,7 +151,7 @@ Override rules beat the routing table:
 - **No match** → constraint dispatch (`references/full-prompt-library.md`) is the safe fallback.
 - **Same question asked again** → switch methods. Variation in method = variation in idea distribution.
 
-### Anti-default check (run before generating)
+### Anti-default check (run before generating) {#anti-default-check-run-before-generating}
 
 - About to write "Here are 5 ideas:" or a bare numbered list? → STOP. Pick a method first.
 - About to default to generic LLM-mode brainstorming? → STOP. Pick a path above.
@@ -153,7 +161,7 @@ The default LLM mode is exactly what this skill exists to displace. If you gener
 
 For deeper edge cases (mood signals, stacking, anti-patterns) see `references/heuristics.md`.
 
-## Output format
+## Output format {#output-format}
 
 For the constraint-dispatch default path:
 
@@ -178,7 +186,7 @@ For other methods, use the format the method specifies (TRIZ produces a contradi
 - Give each idea its concrete mechanism and its honest failure mode / tradeoff / who-it's-for. This depth is what makes ideas land — measured, not decorative.
 - Mark at least one idea as the **grounded** one — buildable/pursuable now, non-obvious but with a real first step. The others can run further toward the strange; this one has to be genuinely doable. Don't let the whole set be weird-but-impractical.
 
-## File map
+## File map {#file-map}
 
 - `references/full-prompt-library.md` — constraint library, sectioned by domain (General, Software, Physical, Social, Lists). Default path for SPECIFICITY=NONE.
 - `references/method-catalog.md` — one-line summary + when-to-use per method
@@ -187,6 +195,6 @@ For other methods, use the format the method specifies (TRIZ produces a contradi
 - `references/exercises.md` — time-boxed exercises (5min / 30min / 1hr / day / week)
 - `references/methods/` — 22 named methods, one file each, load only the one you're using
 
-## Attribution
+## Attribution {#attribution}
 
 Constraint-dispatch core adapted from [wttdotm.com/prompts.html](https://wttdotm.com/prompts.html). Methods drawn from primary sources cited in each method file.

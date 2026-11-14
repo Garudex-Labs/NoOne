@@ -3,19 +3,19 @@ title: "Micro-compaction"
 description: "How micro-compaction amortizes context compression cost: triggers, tail sizing, the cached-prefix trade-off"
 ---
 
-# Micro-compaction
+# Micro-compaction {#micro-compaction}
 
 **A way to amortize the cost of compression.**
 
 Long conversations eventually outgrow the model's context window, and something
-has to be thrown away or summarized. Hermes has always done this in one batch:
+has to be thrown away or summarized. {{app-name}} has always done this in one batch:
 when the transcript crosses a threshold, the session stops, a large chunk of the
 middle is summarized in a single call, and the conversation resumes. That works,
 but the whole bill comes due at once — one visible pause, one big summarization
 request, at whatever moment you happened to cross the line.
 
 Micro-compaction pays the same bill in instalments. After each completed turn,
-Hermes folds the single oldest un-absorbed exchange into a running summary. The
+{{app-name}} folds the single oldest un-absorbed exchange into a running summary. The
 work is the same work; it just happens continuously, a piece at a time, instead
 of all at once in the middle of your session.
 
@@ -42,7 +42,7 @@ rather than sawtoothing up to the threshold and back.
 
 ---
 
-## What it does
+## What it does {#what-it-does}
 
 After every turn that finishes normally, `finalize_turn` asks the context
 compressor to absorb **one** exchange:
@@ -65,7 +65,7 @@ absorbing one exchange at a time is worth doing at all. Taking the whole turn
 alternation strictly valid: the summary marker is an assistant-role message,
 and a full turn is always bounded by user messages on both sides.
 
-## Your messages are never compacted
+## Your messages are never compacted {#your-messages-are-never-compacted}
 
 An exchange deliberately starts at the *assistant* message. Micro-compaction
 walks straight past user messages to get there, so **what you typed is never
@@ -89,7 +89,7 @@ normally a tiny fraction of what a single tool result costs — but it is a real
 floor. If you routinely paste 10–20K-token prompts, that weight stays in context
 by design.
 
-## What it never touches
+## What it never touches {#what-it-never-touches}
 
 Two more regions are protected and stay verbatim:
 
@@ -100,9 +100,9 @@ Two more regions are protected and stay verbatim:
 
 Micro-compaction only ever works in the middle, between those two.
 
-## How it works
+## How it works {#how-it-works}
 
-### The cursor
+### The cursor {#the-cursor}
 
 The compressor keeps a cursor: the index of the first message not yet absorbed.
 Each successful pass advances it past the exchange it just summarized.
@@ -112,7 +112,7 @@ session — it's recovered by scanning the transcript for the last summary marke
 and resuming just after it. The transcript itself is the source of truth, so
 resuming a session doesn't re-summarize work already done.
 
-### The rolling summary
+### The rolling summary {#the-rolling-summary}
 
 Rather than keeping a pile of per-exchange summaries, there is exactly one
 running summary that each new exchange is merged into. The summarizer is asked
@@ -134,7 +134,7 @@ are joined into one user message for the model. That joined row is flagged
 rows, and every display projection (resume, paged history, prompt timeline)
 skips the join, so a resumed session shows each input exactly once.
 
-### Defrag
+### Defrag {#defrag}
 
 Merge into a summary often enough and it gets baggy — repetitive, and larger
 than the material justifies. When the running summary crosses a token threshold
@@ -147,9 +147,9 @@ spliced, the cursor doesn't move, and user turns are untouched. It processes
 only the accumulated summary text, never conversation messages, so the
 "your messages are never compacted" guarantee holds through it.
 
-### Staying in step with the session database
+### Staying in step with the session database {#staying-in-step-with-the-session-database}
 
-The in-memory splice alone isn't enough. Hermes's normal session flush is
+The in-memory splice alone isn't enough. {{app-name}}'s normal session flush is
 append-only, so the original rows would stay marked active and a resume would
 load *both* the summary and the messages it replaced — putting the session
 straight over the context limit.
@@ -160,7 +160,7 @@ already-persisted so the append-only flush that follows skips them. If that
 database step fails, it's logged and the session continues; the resume would
 double-load until the next batch compression cleans up.
 
-### When the summarizer fails
+### When the summarizer fails {#when-the-summarizer-fails}
 
 A summarization call can fail — the auxiliary model is unreachable, out of quota,
 or the exchange itself is somehow unsummarizable. The transcript is left
@@ -171,7 +171,7 @@ anyway. Without that, one bad exchange would be retried on every single turn
 forever. Those skipped messages stay in the transcript and get picked up by the
 next batch compaction.
 
-## Interaction with batch compaction
+## Interaction with batch compaction {#interaction-with-batch-compaction}
 
 Micro-compaction doesn't replace batch compaction — it defers it. Threshold-based
 compaction is still there and still fires if the window fills anyway, and its
@@ -179,7 +179,7 @@ summary markers are the same format, so the two interoperate. In practice
 micro-compaction keeps the transcript far enough below the threshold that the
 batch path fires much less often.
 
-## Configuration
+## Configuration {#configuration}
 
 Micro-compaction is **off by default**. Turn it on explicitly:
 
@@ -190,7 +190,7 @@ compression:
   micro_compact_defrag_threshold_tokens: 2000
 ```
 
-With `micro_compact` unset or `false` Hermes behaves exactly as it always has:
+With `micro_compact` unset or `false` {{app-name}} behaves exactly as it always has:
 batch-only compaction. Everything else about compression is unchanged.
 
 `micro_compact_every_n_turns` is the knob that matters most after the on/off
@@ -210,7 +210,7 @@ It ships opt-in rather than on because of the prompt-cache cost described in
 the next section — that cost is real, it is not universally worth paying, and
 it should be a decision you make rather than one you inherit.
 
-## Prompt caching — the cost you are opting into
+## Prompt caching — the cost you are opting into {#prompt-caching--the-cost-you-are-opting-into}
 
 Read this before enabling the feature. It is the strongest argument against it.
 
@@ -250,7 +250,7 @@ cache discount and a big prefix, the per-turn invalidation can plausibly cost
 more than the stall it removes. Measure your own sessions — see
 [Measuring it](#measuring-it) — rather than assuming.
 
-## Choosing a compression model
+## Choosing a compression model {#choosing-a-compression-model}
 
 Micro-compaction uses the `auxiliary.compression` model:
 
@@ -293,7 +293,7 @@ If passes feel too slow, your options in rough order of effect are: pick a
 faster or smaller compression model; give it a less contended host; or turn
 micro-compaction off and go back to batch compaction.
 
-## Measuring it
+## Measuring it {#measuring-it}
 
 Micro-compaction is not primarily a token-saving or time-saving optimisation,
 and judging it on tokens saved will undersell it. The two things it actually
@@ -343,7 +343,7 @@ python scripts/micro_compaction_report.py [--per-session] [LOGFILE ...]
 Defaults to `$HERMES_HOME/logs/agent.log`. It reports passes, outcome mix, net
 tokens saved, mean absorbed-exchange size and pass durations.
 
-### What it looks like when it is working
+### What it looks like when it is working {#what-it-looks-like-when-it-is-working}
 
 One real session — a 3.5 hour whole-project code review, ~75K tokens of
 transcript, 400K window, compaction threshold at 320K:
@@ -378,7 +378,7 @@ compaction of a 75K-token middle that is still the better trade, but a
 37-second increment is not a rounding error. See
 [Choosing a compression model](#choosing-a-compression-model).
 
-### Reading the numbers honestly
+### Reading the numbers honestly {#reading-the-numbers-honestly}
 
 **The first pass in a session usually costs tokens rather than saving them.**
 Inserting the summary marker carries a fixed ~400 tokens of scaffolding — the
@@ -404,7 +404,7 @@ Message counts move by small amounts — that's expected. The token count is whe
 the effect shows: absorbing one tool-heavy exchange can drop hundreds of tokens
 while changing the message count by one or two.
 
-## Failure behaviour
+## Failure behaviour {#failure-behaviour}
 
 Micro-compaction is best-effort throughout. The call in `finalize_turn` is wrapped
 so that any exception is logged and swallowed — a failure returns the conversation

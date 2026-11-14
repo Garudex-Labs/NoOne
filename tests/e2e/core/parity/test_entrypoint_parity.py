@@ -19,7 +19,7 @@ Desktop/gateway/ACP/cron" class:
 * after the surface's normal shutdown no MCP server / grandchild survives. For the
   gateway-client surfaces (``-z``, ``chat -q``, ``acp``, ``cron run``) the turn runs
   in the profile's ``gateway run`` daemon, which outlives the client by design;
-  their normal shutdown is client exit + ``hermes gateway stop``.
+  their normal shutdown is client exit + ``noone gateway stop``.
 
 ``PARITY_TABLE_OUT=<path>`` appends a markdown row per entrypoint (REPORT.md table).
 """
@@ -71,7 +71,7 @@ Driver = Callable[..., DriveResult]
 DRIVERS: dict[str, Driver] = {
     "oneshot (-z)": _drive_cli.drive_oneshot,
     "chat -q": _drive_cli.drive_chat_q,
-    "tui_gateway (stdio)": _drive_rpc.drive_tui_gateway,
+    "agent_backend (stdio)": _drive_rpc.drive_tui_gateway,
     "serve (Desktop WS)": _drive_rpc.drive_serve,
     "gateway (fake adapter)": _drive_gateway.drive_gateway,
     "api_server": _drive_gateway.drive_api_server,

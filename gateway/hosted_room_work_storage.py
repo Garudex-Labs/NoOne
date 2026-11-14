@@ -5,7 +5,6 @@ import json
 from gateway.hosted_rooms_common import table_exists
 
 
-INVALID_TABLE = "hosted_room_work_records_invalid"
 
 
 def initialize(conn):
@@ -28,63 +27,8 @@ def initialize(conn):
 
 
 def _initialize_locked(conn):
-    from gateway import hosted_room_work_records as work
-    tables = (work.SOURCE_TABLE, work.PENDING_TABLE)
-    # Orphans are opaque evidence, not snapshots. No FK or producer can honestly
-    # be supplied for them. Preserve every original column and forbid mutation.
-    conn.execute(f"""CREATE TABLE IF NOT EXISTS {INVALID_TABLE} (
-        evidence_id INTEGER PRIMARY KEY, source_table TEXT NOT NULL,
-        room_id TEXT NOT NULL, revision INTEGER NOT NULL, digest TEXT NOT NULL, record_json TEXT NOT NULL,
-        target_install_id TEXT, route_generation TEXT, status TEXT,
-        disposition TEXT NOT NULL CHECK(disposition='invalid'))""")
-    for table in tables:
-        pending = table == work.PENDING_TABLE
-        parent = "hosted_room_replicas" if table == work.TARGET_TABLE else "hosted_rooms"
-        columns = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
-        legacy = bool(columns) and "producer_gateway_id" not in columns
-        # Preserve surrounding cleanup triggers by recreating the same table name
-        # inside this transaction, rather than renaming its referents.
-        rows = conn.execute(f"SELECT * FROM {table}").fetchall() if legacy else []
-        triggers = conn.execute("SELECT sql FROM sqlite_master WHERE type='trigger' AND tbl_name=?", (table,)).fetchall() if legacy else []
-        if legacy:
-            conn.execute(f"DROP TABLE {table}")
-        extra = "target_install_id TEXT NOT NULL, route_generation TEXT NOT NULL, status TEXT NOT NULL," if pending else ""
-        key = ",target_install_id" if pending else ""
-        conn.execute(f"""CREATE TABLE IF NOT EXISTS {table} (
-            room_id TEXT NOT NULL, revision INTEGER NOT NULL, digest TEXT NOT NULL, record_json TEXT NOT NULL,
-            producer_gateway_id TEXT NOT NULL, producer_epoch INTEGER NOT NULL,
-            disposition TEXT NOT NULL CHECK(disposition IN ('current','superseded_authority','historical','invalid')),
-            {extra} PRIMARY KEY(room_id,producer_gateway_id,producer_epoch{key}),
-            FOREIGN KEY(room_id) REFERENCES {parent}(room_id) ON DELETE CASCADE)""")
-        for row in rows:
-            if not conn.execute(f"SELECT 1 FROM {parent} WHERE room_id=?", (row["room_id"],)).fetchone():
-                fields = ["source_table", "room_id", "revision", "digest", "record_json", "disposition"]
-                values = [table, row["room_id"], row["revision"], row["digest"], row["record_json"], "invalid"]
-                if pending:
-                    fields += ["target_install_id", "route_generation", "status"]
-                    values += [row[k] for k in fields[-3:]]
-                conn.execute(f"INSERT INTO {INVALID_TABLE} ({','.join(fields)}) VALUES ({','.join('?' for _ in fields)})", values)
-                continue
-            producer, epoch, disposition = "", 0, "invalid"
-            try:
-                record = work.validate(json.loads(row["record_json"]))
-                if (record["version"] != 1 or record["room_id"] != row["room_id"]
-                        or record["revision"] != row["revision"] or record["digest"] != row["digest"]):
-                    raise work.WorkRecordError("legacy work scope conflicts")
-                producer, epoch, disposition = record["home_install_id"], 1, "current"
-            except (ValueError, TypeError, KeyError):
-                pass  # Explicitly invalid, with original bytes and no invented producer.
-            fields = ["room_id", "revision", "digest", "record_json", "producer_gateway_id", "producer_epoch", "disposition"]
-            values = [row[k] for k in fields[:4]] + [producer, epoch, disposition]
-            if pending:
-                fields += ["target_install_id", "route_generation", "status"]
-                values += [row[k] for k in fields[-3:]]
-            values[6] = scope_disposition(conn, table, dict(zip(fields, values)))
-            conn.execute(f"INSERT INTO {table} ({','.join(fields)}) VALUES ({','.join('?' for _ in fields)})", values)
-        for trigger in triggers:
-            conn.execute(trigger[0])
-    _guards(conn, work, tables)
-    _invalid_guards(conn)
+    from agent_cli.database_migrations import initialize_database
+    initialize_database(conn, "hosted_room_work")
     # Ordinary initialization owns schema/guards only. Each consuming operation
     # validates its own row; authority/enrollment triggers freeze exact-room old
     # scopes. Legacy dispositions were resolved at insertion above.
@@ -103,64 +47,13 @@ def scope_disposition(conn, table, row):
     return "superseded_authority" if table == work.PENDING_TABLE and row["status"] != "acked" else "historical"
 
 
-def _guards(conn, work, tables):
-    total, count = usage_sql((*tables, INVALID_TABLE))
-    for table in tables:
-        for operation in ("INSERT", "UPDATE"):
-            key = "room_id=NEW.room_id AND producer_gateway_id=NEW.producer_gateway_id AND producer_epoch=NEW.producer_epoch"
-            if table == work.PENDING_TABLE:
-                key += " AND target_install_id=NEW.target_install_id"
-            old_size = (f"COALESCE((SELECT {row_size_sql(table)} FROM {table} WHERE {key}),0)"
-                        if operation == "INSERT" else row_size_sql(table, "OLD."))
-            new_size = row_size_sql(table, "NEW.")
-            old_count = f"(SELECT COUNT(*) FROM {table} WHERE {key})" if operation == "INSERT" else "1"
-            conn.execute(f"DROP TRIGGER IF EXISTS trg_{table}_budget_v2_{operation.lower()}")
-            conn.execute(f"DROP TRIGGER IF EXISTS trg_{table}_budget_v3_{operation.lower()}")
-            conn.execute(f"DROP TRIGGER IF EXISTS trg_{table}_budget_v4_{operation.lower()}")
-            conn.execute(f"""CREATE TRIGGER trg_{table}_budget_v4_{operation.lower()}
-                BEFORE {operation} ON {table} WHEN (
-                    (({new_size})>({old_size}) AND ({total})-({old_size})+({new_size})>{work.MAX_STORE_BYTES})
-                    OR ({old_count}=0 AND ({total}>{work.MAX_STORE_BYTES} OR {count}+1>{work.MAX_STORE_ROWS})))
-                BEGIN SELECT RAISE(ABORT, 'work record storage is full'); END""")
-        conn.execute(f"""CREATE TRIGGER IF NOT EXISTS trg_{table}_immutable_v2
-            BEFORE UPDATE ON {table} WHEN
-                NEW.room_id!=OLD.room_id OR NEW.producer_gateway_id!=OLD.producer_gateway_id
-                OR NEW.producer_epoch!=OLD.producer_epoch
-                OR (OLD.disposition!='current' AND (NEW.record_json!=OLD.record_json OR NEW.revision!=OLD.revision
-                    OR NEW.digest!=OLD.digest OR NEW.disposition!=OLD.disposition))
-            BEGIN SELECT RAISE(ABORT, 'historical work record is immutable'); END""")
-        conn.execute(f"""CREATE TRIGGER IF NOT EXISTS trg_{table}_delete_v2 BEFORE DELETE ON {table}
-            WHEN OLD.disposition!='current' AND EXISTS (SELECT 1 FROM hosted_rooms
-                WHERE room_id=OLD.room_id AND disbanded_at IS NULL)
-            BEGIN SELECT RAISE(ABORT, 'historical work record is immutable'); END""")
-        # INSERT OR REPLACE performs a delete internally. Refuse it before the
-        # uniqueness conflict can remove an immutable snapshot.
-        extra = " AND p.target_install_id=NEW.target_install_id" if table == work.PENDING_TABLE else ""
-        conn.execute(f"""CREATE TRIGGER IF NOT EXISTS trg_{table}_replace_v2
-            BEFORE INSERT ON {table} WHEN EXISTS (SELECT 1 FROM {table} p WHERE p.room_id=NEW.room_id
-                AND p.producer_gateway_id=NEW.producer_gateway_id AND p.producer_epoch=NEW.producer_epoch
-                {extra} AND p.disposition!='current')
-            BEGIN SELECT RAISE(ABORT, 'historical work record is immutable'); END""")
-    conn.execute(f"""CREATE TRIGGER IF NOT EXISTS trg_work_pending_outcome_v2 BEFORE UPDATE ON {work.PENDING_TABLE}
-        WHEN OLD.disposition!='current' AND (NEW.status!=OLD.status OR NEW.route_generation!=OLD.route_generation
-            OR NEW.target_install_id!=OLD.target_install_id)
-        BEGIN SELECT RAISE(ABORT, 'historical delivery outcome is immutable'); END""")
-    # A raw authority update by an older owner must also freeze old evidence.
-    conn.execute(f"""CREATE TRIGGER IF NOT EXISTS trg_work_authority_transition_v2
-        AFTER UPDATE OF authority_gateway_id,authority_epoch ON hosted_rooms BEGIN
-        UPDATE {work.SOURCE_TABLE} SET disposition='historical' WHERE room_id=NEW.room_id AND disposition='current'
-            AND (producer_gateway_id!=NEW.authority_gateway_id OR producer_epoch!=NEW.authority_epoch);
-        UPDATE {work.PENDING_TABLE} SET disposition=CASE WHEN status='acked' THEN 'historical' ELSE 'superseded_authority' END
-            WHERE room_id=NEW.room_id AND disposition='current'
-            AND (producer_gateway_id!=NEW.authority_gateway_id OR producer_epoch!=NEW.authority_epoch);
-        END""")
 
 
 def retained_fields(table):
     from gateway import hosted_room_work_records as work
     fields = ["room_id", "revision", "digest", "record_json"]
-    fields += ["source_table"] if table == INVALID_TABLE else ["producer_gateway_id", "producer_epoch"]
-    if table in (work.PENDING_TABLE, INVALID_TABLE):
+    fields += ["producer_gateway_id", "producer_epoch"]
+    if table == work.PENDING_TABLE:
         fields += ["target_install_id", "route_generation", "status"]
     return fields
 
@@ -235,13 +128,3 @@ def save_locked(conn, table, record, *, target_install_id=None, route_generation
     updates = ','.join(f'{k}=excluded.{k}' for k in fields if k not in keys)
     conn.execute(f"INSERT INTO {table} ({','.join(fields)}) VALUES ({','.join('?' for _ in fields)}) "
                  f"ON CONFLICT({','.join(keys)}) DO UPDATE SET {updates}", values)
-
-
-
-def _invalid_guards(conn):
-    # There is no reviewed retirement grant in this runtime. Opaque evidence
-    # cannot acquire a first-writer owner or be reclaimed by an ordinary writer.
-    for operation in ("INSERT", "UPDATE", "DELETE"):
-        conn.execute(f"""CREATE TRIGGER IF NOT EXISTS trg_work_invalid_{operation.lower()}
-            BEFORE {operation} ON {INVALID_TABLE}
-            BEGIN SELECT RAISE(ABORT, 'invalid work evidence is immutable'); END""")

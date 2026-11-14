@@ -42,7 +42,7 @@ const electronNative: TestProjectConfiguration = {
     testTimeout: 30_000,
     // Only these contracts need the Hermes test interpreter; resolving it may
     // sync the Python environment, which UI-only runs must not wait for.
-    globalSetup: ['./vitest.hermes-python.ts']
+    globalSetup: ['./vitest.agent-python.ts']
   }
 }
 

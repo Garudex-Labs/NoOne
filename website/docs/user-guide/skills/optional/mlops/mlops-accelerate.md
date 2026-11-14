@@ -1,20 +1,20 @@
 ---
 title: "Accelerate — Run PyTorch training across GPUs with minimal changes"
-sidebar_label: "Accelerate"
+sidebarTitle: "Accelerate"
 description: "Run PyTorch training across GPUs with minimal changes"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Accelerate
+# Accelerate {#accelerate}
 
 Run PyTorch training across GPUs with minimal changes.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/accelerate` |
+| Source | Optional — install with `noone skills install official/mlops/accelerate` |
 | Path | `optional-skills/mlops/accelerate` |
 | Version | `1.0.1` |
 | Author | Orchestra Research |
@@ -23,15 +23,23 @@ Run PyTorch training across GPUs with minimal changes.
 | Platforms | linux, macos, windows |
 | Tags | `Distributed Training`, `HuggingFace`, `Accelerate`, `DeepSpeed`, `FSDP`, `Mixed Precision`, `PyTorch`, `DDP`, `Unified API`, `Simple` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# HuggingFace Accelerate - Unified Distributed Training
+<div className="doc-callout-title">
 
-## Quick start
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# HuggingFace Accelerate - Unified Distributed Training {#huggingface-accelerate---unified-distributed-training}
+
+## Quick start {#quick-start}
 
 Accelerate simplifies distributed training to 4 lines of code.
 
@@ -66,9 +74,9 @@ import torch
 accelerate launch train.py
 ```
 
-## Common workflows
+## Common workflows {#common-workflows}
 
-### Workflow 1: From single GPU to multi-GPU
+### Workflow 1: From single GPU to multi-GPU {#workflow-1-from-single-gpu-to-multi-gpu}
 
 **Original script**:
 ```python
@@ -137,7 +145,7 @@ accelerate launch --multi_gpu --num_processes 16 \
   train.py
 ```
 
-### Workflow 2: Mixed precision training
+### Workflow 2: Mixed precision training {#workflow-2-mixed-precision-training}
 
 **Enable FP16/BF16**:
 ```python
@@ -161,7 +169,7 @@ for batch in dataloader:
     accelerator.backward(loss)
 ```
 
-### Workflow 3: DeepSpeed ZeRO integration
+### Workflow 3: DeepSpeed ZeRO integration {#workflow-3-deepspeed-zero-integration}
 
 **Enable DeepSpeed ZeRO-2** (pass a `DeepSpeedPlugin`, not a raw dict):
 ```python
@@ -221,7 +229,7 @@ accelerate launch train.py
 accelerate launch --config_file accelerate_deepspeed.yaml train.py
 ```
 
-### Workflow 4: FSDP (Fully Sharded Data Parallel)
+### Workflow 4: FSDP (Fully Sharded Data Parallel) {#workflow-4-fsdp-fully-sharded-data-parallel}
 
 **Enable FSDP**:
 ```python
@@ -247,7 +255,7 @@ accelerate config
 # Select: FSDP → Full Shard → No CPU Offload
 ```
 
-### Workflow 5: Gradient accumulation
+### Workflow 5: Gradient accumulation {#workflow-5-gradient-accumulation}
 
 **Accumulate gradients**:
 ```python
@@ -267,7 +275,7 @@ for batch in dataloader:
 
 **Effective batch size**: `batch_size * num_gpus * gradient_accumulation_steps`
 
-## When to use vs alternatives
+## When to use vs alternatives {#when-to-use-vs-alternatives}
 
 **Use Accelerate when**:
 - Want simplest distributed training
@@ -289,7 +297,7 @@ for batch in dataloader:
 - **DeepSpeed**: Direct API control, advanced features
 - **Raw DDP**: Maximum control, minimal abstraction
 
-## Common issues
+## Common issues {#common-issues}
 
 **Issue: Wrong device placement**
 
@@ -333,15 +341,15 @@ from accelerate.utils import set_seed
 set_seed(42)
 ```
 
-## Advanced topics
+## Advanced topics {#advanced-topics}
 
-**Megatron integration**: See [references/megatron-integration.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/accelerate/references/megatron-integration.md) for tensor parallelism, pipeline parallelism, and sequence parallelism setup.
+**Megatron integration**: See [references/megatron-integration.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/accelerate/references/megatron-integration.md) for tensor parallelism, pipeline parallelism, and sequence parallelism setup.
 
-**Custom plugins**: See [references/custom-plugins.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/accelerate/references/custom-plugins.md) for creating custom distributed plugins and advanced configuration.
+**Custom plugins**: See [references/custom-plugins.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/accelerate/references/custom-plugins.md) for creating custom distributed plugins and advanced configuration.
 
-**Performance tuning**: See [references/performance.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/accelerate/references/performance.md) for profiling, memory optimization, and best practices.
+**Performance tuning**: See [references/performance.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/accelerate/references/performance.md) for profiling, memory optimization, and best practices.
 
-## Hardware requirements
+## Hardware requirements {#hardware-requirements}
 
 - **CPU**: Works (slow)
 - **Single GPU**: Works
@@ -356,7 +364,7 @@ set_seed(42)
 - **FSDP**: PyTorch 1.12+ (built-in)
 - **Megatron**: Custom setup
 
-## Resources
+## Resources {#resources}
 
 - Docs: https://huggingface.co/docs/accelerate
 - GitHub: https://github.com/huggingface/accelerate

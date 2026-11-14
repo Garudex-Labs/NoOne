@@ -31,7 +31,7 @@ except ImportError:  # pragma: no cover - non-Windows
 from datetime import datetime, timedelta, UTC
 from pathlib import Path
 from agent.deadline import poll_until
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from cron.constants import CLAIM_TTL_INACTIVITY_HEADROOM, FIRE_CLAIM_SKEW_SECONDS, FIRE_CLAIM_TTL_SECONDS
 from cron.env_settings import cron_env_setting
 from cron.jobs_invariants import _validate_job_mode_invariants, validate_schedule_knobs
@@ -43,9 +43,9 @@ from typing import Optional, Dict, List, Any, Callable, Set, Tuple, Union, Colle
 
 logger = logging.getLogger(__name__)
 
-from hermes_time import now as _hermes_now
-from hermes_time import get_timezone
-from hermes_cli.observability.shared_metrics_gateway import record_cron_missed
+from agent_time import now as _hermes_now
+from agent_time import get_timezone
+from agent_cli.observability.shared_metrics_gateway import record_cron_missed
 from utils import atomic_replace, atomic_write_text, fsync_directory, mkstemp_beside
 
 # croniter is imported lazily (slow import, only needed for cron exprs). HAS_CRONITER stays a
@@ -80,28 +80,28 @@ def _ensure_croniter() -> bool:
 
 # --- Configuration ---
 
-# Cron is per-profile by design: anchor at get_hermes_home() (active profile home), NOT
-# get_default_hermes_root() — the shared root would funnel every profile's jobs into one jobs.json
+# Cron is per-profile by design: anchor at get_agent_home() (active profile home), NOT
+# get_default_agent_root() — the shared root would funnel every profile's jobs into one jobs.json
 # and run them under the ticker's HERMES_HOME, leaking config/credentials/skills across profiles.
 # Each profile owns its own cron store under its own HERMES_HOME, and a profile-scoped gateway runs that
 # profile's jobs under that same HERMES_HOME — so a job authored in profile `coder` lives in
 # `~/.hermes/profiles/coder/cron/jobs.json` and executes with `coder`'s `.env`, `config.yaml`, and skills.
 # Do NOT change this to the default root: that re-breaks per-profile isolation. See also the dynamic
 # `_get_hermes_home()` / `_get_lock_paths()` resolution in cron/scheduler.py. See #4707.
-HERMES_DIR = get_hermes_home().resolve()
+HERMES_DIR = get_agent_home().resolve()
 # Default-profile fallback and compatibility surface for callers/tests. Cross-profile callers must
 # scope paths with use_cron_store() instead of mutating these process-wide.
 CRON_DIR = HERMES_DIR / "cron"
 JOBS_FILE = CRON_DIR / "jobs.json"
-# Heartbeat: touched every ticker loop so `hermes cron status` can tell the ticker THREAD is alive,
+# Heartbeat: touched every ticker loop so `noone cron status` can tell the ticker THREAD is alive,
 # not just the gateway PROCESS; success = last tick that completed WITHOUT raising.
-# The gateway process and the (separate) ``hermes cron status`` process share it so status can tell whether
+# The gateway process and the (separate) ``noone cron status`` process share it so status can tell whether
 # the ticker THREAD is alive, not just whether the gateway PROCESS exists — a ticker that dies silently
 # inside a live gateway would otherwise report healthy (#32612, #32895).
 TICKER_HEARTBEAT_FILE = CRON_DIR / "ticker_heartbeat"
 TICKER_SUCCESS_FILE = CRON_DIR / "ticker_last_success"
 # Single source of truth for the ticker interval (scheduler_provider.py) and the staleness
-# threshold in `hermes cron status` (hermes_cli/cron.py), so they never drift apart.
+# threshold in `noone cron status` (agent_cli/cron.py), so they never drift apart.
 TICKER_INTERVAL_SECONDS = 60
 
 # In-process lock for load_jobs→modify→save_jobs cycles; without it, parallel tick threads'
@@ -174,7 +174,7 @@ _IMPORT_STORE = _CronStorePaths(CRON_DIR, JOBS_FILE, OUTPUT_DIR)
 def _current_cron_store() -> _CronStorePaths:
     """Paths pinned to this execution context's profile. Precedence: (1) active use_cron_store()
     override; (2) deliberately re-pointed module constants; (3) the ACTIVE profile home via
-    get_hermes_home(), so re-pointing HERMES_HOME after import uses ITS OWN store rather than the
+    get_agent_home(), so re-pointing HERMES_HOME after import uses ITS OWN store rather than the
     user's real jobs.json frozen at import; (4) import-time constants."""
     override = _cron_store_override.get()
     if override is not None:
@@ -182,7 +182,7 @@ def _current_cron_store() -> _CronStorePaths:
     live_constants = _CronStorePaths(CRON_DIR, JOBS_FILE, OUTPUT_DIR)
     if live_constants != _IMPORT_STORE:
         return live_constants
-    home = get_hermes_home().resolve()
+    home = get_agent_home().resolve()
     if home == HERMES_DIR:
         return live_constants
     return _CronStorePaths.for_dir(home / "cron")
@@ -579,13 +579,13 @@ def _is_recoverable_error_job(job: dict[str, Any]) -> bool:
 def _secure_dir(path: Path):
     """Owner-only (0700) via the shared helper, so cron/ and cron/output honor the same managed/
     container/HERMES_HOME_MODE rules as the rest of HERMES_HOME (#10757)."""
-    from hermes_cli.config import _secure_dir as _shared_secure_dir
+    from agent_cli.config import _secure_dir as _shared_secure_dir
     _shared_secure_dir(path)
 
 
 def _secure_file(path: Path):
     """Owner-only (0600) via the shared helper (managed/container skip included)."""
-    from hermes_cli.config import _secure_file as _shared_secure_file
+    from agent_cli.config import _secure_file as _shared_secure_file
     _shared_secure_file(path)
 
 
@@ -818,7 +818,7 @@ def parse_schedule(schedule: str) -> dict[str, Any]:
         try:
             dt = datetime.fromisoformat(schedule)
             # Naive timestamps become aware in the CONFIGURED Hermes timezone (not server-local):
-            # the due-check compares against hermes_time.now().
+            # the due-check compares against agent_time.now().
             # Make naive timestamps timezone-aware at parse time so the stored value doesn't depend on the
             # system timezone matching at check time. UTC) while now() runs in Asia/Kolkata, the stored
             # instant would land hours off from the user's wall-clock intent — far enough that one-shots
@@ -1258,7 +1258,7 @@ def compute_next_run(
     return None
 
 
-# --- Ticker heartbeat (liveness signal for `hermes cron status`) ---
+# --- Ticker heartbeat (liveness signal for `noone cron status`) ---
 
 def _write_marker(name: str, text: str, tmp_prefix: str) -> None:
     """Atomic (never torn) best-effort marker write; failures swallowed so markers never break the
@@ -1275,7 +1275,7 @@ def record_ticker_heartbeat(success: bool = False) -> None:
     "alive but failing" from "firing"; scoped per profile store.
 
     The ticker calls this once per loop iteration. ``success=True`` additionally bumps the *last successful
-    tick* marker. We track two distinct signals so `hermes cron status` can tell a thread that is merely
+    tick* marker. We track two distinct signals so `noone cron status` can tell a thread that is merely
     *alive and looping* (heartbeat fresh, success stale) from one that is actually *firing jobs* (both
     fresh) — a ticker stuck failing every tick would otherwise keep the plain heartbeat fresh and falsely
     report healthy (#32612, #32895).
@@ -1309,7 +1309,7 @@ def ticker_heartbeat_writer_alive() -> bool:
     bare-epoch stamp names no writer and is NOT proof of a live scheduler by itself."""
     fields = _read_marker_fields("ticker_heartbeat")
     try:
-        from hermes_cli._subprocess_compat import pid_exists_stdlib
+        from agent_cli._subprocess_compat import pid_exists_stdlib
         return len(fields) >= 2 and pid_exists_stdlib(int(fields[1]))
     except Exception:
         return False
@@ -1320,7 +1320,7 @@ def get_ticker_heartbeat_age() -> Optional[float]:
     not "dead").
 
     Resolution uses ``_current_cron_store()`` so the heartbeat is correctly scoped to the active profile —
-    critical under multiplex_profiles where ``hermes cron status`` must report per-profile liveness
+    critical under multiplex_profiles where ``noone cron status`` must report per-profile liveness
     (#69377).
     """
     return _epoch_file_age("ticker_heartbeat")
@@ -1330,7 +1330,7 @@ def get_ticker_success_age() -> Optional[float]:
     """Seconds since the ticker last completed a tick WITHOUT raising, or None.
 
     Resolution uses ``_current_cron_store()`` so the heartbeat is correctly scoped to the active profile —
-    critical under multiplex_profiles where ``hermes cron status`` must report per-profile liveness
+    critical under multiplex_profiles where ``noone cron status`` must report per-profile liveness
     (#69377).
     """
     return _epoch_file_age("ticker_last_success")
@@ -1730,7 +1730,7 @@ def _normalize_reasoning_effort(value: Any) -> Optional[str]:
     text = str(value).strip().lower()
     if not text:
         return None
-    from hermes_constants import parse_reasoning_effort
+    from agent_constants import parse_reasoning_effort
 
     if parse_reasoning_effort(text) is None:
         raise ValueError(
@@ -2234,7 +2234,7 @@ def trigger_job(job_id: str, extra_prompt: Optional[str] = None) -> Optional[dic
         name = job.get("name", job_id)
         raise ValueError(
             f"Cannot run: job '{name}' is {job.get('state')} (terminal). "
-            f"Create a new occurrence with 'hermes cron resume {name} "
+            f"Create a new occurrence with 'noone cron resume {name} "
             "--run-now' or '--at <ISO-8601>'.")
     manual_run_at = _hermes_now().isoformat()
     return update_job(job["id"], {
@@ -2254,7 +2254,7 @@ def _claim_is_live(claim: Any, now: datetime, ttl_seconds: float) -> bool:
     """True for a well-formed claim aged within ``[0, ttl)`` whose owner is not provably dead:
     future-dated (clock/TZ skew) or malformed claims count as stale so they can never wedge a
     job, and a same-host owner pid that has exited releases the claim immediately instead of
-    after the TTL (a killed ``hermes cron run`` otherwise blocks the next manual run for the
+    after the TTL (a killed ``noone cron run`` otherwise blocks the next manual run for the
     full window with "already being fired")."""
     if not isinstance(claim, dict) or not claim.get("at"):
         return False
@@ -2813,7 +2813,7 @@ COMPLETED_ONESHOT_RETENTION_DAYS = 7
 def _cron_config_number(key: str, default: Any, cast: Callable[[Any], Any]) -> Any:
     """Read ``cron.<key>`` from config as *cast*, falling back to *default* on any failure."""
     try:
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         cfg = load_config() or {}
         cron_cfg = cfg.get("cron", {}) if isinstance(cfg, dict) else {}
         return cast(cron_cfg.get(key, default))
@@ -3138,7 +3138,7 @@ def _oneshot_dispatch_limit_reached(job: dict[str, Any], scan: _DueScan) -> bool
             "Job '%s': one-shot dispatch limit reached (%d/%d) on a record that already completed "
             "a run (last_run_at=%s) — removing it WITHOUT firing. This record was re-armed "
             "without a budget reset (pre-#93615 store or hand edit); re-run it with "
-            "'hermes cron resume <job> --run-now' (#93524).",
+            "'noone cron resume <job> --run-now' (#93524).",
             name, completed, times, job.get("last_run_at"))
     else:
         logger.info(
@@ -3317,7 +3317,7 @@ def _get_due_jobs_locked() -> list[dict[str, Any]]:
 
 # Per-run output files (`cron/output/<job>/<timestamp>.md`) are capped so a frequent job can't fill
 # the disk.
-# Unlike the quick-snapshot store (`hermes_cli.backup`, capped at 20) it had no retention, so a
+# Unlike the quick-snapshot store (`agent_cli.backup`, capped at 20) it had no retention, so a
 # frequently-scheduled job on a long-running deploy accumulated one file per run forever and could fill the
 # disk (#52383). Keep the most recent N files per job; a non-positive value disables pruning (opt-out).
 _CRON_OUTPUT_DEFAULT_KEEP = 50

@@ -67,11 +67,11 @@ async function fixture(): Promise<{
       token: '1234567890abcdef',
       displayName: 'Hermes fresh-preview-29',
       appId: 'chat.nous.hermes.h1234567890abcdef',
-      appNamePascal: 'HermesH1234567890abcdef',
-      artifactNamePascal: 'HermesH1234567890abcdef',
+      appNamePascal: 'AgentH1234567890abcdef',
+      artifactNamePascal: 'AgentH1234567890abcdef',
       cliName: 'hermes-fresh-preview-29',
-      windowsExecutableName: 'HermesH1234567890abcdef.exe',
-      msixAppIdWithOrg: 'NousResearch.HermesH1234567890abcdef'
+      windowsExecutableName: 'AgentH1234567890abcdef.exe',
+      msixAppIdWithOrg: 'NousResearch.AgentH1234567890abcdef'
     }
   }
 

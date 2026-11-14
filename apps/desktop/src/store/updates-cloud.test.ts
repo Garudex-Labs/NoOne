@@ -3,12 +3,12 @@
 // toast or flow left anywhere can start an update Hermes Cloud owns.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesConnection } from '@/global'
+import type { AgentConnection } from '@/global'
 
 const checkHermesUpdateSpy = vi.fn()
 const updateHermesSpy = vi.fn()
 
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   checkHermesUpdate: (...args: unknown[]) => checkHermesUpdateSpy(...args),
   getActionStatus: vi.fn(),
@@ -24,7 +24,7 @@ const { setConnection } = await import('./session')
 const clientCheck = vi.fn().mockResolvedValue({ supported: true, behind: 2, targetSha: 'a' })
 const clientApply = vi.fn().mockResolvedValue({ ok: true })
 
-const remote = (baseUrl: string): HermesConnection => ({
+const remote = (baseUrl: string): AgentConnection => ({
   baseUrl,
   isFullscreen: false,
   logs: [],

@@ -16,8 +16,8 @@ from contextvars import ContextVar
 from pathlib import Path
 from typing import Callable, Dict, Iterator, List, Optional, Tuple
 
-from hermes_cli.config import cfg_get
-from hermes_constants import get_hermes_dir, get_hermes_home
+from agent_cli.config import cfg_get
+from agent_constants import get_agent_dir, get_agent_home
 
 from agent.provider_media import GENERATED_SUBDIR, MEDIA_CACHE_MAX_AGE_HOURS
 from agent.skill_utils import EXCLUDED_SKILL_DIRS
@@ -72,7 +72,7 @@ def register_credential_file(relative_path: str, container_base: str = "/root/.h
     skill what the read surface denies. Fails CLOSED (logged) if the guard is unavailable or raises.
     """
     resolved = _contained_host_path(
-        relative_path, get_hermes_home(),
+        relative_path, get_agent_home(),
         "credential_files: rejected absolute path %r (must be relative to HERMES_HOME)",
         "credential_files: rejected path traversal %r (%s)")
     if resolved is None:
@@ -124,16 +124,16 @@ def _load_config_files() -> list[dict[str, str]]:
     """Load ``terminal.credential_files`` from config.yaml (cached per profile home: the
     multiplexed gateway must never mount the launch profile's credential files into a
     secondary profile's sandbox)."""
-    from hermes_constants import hermes_home_key
-    home_key = hermes_home_key()
+    from agent_constants import agent_home_key
+    home_key = agent_home_key()
     cached = _config_files.get(home_key)
     if cached is not None:
         return cached
 
     result: list[dict[str, str]] = []
     try:
-        from hermes_cli.config import read_raw_config
-        hermes_home = get_hermes_home()
+        from agent_cli.config import read_raw_config
+        hermes_home = get_agent_home()
         cred_files = cfg_get(read_raw_config(), "terminal", "credential_files")
         for item in cred_files if isinstance(cred_files, list) else []:
             rel = item.strip() if isinstance(item, str) else ""
@@ -171,7 +171,7 @@ def _skill_dir_roots(container_base: str) -> Iterator[tuple[Path, str]]:
     project-local at ``<base>/project_skills/<i>`` (own namespace so paths stay stable if external_dirs change).
     """
     base = container_base.rstrip("/")
-    skills_dir = get_hermes_home() / "skills"
+    skills_dir = get_agent_home() / "skills"
     if skills_dir.is_dir():
         yield skills_dir, f"{base}/skills"
     try:
@@ -243,7 +243,7 @@ def iter_skills_files(container_base: str = "/root/.hermes") -> list[dict[str, s
 
 # --- Cache directory mounts (documents, images, audio, videos, screenshots) ---
 
-# (new_subpath, old_name) pairs matching hermes_constants.get_hermes_dir().
+# (new_subpath, old_name) pairs matching agent_constants.get_agent_dir().
 _GENERATED_CACHE = f"cache/{GENERATED_SUBDIR}"
 _CACHE_DIRS: list[tuple[str, str]] = [
     ("cache/documents", "document_cache"),
@@ -257,7 +257,7 @@ _CACHE_DIRS: list[tuple[str, str]] = [
     # Unswept generated image/video deliverables (#126445) need their own mount/sync
     # entry or remote backends never see them. No legacy alias exists.
     (_GENERATED_CACHE, _GENERATED_CACHE),
-    # Flat top-level desktop staging dirs (tui_gateway attach RPCs; no legacy alias),
+    # Flat top-level desktop staging dirs (agent_backend attach RPCs; no legacy alias),
     # mounted so vision/file tools in sandboxes reach uploads and dropped files.
     # Mount it so vision can reach uploads inside sandbox containers (#69575). No legacy alias exists, so
     # both tuple slots are ``images``.
@@ -279,18 +279,18 @@ def _cache_dir_roots(container_base: str, *, create_missing: bool) -> Iterator[t
     """Yield ``(host_dir, container_root)`` per cache dir; always maps to the *new* container layout."""
     base = container_base.rstrip("/")
     for new_subpath, old_name in _CACHE_DIRS:
-        host_dir = get_hermes_dir(new_subpath, old_name)
+        host_dir = get_agent_dir(new_subpath, old_name)
         if not host_dir.is_dir():
             if not create_missing:
                 continue
             # Docker snapshots this list at container CREATION, so a dir appearing later
             # would dangle for the container's life: create it now (empty bind mount is free).
-            # get_hermes_dir already picked new-vs-legacy, so this can't shadow a legacy dir.
+            # get_agent_dir already picked new-vs-legacy, so this can't shadow a legacy dir.
             try:
                 # Create missing staging dirs instead of skipping them: Docker snapshots this mount list at
                 # container CREATION, so a dir that appears later (first desktop attachment, first clipboard
                 # image) would dangle for the whole life of a persistent container (#76577). An empty
-                # bind-mounted dir costs nothing; a missing mount costs the feature. get_hermes_dir()
+                # bind-mounted dir costs nothing; a missing mount costs the feature. get_agent_dir()
                 # already resolved new-vs-legacy layout, so creating its answer cannot shadow a populated
                 # legacy dir.
                 host_dir.mkdir(parents=True, exist_ok=True)
@@ -300,7 +300,7 @@ def _cache_dir_roots(container_base: str, *, create_missing: bool) -> Iterator[t
 
 
 def get_cache_directory_mounts(container_base: str = "/root/.hermes") -> list[dict[str, str]]:
-    """Bind-mount entries for each cache directory (host layout via ``get_hermes_dir``)."""
+    """Bind-mount entries for each cache directory (host layout via ``get_agent_dir``)."""
     return [_mount(h, c) for h, c in _cache_dir_roots(container_base, create_missing=True)]
 
 

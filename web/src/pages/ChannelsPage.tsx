@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { appText } from '@noone/shared/application-identity';
 import {
   AlertTriangle,
   Bot,
@@ -14,8 +14,8 @@ import {
   Settings2,
   WifiOff,
   X,
-} from "lucide-react";
-import * as QRCode from "qrcode";
+} from "@noone/ui/icons";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
 import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Card, CardContent } from "@nous-research/ui/ui/components/card";
@@ -24,7 +24,14 @@ import { Label } from "@nous-research/ui/ui/components/label";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Switch } from "@nous-research/ui/ui/components/switch";
 import { Toast } from "@nous-research/ui/ui/components/toast";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
+import * as QRCode from "qrcode";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+
+import { AllowlistInput } from "@/components/AllowlistInput";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { usePageHeader } from "@/contexts/usePageHeader";
+import { useAppName } from '@/hooks/useAppName';
+import { useModalBehavior } from "@/hooks/useModalBehavior";
 import { api } from "@/lib/api";
 import type {
   MessagingPlatform,
@@ -33,14 +40,10 @@ import type {
   TelegramOnboardingStartResponse,
   WhatsAppOnboardingStartResponse,
 } from "@/lib/api";
-import { useModalBehavior } from "@/hooks/useModalBehavior";
-import { AllowlistInput } from "@/components/AllowlistInput";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { usePageHeader } from "@/contexts/usePageHeader";
-import { cn, themedBody } from "@/lib/utils";
 import { errorMessage } from "@/lib/api-error";
-import { RelayLinkPanel } from "./ChannelsRelayLink";
+import { cn, themedBody } from "@/lib/utils";
 
+import { RelayLinkPanel } from "./ChannelsRelayLink";
 // State → badge mapping. The backend emits a small, fixed vocabulary plus
 // whatever the live gateway runtime reports (connected/disconnected/fatal).
 const STATE_BADGE: Record<
@@ -156,15 +159,15 @@ function normalizeWhatsAppMode(mode: unknown): "bot" | "self-chat" | null {
 }
 
 export default function ChannelsPage() {
+  const appName = useAppName();
   const [platforms, setPlatforms] = useState<MessagingPlatform[]>([]);
   const [envPath, setEnvPath] = useState("~/.hermes/.env");
   const [gatewayStartCommand, setGatewayStartCommand] = useState(
-    "hermes gateway start",
+    "noone gateway start",
   );
   const [loading, setLoading] = useState(true);
   const { toast, showToast } = useToast();
   const { setEnd } = usePageHeader();
-
   // Config modal state
   const [editing, setEditing] = useState<MessagingPlatform | null>(null);
   const [draftEnv, setDraftEnv] = useState<Record<string, string>>({});
@@ -190,7 +193,7 @@ export default function ChannelsPage() {
       .then((res) => {
         setPlatforms(res.platforms);
         setEnvPath(res.env_path || "~/.hermes/.env");
-        setGatewayStartCommand(res.gateway_start_command || "hermes gateway start");
+        setGatewayStartCommand(res.gateway_start_command || "noone gateway start");
       })
       .catch((e) => showToast(`Could not load channels: ${errorMessage(e)}`, "error"));
   }, [showToast]);
@@ -334,7 +337,7 @@ export default function ChannelsPage() {
       </Button>,
     );
     return () => setEnd(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [setEnd, restarting]);
 
   const configured = useMemo(
@@ -487,9 +490,7 @@ export default function ChannelsPage() {
                     </a>
                   </div>
                   <p className="text-xs">
-                    You can leave allowed users blank. Hermes will then send new DM
-                    users a code that you approve from the Pairing page.
-                  </p>
+                    {appText("You can leave allowed users blank. {app_name} will then send new DM\n                    users a code that you approve from the Pairing page.\n                  ", appName)}</p>
                 </div>
               )}
               <p className="text-xs text-muted-foreground">
@@ -733,6 +734,7 @@ export function WhatsAppOnboardingPanel({
   setRestartNeeded: (needed: boolean) => void;
   showToast: (message: string, type: "success" | "error") => void;
 }) {
+  const appName = useAppName();
   const configuredMode = useMemo(
     () => normalizeWhatsAppMode(platform.whatsapp_setup?.mode),
     [platform.whatsapp_setup?.mode],
@@ -751,7 +753,6 @@ export function WhatsAppOnboardingPanel({
   const [confirmRepair, setConfirmRepair] = useState(false);
   const [error, setError] = useState("");
   const [tick, setTick] = useState(0);
-
   useEffect(() => {
     if (!setup && phase === "idle" && configuredMode) {
       setMode(configuredMode);
@@ -923,7 +924,7 @@ export function WhatsAppOnboardingPanel({
   const expiresIn = useMemo(
     () => (setup ? formatExpiry(setup.expires_at) : ""),
     // tick keeps the memo fresh without recalculating on every render branch.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [setup, tick],
   );
   const setupStatusLabel =
@@ -1063,9 +1064,7 @@ export function WhatsAppOnboardingPanel({
 
               {phase === "waiting" && (
                 <div className="text-xs text-muted-foreground">
-                  After saving, unknown DMs use Hermes pairing codes unless their
-                  number is already allowed.
-                </div>
+                  {appText("After saving, unknown DMs use {app_name} pairing codes unless their\n                  number is already allowed.\n                ", appName)}</div>
               )}
 
               {(phase === "connected" || phase === "applying") && (
@@ -1165,6 +1164,7 @@ function TelegramOnboardingPanel({
   setRestartNeeded: (needed: boolean) => void;
   showToast: (message: string, type: "success" | "error") => void;
 }) {
+  const appName = useAppName();
   const [setup, setSetup] = useState<TelegramOnboardingStartResponse | null>(
     null,
   );
@@ -1178,7 +1178,6 @@ function TelegramOnboardingPanel({
   const [newAllowedId, setNewAllowedId] = useState("");
   const [error, setError] = useState("");
   const [tick, setTick] = useState(0);
-
   useEffect(() => {
     if (!setup || phase !== "waiting") return;
     let cancelled = false;
@@ -1291,7 +1290,7 @@ function TelegramOnboardingPanel({
     setNewAllowedId("");
   };
 
-  // restart_started only means the `hermes gateway restart` child spawned —
+  // restart_started only means the `noone gateway restart` child spawned —
   // not that the restart will succeed (e.g. systemd linger missing, service
   // manager failure). Poll the action status briefly and surface a non-zero
   // exit via the manual-restart banner. Note: in no-service installs the
@@ -1360,7 +1359,7 @@ function TelegramOnboardingPanel({
   const expiresIn = useMemo(
     () => (setup ? formatExpiry(setup.expires_at) : ""),
     // tick keeps the memo fresh without recalculating on every render branch.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [setup, tick],
   );
 
@@ -1371,9 +1370,7 @@ function TelegramOnboardingPanel({
           Choose how to connect your Telegram bot
         </span>
         <span className="text-xs text-muted-foreground">
-          Both options connect a bot you control and save its credentials only to
-          this Hermes installation.
-        </span>
+          {appText("Both options connect a bot you control and save its credentials only to\n          this {app_name} installation.\n        ", appName)}</span>
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 sm:divide-x sm:divide-border">
@@ -1385,9 +1382,7 @@ function TelegramOnboardingPanel({
             <Badge tone="success">recommended</Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            Scan a QR code and confirm in Telegram. Hermes creates the bot and
-            detects your Telegram user ID automatically.
-          </p>
+            {appText("Scan a QR code and confirm in Telegram. {app_name} creates the bot and\n            detects your Telegram user ID automatically.\n          ", appName)}</p>
           <Button
             size="sm"
             className="w-fit uppercase"

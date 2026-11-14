@@ -38,7 +38,7 @@ def owner_run(tmp_path, monkeypatch):
 
 
 def test_sessiondb_init_preserves_multiplex_profile_context(owner_run, tmp_path):
-    from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
 
     owner, job, execution_id, agent_cls = owner_run
     profile_home = tmp_path / "profiles" / "jobsearch"
@@ -46,15 +46,15 @@ def test_sessiondb_init_preserves_multiplex_profile_context(owner_run, tmp_path)
     observed = []
 
     def acquire(path):
-        observed.append((path, get_hermes_home()))
+        observed.append((path, get_agent_home()))
         return owner.db
 
-    token = set_hermes_home_override(profile_home)
+    token = set_agent_home_override(profile_home)
     try:
-        with patch("hermes_state_registry.acquire", side_effect=acquire):
+        with patch("agent_state_registry.acquire", side_effect=acquire):
             success, _, response, error = scheduler.run_job(job, execution_id=execution_id)
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
     assert (success, response, error) == (True, "ok", None)
     assert observed == [(profile_home / "state.db", profile_home)]
     assert agent_cls.call_args.kwargs["session_db"] is owner.db
@@ -77,7 +77,7 @@ def test_run_job_does_not_hang_when_sessiondb_init_wedges(owner_run, tmp_path, m
         return owner.db
 
     try:
-        with patch("hermes_state_registry.acquire", side_effect=acquire):
+        with patch("agent_state_registry.acquire", side_effect=acquire):
             started = time.monotonic()
             success, _, response, error = scheduler.run_job(job, execution_id=execution_id)
             elapsed = time.monotonic() - started
@@ -98,7 +98,7 @@ def test_run_job_does_not_hang_when_sessiondb_init_wedges(owner_run, tmp_path, m
 def test_owner_store_failure_never_runs_unpersisted_agent(owner_run, failure):
     owner, job, execution_id, agent_cls = owner_run
     wrong_db = MagicMock()
-    with patch("hermes_state_registry.acquire", return_value=wrong_db,
+    with patch("agent_state_registry.acquire", return_value=wrong_db,
                side_effect=OSError("store unavailable") if failure == "acquire-error" else None):
         success, _, response, error = scheduler.run_job(job, execution_id=execution_id)
     assert not success and response == ""
@@ -136,7 +136,7 @@ def test_guard_is_released_and_job_refires_after_sessiondb_hang(owner_run, monke
     with jobs.use_cron_store(owner.db.db_path.parent):
         saved = jobs.create_job(prompt="hello", schedule="every 5m", deliver="local")
         try:
-            with patch("hermes_state_registry.acquire", side_effect=acquire), \
+            with patch("agent_state_registry.acquire", side_effect=acquire), \
                  patch("cron.scheduler_authority.run_canonical_job", side_effect=admitted), \
                  patch("cron.scheduler_authority.reconcile_pending"), \
                  patch.object(scheduler, "get_due_jobs", return_value=[saved]):
@@ -158,7 +158,7 @@ def test_guard_is_released_and_job_refires_after_sessiondb_hang(owner_run, monke
 def test_wake_gate_false_never_opens_session_db(owner_run):
     _, job, execution_id, agent_cls = owner_run
     job["script"] = "gate.py"
-    with patch("hermes_state_registry.acquire") as acquire, \
+    with patch("agent_state_registry.acquire") as acquire, \
          patch("cron.scheduler._run_job_script_with_claim_heartbeat", return_value=(True, '{"wakeAgent": false}')):
         success, _, _, error = scheduler.run_job(job, execution_id=execution_id)
     assert success and error is None

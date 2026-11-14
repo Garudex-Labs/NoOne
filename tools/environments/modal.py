@@ -11,7 +11,7 @@ import threading
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from tools.environments.base import BaseEnvironment, _load_json_store, _update_json_store
 from tools.environments.base_output import _ThreadedProcessHandle
 from tools.environments.file_sync import (
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 def _snapshot_store() -> Path:
     # Resolved per call: the multiplexed gateway serves every profile from one process, so an
     # import-time path would keep every profile's snapshots in the launch profile's home.
-    return get_hermes_home() / "modal_snapshots.json"
+    return get_agent_home() / "modal_snapshots.json"
 
 
 def _load_snapshots() -> dict:

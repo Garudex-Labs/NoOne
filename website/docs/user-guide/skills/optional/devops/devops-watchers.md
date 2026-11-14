@@ -1,45 +1,53 @@
 ---
 title: "Watchers — Poll RSS, JSON APIs, and GitHub with watermark dedup"
-sidebar_label: "Watchers"
+sidebarTitle: "Watchers"
 description: "Poll RSS, JSON APIs, and GitHub with watermark dedup"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Watchers
+# Watchers {#watchers}
 
 Poll RSS, JSON APIs, and GitHub with watermark dedup.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/devops/watchers` |
+| Source | Optional — install with `noone skills install official/devops/watchers` |
 | Path | `optional-skills/devops/watchers` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `cron`, `polling`, `rss`, `github`, `http`, `automation`, `monitoring` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Watchers
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Watchers {#watchers-1}
 
 Poll external sources on an interval and react only to new items. Three ready-made scripts plus a shared watermark helper; wire them into a cron job (or run them ad-hoc from the terminal).
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User wants to watch an RSS/Atom feed and be notified of new entries
 - User wants to watch a GitHub repo's issues / pulls / releases / commits
 - User wants to poll an arbitrary JSON endpoint and get notified on new items
 - User asks for "a watcher for X" or "notify me when X changes"
 
-## Mental model
+## Mental model {#mental-model}
 
 A watcher is just a script that:
 
@@ -50,7 +58,7 @@ A watcher is just a script that:
 
 The scripts below handle all three. The agent runs them via the terminal tool — from a cron job, a webhook, or an interactive chat — and reports what's new.
 
-## Ready-made scripts
+## Ready-made scripts {#ready-made-scripts}
 
 All three live in `$HERMES_HOME/skills/devops/watchers/scripts/` once the skill is installed. Each reads `WATCHER_STATE_DIR` (defaults to `$HERMES_HOME/watcher-state/`) for its state file, keyed by the `--name` argument.
 
@@ -68,7 +76,7 @@ All three:
 - Empty stdout on no-new — the caller treats that as silent
 - Non-zero exit on fetch errors
 
-## Usage
+## Usage {#usage}
 
 Run a watcher directly from the terminal tool:
 
@@ -81,7 +89,7 @@ Watch a GitHub repo (set `GITHUB_TOKEN` in `${HERMES_HOME:-~/.hermes}/.env` to a
 
 ```bash
 python $HERMES_HOME/skills/devops/watchers/scripts/watch_github.py \
-  --name hermes-issues --repo NousResearch/hermes-agent --scope issues
+  --name hermes-issues --repo Garudex-Labs/NoOne --scope issues
 ```
 
 Poll an arbitrary JSON API:
@@ -92,7 +100,7 @@ python $HERMES_HOME/skills/devops/watchers/scripts/watch_http_json.py \
   --id-field event_id --items-path data.events
 ```
 
-## Wiring into cron
+## Wiring into cron {#wiring-into-cron}
 
 Ask the agent to schedule a cron job with a prompt like:
 
@@ -100,7 +108,7 @@ Ask the agent to schedule a cron job with a prompt like:
 
 The agent invokes the script via the terminal tool inside the cron job's agent loop; no changes to cron's built-in `--script` flag are needed.
 
-## State files
+## State files {#state-files}
 
 Every watcher writes `$HERMES_HOME/watcher-state/<name>.json`. Inspect:
 
@@ -114,11 +122,11 @@ Force a replay (next run treated as first poll):
 rm $HERMES_HOME/watcher-state/hn.json
 ```
 
-## Writing your own
+## Writing your own {#writing-your-own}
 
 All three scripts use the same template: load watermark, fetch, diff, save, emit. `scripts/_watermark.py` is the shared helper; import it to get atomic writes + bounded ID set + first-run baseline for free. See any of the three reference scripts for how little boilerplate it takes.
 
-## Common Pitfalls
+## Common Pitfalls {#common-pitfalls}
 
 1. **Printing a "no new items" header every tick.** Callers rely on empty stdout = silent. If you print anything on an empty delta, you spam the channel. The shipped scripts handle this; custom scripts must too.
 2. **Expecting the first run to emit items.** It won't — first run records a baseline. If you need an initial digest, delete the state file after the first run or add a `--prime-with-latest N` flag in your own script.

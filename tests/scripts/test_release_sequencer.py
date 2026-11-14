@@ -9,6 +9,13 @@ import json
 import subprocess
 
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def admitted_synthetic_sources(monkeypatch):
+    # This corpus models already-admitted project receipts with synthetic SHAs.
+    # Actual fork ancestry/marker admission is tested with real Git imports.
+    monkeypatch.setattr("scripts.releases.sequencer.is_project_release_commit", lambda commit: True)
 from datetime import UTC
 
 

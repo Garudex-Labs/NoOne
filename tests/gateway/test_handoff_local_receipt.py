@@ -40,7 +40,7 @@ async def _handoff(runner, authority, sid, source):
     """The handoff watcher's repoint (``GatewayStartupMixin._handoff_repoint``) on the real store."""
     from gateway.run_startup import GatewayStartupMixin
     from gateway.session import AsyncSessionStore
-    from hermes_state import AsyncSessionDB
+    from agent_state import AsyncSessionDB
     route = runner.session_store._generate_session_key(source)
     gateway = SimpleNamespace(_session_db=AsyncSessionDB(authority.db), session_authority=authority,
                               async_session_store=AsyncSessionStore(runner.session_store))
@@ -50,9 +50,9 @@ async def _handoff(runner, authority, sid, source):
 
 def _as_an_older_build(monkeypatch):
     """An older build's repoint: the row's routing identity moves, its local receipt stays."""
-    import hermes_state_local
+    import agent_state_local
     for name in ('hand_off_conversations', 'release_receipts'):
-        monkeypatch.setattr(hermes_state_local, name, lambda *_args: None, raising=False)
+        monkeypatch.setattr(agent_state_local, name, lambda *_args: None, raising=False)
 
 
 @pytest.mark.asyncio
@@ -69,8 +69,8 @@ async def test_a_handed_off_bot_chat_opens_on_its_lane_after_a_restart(tmp_path,
     from gateway.session_local import create_local_session
     from gateway.session_local_recovery import transcript_target
     from gateway.session_local_title import resolve_titled_session
-    from hermes_state_local import POLICY_PREFIX, local_receipt
-    from hermes_state_local_migration import LEGACY_PREFIX
+    from agent_state_local import POLICY_PREFIX, local_receipt
+    from agent_state_local_migration import LEGACY_PREFIX
 
     runner = _Runner(tmp_path)
     warm = await initialize_session_authority(runner, profile_id='fixture', instance_id='warm')
@@ -104,7 +104,7 @@ async def test_a_handed_off_bot_chat_opens_on_its_lane_after_a_restart(tmp_path,
         # The Desktop that ran /handoff still holds the chat open.
         warm.authorize(owner, ref, 'session:read')
         if history == 'reset':  # its pre-/new segment is the lane's history now
-            warm.authorize(owner, ref, 'session:control')  # Teknium's ruling: writable, detached off the lane
+            warm.authorize(owner, ref, 'session:control')  # writable, detached off the lane
         else:
             warm.authorize(owner, ref, 'session:control')
             assert transcript_target(warm, ref) == warm.physical_target(ref)
@@ -123,8 +123,8 @@ async def test_a_handed_off_bot_chat_opens_on_its_lane_after_a_restart(tmp_path,
     assert json.loads(tip['origin_json'])['platform'] == 'telegram'
     if history == 'reset':  # the earlier segment opens off that lane
         cold.authorize(webapp, ref, 'session:read')
-        assert cold.sessions[ref.session_id].detached  # Teknium's ruling: off that lane, on its own key
-        cold.authorize(webapp, ref, 'session:control')  # Teknium's ruling: writable, detached off the lane
+        assert cold.sessions[ref.session_id].detached  # off that lane, on its own key
+        cold.authorize(webapp, ref, 'session:control')  # writable, detached off the lane
 
 
 @pytest.mark.asyncio
@@ -135,7 +135,7 @@ async def test_a_receipt_whose_current_segment_is_still_local_is_never_released(
     from gateway.session_authority import initialize_session_authority
     from gateway.session_contract import SessionActor
     from gateway.session_local import create_local_session
-    from hermes_state_local import local_receipt
+    from agent_state_local import local_receipt
     runner = _Runner(tmp_path)
     warm = await initialize_session_authority(runner, profile_id='fixture', instance_id='warm')
     owner = SessionActor('owner', 'fixture', frozenset({'session:create', 'session:read', 'session:control'}), 'socket')
@@ -195,8 +195,8 @@ async def _bot_row(authority, actor):
     empty but the roster names a chat, so the two must agree."""
     from pathlib import Path
     from gateway.session_controls import AuthorityConnection
-    from tui_gateway.server import _profile_session_fields
-    from tui_gateway.profile_roster_cache import invalidate
+    from agent_backend.server import _profile_session_fields
+    from agent_backend.profile_roster_cache import invalidate
     invalidate()
     roster = {}
     _profile_session_fields(roster, Path(authority.db.db_path).parent)
@@ -214,7 +214,7 @@ async def test_a_handed_off_bot_chat_whose_lane_moved_on_is_moved_aside(tmp_path
     """After the platform's own ``/new`` the handed-off chat is that lane's history: the canonical
     title moves aside at once, so the Bots row's roster and its registry lookup agree at every step
     (warm, cold) and its click mints a fresh Bot Chat; the Desktop still viewing the old one is
-    detached onto its own key (Teknium's ruling: still writable, never reaching the chat)."""
+    detached onto its own key (still writable, never reaching the chat)."""
     from gateway.session_authority import initialize_session_authority
     from gateway.session_bot import _target
     from gateway.session_controls import AuthorityConnection
@@ -225,7 +225,7 @@ async def test_a_handed_off_bot_chat_whose_lane_moved_on_is_moved_aside(tmp_path
     newer = warm.register(telegram)
     assert newer != ref and warm.sessions[newer.session_id].route == route
     assert warm.sessions[ref.session_id].detached and warm.agent(ref) is None
-    warm.authorize(owner, ref, 'session:control')  # Teknium's ruling: writable, detached off the lane
+    warm.authorize(owner, ref, 'session:control')  # writable, detached off the lane
 
     cold_runner = _Runner(tmp_path)
     cold = await initialize_session_authority(cold_runner, profile_id='fixture', instance_id='cold')
@@ -261,19 +261,19 @@ async def test_a_second_chat_handed_off_to_the_same_home_chat_supersedes_the_fir
     assert await _handoff(runner, warm, other.session_id, telegram) == route
     assert warm.logical_owner(runner.session_store.lookup_by_session_key(route).session_id) == other.session_id
     warm.authorize(owner, other, 'session:submit')
-    warm.authorize(owner, ref, 'session:submit')  # Teknium's ruling: writable, detached off the lane
+    warm.authorize(owner, ref, 'session:submit')  # writable, detached off the lane
     assert warm.agent(ref) is None
     assert await _bot_row(warm, owner) is None
 
     # H handed off there again: the lane names H once more, and Y is the one that is history now.
     await _handoff(runner, warm, ref.session_id, telegram)
     warm.authorize(owner, ref, 'session:submit')
-    warm.authorize(owner, other, 'session:submit')  # Teknium's ruling: writable, detached off the lane
+    warm.authorize(owner, other, 'session:submit')  # writable, detached off the lane
 
     cold = await initialize_session_authority(_Runner(tmp_path), profile_id='fixture', instance_id='cold')
     cold.authorize(owner, ref, 'session:control')
     cold.authorize(owner, other, 'session:read')
-    cold.authorize(owner, other, 'session:control')  # Teknium's ruling: writable, detached off the lane
+    cold.authorize(owner, other, 'session:control')  # writable, detached off the lane
 
 
 @pytest.mark.asyncio
@@ -337,7 +337,7 @@ def _resume_gateway(runner, authority):
     """The platform's ``/resume`` handler (``GatewayRunner._handle_resume_command``) on the real store,
     run by an admin (``--all`` widens it to every titled conversation)."""
     from gateway.run import GatewayRunner
-    from hermes_state import AsyncSessionDB
+    from agent_state import AsyncSessionDB
     gateway = object.__new__(GatewayRunner)
     gateway.adapters, gateway.config, gateway._voice_mode, gateway._running_agents = {}, runner.config, {}, {}
     gateway._session_db, gateway.session_store = AsyncSessionDB(authority.db), runner.session_store
@@ -357,7 +357,7 @@ async def test_a_platform_resume_of_a_local_conversation_continues_its_current_h
     from gateway.session_contract import SessionActor, SessionRef
     from gateway.session_local import create_local_session
     from gateway.session_local_title import resolve_titled_session
-    from hermes_state_local import local_receipt
+    from agent_state_local import local_receipt
     runner = _Runner(tmp_path)
     warm = await initialize_session_authority(runner, profile_id='fixture', instance_id='warm')
     owner = SessionActor('owner', 'fixture', frozenset({'session:create', 'session:read', 'session:control'}), 'socket')
@@ -389,13 +389,13 @@ async def test_a_moved_conversation_stays_writable_once_its_lane_is_taken_over(t
     continues its head, writable there. Once that lane is taken over (another chat handed off to
     it, or the platform's ``/new`` and its next inbound) the head is the lane's history, however it
     was mounted: the Desktop that followed it, a viewer or the lane's inbound after a restart. Its
-    route was the lane's, so it detaches onto its own key (Teknium's ruling): read, submit and control
+    route was the lane's, so it detaches onto its own key (The design rule): read, submit and control
     stay open and act on it alone, warm and after a restart."""
     from gateway.platforms.event import MessageEvent
     from gateway.session_authority import initialize_session_authority
     from gateway.session_contract import SessionActor, SessionRef
     from gateway.session_local import create_local_session
-    from hermes_state_local import local_receipt
+    from agent_state_local import local_receipt
     runner = _Runner(tmp_path)
     warm = await initialize_session_authority(runner, profile_id='fixture', instance_id='warm')
     owner = SessionActor('owner', 'fixture', frozenset({'session:create', 'session:read', 'session:control',
@@ -435,7 +435,7 @@ async def test_a_moved_conversation_stays_writable_once_its_lane_is_taken_over(t
     for authority in (warm, cold):
         authority.authorize(owner, head, 'session:read')
         for capability in ('session:submit', 'session:control'):
-            authority.authorize(owner, head, capability)  # Teknium's ruling: writable, detached off the lane
+            authority.authorize(owner, head, capability)  # writable, detached off the lane
         assert authority.agent(head) is None  # never the lane's running agent
 
 
@@ -458,7 +458,7 @@ async def test_a_moved_conversation_mounted_by_startup_recovery_stays_writable_o
     from tests.gateway.test_command_bypass_active_session import _StubAdapter
     monkeypatch.setenv('TELEGRAM_ALLOWED_USERS', '42')
     monkeypatch.setattr('gateway.run._hermes_home', tmp_path)
-    monkeypatch.setattr('hermes_state.DEFAULT_DB_PATH', tmp_path / 'state.db')
+    monkeypatch.setattr('agent_state.DEFAULT_DB_PATH', tmp_path / 'state.db')
 
     def boot():
         runner = GatewayRunner(GatewayConfig(multiplex_profiles=False, sessions_dir=tmp_path / 'sessions'))
@@ -500,7 +500,7 @@ async def test_a_moved_conversation_mounted_by_startup_recovery_stays_writable_o
         await _handoff(runner, cold, chat(cold, 'Chat B').session_id, telegram)
         cold.authorize(owner, a, 'session:read')
         for capability in ('session:submit', 'session:control'):
-            cold.authorize(owner, a, capability)  # Teknium's ruling: writable, detached off the lane
+            cold.authorize(owner, a, capability)  # writable, detached off the lane
         assert cold.sessions[a.session_id].detached and cold.agent(a) is None  # never the lane's
     finally:
         runner.session_store.close_all_db_handles()
@@ -531,7 +531,7 @@ async def test_a_moved_conversation_resumed_on_another_chat_moves_there(tmp_path
     a = chat('Chat A')
     await _handoff(runner, warm, a.session_id, first)
     await _handoff(runner, warm, chat('Chat B').session_id, first)
-    warm.authorize(owner, a, 'session:submit')  # Teknium's ruling: writable, detached off the lane
+    warm.authorize(owner, a, 'session:submit')  # writable, detached off the lane
     assert warm.sessions[a.session_id].detached and warm.agent(a) is None  # never chat 4242's
     await _resume_gateway(runner, warm)._handle_resume_command(
         MessageEvent(text='/resume --all Chat A', source=second))
@@ -545,7 +545,7 @@ async def test_a_moved_conversation_resumed_on_another_chat_moves_there(tmp_path
     runner.session_store.reset_session(route)
     warm.register(second)
     for capability in ('session:submit', 'session:control'):
-        warm.authorize(owner, a, capability)  # Teknium's ruling: writable, detached off the lane
+        warm.authorize(owner, a, capability)  # writable, detached off the lane
     assert warm.sessions[a.session_id].route != route and warm.agent(a) is None  # never chat 77's
 
 
@@ -554,7 +554,7 @@ async def test_a_moved_receipt_with_a_malformed_lineage_never_stops_the_boot(tmp
     from gateway.session_authority import initialize_session_authority
     from gateway.session_contract import SessionActor
     from gateway.session_local import create_local_session
-    from hermes_state_local import POLICY_PREFIX
+    from agent_state_local import POLICY_PREFIX
     runner = _Runner(tmp_path)
     warm = await initialize_session_authority(runner, profile_id='fixture', instance_id='warm')
     owner = SessionActor('owner', 'fixture', frozenset({'session:create', 'session:read', 'session:control'}), 'socket')
@@ -576,7 +576,7 @@ def _serve(tmp_path, monkeypatch):
     """A multiplexed gateway's homes: the default profile and a named ``bot`` profile, each with its
     own ``state.db``; ``bot`` delivers to a Telegram home channel."""
     from pathlib import Path
-    import hermes_state
+    import agent_state
     root = tmp_path / '.hermes'
     bot = root / 'profiles' / 'bot'
     bot.mkdir(parents=True, mode=0o700)
@@ -585,7 +585,7 @@ def _serve(tmp_path, monkeypatch):
         '    home_channel: {platform: telegram, chat_id: "-1001", name: Bot Home}\n')
     monkeypatch.setattr(Path, 'home', lambda: tmp_path)  # the profiles root is HOME-anchored
     monkeypatch.setenv('HERMES_HOME', str(root))
-    monkeypatch.setattr(hermes_state, 'DEFAULT_DB_PATH', hermes_state._IMPORT_DEFAULT_DB_PATH)
+    monkeypatch.setattr(agent_state, 'DEFAULT_DB_PATH', agent_state._IMPORT_DEFAULT_DB_PATH)
     return root, bot
 
 
@@ -626,8 +626,8 @@ async def test_a_named_profiles_handed_off_bot_chat_opens_on_its_lane_after_a_re
     from gateway.session_local import create_local_session
     from gateway.session_local_recovery import transcript_target
     from gateway.session_local_title import resolve_titled_session
-    from hermes_state_local import POLICY_PREFIX
-    from hermes_state_local_migration import LEGACY_PREFIX
+    from agent_state_local import POLICY_PREFIX
+    from agent_state_local_migration import LEGACY_PREFIX
 
     root, bot = _serve(tmp_path, monkeypatch)
     process_ownership.reserve([root, bot])

@@ -20,8 +20,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from hermes_cli.browser_runtime import chromium_executable
-from hermes_constants import get_hermes_home
+from agent_cli.browser_runtime import chromium_executable
+from agent_constants import get_agent_home
 from utils import atomic_json_write
 
 from plugins.google_meet import process_manager as pm
@@ -31,7 +31,7 @@ from plugins.google_meet.tools import resolve_node
 
 
 def _auth_state_path() -> Path:
-    return Path(get_hermes_home()) / "workspace" / "meetings" / "auth.json"
+    return Path(get_agent_home()) / "workspace" / "meetings" / "auth.json"
 
 
 # ``hermes meet <sub>`` in help order.

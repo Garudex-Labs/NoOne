@@ -1,5 +1,6 @@
 import type { ToolCallMessagePartProps } from '@assistant-ui/react'
 import { useStore } from '@nanostores/react'
+import { Book, Loader2, Plug } from '@noone/ui/icons'
 import { useMemo, useRef, useState } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'
@@ -10,7 +11,6 @@ import { WIDGET_SHELL_CLASS } from '@/components/chat/widget-shell'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useI18n } from '@/i18n'
-import { Book, Loader2, Plug } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { type AgentPluginInstallResult, installAgentPlugin } from '@/store/agent-plugins'
 import {

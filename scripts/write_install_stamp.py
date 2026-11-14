@@ -2,7 +2,7 @@
 
 All packagers (Docker, Nix, desktop) call this script to produce the same
 ``install-stamp.json`` file. Runtime surfaces (CLI, TUI, desktop) read the
-stamp through ``hermes_cli.version_info`` — no env vars, no separate
+stamp through ``agent_cli.version_info`` — no env vars, no separate
 docker/nix code paths.
 
 Usage::
@@ -35,19 +35,20 @@ from datetime import datetime, timezone, UTC
 from pathlib import Path
 
 # Bootstrap the repo root onto sys.path so the canary tag shape can come
-# from hermes_cli.update_channel — the single authority — instead of a
-# re-typed regex (hermes_cli/__init__.py is import-light).
+# from agent_cli.update_channel — the single authority — instead of a
+# re-typed regex (agent_cli/__init__.py is import-light).
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from hermes_cli import update_channel
-from hermes_cli.steward import UPDATE_MECHANISMS
+from agent_cli import update_channel
+from agent_cli.steward import UPDATE_MECHANISMS
+from agent_cli.version_info import project_version, release_history_start
 
 STAMP_SCHEMA_VERSION = 2
 _REPO_ROOT = Path(__file__).parent.parent.resolve()
 
 # Who applies the next update to the tree this stamp describes. REQUIRED —
 # stamp readers hard-fail a stamp without it.
-#   self             — `hermes update` owns the tree (installer-created
+#   self             — `noone update` owns the tree (installer-created
 #                      source checkouts).
 #   electron-updater — the in-app updater replaces the artifact (NSIS,
 #                      mac .app, AppImage).
@@ -105,6 +106,16 @@ def _resolve_commit_date_from_git() -> int | None:
 def _resolve_dirty_from_git() -> bool:
     status = _run_git("status", "--porcelain", "-uno")
     return status is not None and len(status) > 0
+
+
+def _project_base_version(value: str | None) -> str | None:
+    return project_version(_REPO_ROOT) if release_history_start(_REPO_ROOT) is not None else value
+
+
+def _project_release_stamp(stamp: dict) -> None:
+    if release_history_start(_REPO_ROOT) is not None:
+        version = project_version(_REPO_ROOT)
+        stamp.update(baseVersion=version, displayVersion=version, releaseVersion=version)
 
 
 def build_stamp(
@@ -193,6 +204,7 @@ def build_stamp(
     if dirty is None:
         dirty = _resolve_dirty_from_git()
 
+    base_version = _project_base_version(base_version)
     if base_version is None and not commit_admitted:
         raise ValueError(
             "install stamps require an explicit base version or commit; leave local development "
@@ -270,6 +282,7 @@ def build_stamp(
     if channel_request is not None:
         stamp["channelBuild"] = channel_request
         stamp["displayVersion"] = f'{base_version} ({channel_request["channel"]} #{channel_request["sequence"]}, {commit[:7]})'
+    _project_release_stamp(stamp)
     if runtime_dir is not None:
         stamp["runtimeDir"] = runtime_dir
     return stamp
@@ -305,7 +318,7 @@ def main() -> int:
         "--update-mechanism",
         required=True,
         choices=UPDATE_MECHANISMS,
-        help="Who applies the next update: 'self' (hermes update), "
+        help="Who applies the next update: 'self' (noone update), "
         "'app-installer' (Windows App Installer), 'electron-updater' (in-app updater), "
         "'external' (nix/docker/store)",
     )

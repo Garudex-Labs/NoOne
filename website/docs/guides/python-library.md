@@ -1,39 +1,46 @@
 ---
-sidebar_position: 5
-title: "Using Hermes as a Python Library"
+title: "Using the agent as a Python Library"
 description: "Embed AIAgent in your own Python scripts, web apps, or automation pipelines — no CLI required"
 ---
 
-# Using Hermes as a Python Library
+# Using {{app-name}} as a Python Library {#using-hermes-as-a-python-library}
 
-Hermes isn't just a CLI tool. You can import `AIAgent` directly and use it programmatically in your own Python scripts, web applications, or automation pipelines. This guide shows you how.
+{{app-name}} isn't just a CLI tool. You can import `AIAgent` directly and use it programmatically in your own Python scripts, web applications, or automation pipelines. This guide shows you how.
 
 ---
 
-## Installation
+## Installation {#installation}
 
-Clone Hermes and prepare its source environment through PM. The Bash recipe is:
+Clone {{app-name}} and prepare its source environment through PM. The Bash recipe is:
 
 ```bash
-git clone https://github.com/NousResearch/hermes-agent.git
-cd hermes-agent
+git clone https://github.com/Garudex-Labs/NoOne.git
+cd NoOne
 source ./activate
 ```
 
 Run your application with `python your_app.py` from that activated checkout.
 For PowerShell preparation or an independent interpreter, see the
 [PM developer workflow](../reference/package-management.md#developer-workflow).
-Hermes does not publish a supported wheel or source distribution for `requirements.txt` installs.
+{{app-name}} does not publish a supported wheel or source distribution for `requirements.txt` installs.
 
-:::tip
-The same environment variables used by the CLI are required when using Hermes as a library. At minimum, set `OPENROUTER_API_KEY` (or `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` if using direct provider access).
-:::
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+The same environment variables used by the CLI are required when using {{app-name}} as a library. At minimum, set `OPENROUTER_API_KEY` (or `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` if using direct provider access).
+
+</Tip>
 
 ---
 
-## Basic Usage
+## Basic Usage {#basic-usage}
 
-The simplest way to use Hermes is the `chat()` method — pass a message, get a string back:
+The simplest way to use {{app-name}} is the `chat()` method — pass a message, get a string back:
 
 ```python
 from run_agent import AIAgent
@@ -48,13 +55,21 @@ print(response)
 
 `chat()` handles the full conversation loop internally — tool calls, retries, everything — and returns just the final text response.
 
-:::warning
-Always set `quiet_mode=True` when embedding Hermes in your own code. Without it, the agent prints CLI spinners, progress indicators, and other terminal output that will clutter your application's output.
-:::
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
+Always set `quiet_mode=True` when embedding {{app-name}} in your own code. Without it, the agent prints CLI spinners, progress indicators, and other terminal output that will clutter your application's output.
+
+</Warning>
 
 ---
 
-## Full Conversation Control
+## Full Conversation Control {#full-conversation-control}
 
 For more control over the conversation, use `run_conversation()` directly. It returns a dictionary with the full response, message history, and metadata:
 
@@ -90,7 +105,7 @@ result = agent.run_conversation(
 
 ---
 
-## Configuring Tools
+## Configuring Tools {#configuring-tools}
 
 Control which toolsets the agent has access to using `enabled_toolsets` or `disabled_toolsets`:
 
@@ -110,13 +125,21 @@ agent = AIAgent(
 )
 ```
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 Use `enabled_toolsets` when you want a minimal, locked-down agent (e.g., only web search for a research bot). Use `disabled_toolsets` when you want most capabilities but need to restrict specific ones (e.g., no terminal access in a shared environment).
-:::
+
+</Tip>
 
 ---
 
-## Multi-turn Conversations
+## Multi-turn Conversations {#multi-turn-conversations}
 
 Maintain conversation state across multiple turns by passing the message history back in:
 
@@ -142,7 +165,7 @@ The `conversation_history` parameter accepts the `messages` list from a previous
 
 ---
 
-## Saving Trajectories
+## Saving Trajectories {#saving-trajectories}
 
 Enable trajectory saving to capture conversations in ShareGPT format — useful for generating training data or debugging:
 
@@ -161,7 +184,7 @@ Each conversation is appended as a single JSONL line, making it easy to collect 
 
 ---
 
-## Custom System Prompts
+## Custom System Prompts {#custom-system-prompts}
 
 Use `ephemeral_system_prompt` to set a custom system prompt that guides the agent's behavior but is **not** saved to trajectory files (keeping your training data clean):
 
@@ -180,9 +203,9 @@ This is ideal for building specialized agents — a code reviewer, a documentati
 
 ---
 
-## Batch Processing
+## Batch Processing {#batch-processing}
 
-For running many prompts in parallel, Hermes includes `batch_runner.py`. It manages concurrent `AIAgent` instances with proper resource isolation:
+For running many prompts in parallel, {{app-name}} includes `batch_runner.py`. It manages concurrent `AIAgent` instances with proper resource isolation:
 
 ```bash
 python batch_runner.py --input prompts.jsonl --output results.jsonl
@@ -216,15 +239,23 @@ for prompt, result in zip(prompts, results):
     print(f"Q: {prompt}\nA: {result}\n")
 ```
 
-:::warning
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
 Always create a **new `AIAgent` instance per thread or task**. The agent maintains internal state (conversation history, tool sessions, iteration counters) that is not thread-safe to share.
-:::
+
+</Warning>
 
 ---
 
-## Integration Examples
+## Integration Examples {#integration-examples}
 
-### FastAPI Endpoint
+### FastAPI Endpoint {#fastapi-endpoint}
 
 ```python
 from fastapi import FastAPI
@@ -249,7 +280,7 @@ async def chat(request: ChatRequest):
     return {"response": response}
 ```
 
-### Discord Bot
+### Discord Bot {#discord-bot}
 
 ```python
 import discord
@@ -276,7 +307,7 @@ async def on_message(message):
 client.run("YOUR_DISCORD_TOKEN")
 ```
 
-### CI/CD Pipeline Step
+### CI/CD Pipeline Step {#cicd-pipeline-step}
 
 ```python
 #!/usr/bin/env python3
@@ -302,11 +333,11 @@ print(review)
 
 ---
 
-## Key Constructor Parameters
+## Key Constructor Parameters {#key-constructor-parameters}
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `model` | `str` | `""` | Model in OpenRouter format (defaults to empty; resolved from your hermes config at runtime) |
+| `model` | `str` | `""` | Model in OpenRouter format (defaults to empty; resolved from your noone config at runtime) |
 | `quiet_mode` | `bool` | `False` | Suppress CLI output |
 | `enabled_toolsets` | `List[str]` | `None` | Whitelist specific toolsets |
 | `disabled_toolsets` | `List[str]` | `None` | Blacklist specific toolsets |
@@ -321,16 +352,32 @@ print(review)
 
 ---
 
-## Important Notes
+## Important Notes {#important-notes}
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 - Set **`skip_context_files=True`** if you don't want `AGENTS.md` files from the working directory loaded into the system prompt.
 - Set **`skip_memory=True`** to prevent the agent from reading or writing persistent memory — recommended for stateless API endpoints.
 - The `platform` parameter (e.g., `"discord"`, `"telegram"`) injects platform-specific formatting hints so the agent adapts its output style.
-:::
 
-:::warning
+</Tip>
+
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
 - **Thread safety**: Create one `AIAgent` per thread or task. Never share an instance across concurrent calls.
 - **Resource cleanup**: The agent automatically cleans up resources (terminal sessions, browser instances) when a conversation ends. If you're running in a long-lived process, ensure each conversation completes normally.
 - **Iteration limits**: The default `max_iterations=500` is generous. For simple Q&A use cases, consider lowering it (e.g., `max_iterations=10`) to prevent runaway tool-calling loops and control costs.
-:::
+
+</Warning>

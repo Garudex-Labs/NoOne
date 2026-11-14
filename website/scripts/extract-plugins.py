@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract plugin-catalog entries into website/static/api/plugins.json.
+"""Extract plugin-catalog entries into website/docs/api/plugins.json.
 
 Feeds the Plugin Catalog page at /docs/plugins (website/src/pages/plugins/).
 
@@ -13,13 +13,13 @@ catalog PR may not have merged), we emit an EMPTY catalog list and zeroed
 meta counts and exit 0 so the docs build stays green. The page renders a
 "catalog is just getting started" state.
 
-Outputs (both under website/static/api/, CDN-served at /docs/api/):
+Outputs (both under website/docs/api/, CDN-served at /docs/api/):
 
 - ``plugins.json``        — list of catalog entries for the page (camelCase)
 - ``plugins-meta.json``   — counts by tier + generatedAt + removedCount
 - ``plugin-catalog.json`` — ``{"entries": [raw YAML mappings], "removed": [...]}`` in the loader's own
-  schema; installed Hermes clients fetch this for live catalog refresh
-  (``hermes_cli.plugin_catalog.LIVE_CATALOG_URL``) so new entries and removals reach them without
+  schema; installed agent clients fetch this for live catalog refresh
+  (``agent_cli.plugin_catalog.LIVE_CATALOG_URL``) so new entries and removals reach them without
   updating. Emitting it here means the docs deploy IS the publish step — no second pipeline.
 """
 
@@ -37,10 +37,10 @@ from urllib.parse import urlsplit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 DEFAULT_CATALOG_DIR = REPO_ROOT / "plugin-catalog"
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "website" / "static" / "api"
+DEFAULT_OUTPUT_DIR = REPO_ROOT / "website" / "docs" / "api"
 # Written by fetch-plugin-stars.py (at most one GitHub probe per day); absent → no ranking data.
 DEFAULT_STARS_FILE = DEFAULT_OUTPUT_DIR / "plugin-stars.json"
 _GITHUB_REPO_RE = re.compile(r"^https://github\.com/([^/\s]+)/([^/\s#?]+?)(?:\.git)?/?$")
@@ -275,7 +275,7 @@ def load_catalog_entries(catalog_dir: Path, stars: dict[str, int] | None = None,
             "readme": raw.get("readme") is not False and bool(readme_url(repo, sha, subdir)),
             "readmeUrl": readme_url(repo, sha, subdir) if raw.get("readme") is not False else "",
             "maintainerSlug": maintainer_slug(str(raw.get("maintainer") or "")),
-            "installCommand": f"hermes plugins install {name}",
+            "installCommand": f"noone plugins install {name}",
             "stars": _repo_stars(repo, stars),
             "addedAt": dates.get(path.name, {}).get("addedAt"),
             "updatedAt": dates.get(path.name, {}).get("updatedAt"),

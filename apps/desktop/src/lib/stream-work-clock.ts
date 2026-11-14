@@ -1,4 +1,4 @@
-import { randomUuid } from '@hermes/shared'
+import { randomUuid } from '@noone/shared'
 
 type StreamWorkBridge = Required<
   Pick<NonNullable<Window['hermesDesktop']>, 'scheduleStreamWorkWake' | 'onStreamWorkWake'>

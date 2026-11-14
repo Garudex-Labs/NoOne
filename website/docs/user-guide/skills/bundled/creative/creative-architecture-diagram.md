@@ -1,39 +1,47 @@
 ---
 title: "Architecture Diagram — Dark-themed SVG architecture/cloud/infra diagrams as HTML"
-sidebar_label: "Architecture Diagram"
+sidebarTitle: "Architecture Diagram"
 description: "Dark-themed SVG architecture/cloud/infra diagrams as HTML"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Architecture Diagram
+# Architecture Diagram {#architecture-diagram}
 
 Dark-themed SVG architecture/cloud/infra diagrams as HTML.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/creative/architecture-diagram` |
 | Version | `1.0.0` |
-| Author | Cocoon AI (hello@cocoon-ai.com), ported by Hermes Agent |
+| Author | Cocoon AI (hello@cocoon-ai.com), ported by {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `architecture`, `diagrams`, `SVG`, `HTML`, `visualization`, `infrastructure`, `cloud` |
 | Related skills | [`concept-diagrams`](../../optional/creative/creative-concept-diagrams.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Architecture Diagram Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Architecture Diagram Skill {#architecture-diagram-skill}
 
 Generate professional, dark-themed technical architecture diagrams as standalone HTML files with inline SVG graphics. No external tools, no API keys, no rendering libraries — just write the HTML file and open it in a browser.
 
-## Scope
+## Scope {#scope}
 
 **Best suited for:**
 - Software system architecture (frontend / backend / database layers)
@@ -53,21 +61,21 @@ If a more specialized skill is available for the subject, prefer that. If none f
 
 Based on [Cocoon AI's architecture-diagram-generator](https://github.com/Cocoon-AI/architecture-diagram-generator) (MIT).
 
-## Workflow
+## Workflow {#workflow}
 
 1. User describes their system architecture (components, connections, technologies)
 2. Generate the HTML file following the design system below
 3. Save with `write_file` to a `.html` file (e.g. `~/architecture-diagram.html`)
 4. User opens in any browser — works offline, no dependencies
 
-### Output Location
+### Output Location {#output-location}
 
 Save diagrams to a user-specified path, or default to the current working directory:
 ```
 ./[project-name]-architecture.html
 ```
 
-### Preview
+### Preview {#preview}
 
 After saving, suggest the user open it:
 ```bash
@@ -77,9 +85,9 @@ open ./my-architecture.html
 xdg-open ./my-architecture.html
 ```
 
-## Design System & Visual Language
+## Design System & Visual Language {#design-system--visual-language}
 
-### Color Palette (Semantic Mapping)
+### Color Palette (Semantic Mapping) {#color-palette-semantic-mapping}
 
 Use specific `rgba` fills and hex strokes to categorize components:
 
@@ -93,7 +101,7 @@ Use specific `rgba` fills and hex strokes to categorize components:
 | **Message Bus** | `rgba(251, 146, 60, 0.3)` | `#fb923c` (orange-400) |
 | **External** | `rgba(30, 41, 59, 0.5)` | `#94a3b8` (slate-400) |
 
-### Typography & Background
+### Typography & Background {#typography--background}
 - **Font:** JetBrains Mono (Monospace), loaded from Google Fonts
 - **Sizes:** 12px (Names), 9px (Sublabels), 8px (Annotations), 7px (Tiny labels)
 - **Background:** Slate-950 (`#020617`) with a subtle 40px grid pattern
@@ -105,14 +113,14 @@ Use specific `rgba` fills and hex strokes to categorize components:
 </pattern>
 ```
 
-## Technical Implementation Details
+## Technical Implementation Details {#technical-implementation-details}
 
-### Component Rendering
+### Component Rendering {#component-rendering}
 Components are rounded rectangles (`rx="6"`) with 1.5px strokes. To prevent arrows from showing through semi-transparent fills, use a **double-rect masking technique**:
 1. Draw an opaque background rect (`#0f172a`)
 2. Draw the semi-transparent styled rect on top
 
-### Connection Rules
+### Connection Rules {#connection-rules}
 - **Z-Order:** Draw arrows *early* in the SVG (after the grid) so they render behind component boxes
 - **Arrowheads:** Defined via SVG markers
 - **Security Flows:** Use dashed lines in rose color (`#fb7185`)
@@ -120,13 +128,13 @@ Components are rounded rectangles (`rx="6"`) with 1.5px strokes. To prevent arro
   - *Security Groups:* Dashed (`4,4`), rose color
   - *Regions:* Large dashed (`8,4`), amber color, `rx="12"`
 
-### Spacing & Layout Logic
+### Spacing & Layout Logic {#spacing--layout-logic}
 - **Standard Height:** 60px (Services); 80-120px (Large components)
 - **Vertical Gap:** Minimum 40px between components
 - **Message Buses:** Must be placed *in the gap* between services, not overlapping them
 - **Legend Placement:** **CRITICAL.** Must be placed outside all boundary boxes. Calculate the lowest Y-coordinate of all boundaries and place the legend at least 20px below it.
 
-## Document Structure
+## Document Structure {#document-structure}
 
 The generated HTML file follows a four-part layout:
 1. **Header:** Title with a pulsing dot indicator and subtitle
@@ -134,7 +142,7 @@ The generated HTML file follows a four-part layout:
 3. **Summary Cards:** A grid of three cards below the diagram for high-level details
 4. **Footer:** Minimal metadata
 
-### Info Card Pattern
+### Info Card Pattern {#info-card-pattern}
 ```html
 <div class="card">
   <div class="card-header">
@@ -148,13 +156,13 @@ The generated HTML file follows a four-part layout:
 </div>
 ```
 
-## Output Requirements
+## Output Requirements {#output-requirements}
 - **Single File:** One self-contained `.html` file
 - **No External Dependencies:** All CSS and SVG must be inline (except Google Fonts)
 - **No JavaScript:** Use pure CSS for any animations (like pulsing dots)
 - **Compatibility:** Must render correctly in any modern web browser
 
-## Template Reference
+## Template Reference {#template-reference}
 
 Load the full HTML template for the exact structure, CSS, and SVG component examples:
 

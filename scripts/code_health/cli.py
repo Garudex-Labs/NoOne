@@ -96,7 +96,8 @@ def run(repo: Path, base: str, head: str | None, as_json: bool = False,
     if mode == "off":
         _skipped(f"code health: off (ENFORCEMENT in {_SWITCH_FILE} on {switch_rev[:12]})", as_json)
         return 0
-    changes = gitio.changed_files(repo, base, head)
+    from scripts.code_health.identity_names import pair_moves
+    changes = pair_moves(gitio.changed_files(repo, base, head))
     head_paths = sorted({c.new for c in changes if c.new and in_scope(c.new)})
     base_paths = sorted({c.old for c in changes if c.old and in_scope(c.old)})
     if not head_paths:

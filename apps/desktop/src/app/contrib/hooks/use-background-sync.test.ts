@@ -40,7 +40,7 @@ import {
   useBackgroundSync
 } from './use-background-sync'
 
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal()),
   getLatestSessionMessages: vi.fn(),
   getOlderSessionMessages: vi.fn()
@@ -52,7 +52,7 @@ vi.mock('@/store/projects', async importOriginal => ({
   refreshProjects: vi.fn(async () => undefined)
 }))
 
-const { getLatestSessionMessages, getOlderSessionMessages } = await import('@/hermes')
+const { getLatestSessionMessages, getOlderSessionMessages } = await import('@/agent-client')
 const { refreshProjectTree, refreshProjects } = await import('@/store/projects')
 
 const ACTIVE_RUNTIME_ID = 'runtime-active'

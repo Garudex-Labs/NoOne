@@ -16,7 +16,7 @@ from gateway.platforms.base import BasePlatformAdapter, MessageEvent, Processing
 
 def _followup_processing_hooks_apply(adapter, event: MessageEvent | None) -> bool:
     """Both conditions are necessary: a real inbound platform message to acknowledge (adapters key their
-    marker off ``message_id`` — Slack/Telegram/Feishu/Matrix/Photon — or off ``raw_message`` — Signal,
+    marker off ``message_id`` — Slack/Telegram/Photon — or off ``raw_message`` — Signal,
     Discord; synthetic drains such as ``/goal`` continuations, wake-ups and startup auto-resume carry
     neither and must stay silent), and an adapter that overrides ``on_processing_start``. We bracket, so
     both halves must belong to us: a complete-only adapter (Google Chat reaps its typing card there,
@@ -33,7 +33,7 @@ def _followup_processing_hooks_apply(adapter, event: MessageEvent | None) -> boo
 def _followup_cancel_outcome(adapter) -> ProcessingOutcome:
     """Classify a cancelled follow-up exactly as ``_process_message_background`` does: only cancels the
     adapter itself routed (``/stop``, ``/new``, ``/reset``, cleanup) are CANCELLED, anything else is a
-    failure. Signal and Matrix leave the in-progress marker in place on CANCELLED, so reporting an
+    failure. Signal leave the in-progress marker in place on CANCELLED, so reporting an
     unexpected cancellation as CANCELLED would strand it."""
     expected = getattr(adapter, "_expected_cancelled_tasks", None)
     if expected is None:

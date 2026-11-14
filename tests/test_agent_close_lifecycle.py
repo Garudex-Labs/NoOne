@@ -7,11 +7,10 @@ sessions, tool subprocesses and httpx clients:
 * ``batch_runner._process_single_prompt`` — one agent per prompt, N prompts
   per batch process: an unclosed agent leaked terminals/VMs/clients for the
   batch's whole run.
-* ``plugins.platforms/feishu/feishu_comment._run_comment_agent`` — one agent
   per comment run in a long-lived gateway process.
-* ``tui_gateway/methods_prompt`` ``prompt.background`` — one side agent per
+* ``agent_backend/methods_prompt`` ``prompt.background`` — one side agent per
   background turn in the gateway process.
-* ``hermes_cli/cli_commands_mixin._handle_background_command`` — one agent
+* ``agent_cli/cli_commands_mixin._handle_background_command`` — one agent
   per ``/bg`` task in a long-lived CLI process.
 
 The tests drive each real call path with a recording fake ``AIAgent`` and
@@ -27,7 +26,7 @@ from types import SimpleNamespace
 
 import pytest
 
-import hermes_bootstrap
+import agent_bootstrap
 
 
 class RecordingAgent:
@@ -100,43 +99,11 @@ class TestBatchRunnerClosesAgent:
         assert FailingAgent.instances[0].closed
 
 
-# ── feishu comment agent: one per comment run in the gateway ───────────────
 
 
-class TestFeishuCommentClosesAgent:
-    def _run(self, monkeypatch):
-        from plugins.platforms.feishu import feishu_comment
-
-        RecordingAgent.reset()
-        monkeypatch.setattr("run_agent.AIAgent", RecordingAgent)
-        monkeypatch.setattr(feishu_comment, "_resolve_model_and_runtime", lambda: ("m", {}))
-        # session_key="" keeps the cross-card history cache out of the test.
-        response = feishu_comment._run_comment_agent("hi", client=None, session_key="")
-        return response
-
-    def test_agent_closed_after_successful_comment(self, monkeypatch):
-        response = self._run(monkeypatch)
-        assert response == "ok"
-        assert len(RecordingAgent.instances) == 1
-        assert RecordingAgent.instances[0].closed
-
-    def test_agent_closed_when_run_fails(self, monkeypatch):
-        from plugins.platforms.feishu import feishu_comment
-
-        class FailingAgent(RecordingAgent):
-            def __init__(self, *args, **kwargs):
-                kwargs["_fail"] = True
-                super().__init__(*args, **kwargs)
-
-        FailingAgent.instances = []
-        monkeypatch.setattr("run_agent.AIAgent", FailingAgent)
-        monkeypatch.setattr(feishu_comment, "_resolve_model_and_runtime", lambda: ("m", {}))
-        response = feishu_comment._run_comment_agent("hi", client=None, session_key="")
-        assert response == ""
-        assert FailingAgent.instances[0].closed
 
 
-# ── tui_gateway prompt.background: one side agent per bg turn ──────────────
+# ── agent_backend prompt.background: one side agent per bg turn ──────────────
 
 
 def _bg_session(server, sid: str) -> dict:
@@ -162,7 +129,7 @@ def _bg_session(server, sid: str) -> dict:
 
 class TestPromptBackgroundClosesAgent:
     def _call(self, monkeypatch, sid, agent_cls):
-        from tui_gateway import server
+        from agent_backend import server
         import contextlib
 
         monkeypatch.setattr(server, "_start_agent_build", lambda sid_, session_: None)
@@ -191,7 +158,7 @@ class TestPromptBackgroundClosesAgent:
         return response
 
     def test_agent_closed_after_background_turn(self, monkeypatch):
-        from tui_gateway import server
+        from agent_backend import server
         sid = "close-lifecycle-bg"
         _bg_session(server, sid)
         try:
@@ -202,7 +169,7 @@ class TestPromptBackgroundClosesAgent:
             server._sessions.pop(sid, None)
 
     def test_agent_closed_when_background_turn_fails(self, monkeypatch):
-        from tui_gateway import server
+        from agent_backend import server
 
         class FailingAgent(RecordingAgent):
             def __init__(self, *args, **kwargs):
@@ -224,9 +191,9 @@ class TestPromptBackgroundClosesAgent:
 
 
 def _make_cli():
-    from cli import HermesCLI
+    from cli import AgentCLI
 
-    cli = HermesCLI.__new__(HermesCLI)
+    cli = AgentCLI.__new__(AgentCLI)
     cli._background_task_counter = 0
     cli._background_tasks = {}
     cli._agent_running = False

@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { Bell, Play } from '@noone/ui/icons'
 import { type ReactNode, useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -7,7 +8,6 @@ import { useI18n } from '@/i18n'
 import { COMPLETION_SOUND_VARIANTS, previewCompletionSound } from '@/lib/completion-sound'
 import { triggerHaptic } from '@/lib/haptics'
 import { hostHas } from '@/lib/host-capabilities'
-import { Bell, Play } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import {
   $browserNotificationPermission,

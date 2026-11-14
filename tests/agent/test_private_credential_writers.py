@@ -77,8 +77,8 @@ def _writers(home: Path, monkeypatch):
     from agent.proxy_sources import iron_proxy
     from agent.vault_store import VaultStore
     from gateway import pairing
-    from hermes_cli import auth as auth_mod
-    from hermes_cli import process_identity
+    from agent_cli import auth as auth_mod
+    from agent_cli import process_identity
     from tools import mcp_oauth
     from plugins.google_meet import cli as meet_cli
     from plugins.google_meet.node.registry import NodeRegistry

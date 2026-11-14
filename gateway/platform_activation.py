@@ -8,8 +8,7 @@ SDKs, telegram's i18n catalog) although a fresh profile configures none. The con
 configuring that platform, so they materialize only names with *activation evidence*:
 
 * a config block for it (top-level ``<name>:``, ``platforms.<name>``, ``gateway.platforms.<name>``,
-  ``gateway.<name>``, or a legacy ``gateway.json`` row) — including a sibling block such as
-  ``wecom_callback`` (registered by the ``wecom`` plugin);
+  ``gateway.<name>``, or a legacy ``gateway.json`` row);
 * an env var (process env, the profile ``.env``, or the active secret scope) under the platform's
   prefix (``TELEGRAM_*``, ``GOOGLE_CHAT_*``) or named in its manifest ``requires_env``
   (``TWILIO_*`` for sms);
@@ -54,9 +53,9 @@ def _env_names(home: Optional[Path]) -> set[str]:
             names.update(k for k, v in load_env_file(home / ".env").items() if str(v).strip())
             # Values an external secret source (Bitwarden, 1Password) resolved for this home, and
             # the administrator-managed .env: both feed the profile scope the adapters read.
-            from hermes_cli.env_loader import get_secret_source_values
+            from agent_cli.env_loader import get_secret_source_values
             names.update(k for k, v in get_secret_source_values(home).items() if str(v).strip())
-        from hermes_cli.managed_scope import load_managed_env
+        from agent_cli.managed_scope import load_managed_env
         names.update(k for k, v in load_managed_env().items() if str(v).strip())
     except Exception:
         logger.debug("platform activation: env scan degraded", exc_info=True)
@@ -106,8 +105,8 @@ def activation_predicate(
     Hermes home.
     """
     if home is None:
-        from hermes_constants import get_hermes_home
-        home = get_hermes_home()
+        from agent_constants import get_agent_home
+        home = get_agent_home()
     if yaml_cfg is None and home is not None:
         try:
             from gateway.config_loader import read_yaml_layers

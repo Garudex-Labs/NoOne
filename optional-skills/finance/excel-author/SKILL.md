@@ -2,7 +2,7 @@
 name: excel-author
 description: Build auditable financial workbooks headless via openpyxl.
 version: 1.0.0
-author: Anthropic (adapted by Nous Research)
+author: Anthropic (adapted by Garudex Labs)
 license: Apache-2.0
 platforms: [linux, macos, windows]
 metadata:
@@ -35,7 +35,7 @@ runs Hermes:
 
 ```bash
 python -c "import openpyxl" 2>/dev/null && PY=python || if command -v hermes >/dev/null 2>&1; then
-  PY="$(hermes pm environment documents --extra documents --extra documents-pdf)"
+  PY="$(noone pm environment documents --extra documents --extra documents-pdf)"
 else
   PY="$HOME/.cache/hermes-docs-venv/bin/python"
   "$PY" -c "import docx, openpyxl, pptx, reportlab, pypdf, pdfplumber, pypdfium2" 2>/dev/null || (

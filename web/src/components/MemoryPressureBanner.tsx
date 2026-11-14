@@ -1,7 +1,8 @@
+import { AlertTriangle, X } from "@noone/ui/icons";
 import { useState } from "react";
-import { AlertTriangle, X } from "lucide-react";
-import type { StatusResponse } from "@/lib/api";
+
 import { useI18n } from "@/i18n";
+import type { StatusResponse } from "@/lib/api";
 
 /**
  * App-wide warning banner for resource trouble (NS-656): memory pressure

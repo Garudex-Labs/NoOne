@@ -1,7 +1,7 @@
 import { batch } from 'nanostores'
 
+import { setApiRequestConnection } from '@/agent-client'
 import { getApiRequestConnection, setApiRequestProfile } from '@/api/client'
-import { setApiRequestConnection } from '@/hermes'
 
 /**
  * Point the ambient REST scope at `connectionId`, served by `profile`, in ONE

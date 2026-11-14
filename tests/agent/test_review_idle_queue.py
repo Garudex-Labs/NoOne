@@ -350,7 +350,7 @@ def test_dispatch_runs_under_the_enqueuing_profile_context(tmp_path, monkeypatch
     """#108537: the enabled re-check and the spawn must run under the contextvars captured at
     enqueue (that profile's home + secret scope), not the shared dispatcher thread's ambient ones."""
     from agent import secret_scope as ss
-    from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
 
     ambient, on_home, off_home = (tmp_path / n for n in ("ambient", "on", "off"))
     for home, gate in ((ambient, False), (on_home, True), (off_home, False)):
@@ -363,7 +363,7 @@ def test_dispatch_runs_under_the_enqueuing_profile_context(tmp_path, monkeypatch
 
     class _Agent:
         def _spawn_background_review_now(self, **kwargs):
-            seen.append((kwargs["home"], get_hermes_home(), ss.get_secret("REVIEW_PROBE_KEY")))
+            seen.append((kwargs["home"], get_agent_home(), ss.get_secret("REVIEW_PROBE_KEY")))
 
     class _Stop(BaseException):
         pass
@@ -378,13 +378,13 @@ def test_dispatch_runs_under_the_enqueuing_profile_context(tmp_path, monkeypatch
     ss.set_multiplex_active(True)
     try:
         for home in (on_home, off_home):
-            tok = set_hermes_home_override(home)
+            tok = set_agent_home_override(home)
             stok = ss.set_secret_scope({"REVIEW_PROBE_KEY": home.name}, profile_home=str(home))
             try:
                 q.enqueue(_Agent(), home.name, {"home": home, "task_cfg": {}})
             finally:
                 ss.reset_secret_scope(stok)
-                reset_hermes_home_override(tok)
+                reset_agent_home_override(tok)
         clock["t"] += defer_max_age_s(None) + 1  # aged out: dispatch regardless of idleness
         q._wake = _DrainWake()
         with pytest.raises(_Stop):

@@ -3,7 +3,7 @@
 Claude Code's OAuth refresh token is single-use: once Hermes borrows and refreshes it, Hermes and
 Claude Code hold one token family and whichever refreshes first logs the other out. With the opt-out
 set, Hermes must neither read nor refresh ``~/.claude/.credentials.json``, must drop the pool row an
-earlier adopting process persisted, and must say so in ``hermes auth list``.
+earlier adopting process persisted, and must say so in ``noone auth list``.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ import urllib.request
 from agent import anthropic_credentials as ac
 from agent import credential_sources
 from agent.credential_pool import load_pool
-from hermes_cli.auth_commands import auth_list_command
+from agent_cli.auth_commands import auth_list_command
 
 
 def _write_config(hermes_home, adopt):

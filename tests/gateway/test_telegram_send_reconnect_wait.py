@@ -3,7 +3,7 @@
 A network blip can disconnect Telegram while the agent is sending its final
 response. send() used to return "Not connected" immediately (retryable=False),
 so the delivery ledger held the answer until the next gateway boot — hours
-later. QQBot already waits; these tests pin the same contract on Telegram,
+later. These tests pin the wait contract on Telegram,
 including the reconnect-watcher case that *replaces* the adapter object.
 """
 from __future__ import annotations

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { saveHermesConfig } from '@/agent-client'
 import {
   normalizeTerminalFontFamily,
   resolveTerminalFontFamily,
@@ -7,12 +8,11 @@ import {
   TERMINAL_FONT_SUGGESTIONS
 } from '@/app/right-sidebar/terminal/terminal-font'
 import { Button } from '@/components/ui/button'
-import { saveHermesConfig } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { notifyError } from '@/store/notifications'
-import type { HermesConfigRecord } from '@/types/hermes'
+import type { AgentConfigRecord } from '@/types/agent-client'
 
-import { setHermesConfigCache, useHermesConfigRecord } from '../hooks/use-config-record'
+import { setHermesConfigCache, useAgentConfigRecord } from '../hooks/use-config-record'
 import { useOnProfileSwitch } from '../hooks/use-on-profile-switch'
 import { useProfileSwitchLatch } from '../hooks/use-profile-switch-latch'
 
@@ -22,14 +22,14 @@ import { ListRow } from './primitives'
 
 const AUTOSAVE_DELAY_MS = 550
 
-function fontFamilyFromConfig(config: HermesConfigRecord): string {
+function fontFamilyFromConfig(config: AgentConfigRecord): string {
   return normalizeTerminalFontFamily(getNested(config, 'terminal.font_family'))
 }
 
 export function TerminalFontSetting() {
   const { t } = useI18n()
   const copy = t.settings.appearance
-  const { data: loadedConfig, dataUpdatedAt, writeScope } = useHermesConfigRecord()
+  const { data: loadedConfig, dataUpdatedAt, writeScope } = useAgentConfigRecord()
   // draft === null ⇔ unseeded: nothing painted yet for this profile. The
   // profile-switch handler keeps it unseeded until a config refetch completes;
   // the timestamp is the freshness proof because React Query can reuse the

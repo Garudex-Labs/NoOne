@@ -21,7 +21,7 @@ def main():
     Path(os.environ['HERMES_HOME'], 'config.yaml').write_text(
         f'model:\n  default: local-wire-stub\n  provider: custom\n  base_url: {url}\n'
         'auxiliary:\n  title_generation:\n    enabled: false\n')
-    from tui_gateway.transport import StdioTransport
+    from agent_backend.transport import StdioTransport
 
     slow_read, slow_write = os.pipe()
     healthy_read, healthy_write = os.pipe()
@@ -56,7 +56,7 @@ def main():
         from gateway.session_authority import initialize_session_authority
         from gateway.session_controls import AuthorityConnection
         from gateway.session_contract import Submission
-        from hermes_state_runtime import list_session_admissions
+        from agent_state_runtime import list_session_admissions
         from run_agent import AIAgent
 
         runner = GatewayRunner()

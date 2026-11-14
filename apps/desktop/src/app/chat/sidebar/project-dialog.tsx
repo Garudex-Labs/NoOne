@@ -1,9 +1,9 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useEffect, useRef, useState } from 'react'
 
 import type { NewSessionPlacement } from '@/app/chat/new-session-drag'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   Dialog,
   DialogContent,
@@ -243,7 +243,7 @@ export function ProjectDialog() {
                     )}
                     key={folder}
                   >
-                    <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="folder" size="0.75rem" />
+                    <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="folder" size="0.75rem" />
                     <span className="min-w-0 flex-1 truncate" title={folder}>
                       {folder}
                     </span>
@@ -261,7 +261,7 @@ export function ProjectDialog() {
                         type="button"
                         variant="ghost"
                       >
-                        <Codicon name="close" size="0.75rem" />
+                        <AppIcon name="close" size="0.75rem" />
                       </Button>
                     </Tip>
                   </li>
@@ -276,7 +276,7 @@ export function ProjectDialog() {
               type="button"
               variant="ghost"
             >
-              <Codicon name="add" size="0.75rem" />
+              <AppIcon name="add" size="0.75rem" />
               {p.addFolder}
             </Button>
           </div>
@@ -325,7 +325,7 @@ export function ProjectDialog() {
                   type="button"
                   variant="ghost"
                 >
-                  <Codicon name="refresh" size="0.75rem" />
+                  <AppIcon name="refresh" size="0.75rem" />
                 </Button>
               </Tip>
             </div>
@@ -334,7 +334,7 @@ export function ProjectDialog() {
 
         {mode === 'add-folder' && (
           <Button disabled={submitting} onClick={() => void pickFolder()} type="button">
-            <Codicon name="folder-opened" size="0.875rem" />
+            <AppIcon name="folder-opened" size="0.875rem" />
             {p.addFolder}
           </Button>
         )}

@@ -12,7 +12,7 @@ import type {
   MemoryProviderConfig,
   MemoryProviderOAuthStatus,
   MemoryStatusResponse
-} from '@/types/hermes'
+} from '@/types/agent-client'
 
 import {
   capabilityScoped,
@@ -268,8 +268,8 @@ export function getElevenLabsVoices(profile?: null | string): Promise<ElevenLabs
 }
 
 // ---------------------------------------------------------------------------
-// Maintenance operations (parity with `hermes doctor` / `hermes security
-// audit` / `hermes backup` / `hermes debug share` and the dashboard System
+// Maintenance operations (parity with `noone doctor` / `hermes security
+// audit` / `noone backup` / `noone debug share` and the dashboard System
 // page). All except debug share are spawn-based background actions tailed via
 // getActionStatus().
 //

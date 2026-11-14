@@ -333,7 +333,7 @@ def build_member_dirs(extras: Iterable[str], python: Path | None = None) -> list
 def _member_key(identity: Path) -> str:
     """``<plugin dir name>-<sha256(path)[:16]>``: the hash keeps two same-named plugins from
     different homes apart; the name is what a user sees in uv's conflict text
-    (``hermes-plugin-<key> depends on …``) — a bare hash told them nothing to disable."""
+    (``agent-plugin-<key> depends on …``) — a bare hash told them nothing to disable."""
     import re
 
     digest = hashlib.sha256(str(identity.resolve()).encode()).hexdigest()[:16]
@@ -564,7 +564,7 @@ def core_requirement_error(declaration, extras: Iterable[str] | None = None,
     from packaging.markers import default_environment
     from packaging.version import InvalidVersion, Version
 
-    from hermes_cli.plugins_manifest import running_hermes_version
+    from agent_cli.plugins_manifest import running_hermes_version
     from pm.install import _extra_key
 
     if declaration.external:
@@ -576,18 +576,22 @@ def core_requirement_error(declaration, extras: Iterable[str] | None = None,
         installed = _selected_member_extras(document, _recorded_extras() if extras is None else extras, environment)[0]
         specs += [spec for name, values in document["project"].get("optional-dependencies", {}).items()
                   if _extra_key(name) in installed for spec in values]
-    pins = [requirement for requirement in _self_references(specs, "hermes-agent")
+    pins = [requirement for own in ("noone", "hermes-agent")
+            for requirement in _self_references(specs, own)
             if requirement.specifier and _reference_active(requirement, ("", *sorted(installed)), environment)]
     if not pins:
         return None
     current = running_hermes_version()
-    try:
-        Version(current)
-    except InvalidVersion:
-        return None
-    rejected = [str(requirement) for requirement in pins
-                if not requirement.specifier.contains(current, prereleases=True)]
-    return f"requires {rejected[0]}, running {current}" if rejected else None
+    from agent_cli.version_info import project_version
+    for requirement in pins:
+        version = project_version() if requirement.name.lower().replace("_", "-") == "noone" else current
+        try:
+            Version(version)
+        except InvalidVersion:
+            continue
+        if not requirement.specifier.contains(version, prereleases=True):
+            return f"requires {requirement}, running {version}"
+    return None
 
 
 def hermes_fit_error(declaration, extras: Iterable[str] | None = None) -> Optional[str]:
@@ -595,9 +599,40 @@ def hermes_fit_error(declaration, extras: Iterable[str] | None = None) -> Option
     ``hermes-agent`` requirement rejects the running version. Either verdict is only as good as
     our version identity, so a selected misfit sits out of the build (config untouched) and
     rejoins once it flips; admission refuses it."""
-    from hermes_cli.plugins_manifest import requires_hermes_error
+    from agent_cli.plugins_manifest import requires_hermes_error
 
     return requires_hermes_error(declaration.manifest) or core_requirement_error(declaration, extras)
+
+
+def _normalize_core_references(document: dict) -> bool:
+    """Bind legacy plugin core extras to this checkout, never to the upstream index package."""
+    import re
+    from packaging.requirements import InvalidRequirement, Requirement
+    from packaging.utils import canonicalize_name
+
+    def canonical(spec):
+        try:
+            legacy = canonicalize_name(Requirement(spec).name) == "hermes-agent"
+        except InvalidRequirement:
+            return spec  # The resolver diagnoses malformed declarations.
+        return re.sub(r"^\s*[A-Za-z0-9][A-Za-z0-9._-]*", "noone", spec, count=1) if legacy else spec
+
+    changed = False
+    project = document.get("project", {})
+    if "dependencies" in project:
+        normalized = [canonical(spec) for spec in project["dependencies"]]
+        changed |= normalized != project["dependencies"]
+        project["dependencies"] = normalized
+    for extra, specs in project.get("optional-dependencies", {}).items():
+        normalized = [canonical(spec) for spec in specs]
+        changed |= normalized != specs
+        project["optional-dependencies"][extra] = normalized
+    sources = document.get("tool", {}).get("uv", {}).get("sources", {})
+    for name in list(sources):
+        if canonicalize_name(name) == "hermes-agent":
+            del sources[name]  # Root policy already binds noone to its workspace source.
+            changed = True
+    return changed
 
 
 def _workspace_member(plugin_dir: Path, root: Path, *, identity: Path, extras: Iterable[str] = (),
@@ -614,6 +649,7 @@ def _workspace_member(plugin_dir: Path, root: Path, *, identity: Path, extras: I
         shutil.copytree(plugin_dir, member, symlinks=True,
                         ignore=_member_ignored)
         document = tomllib.loads(pyproject.read_text(encoding="utf-8-sig"))
+        normalized_core = _normalize_core_references(document)
         # uv identifies a workspace member by [project].name, so the same virtual
         # plugin enabled in two profiles would declare one name twice and fail
         # `uv lock`. A member with no build backend is metadata-only: it can carry
@@ -622,13 +658,13 @@ def _workspace_member(plugin_dir: Path, root: Path, *, identity: Path, extras: I
         # package metadata its backend produces.
         # tool.uv.package = true opts into uv package mode: real build metadata, so buildable.
         virtual = "build-system" not in document and document.get("tool", {}).get("uv", {}).get("package") is not True
-        changed = False
+        changed = normalized_core
         if declaration.install_requirements != declaration.requirements:
             document["project"]["dependencies"] = list(declaration.install_requirements)
             changed = True
         if virtual:
             # Before the extras pass, so its self-reference closure reads the names uv will see.
-            _rename_virtual_member(document, f"hermes-plugin-{key}")
+            _rename_virtual_member(document, f"agent-plugin-{key}")
         changed = _runtime_member_metadata(document, extras, target) or changed
         for sources in document.get("tool", {}).get("uv", {}).get("sources", {}).values():
             for spec in sources if isinstance(sources, list) else [sources]:
@@ -660,7 +696,7 @@ def _workspace_member(plugin_dir: Path, root: Path, *, identity: Path, extras: I
     member = root / "plugin-deps" / key
     member.mkdir(parents=True)
     (member / "pyproject.toml").write_text(
-        f'[project]\nname = "hermes-plugin-{key}"\nversion = "0.0.0"\n'
+        f'[project]\nname = "agent-plugin-{key}"\nversion = "0.0.0"\n'
         'requires-python = ">=3.11"\n'
         f'dependencies = {json.dumps(specs)}\n[tool.uv]\npackage = false\n',
         encoding="utf-8",
@@ -687,7 +723,7 @@ def install_node_sidecar(
 
     # Tool availability does not authorize mutation of the sidecar itself.
     if not explicit and not lazy_installs_allowed():
-        return "lazy installs are disabled — run `hermes plugins install` and approve Node dependencies"
+        return "lazy installs are disabled — run `noone plugins install` and approve Node dependencies"
 
     # a lockfile means reproducible `npm ci`; plain `npm install` otherwise
     install_cmd = ["ci"] if (plugin_dir / "package-lock.json").is_file() else ["install"]

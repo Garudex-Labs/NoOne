@@ -15,7 +15,7 @@ from pathlib import Path
 import stat
 import threading
 import time
-from hermes_dir_acl import make_user_dir
+from agent_dir_acl import make_user_dir
 
 logger = logging.getLogger(__name__)
 
@@ -292,7 +292,7 @@ def _conflicting_homes(homes):
 def reserve_waiting_out_transient_holders(ownership, homes, *, wait_s: float,
                                           cancel: threading.Event | None = None) -> None:
     """``ownership.reserve(homes)``, retried until *wait_s* passes while every contender is
-    transient: a client's lock probe (gone by the re-check), a browse reconcile, or a holder that has
+    transient: a client's lock probe (gone by the re-check), or a holder that has
     not published its record yet (flock taken, record unwritten). A positively identified live owner
     on any home refuses at once. Every grant is a real ``reserve``: the flock is never bypassed.
     Shared by the gateway boot and the running multiplexer's hot-serve of a new profile.
@@ -300,7 +300,6 @@ def reserve_waiting_out_transient_holders(ownership, homes, *, wait_s: float,
     *cancel* set (a worker thread's caller gave up) ends the wait at once and releases a grant
     that landed meanwhile, raising :class:`ReservationCancelled`: the caller may already have run
     its ownership cleanup, so nobody would ever release a home taken after it."""
-    from hermes_state_reconcile import BROWSE_RECONCILE_PURPOSE
     cancel = threading.Event() if cancel is None else cancel
     deadline = time.monotonic() + wait_s
     logged = False
@@ -313,14 +312,14 @@ def reserve_waiting_out_transient_holders(ownership, homes, *, wait_s: float,
             # once, even while another home is mid-browse (multiplexer boot, all-or-nothing).
             conflicting = _conflicting_homes(homes)
             holders = [h for h in conflicting
-                       if maintenance_holder(h, BROWSE_RECONCILE_PURPOSE) or lock_record_unpublished(h)]
+                       if lock_record_unpublished(h)]
             if len(holders) < len(conflicting) or time.monotonic() >= deadline:
                 raise
             if not conflicting:
                 cancel.wait(PROBE_RETRY_BACKOFF_S)  # the holder already let go: a lock probe, never an owner
                 continue
             if not logged:
-                logger.info("Profile %s is held by a short session-store schema catch-up; waiting up to %.0fs",
+                logger.info("Profile %s is held by an unpublished ownership probe; waiting up to %.0fs",
                             holders[0], wait_s)
                 logged = True
             cancel.wait(TRANSIENT_HOLDER_POLL_S)

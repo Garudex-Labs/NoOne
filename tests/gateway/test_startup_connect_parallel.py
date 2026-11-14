@@ -4,7 +4,7 @@ The old ``GatewayRunner.start()`` loop awaited each platform's connect()
 (including its own timeout) in turn. A single slow/failing platform (e.g.
 Telegram behind a dead proxy) therefore delayed every later platform's
 connect by a full timeout window, cascading one platform's failure onto
-WeChat/QQ/etc. These tests prove the connects now run concurrently.
+WeChat/etc. These tests prove the connects now run concurrently.
 
 Why event-order, not wall-clock timings
 ---------------------------------------
@@ -133,7 +133,7 @@ async def test_startup_one_failing_platform_does_not_block_others(monkeypatch, t
     """A failing/slow platform must not prevent others from connecting (#83791).
 
     Mirrors the reported Windows symptom: Telegram (dead proxy) must not keep
-    WeChat/QQ offline. Here Telegram fails (returns False after a sleep) while
+    WeChat offline. Here Telegram fails (returns False after a sleep) while
     Discord connects successfully and is registered.
     """
 

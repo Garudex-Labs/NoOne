@@ -1,35 +1,43 @@
 ---
 title: "Darwinian Evolver — Evolve prompts/regex/SQL/code with Imbue's evolution loop"
-sidebar_label: "Darwinian Evolver"
+sidebarTitle: "Darwinian Evolver"
 description: "Evolve prompts/regex/SQL/code with Imbue's evolution loop"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Darwinian Evolver
+# Darwinian Evolver {#darwinian-evolver}
 
 Evolve prompts/regex/SQL/code with Imbue's evolution loop.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/darwinian-evolver` |
+| Source | Optional — install with `noone skills install official/research/darwinian-evolver` |
 | Path | `optional-skills/research/darwinian-evolver` |
 | Version | `0.1.0` |
-| Author | Bihruze (Asahi0x), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `evolution`, `optimization`, `prompt-engineering`, `research` |
 | Related skills | [`arxiv`](../../bundled/research/research-arxiv.md), [`jupyter-notebook`](../../optional/data-science/data-science-jupyter-notebook.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Darwinian Evolver
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Darwinian Evolver {#darwinian-evolver-1}
 
 Run Imbue's [darwinian_evolver](https://github.com/imbue-ai/darwinian_evolver) — an
 LLM-driven evolutionary search loop — to optimize a **prompt, regex, SQL query,
@@ -43,7 +51,7 @@ and drives the loop via the upstream CLI or a small custom Python driver.
 via the upstream CLI or a `subprocess`/`uv run` call (mere aggregation). Do NOT
 import upstream classes into Hermes itself.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User says "optimize this prompt", "evolve a regex for X", "auto-improve this
   code/SQL", "search for a better instruction".
@@ -58,7 +66,7 @@ Do **not** use this when:
 - You only need to try 2–3 variants — just write them by hand.
 - The fitness signal is purely subjective with no measurable criterion.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Python ≥3.11
 - `git`, `uv` (or `pip`)
@@ -68,7 +76,7 @@ The skill ships a small `parrot_openrouter.py` driver that uses `OPENROUTER_API_
 via the OpenAI SDK, so any model on OpenRouter works. The upstream CLI itself
 hardcodes Anthropic and needs `ANTHROPIC_API_KEY`.
 
-## Install (One-Time)
+## Install (One-Time) {#install-one-time}
 
 Run via the `terminal` tool:
 
@@ -85,7 +93,7 @@ cd ~/.hermes/cache/darwinian-evolver/darwinian_evolver \
   && uv run darwinian_evolver --help | head -5
 ```
 
-## Quick Start — The Built-In Parrot Example
+## Quick Start — The Built-In Parrot Example {#quick-start--the-built-in-parrot-example}
 
 Tiny smoke test (requires `ANTHROPIC_API_KEY`):
 
@@ -105,7 +113,7 @@ Outputs:
 Open `~/.hermes/cache/darwinian-evolver/darwinian_evolver/darwinian_evolver/lineage_visualizer.html`
 in a browser and load the JSON log to see the evolutionary tree.
 
-## Quick Start — OpenRouter Driver (No Anthropic Key)
+## Quick Start — OpenRouter Driver (No Anthropic Key) {#quick-start--openrouter-driver-no-anthropic-key}
 
 The skill ships `scripts/parrot_openrouter.py` — same parrot problem, but the
 LLM call goes through OpenRouter so any provider works.
@@ -132,7 +140,7 @@ uv run --with openai python "$SKILL_DIR/scripts/show_snapshot.py" \
 Expected output: 7 evolved prompt templates ranked by score, with the best
 landing around 0.6–0.8 (the seed `Say {{ phrase }}` scored 0.000).
 
-## Defining a Custom Problem
+## Defining a Custom Problem {#defining-a-custom-problem}
 
 The skill ships `templates/custom_problem_template.py` — copy, edit, run.
 Three things you must define:
@@ -160,7 +168,7 @@ Then write a driver script that wires `Problem(initial_organism, evaluator, [mut
 into `EvolveProblemLoop` and iterates over `loop.run(num_iterations=N)` — the
 shipped `scripts/parrot_openrouter.py` is the reference.
 
-## Hyperparameters That Actually Matter
+## Hyperparameters That Actually Matter {#hyperparameters-that-actually-matter}
 
 | flag | default | when to change |
 |---|---|---|
@@ -173,7 +181,7 @@ shipped `scripts/parrot_openrouter.py` is the reference.
 | `--midpoint_score` | `p75` | leave alone unless scores cluster |
 | `--sharpness` | 10 | leave alone |
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 1. **`Initial organism must be viable`** — set `is_viable=True` in your
    `EvaluationResult` even on a 0-score seed. The loop refuses non-viable
@@ -192,12 +200,12 @@ shipped `scripts/parrot_openrouter.py` is the reference.
 6. **CLI is hardcoded to Anthropic.** `uv run darwinian_evolver <problem>`
    reaches for `ANTHROPIC_API_KEY` and uses Claude Sonnet. To use any other
    provider, write a driver like `parrot_openrouter.py`.
-7. **AGPL.** Never `from darwinian_evolver import ...` inside Hermes core.
+7. **AGPL.** Never `from darwinian_evolver import ...` inside {{app-name}} core.
    Custom driver scripts under `~/.hermes/skills/...` are user-side and fine.
 8. **No PyPI package.** `pip install darwinian-evolver` will pull the wrong
    thing. Always install from the GitHub repo.
 
-## Verification
+## Verification {#verification}
 
 After install + a parrot run, exit code 0 from this is sufficient:
 
@@ -208,7 +216,7 @@ cd "$DE_DIR" && uv run darwinian_evolver --help >/dev/null && \
 echo "darwinian-evolver: OK"
 ```
 
-## References
+## References {#references}
 
 - [Imbue research post](https://imbue.com/research/2026-02-27-darwinian-evolver/)
 - [ARC-AGI-2 results](https://imbue.com/research/2026-02-27-arc-agi-2-evolution/)

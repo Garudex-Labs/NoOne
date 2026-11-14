@@ -1,4 +1,4 @@
-import type { PersistedTurn } from '@hermes/shared'
+import type { PersistedTurn } from '@noone/shared'
 import type { QueryClient } from '@tanstack/react-query'
 import { type MutableRefObject, useCallback, useEffect, useRef } from 'react'
 
@@ -970,7 +970,7 @@ export function useMessageStream({
 
             // The last assistant row is a sealed interim (a tool-call turn or a
             // verify-on-stop candidate — `message.interim` fires for BOTH, see
-            // tui_gateway `_load_interim_assistant_messages`). When the final
+            // agent_backend `_load_interim_assistant_messages`). When the final
             // completion is the SAME turn's reply, settle it onto that interim
             // instead of appending a second bubble. Continuity, not exact
             // equality: streaming can drop a small number of characters and

@@ -550,11 +550,11 @@ class TestCustomProviderVisionAlias:
 
 
     def test_named_custom_provider_bare_custom_runtime_vision_alias(self):
-        """Teknium's requested regression case.
+        """Requested regression case.
 
         A named custom provider (``model.provider: my-vllm``) is rewritten to
         the runtime value ``provider="custom"`` by
-        ``hermes_cli/runtime_provider.py``. The resolver must still match the
+        ``agent_cli/runtime_provider.py``. The resolver must still match the
         ``my-vllm`` entry via the ``model.provider`` candidate and honour the
         ``vision`` alias.
         """

@@ -1,9 +1,9 @@
+import { ExternalLink } from '@noone/ui/icons'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
-import { ExternalLink } from '@/lib/icons'
 
 import { ToggleRow } from '../primitives'
 

@@ -1,13 +1,13 @@
-#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-hermes-env" python3 "$0" "$@"'
+#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-agent-env" python3 "$0" "$@"'
 """Regenerate website/docs/developer-guide/gateway-command-parity.md from the code.
 
 For every ``COMMAND_REGISTRY`` command it records what each local client does with it on the
-shared gateway -- the classic CLI (main's ``HermesCLI`` dispatch table, ``cli.py``), Ink
+shared gateway -- the classic CLI (main's ``AgentCLI`` dispatch table, ``cli.py``), Ink
 (``ui-tui/src/app/slash/commands/*.ts``), Desktop (``apps/desktop/src/lib/desktop-slash-commands.ts``
 + the registry's ``desktop=`` dump), ACP (``acp_adapter/gateway_commands.py``) -- and the
 gateway's own ``slash.exec`` verdict for a local session (``gateway/session_commands.py``).
 Every column is derived from source, so a verdict that changes without a regenerated table
-fails ``tests/hermes_cli/test_gateway_command_parity.py``. ``--check`` writes nothing and exits 1
+fails ``tests/agent_cli/test_gateway_command_parity.py``. ``--check`` writes nothing and exits 1
 on drift.
 """
 
@@ -63,13 +63,13 @@ def gateway_cell(name):
 
 
 # Reads a TUI session gets as main's TUI sidecar rendered them (gateway/session_tui_reads.py).
-TUI_READS = {"status": "TUI session: main's `Hermes TUI Status`",
+SESSION_READS = {"status": "TUI session: main's `Hermes TUI Status`",
              "context": "TUI session: main's live /context with the category table"}
 
 
 def port_note(cmd):
-    if cmd.name in TUI_READS:
-        return "; ".join(filter(None, [TUI_READS[cmd.name], _base_note(cmd)]))
+    if cmd.name in SESSION_READS:
+        return "; ".join(filter(None, [SESSION_READS[cmd.name], _base_note(cmd)]))
     return _base_note(cmd)
 
 
@@ -86,14 +86,14 @@ def _base_note(cmd):
 
 
 def classic_cell(cmd):
-    """``hermes chat`` is main's ``HermesCLI`` with a gateway-backed agent and session store
-    (``hermes_cli/gateway_agent.py``, ``gateway_session_store.py``): every command runs main's own
+    """``noone chat`` is main's ``AgentCLI`` with a gateway-backed agent and session store
+    (``agent_cli/gateway_agent.py``, ``gateway_session_store.py``): every command runs main's own
     handler in the CLI process. The cell names that handler; a gateway-only command has none."""
-    from cli import HermesCLI
-    entry = HermesCLI._slash_handler(cmd.name)
+    from cli import AgentCLI
+    entry = AgentCLI._slash_handler(cmd.name)
     if entry is None:
         return "messaging-only: unknown command" if cmd.gateway_only else "unknown command"
-    return f"HermesCLI.{entry[0]}"
+    return f"AgentCLI.{entry[0]}"
 
 
 def acp_cell(name, gateway):
@@ -105,59 +105,22 @@ def acp_cell(name, gateway):
     return "slash.exec" if gateway != "refused" else "slash.exec: refused"
 
 
-def _ink_commands():
-    """``{name_or_alias: (canonical_ink_name, block_text)}`` from the static Ink tables."""
-    table = {}
-    for path in sorted((ROOT / "ui-tui" / "src" / "app" / "slash" / "commands").glob("*.ts")):
-        text = path.read_text(encoding="utf-8-sig")
-        for block in re.split(r"\n  \{\n", text)[1:]:
-            block = block.split("\n  },", 1)[0]
-            match = re.search(r"^    name: '([\w-]+)'", block, re.MULTILINE)
-            if not match:
-                continue
-            aliases = re.search(r"^    aliases: \[([^\]]*)\]", block, re.MULTILINE)
-            names = [match.group(1)] + (re.findall(r"'([\w-]+)'", aliases.group(1)) if aliases else [])
-            for name in names:
-                table.setdefault(name, (match.group(1), block))
-    return table
 
 
-def ink_cell(cmd, gateway, ink, served):
-    entry = next((ink[n] for n in (cmd.name, *cmd.aliases) if n in ink), None)
-    if entry is None:
-        return "slash.exec" if gateway != "refused" or cmd.name in TUI_READS else "slash.exec: refused"
-    _, block = entry
-    methods = set(re.findall(r"(?:rpc|request)(?:<[^>]*>)?\(\s*'([a-z_]+\.[a-z_.]+)'", block))
-    refused = re.findall(r"notAvailable', '([\w-]+) ([\w-]+)'\)", block)
-    if refused and "canonical.controls.notAvailable" not in re.sub(r"notAvailable', '[\w-]+ [\w-]+'\)", "", block):
-        # Only named subcommands are refused (``/voice tts``); the rest of the command keeps its route.
-        cell = _rpc_cell(methods, served) if methods else "local"
-        return cell + "; " + ", ".join(f"`{sub}` refused" for _, sub in refused)
-    if "canonical.controls.notAvailable" in block:
-        # The shared gateway refuses it in the client (no owner verb yet), whatever it calls on a
-        # standalone backend; never reported as a working route. A bare form that still reads the
-        # current value through a served ``.get`` is named.
-        reads = sorted(m for m in methods & served if m.endswith(".get"))
-        return (", ".join(reads) + "; change refused: not available yet") if reads else "refused: not available yet"
-    if "isCanonical" in block:
-        return "canonical route"
-    cell = _rpc_cell(methods, served) if methods else "local"
-    # A client display preference: applied to the view, reported as not saved on the owner.
-    return cell + " (preference not saved)" if "saveDisplayPref(" in block else cell
 
 
 def _sidecar_live_session_methods():
     """Sidecar RPCs that resolve their ``session_id`` in the sidecar's own session map
     (``@_rpc(..., live_session=True)``), which never holds a shared-gateway session."""
-    text = "".join(p.read_text(encoding="utf-8-sig") for p in sorted((ROOT / "tui_gateway").glob("*.py")))
+    text = "".join(p.read_text(encoding="utf-8-sig") for p in sorted((ROOT / "agent_backend").glob("*.py")))
     return set(re.findall(r'_rpc\(\s*"([\w.]+)"[^)]*\blive_session=True', text))
 
 
 def _rpc_cell(methods, served):
     """An RPC the authority does not serve: session-namespace verbs answer -32601 (the client's
-    "out of sync" error); any other method reaches the legacy sidecar (``tui_gateway/ws.py``),
+    "out of sync" error); any other method reaches the legacy sidecar (``agent_backend/ws.py``),
     where a live-session handler answers 4001 for every shared-gateway session."""
-    from tui_gateway.ws_legacy_fallback import _SESSION_FALLBACK_ALLOWED, _SESSION_NAMESPACES
+    from agent_backend.ws_legacy_fallback import _SESSION_FALLBACK_ALLOWED, _SESSION_NAMESPACES
     broken = sorted(m for m in methods - served
                     if m.startswith(_SESSION_NAMESPACES) and m not in _SESSION_FALLBACK_ALLOWED)
     if broken:
@@ -210,8 +173,8 @@ title: Gateway command parity
 description: What each local client does with every slash command on the shared gateway
 ---
 
-<!-- GENERATED by scripts/gen_gateway_command_parity.py — DO NOT EDIT. -->
-<!-- tests/hermes_cli/test_gateway_command_parity.py fails when this table is stale. -->
+{/* GENERATED by scripts/gen_gateway_command_parity.py — DO NOT EDIT. */}
+{/* tests/agent_cli/test_gateway_command_parity.py fails when this table is stale. */}
 
 # Gateway command parity (local sessions)
 
@@ -219,11 +182,11 @@ Every local client (classic CLI, Ink TUI, Desktop, ACP) attaches to the one gate
 the session. A slash command either runs in the client against a canonical verb
 (`session.mutate`, `session.create`, `prompt.receipt`, ...), or goes to the owner as
 `slash.exec`, where `gateway/session_commands.py` runs only the reviewed reads below and refuses
-the rest (`unsupported_command`). The classic CLI (`hermes chat`) is main's `HermesCLI` with a
+the rest (`unsupported_command`). The classic CLI (`noone chat`) is main's `AgentCLI` with a
 gateway-backed agent and session store: its column names the main handler it runs in-process
-(turns, tools and session writes go to the gateway through `hermes_cli/gateway_agent.py` /
+(turns, tools and session writes go to the gateway through `agent_cli/gateway_agent.py` /
 `gateway_session_store.py`). The `--stream-json` / safe-mode transport client keeps its own
-narrower routes (`hermes_cli/gateway_chat_commands.py`).
+narrower routes (`agent_cli/gateway_chat_commands.py`).
 
 **Gateway (`slash.exec`)**: `read` = the real handler runs for a local session (proved by
 `tests/gateway/test_session_read_commands.py`); `control` = admission-fenced write (`/approve`
@@ -238,18 +201,18 @@ handler does; `client-local (cli_only)` commands are terminal/UI features of a c
 
 def render() -> str:
     sys.path.insert(0, str(ROOT))
-    from hermes_cli.commands import COMMAND_REGISTRY
+    from agent_cli.commands import COMMAND_REGISTRY
     served = _served_methods()
-    ink, specs = _ink_commands(), _desktop_specs()
-    rows = ["| Command | Gateway (`slash.exec`) | Classic CLI | Ink | Desktop | ACP | Notes |",
-            "|---|---|---|---|---|---|---|"]
+    specs = _desktop_specs()
+    rows = ["| Command | Gateway (`slash.exec`) | Classic CLI | Desktop | ACP | Notes |",
+            "|---|---|---|---|---|---|"]
     counts = {}
     for cmd in sorted(COMMAND_REGISTRY, key=lambda c: c.name):
         gateway = gateway_cell(cmd.name)
         counts[gateway.split(" ")[0]] = counts.get(gateway.split(" ")[0], 0) + 1
         aliases = f" ({', '.join('/' + a for a in cmd.aliases)})" if cmd.aliases else ""
         cells = [f"`/{cmd.name}`{aliases}", gateway, classic_cell(cmd),
-                 ink_cell(cmd, gateway, ink, served), desktop_cell(cmd, gateway, specs, served),
+                 desktop_cell(cmd, gateway, specs, served),
                  acp_cell(cmd.name, gateway), port_note(cmd)]
         rows.append("| " + " | ".join(cell.replace("|", "\\|") for cell in cells) + " |")
     summary = ", ".join(f"{count} {kind}" for kind, count in sorted(counts.items()))

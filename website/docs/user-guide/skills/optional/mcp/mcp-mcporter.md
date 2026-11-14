@@ -1,20 +1,20 @@
 ---
 title: "Mcporter — List, auth, and call MCP servers/tools from the terminal"
-sidebar_label: "Mcporter"
+sidebarTitle: "Mcporter"
 description: "List, auth, and call MCP servers/tools from the terminal"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Mcporter
+# Mcporter {#mcporter}
 
 List, auth, and call MCP servers/tools from the terminal.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mcp/mcporter` |
+| Source | Optional — install with `noone skills install official/mcp/mcporter` |
 | Path | `optional-skills/mcp/mcporter` |
 | Version | `1.0.0` |
 | Author | community |
@@ -22,17 +22,25 @@ List, auth, and call MCP servers/tools from the terminal.
 | Platforms | linux, macos, windows |
 | Tags | `MCP`, `Tools`, `API`, `Integrations`, `Interop` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# mcporter
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# mcporter {#mcporter-1}
 
 Use `mcporter` to discover, call, and manage [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) servers and tools directly from the terminal.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 Requires Node.js:
 ```bash
@@ -43,7 +51,7 @@ npx mcporter list
 npm install -g mcporter
 ```
 
-## Quick Start
+## Quick Start {#quick-start}
 
 ```bash
 # List MCP servers already configured on this machine
@@ -56,7 +64,7 @@ mcporter list <server> --schema
 mcporter call <server.tool> key=value
 ```
 
-## Discovering MCP Servers
+## Discovering MCP Servers {#discovering-mcp-servers}
 
 mcporter auto-discovers servers configured by other MCP clients (Claude Desktop, Cursor, etc.) on the machine. To find new servers to use, browse registries like [mcpfinder.dev](https://mcpfinder.dev) or [mcp.so](https://mcp.so), then connect ad-hoc:
 
@@ -68,7 +76,7 @@ mcporter list --http-url https://some-mcp-server.com --name my_server
 mcporter list --stdio "npx -y @modelcontextprotocol/server-filesystem" --name fs
 ```
 
-## Calling Tools
+## Calling Tools {#calling-tools}
 
 ```bash
 # Key=value syntax
@@ -90,7 +98,7 @@ mcporter call <server.tool> --args '{"limit": 5}'
 mcporter call <server.tool> key=value --output json
 ```
 
-## Auth and Config
+## Auth and Config {#auth-and-config}
 
 ```bash
 # OAuth login for a server
@@ -106,7 +114,7 @@ mcporter config import <path>
 
 Config file location: `./config/mcporter.json` (override with `--config`).
 
-## Daemon
+## Daemon {#daemon}
 
 For persistent server connections:
 ```bash
@@ -116,7 +124,7 @@ mcporter daemon stop
 mcporter daemon restart
 ```
 
-## Code Generation
+## Code Generation {#code-generation}
 
 ```bash
 # Generate a CLI wrapper for an MCP server
@@ -131,7 +139,7 @@ mcporter emit-ts <server> --mode client
 mcporter emit-ts <server> --mode types
 ```
 
-## Notes
+## Notes {#notes}
 
 - Use `--output json` for structured output that's easier to parse
 - Ad-hoc servers (HTTP URL or `--stdio` command) work without any config — useful for one-off calls

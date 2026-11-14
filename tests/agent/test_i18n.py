@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from agent import i18n
 
@@ -61,9 +61,11 @@ def test_catalog_placeholders_match_english(lang: str):
     en_flat = _flatten(_load_raw("en"))
     lang_flat = _flatten(_load_raw(lang))
     for key, en_value in en_flat.items():
-        en_placeholders = set(placeholder_re.findall(en_value))
+        # Identity is injected by the platform, not supplied by the caller.
+        # A translation may name the application where English uses an implied subject.
+        en_placeholders = set(placeholder_re.findall(en_value)) - {"app_name"}
         lang_value = lang_flat.get(key, "")
-        lang_placeholders = set(placeholder_re.findall(lang_value))
+        lang_placeholders = set(placeholder_re.findall(lang_value)) - {"app_name"}
         assert en_placeholders == lang_placeholders, (
             f"{lang}.yaml key={key!r}: placeholders {lang_placeholders} "
             f"don't match English {en_placeholders}"
@@ -105,7 +107,7 @@ def test_language_is_per_profile_under_multiplex(monkeypatch, tmp_path):
     """HERMES_LANGUAGE in the DEFAULT profile's environ must not leak into a secondary profile's
     turn, and the config-language cache must not freeze one profile's ``display.language`` for all."""
     from agent import secret_scope
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     default_home = tmp_path / "default"; default_home.mkdir()
     prof_b = tmp_path / "b"; prof_b.mkdir()
@@ -118,11 +120,11 @@ def test_language_is_per_profile_under_multiplex(monkeypatch, tmp_path):
     token = secret_scope.set_secret_scope({})
     try:
         assert i18n.get_language() == "fr"  # scoped miss: env ignored, this profile's config wins
-        home_token = set_hermes_home_override(prof_b)
+        home_token = set_agent_home_override(prof_b)
         try:
             assert i18n.get_language() == "de"  # not the first profile's cached "fr"
         finally:
-            reset_hermes_home_override(home_token)
+            reset_agent_home_override(home_token)
     finally:
         secret_scope.reset_secret_scope(token)
         secret_scope.set_multiplex_active(False)

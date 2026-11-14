@@ -11,7 +11,7 @@ from gateway.message_timestamps import (
     format_message_timestamp,
     render_user_content_with_timestamp,
 )
-from hermes_time import safe_strftime
+from agent_time import safe_strftime
 
 
 BERLIN = ZoneInfo("Europe/Berlin")
@@ -236,8 +236,8 @@ def test_compactor_restatement_replays_unstamped_through_session_db(tmp_path):
     from gateway.config import GatewayConfig
     from gateway.run import _build_gateway_agent_history
     from gateway.session import SessionStore
-    from hermes_state import SessionDB
-    from hermes_time import get_timezone
+    from agent_state import SessionDB
+    from agent_time import get_timezone
 
     sent_at = _epoch(2026, 4, 28, 13, 40, 53)
     messages = [{"role": "system", "content": "sys"},
@@ -264,7 +264,7 @@ def test_compactor_restatement_replays_unstamped_through_session_db(tmp_path):
     store = SessionStore(tmp_path / "sessions", GatewayConfig())
     store._db = db
     try:
-        db.create_session("room", source="matrix")
+        db.create_session("room", source="mattermost")
         db.archive_and_compact("room", sent)
         first, _ = _build_gateway_agent_history(store.load_transcript("room"), inject_timestamps=True)
         # A later in-session prune re-persists the replayed view; the next reload must still know the row.
@@ -291,7 +291,7 @@ def test_compaction_summary_stays_unstamped_across_real_prune(tmp_path):
     from gateway.config import GatewayConfig
     from gateway.run import _build_gateway_agent_history
     from gateway.session import SessionStore
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
 
     summary = {"role": "user", "content": "[CONTEXT COMPACTION — REFERENCE ONLY] retained summary",
                "_compressed_summary": True}
@@ -305,7 +305,7 @@ def test_compaction_summary_stays_unstamped_across_real_prune(tmp_path):
     store = SessionStore(tmp_path / "sessions", GatewayConfig())
     store._db = db
     try:
-        db.create_session("room", source="matrix")
+        db.create_session("room", source="mattermost")
         db.archive_and_compact("room", rows)
         first, _ = _build_gateway_agent_history(store.load_transcript("room"), inject_timestamps=True)
         compressor = ContextCompressor(model="m", quiet_mode=True, config_context_length=100_000, protect_first_n=1,

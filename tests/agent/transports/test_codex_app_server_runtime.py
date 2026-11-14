@@ -12,7 +12,7 @@ import threading
 
 import pytest
 
-from hermes_cli.runtime_provider import (
+from agent_cli.runtime_provider import (
     _VALID_API_MODES,
     _maybe_apply_codex_app_server_runtime,
 )
@@ -314,7 +314,7 @@ class TestSpawnEnvIsolation:
 
 
 class TestSpawnEnvSecretStripping:
-    """codex app-server routes its spawn env through hermes_subprocess_env(
+    """codex app-server routes its spawn env through agent_subprocess_env(
     inherit_credentials=True) instead of a raw os.environ.copy().
 
     codex is a model-driving CLI executor: it legitimately needs LLM provider

@@ -38,7 +38,7 @@ MAX_REFERENCE_IMAGES = 7
 _REMOTE_PREFIXES = ("http://", "https://")
 _TERMINAL_POLL_STATUSES = {"done", "failed", "error", "expired", "cancelled"}
 _IMAGE_TO_VIDEO_COMPAT_MODEL_IDS = {"grok-imagine-video-1.5-preview", "grok-imagine-video-1.5-2026-05-30"}
-_AUTH_REQUIRED_MSG = ("No xAI credentials found. Sign in via `hermes auth add xai-oauth` "
+_AUTH_REQUIRED_MSG = ("No xAI credentials found. Sign in via `noone auth add xai-oauth` "
                       "(SuperGrok / Premium+) or set XAI_API_KEY from https://console.x.ai/.")
 _PUBLIC_URL_HINT = "(e.g. the `image`/`public_url` from a prior Imagine result)"
 _MODELS: dict[str, dict[str, Any]] = {
@@ -148,7 +148,7 @@ class XAIVideoGenProvider(VideoGenProvider):
         return DEFAULT_MODEL
 
     def get_setup_schema(self) -> dict[str, Any]:
-        # Auth resolution lives in the shared ``xai_grok`` post_setup hook (hermes_cli/tools_config.py): no API-key
+        # Auth resolution lives in the shared ``xai_grok`` post_setup hook (agent_cli/tools_config.py): no API-key
         # prompt when already signed in via xAI Grok OAuth; OAuth-vs-API-key choice when neither is configured.
         storage_notice = _xai_http("xai_storage_notice_text", "", "video_gen")
         tag = ("grok-imagine-video for text/reference; grok-imagine-video-1.5 for image-to-video; edit/extend: pass the stored public "

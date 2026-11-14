@@ -1,5 +1,5 @@
 """Telegram outbound send policy shared by the gateway adapter and the standalone sender
-(``hermes send``, the ``send_message`` tool, standalone cron delivery): the push-notification
+(``noone send``, the ``send_message`` tool, standalone cron delivery): the push-notification
 mode and the visually-empty guard, so both lanes make the same decision for the same text."""
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ def resolve_notifications_mode() -> str:
     ``display.platforms.telegram.notifications``; unknown values warn and use ``important``."""
     mode = os.getenv("HERMES_TELEGRAM_NOTIFICATIONS", "").strip().lower()
     if not mode:
-        from hermes_cli.config import cfg_get, load_config_readonly
+        from agent_cli.config import cfg_get, load_config_readonly
         raw = cfg_get(load_config_readonly(), "display", "platforms", "telegram", "notifications")
         mode = "" if raw is None else str(raw).strip().lower()
     if not mode:

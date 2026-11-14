@@ -1,20 +1,20 @@
 ---
 title: "Flash Attention — Speed up long-sequence transformer training and inference"
-sidebar_label: "Flash Attention"
+sidebarTitle: "Flash Attention"
 description: "Speed up long-sequence transformer training and inference"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Flash Attention
+# Flash Attention {#flash-attention}
 
 Speed up long-sequence transformer training and inference.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/flash-attention` |
+| Source | Optional — install with `noone skills install official/mlops/flash-attention` |
 | Path | `optional-skills/mlops/flash-attention` |
 | Version | `1.0.1` |
 | Author | Orchestra Research |
@@ -23,15 +23,23 @@ Speed up long-sequence transformer training and inference.
 | Platforms | linux, macos |
 | Tags | `Optimization`, `Flash Attention`, `Attention Optimization`, `Memory Efficiency`, `Speed Optimization`, `Long Context`, `PyTorch`, `SDPA`, `H100`, `FP8`, `Transformers` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Flash Attention - Fast Memory-Efficient Attention
+<div className="doc-callout-title">
 
-## Quick start
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Flash Attention - Fast Memory-Efficient Attention {#flash-attention---fast-memory-efficient-attention}
+
+## Quick start {#quick-start}
 
 Flash Attention provides 2-4x speedup and 10-20x memory reduction for transformer attention through IO-aware tiling and recomputation.
 
@@ -60,9 +68,9 @@ from flash_attn import flash_attn_func
 out = flash_attn_func(q, k, v, dropout_p=0.0, causal=True)
 ```
 
-## Common workflows
+## Common workflows {#common-workflows}
 
-### Workflow 1: Enable in existing PyTorch model
+### Workflow 1: Enable in existing PyTorch model {#workflow-1-enable-in-existing-pytorch-model}
 
 Copy this checklist:
 
@@ -153,7 +161,7 @@ print(f"Max difference: {diff:.6f}")
 # Should be <1e-3 for float16
 ```
 
-### Workflow 2: Use flash-attn library for advanced features
+### Workflow 2: Use flash-attn library for advanced features {#workflow-2-use-flash-attn-library-for-advanced-features}
 
 For multi-query attention, sliding window, or H100 FP8.
 
@@ -245,7 +253,7 @@ print(f"Time per iteration: {(end-start)/100*1000:.2f}ms")
 print(f"Memory allocated: {torch.cuda.max_memory_allocated()/1e9:.2f}GB")
 ```
 
-### Workflow 3: H100 FP8 optimization (FlashAttention-3)
+### Workflow 3: H100 FP8 optimization (FlashAttention-3) {#workflow-3-h100-fp8-optimization-flashattention-3}
 
 For maximum performance on Hopper GPUs (H100).
 
@@ -303,7 +311,7 @@ out = flash_attn_func(q_fp8, k_fp8, v_fp8, causal=True)
 # FP16/BF16 forward+backward is also supported by the FA3 interface.
 ```
 
-## When to use vs alternatives
+## When to use vs alternatives {#when-to-use-vs-alternatives}
 
 **Use Flash Attention when:**
 - Training transformers with sequences >512 tokens
@@ -317,7 +325,7 @@ out = flash_attn_func(q_fp8, k_fp8, v_fp8, causal=True)
 - **xFormers**: Need more attention variants (not just speed)
 - **Memory-efficient attention**: CPU inference (Flash Attention needs GPU)
 
-## Common issues
+## Common issues {#common-issues}
 
 **Issue: ImportError: cannot import flash_attn**
 
@@ -364,13 +372,13 @@ q = q.to(torch.float16)  # Or torch.bfloat16
 
 Flash Attention uses float16/bfloat16 for speed. Float32 not supported.
 
-## Advanced topics
+## Advanced topics {#advanced-topics}
 
-**Integration with HuggingFace Transformers**: See [references/transformers-integration.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/flash-attention/references/transformers-integration.md) for enabling Flash Attention in BERT, GPT, Llama models.
+**Integration with HuggingFace Transformers**: See [references/transformers-integration.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/flash-attention/references/transformers-integration.md) for enabling Flash Attention in BERT, GPT, Llama models.
 
-**Performance benchmarks**: See [references/benchmarks.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/flash-attention/references/benchmarks.md) for detailed speed and memory comparisons across GPUs and sequence lengths.
+**Performance benchmarks**: See [references/benchmarks.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/flash-attention/references/benchmarks.md) for detailed speed and memory comparisons across GPUs and sequence lengths.
 
-## Hardware requirements
+## Hardware requirements {#hardware-requirements}
 
 - **GPU**: NVIDIA Ampere+ (A100, A10, A30) or AMD MI200+
 - **VRAM**: Same as standard attention (Flash Attention doesn't increase memory)
@@ -379,7 +387,7 @@ Flash Attention uses float16/bfloat16 for speed. Float32 not supported.
 
 **Not supported**: V100 (Volta), CPU inference
 
-## Resources
+## Resources {#resources}
 
 - Paper: "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness" (NeurIPS 2022)
 - Paper: "FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning" (ICLR 2024)

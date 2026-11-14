@@ -1,74 +1,73 @@
 ---
-sidebar_position: 1
-title: "Hermes Agent Quickstart"
-description: "Your first conversation with Hermes Agent — from install to chatting in under 5 minutes"
+title: "the agent Quickstart"
+description: "Your first conversation with the agent — from install to chatting in under 5 minutes"
 ---
 
-# Hermes Agent Quickstart
+# {{app-name}} Quickstart {#hermes-agent-quickstart}
 
 Python dependency commands on this page use a
 [PM-prepared source checkout](../reference/package-management.md#developer-workflow).
-After a dependency change, reactivate the checkout and restart Hermes.
+After a dependency change, reactivate the checkout and restart {{app-name}}.
 
-This guide gets you from zero to a working Hermes setup that survives real use. Install, choose a provider, verify a working chat, and know exactly what to do when something breaks.
+This guide gets you from zero to a working {{app-name}} setup that survives real use. Install, choose a provider, verify a working chat, and know exactly what to do when something breaks.
 
-## Prefer to watch?
+## Prefer to watch? {#prefer-to-watch}
 
-**Onchain AI Garage** put together a Masterclass walkthrough of installation, setup, and basic commands — a good companion to this page if you'd rather follow along on video. For more, see the full [Hermes Agent Tutorials & Use Cases](https://www.youtube.com/playlist?list=PLmpUb_PWAkDxewld5ZYyKifuHxgIbiq2d) playlist.
+**Onchain AI Garage** put together a Masterclass walkthrough of installation, setup, and basic commands — a good companion to this page if you'd rather follow along on video. For more, see the full [{{app-name}} Tutorials & Use Cases](https://www.youtube.com/playlist?list=PLmpUb_PWAkDxewld5ZYyKifuHxgIbiq2d) playlist.
 
 <div style={{position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', maxWidth: '100%', marginBottom: '1.5rem'}}>
   <iframe
     style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'}}
     src="https://www.youtube-nocookie.com/embed/R3YOGfTBcQg"
-    title="Hermes Agent Masterclass: Installation, Setup, Basic Commands"
+    title="NoOne Masterclass: Installation, Setup, Basic Commands"
     frameBorder="0"
     allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowFullScreen
   ></iframe>
 </div>
 
-## Who this is for
+## Who this is for {#who-this-is-for}
 
 - Brand new and want the shortest path to a working setup
 - Switching providers and don't want to lose time to config mistakes
-- Setting up Hermes for a team, bot, or always-on workflow
+- Setting up {{app-name}} for a team, bot, or always-on workflow
 - Tired of "it installed, but it still does nothing"
 
-## The fastest path
+## The fastest path {#the-fastest-path}
 
 Pick the row that matches your goal:
 
 | Goal | Do this first | Then do this |
 |---|---|---|
-| I just want Hermes working on my machine | `hermes setup` | Run a real chat and verify it responds |
-| I already know my provider | `hermes model` | Save the config, then start chatting |
-| I want a bot or always-on setup | `hermes gateway setup` after CLI works | Connect Telegram, Discord, Slack, or another platform |
-| I want a local or self-hosted model | `hermes model` → custom endpoint | Verify the endpoint, model name, and context length |
-| I want multi-provider fallback | `hermes model` first | Add routing and fallback only after the base chat works |
+| I just want {{app-name}} working on my machine | `noone setup` | Run a real chat and verify it responds |
+| I already know my provider | `noone model` | Save the config, then start chatting |
+| I want a bot or always-on setup | `noone gateway setup` after CLI works | Connect Telegram, Discord, Slack, or another platform |
+| I want a local or self-hosted model | `noone model` → custom endpoint | Verify the endpoint, model name, and context length |
+| I want multi-provider fallback | `noone model` first | Add routing and fallback only after the base chat works |
 
-**Rule of thumb:** if Hermes cannot complete a normal chat, do not add more features yet. Get one clean conversation working first, then layer on gateway, cron, skills, voice, or routing.
+**Rule of thumb:** if {{app-name}} cannot complete a normal chat, do not add more features yet. Get one clean conversation working first, then layer on gateway, cron, skills, voice, or routing.
 
 ---
 
-## 1. Install Hermes Agent
-### With the Hermes Desktop installer on macOS or Windows (recommended)
-To easily install the command-line and desktop applications, [download the Hermes Desktop installer](https://hermes-agent.nousresearch.com/) from our website and run it.
+## 1. Install {{app-name}} {#1-install-hermes-agent}
+### With the {{app-name}} Desktop installer on macOS or Windows (recommended) {#with-the-hermes-desktop-installer-on-macos-or-windows-recommended}
+To easily install the command-line and desktop applications, [download the {{app-name}} Desktop installer](https://github.com/Garudex-Labs/NoOne/tree/main/website/docs) from our website and run it.
 
-### Without Hermes Desktop:
-For a command-line only install without Hermes Desktop, run:
+### Without {{app-name}} Desktop: {#without-hermes-desktop}
+For a command-line only install without {{app-name}} Desktop, run:
 
 For aarch64 Android devices, use the separate [Termux APT guide](./termux.md).
 
-#### Linux / macOS / WSL2
+#### Linux / macOS / WSL2 {#linux--macos--wsl2}
 ```bash
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Garudex-Labs/NoOne/main/scripts/install.sh | bash
 ```
 
-#### Windows (native)
+#### Windows (native) {#windows-native}
 
 Run in powershell:
 ```powershell
-iex (irm https://hermes-agent.nousresearch.com/install.ps1) 
+iex (irm https://raw.githubusercontent.com/Garudex-Labs/NoOne/main/scripts/install.ps1)
 ```
 
 After it finishes, reload your shell:
@@ -79,43 +78,59 @@ source ~/.bashrc   # or source ~/.zshrc
 
 For detailed installation options, prerequisites, and troubleshooting, see the [Installation guide](./installation.md).
 
-## 2. Choose a Provider
+## 2. Choose a Provider {#2-choose-a-provider}
 
-The single most important setup step. Use `hermes model` to walk through the choice interactively:
+The single most important setup step. Use `noone model` to walk through the choice interactively:
 
 ```bash
-hermes model
+noone model
 ```
 
-:::tip Easiest path: Nous Portal
+<Tip>
+
+<div className="doc-callout-title">
+
+Easiest path: Nous Portal
+
+</div>
+
 One subscription covers 300+ models plus the [Tool Gateway](../user-guide/features/tool-gateway.md) (web search, image generation, TTS, cloud browser). On a fresh install:
 
 ```bash
-hermes setup --portal
+noone setup --portal
 ```
 
 That logs you in, sets Nous as your provider, and turns on the Tool Gateway in one command.
-:::
 
-:::info Setup modes
-Coming from OpenClaw, Claude Code, Codex CLI or Cursor? When a fresh `hermes setup` finds one of them on your computer it first offers to import your setup (it installs the `agent-importers` plugin for that; see [Import from Other Agents](../user-guide/import-from-other-agents.md)).
+</Tip>
 
-On a fresh install, `hermes setup` offers three modes:
+<Info>
+
+<div className="doc-callout-title">
+
+Setup modes
+
+</div>
+
+Coming from OpenClaw, Claude Code, Codex CLI or Cursor? When a fresh `noone setup` finds one of them on your computer it first offers to import your setup (it installs the `agent-importers` plugin for that; see [Import from Other Agents](../user-guide/import-from-other-agents.md)).
+
+On a fresh install, `noone setup` offers three modes:
 
 - **Quick Setup (Nous Portal)** — OAuth login, no API keys to manage; sets up a model plus the Tool Gateway tools, billed to your [Nous Portal subscription](../integrations/nous-portal.md). The recommended fast path.
 - **Full Setup** — walk through every provider, tool, and option yourself (bring your own keys).
 - **Blank Slate** — everything starts **off** except the bare minimum needed to run an agent: **provider & model, the File Operations toolset, and the Terminal toolset**. No web, browser, code execution, vision, memory, delegation, cron, skills, plugins, or MCP servers — and compression, checkpoints, smart routing, and memory capture are all disabled. After the minimal baseline is applied, you choose one of two paths: **start with everything disabled** (finish now with the minimal agent), or **walk through all configurations** (opt in to tools, skills, plugins, MCP, and messaging). Pick this when you want a minimal, fully-controlled agent and intend to enable only exactly what you need.
 
-Blank Slate writes an explicit `platform_toolsets.cli` list plus `agent.disabled_toolsets`, so nothing you didn't choose ever loads — not even after `hermes update`. Re-enable anything later with `hermes tools`, seed skills with `hermes skills opt-in --sync`, or tune settings with `hermes setup agent`.
-:::
+Blank Slate writes an explicit `platform_toolsets.cli` list plus `agent.disabled_toolsets`, so nothing you didn't choose ever loads — not even after `noone update`. Re-enable anything later with `noone tools`, seed skills with `noone skills opt-in --sync`, or tune settings with `noone setup agent`.
+
+</Info>
 
 Good defaults:
 
 | Provider | What it is | How to set up |
 |----------|-----------|---------------|
-| **Nous Portal** | Subscription-based, zero-config | OAuth login via `hermes model` |
-| **OpenAI Codex** | ChatGPT or Codex subscription, uses Codex models | Device code auth via `hermes model` → **ChatGPT or Codex Subscription** |
-| **Anthropic** | Claude models directly — Max plan + extra usage credits (OAuth), or API key for pay-per-token | `hermes model` → OAuth login (requires Max + extra credits), or an Anthropic API key |
+| **Nous Portal** | Subscription-based, zero-config | OAuth login via `noone model` |
+| **OpenAI Codex** | ChatGPT or Codex subscription, uses Codex models | Device code auth via `noone model` → **ChatGPT or Codex Subscription** |
+| **Anthropic** | Claude models directly — Max plan + extra usage credits (OAuth), or API key for pay-per-token | `noone model` → OAuth login (requires Max + extra credits), or an Anthropic API key |
 | **OpenRouter** | Multi-provider routing across many models | Enter your API key |
 | **Fireworks AI** | Direct OpenAI-compatible model API | Set `FIREWORKS_API_KEY` |
 | **Z.AI** | GLM / Zhipu-hosted models | Set `GLM_API_KEY` / `ZAI_API_KEY` (also accepts `Z_AI_API_KEY`) |
@@ -124,7 +139,7 @@ Good defaults:
 | **Arcee AI** | Trinity models | Set `ARCEEAI_API_KEY` |
 | **GMI Cloud** | Multi-model direct API | Set `GMI_API_KEY` |
 | **Actual Computer** | Your own hardware as a private inference cluster — hosted relay or local daemon | Set `ACTUAL_API_KEY` (relay) or `ACTUAL_BASE_URL=http://127.0.0.1:8080` (local, no key) |
-| **MiniMax (OAuth)** | MiniMax frontier model via browser OAuth — no API key needed (model name in `hermes_cli/models.py` may change between releases) | `hermes model` → MiniMax (OAuth) |
+| **MiniMax (OAuth)** | MiniMax frontier model via browser OAuth — no API key needed (model name in `agent_cli/models.py` may change between releases) | `noone model` → MiniMax (OAuth) |
 | **MiniMax** | International MiniMax endpoint | Set `MINIMAX_API_KEY` |
 | **MiniMax China** | China-region MiniMax endpoint | Set `MINIMAX_CN_API_KEY` |
 | **Alibaba Cloud** | Qwen models via DashScope | Set `DASHSCOPE_API_KEY` (Qwen Coding Plan also accepts `ALIBABA_CODING_PLAN_API_KEY`) |
@@ -133,7 +148,7 @@ Good defaults:
 | **Azure Foundry** | Azure AI Foundry-hosted models | Set `AZURE_FOUNDRY_API_KEY` + `AZURE_FOUNDRY_BASE_URL` |
 | **Google AI Studio** | Gemini models via direct API | Set `GOOGLE_API_KEY` / `GEMINI_API_KEY` |
 | **xAI** | Grok models via direct API | Set `XAI_API_KEY` |
-| **xAI Grok OAuth** | SuperGrok / Premium+ subscription, no API key needed | `hermes model` → xAI Grok OAuth |
+| **xAI Grok OAuth** | SuperGrok / Premium+ subscription, no API key needed | `noone model` → xAI Grok OAuth |
 | **NovitaAI** | Multi-model API gateway | Set `NOVITA_API_KEY` |
 | **Ramp Router** | Responses-native LLM gateway routing across OpenAI/Anthropic/xAI/... | Set `RAMP_ROUTER_API_KEY` |
 | **Nebius Token Factory** | Open models on Nebius AI cloud | Set `NEBIUS_API_KEY` |
@@ -143,7 +158,7 @@ Good defaults:
 | **Tencent TokenPlan** | Tencent Hy models via Anthropic-style endpoint | Set `TOKENPLAN_API_KEY` |
 | **Ollama Cloud** | Managed Ollama-hosted models | Set `OLLAMA_API_KEY` |
 | **LM Studio** | Local desktop app exposing an OpenAI-compatible API | Set `LM_API_KEY` (and `LM_BASE_URL` if non-default) |
-| **Qwen OAuth** | Qwen Portal browser OAuth — no API key needed | `hermes model` → Qwen OAuth |
+| **Qwen OAuth** | Qwen Portal browser OAuth — no API key needed | `noone model` → Qwen OAuth |
 | **Kilo Code** | KiloCode-hosted models | Set `KILOCODE_API_KEY` |
 | **OpenCode Zen** | Pay-as-you-go access to curated models | Set `OPENCODE_ZEN_API_KEY` |
 | **OpenCode Go** | $10/month subscription for open models | Set `OPENCODE_GO_API_KEY` |
@@ -154,17 +169,33 @@ Good defaults:
 
 For most first-time users: choose a provider, accept the defaults unless you know why you're changing them. The full provider catalog with env vars and setup steps lives on the [Providers](../integrations/providers.md) page.
 
-:::caution Minimum context: 64K tokens
-Hermes Agent requires a model with at least **64,000 tokens** of context. Models with smaller windows cannot maintain enough working memory for multi-step tool-calling workflows and will be rejected at startup. Most hosted models (Claude, GPT, Gemini, Qwen, DeepSeek) meet this easily. If you're running a local model, set its context size to at least 64K (e.g. `--ctx-size 65536` for llama.cpp or `-c 65536` for Ollama).
-:::
+<Warning>
 
-:::tip
-You can switch providers at any time with `hermes model` — no lock-in. For a full list of all supported providers and setup details, see [AI Providers](../integrations/providers.md).
-:::
+<div className="doc-callout-title">
 
-### How settings are stored
+Minimum context: 64K tokens
 
-Hermes separates secrets from normal config:
+</div>
+
+{{app-name}} requires a model with at least **64,000 tokens** of context. Models with smaller windows cannot maintain enough working memory for multi-step tool-calling workflows and will be rejected at startup. Most hosted models (Claude, GPT, Gemini, Qwen, DeepSeek) meet this easily. If you're running a local model, set its context size to at least 64K (e.g. `--ctx-size 65536` for llama.cpp or `-c 65536` for Ollama).
+
+</Warning>
+
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+You can switch providers at any time with `noone model` — no lock-in. For a full list of all supported providers and setup details, see [AI Providers](../integrations/providers.md).
+
+</Tip>
+
+### How settings are stored {#how-settings-are-stored}
+
+{{app-name}} separates secrets from normal config:
 
 - **Secrets and tokens** → `~/.hermes/.env`
 - **Non-secret settings** → `~/.hermes/config.yaml`
@@ -172,25 +203,32 @@ Hermes separates secrets from normal config:
 The easiest way to set values correctly is through the CLI:
 
 ```bash
-hermes config set model anthropic/claude-opus-4.6
-hermes config set terminal.backend docker
-hermes config set OPENROUTER_API_KEY sk-or-...
+noone config set model anthropic/claude-opus-4.6
+noone config set terminal.backend docker
+noone config set OPENROUTER_API_KEY sk-or-...
 ```
 
 The right value goes to the right file automatically.
 
-## 3. Run Your First Chat
+## 3. Run Your First Chat {#3-run-your-first-chat}
 
 ```bash
 hermes            # classic CLI
-hermes --tui      # modern TUI (recommended)
+noone --cli      # modern TUI (recommended)
 ```
 
 You'll see a welcome banner with your model, available tools, and skills. Use a prompt that's specific and easy to verify:
 
-:::tip Pick your interface
-Hermes ships with two terminal interfaces: the classic `prompt_toolkit` CLI and a newer [TUI](../user-guide/tui.md) with modal overlays, mouse selection, and non-blocking input. Both share the same sessions, slash commands, and config — try each with `hermes` vs `hermes --tui`.
-:::
+<Tip>
+
+<div className="doc-callout-title">
+
+Pick your interface
+
+</div>
+
+
+</Tip>
 
 ```
 Summarize this repo in 5 bullets and tell me what the main entrypoint is.
@@ -207,26 +245,26 @@ Help me set up a clean GitHub PR workflow for this codebase.
 **What success looks like:**
 
 - The banner shows your chosen model/provider
-- Hermes replies without error
+- {{app-name}} replies without error
 - It can use a tool if needed (terminal, file read, web search)
 - The conversation continues normally for more than one turn
 
 If that works, you're past the hardest part.
 
-## 4. Verify Sessions Work
+## 4. Verify Sessions Work {#4-verify-sessions-work}
 
 Before moving on, make sure resume works:
 
 ```bash
-hermes --continue    # Resume the most recent session
+noone --continue    # Resume the most recent session
 hermes -c            # Short form
 ```
 
 That should bring you back to the session you just had. If it doesn't, check whether you're in the same profile and whether the session actually saved. This matters later when you're juggling multiple setups or machines.
 
-## 5. Try Key Features
+## 5. Try Key Features {#5-try-key-features}
 
-### Use the terminal
+### Use the terminal {#use-the-terminal}
 
 ```
 ❯ What's my disk usage? Show the top 5 largest directories.
@@ -234,7 +272,7 @@ That should bring you back to the session you just had. If it doesn't, check whe
 
 The agent runs terminal commands on your behalf and shows results.
 
-### Slash commands
+### Slash commands {#slash-commands}
 
 Type `/` to see an autocomplete dropdown of all commands:
 
@@ -246,65 +284,65 @@ Type `/` to see an autocomplete dropdown of all commands:
 | `/personality pirate` | Try a fun personality |
 | `/save` | Save the conversation |
 
-### Multi-line input
+### Multi-line input {#multi-line-input}
 
 Press `Alt+Enter`, `Ctrl+J`, or `Shift+Enter` to add a new line. `Shift+Enter` requires a terminal that sends it as a distinct sequence (Kitty / foot / WezTerm / Ghostty by default; iTerm2 / Alacritty / VS Code terminal once the Kitty keyboard protocol is enabled). `Alt+Enter` and `Ctrl+J` work in every terminal.
 
-### Interrupt the agent
+### Interrupt the agent {#interrupt-the-agent}
 
 If the agent is taking too long, type a new message and press Enter — it interrupts the current task and switches to your new instructions. `Ctrl+C` also works.
 
-## 6. Add the Next Layer
+## 6. Add the Next Layer {#6-add-the-next-layer}
 
 Only after the base chat works. Pick what you need:
 
-### Bot or shared assistant
+### Bot or shared assistant {#bot-or-shared-assistant}
 
 ```bash
-hermes gateway setup    # Interactive platform configuration
+noone gateway setup    # Interactive platform configuration
 ```
 
 Connect [Telegram](../user-guide/messaging/telegram.md), [Discord](../user-guide/messaging/discord.md), [Slack](../user-guide/messaging/slack.md), [WhatsApp](../user-guide/messaging/whatsapp.md), [Signal](../user-guide/messaging/signal.md), [Email](../user-guide/messaging/email.md), [Home Assistant](../user-guide/messaging/homeassistant.md) (plugin), or [Microsoft Teams](../user-guide/messaging/teams.md).
 
-### Automation and tools
+### Automation and tools {#automation-and-tools}
 
-- `hermes tools` — tune tool access per platform
-- `hermes skills` — browse and install reusable workflows
+- `noone tools` — tune tool access per platform
+- `noone skills` — browse and install reusable workflows
 - Cron — only after your bot or CLI setup is stable
 
-### Sandboxed terminal
+### Sandboxed terminal {#sandboxed-terminal}
 
 For safety, run the agent in a Docker container or on a remote server:
 
 ```bash
-hermes config set terminal.backend docker    # Docker isolation
-hermes config set terminal.backend ssh       # Remote server
+noone config set terminal.backend docker    # Docker isolation
+noone config set terminal.backend ssh       # Remote server
 ```
 
-For Docker sandboxes, you can also enable the **egress credential-injection proxy** so the sandbox never sees your real API keys — only opaque proxy tokens that work exclusively from behind a local TLS-intercepting daemon. See [Egress proxy](../user-guide/egress/iron-proxy.md). Setup is `hermes egress setup && hermes egress start`; `hermes setup terminal` also points Docker users at it. Modal, SSH, Daytona, and Singularity are not wired yet.
+For Docker sandboxes, you can also enable the **egress credential-injection proxy** so the sandbox never sees your real API keys — only opaque proxy tokens that work exclusively from behind a local TLS-intercepting daemon. See [Egress proxy](../user-guide/egress/iron-proxy.md). Setup is `hermes egress setup && hermes egress start`; `noone setup terminal` also points Docker users at it. Modal, SSH, Daytona, and Singularity are not wired yet.
 
-### Voice mode
+### Voice mode {#voice-mode}
 
-Run `hermes tools` and configure the Voice providers. Then enable `/voice on`
+Run `noone tools` and configure the Voice providers. Then enable `/voice on`
 in the CLI and press `Ctrl+B` to record. PM handles missing supported
 requirements; a dependency change can require a restart. Local Faster-Whisper
 is not available on every architecture. See [Voice Mode](../user-guide/features/voice-mode.md).
 
-### Skills
+### Skills {#skills}
 
-Skills are on-demand instruction documents that teach Hermes how to do a specific task — deploy to Kubernetes, open a GitHub PR, fine-tune a model, search for GIFs. Each is a `SKILL.md` file with a name, a description, and a step-by-step procedure. The agent reads the short descriptions for free and only loads a skill's full content when a task actually calls for it, so adding skills doesn't bloat every request.
+Skills are on-demand instruction documents that teach {{app-name}} how to do a specific task — deploy to Kubernetes, open a GitHub PR, fine-tune a model, search for GIFs. Each is a `SKILL.md` file with a name, a description, and a step-by-step procedure. The agent reads the short descriptions for free and only loads a skill's full content when a task actually calls for it, so adding skills doesn't bloat every request.
 
-Hermes ships with a catalog of bundled skills already installed in `~/.hermes/skills/`. You can add more from the Skills Hub, or write your own.
+{{app-name}} ships with a catalog of bundled skills already installed in `~/.hermes/skills/`. You can add more from the Skills Hub, or write your own.
 
 **Browse and install from the hub:**
 
 ```bash
-hermes skills browse                      # list everything available
-hermes skills search kubernetes           # find skills by keyword
-hermes skills install openai/skills/k8s   # install one (runs a security scan first)
+noone skills browse                      # list everything available
+noone skills search kubernetes           # find skills by keyword
+noone skills install openai/skills/k8s   # install one (runs a security scan first)
 ```
 
-The install argument is a `source/path` slug from the hub — `openai/skills/k8s` means the `k8s` skill from OpenAI's catalog. `hermes skills browse` shows the exact slugs to use.
+The install argument is a `source/path` slug from the hub — `openai/skills/k8s` means the `k8s` skill from OpenAI's catalog. `noone skills browse` shows the exact slugs to use.
 
 **Use a skill** — every installed skill becomes a slash command automatically:
 
@@ -317,7 +355,7 @@ This works in the CLI and in any connected messaging platform. You don't have to
 
 See [Skills System](../user-guide/features/skills.md) for writing your own, external skill directories, and the full hub source list.
 
-### MCP servers
+### MCP servers {#mcp-servers}
 
 ```yaml
 # Add to ~/.hermes/config.yaml
@@ -329,7 +367,7 @@ mcp_servers:
       GITHUB_PERSONAL_ACCESS_TOKEN: "ghp_xxx"
 ```
 
-### Editor integration (ACP)
+### Editor integration (ACP) {#editor-integration-acp}
 
 ACP support ships with the standard `[all]` extras, so the curl installer already includes it. Just run:
 
@@ -343,50 +381,50 @@ See [ACP Editor Integration](../user-guide/features/acp.md).
 
 ---
 
-## Common Failure Modes
+## Common Failure Modes {#common-failure-modes}
 
 These are the problems that waste the most time:
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| Hermes opens but gives empty or broken replies | Provider auth or model selection is wrong | Run `hermes model` again and confirm provider, model, and auth |
+| {{app-name}} opens but gives empty or broken replies | Provider auth or model selection is wrong | Run `noone model` again and confirm provider, model, and auth |
 | Custom endpoint "works" but returns garbage | Wrong base URL, model name, or not actually OpenAI-compatible | Verify the endpoint in a separate client first |
-| Gateway starts but nobody can message it | Bot token, allowlist, or platform setup is incomplete | Re-run `hermes gateway setup` and check `hermes gateway status` |
-| `hermes --continue` can't find old session | Switched profiles or session never saved | Check `hermes sessions list` and confirm you're in the right profile |
+| Gateway starts but nobody can message it | Bot token, allowlist, or platform setup is incomplete | Re-run `noone gateway setup` and check `noone gateway status` |
+| `noone --continue` can't find old session | Switched profiles or session never saved | Check `noone sessions list` and confirm you're in the right profile |
 | Model unavailable or odd fallback behavior | Provider routing or fallback settings are too aggressive | Keep routing off until the base provider is stable |
-| `hermes doctor` flags config problems | Config values are missing or stale | Fix the config, retest a plain chat before adding features |
+| `noone doctor` flags config problems | Config values are missing or stale | Fix the config, retest a plain chat before adding features |
 
-## Recovery Toolkit
+## Recovery Toolkit {#recovery-toolkit}
 
 When something feels off, use this order:
 
-1. `hermes doctor`
-2. `hermes model`
-3. `hermes setup`
-4. `hermes sessions list`
-5. `hermes --continue`
-6. `hermes gateway status`
+1. `noone doctor`
+2. `noone model`
+3. `noone setup`
+4. `noone sessions list`
+5. `noone --continue`
+6. `noone gateway status`
 
 That sequence gets you from "broken vibes" back to a known state fast.
 
 ---
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Command | Description |
 |---------|-------------|
 | `hermes` | Start chatting |
-| `hermes model` | Choose your LLM provider and model |
-| `hermes tools` | Configure which tools are enabled per platform |
-| `hermes setup` | Full setup wizard (configures everything at once) |
-| `hermes doctor` | Diagnose issues |
-| `hermes update` | Update to latest version |
-| `hermes gateway` | Start the messaging gateway |
-| `hermes --continue` | Resume last session |
+| `noone model` | Choose your LLM provider and model |
+| `noone tools` | Configure which tools are enabled per platform |
+| `noone setup` | Full setup wizard (configures everything at once) |
+| `noone doctor` | Diagnose issues |
+| `noone update` | Update to latest version |
+| `noone gateway` | Start the messaging gateway |
+| `noone --continue` | Resume last session |
 
-## Next Steps
+## Next Steps {#next-steps}
 
-- **[User Stories](../user-stories.mdx)**: real setups from the community, a good place to start if you're not sure what to hand Hermes first
+- **[User Stories](../user-stories.mdx)**: real setups from the community, a good place to start if you're not sure what to hand {{app-name}} first
 - **[CLI Guide](../user-guide/cli.md)** — Master the terminal interface
 - **[Configuration](../user-guide/configuration.md)** — Customize your setup
 - **[Messaging Gateway](../user-guide/messaging/index.md)** — Connect Telegram, Discord, Slack, WhatsApp, Signal, Email, Home Assistant, Teams, and more
@@ -394,4 +432,4 @@ That sequence gets you from "broken vibes" back to a known state fast.
 - **[AI Providers](../integrations/providers.md)** — Full provider list and setup details
 - **[Skills System](../user-guide/features/skills.md)** — Reusable workflows and knowledge
 - **[Tips & Best Practices](../guides/tips.md)** — Power user tips
-- **[Moving to another machine](../reference/faq.md#exporting-hermes-to-another-machine)** — `hermes backup` migrates your whole setup (or [a single profile](../reference/faq.md#moving-a-single-profile-to-another-machine)); no need to rebuild from scratch
+- **[Moving to another machine](../reference/faq.md#exporting-hermes-to-another-machine)** — `noone backup` migrates your whole setup (or [a single profile](../reference/faq.md#moving-a-single-profile-to-another-machine)); no need to rebuild from scratch

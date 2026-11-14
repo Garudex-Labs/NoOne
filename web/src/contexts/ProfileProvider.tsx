@@ -7,6 +7,7 @@ import {
 } from "react";
 import { useLocation, useSearchParams } from "react-router";
 import { api, setManagementProfile } from "@/lib/api";
+import { applyAppIdentity } from "@noone/shared/application-identity";
 import { ProfileContext } from "@/contexts/profile-context";
 import {
   dashboardInitialProfile,
@@ -69,6 +70,20 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   // Mirror into the api module synchronously on every render where it
   // changed, so fetches fired by child effects in the same commit see it.
   setManagementProfile(profile);
+
+  useEffect(() => {
+    let current = true;
+    let retries = 0;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    applyAppIdentity(null);
+    const hydrate = () => {
+      void api.getConfig(profile).catch(() => {
+        if (current && retries++ < 10) retryTimer = setTimeout(hydrate, 1000);
+      });
+    };
+    hydrate();
+    return () => { current = false; clearTimeout(retryTimer); };
+  }, [profile]);
 
   // Re-assert ?profile= after navigations that dropped it (bare nav links)
   // and after state-only changes. No-ops when already in sync.

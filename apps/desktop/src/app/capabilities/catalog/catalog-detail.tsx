@@ -1,9 +1,9 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { type ReactNode, useLayoutEffect, useRef } from 'react'
 
 import { ZoomableImage } from '@/components/chat/zoomable-image'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { DialogTitle } from '@/components/ui/dialog'
 import { Reel } from '@/components/ui/reel'
 import { RowButton } from '@/components/ui/row-button'
@@ -192,7 +192,7 @@ export function CatalogDetail({
                   <CatalogImage className="aspect-[2/1] w-full rounded-t-md object-contain" src={item.imageUrl} />
                 ) : (
                   <span className="flex aspect-[2/1] w-full items-center justify-center bg-(--ui-bg-quaternary) text-(--ui-text-tertiary)">
-                    <Codicon name={catalogIcon(item.category)} size="1.25rem" />
+                    <AppIcon name={catalogIcon(item.category)} size="1.25rem" />
                   </span>
                 )}
                 <span className="w-full truncate px-2 pb-2 text-xs font-medium">{item.name}</span>

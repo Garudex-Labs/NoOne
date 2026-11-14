@@ -71,7 +71,7 @@ def test_kanban_guidance_requires_worker_task_at_agent_init(monkeypatch, task_id
         monkeypatch.delenv("HERMES_KANBAN_TASK", raising=False)
     else:
         monkeypatch.setenv("HERMES_KANBAN_TASK", task_id)
-    monkeypatch.setattr("hermes_cli.plugins.discover_plugins", lambda: None)
+    monkeypatch.setattr("agent_cli.plugins.discover_plugins", lambda: None)
     monkeypatch.setattr(
         model_tools,
         "get_tool_definitions",
@@ -397,8 +397,8 @@ class TestExecutionGuidanceInjection:
 class TestNamedProfileHintIntegration:
     """The same defect through the REAL resolution chain (#72894).
 
-    ``TestNamedProfileHint`` mocks ``get_hermes_home``,
-    ``get_default_hermes_root`` and ``_resolve_active_profile_name``, so it
+    ``TestNamedProfileHint`` mocks ``get_agent_home``,
+    ``get_default_agent_root`` and ``_resolve_active_profile_name``, so it
     validates template rendering but not the relationship that causes the bug:
     ``_resolve_active_profile_name`` returns a named profile *only* when the
     active home is already ``<root>/profiles/<name>``, which is exactly why
@@ -419,11 +419,11 @@ class TestNamedProfileHintIntegration:
 
         # Sanity-check the real chain before asserting on the prompt.
         from agent.file_safety import _resolve_active_profile_name
-        from hermes_constants import get_default_hermes_root, get_hermes_home
+        from agent_constants import get_default_agent_root, get_agent_home
 
         assert _resolve_active_profile_name() == "coder"
-        assert get_hermes_home() == profile_home
-        assert get_default_hermes_root() == root
+        assert get_agent_home() == profile_home
+        assert get_default_agent_root() == root
 
         agent = _make_agent(valid_tool_names=["read_file"])
         with patch("agent.coding_context._coding_mode", return_value="off"):
@@ -500,9 +500,9 @@ def test_coding_prompt_orders_shared_context_before_workspace(monkeypatch):
     monkeypatch.setattr(system_prompt, "HERMES_AGENT_HELP_GUIDANCE", "HELP")
     monkeypatch.setattr(system_prompt, "HERMES_AGENT_HELP_GUIDANCE_NO_SKILLS", "HELP")
     monkeypatch.setattr(system_prompt, "STEER_CHANNEL_NOTE", "STEER")
-    monkeypatch.setattr(system_prompt, "get_hermes_home", lambda: Path("/hermes"))
+    monkeypatch.setattr(system_prompt, "get_agent_home", lambda: Path("/hermes"))
 
-    # Production renders this as str(get_hermes_home()) + "/profiles/<name>/",
+    # Production renders this as str(get_agent_home()) + "/profiles/<name>/",
     # and str(Path("/hermes")) is platform-dependent (backslash on Windows) —
     # build the expectation the same way instead of hardcoding "/hermes".
     _home_str = str(Path("/hermes"))
@@ -539,7 +539,7 @@ def test_coding_prompt_orders_shared_context_before_workspace(monkeypatch):
             ),
         ),
         patch("agent.file_safety._resolve_active_profile_name", return_value="default"),
-        patch("hermes_time.now", return_value=datetime(2026, 1, 2)),
+        patch("agent_time.now", return_value=datetime(2026, 1, 2)),
     ):
         prompt = build_system_prompt(agent, system_message="SYSTEM_MESSAGE")
 
@@ -553,7 +553,7 @@ class TestTelegramRichMessagesHint:
     def test_base_hint_without_rich_messages(self, monkeypatch):
         """When rich_messages is False, only the base hint is used."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("agent_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": {"rich_messages": False}}}}
             }
@@ -566,7 +566,7 @@ class TestTelegramRichMessagesHint:
         """When rich_messages is True in gateway.platforms, the extension
         is appended (the canonical/primary location)."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("agent_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": {"rich_messages": True}}}}
             }
@@ -581,7 +581,7 @@ class TestTelegramRichMessagesHint:
         """Top-level ``platforms.telegram.extra.rich_messages`` is merged
         alongside gateway.platforms, so it works on its own."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("agent_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "platforms": {"telegram": {"extra": {"rich_messages": True}}}
             }
@@ -593,7 +593,7 @@ class TestTelegramRichMessagesHint:
         """Top-level ``platforms.telegram.extra`` wins over gateway.platforms
         at the leaf, matching the adapter's merge precedence."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("agent_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": {"rich_messages": False}}}},
                 "platforms": {"telegram": {"extra": {"rich_messages": True}}},
@@ -605,7 +605,7 @@ class TestTelegramRichMessagesHint:
         """When gateway.platforms.telegram.extra has other keys but not
         rich_messages, the top-level rich_messages still activates."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("agent_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": {"disable_link_previews": True}}}},
                 "platforms": {"telegram": {"extra": {"rich_messages": True}}},
@@ -635,7 +635,7 @@ class TestTelegramRichMessagesHint:
         monkeypatch.setenv("HERMES_HOME", str(home))
         # Point config resolution at the temp file without mocking the loader:
         # mirror the pattern used in test_config_env_expansion.py.
-        from hermes_cli import config as _cfgmod
+        from agent_cli import config as _cfgmod
         monkeypatch.setattr(_cfgmod, "get_config_path", lambda: home / "config.yaml")
 
         agent = _make_agent(platform="telegram")
@@ -648,7 +648,7 @@ class TestTelegramRichMessagesHint:
         it should fail open to the base hint (Tek's fail-open concern).
         """
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("agent_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": "not-a-map"}}}
             }
@@ -893,7 +893,7 @@ def test_conversation_start_uses_session_start_not_build_time(monkeypatch):
     monkeypatch.setattr(system_prompt, "HERMES_AGENT_HELP_GUIDANCE", "HELP")
     monkeypatch.setattr(system_prompt, "HERMES_AGENT_HELP_GUIDANCE_NO_SKILLS", "HELP")
     monkeypatch.setattr(system_prompt, "STEER_CHANNEL_NOTE", "STEER")
-    monkeypatch.setattr(system_prompt, "get_hermes_home", lambda: Path("/hermes"))
+    monkeypatch.setattr(system_prompt, "get_agent_home", lambda: Path("/hermes"))
 
     with (
         patch("agent.prompt_builder.load_soul_md", return_value=""),
@@ -905,7 +905,7 @@ def test_conversation_start_uses_session_start_not_build_time(monkeypatch):
         ),
         patch("agent.file_safety._resolve_active_profile_name", return_value="default"),
         # The system prompt is rebuilt a day LATER than the session start.
-        patch("hermes_time.now", return_value=datetime(2026, 1, 2, 9, 0)),
+        patch("agent_time.now", return_value=datetime(2026, 1, 2, 9, 0)),
     ):
         prompt = build_system_prompt(agent, system_message="SYSTEM_MESSAGE")
 
@@ -935,7 +935,7 @@ class TestConversationStartedTwoLine:
         assert "as of the last context rebuild" in vol
 
     def test_same_day_session_keeps_single_line(self):
-        from hermes_time import now as hermes_now
+        from agent_time import now as hermes_now
         sid = hermes_now().strftime("%Y%m%d_%H%M%S_fresh")
         vol = self._volatile(self._agent(sid))
         assert "Conversation started:" in vol
@@ -945,7 +945,7 @@ class TestConversationStartedTwoLine:
         # Windows cp1252 zone name decoded under a UTF-8 LC_CTYPE; strftime("%Z") raised (#102910).
         from datetime import timedelta, timezone
         current = datetime(2026, 7, 14, 13, 5, tzinfo=timezone(timedelta(hours=2), "Paris, Madrid (heure d'\udce9t\udce9)"))
-        with patch("hermes_time.now", return_value=current):
+        with patch("agent_time.now", return_value=current):
             vol = self._volatile(self._agent("20260714_090000_fresh"))
 
         json.dumps(vol, ensure_ascii=False).encode("utf-8")

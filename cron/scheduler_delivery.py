@@ -25,9 +25,8 @@ logger = logging.getLogger("cron.scheduler")
 
 # Validates user-supplied delivery platform names, preventing env-var enumeration via crafted names.
 # Plugin platforms are known through ``PlatformEntry.cron_deliver_env_var``; these rows have none:
-# ``webhook`` is core-only and ``wecom_callback`` (a ``wecom`` plugin sibling) delivers only to its
-# config.yaml ``home_channel``.
-_KNOWN_DELIVERY_PLATFORMS = frozenset({"webhook", "wecom_callback"})
+# ``webhook`` is core-only.
+_KNOWN_DELIVERY_PLATFORMS = frozenset({"webhook"})
 
 # Gateway platforms whose adapter declares ``supports_async_delivery = False`` (request/response
 # only, ``send()`` is a stub) — a cron report can never reach them, so they are never a
@@ -39,12 +38,10 @@ _NON_PUSH_ORIGIN_PLATFORMS = frozenset({"api_server"})
 # ``cron_deliver_env_var``. Other plugin platforms follow by name (a fresh process loads deferred
 # entries in name order, so this is the order they had when they trailed a static table).
 _HOME_TARGET_PRIORITY = (
-    "matrix", "telegram", "discord", "slack", "signal", "mattermost", "sms", "email", "dingtalk",
-    "feishu", "wecom", "weixin", "bluebubbles", "qqbot", "whatsapp", "whatsapp_cloud",
+     "telegram", "discord", "slack", "signal", "mattermost", "sms", "email",
+      "weixin",   "whatsapp", "whatsapp_cloud",
 )
 
-# Back-compat: primary env var -> previous name, consulted when the primary is unset.
-_LEGACY_HOME_TARGET_ENV_VARS = {"QQBOT_HOME_CHANNEL": "QQ_HOME_CHANNEL"}
 
 
 def _resolve_cron_surface_mode(pconfig, logical_platform_name: str) -> str:
@@ -234,10 +231,10 @@ def _maybe_mirror_cron_delivery(
 
 
 # chat_type slot a platform's adapter puts on a NON-DM in-thread reply. Discord (and the default)
-# key the shared "thread" lane; Slack, Matrix and Telegram (forum topics: ``_build_message_event``
+# key the shared "thread" lane; Slack and Telegram (forum topics: ``_build_message_event``
 # types every supergroup "group") keep the parent channel/room's "group" — a seed on the wrong slot
 # is a row no reply ever resolves to (#111896, #112918).
-_THREAD_REPLY_CHAT_TYPE = {"slack": "group", "matrix": "group", "telegram": "group"}
+_THREAD_REPLY_CHAT_TYPE = {"slack": "group",  "telegram": "group"}
 
 
 def _open_continuable_cron_thread(job: dict, adapter, chat_id: str, loop) -> Optional[str]:
@@ -394,7 +391,7 @@ def _cron_job_origin_log_suffix(job: dict) -> str:
 def _plugin_cron_env_var(platform_name: str) -> str:
     """Cron home-channel env var registered by a plugin ``PlatformEntry.cron_deliver_env_var``."""
     with contextlib.suppress(Exception):
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
         discover_plugins()  # idempotent
         from gateway.platform_registry import platform_registry
         entry = platform_registry.get(platform_name.lower())
@@ -428,7 +425,7 @@ def _get_config_home_channel(platform_name: str):
 
 
 def _home_env_lookup(env_var: str, suffix: str = "", *, strip: bool = False) -> str:
-    """Value of ``<env_var><suffix>``, falling back to the legacy name (same suffix) when unset.
+    """Value of ``<env_var><suffix>``, under the same profile scope.
     Reads via ``get_secret``, not ``os.getenv``: in a multiplex gateway the tick runs with the
     job-owning profile's secret scope (run_one_job sets it), so this resolves the OWNING profile's
     value, not the host environ. ``os.getenv`` only if the scope module is missing."""
@@ -441,11 +438,7 @@ def _home_env_lookup(env_var: str, suffix: str = "", *, strip: bool = False) -> 
         value = (get_secret(name, "") or "") if get_secret is not None else os.getenv(name, "")
         return value.strip() if strip else value
 
-    value = read(env_var + suffix)
-    legacy = _LEGACY_HOME_TARGET_ENV_VARS.get(env_var)
-    if not value and legacy:
-        value = read(legacy + suffix)
-    return value
+    return read(env_var + suffix)
 
 
 def _env_home_target_chat_id(platform_name: str) -> str:
@@ -502,7 +495,7 @@ def _get_home_target_thread_id(platform_name: str) -> Optional[str]:
 def _iter_home_target_platforms():
     """Iterate plugin platform names that expose a home channel, ``_HOME_TARGET_PRIORITY`` first."""
     with contextlib.suppress(Exception):
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
         discover_plugins()  # idempotent
         from gateway.platform_registry import platform_registry
         named = [e.name for e in platform_registry.plugin_entries() if e.cron_deliver_env_var]
@@ -549,7 +542,7 @@ def cron_delivery_targets() -> list[dict]:
 
     # Bot Chat targets: one per local profile (machine-local; no gateway config or home channel).
     try:
-        from hermes_cli.profiles import list_profile_names
+        from agent_cli.profiles import list_profile_names
         for profile_name in list_profile_names():
             targets.append({
                 "id": f"{BOT_CHAT_PLATFORM}:{profile_name}",
@@ -642,7 +635,7 @@ def _resolve_single_delivery_target(
             logger.warning("Invalid cron delivery target '%s': %s", deliver_value, resolution_error)
             return None
         # Chat-only target on the origin chat adopts the origin lane where it is a durable place
-        # (Telegram topic, Slack thread); Matrix/Mattermost threads are per-message ids -> top-level.
+        # (Telegram topic, Slack thread); Mattermost threads are per-message ids -> top-level.
         if (
             thread_id is None and platform_key in ("telegram", "slack")
             and origin
@@ -726,8 +719,8 @@ def _deliver_to_bot_chat(job: dict, content: str, profile: str, *,
     import hashlib
     import json
     import uuid
-    from hermes_constants import get_hermes_home
-    from hermes_cli.profiles import get_profile_dir
+    from agent_constants import get_agent_home
+    from agent_cli.profiles import get_profile_dir
     from tools.bot_live_delivery import (
         deliver_to_live_owner, find_canonical_live_owner, read_delivery_result,
     )
@@ -736,10 +729,10 @@ def _deliver_to_bot_chat(job: dict, content: str, profile: str, *,
     profile_label = profile or "(own)"
     message = bot_chat_message(job, content)
     try:
-        source_home = get_hermes_home().resolve()
+        source_home = get_agent_home().resolve()
         home = (get_profile_dir(profile) if profile else source_home).resolve()
         from gateway.warning_notifications import warning_notifications_enabled
-        from hermes_cli.config_effective import load_user_config_effective
+        from agent_cli.config_effective import load_user_config_effective
         suppress_notification = for_failure and not warning_notifications_enabled(
             BOT_CHAT_POLICY_PLATFORM, load_user_config_effective(home / "config.yaml"))
         # run_one_job/claim_fire attach the durable execution id before delivery. The
@@ -836,7 +829,7 @@ def _resolve_bot_chat_target(job: dict, profile_arg: str) -> Optional[dict]:
     if not profile_arg:
         return {"platform": BOT_CHAT_PLATFORM, "chat_id": "", "thread_id": None}
     try:
-        from hermes_cli.profiles import normalize_profile_name, profile_exists
+        from agent_cli.profiles import normalize_profile_name, profile_exists
         canon = normalize_profile_name(profile_arg)
         if not profile_exists(canon):
             logger.warning(
@@ -1700,7 +1693,7 @@ def _deliver_result(
     # Restart-safe workers have no live gateway adapters: hand the send back through a durable
     # queue so the current or replacement gateway performs it with relay/E2EE parity. The execution
     # id is the idempotency key (the queue never retries an uncertain claimed send). Match on THIS
-    # job's own attempt: a worker's script may dispatch another job in-process (`hermes cron run`),
+    # job's own attempt: a worker's script may dispatch another job in-process (`noone cron run`),
     # and that nested delivery must not be keyed under the outer execution id.
     external_execution = os.environ.get("_HERMES_CRON_EXTERNAL_WORKER", "")
     if (external_execution and adapters is None
@@ -1729,8 +1722,8 @@ def _deliver_result(
         wrap_response = user_cfg.get("cron", {}).get("wrap_response", True)
     # Mark live sends FINAL so the platform pushes them (Telegram "important" mode mutes otherwise).
     notify_delivery = _cron_delivery_notify_enabled(user_cfg)
-    # Targets acked with NO evidence (bare SendResult(success=True) — Slack/Matrix/Mattermost);
-    # persisted as ``last_delivery_unverified`` so `hermes cron list` shows it.
+    # Targets acked with NO evidence (bare SendResult(success=True) — Slack/Mattermost);
+    # persisted as ``last_delivery_unverified`` so `noone cron list` shows it.
     unverified_targets: list = []
     if wrap_response:
         task_name = job.get("name", job["id"])
@@ -1747,7 +1740,7 @@ def _deliver_result(
 
     from gateway.platforms.base import BasePlatformAdapter
     # Bridge media-policy config into the env vars the path validator reads. The gateway does this
-    # at boot; standalone runs (`hermes cron run`) did not, silently dropping files. Idempotent.
+    # at boot; standalone runs (`noone cron run`) did not, silently dropping files. Idempotent.
     from gateway.media_policy import apply_media_policy_env
     apply_media_policy_env(user_cfg)
     media_files, cleaned_delivery_content = BasePlatformAdapter.extract_media(delivery_content)
@@ -1820,8 +1813,8 @@ def _deliver_result(
             continue
         if target["platform"] == "local":
             from gateway.session_cron import deliver_to_local_chat
-            from hermes_constants import get_hermes_home
-            local_error = deliver_to_local_chat(get_hermes_home(), target["chat_id"],
+            from agent_constants import get_agent_home
+            local_error = deliver_to_local_chat(get_agent_home(), target["chat_id"],
                                                 cleaned_delivery_content, diagnostic=for_failure)
             if local_error:
                 delivery_errors.append(local_error)

@@ -95,16 +95,16 @@ class TestMultiprofileRawConfigCache:
     @staticmethod
     def _load_under(home) -> list:
         from agent import skill_utils
-        from hermes_constants import (
-            reset_hermes_home_override,
-            set_hermes_home_override,
+        from agent_constants import (
+            reset_agent_home_override,
+            set_agent_home_override,
         )
 
-        token = set_hermes_home_override(str(home))
+        token = set_agent_home_override(str(home))
         try:
             return skill_utils._load_raw_config()["skills"]["disabled"]
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
 
     def test_watcher_rotation_reparses_no_unchanged_config(self, tmp_path, monkeypatch):
         from agent import skill_utils
@@ -224,7 +224,7 @@ class TestMultiprofileRawConfigCache:
 
 
 class TestParseConfigStringList:
-    """#86661: `hermes config set` and JSON-mode editor saves store lists as
+    """#86661: `noone config set` and JSON-mode editor saves store lists as
     quoted strings (e.g. '["a","b"]'). Treating such a string as a single name
     made curated disabled lists silently filter nothing."""
 
@@ -235,7 +235,7 @@ class TestParseConfigStringList:
         ]
 
     def test_python_literal_array_string_parses(self):
-        # `hermes config set` can persist single-quoted Python-literal forms.
+        # `noone config set` can persist single-quoted Python-literal forms.
         assert parse_config_string_list("['skill-a']") == ["skill-a"]
 
     def test_scalar_string_means_one_name(self):

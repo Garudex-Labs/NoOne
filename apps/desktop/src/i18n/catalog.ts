@@ -3,11 +3,11 @@ import { de } from './de'
 import { en } from './en'
 import { es } from './es'
 import { fr } from './fr'
+import { hi } from './hi'
 import { ja } from './ja'
-import { ru } from './ru'
+import { ko } from './ko'
 import type { BundledLocale, Translations } from './types'
 import { zh } from './zh'
-import { zhHant } from './zh-hant'
 
 /** The catalogs compiled into the app. Runtime-registered languages (plugin
  *  packs, backend `.desktop.yaml` packs) are NOT here — resolve through
@@ -15,10 +15,10 @@ import { zhHant } from './zh-hant'
 export const TRANSLATIONS: Record<BundledLocale, Translations> = {
   en,
   zh,
-  'zh-hant': zhHant,
   ja,
+  ko,
+  hi,
   ar,
-  ru,
   fr,
   de,
   es

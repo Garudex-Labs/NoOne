@@ -1,39 +1,39 @@
-# Bitwarden Secrets Manager
+# Bitwarden Secrets Manager {#bitwarden-secrets-manager}
 
 Pull API keys from [Bitwarden Secrets Manager](https://bitwarden.com/products/secrets-manager/) at process startup instead of storing them in plaintext inside `~/.hermes/.env`. One bootstrap secret (a machine-account access token) replaces N per-provider keys, and rotating a credential becomes a single change in the Bitwarden web app.
 
-## How it works
+## How it works {#how-it-works}
 
 1. You create a **machine account** in Bitwarden Secrets Manager, give it read access to a project, and generate an **access token**.
-2. Hermes stores that single token in `~/.hermes/.env` as `BWS_ACCESS_TOKEN`.
-3. Every time `hermes` (or the gateway, or a cron job) starts, after `~/.hermes/.env` has loaded, Hermes calls `bws secret list <project_id>` and sets the returned keys into `os.environ`.
-4. By default Hermes **overrides** values already in your environment, so Bitwarden is the source of truth — rotate a key once in the web app and every Hermes process picks it up on next start. Flip `override_existing: false` in config if you want `.env` to win instead.
+2. {{app-name}} stores that single token in `~/.hermes/.env` as `BWS_ACCESS_TOKEN`.
+3. Every time `hermes` (or the gateway, or a cron job) starts, after `~/.hermes/.env` has loaded, {{app-name}} calls `bws secret list <project_id>` and sets the returned keys into `os.environ`.
+4. By default {{app-name}} **overrides** values already in your environment, so Bitwarden is the source of truth — rotate a key once in the web app and every {{app-name}} process picks it up on next start. Flip `override_existing: false` in config if you want `.env` to win instead.
 
-Hermes honors a `bws` executable on `PATH` before checking PM selection.
+{{app-name}} honors a `bws` executable on `PATH` before checking PM selection.
 If neither exists, first use requests the pinned package from
 [PM](../../reference/package-management.md#optional-security-tools), subject to the lazy-install policy.
 
-## Why machine accounts (and why no 2FA prompt)
+## Why machine accounts (and why no 2FA prompt) {#why-machine-accounts-and-why-no-2fa-prompt}
 
 Bitwarden Secrets Manager is designed for non-interactive workloads: machine accounts can't be 2FA-gated because there's no human in the loop. The access token is the credential. Anyone with it can read every secret the machine account has access to, so treat it like a high-value bearer token — store it in `.env` (not `config.yaml`), and revoke + regenerate from the Bitwarden web app if it ever leaks.
 
 You set up the machine account *in the web app*, where your normal 2FA applies. After that the token is autonomous.
 
-## Setup
+## Setup {#setup}
 
-### 1. Create a machine account and access token
+### 1. Create a machine account and access token {#1-create-a-machine-account-and-access-token}
 
 In the [Bitwarden web app](https://vault.bitwarden.com) (or [vault.bitwarden.eu](https://vault.bitwarden.eu) for EU accounts):
 
 1. Switch to **Secrets Manager** from the product switcher.
-2. Create or pick a **Project** (e.g. "Hermes keys").
+2. Create or pick a **Project** (e.g. "{{app-name}} keys").
 3. Add your provider keys as secrets. The secret **Name** becomes the environment variable name — use `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, etc.
-4. **Machine accounts → New machine account → My Hermes machine** → **Projects** tab → grant Read access to your project.
+4. **Machine accounts → New machine account → My {{app-name}} machine** → **Projects** tab → grant Read access to your project.
 5. **Access tokens** tab → **Create access token** → **Never** expires (or pick a date) → copy the token (starts with `0.`). Bitwarden cannot retrieve it again — keep the copy.
 
 Secrets Manager is included on the Bitwarden free tier with limits; no paid plan needed to try this.
 
-### 2. Run the wizard
+### 2. Run the wizard {#2-run-the-wizard}
 
 ```bash
 hermes secrets bitwarden setup
@@ -57,7 +57,7 @@ hermes secrets bitwarden setup \
   --project-id <project-uuid>
 ```
 
-### 3. Confirm
+### 3. Confirm {#3-confirm}
 
 ```bash
 hermes secrets bitwarden status
@@ -65,7 +65,7 @@ hermes secrets bitwarden status
 
 From now on, every `hermes` invocation pulls fresh secrets at startup. You'll see a one-line summary in stderr the first time secrets are applied in a process.
 
-## CLI
+## CLI {#cli}
 
 | Command | What it does |
 |---|---|
@@ -78,7 +78,7 @@ From now on, every `hermes` invocation pulls fresh secrets at startup. You'll se
 | `hermes secrets bitwarden install --force` | Check and repair the managed copy. Valid entries can be reused without another download. |
 | `hermes secrets bitwarden disable` | Flip `enabled: false`; leaves token + project id in place |
 
-## Rotating an expired or revoked token
+## Rotating an expired or revoked token {#rotating-an-expired-or-revoked-token}
 
 When the machine-account token expires, gets revoked, or the account is deleted, startup shows:
 
@@ -96,7 +96,7 @@ hermes secrets bitwarden token --access-token 0.…  # non-interactive
 
 The command probes Bitwarden with the new token **before** writing anything — a rejected token leaves your current `.env` untouched. On success it stores the token, clears the fetch caches, and warns if the configured project is not visible to the new machine account.
 
-## Configuration
+## Configuration {#configuration}
 
 Defaults in `~/.hermes/config.yaml`:
 
@@ -127,9 +127,9 @@ secrets:
 | `override_existing` | `true` | When true, Bitwarden values overwrite anything already in env (so rotation in the web app actually takes effect). Flip to `false` if you want `.env` / shell exports to win locally. |
 | `auto_install` | `true` | Requests the PM-pinned `bws` package when no binary exists. PM's lazy-install policy also applies. |
 
-## Failure modes
+## Failure modes {#failure-modes}
 
-Bitwarden never blocks Hermes startup. If anything goes wrong, you'll see a one-line warning in stderr and Hermes continues with whatever credentials `.env` already had:
+Bitwarden never blocks {{app-name}} startup. If anything goes wrong, you'll see a one-line warning in stderr and {{app-name}} continues with whatever credentials `.env` already had:
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -142,18 +142,18 @@ Bitwarden never blocks Hermes startup. If anything goes wrong, you'll see a one-
 
 Startup warnings now include a `→` remediation line telling you exactly which command fixes the failure.
 
-## Security notes
+## Security notes {#security-notes}
 
 - The bootstrap token (`BWS_ACCESS_TOKEN`) is itself sensitive — anyone with it can read every secret the machine account has access to. Treat it the same as any other API key.
-- Hermes will refuse to let Bitwarden overwrite the bootstrap token itself, even with `override_existing: true`. If you store `BWS_ACCESS_TOKEN` as a secret inside the project, it's silently skipped during apply.
-- `BWS_ACCESS_TOKEN` is stripped from the processes the agent and its tools spawn (terminal, `execute_code`, background processes, cron scripts, CLI helpers). `terminal.env_passthrough` and skill `required_environment_variables` cannot re-allow it, so `bws` run by the agent never sees the token. Hermes's own processes for the same profile still get it: its `bws` child, a gateway it starts or restarts, and `key_cmd` helpers. Run `bws` yourself from your own shell.
+- {{app-name}} will refuse to let Bitwarden overwrite the bootstrap token itself, even with `override_existing: true`. If you store `BWS_ACCESS_TOKEN` as a secret inside the project, it's silently skipped during apply.
+- `BWS_ACCESS_TOKEN` is stripped from the processes the agent and its tools spawn (terminal, `execute_code`, background processes, cron scripts, CLI helpers). `terminal.env_passthrough` and skill `required_environment_variables` cannot re-allow it, so `bws` run by the agent never sees the token. {{app-name}}'s own processes for the same profile still get it: its `bws` child, a gateway it starts or restarts, and `key_cmd` helpers. Run `bws` yourself from your own shell.
 - PM checks the managed archive against its SHA-256 hash in `pm/lock.json`. A mismatch aborts installation.
 - The same lock declares the version. First use does not resolve a "latest" release. External binaries remain outside these PM checks.
 
-## When NOT to use this
+## When NOT to use this {#when-not-to-use-this}
 
 - **Single-machine personal setups** where `~/.hermes/.env` is fine. You're trading one credential for another and adding a network dependency at startup.
 - **Air-gapped environments** that can't reach `api.bitwarden.com`.
 - **CI/CD** where the existing secrets-injection mechanism (GitHub Actions secrets, Vault, etc.) is already set up — pick one path, not two.
 
-The good case for this is multi-machine fleets, shared dev boxes, gateway VPSes, or any setup where you want centralized rotation and revocation across multiple Hermes installations.
+The good case for this is multi-machine fleets, shared dev boxes, gateway VPSes, or any setup where you want centralized rotation and revocation across multiple {{app-name}} installations.

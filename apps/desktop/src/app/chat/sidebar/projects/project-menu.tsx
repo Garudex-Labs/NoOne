@@ -1,5 +1,6 @@
-import { LOCAL_CONNECTION_ID } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { LOCAL_CONNECTION_ID } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
 import type * as React from 'react'
 import { useState } from 'react'
 
@@ -10,7 +11,6 @@ import {
   type MenuKit,
   renderActionItem
 } from '@/components/ui/actions-menu'
-import { Codicon } from '@/components/ui/codicon'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   DropdownMenu,
@@ -215,7 +215,7 @@ export function ProjectMenu({
   // (where selecting adopts the repo as a real project so the look sticks).
   const appearanceItem = (
     <DropdownMenuItem onSelect={() => setAppearanceOpen(true)}>
-      <Codicon name="symbol-color" size="0.875rem" />
+      <AppIcon name="symbol-color" size="0.875rem" />
       <span>{p.menuAppearance}</span>
     </DropdownMenuItem>
   )
@@ -237,7 +237,7 @@ export function ProjectMenu({
         onClick={event => event.stopPropagation()}
         type="button"
       >
-        <Codicon name="kebab-vertical" size="0.75rem" />
+        <AppIcon name="kebab-vertical" size="0.75rem" />
       </button>
     </DropdownMenuTrigger>
   )
@@ -343,7 +343,7 @@ export function ProjectContextMenu({
       {canTheme && (
         <kit.Sub>
           <kit.SubTrigger>
-            <Codicon name="symbol-color" size="0.875rem" />
+            <AppIcon name="symbol-color" size="0.875rem" />
             <span>{p.menuAppearance}</span>
           </kit.SubTrigger>
           <kit.SubContent className="w-auto p-2">

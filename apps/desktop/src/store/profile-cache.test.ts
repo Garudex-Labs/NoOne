@@ -2,9 +2,9 @@ import { atom } from 'nanostores'
 import { afterEach, expect, it, vi } from 'vitest'
 
 import { setApiRequestConnection } from '@/api/client'
-import type { DesktopAgentRoster, HermesConnection } from '@/global'
+import type { AgentConnection, DesktopAgentRoster } from '@/global'
 import { $fleetRoster, _resetFleetRosterForTests } from '@/store/fleet-roster'
-import type { ProfileInfo } from '@/types/hermes'
+import type { ProfileInfo } from '@/types/agent-client'
 
 vi.mock('@/store/gateway', () => ({ $gateway: atom(null) }))
 vi.mock('@/lib/query-client', () => ({ invalidateProfileScopedQueries: vi.fn() }))
@@ -25,13 +25,13 @@ const profile = (name: string): ProfileInfo => ({
   skill_count: 0
 })
 
-const descriptor = (connectionId: string): HermesConnection =>
+const descriptor = (connectionId: string): AgentConnection =>
   ({
     connectionId,
     baseUrl: `https://${connectionId}.example.com`,
     mode: 'remote',
     profile: 'default'
-  }) as HermesConnection
+  }) as AgentConnection
 
 function activate(connectionId: string) {
   setApiRequestConnection(connectionId)

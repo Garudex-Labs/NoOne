@@ -1,4 +1,4 @@
-import type { GatewayEvent } from '@hermes/shared'
+import type { GatewayEvent } from '@noone/shared'
 import { act, cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -289,7 +289,7 @@ describe('useMessageStream interim text sealing', () => {
     // Production ordering: mid-turn compaction-resume events do NOT include
     // message.start (COMPACTION_RESUME_EVENT_TYPES in gateway-event/index.ts), and
     // the TUI gateway emits message.complete BEFORE goal-followup starts
-    // (tui_gateway/server.py), so a previewed final arriving after the reset
+    // (agent_backend/server.py), so a previewed final arriving after the reset
     // is a DISTINCT reply, not a rewrite of the interim. It must append its
     // own bubble — never overwrite the old one (sweeper review on #76583).
     await start()

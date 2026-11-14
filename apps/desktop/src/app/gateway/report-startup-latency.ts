@@ -1,4 +1,4 @@
-import { randomUuid } from '@hermes/shared'
+import { randomUuid } from '@noone/shared'
 
 type GatewayRequest = (
   method: 'shared_metrics.startup_latency',

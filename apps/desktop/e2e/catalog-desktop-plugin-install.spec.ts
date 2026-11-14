@@ -3,7 +3,7 @@
  * 2026-11-07): the install worked, but the card kept its "+", the plugin sat switched off (it ships
  * `defaultEnabled: false`), and a second Install answered "already exists" with Force out of sight.
  *
- * Real Electron and real `hermes serve`. The catalog feed is answered with one entry that points at a
+ * Real Electron and real `noone serve`. The catalog feed is answered with one entry that points at a
  * local Git repository laid out like hermes-official-plugins (plugin.yaml + desktop/plugin.js, no agent
  * half), so the install clones, checks out the pinned commit and publishes for real, with no network.
  *

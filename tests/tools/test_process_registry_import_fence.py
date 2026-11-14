@@ -1,7 +1,7 @@
 """Importing a tool module must never open the canonical store.
 
 Only the runtime that owns delegation state (gateway authority, interactive agent) may
-restore durable completions, and only explicitly; an ordinary client CLI (``hermes cron
+restore durable completions, and only explicitly; an ordinary client CLI (``noone cron
 run``, ``hermes sessions list``) imports ``tools.process_registry`` transitively and must
 stay a zero-writer against ``state.db``.
 """
@@ -46,7 +46,7 @@ async def test_gateway_startup_restores_pending_delegation_completions(tmp_path,
 
     monkeypatch.setattr(ad, "_db_path", lambda: tmp_path / "state.db")
     monkeypatch.setattr(gateway_run, "_hermes_home", tmp_path)
-    monkeypatch.setattr("hermes_cli.plugins.discover_plugins", lambda: None)
+    monkeypatch.setattr("agent_cli.plugins.discover_plugins", lambda: None)
     monkeypatch.setattr("agent.shell_hooks.register_from_config", lambda *a, **k: None)
     monkeypatch.setattr(process_registry, "recover_from_checkpoint", lambda: 0)
     event = {"type": "async_delegation", "delegation_id": "d-owner", "session_key": "OLD", "origin_ui_session_id": "",

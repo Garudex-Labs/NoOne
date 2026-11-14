@@ -1,14 +1,13 @@
 ---
-sidebar_position: 1
 title: "Architecture"
-description: "Hermes Agent internals — major subsystems, execution paths, data flow, and where to read next"
+description: "the agent internals — major subsystems, execution paths, data flow, and where to read next"
 ---
 
-# Architecture
+# Architecture {#architecture}
 
-This page is the top-level map of Hermes Agent internals. Use it to orient yourself in the codebase, then dive into subsystem-specific docs for implementation details.
+This page is the top-level map of {{app-name}} internals. Use it to orient yourself in the codebase, then dive into subsystem-specific docs for implementation details.
 
-## System Overview
+## System Overview {#system-overview}
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -41,23 +40,23 @@ This page is the top-level map of Hermes Agent internals. Use it to orient yours
 ┌───────────────────┐              ┌──────────────────────┐
 │ Session Storage   │              │ Tool Backends         │
 │ (SQLite + FTS5)   │              │ Terminal (7 backends) │
-│ hermes_state.py   │              │ Browser (5 backends)  │
+│ agent_state.py   │              │ Browser (5 backends)  │
 │ gateway/session.py│              │ Web (4 backends)      │
 └───────────────────┘              │ MCP (dynamic)         │
                                    │ File, Vision, etc.    │
                                    └──────────────────────┘
 ```
 
-## Directory Structure
+## Directory Structure {#directory-structure}
 
 ```text
 hermes-agent/
 ├── run_agent.py              # AIAgent facade — loop lives in agent/conversation_loop.py + agent/turn_*.py
-├── cli.py                    # HermesCLI facade — mixins in hermes_cli/cli_*_mixin.py
+├── cli.py                    # AgentCLI facade — mixins in agent_cli/cli_*_mixin.py
 ├── model_tools.py            # Tool discovery, schema collection, dispatch
 ├── toolsets.py               # Tool groupings and platform presets
-├── hermes_state.py           # SQLite session/state database facade (+ hermes_state_*.py siblings)
-├── hermes_constants.py       # HERMES_HOME, profile-aware paths
+├── agent_state.py           # SQLite session/state database facade (+ agent_state_*.py siblings)
+├── agent_constants.py       # HERMES_HOME, profile-aware paths
 ├── batch_runner.py           # Batch trajectory generation
 │
 ├── agent/                    # Agent internals
@@ -75,7 +74,7 @@ hermes-agent/
 │   ├── memory_provider.py   # Memory provider ABC
 │   └── trajectory.py         # Trajectory saving helpers
 │
-├── hermes_cli/               # CLI subcommands and setup
+├── agent_cli/               # CLI subcommands and setup
 │   ├── main.py               # Entry point — `hermes` subcommands (parsers in subcommands/, main_*.py)
 │   ├── config.py             # DEFAULT_CONFIG, OPTIONAL_ENV_VARS, migration
 │   ├── commands.py           # COMMAND_REGISTRY — central slash command definitions
@@ -85,12 +84,12 @@ hermes-agent/
 │   ├── model_switch.py       # /model command logic (CLI + gateway shared)
 │   ├── setup.py              # Interactive setup wizard (+ setup_*.py siblings)
 │   ├── skin_engine.py        # CLI theming engine
-│   ├── skills_config.py      # hermes skills — enable/disable per platform
+│   ├── skills_config.py      # noone skills — enable/disable per platform
 │   ├── skills_hub.py         # /skills slash command
-│   ├── tools_config.py       # hermes tools — enable/disable per platform
+│   ├── tools_config.py       # noone tools — enable/disable per platform
 │   ├── plugins.py            # PluginManager — discovery, loading, hooks
 │   ├── callbacks.py          # Terminal callbacks (clarify, sudo, approval)
-│   └── gateway.py            # hermes gateway start/stop
+│   └── gateway.py            # noone gateway start/stop
 │
 ├── tools/                    # Tool implementations (one file per tool)
 │   ├── registry.py           # Central tool registry
@@ -122,10 +121,9 @@ hermes-agent/
 │                             #   msgraph_webhook
 │
 ├── plugins/platforms/        # Bundled platform plugins: telegram, discord, slack,
-│                             #   whatsapp, matrix, mattermost, email, sms, dingtalk,
-│                             #   feishu, wecom, irc, line, teams, google_chat,
-│                             #   buzz, ntfy, photon, raft, simplex, whatsapp_cloud,
-│                             #   signal, weixin, bluebubbles, qqbot
+│                             #   whatsapp, mattermost, email, sms, line, teams,
+│                             #   google_chat, photon, whatsapp_cloud,
+│                             #   signal, weixin
 │                             #   (Home Assistant: `homeassistant` catalog plugin;
 │                             #    Yuanbao: `yuanbao` Hermes Labs plugin)
 │
@@ -139,12 +137,12 @@ hermes-agent/
 └── tests/                    # Pytest suite (~25,000 tests across ~1,250 files)
 ```
 
-## Data Flow
+## Data Flow {#data-flow}
 
-### CLI Session
+### CLI Session {#cli-session}
 
 ```text
-User input → HermesCLI.process_input()
+User input → AgentCLI.process_input()
   → AIAgent.run_conversation()
     → prompt_builder.build_system_prompt()
     → runtime_provider.resolve_runtime_provider()
@@ -153,7 +151,7 @@ User input → HermesCLI.process_input()
     → final response → display → save to SessionDB
 ```
 
-### Gateway Message
+### Gateway Message {#gateway-message}
 
 ```text
 Platform event → Adapter.on_message() → MessageEvent
@@ -165,7 +163,7 @@ Platform event → Adapter.on_message() → MessageEvent
     → deliver response back through adapter
 ```
 
-### Cron Job
+### Cron Job {#cron-job}
 
 ```text
 Scheduler tick → load due jobs from jobs.json
@@ -176,7 +174,7 @@ Scheduler tick → load due jobs from jobs.json
   → update job state and next_run
 ```
 
-## Recommended Reading Order
+## Recommended Reading Order {#recommended-reading-order}
 
 If you are new to the codebase:
 
@@ -191,15 +189,15 @@ If you are new to the codebase:
 9. **[Context Compression & Prompt Caching](./context-compression-and-caching.md)** — compression and caching
 10. **[ACP Internals](./acp-internals.md)** — IDE integration
 
-## Major Subsystems
+## Major Subsystems {#major-subsystems}
 
-### Agent Loop
+### Agent Loop {#agent-loop}
 
 The synchronous orchestration engine (`AIAgent`, exposed by the `run_agent.py` facade; the loop lives in `agent/conversation_loop.py` and `agent/turn_*.py`). Handles provider selection, prompt construction, tool execution, retries, fallback, callbacks, compression, and persistence. Supports three API modes for different provider backends.
 
 → [Agent Loop Internals](./agent-loop.md)
 
-### Prompt System
+### Prompt System {#prompt-system}
 
 Prompt construction and maintenance across the conversation lifecycle:
 
@@ -209,55 +207,55 @@ Prompt construction and maintenance across the conversation lifecycle:
 
 → [Prompt Assembly](./prompt-assembly.md), [Context Compression & Prompt Caching](./context-compression-and-caching.md)
 
-### Provider Resolution
+### Provider Resolution {#provider-resolution}
 
 A shared runtime resolver used by CLI, gateway, cron, ACP, and auxiliary calls. Maps `(provider, model)` tuples to `(api_mode, api_key, base_url)`. Handles 18+ providers, OAuth flows, credential pools, and alias resolution.
 
 → [Provider Runtime Resolution](./provider-runtime.md)
 
-### Tool System
+### Tool System {#tool-system}
 
 Central tool registry (`tools/registry.py`) with 70+ registered tools across ~28 toolsets. Each tool file self-registers at import time. The registry handles schema collection, dispatch, availability checking, and error wrapping. Terminal tools support 6 built-in backends (local, Docker, SSH, Daytona, Modal, Vercel Sandbox) plus plugin backends (e.g. Singularity).
 
 → [Tools Runtime](./tools-runtime.md)
 
-### Session Persistence
+### Session Persistence {#session-persistence}
 
 SQLite-based session storage with FTS5 full-text search. Sessions have lineage tracking (parent/child across compressions), per-platform isolation, and atomic writes with contention handling.
 
 → [Session Storage](./session-storage.md)
 
-### Messaging Gateway
+### Messaging Gateway {#messaging-gateway}
 
 Long-running process with 25+ platform adapters (built-in + bundled plugins), unified session routing, user authorization (allowlists + DM pairing), slash command dispatch, hook system, cron ticking, and background maintenance.
 
 → [Gateway Internals](./gateway-internals.md)
 
-### Plugin System
+### Plugin System {#plugin-system}
 
-Three discovery sources: `~/.hermes/plugins/` (user), `.hermes/plugins/` (project), and pip entry points. Plugins register tools, hooks, and CLI commands through a context API. Two specialized plugin types exist: memory providers (`plugins/memory/`) and context engines (`plugins/context_engine/`). Both are single-select — only one of each can be active at a time, configured via `hermes plugins` or `config.yaml`.
+Three discovery sources: `~/.hermes/plugins/` (user), `.hermes/plugins/` (project), and pip entry points. Plugins register tools, hooks, and CLI commands through a context API. Two specialized plugin types exist: memory providers (`plugins/memory/`) and context engines (`plugins/context_engine/`). Both are single-select — only one of each can be active at a time, configured via `noone plugins` or `config.yaml`.
 
 → [Plugin Guide](./plugins/index.md), [Memory Provider Plugin](./memory-provider-plugin.md)
 
-### Cron
+### Cron {#cron}
 
 First-class agent tasks (not shell tasks). Jobs store in JSON, support multiple schedule formats, can attach skills and scripts, and deliver to any platform.
 
 → [Cron Internals](./cron-internals.md)
 
-### ACP Integration
+### ACP Integration {#acp-integration}
 
-Exposes Hermes as an editor-native agent over stdio/JSON-RPC for VS Code, Zed, and JetBrains.
+Exposes {{app-name}} as an editor-native agent over stdio/JSON-RPC for VS Code, Zed, and JetBrains.
 
 → [ACP Internals](./acp-internals.md)
 
-### Trajectories
+### Trajectories {#trajectories}
 
 Generates ShareGPT-format trajectories from agent sessions for training data generation.
 
 → [Trajectories & Training Format](./trajectory-format.md)
 
-## Design Principles
+## Design Principles {#design-principles}
 
 | Principle | What it means in practice |
 |-----------|--------------------------|
@@ -268,7 +266,7 @@ Generates ShareGPT-format trajectories from agent sessions for training data gen
 | **Loose coupling** | Optional subsystems (MCP, plugins, memory providers, RL environments) use registry patterns and check_fn gating, not hard dependencies. |
 | **Profile isolation** | Each profile (`hermes -p <name>`) gets its own HERMES_HOME, config, memory, sessions, and gateway PID. Multiple profiles run concurrently. |
 
-## File Dependency Chain
+## File Dependency Chain {#file-dependency-chain}
 
 ```text
 tools/registry.py  (no deps — imported by all tool files)

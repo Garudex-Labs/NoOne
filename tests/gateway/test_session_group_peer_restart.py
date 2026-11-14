@@ -6,14 +6,14 @@ import pytest
 
 from gateway import hosted_room_driver as driver, hosted_rooms
 from gateway.run import _profile_runtime_scope
-from hermes_state_runtime import list_session_admissions
+from agent_state_runtime import list_session_admissions
 from tests.gateway.test_api_unknown_resolution import (
     _AUTH_HEADERS, _close_fixture, _restarted_api_runs,
 )
 from tests.gateway import test_session_group_peers as peers
 from tests.waiting import async_wait_until
-from tui_gateway.hosted_room_peer_http import PeerRunsHTTPError
-from tui_gateway.hosted_room_peer_transport import build_member_dispatch
+from agent_backend.hosted_room_peer_http import PeerRunsHTTPError
+from agent_backend.hosted_room_peer_transport import build_member_dispatch
 
 gateway, linked_peer = peers.gateway, peers.linked_peer
 

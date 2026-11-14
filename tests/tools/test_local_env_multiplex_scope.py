@@ -51,18 +51,12 @@ def test_scope_values_pass_the_same_credential_scrub(monkeypatch):
     assert _PROVIDER_KEY not in env
 
 
-def test_first_party_context_values_keep_the_process_value(monkeypatch):
-    monkeypatch.setenv("BUZZ_MANAGED_AGENT", "1")  # the Buzz context entitles BUZZ_* names
-    monkeypatch.setenv("BUZZ_WORKSPACE_ID", "from-context")
-    _multiplex(monkeypatch, {"BUZZ_WORKSPACE_ID": "from-routed-dotenv"})
-    env = _make_run_env({})
-    assert env["BUZZ_WORKSPACE_ID"] == "from-context"
 
 
 def test_managed_policy_keys_beat_the_routed_scope(monkeypatch):
     monkeypatch.setenv("ORG_POLICY_FLAG", "policy-value")
     monkeypatch.setattr(
-        "hermes_cli.env_loader.managed_dotenv_keys", lambda: ["ORG_POLICY_FLAG"])
+        "agent_cli.env_loader.managed_dotenv_keys", lambda: ["ORG_POLICY_FLAG"])
     _multiplex(monkeypatch, {"ORG_POLICY_FLAG": "routed-user-value"})
     env = _make_run_env({})
     assert env["ORG_POLICY_FLAG"] == "policy-value"
@@ -71,15 +65,15 @@ def test_managed_policy_keys_beat_the_routed_scope(monkeypatch):
 def test_background_commands_get_the_same_routed_base(monkeypatch, tmp_path):
     """``terminal(background=True)`` spawns through ProcessRegistry, not ``_make_run_env``: it must
     drop the launch profile's ``.env`` residue and see the served profile's own values too."""
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
     monkeypatch.setenv("MYAPP_AGENT_ID", "from-p1")
     monkeypatch.setenv("LAUNCH_DOTENV_NAME", "launch-residue")
-    monkeypatch.setattr("hermes_cli.env_loader.launch_dotenv_keys", lambda: ["LAUNCH_DOTENV_NAME"])
+    monkeypatch.setattr("agent_cli.env_loader.launch_dotenv_keys", lambda: ["LAUNCH_DOTENV_NAME"])
     _multiplex(monkeypatch, {"MYAPP_AGENT_ID": "from-p2"})
-    token = set_hermes_home_override(str(tmp_path / "profiles" / "p2"))
+    token = set_agent_home_override(str(tmp_path / "profiles" / "p2"))
     try:
         env = ProcessRegistry._spawn_env({})
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
     assert env["MYAPP_AGENT_ID"] == "from-p2"
     assert "LAUNCH_DOTENV_NAME" not in env

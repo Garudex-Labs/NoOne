@@ -1,3 +1,4 @@
+import { Upload } from '@noone/ui/icons'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -12,7 +13,6 @@ import {
 } from '@/components/ui/dialog'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { Upload } from '@/lib/icons'
 
 interface ShareControlsProps {
   // True when the shown map was loaded from a pasted code (not the live scan).

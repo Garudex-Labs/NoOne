@@ -3,7 +3,7 @@ name: drug-discovery
 description: "Drug discovery: ChEMBL search, drug-likeness, interactions."
 platforms: [linux, macos, windows]
 version: 1.0.0
-author: bennytimz
+author: RAWx18
 license: MIT
 metadata:
   hermes:

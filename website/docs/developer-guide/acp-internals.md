@@ -1,12 +1,11 @@
 ---
-sidebar_position: 2
 title: "ACP Internals"
 description: "How the ACP adapter works: lifecycle, sessions, event bridge, approvals, and tool rendering"
 ---
 
-# ACP Internals
+# ACP Internals {#acp-internals}
 
-The ACP adapter wraps Hermes' synchronous `AIAgent` in an async JSON-RPC stdio server.
+The ACP adapter wraps {{app-name}}' synchronous `AIAgent` in an async JSON-RPC stdio server.
 
 Key implementation files:
 
@@ -18,7 +17,7 @@ Key implementation files:
 - `acp_adapter/tools.py`
 - `acp_adapter/auth.py`
 
-## Boot flow
+## Boot flow {#boot-flow}
 
 ```text
 hermes acp / hermes-acp / python -m acp_adapter
@@ -26,13 +25,13 @@ hermes acp / hermes-acp / python -m acp_adapter
   -> parse --version / --check / --setup before server startup
   -> load ~/.hermes/.env
   -> configure stderr logging
-  -> construct HermesACPAgent
+  -> construct ACPAgent
   -> acp.run_agent(agent, use_unstable_protocol=True)
 ```
 
 Stdout is reserved for ACP JSON-RPC transport. Human-readable logs go to stderr.
 
-### Gateway terminal projection
+### Gateway terminal projection {#gateway-terminal-projection}
 
 `acp_adapter/gateway_server.py` waits for the completion of the exact submitted
 admission. A cancelled admission returns `stopReason: cancelled`; a failed
@@ -43,9 +42,9 @@ message; actual partial assistant text remains visible. Terminal outcomes come
 from the gateway's structured execution result, not from assistant prose or a
 session-wide cancellation flag.
 
-## Major components
+## Major components {#major-components}
 
-### `HermesACPAgent`
+### `ACPAgent` {#hermesacpagent}
 
 `acp_adapter/server.py` implements the ACP agent protocol.
 
@@ -57,7 +56,7 @@ Responsibilities:
 - session model switching
 - wiring sync AIAgent callbacks into ACP async notifications
 
-### `SessionManager`
+### `SessionManager` {#sessionmanager}
 
 `acp_adapter/session.py` tracks live ACP sessions.
 
@@ -80,7 +79,7 @@ The manager is thread-safe and supports:
 - cleanup
 - cwd updates
 
-### Event bridge
+### Event bridge {#event-bridge}
 
 `acp_adapter/events.py` converts AIAgent callbacks into ACP `session_update` events.
 
@@ -102,21 +101,21 @@ Because `AIAgent` runs in a worker thread while ACP I/O lives on the main event 
 asyncio.run_coroutine_threadsafe(...)
 ```
 
-### Permission bridge
+### Permission bridge {#permission-bridge}
 
 `acp_adapter/permissions.py` adapts dangerous terminal approval prompts into ACP permission requests.
 
 Mapping:
 
-- `allow_once` -> Hermes `once`
-- `allow_always` -> Hermes `always`
-- reject options -> Hermes `deny`
+- `allow_once` -> {{app-name}} `once`
+- `allow_always` -> {{app-name}} `always`
+- reject options -> {{app-name}} `deny`
 
 Timeouts and bridge failures deny by default.
 
-### Tool rendering helpers
+### Tool rendering helpers {#tool-rendering-helpers}
 
-`acp_adapter/tools.py` maps Hermes tools to ACP tool kinds and builds editor-facing content.
+`acp_adapter/tools.py` maps {{app-name}} tools to ACP tool kinds and builds editor-facing content.
 
 Examples:
 
@@ -125,7 +124,7 @@ Examples:
 - `read_file` / `search_files` -> text previews
 - large results -> truncated text blocks for UI safety
 
-## Session lifecycle
+## Session lifecycle {#session-lifecycle}
 
 ```text
 new_session(cwd)
@@ -146,13 +145,13 @@ prompt(..., session_id)
 ```
 
 A turn that ends in a terminal failure (provider refusal, non-retryable error, exhausted
-retries, interrupt before any reply) is closed by the core loop with a Hermes-authored
+retries, interrupt before any reply) is closed by the core loop with a {{app-name}}-authored
 assistant row ("Your request was not processed…" / "This turn did not complete…") so the
 durable transcript never ends on an open `user` row. Without it the next prompt would be
 merged into the failed request and replayed. Context-overflow failures are exempt: their
 repair is session rotation, not another row.
 
-### Cancelation
+### Cancelation {#cancelation}
 
 `cancel(session_id)`:
 
@@ -160,28 +159,28 @@ repair is session rotation, not another row.
 - calls `agent.interrupt()` when available
 - causes the prompt response to return `stop_reason="cancelled"`
 
-### Forking
+### Forking {#forking}
 
 `fork_session()` deep-copies message history into a new live session, preserving conversation state while giving the fork its own session ID and cwd.
 
-## Provider/auth behavior
+## Provider/auth behavior {#providerauth-behavior}
 
 ACP does not implement its own auth store.
 
-Instead it reuses Hermes' runtime resolver:
+Instead it reuses {{app-name}}' runtime resolver:
 
 - `acp_adapter/auth.py`
-- `hermes_cli/runtime_provider.py`
+- `agent_cli/runtime_provider.py`
 
-So ACP advertises and uses the currently configured Hermes provider/credentials. It also always advertises a terminal setup auth method (`hermes-setup`, args `--setup`) so first-run ACP clients can open Hermes' interactive model/provider configuration before starting a normal ACP session.
+So ACP advertises and uses the currently configured {{app-name}} provider/credentials. It also always advertises a terminal setup auth method (`hermes-setup`, args `--setup`) so first-run ACP clients can open {{app-name}}' interactive model/provider configuration before starting a normal ACP session.
 
-## Working directory binding
+## Working directory binding {#working-directory-binding}
 
 ACP sessions carry an editor cwd.
 
 The session manager binds that cwd to the ACP session ID via task-scoped terminal/file overrides, so file and terminal tools operate relative to the editor workspace.
 
-## Duplicate same-name tool calls
+## Duplicate same-name tool calls {#duplicate-same-name-tool-calls}
 
 The event bridge tracks tool IDs FIFO per tool name, not just one ID per name. This is important for:
 
@@ -190,19 +189,19 @@ The event bridge tracks tool IDs FIFO per tool name, not just one ID per name. T
 
 Without FIFO queues, completion events would attach to the wrong tool invocation.
 
-## Approval callback restoration
+## Approval callback restoration {#approval-callback-restoration}
 
 ACP temporarily installs an approval callback on the terminal tool during prompt execution, then restores the previous callback afterward. This avoids leaving ACP session-specific approval handlers installed globally forever.
 
-## Current limitations
+## Current limitations {#current-limitations}
 
 - ACP sessions are persisted to the shared `~/.hermes/state.db` (SessionDB) and transparently restored across process restarts; they appear in `session_search`
 - non-text prompt blocks are currently ignored for request text extraction
 - editor-specific UX varies by ACP client implementation
 
-## Related files
+## Related files {#related-files}
 
 - `tests/acp_adapter/` — ACP test suite
 - `toolsets.py` — `hermes-acp` toolset definition
-- `hermes_cli/main.py` — `hermes acp` CLI subcommand
+- `agent_cli/main.py` — `hermes acp` CLI subcommand
 - `pyproject.toml` — `[acp]` optional dependency + `hermes-acp` script

@@ -1,6 +1,6 @@
+import { AppIcon, type AppIconProps } from '@noone/ui/app-icon'
 import * as React from 'react'
 
-import { Codicon, type CodiconProps } from '@/components/ui/codicon'
 import { cn } from '@/lib/utils'
 
 /**
@@ -22,9 +22,9 @@ function CodeCard({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-function CodeCardIcon({ className, ...props }: CodiconProps) {
+function CodeCardIcon({ className, ...props }: AppIconProps) {
   return (
-    <Codicon
+    <AppIcon
       className={cn('shrink-0 text-[0.875rem] leading-none text-muted-foreground', className)}
       data-slot="code-card-icon"
       {...props}

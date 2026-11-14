@@ -1,6 +1,6 @@
 """MCP server lifecycle on the long-lived host (issue class C15).
 
-Uses the tui_gateway stdio host (the Ink TUI's backend; the Desktop's WS backend
+Uses the agent_backend stdio host (the Ink TUI's backend; the Desktop's WS backend
 runs the same MCP runtime) with the real stdio MCP fixture:
 
 * fast death: the MCP server crashes WHILE its call is in flight, leaving a helper
@@ -108,7 +108,7 @@ def test_mcp_server_death_mid_call_fails_fast_and_the_turn_completes(tmp_path: P
         text = _turn(rpc, timeout=FAST_DEATH_BOUND)
         elapsed = time.monotonic() - started
 
-        obs = collect_observation("tui_gateway", ph, srv, text)
+        obs = collect_observation("agent_backend", ph, srv, text)
         assert FINAL_ANSWER in text, f"turn did not complete after the MCP server died: {text[-300:]!r}"
         assert obs.tool_results, "the dead MCP call produced no tool result for the model"
         assert not any(ph.canaries["mcp"] in r for r in obs.tool_results), obs.tool_results

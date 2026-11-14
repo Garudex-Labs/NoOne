@@ -1,4 +1,4 @@
-"""The canonical dispatcher speaks only the declared wire contract (``tui_gateway/contracts``)."""
+"""The canonical dispatcher speaks only the declared wire contract (``agent_backend/contracts``)."""
 from types import SimpleNamespace
 
 import pytest
@@ -6,9 +6,9 @@ import pytest
 from gateway.session_authority import LiveSession, SessionAuthority
 from gateway.session_controls import AuthorityConnection
 from gateway.session_group_controls import GROUP_METHODS
-from hermes_state import SessionDB
-from hermes_state_runtime import begin_runtime_epoch
-from tui_gateway.contracts.registry import CANONICAL_METHODS, METHODS
+from agent_state import SessionDB
+from agent_state_runtime import begin_runtime_epoch
+from agent_backend.contracts.registry import CANONICAL_METHODS, METHODS
 
 
 @pytest.fixture

@@ -150,8 +150,8 @@ _SHERPA_KWS_MODEL_DIR = "sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01"
 
 
 def _sherpa_model_root() -> Path:
-    from hermes_constants import get_hermes_home
-    return get_hermes_home() / "cache" / "wakewords"
+    from agent_constants import get_agent_home
+    return get_agent_home() / "cache" / "wakewords"
 
 
 def _ensure_sherpa_model(root: Optional[Path] = None) -> Path:

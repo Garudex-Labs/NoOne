@@ -11,7 +11,7 @@ import os
 import pytest
 
 from tools import terminal_tool
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 
 @pytest.fixture(autouse=True)
@@ -29,7 +29,7 @@ def _reset_bridge_state(monkeypatch):
 
 
 def _write_config(text: str) -> None:
-    home = get_hermes_home()
+    home = get_agent_home()
     home.mkdir(parents=True, exist_ok=True)
     (home / "config.yaml").write_text(text)
 
@@ -120,7 +120,7 @@ def test_defaults_backfill_when_neither_config_nor_env_selects_backend():
 
 
 def test_bridge_config_failure_does_not_crash(monkeypatch):
-    import hermes_cli.config as config_mod
+    import agent_cli.config as config_mod
 
     monkeypatch.setattr(
         config_mod,
@@ -139,12 +139,12 @@ def test_bridge_config_failure_does_not_crash(monkeypatch):
 def test_secondary_home_override_does_not_latch_ambient_env(tmp_path, monkeypatch):
     """#107422: first bridge under a secondary profile must not poison os.environ.
 
-    Multiplexed dashboard sets ``set_hermes_home_override`` for profile B. If
+    Multiplexed dashboard sets ``set_agent_home_override`` for profile B. If
     ``_ensure_terminal_env_bridged`` ran there (no terminal scope yet), the
     one-shot latch used to write B's docker policy into process-global env and
     every later unscoped launch-profile tool call inherited it.
     """
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     launch_home = tmp_path / "launch"
     secondary_home = tmp_path / "profiles" / "docker-bee"
@@ -170,12 +170,12 @@ def test_secondary_home_override_does_not_latch_ambient_env(tmp_path, monkeypatc
     ):
         monkeypatch.delenv(name, raising=False)
 
-    token = set_hermes_home_override(str(secondary_home))
+    token = set_agent_home_override(str(secondary_home))
     try:
         # Unscoped call under secondary home (the residual path).
         terminal_tool._ensure_terminal_env_bridged()
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
     assert "TERMINAL_ENV" not in os.environ
     assert "TERMINAL_DOCKER_IMAGE" not in os.environ

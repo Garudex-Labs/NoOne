@@ -1,4 +1,5 @@
-import type { IconComponent } from '@/lib/icons'
+import type { IconComponent } from '@noone/ui/icons'
+
 import { cn } from '@/lib/utils'
 
 export interface SegmentedControlOption<T extends string> {

@@ -1,4 +1,4 @@
-"""A one-shot run (``hermes chat -q`` / ``-z``) has nobody to ask, steer, or live-control children for.
+"""A one-shot run (``noone chat -q`` / ``-z``) has nobody to ask, steer, or live-control children for.
 
 It drops ``clarify``, the mid-turn steering briefing and ``delegate_task``'s live-control parameters on both
 paths that build its surface (the agent's tool build and the gateway's session inventory). An interactive

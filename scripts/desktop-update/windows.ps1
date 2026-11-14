@@ -9,7 +9,7 @@
 # published. In practice binaries go months stale and users hit long-fixed
 # bugs on every update (the 2026-08-09 incident chain).
 #
-# This script lives in the repo checkout, so EVERY `hermes update` refreshes
+# This script lives in the repo checkout, so EVERY `noone update` refreshes
 # the very code that drives the next update. The Desktop spawns it through a
 # `cmd start` wrapper (see wrapHandoffForDetachedConsole in
 # apps/desktop/electron/updater-process.ts -- a bare detached+hidden
@@ -226,7 +226,7 @@ try {
 # Console selection must never hold the hand-off (#103222). The console is
 # hidden by design (wrapHandoffForDetachedConsole), but an older Desktop or a
 # manual run can leave it visible, and conhost blocks every write to it while a
-# selection is active: the child output replayed after `hermes update` exited
+# selection is active: the child output replayed after `noone update` exited
 # stalled on Write-Host until the user pressed Esc, and the result, marker
 # cleanup and relaunch waited behind it. QuickEdit goes off for the run (so a
 # stray click cannot start a selection) and the console echo is skipped while
@@ -278,7 +278,7 @@ $script:UiStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 # current hand-off stage or a terminal event and reacts. The loopback listener
 # is not a web server in any meaningful sense; it exists because file:// pages
 # cannot receive events from a detached process. Salvaged from the web-shell
-# spike (Co-authored-by: teknium1), reshaped to the quiet update-surface
+# spike, reshaped to the quiet update-surface
 # contract (#75895/#83634): loader, one title, one line, no dashboard.
 $script:UiState = [hashtable]::Synchronized(@{
     status     = "running"      # running | done | manual | error
@@ -288,7 +288,7 @@ $script:UiState = [hashtable]::Synchronized(@{
     acknowledged_receipt = $null
 })
 $script:UiServer = $null     # @{ Listener; Runspace; PowerShell; Port; BrowserProc; Profile }
-# `hermes update` publishes its own stages (hermes_cli/update_stage.py: downloading, dependencies,
+# `noone update` publishes its own stages (agent_cli/update_stage.py: downloading, dependencies,
 # each app build, packaging) into this file, as it does under posix.sh. The step loop relays them
 # to the window, which otherwise read "Updating code and dependencies" for a whole 20-60 minute
 # run (#139952, #135363), and to the hand-off log, whose timestamps then name the slow stage.
@@ -658,7 +658,7 @@ function Show-ProgressWindow {
 
 function Show-ErrorFinale([string]$Message) {
     # Terse by design: a title + the debug-share pointer. No error text, no
-    # log tail -- `hermes debug share` uploads the real evidence and the
+    # log tail -- `noone debug share` uploads the real evidence and the
     # relaunched Desktop surfaces the result message.
     if ($script:UiServer) {
         # The shim renders the error state itself; leave the window up for
@@ -674,7 +674,7 @@ function Show-ErrorFinale([string]$Message) {
         if ($ui.Timer) { $ui.Timer.Stop() }
         $ui.Bar.Visible = $false
         $ui.Title.Text = "Failed to update"
-        $ui.Sub.Text = "Run `"hermes debug share`" in a terminal to send a report."
+        $ui.Sub.Text = "Run `"noone debug share`" in a terminal to send a report."
         $close = New-Object System.Windows.Forms.Button
         $close.Text = "Close"
         $close.SetBounds(100, 252, 80, 28)
@@ -794,7 +794,7 @@ function Write-Result([bool]$Ok, [int]$Code, [string]$Message, [bool]$ManualActi
     }
 }
 
-# Post-commit follow-ups (contract C3): each failed step after `hermes update`
+# Post-commit follow-ups (contract C3): each failed step after `noone update`
 # exited 0 becomes a warning, never a failed update.
 $script:Warnings = New-Object System.Collections.Generic.List[string]
 # A plain array: Windows PowerShell 5.1's @() over a non-empty List[object] throws
@@ -1007,8 +1007,8 @@ function Start-DesktopRelaunch {
 # write end of a redirected pipe to the child as an INHERITABLE handle, so
 # every descendant that is spawned without its own redirection gets a
 # duplicate -- and the read side does not see EOF until the last of them
-# closes it. `hermes update` deliberately runs its build steps with stdout
-# inherited (hermes_cli/main.py, the tee-stderr runner), so the tree under a
+# closes it. `noone update` deliberately runs its build steps with stdout
+# inherited (agent_cli/main.py, the tee-stderr runner), so the tree under a
 # step is arbitrarily deep and not something this script can enumerate. When
 # one of those descendants is a resident gateway, the pipe stays open for the
 # life of the gateway, i.e. forever.
@@ -1049,9 +1049,9 @@ if ($env:HERMES_UPDATE_DESKTOP_EXIT_SECONDS) {
     }
 }
 
-# Silence on the pipes is NOT silence in the update. `hermes update` captures
+# Silence on the pipes is NOT silence in the update. `noone update` captures
 # the (very loud) Electron/vite build into logs/update.log instead of its own
-# stdout (hermes_cli/update_cmd.py, the update-log tee), so a real update is
+# stdout (agent_cli/update_cmd.py, the update-log tee), so a real update is
 # routinely stdout-silent for 40+ minutes while demonstrably progressing. An
 # idle ceiling that watched only stdout/stderr would cancel every healthy
 # large update at StepIdleTimeoutSeconds. The drain therefore also counts
@@ -1128,7 +1128,7 @@ function Invoke-HermesStep([string]$Exe, [string[]]$HermesArgs, [string]$Tag) {
     # DoEvents loop keeps the marquee animating through long silent
     # stretches (pip installs) -- the old EndOfStream pump blocked on quiet
     # children and froze it. Full output still lands in the hand-off log
-    # afterwards, where `hermes debug share` picks it up.
+    # afterwards, where `noone debug share` picks it up.
     #
     # The drain is bounded once the step exits (#90455). Waiting for pipe EOF
     # is waiting on the step's whole surviving descendant tree, and this
@@ -1230,7 +1230,7 @@ function Invoke-HermesStep([string]$Exe, [string[]]$HermesArgs, [string]$Tag) {
                 break
             }
         } elseif (-not $stalled -and $job -ne [IntPtr]::Zero -and ((Get-Date) - $lastProgressAt).TotalSeconds -ge $script:StepIdleTimeoutSeconds) {
-            # Quiet pipes are how a healthy `hermes update` looks for 40+
+            # Quiet pipes are how a healthy `noone update` looks for 40+
             # minutes: its build output streams to logs/update.log, not the
             # child's stdout. Growth of that file is progress -- reset the
             # clock instead of cancelling. Stat'd only once the ceiling is
@@ -1312,7 +1312,7 @@ function Invoke-HermesStep([string]$Exe, [string[]]$HermesArgs, [string]$Tag) {
     return @{ Code = $code; Output = $all; TreeQuiesced = (-not $stalled -or $proc.HasExited); StartedAfterJobAssignment = $true }
 }
 
-# `hermes update` can COMPLETE (its output carries "✓ Update complete!") and
+# `noone update` can COMPLETE (its output carries "✓ Update complete!") and
 # still be killed with the idle-watchdog sentinel 124: the post-update phase
 # (gateway restart hand-off) stayed alive and silent past the ceiling, so
 # Invoke-HermesStep terminated the tree (#96205). The install is done; failing
@@ -1334,7 +1334,7 @@ function Resolve-HermesUpdateOutcome($StepResult) {
 }
 
 # -- The commit point (contract C3) --------------------------------------------
-# `hermes update` exits 0 once committed, except an interrupt (130) or a parked
+# `noone update` exits 0 once committed, except an interrupt (130) or a parked
 # autostash (1) after the commit point, and a crash of a committed run. Its own
 # receipt says which (same rule as posix.sh::update_committed_after_exit): the
 # run's receipt -- matched by the correlation id handed to it, finalized
@@ -1343,7 +1343,7 @@ function Resolve-HermesUpdateOutcome($StepResult) {
 # record keeps finished_at null, so it never matches.
 function Get-CommittedReceiptOutcome {
     $root = $HermesHome
-    # hermes_constants.get_default_hermes_root: a <root>\profiles\<name> home files under <root>
+    # agent_constants.get_default_agent_root: a <root>\profiles\<name> home files under <root>
     $parent = Split-Path -Parent $root
     if ($parent -and (Split-Path -Leaf $parent) -eq 'profiles') { $root = Split-Path -Parent $parent }
     $path = Join-Path $root 'logs\update_receipts\latest.json'
@@ -1418,7 +1418,7 @@ if ($SelfTestUi) {
 #            output. Guards #95589: the hand-off must terminate it and reach its
 #            retry/finally recovery rather than strand the Desktop.
 #   logstall -- a step that is silent on its pipes but keeps growing the
-#            update log, the shape of every real `hermes update` build (output
+#            update log, the shape of every real `noone update` build (output
 #            goes to logs/update.log, not stdout, for 40+ minutes). Guards the
 #            watchdog's other cliff: the idle ceiling must count update.log
 #            growth as progress and must NOT kill the healthy step.
@@ -1457,7 +1457,7 @@ Write-Output "pipe-drain step output"
 exit 7
 '@
     # Writes straight to the console stream, holding nothing: a step that is
-    # merely loud. `hermes update` is this shape -- the Electron/vite build
+    # merely loud. `noone update` is this shape -- the Electron/vite build
     # alone is megabytes. Few large lines rather than many small ones on
     # purpose: Write-HandoffLog is one file append per line and runs inside the
     # measured window, so line-heavy output would time the logger instead of
@@ -1820,7 +1820,7 @@ try {
     Write-HandoffLog ("running: python " + ($updateArgs -join " "))
     Publish-UiProgress "Updating code and dependencies"
     $res = Invoke-HermesStep $pythonExe $updateArgs "update"
-    Write-HandoffLog "hermes update exit code: $($res.Code)"
+    Write-HandoffLog "noone update exit code: $($res.Code)"
     $res = Resolve-HermesUpdateOutcome $res
 
     # Retry only the identified pre-PM update-boundary transition. Current
@@ -1842,34 +1842,34 @@ try {
     if ($res.Code -ne 0 -and $res.Code -ne 2) { $committedAfterExit = Get-CommittedReceiptOutcome }
     if ($res.Code -ne 0 -and -not $committedAfterExit) {
         $finalCode = $res.Code
-        $finalMsg = "Update failed (exit $($res.Code)). Run `hermes debug share` in a terminal to send a report."
+        $finalMsg = "Update failed (exit $($res.Code)). Run `noone debug share` in a terminal to send a report."
         exit $finalCode
     }
 
-    # -- Commit point: `hermes update` exited 0 (contract C3). The install is
+    # -- Commit point: `noone update` exited 0 (contract C3). The install is
     # on the new version; every step below is follow-up work whose failure is
     # a warning on an ok result, never "still on the previous version".
     $script:Committed = $true
     $finalCode = 0
     $finalMsg = "Update complete."
     if ($script:UpdateInterrupted) {
-        Add-Followup "post-update steps (gateway resume) were interrupted; run hermes update again" "its post-update steps (gateway resume) were interrupted. Run 'hermes update' again to finish them." -Manual
+        Add-Followup "post-update steps (gateway resume) were interrupted; run noone update again" "its post-update steps (gateway resume) were interrupted. Run 'noone update' again to finish them." -Manual
     }
     if ($committedAfterExit) {
         # Past the commit point with a nonzero exit: installed, with an owed follow-up.
         $sentence = switch ($committedAfterExit) {
-            'partial' { "one step is left for you: your local source changes may still be parked in git stash. Run 'hermes update' in a terminal for the exact commands." }
-            'interrupted' { "its post-update steps were interrupted. The next launch or 'hermes update' finishes them." }
-            default { "'hermes update' exited with code $($res.Code) afterwards. Run 'hermes update' in a terminal to finish any remaining steps." }
+            'partial' { "one step is left for you: your local source changes may still be parked in git stash. Run 'noone update' in a terminal for the exact commands." }
+            'interrupted' { "its post-update steps were interrupted. The next launch or 'noone update' finishes them." }
+            default { "'noone update' exited with code $($res.Code) afterwards. Run 'noone update' in a terminal to finish any remaining steps." }
         }
-        Add-Followup "update: hermes update exited $($res.Code) after the commit point (receipt outcome: $committedAfterExit)" $sentence -Manual
+        Add-Followup "update: noone update exited $($res.Code) after the commit point (receipt outcome: $committedAfterExit)" $sentence -Manual
     }
 
     # Pre-PM updates reported a successful exit with a failed build warning.
     # Keep that historical transition here only; current failures propagate.
     $desktopBuildFailed = $false
     if ($legacyInstall -and $res.Output -match "Desktop build failed") {
-        Write-HandoffLog "hermes update reported a desktop build failure; retrying build"
+        Write-HandoffLog "noone update reported a desktop build failure; retrying build"
         Publish-UiProgress "Rebuilding Desktop"
         $rebuildFailure = $null
         try {
@@ -1893,7 +1893,7 @@ try {
     if (-not $desktopBuildFailed -and $res.Output -match '(?m)^\s*Desktop app build owed: ') {
         # #101789: a program that is not part of Hermes (an IME cloud helper, an AV
         # component) has its working folder inside release\ and Windows refuses the swap.
-        # hermes_cli/desktop_release_holders.py names each one on its own line; the
+        # agent_cli/desktop_release_holders.py names each one on its own line; the
         # relaunched Desktop offers to close exactly those and retry, never silently.
         # pid + start time identify the exact process the user is asked about; the start time
         # stays the CLI's invariant text (no locale-dependent number parsing here). An exe of
@@ -1914,25 +1914,25 @@ try {
 
     # Every other owed follow-up of the committed update (a gateway still on the old code, a
     # Windows resume, a lost completion...) prints one whole "Update follow-up '<step>' did not
-    # finish:" line (hermes_cli/update_receipt.record_followup): never a plain success either.
+    # finish:" line (agent_cli/update_receipt.record_followup): never a plain success either.
     $owedSteps = @([regex]::Matches(($res.Output -join "`n"), "Update follow-up '([A-Za-z0-9_]+)' did not finish: ") |
         ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
     if ($owedSteps.Count -gt 0) {
         # A gateway_restart owed only for serve/dashboard units (the reason then starts with
-        # "serve/dashboard ", hermes_cli/update_cmd_fleet_verify.SERVE_ONLY_REASON_PREFIX) names their own
+        # "serve/dashboard ", agent_cli/update_cmd_fleet_verify.SERVE_ONLY_REASON_PREFIX) names their own
         # command in the log. The hint drops only when EVERY gateway_restart line is serve-only; any other
         # reason, including a raw restart-phase error, keeps it (#141071).
         $gwReasons = @((($res.Output -join "`n") -split "`r?`n") | Where-Object { $_ -cmatch "Update follow-up 'gateway_restart' did not finish: " })
-        $serveOnly = ($gwReasons.Count -gt 0) -and -not @($gwReasons | Where-Object { ($_ -cnotmatch "did not finish: serve/dashboard ") -or ($_ -cmatch "hermes gateway restart") }).Count
-        $owedHint = if (($owedSteps -contains 'gateway_restart') -and -not $serveOnly) { " Run 'hermes gateway restart' to move the messaging gateway onto the new code now." } else { '' }
-        Add-Followup ("followup: owed by the committed update: " + ($owedSteps -join ', ')) ("some follow-up steps did not finish (" + ($owedSteps -join ', ') + "). The next launch or 'hermes update' retries them; the update log has the details." + $owedHint) -Manual
+        $serveOnly = ($gwReasons.Count -gt 0) -and -not @($gwReasons | Where-Object { ($_ -cnotmatch "did not finish: serve/dashboard ") -or ($_ -cmatch "noone gateway restart") }).Count
+        $owedHint = if (($owedSteps -contains 'gateway_restart') -and -not $serveOnly) { " Run 'noone gateway restart' to move the messaging gateway onto the new code now." } else { '' }
+        Add-Followup ("followup: owed by the committed update: " + ($owedSteps -join ', ')) ("some follow-up steps did not finish (" + ($owedSteps -join ', ') + "). The next launch or 'noone update' retries them; the update log has the details." + $owedHint) -Manual
     }
 
     # A zero-exit update is not proof that the runtime survived the update.
     if (-not $desktopBuildFailed) {
         $verifyFailure = $null
         try {
-            $verifyCommand = @(Get-HermesRuntimeCommand -InstallRoot $InstallRoot -Module 'hermes_cli.desktop_update_verify')
+            $verifyCommand = @(Get-HermesRuntimeCommand -InstallRoot $InstallRoot -Module 'agent_cli.desktop_update_verify')
             $verifyArgs = @($verifyCommand | Select-Object -Skip 1)
             $verify = Invoke-HermesStep $verifyCommand[0] $verifyArgs 'verify'
             if ($verify.Code -ne 0) { $verifyFailure = "exit $($verify.Code)" }
@@ -1946,7 +1946,7 @@ try {
 
     # Desktop stopped every locally running profile gateway before handing off
     # so their venv launchers could not hold the update lock. That happens
-    # before `hermes update` captures its Windows pause inventory, leaving the
+    # before `noone update` captures its Windows pause inventory, leaving the
     # updater nothing to resume on its normal success path. Restore the same
     # all-profile fleet after the update -- also when a follow-up above failed:
     # the code is committed and the gateways must not stay down. A remote-served
@@ -1964,7 +1964,7 @@ try {
             $gatewayFailure = $_.Exception.Message
         }
         if ($gatewayFailure) {
-            Add-Followup "gateway start: $gatewayFailure" "it could not restart every messaging gateway. Run `hermes gateway start --all` in a terminal." -Manual
+            Add-Followup "gateway start: $gatewayFailure" "it could not restart every messaging gateway. Run `noone gateway start --all` in a terminal." -Manual
         }
     }
 
@@ -1976,7 +1976,7 @@ try {
     # tree gets its own warning in the finally block.
     Write-HandoffLog "hand-off error: $($_.Exception.Message)"
     if ($script:Committed -and $script:TreeSafeToFinalize) {
-        Add-Followup "hand-off: $($_.Exception.Message)" "a post-update step failed unexpectedly. Run 'hermes update' again to finish it." -Manual
+        Add-Followup "hand-off: $($_.Exception.Message)" "a post-update step failed unexpectedly. Run 'noone update' again to finish it." -Manual
         $finalCode = 0
     }
 } finally {

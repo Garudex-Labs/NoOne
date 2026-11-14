@@ -34,7 +34,7 @@
       branch = if rawRef != null then builtins.replaceStrings [ "refs/heads/" ] [ "" ] rawRef else null;
       dirty = dirtyRevision != null;
       lastModified = inputs.self.lastModified or null;
-      minimal = pkgs.callPackage ./hermes-agent.nix {
+      minimal = pkgs.callPackage ./agent.nix {
         inherit (inputs) uv2nix pyproject-nix pyproject-build-systems;
         # Passed explicitly so `override (prev: ...)` sees it: a function form that appends to
         # `prev.extraDependencyGroups` worked before the shipped groups moved to
@@ -58,11 +58,9 @@
           "azure-identity"
           "bedrock"
           "daytona"
-          "dingtalk"
           "edge-tts"
           "exa"
           "fal"
-          "feishu"
           "firecrawl"
           "messaging"
           "modal"
@@ -70,9 +68,7 @@
           "tts-premium"
           "vercel"
           "voice"
-        ]
-        # matrix is Linux-only (oqs/liboqs lacks aarch64-darwin wheels).
-        ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ "matrix" ];
+        ];
       };
     in
     {
@@ -94,7 +90,6 @@
           defaultDependencyGroups = [ "messaging" ];
         };
 
-        tui = full.hermesTui;
         web = full.hermesWeb;
         webapp = full.hermesWebapp;
         desktop = full.hermesDesktop;

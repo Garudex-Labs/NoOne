@@ -1,14 +1,14 @@
-"""Dashboard embedded chat: the ``/api/pty`` WebSocket drives a REAL ``hermes --tui`` end to end.
+"""Dashboard embedded chat: the ``/api/pty`` WebSocket drives a REAL ``noone --tui`` end to end.
 
 Issue class: the dashboard Chat tab talking to the wrong profile, or losing the conversation on a
-reconnect. Every cell runs the real ``hermes dashboard``, which
-spawns the real Ink TUI (``ui-tui/dist/entry.js``) and its ``tui_gateway`` under a real PTY; the
+reconnect. Every cell runs the real ``noone dashboard``, which
+spawns the real Ink TUI (``ui-tui/dist/entry.js``) and its ``agent_backend`` under a real PTY; the
 client is what the browser's xterm does (raw PTY bytes, the ``\\x1b[RESIZE:c;r]`` control frame, the
 SPA's ``?attach=`` keep-alive token, ``?profile=`` and a per-(profile) ``?channel=``). Each profile
 has its own fake provider that only accepts that profile's key and echoes the prompt's canary, so
 every recorded request proves which profile's TUI sent it, and state.db proves where it landed.
 
-Contract under test (``hermes_cli/web_routers/chat_ws.py::pty_ws`` + ``hermes_cli/pty_session.py``):
+Contract under test (``agent_cli/web_routers/chat_ws.py::pty_ws`` + ``agent_cli/pty_session.py``):
   * ``?profile=<name>`` scopes the whole chat to that profile (HERMES_HOME=<profile dir>);
   * with ``?attach=T`` the PTY outlives the socket; reconnecting with the same T + profile replays
     the buffer and forces a redraw of the SAME TUI/session;
@@ -17,7 +17,7 @@ Contract under test (``hermes_cli/web_routers/chat_ws.py::pty_ws`` + ``hermes_cl
 Not a cell: "dashboard shutdown leaves no TUI behind". It holds, but it cannot be made red from the
 dashboard side: with ``PtySessionRegistry.close_all`` disabled (and even with the child ignoring
 SIGHUP) the TUI still exits when the dying dashboard's PTY master closes (kernel hangup / EIO) and
-its ``tui_gateway`` exits on stdin EOF. The fixture still waits for every descendant to exit and
+its ``agent_backend`` exits on stdin EOF. The fixture still waits for every descendant to exit and
 fails the test (after an identity-checked kill) on any that outlives the dashboard, so a leak is
 reported and cannot poison later tests.
 """
@@ -48,12 +48,6 @@ ROWS, COLS = 40, 120
 TURN_TIMEOUT = 90.0
 
 
-def _require_tui() -> None:
-    if shutil.which("node") and (H.REPO_ROOT / "ui-tui" / "dist" / "entry.js").is_file():
-        return
-    if os.environ.get("HERMES_E2E_REQUIRE_TUI") == "1":
-        pytest.fail("ui-tui/dist/entry.js or node missing but HERMES_E2E_REQUIRE_TUI=1")
-    pytest.skip("Ink TUI not built (cd ui-tui && pnpm run build) or node missing")
 
 
 def _text_of(content: Any) -> str:
@@ -149,33 +143,12 @@ class Chat:
         return rec
 
 
-def _private_tui(tmp_path: Path) -> Path:
-    """A private, syntax-checked copy of the prebuilt bundle, handed to the dashboard as
-    ``HERMES_TUI_DIR`` (the prebuilt-install path of ``_make_tui_argv``). On a source checkout every
-    PTY spawn otherwise re-runs ``pnpm run build``, rewriting ``ui-tui/dist/entry.js`` in place, and a
-    TUI starting during a concurrent build (another worker, another dashboard) crashes on the
-    truncated file (#121286). The bundle is self-contained (node builtins only)."""
-    src = H.REPO_ROOT / "ui-tui" / "dist" / "entry.js"
-    dst = tmp_path / "tui" / "dist" / "entry.js"
-    dst.parent.mkdir(parents=True)
-    # Same module type as ui-tui/package.json, so older Node versions without ESM syntax detection
-    # load the copy exactly like the original.
-    (dst.parent.parent / "package.json").write_text('{"type": "module"}\n', encoding="utf-8")
-    def copied_intact() -> bool:
-        shutil.copyfile(src, dst)
-        return subprocess.run([shutil.which("node") or "node", "--check", str(dst)], capture_output=True,
-                              timeout=60, stdin=subprocess.DEVNULL, check=False).returncode == 0
-    poll(copied_intact, 180, "an intact copy of ui-tui/dist/entry.js (a concurrent build may be writing it)",
-         interval=1.0)
-    return dst.parent.parent
 
 
 @pytest.fixture
 def dash_env(tmp_path: Path):
-    _require_tui()
-    tui_dir = _private_tui(tmp_path)
     sb = H.make_sandbox(tmp_path, ("default", "alpha", "beta"), responder=_echo_responder)
-    dash = H.Dashboard(sb, tmp_path / "dashboard.log", extra_env={"HERMES_TUI_DIR": str(tui_dir)})
+    dash = H.Dashboard(sb, tmp_path / "dashboard.log", extra_env={})
     ledger = ProcessLedger(dash.proc.pid)
     try:
         yield sb, dash, ledger

@@ -7,9 +7,9 @@ description: >
   mode (SSE inbound, JSON-RPC 2.0 outbound). Supports DMs, allowlisted
   groups, attachments, reactions and home-channel cron delivery. Phone
   numbers are treated as PII in logs.
-author: NousResearch
-# ``requires_env`` / ``optional_env`` entries are surfaced in the ``hermes config`` UI via the
-# platform-plugin env var injector in ``hermes_cli/config.py``.
+author: Garudex Labs
+# ``requires_env`` / ``optional_env`` entries are surfaced in the ``noone config`` UI via the
+# platform-plugin env var injector in ``agent_cli/config.py``.
 requires_env:
   - name: SIGNAL_HTTP_URL
     description: "signal-cli HTTP daemon URL (e.g. http://127.0.0.1:8080)"

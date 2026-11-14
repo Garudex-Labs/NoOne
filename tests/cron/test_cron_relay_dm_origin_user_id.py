@@ -1,6 +1,6 @@
 """A cron fire into a relay DM carries the origin's ``user_id``, so a COLD routing cache still egresses.
 
-The relay connector resolves a guild-less DM (Telegram, WhatsApp, Matrix, Signal) to a tenant ONLY from
+The relay connector resolves a guild-less DM (Telegram, WhatsApp, Signal) to a tenant ONLY from
 ``metadata.user_id``, the authentic recipient. The RelayAdapter fills it from a cache learned from inbound
 events, which is empty after every process start. A backend that stops the guest on sleep restarts the
 gateway on every wake, so the first cron fire after a wake sent the DM with no discriminator and the

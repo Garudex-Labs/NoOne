@@ -1,7 +1,7 @@
 """``complete.path`` on the shared gateway: the sidecar's path / ``@`` listing, rooted in one session's folder.
 
 The Ink TUI asks its canonical connection for composer completions. The listing is the sidecar's own
-(``tui_gateway/methods_complete.py``); its root is the session's frozen policy cwd, never a cwd the
+(``agent_backend/methods_complete.py``); its root is the session's frozen policy cwd, never a cwd the
 client sends or the daemon's own folder.
 """
 import asyncio
@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 from gateway.session_busy_controls import authorize
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 
 async def complete_path(connection, ref, params):
@@ -29,7 +29,7 @@ async def complete_path(connection, ref, params):
         # A remote or sandboxed backend's tree is not this host's; completion is advisory, so nothing.
         return {'items': []}
     # The listing helpers are bound onto the sidecar module's globals (method_ctx.bind_module).
-    from tui_gateway import server
+    from agent_backend import server
 
     def listing():
         from gateway.run import _profile_runtime_scope

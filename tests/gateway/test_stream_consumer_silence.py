@@ -201,9 +201,29 @@ def _draft_adapter():
 
 
 def _native_adapter():
-    from tests.gateway.test_stream_consumer_wecom_native import _make_native_streaming_adapter
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock
+    from gateway.platforms.base import BasePlatformAdapter
 
-    adapter = _make_native_streaming_adapter()
+    NativeAdapter = type("NativeAdapter", (BasePlatformAdapter,), {
+        "MAX_MESSAGE_LENGTH": 4096,
+        "SUPPORTS_MESSAGE_EDITING": False,
+        "SUPPORTS_NATIVE_STREAMING": True,
+    })
+    NativeAdapter.__abstractmethods__ = frozenset()
+    adapter = object.__new__(NativeAdapter)
+    adapter._typing_paused = set()
+    adapter._fatal_error_message = None
+    adapter.frames = []
+    adapter.supports_native_streaming = lambda chat_type=None, metadata=None: True
+
+    async def send_frame(text, *, finalize=False, **kwargs):
+        adapter.frames.append({"text": text, "finalize": finalize})
+        return True
+
+    adapter.send_stream_frame = send_frame
+    adapter.send = AsyncMock(return_value=SimpleNamespace(success=True, message_id="fallback"))
+    adapter.edit_message = AsyncMock(return_value=SimpleNamespace(success=True))
     adapter.answer_copies = lambda: sum(1 for f in adapter.frames if f["finalize"] and f["text"] == ANSWER)
     adapter.marker_shown = lambda: any("NO_REPLY" in f["text"] for f in adapter.frames)
     return adapter

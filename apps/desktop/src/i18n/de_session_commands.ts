@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 // Typed /undo /retry /steer /queue lines (en_session_commands.ts is the source).
 export const deSessionCommands = {
   undoUsage: 'Verwendung: /undo [N]',
@@ -8,7 +9,7 @@ export const deSessionCommands = {
   retryNothing: 'nichts zum Wiederholen',
   retryUnsupported: '/retry: Medien oder unbekannte Inhaltsteile können nicht wiederholt werden',
   busy: (command: string) =>
-    `Sitzung beschäftigt — Hermes antwortet noch. Beende zuerst die aktuelle Antwort (Stopp-Taste oder Strg+C im Terminal), dann führe /${command} aus.`,
+    `Sitzung beschäftigt — ${appText('{app_name}')} antwortet noch. Beende zuerst die aktuelle Antwort (Stopp-Taste oder Strg+C im Terminal), dann führe /${command} aus.`,
   busyCompressing: (command: string) =>
     `Sitzung beschäftigt — ein /compress läuft; führe /${command} aus, wenn es fertig ist.`,
   steerUsage: 'Verwendung: /steer <Prompt>',
@@ -24,5 +25,5 @@ export const deSessionCommands = {
     'Sie wurde gestartet oder abgelehnt, bevor deine Änderung gespeichert war. Dein bearbeiteter Text steht im Eingabefeld.',
   queueEditUnconfirmedTitle: 'Änderung nicht bestätigt',
   queueEditUnconfirmed:
-    'Hermes konnte deine Änderung nicht bestätigen. Speichere erneut, um dieselbe Änderung zu wiederholen; sie wird nie doppelt eingereiht.'
+    '{app_name} konnte deine Änderung nicht bestätigen. Speichere erneut, um dieselbe Änderung zu wiederholen; sie wird nie doppelt eingereiht.'
 }

@@ -20,9 +20,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from hermes_cli import runtime_provider as rp
-from hermes_cli import providers as _providers
-from hermes_cli.providers import nous_api_mode
+from agent_cli import runtime_provider as rp
+from agent_cli import providers as _providers
+from agent_cli.providers import nous_api_mode
 
 
 @pytest.fixture(autouse=True)
@@ -67,7 +67,7 @@ class TestApiModeRouting:
         """Callers that skip resolve_runtime_provider (fallback, switch_model
         empty-mode path) must still land Claude on Messages — the Hermes
         overlay alone advertises openai_chat for every Nous model."""
-        from hermes_cli.providers import determine_api_mode
+        from agent_cli.providers import determine_api_mode
 
         assert (
             determine_api_mode(
@@ -299,7 +299,7 @@ class TestPortalBodyFields:
         return build_api_kwargs(agent, [{"role": "user", "content": "hi"}])
 
     def test_portal_tags_reach_the_messages_request(self):
-        from agent.portal_tags import hermes_client_tag
+        from agent.conversation_scope import hermes_client_tag
 
         tags = self._build()["extra_body"]["tags"]
 
@@ -467,7 +467,7 @@ class TestAuxiliaryDualWire:
     def test_build_call_kwargs_includes_sticky_session_id(self):
         """Aux Messages calls must pin session_id, not just tags."""
         from agent.auxiliary_client import _build_call_kwargs
-        from agent.portal_tags import (
+        from agent.conversation_scope import (
             reset_conversation_context,
             set_conversation_context,
         )

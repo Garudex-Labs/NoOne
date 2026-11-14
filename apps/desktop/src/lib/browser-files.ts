@@ -1,6 +1,6 @@
-import { fileUrlToNativePath } from '@hermes/shared'
+import { fileUrlToNativePath } from '@noone/shared'
 
-import type { HermesApiRequest } from '@/global'
+import type { AgentApiRequest } from '@/global'
 import { translateNow } from '@/i18n'
 import { requireBrowserConnection } from '@/lib/browser-connection'
 import { fetchBrowserImage } from '@/lib/browser-image-download'
@@ -19,7 +19,7 @@ function queryPath(route: string, values: Record<string, boolean | null | string
 }
 
 interface BrowserFilesOptions {
-  api: <T>(request: HermesApiRequest) => Promise<T>
+  api: <T>(request: AgentApiRequest) => Promise<T>
   bootstrap: BrowserBootstrap
   currentProfile: () => string | null
   /** The bootstrap a file of *connectionId* is read through: a relayed gateway's, when the serving
@@ -58,7 +58,7 @@ export function createBrowserFilesBridge({
 
     const target = bootstrapFor(connectionId)
 
-    return { api: <T>(request: HermesApiRequest) => browserApi<T>(target, request), bootstrap: target }
+    return { api: <T>(request: AgentApiRequest) => browserApi<T>(target, request), bootstrap: target }
   }
 
   const downloadUrl = async (url: string, filename = '') => {

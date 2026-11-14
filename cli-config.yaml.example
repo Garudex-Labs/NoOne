@@ -1,11 +1,11 @@
 # Hermes Agent CLI Configuration
 # Copy settings from this example into ~/.hermes/config.yaml, or use
-# `hermes config set <section.key> <value>` to update the active profile.
+# `noone config set <section.key> <value>` to update the active profile.
 # This file configures CLI behavior; only documented secret environment
 # variables in .env take precedence over their corresponding settings.
 
 # Schema version of this file. The installers copy it to seed config.yaml, and
-# `hermes update` uses it to know which one-time migrations the file already
+# `noone update` uses it to know which one-time migrations the file already
 # has. Hermes manages it: do not copy it into another config.
 _config_version: 53
 
@@ -40,7 +40,7 @@ database:
 # hard limit and never lowers an already higher soft limit. Set to 0, false, or
 # null to disable the adjustment. Default: 4096.
 #
-# malloc_arena_max caps glibc malloc arenas in the gateway / `hermes serve`
+# malloc_arena_max caps glibc malloc arenas in the gateway / `noone serve`
 # process (Linux/glibc only; child commands keep glibc's default). An explicit
 # MALLOC_ARENA_MAX (exported or in .env) wins. 0, false, or null = glibc default
 # (8 per CPU core). Default: 4.
@@ -83,10 +83,10 @@ model:
   # Inference provider selection:
   #   "auto"         - Auto-detect from credentials (default)
   #   "openrouter"   - OpenRouter (requires: OPENROUTER_API_KEY or OPENAI_API_KEY)
-  #   "nous"         - Nous Portal OAuth (requires: hermes auth add nous)
+  #   "nous"         - Nous Portal OAuth (requires: noone auth add nous)
   #   "nous-api"     - Nous Portal API key (requires: NOUS_API_KEY)
   #   "anthropic"    - Direct Anthropic API (requires: ANTHROPIC_API_KEY)
-  #   "openai-codex" - OpenAI Codex (requires: hermes auth)
+  #   "openai-codex" - OpenAI Codex (requires: noone auth)
   #   "gemini"      - Use Google AI Studio direct (requires: GOOGLE_API_KEY or GEMINI_API_KEY)
   #   "zai"         - Use z.ai / ZhipuAI GLM models (requires: GLM_API_KEY)
   #   "kimi-coding"  - Kimi / Moonshot AI (requires: KIMI_API_KEY)
@@ -450,7 +450,7 @@ terminal:
   # Two process_manage wait/poll calls in a row with no new output on a running background process
   # turn on notify_on_complete for it and tell the agent to stop checking; false = poll as before.
   process_wait_auto_notify: true
-  # A `hermes` / `hermes --tui` session's local tools (terminal, background processes, execute_code)
+  # A `hermes` / `noone --tui` session's local tools (terminal, background processes, execute_code)
   # start with the launching shell's toolchain: PATH, an activated venv and CONDA_* / NODE_* / NVM_* /
   # PYENV_* (plus GOPATH, GOROOT, CARGO_HOME, RUSTUP_HOME, JAVA_HOME), for that session only, when
   # the client runs on the gateway's host (a remote client's session keeps the gateway's toolchain).
@@ -513,7 +513,7 @@ terminal:
 # OPTION 4: Singularity/Apptainer container (the official `singularity` plugin)
 # Commands run in a Singularity container (common in HPC environments)
 # Great for: HPC clusters, shared compute environments
-# Install it first: hermes plugins install singularity
+# Install it first: noone plugins install singularity
 # -----------------------------------------------------------------------------
 # terminal:
 #   backend: "singularity"
@@ -628,7 +628,7 @@ browser:
   inactivity_timeout: 120
 
   # Local Chromium for browser_exec. Empty executable_path = pm's chromium
-  # (`hermes pm install chromium`), the Docker image's build, or a system
+  # (`noone pm install chromium`), the Docker image's build, or a system
   # chromium where pm builds none (Termux). user_data_dir keeps one persistent
   # profile for every local session (empty = a throwaway profile per session).
   # executable_path: ""
@@ -905,10 +905,10 @@ prompt_caching:
 # Provider options:
 #   "auto"       - Best available: OpenRouter → Nous Portal → main endpoint (default)
 #   "openrouter" - Force OpenRouter (requires OPENROUTER_API_KEY)
-#   "nous"       - Force Nous Portal (requires: hermes auth add nous)
+#   "nous"       - Force Nous Portal (requires: noone auth add nous)
 #   "gemini"      - Force Google AI Studio direct (requires: GOOGLE_API_KEY or GEMINI_API_KEY)
 #   "ollama-cloud" - Ollama Cloud (requires: OLLAMA_API_KEY)
-#   "codex"       - Force Codex OAuth (requires: hermes model → Codex).
+#   "codex"       - Force Codex OAuth (requires: noone model → Codex).
 #                  Uses gpt-5.3-codex which supports vision.
 #   "main"       - Use your custom endpoint (OPENAI_BASE_URL + OPENAI_API_KEY).
 #                  Works with OpenAI API, local models, or any OpenAI-compatible
@@ -1259,7 +1259,7 @@ agent:
   # sanitiser silently repairs empty non-final turns on the wire copy; after
   # this many heal passes within a 10-minute session window Hermes logs one
   # ERROR (with session id + heal pattern) and sends a ONE-TIME out-of-band
-  # notice to the user suggesting /debug share or `hermes doctor`. The notice
+  # notice to the user suggesting /debug share or `noone doctor`. The notice
   # goes through the status channel only — conversation context and prompt
   # caching are untouched. Set 0 to disable escalation (per-window WARNINGs
   # still fire). Default 3.
@@ -1372,7 +1372,7 @@ agent:
   #      provider prefix optional). First match wins.
   # Value: reasoning effort level (same options as reasoning_effort, dict form included)
   # Override the global reasoning_effort for that specific model.
-  # NOTE: no `hermes config set` support for this key -- edit YAML directly.
+  # NOTE: no `noone config set` support for this key -- edit YAML directly.
   # reasoning_overrides:
   #   "openrouter/anthropic/claude-opus-4.5": "xhigh"
   #   "openai/gpt-5": "low"
@@ -1398,7 +1398,7 @@ agent:
   # Custom personalities (use with /personality command).
   # Built-ins (helpful, concise, technical, creative, teacher, kawaii, catgirl,
   # pirate, shakespeare, surfer, noir, uwu, philosopher, hype) are always
-  # available on every surface — defined once in hermes_cli/personality.py.
+  # available on every surface — defined once in agent_cli/personality.py.
   # Entries here ADD new personalities or OVERRIDE a built-in by name.
   # The active selection is stored in display.personality (never here, and
   # never in agent.system_prompt — that field is your manual system prompt).
@@ -1429,7 +1429,7 @@ gateway:
 # Toolsets
 # =============================================================================
 # Control which tools the agent has access to.
-# Use `hermes tools` to interactively enable/disable tools per platform.
+# Use `noone tools` to interactively enable/disable tools per platform.
 
 # =============================================================================
 # Platform Toolsets (per-platform tool configuration)
@@ -1441,7 +1441,7 @@ gateway:
 #   - A preset like "hermes-cli" or "hermes-telegram" (curated tool set)
 #   - A list of individual toolsets to compose your own (see list below)
 #
-# Supported platform keys: cli, telegram, discord, whatsapp, slack, qqbot, teams, google_chat
+# Supported platform keys: cli, telegram, discord, whatsapp, slack, teams, google_chat
 #
 # Examples:
 #
@@ -1469,7 +1469,6 @@ gateway:
 #   whatsapp:      hermes-whatsapp       (same as telegram)
 #   slack:         hermes-slack          (same as telegram)
 #   signal:        hermes-signal         (same as telegram)
-#   qqbot:            hermes-qqbot            (same as telegram)
 #   teams:            hermes-teams            (same as telegram)
 #   google_chat:      hermes-google_chat      (same as telegram)
 #
@@ -1480,7 +1479,6 @@ platform_toolsets:
   whatsapp: [hermes-whatsapp]
   slack: [hermes-slack]
   signal: [hermes-signal]
-  qqbot: [hermes-qqbot]
   # Plugin platforms (teams, google_chat, ...) need no row: they default to hermes-<platform> once loaded.
 
 # =============================================================================
@@ -1517,13 +1515,6 @@ platform_toolsets:
 #         priority:
 #           - my_plugin_command
 #           - my-important-skill
-#   matrix:
-#     channel_overrides:
-#       "!exampleTeamRoom:example.org":
-#         # Successful explicit NO_REPLY/[SILENT] finals stay silent, even when addressed.
-#         # Omitted/null/false keeps the current reply policy; failures remain visible.
-#         # Restart the gateway after changing room overrides.
-#         allow_silence: true
 #   slack:
 #     extra:
 #       # Render live tool calls as Slack-native plan/task cards. This explicit
@@ -1561,8 +1552,8 @@ platform_toolsets:
 # ─────────────────────────────────────────────────────────────────────────────
 # Available toolsets (use these names in platform_toolsets or the toolsets list)
 #
-# Run `hermes chat --list-toolsets` to see all toolsets and their tools.
-# Run `hermes chat --list-tools` to see every individual tool with descriptions.
+# Run `noone chat --list-toolsets` to see all toolsets and their tools.
+# Run `noone chat --list-tools` to see every individual tool with descriptions.
 # ─────────────────────────────────────────────────────────────────────────────
 #
 # INDIVIDUAL TOOLSETS (compose your own):
@@ -1613,9 +1604,9 @@ platform_toolsets:
 
 # NOTE: The top-level "toolsets" key is deprecated and ignored.
 # Tool configuration is managed per-platform via platform_toolsets above.
-# Use `hermes tools` to configure interactively, or edit platform_toolsets directly.
+# Use `noone tools` to configure interactively, or edit platform_toolsets directly.
 #
-# CLI override: hermes chat --toolsets terminal,web,file
+# CLI override: noone chat --toolsets terminal,web,file
 
 # =============================================================================
 # MCP (Model Context Protocol) Servers
@@ -1759,7 +1750,7 @@ stt:
   #   local_command/xai/
   #   elevenlabs             -> unsupported; DEBUG log, then continue
   #   plugin providers       -> `prompt` in `**extra`; plugin owns limits
-  # prompt: "Hermes, Teknium, Nous Research, kanban"
+  # prompt: "Hermes, RAWx18, Garudex Labs, kanban"
   local:
     model: "base"              # tiny | base | small | medium | large-v3 | turbo
     # language: ""             # blank = inherit stt.language; set "en", "es", "fr", etc. to force
@@ -1805,7 +1796,7 @@ stt:
 # Text-to-speech. Only the deepinfra block is documented here — the
 # remaining providers (edge, openai, xai, minimax, mistral, gemini,
 # elevenlabs, neutts, kittentts, piper) inherit sensible defaults from
-# DEFAULT_CONFIG in hermes_cli/config.py.
+# DEFAULT_CONFIG in agent_cli/config.py.
 # tts:
 #   provider: "deepinfra"
 #   deepinfra:
@@ -1817,7 +1808,7 @@ stt:
 
 # "Hey Hermes" hands-free wake word (off by default; toggle with /wake).
 # Full engine/provider options inherit from DEFAULT_CONFIG in
-# hermes_cli/config_defaults.py — only capture placement is documented here.
+# agent_cli/config_defaults.py — only capture placement is documented here.
 # wake_word:
 #   enabled: false
 #   capture: "auto"    # auto | local | client
@@ -1890,7 +1881,7 @@ delegation:
                                               # else the parent's route. model_map / profile_routes come from the
                                               # advanced-delegation plugin; a backend that is missing, disabled or
                                               # unavailable fails closed (tool error naming it; /delegation default or
-                                              # `hermes config set delegation.backend default` restores the default).
+                                              # `noone config set delegation.backend default` restores the default).
   # backends:                                 # Each plugin backend's own settings, keyed by its backend name.
   #   model_map:                              # backend: model_map (advanced-delegation)
   #     options:
@@ -2174,7 +2165,7 @@ display:
 # stdout the script may return JSON that either blocks the tool call or
 # injects context into the next LLM call.
 #
-# Valid events (mirror hermes_cli.plugins.VALID_HOOKS):
+# Valid events (mirror agent_cli.plugins.VALID_HOOKS):
 #   pre_tool_call, post_tool_call, pre_llm_call, post_llm_call,
 #   pre_api_request, post_api_request, on_session_start, on_session_end,
 #   on_session_finalize, on_session_reset, subagent_stop
@@ -2243,12 +2234,12 @@ auth:
   # no usable login of its own. Their refresh tokens are single-use, so two programs on one login
   # can log each other out; set false to make Hermes use only its own logins.
   adopt_external_logins: true
-  # How `hermes auth add openai-codex` / `hermes model` sign in to OpenAI Codex.
+  # How `noone auth add openai-codex` / `noone model` sign in to OpenAI Codex.
   #   device_code (default) — open a URL and enter a code.
   #   browser — authorization-code + PKCE on http://localhost:1455/auth/callback (the redirect
   #             OpenAI registered for the Codex client) for organizations that disable the
   #             device-code grant; falls back to device code when that port is busy.
-  # `hermes auth add openai-codex --browser` opts in for a single login without changing this.
+  # `noone auth add openai-codex --browser` opts in for a single login without changing this.
   codex_login_flow: device_code
 
 
@@ -2256,10 +2247,10 @@ auth:
 # Update Behavior
 # =============================================================================
 updates:
-  # Disable passive CLI/banner update checks with `hermes config set updates.check false`.
-  # Explicit `hermes update --check` and `hermes update` remain available.
+  # Disable passive CLI/banner update checks with `noone config set updates.check false`.
+  # Explicit `noone update --check` and `noone update` remain available.
   check: true
-  # Backup taken before every `hermes update`:
+  # Backup taken before every `noone update`:
   #   quick - snapshot of small critical state (pairing, cron jobs, config.yaml,
   #           .env, auth.json, profile databases) in state-snapshots/ (default)
   #   full  - quick plus a zip of HERMES_HOME in backups/; slow on large homes
@@ -2281,7 +2272,7 @@ updates:
 # =============================================================================
 # Web Dashboard
 # =============================================================================
-# OAuth gate configuration for `hermes dashboard --host <non-loopback>`.
+# OAuth gate configuration for `noone dashboard --host <non-loopback>`.
 # The bundled Nous Portal plugin reads these on startup; settings here are
 # the canonical surface. Each can be overridden by an environment variable:
 #
@@ -2377,7 +2368,7 @@ updates:
 #     are skipped with a startup warning (never a silent clobber)
 #   - a source's override_existing lets it beat .env/shell values, but
 #     never another secret source's claim
-# Docs: https://hermes-agent.nousresearch.com/docs/user-guide/secrets/
+# Docs: https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/secrets/index.md
 #
 # secrets:
 #   # Optional explicit ordering of enabled sources.

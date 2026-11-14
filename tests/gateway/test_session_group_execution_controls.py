@@ -6,8 +6,8 @@ from types import SimpleNamespace
 import pytest
 
 from gateway.session_controls import AuthorityConnection
-from hermes_state import SessionDB
-from hermes_state_runtime import RuntimeStoreError
+from agent_state import SessionDB
+from agent_state_runtime import RuntimeStoreError
 
 
 class RoomService:
@@ -169,7 +169,7 @@ def test_send_refusals_say_only_a_refusal_before_commit_admitted_nothing(tmp_pat
     if preparation fails; an event-id conflict stays uncertain."""
     import threading
     from gateway import hosted_rooms
-    from tui_gateway.hosted_room_service import HostedRoomService
+    from agent_backend.hosted_room_service import HostedRoomService
 
     class OwnedRooms(HostedRoomService):
         def authorize_room(self, actor_subject, room_id, *, create=False, conn=None):

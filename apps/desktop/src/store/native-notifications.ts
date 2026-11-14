@@ -1,7 +1,7 @@
 import { atom } from 'nanostores'
 
 import { translateNow } from '@/i18n'
-import { type HermesOpenTarget, resolveHermesOpenPath } from '@/lib/hermes-open-target'
+import { type AgentOpenTarget, resolveHermesOpenPath } from '@/lib/agent-open-target'
 import { persistString, storedString } from '@/lib/storage'
 
 import { recordFeatureToggle } from './desktop-metrics'
@@ -19,7 +19,7 @@ import { isSessionGone, isSessionGoneForBackgroundPolling, markSessionGone } fro
 import { $activeSessionId, ownerLookupSessionRows, sessionMatchesStoredId } from './session'
 import { storedSessionIdForRuntimeId } from './session-states'
 
-export type { HermesOpenTarget }
+export type { AgentOpenTarget }
 
 // Native OS notifications (Electron `Notification`), separate from the in-app
 // toast feed in `notifications.ts`. Each kind toggles independently.
@@ -269,7 +269,7 @@ export interface PluginNotificationAction {
   id: string
   label: string
   /** Navigate here on button press (path or `hermes://index-network/intent/1`). */
-  activate?: HermesOpenTarget
+  activate?: AgentOpenTarget
   /** Renderer callback — only `id` crosses IPC; this stays in-process. */
   onAction?: () => void
 }
@@ -285,7 +285,7 @@ export interface PluginNativeNotificationInput {
    * (`hermes://index-network/intent/1`), a hash path (`/index-network/intent/1`),
    * or `{ path, params }` — all resolve through the same helper as OS deep links.
    */
-  activate?: HermesOpenTarget
+  activate?: AgentOpenTarget
   /** Extra work on body click (runs in addition to `activate` navigation). */
   onActivate?: () => void
   actions?: PluginNotificationAction[]

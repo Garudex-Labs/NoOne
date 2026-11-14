@@ -1,8 +1,8 @@
-import type { FreeTierChallengePayload, FreeTierChallengeResultParams } from '@hermes/shared'
+import type { FreeTierChallengePayload, FreeTierChallengeResultParams } from '@noone/shared'
 
 /**
  * The free tier's browser challenge, renderer half: a relay. The backend
- * (`hermes_cli/anon_challenge.py`) announces a challenge and polls the account
+ * (`agent_cli/anon_challenge.py`) announces a challenge and polls the account
  * service for the result itself; the Electron main process
  * (`electron/challenge-window.ts`) loads the page hidden and decides when to
  * reveal it. This relays each presentation attempt and reports how the window

@@ -1,6 +1,6 @@
 """xAI (Grok) provider profile."""
 
-from hermes_cli.version_info import hermes_user_agent
+from agent_cli.version_info import hermes_user_agent
 from providers import register_provider
 from providers.base import LazyHeaders, ProviderProfile
 

@@ -1,7 +1,7 @@
 import '@/store/session-states'
 
 import { EditorView } from '@codemirror/view'
-import { LOCAL_CONNECTION_ID } from '@hermes/shared'
+import { LOCAL_CONNECTION_ID } from '@noone/shared'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { atom } from 'nanostores'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -27,7 +27,7 @@ vi.mock('@/components/chat/shiki-highlighter', () => ({
 }))
 
 // WA-5: a Docker agent's /workspace is its own session's sandbox, so a Webapp file request names
-// the session it belongs to. The gateway half is tests/hermes_cli/test_web_server_fs_session_workspace.py.
+// the session it belongs to. The gateway half is tests/agent_cli/test_web_server_fs_session_workspace.py.
 const OWNER = { connectionId: LOCAL_CONNECTION_ID, profile: 'default' }
 const CLIP = '/workspace/clip.mp4'
 const win = window

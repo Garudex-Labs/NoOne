@@ -1,4 +1,4 @@
-import { JsonRpcGatewayError } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@noone/shared'
 import { beforeEach, expect, test, vi } from 'vitest'
 
 import { en } from '@/i18n/en'

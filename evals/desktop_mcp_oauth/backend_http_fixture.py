@@ -182,9 +182,9 @@ def run_probe(repo, receipt):
     sys.path.insert(0, str(repo))
     logging.disable(logging.CRITICAL)
     import httpx
-    from hermes_constants import set_hermes_home_override, reset_hermes_home_override
-    from tui_gateway import mcp_oauth_sessions as sessions
-    from tools.mcp_oauth import HermesTokenStorage
+    from agent_constants import set_agent_home_override, reset_agent_home_override
+    from agent_backend import mcp_oauth_sessions as sessions
+    from tools.mcp_oauth import AgentTokenStorage
 
     owner = Path(os.environ["HERMES_HOME"])
     other = owner.parent / "other-profile"
@@ -237,7 +237,7 @@ def run_probe(repo, receipt):
         check("disk_token_matches_provider", stored["access_token"] in provider.tokens)
         check("disk_refresh_token_and_absolute_expiry", bool(stored.get("refresh_token")) and stored["expires_at"] > time.time())
         check("token_file_private", token_path.stat().st_mode & 0o777 == 0o600)
-        reloaded = asyncio.run(HermesTokenStorage("positive", hermes_home=owner).get_tokens())
+        reloaded = asyncio.run(AgentTokenStorage("positive", hermes_home=owner).get_tokens())
         check("fresh_storage_reload", reloaded.access_token in provider.tokens)
         check("wrong_profile_has_no_token", not (other / "mcp-tokens" / "positive.json").exists())
         check("config_saved_to_owner", "positive" in (owner / "config.yaml").read_text(encoding="utf-8"))
@@ -269,12 +269,12 @@ def run_probe(repo, receipt):
         # Even possession of valid session/state cannot cross the resolved home.
         flow = begin("owner_boundary")
         browser.get(flow["auth_url"], follow_redirects=True)
-        override = set_hermes_home_override(other)
+        override = set_agent_home_override(other)
         try:
             foreign_poll = sessions.poll_flow(flow["session_id"], "owner_boundary")
             foreign_callback = sessions.deliver_callback_flow(flow["session_id"], "owner_boundary", **callback.callback)
         finally:
-            reset_hermes_home_override(override)
+            reset_agent_home_override(override)
         receipt["ownership_boundary"] = {
             "cancel_owner_enforced": checks["wrong_owner_cancel_rejected"],
             "cross_profile_poll_rejected": foreign_poll["status"] == "error",
@@ -305,7 +305,7 @@ def main():
     if args.cold_probe:
         sys.path.insert(0, str(repo))
         logging.disable(logging.CRITICAL)
-        from hermes_cli.mcp_config import _get_mcp_servers, _probe_single_server
+        from agent_cli.mcp_config import _get_mcp_servers, _probe_single_server
         from tools.mcp_oauth import suppress_interactive_oauth
         with suppress_interactive_oauth():
             tools = _probe_single_server("positive", _get_mcp_servers()["positive"])

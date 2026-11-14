@@ -1,8 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 
 import { StatusRow } from '@/components/chat/status-row'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 import { $billingBlock, billingCtaLabel, clearBillingBlock, runBillingRecovery } from '@/store/billing-block'
 import { recordFriction } from '@/store/desktop-metrics'
@@ -36,7 +36,7 @@ export function BillingBanner({ sessionId }: { sessionId: null | string }) {
 
   return (
     <StatusRow
-      leading={<Codicon aria-hidden className="text-destructive/85" name="credit-card" size="0.8rem" />}
+      leading={<AppIcon aria-hidden className="text-destructive/85" name="credit-card" size="0.8rem" />}
       trailing={
         <>
           <Button
@@ -59,7 +59,7 @@ export function BillingBanner({ sessionId }: { sessionId: null | string }) {
             type="button"
             variant="ghost"
           >
-            <Codicon name="close" size="0.75rem" />
+            <AppIcon name="close" size="0.75rem" />
           </Button>
         </>
       }

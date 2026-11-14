@@ -1,10 +1,10 @@
+import { Check, CircleIcon, Loader2 } from '@noone/ui/icons'
 import type { ReactNode } from 'react'
 
 import { SCAFFOLD_META_CLASS, ScaffoldRow } from '@/components/chat/scaffold-row'
 import { WIDGET_SHELL_CLASS } from '@/components/chat/widget-shell'
 import { Button } from '@/components/ui/button'
 import { ConnectorLogo, type ConnectorLogoSubject } from '@/components/ui/connector-logo'
-import { Check, CircleIcon, Loader2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 /**

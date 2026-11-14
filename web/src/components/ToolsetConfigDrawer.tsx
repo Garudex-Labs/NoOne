@@ -1,20 +1,21 @@
+import { Check, ExternalLink, Loader2, Terminal, X } from "@noone/ui/icons";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
+import { Badge } from "@nous-research/ui/ui/components/badge";
+import { Button } from "@nous-research/ui/ui/components/button";
+import { Input } from "@nous-research/ui/ui/components/input";
+import { Label } from "@nous-research/ui/ui/components/label";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Switch } from "@nous-research/ui/ui/components/switch";
+import { Toast } from "@nous-research/ui/ui/components/toast";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, ExternalLink, Loader2, Terminal, X } from "lucide-react";
+
 import { api } from "@/lib/api";
 import type {
   ToolsetConfig,
   ToolsetInfo,
   ToolsetProvider,
 } from "@/lib/api";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Label } from "@nous-research/ui/ui/components/label";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Switch } from "@nous-research/ui/ui/components/switch";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { Toast } from "@nous-research/ui/ui/components/toast";
 import { cn, themedBody } from "@/lib/utils";
 
 interface Props {
@@ -30,7 +31,7 @@ interface Props {
 
 /**
  * Full configuration surface for a single toolset's backends — the dashboard
- * equivalent of selecting a toolset in the `hermes tools` curses UI: toggle
+ * equivalent of selecting a toolset in the `noone tools` curses UI: toggle
  * the toolset on/off, pick a provider, enter API keys, and run a provider's
  * post-setup install hook (npm/pip/binary) with a live log tail.
  */

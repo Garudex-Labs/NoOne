@@ -1,8 +1,9 @@
 'use client'
 
+import { AlertTriangle } from '@noone/ui/icons'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useI18n } from '@/i18n'
-import { AlertTriangle } from '@/lib/icons'
 
 /** Heads a card whose request never reached this window: nothing on it can
  *  answer, so say so and point at the way out instead of a silent wait. */

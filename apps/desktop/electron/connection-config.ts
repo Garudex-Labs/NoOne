@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 /**
  * connection-config.ts
  *
@@ -21,7 +22,7 @@
 // Bare + prefixed variants of the session cookies the gateway may set,
 // depending on its deploy shape (HTTPS direct → __Host-, behind a path prefix
 // → __Secure-, loopback HTTP → bare). Mirrors
-// hermes_cli/dashboard_auth/cookies.py.
+// agent_cli/dashboard_auth/cookies.py.
 //
 // Two cookies are in play (see that module):
 //   - hermes_session_at: the OAuth access token. Short-lived (~15 min); its
@@ -48,7 +49,7 @@ function isCookieVariant(name: unknown, variants: string[]): boolean {
   return typeof name === 'string' && (variants.includes(name) || variants.includes(name.replace(GATEWAY_COOKIE_SUFFIX, '')))
 }
 
-// Keep this aligned with hermes_cli.profiles.validate_profile_name(). `default`
+// Keep this aligned with agent_cli.profiles.validate_profile_name(). `default`
 // is the built-in root alias; these names cannot be created as profiles.
 const RESERVED_REMOTE_PROFILES = new Set(['hermes', 'test', 'tmp', 'root', 'sudo'])
 
@@ -136,7 +137,7 @@ export function gatewayTicketTransportMessage(error: unknown): string {
 
   if (['ETIMEDOUT', 'ETIMEOUT', 'ENETUNREACH', 'EHOSTUNREACH', 'EAI_AGAIN', 'ENOTFOUND'].includes(code)) {
     return (
-      'Could not reach the remote Hermes gateway while refreshing its WebSocket ticket: ' +
+      appText('Could not reach the remote {app_name} gateway while refreshing its WebSocket ticket: ') +
       'the connection timed out or the host could not be resolved. ' +
       'Check your network/VPN path and the gateway URL, then reconnect.'
     )
@@ -144,13 +145,13 @@ export function gatewayTicketTransportMessage(error: unknown): string {
 
   if (code === 'ECONNREFUSED') {
     return (
-      'Could not reach the remote Hermes gateway while refreshing its WebSocket ticket: ' +
+      appText('Could not reach the remote {app_name} gateway while refreshing its WebSocket ticket: ') +
       'the connection was refused. The gateway process is likely down or listening on another port. ' +
       'Start the gateway (or fix its URL), then reconnect.'
     )
   }
 
-  return 'Could not reach the remote Hermes gateway while refreshing its WebSocket ticket. Try reconnecting.'
+  return appText('Could not reach the remote {app_name} gateway while refreshing its WebSocket ticket. Try reconnecting.')
 }
 
 function gatewayTicketFailure(error, authMessage, transportMessage) {
@@ -843,7 +844,7 @@ export function unscopableMutatingRequest(opts: ProfileRouteOptions = {}): boole
  *     backend, with `?profile=` when the handler reads the query (handlers that
  *     name their target in the path or `body.profile` get no query).
  *  6. Every other LOCAL profile also shares the one host backend
- *     (multiplex-only: one `hermes serve` per HOST). The descriptor carries
+ *     (multiplex-only: one `noone serve` per HOST). The descriptor carries
  *     `sharedPrimary: true`, and the renderer honours it on BOTH request paths
  *     (`requestGatewayForProfile` and the session-owner
  *     `requestGatewayForAgent` family): the profile's calls ride the primary
@@ -875,7 +876,7 @@ function resolveProfileBackendRoute(profile, opts: ProfileRouteOptions = {}): Pr
       return { backend: 'primary', descriptorProfile: scopedProfile, scopePath: true }
     }
 
-    // The same holds for the LOCAL host backend: with one `hermes serve` per
+    // The same holds for the LOCAL host backend: with one `noone serve` per
     // host the app attaches to whatever backend is running, and that process
     // was launched under some OTHER profile's home whenever another app (or an
     // earlier boot) registered it. A bare request the server can scope then
@@ -922,7 +923,7 @@ function resolveProfileBackendRoute(profile, opts: ProfileRouteOptions = {}): Pr
 
   // 6. Multiplex-only: every other LOCAL profile shares the one host backend
   //    too, carrying `?profile=` / the `profile` RPC param instead of getting
-  //    a `hermes serve` child of its own — UNLESS this request mutates state
+  //    a `noone serve` child of its own — UNLESS this request mutates state
   //    the server cannot scope, in which case the pooled backend's own
   //    HERMES_HOME is the only scope left and it keeps one.
   if (sharesHostBackend({ isolated: opts.isolatedBackend, unscopableRequest: unscopableMutatingRequest(opts) })) {

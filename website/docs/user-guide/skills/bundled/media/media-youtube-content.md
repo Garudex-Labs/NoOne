@@ -1,49 +1,57 @@
 ---
 title: "Youtube Content — YouTube transcripts to summaries, threads, blogs"
-sidebar_label: "Youtube Content"
+sidebarTitle: "Youtube Content"
 description: "YouTube transcripts to summaries, threads, blogs"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Youtube Content
+# Youtube Content {#youtube-content}
 
 YouTube transcripts to summaries, threads, blogs.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/media/youtube-content` |
 | Version | `1.0.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `YouTube`, `Video`, `Transcripts`, `Media` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# YouTube Content Tool
+<div className="doc-callout-title">
 
-## When to use
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# YouTube Content Tool {#youtube-content-tool}
+
+## When to use {#when-to-use}
 
 Use when the user shares a YouTube URL or video link, asks to summarize a video, requests a transcript, or wants to extract and reformat content from any YouTube video. Transforms transcripts into structured content (chapters, summaries, threads, blog posts).
 
 Extract transcripts from YouTube videos and convert them into useful formats.
 
-## Setup
+## Setup {#setup}
 
-Use `terminal` with the Python from a PM-prepared Hermes source checkout. The
+Use `terminal` with the Python from a PM-prepared {{app-name}} source checkout. The
 `youtube` extra declares the helper's dependency; do not install packages into
-Hermes with raw pip or project-discovering `uv run`.
+{{app-name}} with raw pip or project-discovering `uv run`.
 
 From that checkout, first follow the isolated development-home setup in
-[Package Management](https://hermes-agent.nousresearch.com/docs/reference/package-management#developer-workflow),
+[Package Management](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/package-management.md#developer-workflow),
 then prepare the extra and reactivate before running the helper:
 
 ```bash
@@ -58,7 +66,7 @@ runs on a different host or in a sandbox, use an explicitly isolated helper
 environment there, not the agent's production environment. Run every command
 below with the interpreter whose import check succeeded.
 
-## Helper Script
+## Helper Script {#helper-script}
 
 `SKILL_DIR` is the directory containing this SKILL.md file. The script accepts any standard YouTube URL format, short links (youtu.be), shorts, embeds, live links, or a raw 11-character video ID.
 
@@ -76,7 +84,7 @@ python SKILL_DIR/scripts/fetch_transcript.py "URL" --timestamps
 python SKILL_DIR/scripts/fetch_transcript.py "URL" --language tr,en
 ```
 
-## Output Formats
+## Output Formats {#output-formats}
 
 After fetching the transcript, format it based on what the user asks for:
 
@@ -87,7 +95,7 @@ After fetching the transcript, format it based on what the user asks for:
 - **Blog post**: Full article with title, sections, and key takeaways
 - **Quotes**: Notable quotes with timestamps
 
-### Example — Chapters Output
+### Example — Chapters Output {#example--chapters-output}
 
 ```
 00:00 Introduction — host opens with the problem statement
@@ -97,7 +105,7 @@ After fetching the transcript, format it based on what the user asks for:
 31:55 Q&A — audience questions on scalability and next steps
 ```
 
-## Workflow
+## Workflow {#workflow}
 
 1. **Fetch** the transcript using `terminal` and the prepared Python with `--text-only --timestamps`.
 2. **Validate**: confirm the output is non-empty and in the expected language. If empty, retry without `--language` to get any available transcript. If still empty, tell the user the video likely has transcripts disabled.
@@ -105,7 +113,7 @@ After fetching the transcript, format it based on what the user asks for:
 4. **Transform** into the requested output format. If the user did not specify a format, default to a summary.
 5. **Verify**: re-read the transformed output to check for coherence, correct timestamps, and completeness before presenting.
 
-## Error Handling
+## Error Handling {#error-handling}
 
 - **Transcript disabled**: tell the user; suggest they check if subtitles are available on the video page.
 - **Private/unavailable video**: relay the error and ask the user to verify the URL.

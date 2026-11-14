@@ -1,7 +1,7 @@
 """Bounded replay context for committed authority changes, never election proof.
 
-Reused from the recovery prerequisite; lineage mechanics build on Teknium's
-#99047, authored commit 6af548a1f73f26bca54dd2e23f0d278c37f3ba6c.
+Reused from the recovery prerequisite; lineage mechanics build on
+#99047, commit 6af548a1f73f26bca54dd2e23f0d278c37f3ba6c.
 The passive wire contract applies stricter bounds in hosted_room_passive_lineage.
 """
 

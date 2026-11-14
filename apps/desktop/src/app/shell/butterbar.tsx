@@ -1,10 +1,10 @@
 import './butterbar.css'
 
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { type CSSProperties, useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 import { $butterbarItems, type ButterbarItem, dismissButterbar, isButterbarCloseable } from '@/store/butterbar'
 
@@ -114,7 +114,7 @@ function ButterbarClose({ item }: { item: ButterbarItem }) {
       type="button"
       variant="ghost"
     >
-      <Codicon name="close" size="0.75rem" />
+      <AppIcon name="close" size="0.75rem" />
     </Button>
   )
 }

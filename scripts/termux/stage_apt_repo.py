@@ -269,7 +269,7 @@ def stage(
                 "Package": fields["Package"],
                 "Version": fields["Version"],
                 "Architecture": arch,
-                "Maintainer": fields.get("Maintainer", "Hermes Agent <noreply@nousresearch.com>"),
+                "Maintainer": fields.get("Maintainer", "RAWx18 <rawx18.dev@gmail.com>"),
                 "Installed-Size": fields.get("Installed-Size", "0"),
                 "Description": fields.get("Description", "Hermes Agent"),
                 "Filename": filename,

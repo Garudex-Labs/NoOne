@@ -1,7 +1,7 @@
 """A gateway-owned room says which tool a working member is in.
 
 The member's turn runs on the gateway's canonical session path, whose frames never pass through
-tui_gateway's room projection: the member authority's ``info`` reports its live tool, and the room
+agent_backend's room projection: the member authority's ``info`` reports its live tool, and the room
 driver's existing info poll carries it into ``groups.state`` ``member_activity``.
 """
 
@@ -17,7 +17,7 @@ from tests.waiting import wait_until
 def test_member_info_reports_the_running_executions_tool_and_last_frame(hosted_owner):
     from gateway.hosted_room_driver import TaskIdentity
     from gateway.session_hosted_rpc import HostedRoomAuthorityRPC
-    from hermes_state_runtime import claim_session_input
+    from agent_state_runtime import claim_session_input
     authority, loop, principal, _agent = hosted_owner
     rpc = HostedRoomAuthorityRPC(authority, loop, room_id='room', member_id='scout', profile='default',
                                  principal=principal, authorize=lambda *args: True)
@@ -79,7 +79,7 @@ class _ToolRPC:
 
 
 def test_groups_state_names_the_tool_a_member_transport_reports(tmp_path: Path):
-    from tui_gateway.hosted_room_service import HostedRoomService
+    from agent_backend.hosted_room_service import HostedRoomService
     server = SimpleNamespace(_methods={}, _sessions={}, _sessions_lock=threading.Lock())
     service = HostedRoomService(server, db_path=tmp_path / "state.db")
     service.rpc = service.runtime.rpc = _ToolRPC()
@@ -100,7 +100,7 @@ def test_groups_state_names_the_tool_a_member_transport_reports(tmp_path: Path):
 
         service.rpc.on_terminal({"status": "settled", "text": "Build logs are clean."})
         wait_until(lambda: scout_activity() == {}, timeout=5)
-        from tui_gateway.hosted_room_member_activity import task_progress
+        from agent_backend.hosted_room_member_activity import task_progress
         assert task_progress("room-1", service.rpc.task.task_id, 1) == {}
     finally:
         service.stop(timeout=5)

@@ -1,25 +1,32 @@
 ---
-sidebar_position: 8
-sidebar_label: "SMS (Twilio)"
+sidebarTitle: "SMS (Twilio)"
 title: "SMS (Twilio)"
-description: "Set up Hermes Agent as an SMS chatbot via Twilio"
+description: "Set up the agent as an SMS chatbot via Twilio"
 ---
 
-# SMS Setup (Twilio)
+# SMS Setup (Twilio) {#sms-setup-twilio}
 
 Python dependency commands on this page use a
 [PM-prepared source checkout](../../reference/package-management.md#developer-workflow).
-After a dependency change, reactivate the checkout and restart Hermes.
+After a dependency change, reactivate the checkout and restart {{app-name}}.
 
-Hermes connects to SMS through the [Twilio](https://www.twilio.com/) API. People text your Twilio phone number and get AI responses back — same conversational experience as Telegram or Discord, but over standard text messages.
+{{app-name}} connects to SMS through the [Twilio](https://www.twilio.com/) API. People text your Twilio phone number and get AI responses back — same conversational experience as Telegram or Discord, but over standard text messages.
 
-:::info Shared Credentials
+<Info>
+
+<div className="doc-callout-title">
+
+Shared Credentials
+
+</div>
+
 The SMS gateway shares credentials with the optional [telephony skill](../../reference/skills-catalog.md). If you've already set up Twilio for voice calls or one-off SMS, the gateway works with the same `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER`.
-:::
+
+</Info>
 
 ---
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **Twilio account** — [Sign up at twilio.com](https://www.twilio.com/try-twilio) (free trial available)
 - **A Twilio phone number** with SMS capability
@@ -28,7 +35,7 @@ The SMS gateway shares credentials with the optional [telephony skill](../../ref
 
 ---
 
-## Step 1: Get Your Twilio Credentials
+## Step 1: Get Your Twilio Credentials {#step-1-get-your-twilio-credentials}
 
 1. Go to the [Twilio Console](https://console.twilio.com/)
 2. Copy your **Account SID** and **Auth Token** from the dashboard
@@ -36,17 +43,17 @@ The SMS gateway shares credentials with the optional [telephony skill](../../ref
 
 ---
 
-## Step 2: Configure Hermes
+## Step 2: Configure {{app-name}} {#step-2-configure-hermes}
 
-### Interactive setup (recommended)
+### Interactive setup (recommended) {#interactive-setup-recommended}
 
 ```bash
-hermes gateway setup
+noone gateway setup
 ```
 
 Select **SMS (Twilio)** from the platform list. The wizard will prompt for your credentials.
 
-### Manual setup
+### Manual setup {#manual-setup}
 
 Add to `~/.hermes/.env`:
 
@@ -64,7 +71,7 @@ SMS_HOME_CHANNEL=+15559876543
 
 ---
 
-## Step 3: Configure Twilio Webhook
+## Step 3: Configure Twilio Webhook {#step-3-configure-twilio-webhook}
 
 Twilio needs to know where to send incoming messages. In the [Twilio Console](https://console.twilio.com/):
 
@@ -74,8 +81,15 @@ Twilio needs to know where to send incoming messages. In the [Twilio Console](ht
    - **Webhook**: `https://your-server:8080/webhooks/twilio`
    - **HTTP Method**: `POST`
 
-:::tip Exposing Your Webhook
-If you're running Hermes locally, use a tunnel to expose the webhook:
+<Tip>
+
+<div className="doc-callout-title">
+
+Exposing Your Webhook
+
+</div>
+
+If you're running {{app-name}} locally, use a tunnel to expose the webhook:
 
 ```bash
 # Using cloudflared
@@ -86,7 +100,8 @@ ngrok http 8080
 ```
 
 Set the resulting public URL as your Twilio webhook.
-:::
+
+</Tip>
 
 **Set `SMS_WEBHOOK_URL` to the same URL you configured in Twilio.** This is required for Twilio signature validation — the adapter will refuse to start without it:
 
@@ -103,10 +118,10 @@ SMS_WEBHOOK_PORT=3000
 
 ---
 
-## Step 4: Start the Gateway
+## Step 4: Start the Gateway {#step-4-start-the-gateway}
 
 ```bash
-hermes gateway
+noone gateway
 ```
 
 You should see:
@@ -117,11 +132,11 @@ You should see:
 
 If you see `Refusing to start: SMS_WEBHOOK_URL is required`, set `SMS_WEBHOOK_URL` to the public URL configured in your Twilio Console (see Step 3).
 
-Text your Twilio number — Hermes will respond via SMS.
+Text your Twilio number — {{app-name}} will respond via SMS.
 
 ---
 
-## Environment Variables
+## Environment Variables {#environment-variables}
 
 | Variable | Required | Description |
 |----------|----------|-------------|
@@ -139,7 +154,7 @@ Text your Twilio number — Hermes will respond via SMS.
 
 ---
 
-## SMS-Specific Behavior
+## SMS-Specific Behavior {#sms-specific-behavior}
 
 - **Plain text only** — Markdown is automatically stripped since SMS renders it as literal characters
 - **1600 character limit** — Longer responses are split across multiple messages at natural boundaries (newlines, then spaces)
@@ -148,11 +163,11 @@ Text your Twilio number — Hermes will respond via SMS.
 
 ---
 
-## Security
+## Security {#security}
 
-### Webhook signature validation
+### Webhook signature validation {#webhook-signature-validation}
 
-Hermes validates that inbound webhooks genuinely originate from Twilio by verifying the `X-Twilio-Signature` header (HMAC-SHA1). This prevents attackers from injecting forged messages.
+{{app-name}} validates that inbound webhooks genuinely originate from Twilio by verifying the `X-Twilio-Signature` header (HMAC-SHA1). This prevents attackers from injecting forged messages.
 
 **`SMS_WEBHOOK_URL` is required.** Set it to the public URL configured in your Twilio Console. The adapter will refuse to start without it.
 
@@ -163,7 +178,7 @@ For local development without a public URL, you can disable validation:
 SMS_INSECURE_NO_SIGNATURE=true
 ```
 
-### User allowlists
+### User allowlists {#user-allowlists}
 
 **The gateway denies all users by default.** Configure an allowlist:
 
@@ -175,28 +190,36 @@ SMS_ALLOWED_USERS=+15559876543,+15551112222
 SMS_ALLOW_ALL_USERS=true
 ```
 
-:::warning
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
 SMS has no built-in encryption. Don't use SMS for sensitive operations unless you understand the security implications. For sensitive use cases, prefer Signal or Telegram.
-:::
+
+</Warning>
 
 ---
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
-### Messages not arriving
+### Messages not arriving {#messages-not-arriving}
 
 1. Check your Twilio webhook URL is correct and publicly accessible
 2. Verify `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` are correct
 3. Check the Twilio Console → **Monitor → Logs → Messaging** for delivery errors
 4. Ensure your phone number is in `SMS_ALLOWED_USERS` (or `SMS_ALLOW_ALL_USERS=true`)
 
-### Replies not sending
+### Replies not sending {#replies-not-sending}
 
 1. Check `TWILIO_PHONE_NUMBER` is set correctly (E.164 format with `+`)
 2. Verify your Twilio account has SMS-capable numbers
-3. Check Hermes gateway logs for Twilio API errors
+3. Check {{app-name}} gateway logs for Twilio API errors
 
-### Webhook port conflicts
+### Webhook port conflicts {#webhook-port-conflicts}
 
 If port 8080 is already in use, change it:
 

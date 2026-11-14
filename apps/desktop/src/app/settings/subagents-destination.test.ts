@@ -1,6 +1,5 @@
+import { Box } from '@noone/ui/icons'
 import { describe, expect, it } from 'vitest'
-
-import { Box } from '@/lib/icons'
 
 import { CONFIG_SUBPAGES, configSubpageForField } from './config-subpages'
 import { sectionFieldEntries } from './helpers'

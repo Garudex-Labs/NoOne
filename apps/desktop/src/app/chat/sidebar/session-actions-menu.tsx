@@ -1,7 +1,10 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { ArchiveOff } from '@noone/ui/icons'
 import type * as React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
+import { renameSession } from '@/agent-client'
 import { openSession } from '@/app/open-session'
 import {
   closeAllTreeTabs,
@@ -18,16 +21,13 @@ import {
   renderActionItem
 } from '@/components/ui/actions-menu'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ColorSwatches } from '@/components/ui/color-swatches'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { renameSession } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { ArchiveOff } from '@/lib/icons'
 import { isSubmitEnter } from '@/lib/ime'
 import { PROFILE_SWATCHES } from '@/lib/profile-color'
 import { exportSession } from '@/lib/session-export'
@@ -557,7 +557,7 @@ function useSessionActions({
       {identityItems.map(item => renderActionItem(kit, item))}
       <kit.Sub>
         <kit.SubTrigger disabled={!sessionId}>
-          <Codicon name="symbol-color" size="0.875rem" />
+          <AppIcon name="symbol-color" size="0.875rem" />
           <span>{t.sidebar.projects.menuAppearance}</span>
         </kit.SubTrigger>
         <kit.SubContent className="p-2">
@@ -578,7 +578,7 @@ function useSessionActions({
       {workItems.map(item => renderActionItem(kit, item))}
       <kit.Sub>
         <kit.SubTrigger disabled={!sessionId}>
-          <Codicon name="folder" size="0.875rem" />
+          <AppIcon name="folder" size="0.875rem" />
           <span>{t.sidebar.projects.moveToProject}</span>
         </kit.SubTrigger>
         <kit.SubContent>

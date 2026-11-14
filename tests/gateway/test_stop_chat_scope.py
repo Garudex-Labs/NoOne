@@ -242,14 +242,14 @@ async def test_pending_sentinel_is_never_interrupted():
 
 @pytest.mark.asyncio
 async def test_stop_reaches_a_chat_whose_id_contains_a_colon():
-    # Matrix ids carry ":" (`!room:example.org`), so the chat id must be matched as text after
+    # Opaque chat ids can carry ":" (`room:tenant`), so the chat id must be matched as text after
     # the fixed-shape head — slot-splitting the key would silently disable both fallbacks.
-    room = SessionSource(platform=Platform.MATRIX, chat_type="channel", chat_id="!room:example.org",
-                         thread_id="$t1", user_id="@alice:example.org")
+    room = SessionSource(platform=Platform.MATTERMOST, chat_type="channel", chat_id="room:tenant",
+                         thread_id="thread-1", user_id="alice")
     running_key = build_session_key(room)
-    stop_source = SessionSource(platform=Platform.MATRIX, chat_type="thread",
-                                chat_id="!room:example.org", thread_id="$t1",
-                                user_id="@alice:example.org")
+    stop_source = SessionSource(platform=Platform.MATTERMOST, chat_type="thread",
+                                chat_id="room:tenant", thread_id="thread-1",
+                                user_id="alice")
     assert build_session_key(stop_source) != running_key
 
     interrupted, result = await _stop(stop_source, running_key)

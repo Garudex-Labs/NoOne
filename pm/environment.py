@@ -339,8 +339,7 @@ class PythonEnvironment:
         env.update(UV_PYTHON=native(self.python), UV_PROJECT_ENVIRONMENT=native(self.destination),
                    UV_CACHE_DIR=native(self.cache), UV_PYTHON_DOWNLOADS="never")
         # CMake 4 removed compatibility with cmake_minimum_required(VERSION < 3.5),
-        # so an sdist carrying an old minimum dies at CONFIGURE time: python-olm
-        # (mautrix[encryption], the matrix extra) vendors libolm declaring 3.4.
+        # so an sdist carrying an old minimum dies at CONFIGURE time.
         # Every source build uv drives inherits this env; older CMake ignores
         # the variable, and a value the caller or user already set wins.
         env.setdefault("CMAKE_POLICY_VERSION_MINIMUM", "3.5")
@@ -520,7 +519,7 @@ class PythonEnvironment:
         still = failed_cached_packages(text)
         if still:
             remedy = ("the package source is serving a broken wheel; retry later or pin another version"
-                      if still <= purged else "run `hermes pm doctor --repair`, then retry")
+                      if still <= purged else "run `noone pm doctor --repair`, then retry")
             raise InstallError(
                 "venv",
                 f"uv {stage} exited {result.returncode}: the cached copy of {', '.join(sorted(still))} is "

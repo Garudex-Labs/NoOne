@@ -18,13 +18,13 @@ class TestAutoVoiceReplyFormat:
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
         "platform",
-        [Platform.MATRIX, Platform.FEISHU, Platform.WHATSAPP, Platform.SIGNAL],
+        [  Platform.WHATSAPP, Platform.SIGNAL],
     )
     async def test_opus_platform_auto_voice_reply_requests_ogg(self, platform):
         """Every OPUS_VOICE_PLATFORMS member gets an explicit .ogg output path.
 
-        Regression for #14841 (Matrix) / #45557 (Feishu): _send_voice_reply
-        hardcoded .ogg for Telegram only, so Matrix/Feishu voice replies were
+        Shared voice-platform regression: _send_voice_reply
+        hardcoded .ogg for Telegram only, so other voice-platform replies were
         synthesized as MP3 and delivered as plain attachments instead of
         native voice bubbles.
         """
@@ -166,7 +166,7 @@ class TestAutoVoiceReplyFormat:
         telegram_adapter._auto_tts_disabled_chats = set()
         telegram_adapter._auto_tts_enabled_chats = set()
 
-        with patch("hermes_cli.config.load_config", return_value={"voice": {"auto_tts": True}}):
+        with patch("agent_cli.config.load_config", return_value={"voice": {"auto_tts": True}}):
             runner._sync_voice_mode_state_to_adapter(a2a_adapter)
             runner._sync_voice_mode_state_to_adapter(telegram_adapter)
 

@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from plugins.platforms.whatsapp.adapter import _bridge_media_type, _standalone_send
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 
 # ---------------------------------------------------------------------------
@@ -224,7 +224,7 @@ def test_secondary_standalone_sends_use_active_profile_port_for_text_media_and_m
             [_resp(200, {"messageId": "text"}), _resp(200, {"messageId": "media"})],
             health=_resp(200, {"capabilities": {"outboundMentions": True}}),
         )
-        override = set_hermes_home_override(home)
+        override = set_agent_home_override(home)
         try:
             with patch("aiohttp.ClientSession", return_value=session_ctx):
                 result = asyncio.run(_standalone_send(
@@ -232,7 +232,7 @@ def test_secondary_standalone_sends_use_active_profile_port_for_text_media_and_m
                     media_files=[(str(media), False)], mentions=["12345"],
                 ))
         finally:
-            reset_hermes_home_override(override)
+            reset_agent_home_override(override)
         assert result.get("success") is True, result
         assert [url for url, _ in calls] == [
             f"http://127.0.0.1:{port}/health",

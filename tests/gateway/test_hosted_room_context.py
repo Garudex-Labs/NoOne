@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from agent_cli.database_migrations import UnsupportedDatabaseSchema
 from gateway import hosted_room_context as context
 from gateway import hosted_room_discussion as discussion
 from gateway import hosted_rooms
@@ -135,10 +136,7 @@ def test_context_is_bounded(room_db: Path):
             room_db, room_id=ROOM_ID, event_id="c", purpose="", notes="x" * (context.MAX_NOTES_BYTES + 1))
 
 
-def test_settings_reads_seek_an_index_even_on_a_store_made_before_it(room_db: Path):
-    with closing(sqlite3.connect(room_db)) as conn, conn:
-        conn.execute("DROP INDEX IF EXISTS idx_hosted_room_events_kind")
-
+def test_settings_reads_seek_the_current_store_index(room_db: Path):
     context.set_room_context(room_db, room_id=ROOM_ID, event_id="ctx-1", purpose="Ship it", notes="")
 
     with closing(sqlite3.connect(room_db)) as conn:
@@ -147,3 +145,16 @@ def test_settings_reads_seek_an_index_even_on_a_store_made_before_it(room_db: Pa
             "ORDER BY seq DESC LIMIT 1", (ROOM_ID, context.CONTEXT_EVENT_KIND)))
     assert "idx_hosted_room_events_kind" in plan
     assert context.room_context(room_db, room_id=ROOM_ID)["purpose"] == "Ship it"
+
+
+def test_missing_context_index_is_refused_without_rewriting_the_store(room_db: Path):
+    with closing(sqlite3.connect(room_db)) as conn, conn:
+        conn.execute("DROP INDEX idx_hosted_room_events_kind")
+    with closing(sqlite3.connect(room_db)) as conn:
+        before = list(conn.iterdump())
+
+    with pytest.raises(UnsupportedDatabaseSchema, match="idx_hosted_room_events_kind"):
+        context.set_room_context(room_db, room_id=ROOM_ID, event_id="ctx-1", purpose="Ship it", notes="")
+
+    with closing(sqlite3.connect(room_db)) as conn:
+        assert list(conn.iterdump()) == before

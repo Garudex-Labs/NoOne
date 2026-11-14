@@ -14,12 +14,12 @@
 # keeps its own command. A prompt prefix names the worktree.
 #
 # Scripts and other processes do not source this: they run under
-# `scripts/run-in-hermes-env`. Both build on scripts/_activation.sh.
+# `scripts/run-in-agent-env`. Both build on scripts/_activation.sh.
 #
 # Sync through setup before selecting the environment. PM owns freshness;
 # activation does not maintain a second dependency stamp. It trusts the
-# recorded tool digest instead of re-hashing every entry. `hermes pm
-# install` and `hermes update` keep that check.
+# recorded tool digest instead of re-hashing every entry. `noone pm
+# install` and `noone update` keep that check.
 # ============================================================================
 _HERMES_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Options: `--test-extras a,b` selects the test environment's runtime extras
@@ -100,7 +100,7 @@ _hermes_worktree_here() {
     [ "$(cd "$_hermes_top" && pwd -P)" = "$(cd "$__HERMES_WORKTREE" && pwd -P)" ]
 }
 
-hermes() {
+noone() {
     _hermes_worktree_here || {
         printf '%s\n' "hermes: $(pwd) is outside $__HERMES_WORKTREE; refusing (the installed command is hidden while this checkout is active)" >&2
         return 1
@@ -108,17 +108,17 @@ hermes() {
     (
         cd "$__HERMES_WORKTREE" || exit 1
         if [ -n "${PYTHON-}" ]; then
-            exec "$PYTHON" hermes "$@"
+            exec "$PYTHON" noone "$@"
         elif [ -x .venv/Scripts/python.exe ]; then
-            exec .venv/Scripts/python.exe hermes "$@"
+            exec .venv/Scripts/python.exe noone "$@"
         elif [ -x .venv/bin/python ]; then
-            exec .venv/bin/python hermes "$@"
+            exec .venv/bin/python noone "$@"
         elif [ -x venv/Scripts/python.exe ]; then
-            exec venv/Scripts/python.exe hermes "$@"
+            exec venv/Scripts/python.exe noone "$@"
         elif [ -x venv/bin/python ]; then
-            exec venv/bin/python hermes "$@"
+            exec venv/bin/python noone "$@"
         else
-            exec python hermes "$@"
+            exec python noone "$@"
         fi
     )
 }
@@ -168,7 +168,7 @@ deactivate() {
     unset __HERMES_SAVED_PATH __HERMES_KEY_LIST __HERMES_ACTIVATED \
           __HERMES_WORKTREE __HERMES_WORKTREE_NAME \
           __HERMES_SAVED_PS1 __HERMES_SAVED_PROMPT_COMMAND
-    unset -f deactivate hermes _hermes_worktree_here _hermes_prompt
+    unset -f deactivate noone hermes _hermes_worktree_here _hermes_prompt
     unset _hermes_k _hermes_was _hermes_old _hermes_top
 }
 
@@ -179,3 +179,6 @@ __HERMES_KEY_LIST="$_hermes_keys"
 unset -f hermes_sync hermes_bootstrap_python hermes_compose_env hermes_apply_env \
          hermes_activation_current hermes_ensure_env
 unset _HERMES_REPO _hermes_script _hermes_keys _hermes_k _hermes_top
+
+# Legacy shell command for existing workflows.
+hermes() { noone "$@"; }

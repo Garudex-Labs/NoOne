@@ -1,16 +1,16 @@
 ---
 title: "Baoyu Infographic — Infographics: 21 layouts x 21 styles (信息图, 可视化)"
-sidebar_label: "Baoyu Infographic"
+sidebarTitle: "Baoyu Infographic"
 description: "Infographics: 21 layouts x 21 styles (信息图, 可视化)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Baoyu Infographic
+# Baoyu Infographic {#baoyu-infographic}
 
 Infographics: 21 layouts x 21 styles (信息图, 可视化).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
@@ -22,23 +22,31 @@ Infographics: 21 layouts x 21 styles (信息图, 可视化).
 | Platforms | linux, macos, windows |
 | Tags | `infographic`, `visual-summary`, `creative`, `image-generation` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Infographic Generator
+<div className="doc-callout-title">
 
-Adapted from [baoyu-infographic](https://github.com/JimLiu/baoyu-skills) for Hermes Agent's tool ecosystem.
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Infographic Generator {#infographic-generator}
+
+Adapted from [baoyu-infographic](https://github.com/JimLiu/baoyu-skills) for {{app-name}}'s tool ecosystem.
 
 Two dimensions: **layout** (information structure) × **style** (visual aesthetics). Freely combine any layout with any style.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Trigger this skill when the user asks to create an infographic, visual summary, information graphic, or uses terms like "信息图", "可视化", or "高密度信息大图". The user provides content (text, file path, URL, or topic) and optionally specifies layout, style, aspect ratio, or language.
 
-## Options
+## Options {#options}
 
 | Option | Values |
 |--------|--------|
@@ -47,7 +55,7 @@ Trigger this skill when the user asks to create an infographic, visual summary, 
 | Aspect | Named: landscape (16:9), portrait (9:16), square (1:1). Custom: any W:H ratio (e.g., 3:4, 4:3, 2.35:1) |
 | Language | en, zh, ja, etc. |
 
-## Layout Gallery
+## Layout Gallery {#layout-gallery}
 
 | Layout | Best For |
 |--------|----------|
@@ -75,7 +83,7 @@ Trigger this skill when the user asks to create an infographic, visual summary, 
 
 Full definitions: `references/layouts/<layout>.md`
 
-## Style Gallery
+## Style Gallery {#style-gallery}
 
 | Style | Description |
 |-------|-------------|
@@ -103,7 +111,7 @@ Full definitions: `references/layouts/<layout>.md`
 
 Full definitions: `references/styles/<style>.md`
 
-## Recommended Combinations
+## Recommended Combinations {#recommended-combinations}
 
 | Content Type | Layout + Style |
 |--------------|----------------|
@@ -127,7 +135,7 @@ Full definitions: `references/styles/<style>.md`
 
 Default: `bento-grid` + `craft-handmade`
 
-## Keyword Shortcuts
+## Keyword Shortcuts {#keyword-shortcuts}
 
 When user input contains these keywords, **auto-select** the associated layout and offer associated styles as top recommendations in Step 3. Skip content-based layout inference for matched keywords.
 
@@ -138,9 +146,9 @@ If a shortcut has **Prompt Notes**, append them to the generated prompt (Step 5)
 | 高密度信息大图 / high-density-info | `dense-modules` | `morandi-journal`, `pop-laboratory`, `retro-pop-grid` | portrait | — |
 | 信息图 / infographic | `bento-grid` | `craft-handmade` | landscape | Minimalist: clean canvas, ample whitespace, no complex background textures. Simple cartoon elements and icons only. |
 
-## Output Structure
+## Output Structure {#output-structure}
 
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```
 infographic/{topic-slug}/
 ├── source-{slug}.{ext}
@@ -149,19 +157,19 @@ infographic/{topic-slug}/
 ├── prompts/infographic.md
 └── infographic.png
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
 Slug: 2-4 words kebab-case from topic. Conflict: append `-YYYYMMDD-HHMMSS`.
 
-## Core Principles
+## Core Principles {#core-principles}
 
 - Preserve source data faithfully — no summarization or rephrasing (but **strip any credentials, API keys, tokens, or secrets** before including in outputs)
 - Define learning objectives before structuring content
 - Structure for visual communication (headlines, labels, visual elements)
 
-## Workflow
+## Workflow {#workflow}
 
-### Step 1: Analyze Content
+### Step 1: Analyze Content {#step-1-analyze-content}
 
 **Load references**: Read `references/analysis-framework.md` from this skill.
 
@@ -175,7 +183,7 @@ Slug: 2-4 words kebab-case from topic. Conflict: append `-YYYYMMDD-HHMMSS`.
 
 See `references/analysis-framework.md` for detailed format.
 
-### Step 2: Generate Structured Content → `structured-content.md`
+### Step 2: Generate Structured Content → `structured-content.md` {#step-2-generate-structured-content--structured-contentmd}
 
 Transform content into infographic structure:
 1. Title and learning objectives
@@ -187,7 +195,7 @@ Transform content into infographic structure:
 
 See `references/structured-content-template.md` for detailed format.
 
-### Step 3: Recommend Combinations
+### Step 3: Recommend Combinations {#step-3-recommend-combinations}
 
 **3.1 Check Keyword Shortcuts first**: If user input matches a keyword from the **Keyword Shortcuts** table, auto-select the associated layout and prioritize associated styles as top recommendations. Skip content-based layout inference.
 
@@ -197,7 +205,7 @@ See `references/structured-content-template.md` for detailed format.
 - Audience expectations
 - User design instructions
 
-### Step 4: Confirm Options
+### Step 4: Confirm Options {#step-4-confirm-options}
 
 Use the `clarify` tool to confirm options with the user. Put the independent questions below in one `questions` array (up to 5); ask separately any question whose options depend on an earlier answer:
 
@@ -207,7 +215,7 @@ Use the `clarify` tool to confirm options with the user. Put the independent que
 
 **Q3 — Language** (only if source ≠ user language): Ask which language the text content should use.
 
-### Step 5: Generate Prompt → `prompts/infographic.md`
+### Step 5: Generate Prompt → `prompts/infographic.md` {#step-5-generate-prompt--promptsinfographicmd}
 
 **Backup rule**: If `prompts/infographic.md` exists, rename to `prompts/infographic-backup-YYYYMMDD-HHMMSS.md`
 
@@ -226,7 +234,7 @@ Combine:
 
 Save the assembled prompt to `prompts/infographic.md` using `write_file`.
 
-### Step 6: Generate Image
+### Step 6: Generate Image {#step-6-generate-image}
 
 Use the `image_generate` tool with the assembled prompt from Step 5.
 
@@ -235,11 +243,11 @@ Use the `image_generate` tool with the assembled prompt from Step 5.
 - On failure, auto-retry once
 - Save the resulting image URL/path to the output directory
 
-### Step 7: Output Summary
+### Step 7: Output Summary {#step-7-output-summary}
 
 Report: topic, layout, style, aspect, language, output path, files created.
 
-## References
+## References {#references}
 
 - `references/analysis-framework.md` — Analysis methodology
 - `references/structured-content-template.md` — Content format
@@ -247,7 +255,7 @@ Report: topic, layout, style, aspect, language, output path, files created.
 - `references/layouts/<layout>.md` — 21 layout definitions
 - `references/styles/<style>.md` — 21 style definitions
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 1. **Data integrity is paramount** — never summarize, paraphrase, or alter source statistics. "73% increase" must stay "73% increase", not "significant increase".
 2. **Strip secrets** — always scan source content for API keys, tokens, or credentials before including in any output file.

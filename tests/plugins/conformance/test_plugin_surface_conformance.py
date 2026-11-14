@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pytest
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 _FIXTURE = Path(__file__).parent / "fixtures" / "conformance_surface"
 _ROOT = Path(__file__).resolve().parents[3]
@@ -58,7 +58,7 @@ def _install_fixture(home: Path) -> None:
 @pytest.fixture
 def surface(tmp_path, monkeypatch):
     """The process plugin manager after real discovery of a temp home holding only the fixture."""
-    from hermes_cli import plugins
+    from agent_cli import plugins
 
     home = tmp_path / "hermes-home"
     home.mkdir()
@@ -124,7 +124,7 @@ def test_tool_call_runs_middleware_hooks_and_handler_with_documented_kwargs(surf
 
 
 def test_pre_command_hook_fires_with_documented_kwargs(surface):
-    from hermes_cli.plugins import fire_pre_command_hook
+    from agent_cli.plugins import fire_pre_command_hook
 
     _manager, home = surface
     fire_pre_command_hook(surface="cli", command="help", alias_used="help", args_raw="extra",
@@ -136,7 +136,7 @@ def test_pre_command_hook_fires_with_documented_kwargs(surface):
 
 
 def test_slash_command_dispatches_to_the_plugin_handler(surface):
-    from hermes_cli.plugins import get_plugin_command_handler, get_plugin_commands
+    from agent_cli.plugins import get_plugin_command_handler, get_plugin_commands
 
     assert get_plugin_commands()["conformance-ping"]["description"] == "Conformance ping"
     handler = get_plugin_command_handler("conformance-ping")
@@ -153,7 +153,7 @@ def test_provider_registrar_makes_the_provider_resolvable_by_name(surface, regis
 
 def test_unload_disposes_every_registration(surface):
     """Disabling/uninstalling a plugin unloads it: nothing it registered stays live."""
-    from hermes_cli import plugins
+    from agent_cli import plugins
     from tools.registry import registry
 
     manager, home = surface
@@ -182,7 +182,7 @@ def test_cli_command_runs_from_the_hermes_entry_point(tmp_path):
     bundled.mkdir()
     env = {**os.environ, "HERMES_HOME": str(home), "HERMES_BUNDLED_PLUGINS": str(bundled),
            "HOME": str(tmp_path / "os-home"), "PYTHONPATH": str(_ROOT)}
-    proc = subprocess.run([sys.executable, "-m", "hermes_cli.main", "conformance-cli", "--word", "hi"],
+    proc = subprocess.run([sys.executable, "-m", "agent_cli.main", "conformance-cli", "--word", "hi"],
                           cwd=tmp_path, env=env, capture_output=True, text=True, timeout=120, check=False)
     diagnostics = (proc.returncode, proc.stdout[-2000:], proc.stderr[-2000:])
     assert "conformance-cli:hi" in proc.stdout, diagnostics

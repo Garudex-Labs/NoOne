@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity';
 // Request-scoping rules shared by the dashboard's fetch helpers (api.ts).
 
 // Endpoint families that honor ?profile= on the backend (web_server.py
@@ -83,7 +84,7 @@ export function sameOriginRequestUrl(base: string, url: string): string {
   }
   if (!sameOrigin) {
     throw new Error(
-      `Refusing to send the Hermes session to ${url}: fetchJSON/authedFetch only call ` +
+      appText(`Refusing to send the {app_name} session to ${url}: fetchJSON/authedFetch only call `) +
         "this dashboard's own endpoints. Use plain fetch() for other hosts.",
     );
   }

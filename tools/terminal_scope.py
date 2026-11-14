@@ -3,7 +3,7 @@
 Multiplexed surfaces (gateway, dashboard/TUI, cron) serve several profiles from one process;
 mirroring terminal settings into ``os.environ`` let the first profile pin its backend onto
 everyone else (sandbox escape). The ``terminal`` field of the runtime scope state
-(``hermes_scope``) holds the active profile's COMPLETE ``TERMINAL_*`` policy; while bound, ``terminal_env`` resolves ONLY from it
+(``agent_scope``) holds the active profile's COMPLETE ``TERMINAL_*`` policy; while bound, ``terminal_env`` resolves ONLY from it
 (omitted keys -> defined default, never ambient env). If the policy cannot be resolved a
 *refusal* scope is installed and terminal execution raises :class:`TerminalPolicyUnavailable`.
 """
@@ -19,7 +19,7 @@ from typing import Any, Callable, Dict, Iterator, Optional
 
 logger = logging.getLogger(__name__)
 
-# The policy is the ``terminal`` field of the runtime scope state (``hermes_scope``):
+# The policy is the ``terminal`` field of the runtime scope state (``agent_scope``):
 # None = no scope bound (process-env behavior); dict = complete policy; Refusal = resolution failed.
 
 # Keys whose default lives in terminal_tool.py, not DEFAULT_CONFIG (which wins on overlap);
@@ -54,7 +54,7 @@ def set_terminal_scope(mapping: Optional[dict[str, str]], *, profile_home: Any =
     including clearing the policy, raises ``ScopeSwitchRefused``, since the scope's home and secrets
     would stay with a policy that is not theirs. To run under another profile's policy, bind that
     profile (``agent.runtime_scope.bind_profile_scope``)."""
-    from hermes_scope import ScopeSwitchRefused, current_scope, push_state
+    from agent_scope import ScopeSwitchRefused, current_scope, push_state
     scope = current_scope()
     if scope is not None:
         from agent.runtime_scope import owns_bound_scope
@@ -95,7 +95,7 @@ class DeferredTerminalPolicy:
 
 def get_terminal_scope() -> Optional[dict[str, str]]:
     """The active scope mapping/refusal, or ``None`` when no scope is bound."""
-    from hermes_scope import current_state
+    from agent_scope import current_state
     policy = current_state().terminal
     return policy.resolve() if isinstance(policy, DeferredTerminalPolicy) else policy
 
@@ -129,7 +129,7 @@ def terminal_env(name: str, default: str = "") -> str:
 
 
 def _apply_terminal_mapping(scope: dict[str, str], mapping: dict[str, Any]) -> None:
-    from hermes_cli.config import TERMINAL_CONFIG_ENV_MAP, _terminal_env_value
+    from agent_cli.config import TERMINAL_CONFIG_ENV_MAP, _terminal_env_value
 
     for cfg_key, value in mapping.items():
         # cwd placeholders are resolved per-surface later; not a policy value.
@@ -146,7 +146,7 @@ def _apply_terminal_mapping(scope: dict[str, str], mapping: dict[str, Any]) -> N
 def default_terminal_scope() -> dict[str, str]:
     """Code-default ``TERMINAL_*`` policy: what a profile-bypassing session freezes instead of
     reading ``.env``/``config.yaml``. Total like the profile projection, minus the profile."""
-    from hermes_cli.config_defaults import DEFAULT_CONFIG
+    from agent_cli.config_defaults import DEFAULT_CONFIG
 
     scope: dict[str, str] = {}
     _apply_terminal_mapping(scope, {**_TOOL_LEVEL_DEFAULTS, **(DEFAULT_CONFIG.get("terminal") or {})})
@@ -164,15 +164,15 @@ def build_profile_terminal_scope(
     ``terminal.backend``.
 
     *env_overlay* is a TRUSTED ``TERMINAL_*`` mapping captured from the launch process before
-    multiplexing began (``tui_gateway/launch_profile_policy.py``): the launch profile's
+    multiplexing began (``agent_backend/launch_profile_policy.py``): the launch profile's
     env-only policy (``TERMINAL_ENV=ssh`` from systemd, ``op run``, a launcher bridge) has no
     file to rebuild it from, and reading live ``os.environ`` here is the leak this module
     closes. It sits where the process env sits in the standalone bridge — explicit YAML keys
     still win (``apply_terminal_config_to_env``).
     """
-    from hermes_cli import managed_scope
-    from hermes_cli.config import _deep_merge
-    from hermes_cli.config_backend import config_exists
+    from agent_cli import managed_scope
+    from agent_cli.config import _deep_merge
+    from agent_cli.config_backend import config_exists
 
     home = Path(hermes_home)
     scope = default_terminal_scope()
@@ -213,7 +213,7 @@ def build_profile_terminal_scope(
         raise TerminalPolicyUnavailable(f"cannot resolve terminal config in {home}: {exc}") from exc
     raw_terminal = None
     if has_config:
-        from hermes_cli.config_backend import read_config_doc_readonly
+        from agent_cli.config_backend import read_config_doc_readonly
 
         try:
             # Signature-cached: a scope is rebuilt per routed turn/poll, the file rarely changes.
@@ -240,7 +240,7 @@ def _resolve_scope_cwd_placeholder(scope: dict[str, str]) -> None:
     """Give a scope with no explicit ``terminal.cwd`` the same resolved ``TERMINAL_CWD`` a standalone
     gateway computes at import (``gateway/run.py``: local backend → ``$HOME``; docker with the
     workspace mount → the host cwd signal; other backends → unset). Without it a routed turn's
-    ``resolve_agent_cwd()`` falls back to the multiplexer PROCESS cwd (wherever ``hermes gateway``
+    ``resolve_agent_cwd()`` falls back to the multiplexer PROCESS cwd (wherever ``noone gateway``
     was launched), so the system prompt, context-file discovery and the local terminal all run in
     a directory the profile's standalone gateway would never have used."""
     if scope.get("TERMINAL_CWD"):
@@ -277,7 +277,7 @@ def install_profile_terminal_scope(hermes_home: Any, *, env_overlay: Optional[di
     Legacy setter: new code binds a scope (``agent.runtime_scope.bind_profile_scope``). With a
     scope bound, a call for another profile moves the whole scope to it (local) or raises
     ``ScopeSwitchRefused`` (hosted)."""
-    from hermes_scope import current_scope, push_state
+    from agent_scope import current_scope, push_state
     if current_scope() is not None:
         from agent.runtime_scope import legacy_switch
         switched = legacy_switch(hermes_home, env_overlay=env_overlay)

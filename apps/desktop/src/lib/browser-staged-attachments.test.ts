@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { stageDroppedFilePath, useComposerActions } from '@/app/chat/hooks/use-composer-actions'
 import { uploadComposerAttachment } from '@/app/session/hooks/use-prompt-actions'
-import type { HermesStagedUpload } from '@/global'
+import type { AgentStagedUpload } from '@/global'
 import {
   $composerAttachments, clearSessionDraft, type ComposerAttachment, stashSessionDraft, takeSessionDraft
 } from '@/store/composer'
@@ -13,7 +13,7 @@ import { clearWebappSession, seedWebappSession } from '@/test/webapp-session'
 
 import { installBrowserDesktopBridge } from './browser-desktop-bridge'
 
-const source: HermesStagedUpload = {
+const source: AgentStagedUpload = {
   install_id: '11111111111111111111111111111111',
   path: '/srv/hermes/profiles/owner/uploads/web-123-notes.txt',
   profile_home: '/srv/hermes/profiles/owner'

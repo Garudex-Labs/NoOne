@@ -24,8 +24,8 @@ from __future__ import annotations
 
 import pytest
 
-from hermes_cli import web_server
-import hermes_cli.web_server_chat as _web_server_chat
+from agent_cli import web_server
+import agent_cli.web_server_chat as _web_server_chat
 
 
 # ---------------------------------------------------------------------------
@@ -104,17 +104,6 @@ class TestResolveClientWsHost:
 # ---------------------------------------------------------------------------
 
 
-class TestGatewayWsUrlHost:
-
-    def test_ipv6_wildcard_bind_dials_loopback(
-        self, saved_app_state, clear_ws_host_env
-    ):
-        _set_bound(saved_app_state, "::", port=9119)
-        url = _web_server_chat._build_gateway_ws_url()
-        assert url is not None
-        assert url.startswith("ws://127.0.0.1:9119/api/ws")
-        # The ``::`` must not leak into the client URL.
-        assert "::" not in url
 
 
 # ---------------------------------------------------------------------------

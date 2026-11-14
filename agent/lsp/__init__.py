@@ -42,15 +42,15 @@ def get_service() -> Optional[LSPService]:
     profile override is bound), or None when disabled.
 
     Also registers an :mod:`atexit` hook so a clean exit tears down spawned servers through
-    the LSP ``shutdown``/``exit`` handshake: without it every ``hermes chat`` exit leaks
+    the LSP ``shutdown``/``exit`` handshake: without it every ``noone chat`` exit leaks
     pyright processes for a few seconds while their stdout buffers drain.  SIGKILL/os._exit
     skip atexit; the owner-death supervisor (``LSPClient._spawn`` hands it each server's
     process group) kills whatever is left then.
     """
     global _service
-    from hermes_constants import get_hermes_home_override, hermes_home_key
-    if get_hermes_home_override() is not None:
-        home_key = hermes_home_key()
+    from agent_constants import get_agent_home_override, agent_home_key
+    if get_agent_home_override() is not None:
+        home_key = agent_home_key()
         with _service_lock:
             if home_key not in _services_by_home:
                 _services_by_home[home_key] = LSPService.create_from_config()

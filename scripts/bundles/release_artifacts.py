@@ -28,7 +28,9 @@ def sha256_file(file: Path) -> str:
 def stamp_matches(stamp: dict, tag: str, commit: str, *, channel_request: dict | None = None) -> None:
     if channel_request is not None and channel_request.get("receiverCandidate"):
         if (stamp.get("channelBuild") is not None or stamp.get("source") != "build"
-                or stamp.get("receiverProtocol") != 1 or stamp.get("displayVersion") != channel_request["version"]
+                or stamp.get("receiverProtocol") != 1
+                or stamp.get("displayVersion") != (channel_request["sourceVersion"] if stamp.get("releaseVersion") else channel_request["version"])
+                or (stamp.get("releaseVersion") is not None and stamp["releaseVersion"] != channel_request["sourceVersion"])
                 or stamp.get("commit") != commit or stamp.get("tag") != channel_request["releaseTag"]
                 or stamp.get("baseVersion") != channel_request["sourceVersion"]):
             raise ValueError("Receiver candidate must use ordinary stable update ownership")
@@ -38,8 +40,13 @@ def stamp_matches(stamp: dict, tag: str, commit: str, *, channel_request: dict |
                 or stamp.get("commit") != channel_request["commit"] or stamp.get("tag")):
             raise ValueError("Built package provenance does not match the channel request")
         return
+    version = tag.removeprefix("v")
+    if stamp.get("releaseVersion") is not None:
+        version = version.split("+", 1)[0]
+        if stamp["releaseVersion"] != version or stamp.get("displayVersion") != version:
+            raise ValueError("Built package release version does not match the release")
     if (stamp.get("commit") != commit or stamp.get("tag") != tag
-            or stamp.get("baseVersion") != tag.removeprefix("v")):
+            or stamp.get("baseVersion") != version):
         raise ValueError("Built package provenance does not match the release")
 
 
@@ -347,7 +354,7 @@ def publish_canary_appinstaller(root: Path, *, tag: str, variant: str, bundle: P
                                identity: str, publisher: str, version: str, public_base: str) -> None:
     """Native SDK work is complete; verify its identity before writing a feed."""
     from scripts.releases.r2 import put
-    from hermes_cli.update_channel import is_canary_tag
+    from agent_cli.update_channel import is_canary_tag
 
     if not is_canary_tag(tag):
         raise ValueError("Only canary feeds publish directly; stable requires accepted candidates")

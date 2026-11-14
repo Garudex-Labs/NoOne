@@ -1,6 +1,7 @@
+import { appText } from '@noone/shared/application-identity'
+
 import { arCronControl } from './ar_cron_control'
 import type { TranslationOverrides } from './define-locale'
-
 export const arCommandCenter = {
   commandCenter: {
     close: 'إغلاق',
@@ -21,7 +22,7 @@ export const arCommandCenter = {
       placeholder: 'البحث في الحيوانات الأليفة...',
       loading: 'جار تحميل معرض petdex...',
       error: 'تعذّر الوصول إلى معرض petdex.',
-      staleBackend: 'أعد تشغيل Hermes لاستخدام الحيوانات الأليفة — الخادم الخلفي أقدم من هذه الميزة.',
+      staleBackend: 'أعد تشغيل {app_name} لاستخدام الحيوانات الأليفة — الخادم الخلفي أقدم من هذه الميزة.',
       empty: 'لا توجد حيوانات أليفة مطابقة.',
       turnOff: 'إيقاف التشغيل',
       turnOn: 'تشغيل',
@@ -48,8 +49,8 @@ export const arCommandCenter = {
       hatchComposing: 'جار تجميع الأجزاء...',
       hatchSaving: 'أوشكنا على الانتهاء...',
       namePlaceholder: 'سمِّ حيوانك الأليف',
-      staleBackend: 'حدّث Hermes لتوليد الحيوانات الأليفة.',
-      backgroundHint: 'يمكنك إغلاق هذا — سيُعلِمك Hermes عند الانتهاء.',
+      staleBackend: 'حدّث {app_name} لتوليد الحيوانات الأليفة.',
+      backgroundHint: 'يمكنك إغلاق هذا — سيُعلِمك {app_name} عند الانتهاء.',
       slowProviderHint: 'قد يستغرق هذا عدة دقائق',
       remix: 'إعادة مزج',
       remixConfirmTitle: 'إعادة مزج هذا المظهر؟',
@@ -87,7 +88,7 @@ export const arCommandCenter = {
       },
       settings: {
         title: 'الإعدادات',
-        detail: 'تكوين Hermes desktop'
+        detail: 'تكوين {app_name} desktop'
       },
       capabilities: {
         title: 'المهارات والأدوات',
@@ -128,7 +129,7 @@ export const arCommandCenter = {
     noSessions: 'لا توجد جلسات',
     gatewayRunning: 'البوابة تعمل',
     gatewayStopped: 'البوابة متوقفة',
-    hermesActiveSessions: (version, count) => `Hermes ${version} لديه ${count} جلسة نشطة`,
+    hermesActiveSessions: (version, count) => `${appText('{app_name}')} ${version} لديه ${count} جلسة نشطة`,
     restartGateway: 'إعادة تشغيل البوابة',
     openBrowser: 'تبديل المتصفح',
     toggleBrowser: 'تبديل المتصفح',
@@ -137,7 +138,7 @@ export const arCommandCenter = {
     sharedGatewayRestartDescription: bots => `تتم إعادة اتصال جميع البوتات على هذا الجهاز: ${bots}`,
     sharedGatewayRestartConfirm: 'إعادة تشغيل الكل',
     sharedGatewayRestarted: count => `تمت إعادة تشغيل البوابة المشتركة (${count} بوت)`,
-    updateHermes: 'تحديث Hermes',
+    updateHermes: 'تحديث {app_name}',
     reloadWindow: 'إعادة تحميل النافذة',
     actionRunning: 'الإجراء قيد التشغيل',
     actionDone: 'اكتمل الإجراء',
@@ -204,7 +205,7 @@ export const arCommandCenter = {
     relayLink: {
       title: 'Team Gateway',
       badge: 'لا حاجة لرمز بوت',
-      intro: (platform: string) => `يصل ${platform} إلى هذا الوكيل عبر بوت Hermes المشترك. اربط حسابك في ${platform} ثم راسل البوت للتحدث مع وكيلك.`,
+      intro: (platform: string) => `يصل ${platform} إلى هذا الوكيل عبر بوت ${appText('{app_name}')} المشترك. اربط حسابك في ${platform} ثم راسل البوت للتحدث مع وكيلك.`,
       link: (platform: string) => `ربط ${platform}`,
       linkAnother: (platform: string) => `ربط حساب ${platform} آخر`,
       linkedAccounts: 'الحسابات المرتبطة',
@@ -229,10 +230,10 @@ export const arCommandCenter = {
     },
     telegramQr: {
       title: 'اختر طريقة ربط بوت Telegram',
-      subtitle: 'كلا الخيارين يربط بوتًا تتحكم به ويحفظ بياناته في هذا التثبيت من Hermes فقط.',
+      subtitle: 'كلا الخيارين يربط بوتًا تتحكم به ويحفظ بياناته في هذا التثبيت من {app_name} فقط.',
       quickSetup: 'إعداد سريع',
       recommended: 'موصى به',
-      quickHelp: 'امسح رمز QR وأكّد في Telegram. سينشئ Hermes البوت ويكتشف معرّف مستخدم Telegram الخاص بك تلقائيًا.',
+      quickHelp: 'امسح رمز QR وأكّد في Telegram. سينشئ {app_name} البوت ويكتشف معرّف مستخدم Telegram الخاص بك تلقائيًا.',
       createWithQr: 'إنشاء عبر QR',
       starting: 'جارٍ البدء…',
       replaceWarning: 'بيانات Telegram مُعدّة بالفعل. سيحل إعداد QR الجديد أو رمز البوت محل البوت الحالي عند الحفظ.',
@@ -328,25 +329,11 @@ export const arCommandCenter = {
         label: 'اسم القناة الرئيسية',
         help: 'الاسم المعروض للقناة الرئيسية في السجلات ومخرجات الحالة.'
       },
-      BLUEBUBBLES_ALLOW_ALL_USERS: {
-        label: 'السماح لكل مستخدمي iMessage',
-        help: 'عند التفعيل، يتم تخطي قائمة سماح BlueBubbles.'
-      },
       MATTERMOST_ALLOW_ALL_USERS: {
         label: 'السماح لكل مستخدمي Mattermost'
       },
       MATTERMOST_HOME_CHANNEL: {
         label: 'القناة الرئيسية'
-      },
-      QQ_ALLOW_ALL_USERS: {
-        label: 'السماح لكل مستخدمي QQ'
-      },
-      QQBOT_HOME_CHANNEL: {
-        label: 'قناة QQ الرئيسية',
-        help: 'القناة أو المجموعة الافتراضية لتسليم cron.'
-      },
-      QQBOT_HOME_CHANNEL_NAME: {
-        label: 'اسم قناة QQ الرئيسية'
       },
       SLACK_BOT_TOKEN: {
         label: 'رمز بوت Slack',
@@ -372,21 +359,6 @@ export const arCommandCenter = {
       MATTERMOST_ALLOWED_USERS: {
         label: 'معرّفات المستخدمين المسموح بهم',
         help: 'موصى به. معرّفات مستخدمي Mattermost (واحد في كل حقل).'
-      },
-      MATRIX_HOMESERVER: {
-        label: 'رابط Homeserver',
-        placeholder: 'https://matrix.org'
-      },
-      MATRIX_ACCESS_TOKEN: {
-        label: 'رمز الوصول'
-      },
-      MATRIX_USER_ID: {
-        label: 'معرّف مستخدم البوت',
-        placeholder: '@hermes:example.org'
-      },
-      MATRIX_ALLOWED_USERS: {
-        label: 'معرّفات مستخدمي Matrix المسموح بهم',
-        help: 'موصى به. معرّفات مستخدمين (واحد في كل حقل) بصيغة @user:server.'
       },
       SIGNAL_HTTP_URL: {
         label: 'رابط جسر Signal',
@@ -429,7 +401,7 @@ export const arCommandCenter = {
     exported: 'تم تصدير الملف الشخصي',
     failedImport: 'فشل استيراد الملف الشخصي',
     failedExport: 'فشل تصدير الملف الشخصي',
-    exportNeedsHost: name => `لا يمكن للمتصفح حفظ أرشيف الملف الشخصي. على مضيف Hermes، شغّل: hermes profile export ${name}`,
+    exportNeedsHost: name => `لا يمكن للمتصفح حفظ أرشيف الملف الشخصي. على مضيف ${appText('{app_name}')}، شغّل: noone profile export ${name}`,
     allProfiles: 'كل الملفات الشخصية',
     showAllProfiles: 'إظهار كل الملفات الشخصية',
     notServedHere: 'غير متاح هنا',
@@ -438,9 +410,9 @@ export const arCommandCenter = {
     switchConnectionFailed: name => `تعذّر الاتصال بـ ${name}`,
     manageProfiles: 'إدارة الملفات الشخصية',
     fleet: {
-      localDevice: 'هذا الجهاز (خلفية محلية — تثبّت Hermes إن كان مفقودًا، وإلا تفتح جلسة جديدة)',
-      installDeviceTitle: 'تثبيت Hermes على هذا الجهاز؟',
-      installDeviceDesc: 'سيُثبَّت Hermes محليًا ثم تُفتح جلسة جديدة على هذا الحاسوب. لا يبدأ التثبيت قبل التأكيد.',
+      localDevice: 'هذا الجهاز (خلفية محلية — تثبّت {app_name} إن كان مفقودًا، وإلا تفتح جلسة جديدة)',
+      installDeviceTitle: 'تثبيت {app_name} على هذا الجهاز؟',
+      installDeviceDesc: 'سيُثبَّت {app_name} محليًا ثم تُفتح جلسة جديدة على هذا الحاسوب. لا يبدأ التثبيت قبل التأكيد.',
       installDeviceConfirm: 'تثبيت محليًا',
       connectExistingInstead: 'الاتصال بموجود بدلًا من ذلك'
     },
@@ -448,7 +420,7 @@ export const arCommandCenter = {
       menuItem: 'الاتصال بمضيف بعيد…',
       badge: (host: string) => `يعمل على ${host}`,
       title: (profile: string) => `ربط ${profile} بمضيف بعيد`,
-      description: 'ستعمل جلسات هذا الملف الشخصي على خادم Hermes البعيد الذي تحدده، بدلاً من هذا الجهاز.',
+      description: 'ستعمل جلسات هذا الملف الشخصي على خادم {app_name} البعيد الذي تحدده، بدلاً من هذا الجهاز.',
       urlLabel: 'العنوان البعيد',
       urlPlaceholder: 'https://hermes.example.com',
       urlInvalid: 'أدخل عنواناً كاملاً يبدأ بـ http:// أو https://',
@@ -483,7 +455,7 @@ export const arCommandCenter = {
     setAsDefault: 'تعيين كافتراضي',
     defaultProfile: 'الملف الشخصي الافتراضي',
     defaultSet: name => `أصبح ${name} الملف الافتراضي`,
-    defaultDescription: 'يُستخدم عند فتح Hermes وللمحادثات الجديدة. تبقى الجلسات الحالية في ملفاتها الشخصية.',
+    defaultDescription: 'يُستخدم عند فتح {app_name} وللمحادثات الجديدة. تبقى الجلسات الحالية في ملفاتها الشخصية.',
     failedSetDefault: 'تعذّر تعيين الملف الشخصي الافتراضي',
     setColor: color => `ضبط اللون ${color}`,
     autoColor: 'لون تلقائي',
@@ -605,7 +577,7 @@ export const arCommandCenter = {
     topOfHour: 'في بداية كل ساعة',
     everyHourAt: minute => `كل ساعة عند :${minute}`,
     newCron: 'مهمة مجدولة جديدة',
-    emptyDescNew: 'أنشئ مهمة مجدولة لتشغيل Hermes تلقائيا.',
+    emptyDescNew: 'أنشئ مهمة مجدولة لتشغيل {app_name} تلقائيا.',
     emptyDescSearch: 'لا توجد مهام تطابق البحث.',
     emptyTitleNew: 'لا توجد مهام مجدولة',
     emptyTitleSearch: 'لا توجد نتائج',
@@ -643,13 +615,13 @@ export const arCommandCenter = {
     editTitle: 'تحرير المهمة المجدولة',
     createTitle: 'إنشاء مهمة مجدولة',
     editDesc: 'عدل الجدول والرسالة.',
-    createDesc: 'اضبط مهمة يشغلها Hermes تلقائيا.',
+    createDesc: 'اضبط مهمة يشغلها {app_name} تلقائيا.',
     nameLabel: 'الاسم',
     namePlaceholder: 'مثال: الملخص الصباحي',
     promptLabel: 'الرسالة',
     scriptLabel: 'البرنامج النصي',
     scriptBadge: 'برنامج نصي',
-    promptPlaceholder: 'ماذا تريد من Hermes أن يفعل؟',
+    promptPlaceholder: 'ماذا تريد من {app_name} أن يفعل؟',
     frequencyLabel: 'التكرار',
     deliverLabel: 'التسليم',
     customScheduleLabel: 'جدول مخصص',

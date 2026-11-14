@@ -1,83 +1,68 @@
-"""Release stamping changes only metadata consumed by external builders."""
+"""Version stamping changes local project records, never dependency versions."""
 import json
 from pathlib import Path
+import tomllib
 
 import pytest
 
+from scripts.releases.stamping import stamp, validate_bootstrap_version
+
 
 def _tree(root: Path) -> None:
-    (root / "hermes_cli").mkdir()
-    (root / "hermes_cli" / "__init__.py").write_text(
-        '__release_date__ = "2026.1.1"\n', encoding="utf-8")
-    (root / "pyproject.toml").write_text('version = "0.0.0"\n', encoding="utf-8")
-    desktop = root / "apps" / "desktop"
-    desktop.mkdir(parents=True)
-    (desktop / "package.json").write_text('{"version": "0.0.0"}\n', encoding="utf-8")
-    (root / "pnpm-lock.yaml").write_text(
-        "lockfileVersion: '9.0'\n"
-        "importers:\n  apps/desktop: {}\n  apps/bootstrap-installer: {}\n",
-        encoding="utf-8")
+    (root / "pyproject.toml").write_text('[project]\nname = "hermes-agent"\nversion = "0.0.0"\n')
     (root / "uv.lock").write_text(
-        '[[package]]\nname = "hermes-agent"\nversion = "0.0.0"\n'
-        '[[package]]\nname = "other"\nversion = "0.0.0"\n', encoding="utf-8")
-    (root / "nix").mkdir()
-    (root / "nix" / "hermes-agent.nix").write_text(
-        '{\n  version ? "0.0.0",\n}: version\n', encoding="utf-8")
-    installer = root / "apps" / "bootstrap-installer" / "src-tauri"
+        '[[package]]\nname = "hermes-agent"\nversion = "0.0.0"\nsource = { editable = "." }\n'
+        '[[package]]\nname = "dependency"\nversion = "2.3.4"\nsource = { registry = "https://example.invalid" }\n'
+    )
+    desktop = root / "apps/desktop"
+    desktop.mkdir(parents=True)
+    (desktop / "package.json").write_text('{"version":"0.0.0"}\n')
+    (desktop / "package-lock.json").write_text(json.dumps({
+        "version": "0.0.0", "lockfileVersion": 3,
+        "packages": {"": {"version": "0.0.0"}, "node_modules/dependency": {"version": "2.3.4"}},
+    }))
+    installer = root / "apps/bootstrap-installer/src-tauri"
     installer.mkdir(parents=True)
-    (root / "apps" / "bootstrap-installer" / "package.json").write_text(
-        '{"name": "x", "version": "0.0.0"}\n', encoding="utf-8")
-    (installer / "tauri.conf.json").write_text(
-        '{"productName": "Hermes", "version": "0.0.0"}\n', encoding="utf-8")
-    (installer / "Cargo.toml").write_text('[package]\nversion = "0.0.0"\n', encoding="utf-8")
+    (installer / "tauri.conf.json").write_text('{"version":"0.0.0"}\n')
+    (installer / "Cargo.toml").write_text('[package]\nname = "agent-bootstrap"\nversion = "0.0.0"\n')
     (installer / "Cargo.lock").write_text(
-        '[[package]]\nname = "bootstrap-installer"\nversion = "0.21.1"\n', encoding="utf-8")
+        '[[package]]\nname = "agent-bootstrap"\nversion = "0.0.0"\n'
+        '[[package]]\nname = "dependency"\nversion = "2.3.4"\nsource = "registry+https://example.invalid"\n'
+    )
+    (root / "nix").mkdir()
+    (root / "nix/agent.nix").write_text('{\n  version ? "0.0.0",\n}: version\n')
 
 
-def test_stamping_only_writes_external_builder_inputs(tmp_path):
-    from scripts.releases.stamping import stamp
-
-    build = tmp_path / "build"
-    build.mkdir()
-    _tree(build)
-    inert = [
-        build / "hermes_cli" / "__init__.py",
-        build / "pyproject.toml",
-        build / "uv.lock",
-        build / "apps" / "desktop" / "package.json",
-        build / "pnpm-lock.yaml",
-        build / "apps" / "bootstrap-installer" / "package.json",
-        build / "apps" / "bootstrap-installer" / "src-tauri" / "Cargo.lock",
-    ]
-    before = {path: path.read_bytes() for path in inert}
-
-    written = stamp(build, "0.21.5")
-
-    assert not (build / "hermes_cli" / "_version.py").exists()
-    assert {path: path.read_bytes() for path in inert} == before
-    assert 'version ? "0.21.5"' in (build / "nix" / "hermes-agent.nix").read_text()
-    tauri = build / "apps" / "bootstrap-installer" / "src-tauri" / "tauri.conf.json"
-    cargo = build / "apps" / "bootstrap-installer" / "src-tauri" / "Cargo.toml"
-    assert json.loads(tauri.read_text())["version"] == "0.21.5"
-    assert 'version = "0.21.5"' in cargo.read_text()
-    assert set(written) == {build / "nix" / "hermes-agent.nix", tauri, cargo}
-
-    tauri.write_text('{"version": "0.0.0"}\n', encoding="utf-8")
-    from scripts.releases.stamping import validate_bootstrap_version
-    with pytest.raises(ValueError, match="Tauri config"):
-        validate_bootstrap_version(build, "0.21.5")
-
-
-def test_stamping_a_payload_snapshot_without_external_inputs_is_a_noop(tmp_path):
-    import shutil
-
-    from scripts.releases.stamping import stamp
-
+def test_stamping_synchronizes_project_metadata_and_preserves_dependency_records(tmp_path):
     _tree(tmp_path)
-    shutil.rmtree(tmp_path / "apps")
+    before_python = tomllib.loads((tmp_path / "uv.lock").read_text())["package"][1]
+    before_cargo = tomllib.loads((tmp_path / "apps/bootstrap-installer/src-tauri/Cargo.lock").read_text())["package"][1]
+    before_node = json.loads((tmp_path / "apps/desktop/package-lock.json").read_text())["packages"]["node_modules/dependency"]
+    stamp(tmp_path, "0.1.0")
+    assert tomllib.loads((tmp_path / "pyproject.toml").read_text())["project"]["version"] == "0.1.0"
+    assert json.loads((tmp_path / "apps/desktop/package.json").read_text())["version"] == "0.1.0"
+    python = tomllib.loads((tmp_path / "uv.lock").read_text())["package"]
+    cargo = tomllib.loads((tmp_path / "apps/bootstrap-installer/src-tauri/Cargo.lock").read_text())["package"]
+    node = json.loads((tmp_path / "apps/desktop/package-lock.json").read_text())
+    assert python[0]["version"] == cargo[0]["version"] == node["version"] == "0.1.0"
+    assert node["packages"][""]["version"] == "0.1.0"
+    assert python[1] == before_python
+    assert cargo[1] == before_cargo
+    assert node["packages"]["node_modules/dependency"] == before_node
+    validate_bootstrap_version(tmp_path, "0.1.0")
+    (tmp_path / "apps/bootstrap-installer/src-tauri/tauri.conf.json").write_text('{"version":"0.0.0"}')
+    with pytest.raises(ValueError, match="Tauri config"):
+        validate_bootstrap_version(tmp_path, "0.1.0")
 
-    shutil.rmtree(tmp_path / "nix")
 
-    before = (tmp_path / "pyproject.toml").read_bytes()
-    assert stamp(tmp_path, "0.21.5") == []
-    assert (tmp_path / "pyproject.toml").read_bytes() == before
+def test_build_identity_suffix_does_not_become_the_package_release_version(tmp_path):
+    _tree(tmp_path)
+    stamp(tmp_path, "0.1.0+canary.20261114T000000Z")
+    assert tomllib.loads((tmp_path / "pyproject.toml").read_text())["project"]["version"] == "0.1.0"
+    validate_bootstrap_version(tmp_path, "0.1.0")
+
+
+def test_partial_source_tree_still_stamps_its_local_package_record(tmp_path):
+    (tmp_path / "pyproject.toml").write_text('[project]\nname="hermes-agent"\nversion="0.0.0"\n')
+    assert stamp(tmp_path, "0.1.0") == [tmp_path / "pyproject.toml"]
+    assert tomllib.loads((tmp_path / "pyproject.toml").read_text())["project"]["version"] == "0.1.0"

@@ -1,14 +1,10 @@
-import type { ModelOptionProvider } from '@hermes/shared'
-import { DEFAULT_REASONING_EFFORT, REASONING_EFFORT_VALUES } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import type { ModelOptionProvider } from '@noone/shared'
+import { DEFAULT_REASONING_EFFORT, REASONING_EFFORT_VALUES } from '@noone/shared'
+import { AlertTriangle, Cpu, Loader2 } from '@noone/ui/icons'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Switch } from '@/components/ui/switch'
 import {
   getAuxiliaryModels,
   getGlobalModelInfo,
@@ -19,7 +15,7 @@ import {
   saveMoaModels,
   setEnvVar,
   setModelAssignment
-} from '@/hermes'
+} from '@/agent-client'
 import type {
   AuxiliaryModelsResponse,
   AuxiliaryTaskAssignment,
@@ -27,10 +23,14 @@ import type {
   MoaModelSlot,
   ModelAssignmentRequest,
   StaleAuxAssignment
-} from '@/hermes'
+} from '@/agent-client'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
 import { useI18n } from '@/i18n'
 import { isCodeSkewRestartRequired } from '@/lib/code-skew-error'
-import { AlertTriangle, Cpu, Loader2 } from '@/lib/icons'
 import { isSubmitEnter } from '@/lib/ime'
 import { catalogProviderMatches, findCatalogProvider } from '@/lib/model-options'
 import { composerServiceTier } from '@/lib/model-status-label'
@@ -41,7 +41,7 @@ import { setMainModelAssignment } from '@/store/model-assignment'
 import { notify, notifyError, readableError } from '@/store/notifications'
 import { startManualLocalEndpoint, startManualOnboarding, startManualProviderOAuth } from '@/store/onboarding'
 
-import { hermesConfigCacheWriter, invalidateHermesConfig, useHermesConfigRecord } from '../hooks/use-config-record'
+import { hermesConfigCacheWriter, invalidateHermesConfig, useAgentConfigRecord } from '../hooks/use-config-record'
 import { useOnProfileSwitch } from '../hooks/use-on-profile-switch'
 import { PanelEmpty } from '../overlays/panel'
 
@@ -99,7 +99,7 @@ export function ModelSettingsSkeleton({ subpage }: Pick<ModelSettingsProps, 'sub
 type SpeedTier = 'fast' | 'normal' | 'ultrafast'
 
 // A provider row is "ready" to pick a model from when it reports models. The
-// backend now surfaces the full `hermes model` universe (every canonical
+// backend now surfaces the full `noone model` universe (every canonical
 // provider), so unconfigured providers come back with `authenticated:false`
 // and an empty `models` list — those need a setup step before a model exists.
 function isProviderReady(p?: ModelOptionProvider): boolean {
@@ -400,7 +400,7 @@ export function ModelSettings({ onMainModelChanged, scopeProfile, subpage }: Mod
   const [newMoaPresetName, setNewMoaPresetName] = useState('')
   // agent.* defaults round-trip through the shared config cache (read → write
   // back the whole record), so a save here shows in the MCP/model surfaces.
-  const { data: config, writeScope } = useHermesConfigRecord(scopeProfile)
+  const { data: config, writeScope } = useAgentConfigRecord(scopeProfile)
   const setConfig = useMemo(() => hermesConfigCacheWriter(scopeProfile), [scopeProfile])
   const [applying, setApplying] = useState(false)
   const [editingAuxTask, setEditingAuxTask] = useState<null | string>(null)
@@ -823,7 +823,7 @@ export function ModelSettings({ onMainModelChanged, scopeProfile, subpage }: Mod
       setApiKeyDraft('')
 
       // Pick a sensible default for the freshly-activated provider (mirrors
-      // `hermes model` curation). Best-effort — fall through to the refreshed
+      // `noone model` curation). Best-effort — fall through to the refreshed
       // model list if it fails.
       let nextModel = ''
 

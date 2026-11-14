@@ -37,7 +37,7 @@ import type { UninstallSectionTranslations } from './types_uninstall_section'
 import type { UpdateChannelCopy } from './types_update_channel'
 
 /** The locales compiled into the app (`TRANSLATIONS`). */
-export type BundledLocale = 'en' | 'zh' | 'zh-hant' | 'ja' | 'ar' | 'ru' | 'fr' | 'de' | 'es'
+export type BundledLocale = 'en' | 'zh' | 'ja' | 'ar' | 'fr' | 'de' | 'es' | 'ko' | 'hi'
 
 /** Any language id the app can render: a bundled locale, or one a plugin /
  *  the backend registered at runtime (`registerAppLocale`). Lowercase
@@ -3465,7 +3465,7 @@ export interface Translations extends NoticeTranslations {
       notNow: string
     }
     // First-launch set-up failure notice: the free tier could not be created at boot.
-    // One sentence per backend code (`hermes_cli/anon_auth.py::ANON_*`); the copy never says
+    // One sentence per backend code (`agent_cli/anon_auth.py::ANON_*`); the copy never says
     // the free MODEL is off — what is unavailable is using Hermes without signing in.
     setupFailed: {
       gateClosed: string

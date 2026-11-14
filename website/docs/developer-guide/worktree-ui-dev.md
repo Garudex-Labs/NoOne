@@ -1,10 +1,9 @@
 ---
-sidebar_position: 5
 title: "TUI & Desktop from Worktrees"
 description: "Run the Ink TUI and Electron desktop app from a git worktree without a full pnpm install per checkout"
 ---
 
-# TUI & Desktop from Worktrees
+# TUI & Desktop from Worktrees {#tui--desktop-from-worktrees}
 
 The Python core runs fine from any [git worktree](../user-guide/git-worktrees.md) — `cd` in and `hermes` just works. The two TypeScript surfaces do not: `ui-tui/` and `apps/desktop/` each need a populated `node_modules`, and a fresh `pnpm install` per worktree is slow and repeats for every branch you have checked out.
 
@@ -12,7 +11,7 @@ The Python core runs fine from any [git worktree](../user-guide/git-worktrees.md
 
 They're developer conveniences, not shipped commands. Drop them in `~/.zshrc`; adapt paths to taste.
 
-## The deps-sharing model
+## The deps-sharing model {#the-deps-sharing-model}
 
 One checkout is the **deps checkout** — the one place you actually run `pnpm install`. Every other worktree links against it, and only re-installs locally when its lockfile diverges (a branch that bumps a dependency must not silently run against stale packages).
 
@@ -32,28 +31,36 @@ Two env vars name the canonical checkout:
 | `HERMES_MAIN_CHECKOUT` | The deps checkout — where `node_modules` really lives, and whose `.venv/bin/python` runs the backend. |
 | `HERMES_GUI_DEPS_CHECKOUT` | Where the desktop deps (`apps/desktop/node_modules`) live. Defaults to `HERMES_MAIN_CHECKOUT`; override only if you keep desktop deps elsewhere. |
 
-Neither is read by Hermes itself — they're private to these helpers. The variables Hermes *does* read are covered in [Environment Variables](../reference/environment-variables.md).
+Neither is read by {{app-name}} itself — they're private to these helpers. The variables {{app-name}} *does* read are covered in [Environment Variables](../reference/environment-variables.md).
 
-## `htui` — TUI from the worktree
+## `htui` — TUI from the worktree {#htui--tui-from-the-worktree}
 
-The Ink TUI has a dev path already: `hermes --tui --dev` runs the TypeScript sources via `tsx` instead of the prebuilt bundle. `htui` is a one-liner over it that also points the run at the current worktree's `ui-tui/`:
+The Ink TUI has a dev path already: `noone --cli --dev` runs the TypeScript sources via `tsx` instead of the prebuilt bundle. `htui` is a one-liner over it that also points the run at the current worktree's `ui-tui/`:
 
 ```bash
 htui() {
   local root
   root="$(_hermes_root)" || { echo "htui: not in a Hermes checkout" >&2; return 1; }
   ( cd "$root" && PYTHONPATH="$root" \
-      "$HERMES_MAIN_CHECKOUT/.venv/bin/python" -m hermes_cli.main --tui --dev "$@" )
+      "$HERMES_MAIN_CHECKOUT/.venv/bin/python" -m agent_cli.main --tui --dev "$@" )
 }
 ```
 
 `--dev` compiles from source, so it links `ui-tui/node_modules` from `HERMES_MAIN_CHECKOUT` when the root lockfile matches and installs locally otherwise (see [`_hermes_root` / linking helpers](#shared-helpers)).
 
-:::warning `--dev` and `HERMES_TUI_DIR` are mutually exclusive
-`HERMES_TUI_DIR` points Hermes at a *prebuilt* bundle (Nix, system packages), which has no source to hot-reload. If it's set in your shell, `hermes --tui --dev` exits with an error. Run `unset HERMES_TUI_DIR` before `htui`.
-:::
+<Warning>
 
-## `hgui` — desktop app from the worktree
+<div className="doc-callout-title">
+
+`--dev` and `HERMES_TUI_DIR` are mutually exclusive
+
+</div>
+
+`HERMES_TUI_DIR` points {{app-name}} at a *prebuilt* bundle (Nix, system packages), which has no source to hot-reload. If it's set in your shell, `noone --cli --dev` exits with an error. Run `unset HERMES_TUI_DIR` before `htui`.
+
+</Warning>
+
+## `hgui` — desktop app from the worktree {#hgui--desktop-app-from-the-worktree}
 
 The desktop app needs dependencies at both the repo root and `apps/desktop/`, a Vite server, and a Python backend. The stock `pnpm run dev` pins Vite to `5174`; Electron also defaults to CDP port `9222` and takes a single-instance lock on its user-data directory. Changing only the Vite port is not enough to run two desktops.
 
@@ -118,7 +125,7 @@ Slot `0` uses ports `5174`/`9222`; slot `1` uses `5175`/`9223`. Slots are caller
 
 | Variable | Role in `hgui` |
 |----------|----------------|
-| `HGUI_SLOT` | Helper-only slot number, `0`–`9`; not a Hermes setting. |
+| `HGUI_SLOT` | Helper-only slot number, `0`–`9`; not a {{app-name}} setting. |
 | `HERMES_DESKTOP_HERMES_ROOT` | Runs the backend from this worktree, not the packaged/PATH runtime. |
 | `HERMES_DESKTOP_PYTHON` | Reuses the main checkout's Python environment. Adjust for an installation that uses `venv` rather than `.venv`. |
 | `HERMES_DESKTOP_CWD` | Roots new desktop work in the worktree. |
@@ -129,13 +136,21 @@ Slot `0` uses ports `5174`/`9222`; slot `1` uses `5175`/`9223`. Slots are caller
 
 Each slot starts with fresh desktop preferences and remembers them on later launches. This example does not copy browser storage, saved navigation, or backend ownership from a running app.
 
-:::warning Separate desktops are not separate agent data
+<Warning>
+
+<div className="doc-callout-title">
+
+Separate desktops are not separate agent data
+
+</div>
+
 The default `HERMES_HOME` is shared: sessions, configuration, credentials, and profiles remain the same. Avoid editing the same conversation from both instances. For destructive tests or incompatible database migrations, pass a separate temporary `HERMES_HOME` and configure that sandbox independently.
-:::
+
+</Warning>
 
 Quit the app normally or press Ctrl-C in its launching terminal. `concurrently -k` manages its own child commands, and Electron owns its backend shutdown. Do not add a global `killport`, `pkill electron`, or a sweep of all `serve`/`dashboard --port 0` processes: those can terminate another instance. Remove the old `_hermes_gui_cleanup` trap if replacing an earlier version of this helper.
 
-## Shared helpers
+## Shared helpers {#shared-helpers}
 
 Both functions resolve the enclosing checkout and link deps the same way:
 
@@ -144,7 +159,7 @@ Both functions resolve the enclosing checkout and link deps the same way:
 _hermes_root() {
   local root
   root="$(git rev-parse --show-toplevel 2>/dev/null)" || return 1
-  [[ -f "$root/hermes_cli/main.py" && -d "$root/ui-tui" ]] && print -r "$root"
+  [[ -f "$root/agent_cli/main.py" && -d "$root/ui-tui" ]] && print -r "$root"
 }
 
 # Symlink node_modules from the deps checkout — never over an existing tree.
@@ -155,14 +170,21 @@ _hermes_link_deps() {
 }
 ```
 
-:::info Why link only when locks match
-A symlink to a divergent `node_modules` is worse than no install — the worktree would build against packages its own lockfile never declared. Byte-comparing `pnpm-lock.yaml` is the cheap, exact guard: same lock ⇒ safe to borrow; different lock ⇒ `pnpm install --frozen-lockfile` locally. Vite realpaths symlinks before enforcing `server.fs.allow`, which is why `apps/desktop/vite.config.ts` whitelists the real `node_modules` location.
-:::
+<Info>
 
-## See also
+<div className="doc-callout-title">
+
+Why link only when locks match
+
+</div>
+
+A symlink to a divergent `node_modules` is worse than no install — the worktree would build against packages its own lockfile never declared. Byte-comparing `pnpm-lock.yaml` is the cheap, exact guard: same lock ⇒ safe to borrow; different lock ⇒ `pnpm install --frozen-lockfile` locally. Vite realpaths symlinks before enforcing `server.fs.allow`, which is why `apps/desktop/vite.config.ts` whitelists the real `node_modules` location.
+
+</Info>
+
+## See also {#see-also}
 
 - [Git Worktrees](../user-guide/git-worktrees.md) — the isolation model these helpers build on
-- [TUI](../user-guide/tui.md) — `hermes --tui --dev` and the `HERMES_TUI_DIR` prebuild path
 - [Desktop App](../user-guide/desktop.md) — building from source and the backend resolution ladder
-- [`apps/desktop/README.md`](https://github.com/NousResearch/hermes-agent/blob/main/apps/desktop/README.md) — dev server, sandbox script, and packaging
-- [Environment Variables](../reference/environment-variables.md) — every `HERMES_*` variable Hermes reads
+- [`apps/desktop/README.md`](https://github.com/Garudex-Labs/NoOne/blob/main/apps/desktop/README.md) — dev server, sandbox script, and packaging
+- [Environment Variables](../reference/environment-variables.md) — every `HERMES_*` variable {{app-name}} reads

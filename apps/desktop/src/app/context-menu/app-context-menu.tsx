@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo } from 'react'
 
@@ -6,7 +7,6 @@ import { COMPOSER_AREAS } from '@/app/chat/composer/contrib'
 import { terminalMenuHandleFor } from '@/app/right-sidebar/terminal/terminal-context-menu'
 import { openStarMapNodeMenuFor } from '@/app/starmap/context-menu-handle'
 import { DROPDOWN_KIT } from '@/components/ui/actions-menu'
-import { Codicon } from '@/components/ui/codicon'
 import { HERMES_CONTEXT_MENU_TRIGGER_ATTR } from '@/components/ui/context-menu'
 import {
   DropdownMenu,
@@ -168,7 +168,7 @@ function Item({
 }) {
   return (
     <DropdownMenuItem disabled={disabled} onSelect={onSelect}>
-      {icon ? <Codicon name={icon} size="0.875rem" /> : null}
+      {icon ? <AppIcon name={icon} size="0.875rem" /> : null}
       <span>{label}</span>
       {shortcut ? <DropdownMenuShortcut>{shortcut}</DropdownMenuShortcut> : null}
     </DropdownMenuItem>

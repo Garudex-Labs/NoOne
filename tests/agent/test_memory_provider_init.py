@@ -48,8 +48,8 @@ def test_blank_memory_provider_stays_opt_out():
     cfg = {"memory": {"provider": ""}, "agent": {}}
 
     with (
-        patch("hermes_cli.config.load_config", return_value=cfg), patch("hermes_cli.config.load_config_readonly", return_value=cfg),
-        patch("hermes_cli.config.save_config") as save_config,
+        patch("agent_cli.config.load_config", return_value=cfg), patch("agent_cli.config.load_config_readonly", return_value=cfg),
+        patch("agent_cli.config.save_config") as save_config,
         patch("plugins.memory.load_memory_provider") as load_memory_provider,
         patch("agent.model_metadata.get_model_context_length", return_value=204_800),
         patch("model_tools.get_tool_definitions", return_value=[]),
@@ -92,7 +92,7 @@ def test_aiagent_forwards_user_id_alt_to_memory_provider():
     cfg = {"memory": {"provider": "recording"}, "agent": {}}
 
     with (
-        patch("hermes_cli.config.load_config", return_value=cfg), patch("hermes_cli.config.load_config_readonly", return_value=cfg),
+        patch("agent_cli.config.load_config", return_value=cfg), patch("agent_cli.config.load_config_readonly", return_value=cfg),
         patch("plugins.memory.load_memory_provider", return_value=provider),
         patch("agent.model_metadata.get_model_context_length", return_value=204_800),
         patch("model_tools.get_tool_definitions", return_value=[]),
@@ -108,7 +108,7 @@ def test_aiagent_forwards_user_id_alt_to_memory_provider():
             skip_context_files=True,
             skip_memory=False,
             session_id="sess-alt",
-            platform="feishu",
+            platform="signal",
             user_id="open-id",
             user_id_alt="union-id",
         )
@@ -117,7 +117,7 @@ def test_aiagent_forwards_user_id_alt_to_memory_provider():
     assert provider.init_session_id == "sess-alt"
     assert provider.init_kwargs["user_id"] == "open-id"
     assert provider.init_kwargs["user_id_alt"] == "union-id"
-    assert provider.init_kwargs["platform"] == "feishu"
+    assert provider.init_kwargs["platform"] == "signal"
     assert "warning_callback" not in provider.init_kwargs
     assert "status_callback" not in provider.init_kwargs
 
@@ -176,7 +176,7 @@ def test_aiagent_reuses_handed_in_memory_manager_without_reinitializing():
         skip_context_files=True, skip_memory=False, session_id="sess-api", platform="api_server",
     )
     with (
-        patch("hermes_cli.config.load_config", return_value=cfg), patch("hermes_cli.config.load_config_readonly", return_value=cfg),
+        patch("agent_cli.config.load_config", return_value=cfg), patch("agent_cli.config.load_config_readonly", return_value=cfg),
         patch("plugins.memory.load_memory_provider", return_value=provider) as load_memory_provider,
         patch("agent.model_metadata.get_model_context_length", return_value=204_800),
         patch("model_tools.get_tool_definitions", return_value=[]),

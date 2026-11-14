@@ -29,13 +29,17 @@ export const PRODUCT_IDENTITY: Readonly<ProductIdentity> =
  */
 export function applyDesktopIdentity(
   app: {
-    getPath(name: 'appData'): string
+    getPath(name: 'appData' | 'userData'): string
     setPath(name: 'userData', value: string): void
     setName(name: string): void
   },
   identity: Readonly<ProductIdentity> = PRODUCT_IDENTITY
 ): string | null {
-  if (!identity.token && identity.appNamePascal === identity.artifactNamePascal) {
+  if (!identity.token && (identity.stableState ?? identity.appNamePascal === identity.artifactNamePascal)) {
+    const userData = app.getPath('userData')
+    mkdirSync(userData, { recursive: true })
+    app.setPath('userData', userData)
+
     return null
   }
 

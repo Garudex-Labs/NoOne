@@ -1,3 +1,4 @@
+import { ArrowBarToDown, ArrowBarToUp } from '@noone/ui/icons'
 import { useEffect, useMemo, useRef } from 'react'
 
 import { CodeCardBody } from '@/components/chat/code-card'
@@ -6,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { ArrowBarToDown, ArrowBarToUp } from '@/lib/icons'
 import { logLineSegments, logLineSeverity, type LogSearchHit, type LogSeverity } from '@/lib/log-search'
 import { cn } from '@/lib/utils'
 

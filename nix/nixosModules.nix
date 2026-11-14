@@ -1,4 +1,4 @@
-# nix/nixosModules.nix — the NixOS module for hermes-agent
+# nix/nixosModules.nix — the NixOS module for noone
 #
 # This module shares its options, its renderers for config.yaml, .env and
 # documents, and its state setup with the Home Manager module
@@ -23,7 +23,7 @@
 # writable tool prefixes for npm i -g, pip install, uv tool install, etc.
 #
 # Usage:
-#   services.hermes-agent = {
+#   services.noone = {
 #     enable = true;
 #     settings.model.default = "anthropic/claude-sonnet-4";
 #     environmentFiles = [ config.sops.secrets."hermes/env".path ];
@@ -41,11 +41,11 @@
     }:
 
     let
-      cfg = config.services.hermes-agent;
+      cfg = config.services.noone;
       common = import ./moduleCommon.nix { inherit lib; };
 
       effectivePackage = common.effectivePackage cfg;
-      hermes-agent = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      noone = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
       hermesHome = "${cfg.stateDir}/.hermes";
 
@@ -58,7 +58,7 @@
       # (.env) stay 0640 regardless.
       configYamlMode = if cfg.addToSystemPackages then "0660" else "0640";
 
-      containerName = "hermes-agent";
+      containerName = "noone";
       containerDataDir = "/data"; # stateDir mount point inside container
       containerHomeDir = "/home/hermes";
 
@@ -250,10 +250,10 @@
 
     in
     {
-      options.services.hermes-agent =
+      options.services.noone =
         common.sharedOptions {
-          defaultPackage = hermes-agent;
-          defaultPackageText = lib.literalExpression "hermes-agent.packages.\${system}.default";
+          defaultPackage = noone;
+          defaultPackageText = lib.literalExpression "noone.packages.\${system}.default";
           defaultWorkingDirectory = "${cfg.stateDir}/workspace";
           defaultWorkingDirectoryText = lib.literalExpression ''"''${cfg.stateDir}/workspace"'';
         }
@@ -346,7 +346,7 @@
 
           # ── Merge MCP servers into settings ────────────────────────────────
           (lib.mkIf (cfg.mcpServers != { }) {
-            services.hermes-agent.settings.mcp_servers = common.mcpServersToConfig cfg.mcpServers;
+            services.noone.settings.mcp_servers = common.mcpServersToConfig cfg.mcpServers;
           })
 
           # ── User / group ──────────────────────────────────────────────────
@@ -392,16 +392,16 @@
             assertions =
               common.pluginNameAssertions {
                 inherit cfg;
-                optionPath = "services.hermes-agent";
+                optionPath = "services.noone";
               }
               ++ common.workspaceFilesAssertions {
                 inherit cfg;
-                opt = options.services.hermes-agent.workingDirectory;
-                optionPath = "services.hermes-agent";
+                opt = options.services.noone.workingDirectory;
+                optionPath = "services.noone";
               }
               ++ common.backendBindAssertions {
                 inherit cfg;
-                optionPath = "services.hermes-agent";
+                optionPath = "services.noone";
               }
               ++ [
                 {
@@ -409,7 +409,7 @@
                   # process needs its own container and its own ports. This
                   # module does not do that.
                   assertion = !(cfg.container.enable && cfg.backend.mode != "none");
-                  message = "services.hermes-agent: backend.mode is not supported together with container.enable — the container runs the gateway only.";
+                  message = "services.noone: backend.mode is not supported together with container.enable — the container runs the gateway only.";
                 }
               ];
           }
@@ -431,7 +431,7 @@
             {
               warnings = [
                 ''
-                  services.hermes-agent: container.enable is true and container.hostUsers
+                  services.noone: container.enable is true and container.hostUsers
                   is set, but addToSystemPackages is false. Without a host-installed hermes
                   binary, container routing will not work for interactive users.
                   Set addToSystemPackages = true or ensure hermes is on PATH.
@@ -453,7 +453,7 @@
 
           # ── Activation: link config + auth + documents ────────────────────
           {
-            system.activationScripts."hermes-agent-setup" =
+            system.activationScripts."noone-setup" =
               lib.stringAfter
                 (
                   [ "users" ] ++ lib.optional (config.system.activationScripts ? setupSecrets) "setupSecrets"
@@ -521,7 +521,7 @@
                             ''
                               if [ -L "${symlinkPath}" ] && [ "$(readlink "${symlinkPath}")" = "${hermesHome}" ]; then
                                 rm -f "${symlinkPath}"
-                                echo "hermes-agent: removed symlink ${symlinkPath}"
+                                echo "noone: removed symlink ${symlinkPath}"
                               fi
                             ''
                           ) cfg.container.hostUsers
@@ -546,7 +546,7 @@
                             # Real directory — back it up, then create symlink.
                             # (ln -sfn cannot atomically replace a directory.)
                             _backup="${symlinkPath}.bak.$(date +%s)"
-                            echo "hermes-agent: backing up existing ${symlinkPath} to $_backup"
+                            echo "noone: backing up existing ${symlinkPath} to $_backup"
                             mv "${symlinkPath}" "$_backup"
                           fi
                           # For everything else (existing symlink, doesn't exist, etc.)
@@ -564,7 +564,7 @@
           # MODE A: Native systemd service (default)
           # ══════════════════════════════════════════════════════════════════
           (lib.mkIf (!cfg.container.enable) {
-            systemd.services.hermes-agent = {
+            systemd.services.noone = {
               description = "Hermes Agent Gateway";
               wantedBy = [ "multi-user.target" ];
               # linger-users.service is the unit that runs `loginctl
@@ -579,7 +579,7 @@
               ++ lib.optional lingerEnabled "linger-users.service";
 
               # cfg.environment and cfg.environmentFiles are written to
-              # $HERMES_HOME/.env by the activation script. load_hermes_dotenv()
+              # $HERMES_HOME/.env by the activation script. load_agent_dotenv()
               # reads them at Python startup — no systemd EnvironmentFile needed.
               environment = commonUnitEnvironment;
 
@@ -598,7 +598,7 @@
                   sleep 0.2
                 done
                 if [ ! -S "/run/user/$(id -u)/bus" ]; then
-                  echo "hermes-agent: no user bus at /run/user/$(id -u)/bus after 10s;" \
+                  echo "noone: no user bus at /run/user/$(id -u)/bus after 10s;" \
                        "restart-safe cron dispatch will fail for the life of this process" >&2
                 fi
               '';
@@ -611,7 +611,7 @@
             };
           })
 
-          # ── The backend: hermes serve or hermes dashboard ─────────────────
+          # ── The backend: noone serve or noone dashboard ─────────────────
           # This is a different process from the gateway. Both use one
           # HERMES_HOME.
           (lib.mkIf (!cfg.container.enable && cfg.backend.mode != "none") {
@@ -638,7 +638,7 @@
             # Ensure the container runtime is available
             virtualisation.docker.enable = lib.mkDefault (cfg.container.backend == "docker");
 
-            systemd.services.hermes-agent = {
+            systemd.services.noone = {
               description = "Hermes Agent Gateway (container)";
               wantedBy = [ "multi-user.target" ];
               after = [
@@ -688,7 +688,7 @@
                     --env HOME=${containerHomeDir} \
                     ${lib.concatStringsSep " " cfg.container.extraOptions} \
                     ${cfg.container.image} \
-                    ${containerDataDir}/current-package/bin/hermes gateway run --replace ${lib.concatStringsSep " " cfg.extraArgs}
+                    ${containerDataDir}/current-package/bin/noone gateway run --replace ${lib.concatStringsSep " " cfg.extraArgs}
 
                   echo "${containerIdentity}" > ${identityFile}
                 fi

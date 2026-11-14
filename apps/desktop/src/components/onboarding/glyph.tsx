@@ -1,6 +1,6 @@
+import { Loader2 } from '@noone/ui/icons'
 import { useEffect, useState } from 'react'
 
-import { Loader2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 // Borrowed from the gateway "connecting" overlay: a mono, letter-spaced label

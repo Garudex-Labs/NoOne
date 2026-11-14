@@ -3,7 +3,7 @@ import { EventEmitter } from 'node:events'
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron'
 import { beforeEach, expect, it, vi } from 'vitest'
 
-import type { HermesNotification } from './notification-types'
+import type { AgentNotification } from './notification-types'
 
 const host = vi.hoisted(() => ({
   handle: vi.fn(),
@@ -55,7 +55,7 @@ it('returns native clicks and approval actions to the emitting window, not the p
 
   const notify = host.handle.mock.calls[0][1] as (
     event: IpcMainInvokeEvent,
-    payload: HermesNotification
+    payload: AgentNotification
   ) => Promise<boolean>
 
   const payload = {
@@ -103,7 +103,7 @@ it('delivers plugin callbacks to their source and falls back only for navigation
 
   const notify = host.handle.mock.calls[0][1] as (
     event: IpcMainInvokeEvent,
-    payload: HermesNotification
+    payload: AgentNotification
   ) => Promise<boolean>
 
   await notify({ sender: source.webContents } as unknown as IpcMainInvokeEvent, {
@@ -140,7 +140,7 @@ it('flashes an unfocused source window until it regains focus, and leaves a focu
 
   const notify = host.handle.mock.calls[0][1] as (
     event: IpcMainInvokeEvent,
-    payload: HermesNotification
+    payload: AgentNotification
   ) => Promise<boolean>
 
   const event = { sender: source.webContents } as unknown as IpcMainInvokeEvent

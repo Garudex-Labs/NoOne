@@ -3,15 +3,23 @@ title: "Give Your Agent Its Own Email Address"
 description: "Set up a dedicated mailbox your agent can read and send from using the bundled Himalaya skill, with a cron polling pattern and safety notes"
 ---
 
-# Give Your Agent Its Own Email Address
+# Give Your Agent Its Own Email Address {#give-your-agent-its-own-email-address}
 
 A dedicated email address turns your agent into something you (and services) can email: newsletters it summarises, receipts it files, booking confirmations it tracks, and outbound mail it sends on your behalf. This guide sets that up with the bundled [Himalaya email skill](../user-guide/skills/bundled/email/email-himalaya.md), which drives the `himalaya` CLI over IMAP/SMTP from the agent's terminal tools.
 
-:::info Two different email features
-This is **not** the same as the [Email gateway adapter](../user-guide/messaging/email.md), which lets people chat with Hermes *by* emailing it (send a mail, get a reply in-thread). This guide is about the agent *operating a mailbox* — reading, searching, composing, and organising mail as part of its tasks. You can run both, ideally on separate accounts.
-:::
+<Info>
 
-## 1. Create a dedicated account
+<div className="doc-callout-title">
+
+Two different email features
+
+</div>
+
+This is **not** the same as the [Email gateway adapter](../user-guide/messaging/email.md), which lets people chat with {{app-name}} *by* emailing it (send a mail, get a reply in-thread). This guide is about the agent *operating a mailbox* — reading, searching, composing, and organising mail as part of its tasks. You can run both, ideally on separate accounts.
+
+</Info>
+
+## 1. Create a dedicated account {#1-create-a-dedicated-account}
 
 Create a fresh mailbox for the agent — never hand it your personal inbox:
 
@@ -20,9 +28,9 @@ Create a fresh mailbox for the agent — never hand it your personal inbox:
 - If the provider uses 2FA (Gmail, Outlook), create an **app password** for the agent. For Gmail: enable 2FA, then create one at [App Passwords](https://myaccount.google.com/apppasswords).
 - A memorable address helps: `my-agent@yourdomain.com` or similar.
 
-## 2. Install and configure Himalaya
+## 2. Install and configure Himalaya {#2-install-and-configure-himalaya}
 
-Ask Hermes to do this for you — the skill contains the full procedure — or do it manually:
+Ask {{app-name}} to do this for you — the skill contains the full procedure — or do it manually:
 
 ```bash
 # Pre-built binary (Linux/macOS)
@@ -36,7 +44,7 @@ Then create `~/.config/himalaya/config.toml` with the account's IMAP/SMTP settin
 [accounts.agent]
 default = true
 email = "my-agent@example.com"
-display-name = "My Hermes Agent"
+display-name = "My NoOne"
 
 backend.type = "imap"
 backend.host = "imap.example.com"
@@ -62,12 +70,12 @@ himalaya envelope list
 
 Once `himalaya` works from your own shell, the agent can use it too — the bundled skill teaches it the commands, so "check the agent inbox and summarise anything new" works in any chat.
 
-## 3. Poll the inbox on a schedule
+## 3. Poll the inbox on a schedule {#3-poll-the-inbox-on-a-schedule}
 
 The Himalaya path is pull-based: the agent only sees mail when it looks. Add a [cron job](automate-with-cron.md) so it looks regularly:
 
 ```
-hermes cron add
+noone cron add
 ```
 
 A prompt along these lines works well:
@@ -76,7 +84,7 @@ A prompt along these lines works well:
 
 Every 15–30 minutes is plenty for most uses. If you need real replies-in-thread with sub-minute latency, use the [Email gateway adapter](../user-guide/messaging/email.md) instead, which holds a persistent IMAP connection.
 
-## 4. Safety notes
+## 4. Safety notes {#4-safety-notes}
 
 Email is an unauthenticated inbound channel — anyone can write to the agent's address, which makes it a prompt-injection surface:
 
@@ -85,9 +93,9 @@ Email is an unauthenticated inbound channel — anyone can write to the agent's 
 - **Keep the account low-privilege.** Don't attach the agent's address to password resets, banking, or account recovery for anything that matters.
 - **Scope the credentials.** An app password for a dedicated mailbox is a small blast radius; your personal account's credentials are not.
 
-## See also
+## See also {#see-also}
 
 - [Himalaya skill reference](../user-guide/skills/bundled/email/email-himalaya.md) — full command set the agent uses
-- [Email gateway adapter](../user-guide/messaging/email.md) — chat with Hermes over email instead
+- [Email gateway adapter](../user-guide/messaging/email.md) — chat with {{app-name}} over email instead
 - [Automate with Cron](automate-with-cron.md) — scheduling patterns
 - [Security](../user-guide/security.md) — the wider prompt-injection and credential-handling picture

@@ -20,7 +20,7 @@ be proved deleted, so its missing checkout alone would keep the state forever. I
 once the state has also gone unused for ``worktrees.install_state_retention_days``: every sync
 recreates ``inputs/`` and every launch takes a generation lease (moving its
 ``.leases`` dir), so a checkout that still exists behind a mount boundary and is used at all keeps
-its state. One unused for longer is rebuilt by ``hermes pm repair`` / the next activation.
+its state. One unused for longer is rebuilt by ``noone pm repair`` / the next activation.
 """
 
 from __future__ import annotations
@@ -61,14 +61,14 @@ def _retention_seconds(data_root: Path) -> float | None:
     Every profile of that root shares the store, so the active profile's config must not decide
     for the others: a named profile without the key would apply the default to a state the root
     opted out of reclaiming."""
-    from hermes_cli.config import cfg_get, load_config_readonly
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_cli.config import cfg_get, load_config_readonly
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
-    token = set_hermes_home_override(data_root)
+    token = set_agent_home_override(data_root)
     try:
         days = cfg_get(load_config_readonly(), "worktrees", "install_state_retention_days", default=14)
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
     return days * 86400 if isinstance(days, (int, float)) and days > 0 else None
 
 
@@ -117,7 +117,7 @@ def _install_lock(state: Path):
 
 def _leased(state: Path) -> bool:
     """True while a generation lease (dependency env or PM runtime) is held."""
-    from hermes_cli.runtime_state import leases_held
+    from agent_cli.runtime_state import leases_held
 
     for generations in (state / "environments", state / "pm-runtime" / "generations"):
         if generations.is_dir():

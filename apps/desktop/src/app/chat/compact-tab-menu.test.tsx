@@ -10,14 +10,14 @@ import { registry } from '@/contrib/registry'
 import { $selectedStoredSessionId, $sessions } from '@/store/session'
 import { $sessionTiles, type SessionTileDelegate, setSessionTileDelegate } from '@/store/session-states'
 import { stubMenuDomApis, stubResizeObserver } from '@/test/jsdom'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 import { watchSessionTiles, workspaceTabActions } from './session-tile'
 
 // The transport: the REST rename the dialog falls back to with no live runtime.
 const renameSession = vi.hoisted(() => vi.fn())
 
-vi.mock('@/hermes', async importOriginal => ({ ...(await importOriginal<object>()), renameSession }))
+vi.mock('@/agent-client', async importOriginal => ({ ...(await importOriginal<object>()), renameSession }))
 
 const row = (id: string, title: string): SessionInfo => ({
   cwd: null,

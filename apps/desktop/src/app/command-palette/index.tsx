@@ -1,28 +1,5 @@
 import { useStore } from '@nanostores/react'
-import { useQuery } from '@tanstack/react-query'
-import { Dialog as DialogPrimitive } from 'radix-ui'
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
-
-import {
-  HUD_HEADING,
-  HUD_ITEM,
-  HUD_NOTE,
-  HUD_NOTE_VARIANT,
-  HUD_POSITION,
-  HUD_SURFACE,
-  HUD_TEXT
-} from '@/app/floating-hud'
-import { SESSION_IMPORT_ROUTE } from '@/app/routes'
-import { leaveIntro } from '@/components/onboarding/first-run/intro'
-import { codiconIcon } from '@/components/ui/codicon'
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { HighlightMatches } from '@/components/ui/highlight-matches'
-import { KbdCombo } from '@/components/ui/kbd'
-import { getHermesConfigRecord, listAllProfileSessions } from '@/hermes'
-import { useMediaQuery } from '@/hooks/use-media-query'
-import { useI18n } from '@/i18n'
-import { sessionTitle } from '@/lib/chat-runtime'
+import { getAppIcon } from '@noone/ui/app-icon'
 import {
   Activity,
   AppWindow,
@@ -58,7 +35,30 @@ import {
   Users,
   Wrench,
   Zap
-} from '@/lib/icons'
+} from '@noone/ui/icons'
+import { useQuery } from '@tanstack/react-query'
+import { Dialog as DialogPrimitive } from 'radix-ui'
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
+
+import { getHermesConfigRecord, listAllProfileSessions } from '@/agent-client'
+import {
+  HUD_HEADING,
+  HUD_ITEM,
+  HUD_NOTE,
+  HUD_NOTE_VARIANT,
+  HUD_POSITION,
+  HUD_SURFACE,
+  HUD_TEXT
+} from '@/app/floating-hud'
+import { SESSION_IMPORT_ROUTE } from '@/app/routes'
+import { leaveIntro } from '@/components/onboarding/first-run/intro'
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { HighlightMatches } from '@/components/ui/highlight-matches'
+import { KbdCombo } from '@/components/ui/kbd'
+import { useMediaQuery } from '@/hooks/use-media-query'
+import { useI18n } from '@/i18n'
+import { sessionTitle } from '@/lib/chat-runtime'
 import { getServers } from '@/lib/mcp-servers'
 import { normalize } from '@/lib/text'
 import { cn } from '@/lib/utils'
@@ -460,7 +460,7 @@ const NON_CONFIG_SETTINGS: ReadonlyArray<{
   },
   { icon: Archive, keywords: ['history', 'archived'], labelKey: 'archivedChats', tab: 'sessions' },
   {
-    icon: codiconIcon('extensions'),
+    icon: getAppIcon('extensions'),
     keywords: ['plugins', 'plugin settings', 'plugin options', 'addons', 'add-ons', 'extensions'],
     labelKey: 'plugins',
     tab: 'plugins'
@@ -794,7 +794,7 @@ function CommandPaletteBody({ onExited }: { onExited: () => void }) {
       items: [
         {
           action: 'workspace.openFolder',
-          icon: codiconIcon('folder-opened'),
+          icon: getAppIcon('folder-opened'),
           id: 'project-open-folder',
           keywords: ['open', 'folder', 'directory', 'project', 'add', 'import', 'workspace'],
           label: cc.openFolder,
@@ -802,7 +802,7 @@ function CommandPaletteBody({ onExited }: { onExited: () => void }) {
         },
         ...filterVisibleProjects(projectTree, dismissedAutoProjects).map(project => ({
           comboHint: 'mod+enter',
-          icon: codiconIcon(project.icon || (project.isNoProject ? 'home' : 'folder-library')),
+          icon: getAppIcon(project.icon || (project.isNoProject ? 'home' : 'folder-library')),
           id: `project-${project.id}`,
           keywords: ['project', 'workspace', 'go to', project.label, ...(project.path ? [project.path] : [])],
           label: project.label,
@@ -972,7 +972,7 @@ function CommandPaletteBody({ onExited }: { onExited: () => void }) {
           },
           {
             action: 'view.showBrowser',
-            icon: codiconIcon('globe'),
+            icon: getAppIcon('globe'),
             id: 'cc-open-browser',
             keywords: ['browser', 'web', 'url', 'address', 'open', 'toggle', 'close', 'navigate', 'internet', 'site'],
             label: cc.toggleBrowser,
@@ -1039,7 +1039,7 @@ function CommandPaletteBody({ onExited }: { onExited: () => void }) {
     // `selectTick` is a deliberate re-read trigger, not a value: rows report
     // live state through `detail()`, so the groups must rebuild after a select
     // that kept the palette open — eslint only sees an unused dep.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [
     contributedItems,
     dismissedAutoProjects,
@@ -1106,7 +1106,7 @@ function CommandPaletteBody({ onExited }: { onExited: () => void }) {
       result.push({
         items: [
           {
-            icon: codiconIcon('folder-opened'),
+            icon: getAppIcon('folder-opened'),
             id: `open-folder-${directId}`,
             keywords: ['open', 'folder', 'project', directId],
             label: t.commandCenter.openFolderAt(directId),

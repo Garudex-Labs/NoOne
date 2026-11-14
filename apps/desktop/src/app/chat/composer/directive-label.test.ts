@@ -8,7 +8,7 @@ import { classify } from './hooks/use-at-completions'
 import { useComposerTrigger } from './hooks/use-composer-trigger'
 import { composerPlainText, RICH_INPUT_SLOT } from './rich-editor'
 
-/** A row exactly as tui_gateway's complete.path emits it, run through the
+/** A row exactly as agent_backend's complete.path emits it, run through the
  *  real classify() the popover uses. */
 function backendRow(text: string, display: string, meta: string): Unstable_TriggerItem {
   const c = classify({ text, display, meta })
@@ -138,7 +138,7 @@ describe('one label per reference, on every surface', () => {
 
     act(() => result.current.replaceTriggerWithChip(item))
 
-    const expected = 'github.com/NousResearch/hermes-agent/pull/74533'
+    const expected = 'github.com/Garudex-Labs/NoOne/pull/74533'
 
     expect(item.label).toBe(expected)
     expect(editor.querySelector('[data-ref-text]')?.textContent).toBe(expected)

@@ -1,6 +1,6 @@
 """Plain-text ``/approve`` prompt for adapters whose ``send`` cuts long text instead of splitting it.
 
-ntfy, DingTalk, Photon and LINE (``splits_long_messages = False``) deliver only the first N
+Photon and LINE (``splits_long_messages = False``) deliver only the first N
 characters of a message. The default prompt puts the command first, so on those surfaces a long
 command pushed the answer instructions and the deadline past the cut. Here the instructions come
 first, and a command that would still be cut is shown shortened with the prompt marked Deny-only

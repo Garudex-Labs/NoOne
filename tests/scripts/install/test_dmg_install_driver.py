@@ -39,7 +39,7 @@ def test_dmg_driver_requires_complete_pm_source_install(tmp_path, missing, expec
     if missing != "app":
         (root / "apps/desktop/release/mac-arm64/Hermes.app").mkdir(parents=True)
     if missing not in {"completion", "historical", "wrong-root-log"}:
-        (root / ".hermes-bootstrap-complete").write_text("completed", encoding="utf-8")
+        (root / ".agent-bootstrap-complete").write_text("completed", encoding="utf-8")
     # The legacy file must not mask a missing PM publication.
     legacy = root / "venv/bin/hermes"
     legacy.parent.mkdir(parents=True)
@@ -57,7 +57,7 @@ def test_dmg_driver_requires_complete_pm_source_install(tmp_path, missing, expec
         command = mocks / name
         command.write_text(script, encoding="utf-8")
         command.chmod(0o755)
-    app_bin = tmp_path / "Hermes-Setup"
+    app_bin = tmp_path / "NoOne-Setup"
     app_bin.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
     app_bin.chmod(0o755)
     home = tmp_path / "home"
@@ -67,7 +67,7 @@ def test_dmg_driver_requires_complete_pm_source_install(tmp_path, missing, expec
         logs.mkdir(parents=True)
         logged_root = tmp_path / "other-install" if missing == "wrong-root-log" else root
         (logs / "bootstrap-installer.log").write_text(
-            f"INFO hermes_bootstrap_lib::bootstrap: bootstrap complete install_root={logged_root}\n",
+            f"INFO agent_bootstrap_lib::bootstrap: bootstrap complete install_root={logged_root}\n",
             encoding="utf-8",
         )
     result = subprocess.run(

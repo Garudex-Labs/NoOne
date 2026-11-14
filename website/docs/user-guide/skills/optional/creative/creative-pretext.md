@@ -1,45 +1,53 @@
 ---
 title: "Pretext — Build creative browser demos with DOM-free text layout"
-sidebar_label: "Pretext"
+sidebarTitle: "Pretext"
 description: "Build creative browser demos with DOM-free text layout"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Pretext
+# Pretext {#pretext}
 
 Build creative browser demos with DOM-free text layout.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/pretext` |
+| Source | Optional — install with `noone skills install official/creative/pretext` |
 | Path | `optional-skills/creative/pretext` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `creative-coding`, `typography`, `pretext`, `ascii-art`, `canvas`, `generative`, `text-layout`, `kinetic-typography` |
 | Related skills | [`p5js`](../../bundled/creative/creative-p5js.md), [`claude-design`](../../bundled/creative/creative-claude-design.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md), [`architecture-diagram`](../../bundled/creative/creative-architecture-diagram.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Pretext Creative Demos
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Pretext Creative Demos {#pretext-creative-demos}
+
+## Overview {#overview}
 
 [`@chenglou/pretext`](https://github.com/chenglou/pretext) is a 15KB zero-dependency TypeScript library by Cheng Lou (React core, ReasonML, Midjourney) for **DOM-free multiline text measurement and layout**. It does one thing: given `(text, font, width)`, return the line breaks, per-line widths, per-grapheme positions, and total height — all via canvas measurement, no reflow.
 
 That sounds like plumbing. It is not. Because it is fast and geometric, it is a **creative primitive**: you can reflow paragraphs around a moving sprite at 60fps, build games whose level geometry is made of real words, drive ASCII logos through prose, shatter text into particles with exact per-grapheme starting positions, or pack shrink-wrapped multiline UI without any `getBoundingClientRect` thrash.
 
-This skill exists so Hermes can make **cool demos** with it — the kind people post to X. See `pretext.cool` and `chenglou.me/pretext` for the community demo corpus.
+This skill exists so {{app-name}} can make **cool demos** with it — the kind people post to X. See `pretext.cool` and `chenglou.me/pretext` for the community demo corpus.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use when the user asks for:
 - A "pretext demo" / "cool pretext thing" / "text-as-X"
@@ -57,7 +65,7 @@ Don't use for:
 - Image → text (use `ascii-art` / `ascii-video` skills)
 - Pure canvas generative art with no text role — use `p5js`
 
-## Creative Standard
+## Creative Standard {#creative-standard}
 
 This is visual art rendered in a browser. Pretext returns numbers; **you** draw the thing.
 
@@ -67,7 +75,7 @@ This is visual art rendered in a browser. Pretext returns numbers; **you** draw 
 - **Real source/text, not lorem ipsum.** The corpus should mean something. Short manifestos, poetry, real source code, a found text, the library's own README — never `lorem ipsum`.
 - **First-paint excellence.** No loading states, no blank frames. The demo must look shippable the instant it opens.
 
-## Stack
+## Stack {#stack}
 
 Single self-contained HTML file per demo. No build step.
 
@@ -91,11 +99,11 @@ import {
 
 Pin the version. `@0.0.6` at time of writing — check [npm](https://www.npmjs.com/package/@chenglou/pretext) for the latest if demo behavior is off.
 
-## The Two Use Cases
+## The Two Use Cases {#the-two-use-cases}
 
 Almost everything reduces to one of these two shapes. Learn both.
 
-### Use-case 1 — measure, then render with CSS/DOM
+### Use-case 1 — measure, then render with CSS/DOM {#use-case-1--measure-then-render-with-cssdom}
 
 ```js
 const prepared = prepare(text, "16px Inter");
@@ -110,7 +118,7 @@ You still let the browser draw the text. Pretext just tells you how tall the box
 
 **Keep `font` and `letterSpacing` exactly in sync with your CSS.** The canvas `ctx.font` format (e.g. `"16px Inter"`, `"500 17px 'JetBrains Mono'"`) must match the rendered CSS, or measurements drift.
 
-### Use-case 2 — measure *and* render yourself
+### Use-case 2 — measure *and* render yourself {#use-case-2--measure-and-render-yourself}
 
 ```js
 const prepared = prepareWithSegments(text, FONT);
@@ -143,13 +151,13 @@ while (true) {
 
 This is the most important pattern in the whole library. It's what unlocks "text flowing around a dragged sprite" — the demo that went viral on X.
 
-### Helpers worth knowing
+### Helpers worth knowing {#helpers-worth-knowing}
 
 - `measureLineStats(prepared, maxWidth)` → `{ lineCount, maxLineWidth }` — the widest line, i.e. multiline shrink-wrap width.
 - `walkLineRanges(prepared, maxWidth, callback)` — iterate lines without allocating strings. Use for stats/physics over graphemes when you don't need the characters.
 - `@chenglou/pretext/rich-inline` — the same system but for paragraphs mixing fonts / chips / mentions. Import from the subpath.
 
-## Demo Recipe Patterns
+## Demo Recipe Patterns {#demo-recipe-patterns}
 
 The community corpus (see `references/patterns.md`) clusters into a handful of strong patterns. Pick one and riff — don't invent a new category unless asked.
 
@@ -165,7 +173,7 @@ The community corpus (see `references/patterns.md`) clusters into a handful of s
 
 See `templates/donut-orbit.html` and `templates/hello-orb-flow.html` for working single-file starters.
 
-## Workflow
+## Workflow {#workflow}
 
 1. **Pick a pattern** from the table above based on the user's brief.
 2. **Start from a template**:
@@ -182,7 +190,7 @@ See `templates/donut-orbit.html` and `templates/hello-orb-flow.html` for working
 6. **Check the console** — pretext will throw if `prepareWithSegments` is called with a bad font string; `Intl.Segmenter` is available in every modern browser.
 7. **Show the user the file path**, not just the code — they want to open it.
 
-## Performance Notes
+## Performance Notes {#performance-notes}
 
 - `prepare()` / `prepareWithSegments()` is the expensive call. Do it **once** per text+font pair. Cache the handle.
 - On resize, only rerun `layout()` / `layoutWithLines()` — never re-prepare.
@@ -192,7 +200,7 @@ See `templates/donut-orbit.html` and `templates/hello-orb-flow.html` for working
 - For fades, prefer layer opacity over changing glyph intensity or obstacle scale. Put transient ASCII sprites on their own canvas and fade the canvas with CSS/GSAP opacity so geometry does not appear to shrink.
 - Canvas `ctx.font` setting is surprisingly slow; set it **once** per frame if font doesn't vary, not per `fillText` call.
 
-## Common Pitfalls
+## Common Pitfalls {#common-pitfalls}
 
 1. **Drifting CSS/canvas font strings.** `ctx.font = "16px Inter"` measured, but CSS says `font-family: Inter, sans-serif; font-size: 16px`. Fine *if* Inter loads. If Inter 404s, CSS falls back to sans-serif and measurements drift by 5-20%. Always `preload` the font or use a web-safe family.
 
@@ -210,7 +218,7 @@ See `templates/donut-orbit.html` and `templates/hello-orb-flow.html` for working
 
 8. **Shipping a cold demo.** The default first-paint looks tutorial-grade. Add: vignette, subtle scanline, idle auto-motion, one carefully chosen interactive response (drag, hover, scroll, click). Without these, "cool pretext demo" lands as "intern repro of the README."
 
-## Verification Checklist
+## Verification Checklist {#verification-checklist}
 
 - [ ] Demo is a single self-contained `.html` file — opens by double-click or `python -m http.server`
 - [ ] `@chenglou/pretext` imported via `esm.sh` with pinned version
@@ -223,7 +231,7 @@ See `templates/donut-orbit.html` and `templates/hello-orb-flow.html` for working
 - [ ] 60fps on a mid-tier laptop (or graceful degradation documented)
 - [ ] One "extra mile" detail the user didn't ask for
 
-## Reference: Community Demos
+## Reference: Community Demos {#reference-community-demos}
 
 Clone these for inspiration / patterns (all MIT-ish, linked from [pretext.cool](https://www.pretext.cool/)):
 

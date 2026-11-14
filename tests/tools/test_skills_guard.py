@@ -619,18 +619,18 @@ class TestScanSkill:
             "Never call `load_dotenv(HERMES_HOME/.env)` to get a key.\n",
             encoding="utf-8")
         (skill_dir / "run.py").write_text(
-            "from dotenv import dotenv_values\nfrom hermes_constants import get_hermes_home\n"
-            'keys = dotenv_values(get_hermes_home() / ".env")\n'
+            "from dotenv import dotenv_values\nfrom agent_constants import get_agent_home\n"
+            'keys = dotenv_values(get_agent_home() / ".env")\n'
             'load_dotenv("./project.env")\n'
             # Not the Hermes .env: a .hermes name that is not a path segment, or a lower-case variable.
             'load_dotenv(".hermes-project.env")\nload_dotenv("myapp.hermes.env")\n'
             'load_dotenv(hermes_home_env_path)\n'
             # A Hermes name after the call's closing paren is not one of its arguments.
             'load_dotenv("./project.env")  # independent of HERMES_HOME\n'
-            'load_dotenv("./project.env"); home = get_hermes_home()\n'
+            'load_dotenv("./project.env"); home = get_agent_home()\n'
             # A paren inside a string argument does not end the call's arguments early.
             'load_dotenv("./project(.env")  # independent of HERMES_HOME\n'
-            'load_dotenv("./project(.env"); home = get_hermes_home()\n', encoding="utf-8")
+            'load_dotenv("./project(.env"); home = get_agent_home()\n', encoding="utf-8")
         result = scan_skill(skill_dir, source="community")
         hits = {(fi.file, fi.line, fi.severity) for fi in result.findings if fi.pattern_id == "hermes_env_dotenv"}
         # Prose that quotes the call is flagged too: a caution the user confirms, not a hard block.

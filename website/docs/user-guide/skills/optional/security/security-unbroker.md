@@ -1,35 +1,43 @@
 ---
 title: "Unbroker — Remove your info from data-broker sites, by name or phone"
-sidebar_label: "Unbroker"
+sidebarTitle: "Unbroker"
 description: "Remove your info from data-broker sites, by name or phone"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Unbroker
+# Unbroker {#unbroker}
 
 Remove your info from data-broker sites, by name or phone.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/security/unbroker` |
+| Source | Optional — install with `noone skills install official/security/unbroker` |
 | Path | `optional-skills/security/unbroker` |
 | Version | `1.0.0` |
-| Author | SHL0MS (github.com/SHL0MS) |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `privacy`, `data-broker`, `opt-out`, `ccpa`, `gdpr`, `security`, `doxxing` |
 | Related skills | [`google-workspace`](../../bundled/productivity/productivity-google-workspace.md), [`agentmail`](../../optional/email/email-agentmail.md), [`himalaya`](../../bundled/email/email-himalaya.md), [`scrapling`](../../optional/research/research-scrapling.md), [`osint-investigation`](../../optional/research/research-osint-investigation.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# unbroker
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# unbroker {#unbroker-1}
 
 Find where a person's personal information (name, addresses, phone, email, relatives) is exposed on
 data brokers and people-search sites, then remove it - automatically where possible, with guided
@@ -45,7 +53,7 @@ form-driving with native tools: `web_extract` and `browser_exec` for searching a
 `cronjob` for recurring re-scans. Runs can be entered from a phone number alone (spam-call
 scrubbing), with the FTC Do Not Call registry one-shot (`dnc`) alongside the opt-outs.
 
-## Autonomy contract
+## Autonomy contract {#autonomy-contract}
 
 This skill is designed to run **hands-off**. After intake (+ recorded consent) there are exactly TWO
 legitimate human touchpoints: (1) the intake conversation itself, and (2) ONE consolidated human-task
@@ -69,7 +77,7 @@ The hard limits that autonomy never overrides: no acting without recorded consen
 beyond `disclosure_fields`, no CAPTCHA/anti-bot bypass, and `confirmed_removed` only after a
 verifying re-scan.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - "Remove my (or my family member's) data from data brokers / people-search sites."
 - "Opt me out", "delete me from Spokeo/Whitepages/etc.", "clean up after a doxxing."
@@ -78,12 +86,12 @@ verifying re-scan.
 - "My number keeps getting spam calls" - phone-led scrub: find where the number is listed, opt
   out, register it on the Do Not Call Registry, and re-check on a schedule.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - `python` (stdlib only; no extra packages needed for the core engine).
 - **Optional upgrades** (the skill works zero-config without these; `setup --auto` turns on every
   one it detects, reading credentials from the shell env **and from `$HERMES_HOME/.env`** so keys
-  Hermes already loads for its own tools are picked up without re-exporting - each one converts a
+  {{app-name}} already loads for its own tools are picked up without re-exporting - each one converts a
   class of human tasks into agent actions):
   - **Cloud browser (recommended default): `BROWSERBASE_API_KEY`.** `setup --auto` selects it
     whenever the key is present, and it is the intended baseline: a real residential-IP cloud
@@ -112,7 +120,7 @@ verifying re-scan.
   - Google Sheets tracker: the `google-workspace` skill.
   - The `scrapling` skill for stealth/Cloudflare-protected pages.
 
-## How to Run
+## How to Run {#how-to-run}
 
 Run everything through the `terminal` tool. From this skill's directory:
 
@@ -124,7 +132,7 @@ The engine stores data under `$PDD_DATA_DIR` (default `$HERMES_HOME/unbroker`), 
 `0600`. Run via `terminal`, **not** `execute_code` (that sandbox scrubs env and redacts output, which
 breaks reading the dossier).
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Command | Purpose |
 |---|---|
@@ -152,7 +160,7 @@ breaks reading the dossier).
 | `$PDD status <subject>` | Markdown status report |
 | `$PDD report <subject> --sheets` | Rows for the Google Sheets tracker |
 
-## Batch operation (two-phase: crawl-all, then delete)
+## Batch operation (two-phase: crawl-all, then delete) {#batch-operation-two-phase-crawl-all-then-delete}
 
 For anything past a couple of brokers, run this as **map → reduce → act**, not broker-by-broker:
 
@@ -209,7 +217,7 @@ For anything past a couple of brokers, run this as **map → reduce → act**, n
 Subagent reports are self-reports: the parent re-verifies key claims (listing URLs, match basis) before
 recording `found` and before any deletion.
 
-## Procedure (the autonomous loop)
+## Procedure (the autonomous loop) {#procedure-the-autonomous-loop}
 
 1. **Setup (once, no questions).** Run `$PDD setup --auto` - it detects capabilities and configures
    the most autonomous valid combination itself (programmatic email when `EMAIL_*` creds exist,
@@ -291,7 +299,7 @@ recording `found` and before any deletion.
    windows, verification polls, and reappearance sweeps all flow through the same queue, so the case
    keeps advancing with zero human attention.
 
-## Spam-call scrubber (phone-led run)
+## Spam-call scrubber (phone-led run) {#spam-call-scrubber-phone-led-run}
 
 A number that keeps getting spam calls is almost always published on people-search sites - that
 is where lead buyers get it. The same engine, entered from the number:
@@ -317,7 +325,7 @@ is where lead buyers get it. The same engine, entered from the number:
    disclosure. DNC stops lawful
    telemarketers, not scammers - broker removal is what cuts the lead lists, so do both.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Never disclose more than the broker already shows.** Submit only `disclosure_fields`. The engine
   never volunteers SSN/ID numbers; you must not either.
@@ -356,7 +364,7 @@ is where lead buyers get it. The same engine, entered from the number:
   residential browser on first use, then set `last_verified`. Field-verified curated records (no
   `confidence`, e.g. the cluster parents) have checked mechanics and take precedence.
 
-## Verification
+## Verification {#verification}
 
 - `scripts/run_tests.sh tests/skills/test_unbroker_skill.py` (hermetic; no network), or the
   dependency-free runner `python tests/skills/test_unbroker_skill.py`.

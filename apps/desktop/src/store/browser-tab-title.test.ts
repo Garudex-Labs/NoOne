@@ -1,7 +1,8 @@
+import { $appName, DEFAULT_APP_NAME } from '@noone/shared/application-identity'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { createClientSessionState } from '@/lib/chat-runtime'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 import { makeSessionInfo } from '../test/session-info'
 
@@ -32,8 +33,9 @@ function reset() {
   $sessionSeenCounts.set({})
   $unreadFinishedMarkers.set({})
   $unreadFinishedSessionIds.set([])
+  $appName.set(DEFAULT_APP_NAME)
   delete document.documentElement.dataset.hermesDesktopHost
-  document.title = 'Hermes'
+  document.title = DEFAULT_APP_NAME
 }
 
 describe('browserTabTitle', () => {
@@ -66,6 +68,16 @@ describe('browserTabTitle', () => {
 describe('installBrowserTabTitle', () => {
   beforeEach(reset)
   afterEach(reset)
+
+  it('updates identity without losing the caption or activity marker', () => {
+    document.documentElement.dataset.hermesDesktopHost = 'browser'
+    setSessions([row({ id: 's1', title: 'Fix login' })])
+    $selectedStoredSessionId.set('s1')
+    uninstall = installBrowserTabTitle()
+    publishSessionState('r1', state('s1', { busy: true }))
+    $appName.set('Profile Atlas')
+    expect(document.title).toBe('● Fix login · Profile Atlas')
+  })
 
   it('follows the focused session and background status in a browser host', () => {
     document.documentElement.dataset.hermesDesktopHost = 'browser'
@@ -101,7 +113,7 @@ describe('installBrowserTabTitle', () => {
     $selectedStoredSessionId.set('s1')
     uninstall = installBrowserTabTitle()
 
-    expect(document.title).toBe('Hermes')
+    expect(document.title).toBe(DEFAULT_APP_NAME)
   })
 
   it('leaves the native window title alone', () => {
@@ -110,6 +122,6 @@ describe('installBrowserTabTitle', () => {
     uninstall = installBrowserTabTitle()
     publishSessionState('r1', state('s1', { busy: true }))
 
-    expect(document.title).toBe('Hermes')
+    expect(document.title).toBe(DEFAULT_APP_NAME)
   })
 })

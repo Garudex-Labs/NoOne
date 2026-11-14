@@ -5,7 +5,6 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { afterEach, expect, test } from 'vitest'
-import { buildTui } from '../scripts/build/tui.mjs'
 import { buildWeb } from '../scripts/build/web.mjs'
 import { productOutput, publishDirectory, withProduct } from '../scripts/build/frontend-common.mjs'
 
@@ -43,20 +42,20 @@ function webSource(source) {
 }
 
 test('product outputs exclude the source tree except supported generated destinations', async () => {
-  const inputs = ['ui-tui', 'apps/shared', 'node_modules']
+  const inputs = ['web', 'apps/shared', 'node_modules']
   // Only call the read-only validator on real source paths: never publish here.
-  for (const name of ['pm', 'hermes_cli', 'scripts', 'pyproject.toml', '.git', 'tools', '.build', 'apps/desktop/build/products']) {
+  for (const name of ['pm', 'agent_cli', 'scripts', 'pyproject.toml', '.git', 'tools', '.build', 'apps/desktop/build/products']) {
     expect(() => productOutput(repo, path.join(repo, name), inputs), name).toThrow(/output/i)
   }
   const base = fixture()
   const source = path.join(base, 'source')
   mkdirSync(source)
-  for (const name of ['new-source-file', 'pm/generated', 'hermes_cli/web_dist-copy', 'apps/desktop/dist-copy', 'apps/desktop/build/native-deps-copy', 'hermes_cli/web_dist/assets',
+  for (const name of ['new-source-file', 'pm/generated', 'agent_cli/web_dist-copy', 'apps/desktop/dist-copy', 'apps/desktop/build/native-deps-copy', 'agent_cli/web_dist/assets',
     'apps/desktop/build/native-deps-win32-x64/nested', 'apps/desktop/build/native-deps-freebsd-x64', 'apps/desktop/build/native-deps-win32-ia32']) {
     expect(() => productOutput(source, path.join(source, name), inputs), name).toThrow(/output/i)
   }
-  for (const name of ['hermes_cli/web_dist', 'apps/desktop/dist', 'apps/desktop/build/native-deps', 'apps/desktop/build/native-deps-win32-x64',
-    'apps/desktop/build/native-deps-darwin-arm64', 'apps/desktop/build/products/tui', 'apps/desktop/build/products/web', '.build/web', '.build/termux/tui']) {
+  for (const name of ['agent_cli/web_dist', 'apps/desktop/dist', 'apps/desktop/build/native-deps', 'apps/desktop/build/native-deps-win32-x64',
+    'apps/desktop/build/native-deps-darwin-arm64', 'apps/desktop/build/products/web', '.build/web', '.build/termux/web']) {
     const out = path.join(source, name)
     expect(productOutput(source, out, inputs).out).toBe(out)
     expect(existsSync(out)).toBe(false)
@@ -120,7 +119,7 @@ test('publication replaces only builder-owned directories and rechecks ownership
 
 test('existing npm build directories can be rebuilt without adopting arbitrary outputs', async () => {
   const source = fixture()
-  for (const name of ['ui-tui/dist', 'hermes_cli/web_dist', 'apps/desktop/dist', 'apps/desktop/build/native-deps']) {
+  for (const name of ['apps/desktop/dist', 'agent_cli/web_dist', 'apps/desktop/dist', 'apps/desktop/build/native-deps']) {
     const out = path.join(source, name)
     put(out, 'old-output', 'previous compiler output')
     await withProduct(out, product => put(product, 'new-output', 'rebuilt'), { source })
@@ -182,66 +181,6 @@ test('web rejects missing icons and compiler failures without publishing stale s
   expect(readFileSync(path.join(out, 'index.html'))).toEqual(previous)
 }, 30_000)
 
-function tuiSource(source) {
-  put(source, 'package.json', '{"private":true}')
-  put(source, 'ui-tui/package.json', '{"type":"module"}')
-  put(source, 'ui-tui/src/entry.tsx', '#!/usr/bin/env node\nimport { answer } from "@hermes/ink"; console.log(answer);')
-  put(source, 'ui-tui/packages/hermes-ink/src/entry-exports.ts', 'import devtools from "react-devtools-core"; devtools.initialize(); export const answer: string = "prepared source";')
-  for (const name of ['gateway_bootstrap.py', 'clipboard_image.py']) {
-    put(source, `ui-tui/scripts/${name}`, `print(${JSON.stringify(name)})\n`)
-  }
-}
-
-test('TUI uses prepared workspace-local tools from an unrelated cwd and publishes a relocatable module product', () => {
-  const base = fixture()
-  const source = path.join(base, 'source with spaces')
-  tuiSource(source)
-  copyFileSync(path.join(repo, 'ui-tui/src/lib/pythonHelpers.ts'), path.join(source, 'ui-tui/src/pythonHelpers.ts'))
-  put(source, 'ui-tui/src/entry.tsx', `#!/usr/bin/env node
-import { readFileSync } from 'node:fs'
-import { answer } from '@hermes/ink'
-import { pythonHelperPath } from './pythonHelpers'
-console.log(JSON.stringify({ answer, helpers: ['gateway_bootstrap.py', 'clipboard_image.py'].map(name =>
-  readFileSync(pythonHelperPath(name, process.env.HERMES_PYTHON_SRC_ROOT), 'utf8')) }))`)
-  dependency(source, 'ui-tui', 'esbuild')
-  const out = path.join(base, 'product one')
-  execFileSync(process.execPath, [path.join(repo, 'scripts/build/tui.mjs'), '--source', source, '--out', out], { cwd: base })
-  expect(JSON.parse(readFileSync(path.join(out, 'package.json'), 'utf8')).type).toBe('module')
-  const entry = path.join(out, 'dist/entry.js')
-  expect(readFileSync(entry, 'utf8').startsWith('#!')).toBe(false)
-  rmSync(source, { recursive: true })
-  // Nix keeps Python's site-packages separate from the compiled TUI (#139208).
-  const pythonRoot = path.join(base, 'site-packages')
-  mkdirSync(pythonRoot)
-  const result = execFileSync(process.execPath, [entry], {
-    cwd: base, encoding: 'utf8', env: { ...process.env, HERMES_PYTHON_SRC_ROOT: pythonRoot },
-  })
-  expect(JSON.parse(result)).toEqual({
-    answer: 'prepared source',
-    helpers: ['gateway_bootstrap.py', 'clipboard_image.py'].map(name => `print(${JSON.stringify(name)})\n`),
-  })
-})
-
-test('TUI failure does not publish or disturb a previous product, and missing prepared tools fail clearly', async () => {
-  const base = fixture()
-  const source = path.join(base, 'source')
-  tuiSource(source)
-  const out = path.join(base, 'out')
-  await expect(buildTui({ source, out })).rejects.toThrow(/esbuild.*prepared|prepared.*esbuild/i)
-  expect(existsSync(out)).toBe(false)
-  dependency(source, '', 'esbuild')
-  await buildTui({ source, out })
-  const { productCurrent } = await import('../scripts/build/freshness.mjs')
-  expect(productCurrent({ source, product: 'tui', out: path.join(out, 'dist') })).toBe(true)
-  const previous = readFileSync(path.join(out, 'dist/entry.js'))
-  put(source, 'ui-tui/src/entry.tsx', 'const broken = ;')
-  await expect(buildTui({ source, out })).rejects.toThrow()
-  expect(productCurrent({ source, product: 'tui', out: path.join(out, 'dist') })).toBe(false)
-  expect(readFileSync(path.join(out, 'dist/entry.js'))).toEqual(previous)
-  await expect(buildTui({ source, out: source })).rejects.toThrow(/output/i)
-  expect(existsSync(path.join(source, 'ui-tui/src/entry.tsx'))).toBe(true)
-})
-
 test('built web freshness follows shared sources and build inputs, not mtimes or generated trees', async () => {
   const { productCurrent } = await import('../scripts/build/freshness.mjs')
   const base = fixture()
@@ -284,91 +223,6 @@ test('built web freshness follows shared sources and build inputs, not mtimes or
   rmSync(path.join(out, 'favicon.ico'))
   expect(productCurrent({ source, product: 'web', out })).toBe(false)
 }, 30_000)
-
-test('built TUI stays current after documentation, test and unrelated recipe changes', async () => {
-  const { productCurrent } = await import('../scripts/build/freshness.mjs')
-  const base = fixture()
-  const source = path.join(base, 'source')
-  const out = path.join(base, 'tui')
-  tuiSource(source)
-  dependency(source, '', 'esbuild')
-  put(source, 'apps/shared/src/value.ts', 'export const value: string = "shared source";')
-  await buildTui({ source, out })
-  const entry = path.join(out, 'dist/entry.js')
-  const before = readFileSync(entry)
-  for (const name of [
-    'ui-tui/README.md', 'ui-tui/src/__tests__/new.test.ts', 'ui-tui/src/value.spec.ts',
-    'ui-tui/packages/hermes-ink/src/value.test.ts', 'apps/shared/src/value.test.ts',
-    'apps/shared/README.md', 'scripts/build/web.mjs', 'scripts/build/desktop.mjs',
-    'scripts/build/README.md', 'scripts/build/node-deps.mjs',
-  ]) {
-    put(source, name, 'not a compiler input')
-    expect(productCurrent({ source, product: 'tui', out: path.join(out, 'dist') }), name).toBe(true)
-  }
-  await buildTui({ source, out })
-  expect(readFileSync(entry)).toEqual(before)
-  expect(execFileSync(process.execPath, [entry], { encoding: 'utf8' }).trim()).toBe('prepared source')
-})
-
-test('TUI freshness invalidates source, configuration and compiler inputs and damaged outputs', async () => {
-  const { productCurrent } = await import('../scripts/build/freshness.mjs')
-  const base = fixture()
-  const source = path.join(base, 'source')
-  const out = path.join(base, 'tui')
-  tuiSource(source)
-  dependency(source, '', 'esbuild')
-  // Include the shared workspace in the real compiler graph, not just the receipt.
-  put(source, 'ui-tui/src/value.ts', 'export const value: string = "shared source";')
-  put(source, 'apps/shared/src/value.ts', 'export { value } from "../../../ui-tui/src/value";')
-  put(source, 'ui-tui/src/entry.tsx', 'import { value } from "../../apps/shared/src/value"; console.log(value);')
-  put(source, 'pnpm-lock.yaml', "lockfileVersion: '9.0'\n")
-  const preservedTimes = new Date('2020-01-01T00:00:00Z')
-  const sameLengthChanges = [
-    ['ui-tui/src/value.ts', 'shared', 'edited'],
-    ['apps/shared/src/value.ts', 'value', 'VALUE'],
-    ['package.json', 'true', 'null'],
-    ['pnpm-lock.yaml', '9.0', '6.0'],
-  ]
-  for (const [name] of sameLengthChanges) utimesSync(path.join(source, name), preservedTimes, preservedTimes)
-  await buildTui({ source, out })
-  const current = () => productCurrent({ source, product: 'tui', out: path.join(out, 'dist') })
-  expect(current()).toBe(true)
-  for (const [name, from, to] of sameLengthChanges) {
-    const file = path.join(source, name), previous = readFileSync(file, 'utf8'), before = statSync(file)
-    expect(previous).toContain(from)
-    writeFileSync(file, previous.replace(from, to))
-    utimesSync(file, preservedTimes, preservedTimes)
-    expect([statSync(file).size, statSync(file).mtimeMs]).toEqual([before.size, before.mtimeMs])
-    expect(current(), `same-size and same-mtime change in ${name}`).toBe(false)
-    writeFileSync(file, previous)
-    utimesSync(file, preservedTimes, preservedTimes)
-    expect(current(), `restored ${name}`).toBe(true)
-  }
-  for (const name of [
-    'ui-tui/src/value.ts', 'apps/shared/src/value.ts',
-    'ui-tui/scripts/gateway_bootstrap.py', 'ui-tui/scripts/clipboard_image.py',
-    'ui-tui/packages/hermes-ink/src/entry-exports.ts',
-    'ui-tui/tsconfig.json', 'ui-tui/packages/hermes-ink/tsconfig.json', 'apps/shared/tsconfig.json',
-    'ui-tui/package.json', 'ui-tui/packages/hermes-ink/package.json', 'apps/shared/package.json',
-    'tsconfig.json', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.npmrc', 'pm/lock.json',
-    'scripts/build/tui.mjs', 'scripts/build/frontend-common.mjs', 'scripts/build/freshness.mjs',
-  ]) {
-    const file = path.join(source, name)
-    const previous = existsSync(file) ? readFileSync(file) : null
-    put(source, name, 'changed input')
-    expect(current(), name).toBe(false)
-    if (previous) writeFileSync(file, previous)
-    else rmSync(file)
-    expect(current(), `restored ${name}`).toBe(true)
-  }
-  put(source, 'ui-tui/src/value.ts', 'export const value: string = "rebuilt source";')
-  await buildTui({ source, out })
-  expect(current()).toBe(true)
-  const entry = path.join(out, 'dist/entry.js')
-  expect(execFileSync(process.execPath, [entry], { encoding: 'utf8' }).trim()).toBe('rebuilt source')
-  writeFileSync(entry, 'damaged output')
-  expect(current()).toBe(false)
-})
 
 test('a browser renderer publish never invalidates the native Desktop inputs', async () => {
   const { sourceHash } = await import('../scripts/build/freshness.mjs')
@@ -418,7 +272,7 @@ test('the Webapp receipt certifies its checkout inputs, not the workspace it com
   expect(current()).toBe(true)
   expect(readFileSync(path.join(out, 'index.html'), 'utf8')).toContain('<script')
   // Other products' sources, native outputs and release metadata never rebuild the renderer.
-  for (const name of ['web/src/unrelated.ts', 'pyproject.toml', 'assets/icon.svg', 'apps/desktop/dist/index.html', 'scripts/build/tui.mjs']) {
+  for (const name of ['web/src/unrelated.ts', 'pyproject.toml', 'assets/icon.svg', 'apps/desktop/dist/index.html']) {
     put(source, name, 'not a Webapp input')
     expect(current(), name).toBe(true)
   }
@@ -464,9 +318,9 @@ test('a Webapp rebuild keeps the previous generation for tabs that booted it, ne
     await buildWebapp({ source, workspace, out })
     expect(productCurrent({ source, product: 'webapp', out }), generation).toBe(true)
     if (generation === 'gen-two') {
-      // An update that could not rebuild gen-two marks it (hermes_cli/webapp.py mark_webapp_stale):
+      // An update that could not rebuild gen-two marks it (agent_cli/webapp.py mark_webapp_stale):
       // the marker still forces the rebuild, and must not cost gen-two's tabs their chunks.
-      writeFileSync(path.join(out, '.hermes-stale'), 'hermes update could not rebuild this bundle\n')
+      writeFileSync(path.join(out, '.hermes-stale'), 'noone update could not rebuild this bundle\n')
       expect(productCurrent({ source, product: 'webapp', out })).toBe(false)
     }
   }

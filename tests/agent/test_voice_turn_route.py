@@ -102,7 +102,7 @@ def test_session_runtime_view_preserves_requested_provider_during_voice_turn():
 
 
 def test_voice_usage_never_becomes_the_session_route(tmp_path):
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
 
     db = SessionDB(tmp_path / "state.db")
     db.create_session("s1", source="cli", model="main-model")
@@ -120,7 +120,7 @@ def test_mid_voice_turn_reports_the_sessions_own_route(tmp_path, monkeypatch, se
     """Desktop adopts session.info's effort/model into the composer that seeds new chats: a live
     voice turn's reasoning-off (and voice model) must never be reported or persisted as the chat's."""
     from agent.voice_turn_route import begin_voice_turn_route, end_voice_turn_route
-    from tui_gateway.server import _runtime_model_config, _session_info
+    from agent_backend.server import _runtime_model_config, _session_info
 
     with FakeLLMServer([]) as main, FakeLLMServer([]) as voice:
         extra = ("auxiliary:\n  voice_chat:\n    provider: custom\n"

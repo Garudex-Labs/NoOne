@@ -1,6 +1,6 @@
 """A draining gateway names the work it is waiting on, and the updater's wait prints it.
 
-Before: ``hermes update`` printed "draining (up to 1875s)..." and then nothing for up to 30 minutes
+Before: ``noone update`` printed "draining (up to 1875s)..." and then nothing for up to 30 minutes
 while the gateway waited on one cron job; neither surface said WHAT was being waited on.
 """
 
@@ -12,7 +12,7 @@ from types import SimpleNamespace
 import cron.scheduler as sched
 from gateway.run import GatewayRunner
 from gateway.session_state import SessionState
-from hermes_cli.update_cmd_drain_report import describe_active_work_unit, drain_progress_reporter
+from agent_cli.update_cmd_drain_report import describe_active_work_unit, drain_progress_reporter
 from gateway.status import flush_runtime_status
 
 

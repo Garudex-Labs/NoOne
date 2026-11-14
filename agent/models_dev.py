@@ -7,6 +7,7 @@ Refreshes use ETag conditional GET when a servable registry is held. Hot paths
 pass ``allow_network=False`` and never do I/O. A corrupt/empty disk cache is
 quarantined, never served as ``{}``. ``models_dev.url`` in config.yaml = mirror."""
 
+from agent_cli.application_identity import app_text
 import contextlib
 import json
 import logging
@@ -16,10 +17,9 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-
 from utils import atomic_json_write, atomic_write_text
 
-from hermes_constants import openrouter_variant_base
+from agent_constants import openrouter_variant_base
 
 import requests
 
@@ -214,8 +214,8 @@ def _models_dev_id(
             # A mistyped alias must not leak into ModelInfo.provider_id; the row stays on its own slug.
             if (key, alias) not in _UNKNOWN_CATALOG_PROVIDER_WARNED:
                 _UNKNOWN_CATALOG_PROVIDER_WARNED.add((key, alias))
-                logger.warning("providers.%s: catalog_provider %r is neither a Hermes provider id nor a "
-                               "models.dev id; ignoring", key, alias)
+                logger.warning(app_text("providers.%s: catalog_provider %r is neither a {app_name} provider id nor a "
+                               "models.dev id; ignoring", percent_format=True), key, alias)
             mdev_id = None
     return mdev_id
 
@@ -226,15 +226,15 @@ _UNKNOWN_CATALOG_PROVIDER_WARNED: set = set()  # (provider, alias) warned once p
 def _cfg_get(*keys: str, default: Any, config: Optional[dict[str, Any]] = None) -> Any:
     """``cfg_get`` over the read-only config; *default* on any failure."""
     try:
-        from hermes_cli.config import cfg_get, load_config_readonly
+        from agent_cli.config import cfg_get, load_config_readonly
         return cfg_get(config if config is not None else load_config_readonly(), *keys, default=default)
     except Exception:
         return default
 
 
 def _hermes_path(name: str) -> Path:
-    from hermes_constants import get_hermes_home
-    return get_hermes_home() / name
+    from agent_constants import get_agent_home
+    return get_agent_home() / name
 
 
 def _get_cache_path() -> Path:
@@ -262,9 +262,9 @@ def _load_etag() -> str:
 def _save_etag(etag: str) -> None:
     def write() -> None:
         etag_path = _get_etag_path()
-        from hermes_constants import mkdir_under_hermes_home
+        from agent_constants import mkdir_under_agent_home
 
-        mkdir_under_hermes_home(etag_path.parent)
+        mkdir_under_agent_home(etag_path.parent)
         atomic_write_text(etag_path, etag)
     _quietly("save models.dev ETag", write)
 
@@ -857,7 +857,7 @@ def _relay_vision_marker_metadata(provider: str, model: str) -> Optional[dict[st
     ``-vision`` token is the vendor's own capability marker; without it ``image_input_mode: auto`` treats
     the model as text-only and detours images through the lossy describe path (#96066). Every other field
     keeps the unknown-model defaults, so only vision is claimed."""
-    from hermes_cli.models import opencode_provider_family
+    from agent_cli.models import opencode_provider_family
 
     if "-vision" not in (model or "").strip().lower() or opencode_provider_family(provider) is None:
         return None
@@ -936,7 +936,7 @@ def get_model_capabilities(
 def list_provider_models(provider: str, *, allow_network: bool = True) -> list[str]:
     """All model IDs for a provider ([] if unknown). ``allow_network`` defaults to True: the model
     picker is interactive and a fresh catalog is worth a short wait."""
-    from hermes_cli.models import normalize_provider
+    from agent_cli.models import normalize_provider
     provider = normalize_provider(provider) or provider
     models = _get_provider_models(provider, allow_network=allow_network)
     return [mid for mid in models if not _should_hide_from_provider_catalog(provider, mid)] if models is not None else []

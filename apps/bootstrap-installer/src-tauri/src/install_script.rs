@@ -10,7 +10,7 @@
 //!
 //! Mirrors `apps/desktop/electron/bootstrap-runner.ts`'s `resolveInstallScript`,
 //! but the dev-checkout resolution is driven by an env var rather than the
-//! Electron app's APP_ROOT/../.. trick, because Hermes-Setup.exe is meant
+//! Electron app's APP_ROOT/../.. trick, because NoOne-Setup.exe is meant
 //! to live OUTSIDE any repo checkout.
 
 use anyhow::{anyhow, Context, Result};
@@ -71,7 +71,7 @@ fn is_valid_commit(s: &str) -> bool {
 
 /// Resolves the install script to use for this run.
 ///
-/// `pin` is the commit-or-branch from either Hermes-Setup's build-time
+/// `pin` is the commit-or-branch from either NoOne-Setup's build-time
 /// constant (compiled into the installer) or a runtime override.
 pub async fn resolve(
     kind: ScriptKind,
@@ -206,7 +206,7 @@ pub(crate) fn prepare_cached_script_bytes(kind: ScriptKind, bytes: &[u8]) -> Vec
 /// instead of failing so the user can Retry.
 async fn download(kind: ScriptKind, commit_or_ref: &str, dest_path: &Path) -> Result<()> {
     let url = format!(
-        "https://raw.githubusercontent.com/NousResearch/hermes-agent/{}/scripts/{}",
+        "https://raw.githubusercontent.com/Garudex-Labs/NoOne/{}/scripts/{}",
         commit_or_ref,
         kind.filename()
     );

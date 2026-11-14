@@ -7,7 +7,7 @@ import type {
   CronJobCreatePayload,
   CronJobUpdates,
   SessionInfo
-} from '@/types/hermes'
+} from '@/types/agent-client'
 
 import {
   connectionScoped,

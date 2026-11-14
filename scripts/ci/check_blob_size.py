@@ -31,8 +31,10 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
@@ -108,7 +110,7 @@ def _parse_raw(out: str) -> list[Change]:
 
 
 def _binary_paths(repo: Path, base: str, head: str | None) -> set[str]:
-    args = ["diff", "--numstat", "-z", "-M", "-C", base] + ([head] if head else [])
+    args = ["diff", "--numstat", "-z", "-M", "-C", "-l0", base] + ([head] if head else [])
     fields = _git(repo, *args).split("\0")
     paths: set[str] = set()
     i = 0
@@ -160,6 +162,112 @@ def _hash_file(repo: Path, rel: str) -> str:
     return _git(repo, "hash-object", "--", rel).strip()
 
 
+def _working_blob(repo: Path, rel: str) -> tuple[str, int]:
+    """Git-cleaned identity and size without writing the repository's objects/index."""
+    with tempfile.TemporaryDirectory(prefix="blob-size-clean-") as temporary:
+        env = dict(os.environ, GIT_OBJECT_DIRECTORY=temporary)
+        hashed = subprocess.run(["git", "hash-object", "-w", "--", rel], cwd=repo,
+                                env=env, capture_output=True, text=True, timeout=300,
+                                stdin=subprocess.DEVNULL, check=False)
+        if hashed.returncode:
+            raise GitError(hashed.stderr.strip())
+        blob = hashed.stdout.strip()
+        sized = subprocess.run(["git", "cat-file", "-s", blob], cwd=repo, env=env,
+                               capture_output=True, text=True, timeout=300,
+                               stdin=subprocess.DEVNULL, check=False)
+        if sized.returncode:
+            raise GitError(sized.stderr.strip())
+        return blob, int(sized.stdout.strip())
+
+
+def _deleted_files(repo: Path, base: str) -> dict[str, str]:
+    """Base blobs whose regular tracked paths are absent from the working tree."""
+    fields = _git(repo, "diff", "--raw", "-z", "--no-abbrev", "--no-renames",
+                  "--diff-filter=D", base).split("\0")
+    return {path: meta.split()[2] for meta, path in zip(fields[::2], fields[1::2])
+            if meta.split()[0] in {":100644", ":100755"}}
+
+
+def _similar_size(left: int, right: int) -> bool:
+    # Git's default -M threshold cannot match blobs whose sizes differ by more than 2x.
+    return min(left, right) * 2 >= max(left, right)
+
+
+def _working_sizes(repo: Path, paths: Collection[str]) -> dict[str, int]:
+    return {path: (repo / path).stat().st_size for path in paths
+            if path and (repo / path).is_file() and not (repo / path).is_symlink()}
+
+
+def _binary_attributes(repo: Path, paths: Collection[str]) -> set[str]:
+    """Explicit binary diff attributes also apply to untracked paths."""
+    if not paths:
+        return set()
+    fields = _git(repo, "check-attr", "-z", "diff", "--", *paths).split("\0")
+    drivers: dict[str, bool] = {}
+    binary = set()
+    for path, _, value in zip(fields[::3], fields[1::3], fields[2::3]):
+        if value not in {"set", "unset", "unspecified"} and value not in drivers:
+            drivers[value] = _git(repo, "config", "--type=bool", "--get", f"diff.{value}.binary",
+                                  check=False).strip() == "true"
+        if value == "unset" or drivers.get(value, False):
+            binary.add(path)
+    return binary
+
+
+def _untracked_text_renames(repo: Path, base: str, untracked: dict[str, int], limit: int,
+                            binary: set[str]) -> set[str]:
+    """Ask Git to pair deleted base text with untracked text, without writing an index."""
+    targets = {path: size for path, size in untracked.items()
+               if size > limit and path not in binary and not _sniff_binary(repo / path)}
+    if not targets:
+        return set()
+    deleted = _deleted_files(repo, base)
+    sizes = _sizes(repo, sorted(set(deleted.values())))
+    sources = {path: blob for path, blob in deleted.items()
+               if any(_similar_size(sizes[blob], size) for size in targets.values())}
+    if not sources:
+        return set()
+    source_binary = _binary_attributes(repo, sources)
+    added = _git(repo, "diff", "--name-only", "-z", "--no-renames", "--diff-filter=A", base).split("\0")
+    destinations = untracked | _working_sizes(repo, added)
+    with tempfile.TemporaryDirectory(prefix="blob-size-renames-") as scratch:
+        root = Path(scratch)
+        before, after = root / "before", root / "after"
+        before.mkdir()
+        after.mkdir()
+        text_sizes = []
+        for path, blob in sources.items():
+            if path in source_binary:
+                continue
+            proc = subprocess.run(["git", "cat-file", "blob", blob], cwd=repo, capture_output=True,
+                                  stdin=subprocess.DEVNULL, timeout=300, check=False)
+            if proc.returncode != 0:
+                raise GitError(f"git cat-file blob {blob}: {proc.stderr.decode(errors='replace').strip()}")
+            if b"\0" in proc.stdout[:_SNIFF_BYTES]:
+                continue
+            file = before / path
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_bytes(proc.stdout)
+            text_sizes.append(sizes[blob])
+        if not text_sizes:
+            return set()
+        for path, size in destinations.items():
+            if not any(_similar_size(size, old_size) for old_size in text_sizes):
+                continue
+            file = after / path
+            file.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(repo / path, file)
+        proc = subprocess.run(["git", "diff", "--no-index", "--raw", "-z", "--no-abbrev", "-M",
+                               "--no-ext-diff", "--no-textconv", "--", str(before.resolve()), str(after.resolve())],
+                              cwd=repo, capture_output=True, text=True, encoding="utf-8",
+                              errors="surrogateescape", stdin=subprocess.DEVNULL, timeout=300, check=False)
+        if proc.returncode not in (0, 1):
+            raise GitError(f"git diff --no-index: {proc.stderr.strip()}")
+        renamed = {Path(change.path).relative_to(after.resolve()).as_posix() for change in _parse_raw(proc.stdout)
+                   if change.status == "R"}
+        return renamed.intersection(targets)
+
+
 def parse_allowlist(text: str) -> set[str]:
     entries = set()
     for line in text.lstrip("\ufeff").splitlines():
@@ -186,7 +294,7 @@ def allowlist_at(repo: Path, rev: str) -> set[str]:
 def find_offenders(repo: Path, base: str, head: str | None, limit: int = MAX_BYTES,
                    allowlist: Collection[str] = frozenset()) -> list[Offender]:
     """Changed paths base -> head (None = working tree + untracked files) over ``limit``."""
-    args = ["diff", "--raw", "-z", "-M", "-C", "--no-abbrev", base] + ([head] if head else [])
+    args = ["diff", "--raw", "-z", "-M", "-C", "-l0", "--no-abbrev", base] + ([head] if head else [])
     known = _tree_blobs(repo, base)
     changes = [c for c in _parse_raw(_git(repo, *args)) if c.blob not in known and c.path not in allowlist]
     binary = _binary_paths(repo, base, head)
@@ -198,17 +306,28 @@ def find_offenders(repo: Path, base: str, head: str | None, limit: int = MAX_BYT
         else:  # working-tree content git has not hashed (an unstaged edit)
             disk = repo / change.path
             size = disk.stat().st_size if disk.is_file() and not disk.is_symlink() else 0
+            if size > limit:
+                blob, size = _working_blob(repo, change.path)
+                if blob in known:
+                    continue
         is_binary = change.path in binary
         if size > limit and (is_binary or change.status == "A"):
             offenders.append(Offender(change.path, size, "binary" if is_binary else "new file", change.status))
     if head is None:
-        for rel in _untracked(repo):
-            disk = repo / rel
-            if rel in allowlist or not disk.is_file() or disk.is_symlink():
+        untracked = _working_sizes(repo, _untracked(repo))
+        # Include competing small/exact copies in Git's pairing, not just the
+        # oversized candidates (and staged additions in the temporary tree):
+        # one deleted source can justify only one rename.
+        forced_binary = _binary_attributes(repo, [rel for rel, size in untracked.items() if size > limit])
+        renamed = _untracked_text_renames(repo, base, untracked, limit, forced_binary)
+        for rel, size in untracked.items():
+            if rel in allowlist or rel in renamed:
                 continue
-            size = disk.stat().st_size
-            if size > limit and _hash_file(repo, rel) not in known:  # an untracked copy adds nothing
-                kind = "binary" if _sniff_binary(disk) else "new file"
+            if size <= limit:
+                continue
+            blob, size = _working_blob(repo, rel)
+            if size > limit and blob not in known:  # an untracked copy adds nothing
+                kind = "binary" if rel in forced_binary or _sniff_binary(repo / rel) else "new file"
                 offenders.append(Offender(rel, size, kind, "A"))
     return sorted(offenders, key=lambda o: (-o.size, o.path))
 

@@ -2,7 +2,7 @@
 for the user (``CARD_TIMEOUT_S``), and returns their answer with a short reminder of the next beat.
 
 The ``onboarding`` toolset carrying it is folded in only for the onboarding chat, at agent build
-(``tui_gateway/methods_onboarding.py``). The run record is the session's ``onboarding_run``
+(``agent_backend/methods_onboarding.py``). The run record is the session's ``onboarding_run``
 (``agent/onboarding_record.py``); the order and the options are ``agent/onboarding_flow.py``.
 """
 
@@ -31,8 +31,8 @@ def _connected() -> dict:
 
 
 def _installed() -> dict:
-    from hermes_cli.plugin_catalog_presence import onboarding_names
-    from hermes_cli.plugins_cmd import _catalog_installed_dir
+    from agent_cli.plugin_catalog_presence import onboarding_names
+    from agent_cli.plugins_cmd import _catalog_installed_dir
 
     return {"installed": [name for name in onboarding_names() if _catalog_installed_dir(name) is not None]}
 
@@ -78,7 +78,7 @@ def _reply_event(beat: str, reply: Mapping[str, Any] | None) -> flow.Event:
 def _skill_resolver() -> Callable[[str], str | None]:
     """A written first-task skill name -> the name skill_view loads it with here, or None. A plugin skill
     (``blender:blender``) resolves through the installed catalog plugin to its registered name."""
-    from hermes_cli.plugins_activation_live import catalog_plugin_skill
+    from agent_cli.plugins_activation_live import catalog_plugin_skill
     from tools.skills_tool import find_all_skills
 
     bundled = {skill["name"] for skill in find_all_skills()}

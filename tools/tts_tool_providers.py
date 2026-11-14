@@ -293,7 +293,7 @@ def _generate_xai_tts(text: str, output_path: str, tts_config: dict[str, Any]) -
     creds = resolve_xai_http_credentials(prefer_api_key=True)
     api_key = str(creds.get("api_key") or "").strip()
     if not api_key:
-        raise ValueError("No xAI credentials found. Configure xAI OAuth in `hermes model` or set XAI_API_KEY.")
+        raise ValueError("No xAI credentials found. Configure xAI OAuth in `noone model` or set XAI_API_KEY.")
     xai_config = tts_config.get("xai") or {}
     voice_id = str(xai_config.get("voice_id", DEFAULT_XAI_VOICE_ID)).strip() or DEFAULT_XAI_VOICE_ID
     language = str(xai_config.get("language", DEFAULT_XAI_LANGUAGE)).strip() or DEFAULT_XAI_LANGUAGE
@@ -314,7 +314,7 @@ def _generate_xai_tts(text: str, output_path: str, tts_config: dict[str, Any]) -
     if creds.get("provider") == "xai-oauth":
         base_url = creds.get("base_url")
     else:
-        from hermes_cli.config import get_env_value
+        from agent_cli.config import get_env_value
         base_url = xai_config.get("base_url") or creds.get("base_url") or get_env_value("XAI_BASE_URL")
     base_url = str(base_url or DEFAULT_XAI_BASE_URL).strip().rstrip("/")
 
@@ -400,7 +400,7 @@ def _generate_minimax_tts(text: str, output_path: str, tts_config: dict[str, Any
     base_url = runtime.endpoint
     # MiniMax scopes TTS requests by GroupId (``?GroupId=<id>`` on the t2a_v2 URL): config or
     # MINIMAX_GROUP_ID, attached only when absent from the URL.
-    from hermes_cli.config import get_env_value
+    from agent_cli.config import get_env_value
     group_id = (str(mm_config.get("group_id") or "").strip()
                 or (get_env_value("MINIMAX_GROUP_ID") or "").strip())
     if group_id and "GroupId=" not in base_url:
@@ -477,8 +477,8 @@ def _read_gemini_persona_prompt(gemini_config: dict[str, Any]) -> str:
     path = Path(os.path.expandvars(raw.strip())).expanduser()
     if not path.is_absolute():
         try:
-            from hermes_constants import get_hermes_home
-            path = get_hermes_home() / path
+            from agent_constants import get_agent_home
+            path = get_agent_home() / path
         except Exception:
             path = Path.cwd() / path
     try:
@@ -567,7 +567,7 @@ def _generate_gemini_tts(text: str, output_path: str, tts_config: dict[str, Any]
     gemini_config = _section(tts_config, "gemini")
     model = str(gemini_config.get("model", DEFAULT_GEMINI_TTS_MODEL)).strip() or DEFAULT_GEMINI_TTS_MODEL
     voice = str(gemini_config.get("voice", DEFAULT_GEMINI_TTS_VOICE)).strip() or DEFAULT_GEMINI_TTS_VOICE
-    from hermes_cli.config import get_env_value
+    from agent_cli.config import get_env_value
     from agent.gemini_native_adapter import normalize_gemini_base_url
     base_url = normalize_gemini_base_url(
         gemini_config.get("base_url") or get_env_value("GEMINI_BASE_URL") or DEFAULT_GEMINI_TTS_BASE_URL,
@@ -596,7 +596,7 @@ def _generate_gemini_tts(text: str, output_path: str, tts_config: dict[str, Any]
     headers = {"Content-Type": "application/json", "x-goog-api-key": api_key}
     if urlparse(base_url).hostname == "generativelanguage.googleapis.com":
         try:
-            from hermes_cli.version_info import get_version_info
+            from agent_cli.version_info import get_version_info
             headers["X-Goog-Api-Client"] = f"hermes-agent/{get_version_info().base_version}"
         except Exception:
             headers["X-Goog-Api-Client"] = "hermes-agent/0.0.0"

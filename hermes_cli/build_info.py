@@ -1,6 +1,13 @@
-"""Shims to suppress old updater work until relaunch. Live identity uses version_info."""
+"""Legacy import boundary; implementation lives in agent_cli.build_info.
 
+Retained for shipped updater/plugin compatibility, sharing the canonical module.
+"""
+from importlib import import_module
+import sys
 
-def get_code_identity(refresh: bool = False) -> dict:
-    # Shim to suppress old updater work until relaunch, not certify the new checkout.
-    return {"sha": None, "short_sha": None, "version": None, "source": "unknown"}
+from agent_cli.build_info import (
+    get_code_identity,
+)
+
+_current = import_module('agent_cli.build_info')
+sys.modules[__name__] = _current

@@ -102,7 +102,7 @@ _VOLATILE = (
 
 
 def _cells() -> list[tuple[str, str, str]]:
-    from hermes_cli.auth import PROVIDER_REGISTRY
+    from agent_cli.auth import PROVIDER_REGISTRY
     from providers import get_provider_profile
 
     seen: set[str] = set()

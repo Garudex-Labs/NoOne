@@ -1,6 +1,6 @@
 """Strict gateway identity against a REAL process holding ``gateway.lock``.
 
-``hermes update`` on Windows maps live gateways to profiles through
+``noone update`` on Windows maps live gateways to profiles through
 ``get_running_pid_identity_strict``. A live gateway whose ``gateway.pid`` was
 unlinked still holds its runtime lock, and the lock carries the same identity
 record, so the updater must identify it from the lock instead of aborting the
@@ -143,7 +143,7 @@ def home(gateway_holder, monkeypatch):
 
 
 # The class-scoped holder spawns before the per-test live-system guard is armed; the mark
-# documents the `hermes gateway run` lookalike and covers it if the fixture is ever narrowed.
+# documents the `noone gateway run` lookalike and covers it if the fixture is ever narrowed.
 @pytest.mark.spawns_gateway_lookalike
 class TestStrictIdentityWithLiveLock:
     def test_missing_pid_file_resolves_from_the_lock_record(self, home, gateway_holder):
@@ -157,10 +157,10 @@ class TestStrictIdentityWithLiveLock:
         assert identity == with_pid_file
 
     def test_updater_discovery_maps_the_profile_without_a_pid_file(self, home, gateway_holder, monkeypatch):
-        from hermes_cli.gateway import find_profile_gateway_processes
+        from agent_cli.gateway import find_profile_gateway_processes
 
-        monkeypatch.setattr("hermes_cli.profiles._get_default_hermes_home", lambda: home)
-        monkeypatch.setattr("hermes_cli.profiles._get_profiles_root", lambda: home / "no-profiles")
+        monkeypatch.setattr("agent_cli.profiles._get_default_agent_home", lambda: home)
+        monkeypatch.setattr("agent_cli.profiles._get_profiles_root", lambda: home / "no-profiles")
         (home / "gateway.pid").unlink()
 
         procs = find_profile_gateway_processes(strict=True)
@@ -188,10 +188,10 @@ class TestStrictIdentityWithLiveLock:
     def test_updater_discovery_maps_the_profile_with_a_stale_pid_file(
         self, home, gateway_holder, monkeypatch,
     ):
-        from hermes_cli.gateway import find_profile_gateway_processes
+        from agent_cli.gateway import find_profile_gateway_processes
 
-        monkeypatch.setattr("hermes_cli.profiles._get_default_hermes_home", lambda: home)
-        monkeypatch.setattr("hermes_cli.profiles._get_profiles_root", lambda: home / "no-profiles")
+        monkeypatch.setattr("agent_cli.profiles._get_default_agent_home", lambda: home)
+        monkeypatch.setattr("agent_cli.profiles._get_profiles_root", lambda: home / "no-profiles")
         _write_previous_gateway_pid_file(home, _exited_pid())
 
         procs = find_profile_gateway_processes(strict=True)

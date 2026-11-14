@@ -121,7 +121,7 @@ class TestCallbackSubprocess:
         """Registering via register_from_config makes
         get_pre_tool_call_block_message surface the block — the real
         end-to-end control flow used by run_agent._invoke_tool."""
-        from hermes_cli import plugins
+        from agent_cli import plugins
 
         script = _write_script(
             tmp_path, "block.sh",
@@ -154,7 +154,7 @@ class TestCallbackSubprocess:
     def test_approve_reaches_the_human_gate_through_plugin_manager(self, tmp_path, monkeypatch):
         """End to end: a shell hook's approve directive escalates to request_tool_approval with its
         message and rule_key, and the gate's denial blocks the tool (#92553)."""
-        from hermes_cli import plugins
+        from agent_cli import plugins
 
         script = _write_script(
             tmp_path, "approve.sh",
@@ -308,7 +308,7 @@ class TestParseHooksBlock:
 
 class TestIdempotentRegistration:
     def test_double_call_registers_once(self, tmp_path, monkeypatch):
-        from hermes_cli import plugins
+        from agent_cli import plugins
 
         script = _write_script(tmp_path, "h.sh",
                                "#!/usr/bin/env bash\nprintf '{}\\n'\n")
@@ -332,7 +332,7 @@ class TestIdempotentRegistration:
     ):
         """Same script used for different matchers under one event must
         register both callbacks — dedupe keys on (event, matcher, command)."""
-        from hermes_cli import plugins
+        from agent_cli import plugins
 
         script = _write_script(tmp_path, "h.sh",
                                "#!/usr/bin/env bash\nprintf '{}\\n'\n")
@@ -682,7 +682,7 @@ class TestRoutedProfileEnv:
     def test_hook_child_sees_routed_profile_home_and_no_default_secrets(self, tmp_path, monkeypatch):
         """Under multiplexing the child gets the ROUTED HERMES_HOME, the default profile's secrets
         stay out of its env, and the payload names the firing profile."""
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+        from agent_constants import reset_agent_home_override, set_agent_home_override
 
         launch, routed = tmp_path / "launch", tmp_path / "routed"
         launch.mkdir(); routed.mkdir()
@@ -695,12 +695,12 @@ class TestRoutedProfileEnv:
             'printf \'{"home": "%s", "key": "%s"}\\n\' "$HERMES_HOME" "${OPENAI_API_KEY:-}"\n',
         )
         spec = shell_hooks.ShellHookSpec(event="pre_tool_call", command=str(script))
-        token = set_hermes_home_override(str(routed))
+        token = set_agent_home_override(str(routed))
         try:
             result = shell_hooks._spawn(spec, shell_hooks._serialize_payload("pre_tool_call", {"tool_name": "terminal"}))
             payload = json.loads(shell_hooks._serialize_payload("pre_tool_call", {"tool_name": "terminal"}))
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         seen = json.loads(result["stdout"])
         assert seen["home"] == str(routed)
         assert seen["key"] == ""
@@ -756,7 +756,7 @@ def test_real_tool_hooks_receive_only_the_owning_workers_identity(tmp_path, monk
     from agent.delegation_context import delegated_child_context, non_dispatcher_owned_context
     from agent.agent_runtime_helpers import _pre_tool_block_message
     from agent.inline_tool_executors import emit_terminal_post_tool_call
-    from hermes_cli import plugins
+    from agent_cli import plugins
 
     home = tmp_path / "home"
     monkeypatch.setenv("HERMES_HOME", str(home))

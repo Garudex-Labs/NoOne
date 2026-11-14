@@ -36,7 +36,8 @@ def index(gen) -> str:
     return gen.emit_llms_index()
 
 def _linked(gen, index: str) -> set[str]:
-    return set(re.findall(rf"\]\({re.escape(gen.SITE_BASE)}/([^)]+)\)", index))
+    paths = re.findall(rf"\]\({re.escape(gen.SITE_BASE)}/([^)]+)\)", index)
+    return {gen.slug_for(gen.DOCS / path) for path in paths}
 
 def _pages_on_disk(gen) -> set[str]:
     """Walk the docs tree directly, duplicating only the two documented
@@ -48,6 +49,10 @@ def _pages_on_disk(gen) -> set[str]:
     """
     pages = set()
     for path in (*gen.DOCS.rglob("*.md"), *gen.DOCS.rglob("*.mdx")):
+        # These formerly lived outside the English content root. The product
+        # index keeps its existing language and catalog-summary scope.
+        if path.is_relative_to(gen.DOCS / "zh-Hans") or path.is_relative_to(gen.DOCS / "plugins"):
+            continue
         rel = path.relative_to(gen.DOCS).with_suffix("")
         slug = rel.parent.as_posix() if rel.name == "index" else rel.as_posix()
         # The docs landing page is the index's subject; per-skill pages are
@@ -102,7 +107,9 @@ def test_section_landing_pages_resolve_to_their_directory(gen):
 
 def test_mdx_pages_are_indexed_without_their_imports(gen):
     """MDX docs are real pages; their component imports are not prose."""
-    mdx = [p for p in gen.DOCS.rglob("*.mdx") if gen.slug_for(p)]
+    mdx = [p for p in gen.DOCS.rglob("*.mdx") if gen.slug_for(p)
+           and not p.is_relative_to(gen.DOCS / "zh-Hans")
+           and not p.is_relative_to(gen.DOCS / "plugins")]
     assert mdx, "no .mdx docs — this test no longer guards anything"
     assert {gen.slug_for(p) for p in mdx} <= set(gen.iter_docs())
 

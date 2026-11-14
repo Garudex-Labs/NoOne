@@ -29,19 +29,14 @@ export function SidebarFooter({ status }: SidebarFooterProps) {
       <PluginSlot
         name="footer-right"
         fallback={
-          <a
-            href="https://nousresearch.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          <span
             className={cn(
               "font-sans text-display text-xs tracking-[0.12em] text-midground",
               "inline-flex items-center min-h-[24px]",
-              "transition-opacity hover:opacity-90",
-              "focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-midground/40",
             )}
           >
             {t.app.footer.org}
-          </a>
+          </span>
         }
       />
     </div>

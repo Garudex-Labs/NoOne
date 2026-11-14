@@ -1,12 +1,12 @@
+import { Loader2 } from '@noone/ui/icons'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Slot } from 'radix-ui'
 import * as React from 'react'
 
-import { Loader2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 // Text+icon actions underline the label on hover, not the glyph.
-const TEXT_ACTION_ICON = '[&_.codicon]:no-underline [&_svg]:no-underline'
+const TEXT_ACTION_ICON = '[&_.noone-icon]:no-underline [&_svg]:no-underline'
 
 // Text buttons are square (no radius) and sized by padding + line-height — no
 // fixed heights — so they stay snug and scale with content. Only icon buttons

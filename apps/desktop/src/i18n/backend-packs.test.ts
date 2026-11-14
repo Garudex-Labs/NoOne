@@ -1,4 +1,4 @@
-import { JsonRpcGatewayError } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@noone/shared'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { type BackendLocaleRequest, syncBackendLocalePacks } from './backend-packs'

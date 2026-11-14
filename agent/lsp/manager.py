@@ -10,7 +10,7 @@ per file (``snapshot_baseline()`` runs BEFORE a write; the next ``get_diagnostic
 returns only diagnostics not in it).  Off unless config enables it.
 """
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import asyncio
 import fnmatch
 import logging
@@ -67,8 +67,8 @@ def parse_trusted_workspaces(value: Any) -> list[str]:
     """``lsp.trusted_workspaces``; a malformed value trusts nothing extra."""
     if (roots := _path_list(value)) is None:
         eventlog.event_log.warning(
-            "lsp.trusted_workspaces must be a list of directories, e.g. ['~/code/my-app'] (got %s); only the "
-            "workspaces you launched Hermes or opened a session in are trusted until the key is fixed",
+            app_text("lsp.trusted_workspaces must be a list of directories, e.g. ['~/code/my-app'] (got %s); only the "
+            "workspaces you launched {app_name} or opened a session in are trusted until the key is fixed", percent_format=True),
             type(value).__name__)
     return roots or []
 
@@ -192,9 +192,9 @@ class LSPService:
 
     @classmethod
     def create_from_config(cls) -> Optional[LSPService]:
-        """Build a service from ``hermes_cli.config``; ``None`` if config can't load."""
+        """Build a service from ``agent_cli.config``; ``None`` if config can't load."""
         try:
-            from hermes_cli.config import load_config_readonly
+            from agent_cli.config import load_config_readonly
             cfg = load_config_readonly()
         except Exception as e:
             logger.debug("LSP config load failed: %s", e)

@@ -16,7 +16,7 @@
  *      then offers a dashboard reload so the running chat adopts it.
  *
  *   2. **Event subscriber** (/api/events?channel=…) — passive, receives
- *      every dispatcher emit from the PTY-side `tui_gateway.entry` that
+ *      every dispatcher emit from the PTY-side `agent_backend.entry` that
  *      the dashboard fanned out.  The sidebar uses it for `session.info`
  *      (live chat title) and `dashboard.new_session_requested`.  The
  *      `channel` id ties this listener to the same chat tab's PTY child —
@@ -28,16 +28,19 @@
  * terminal pane keeps working unimpaired.
  */
 
-import { Button } from '@nous-research/ui/ui/components/button'
+import { AlertCircle, ChevronDown, KeyRound, RefreshCw } from '@noone/ui/icons'
 import { Badge } from '@nous-research/ui/ui/components/badge'
+import { Button } from '@nous-research/ui/ui/components/button'
 import { Card } from '@nous-research/ui/ui/components/card'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 
 import { ModelPickerDialog } from '@/components/ModelPickerDialog'
 import { ModelReloadConfirm } from '@/components/ModelReloadConfirm'
 import { ReasoningPicker } from '@/components/ReasoningPicker'
-import { GatewayClient, type ConnectionState } from '@/lib/gatewayClient'
-import { EventsFeedClient } from '@/lib/eventsFeedClient'
 import { api } from '@/lib/api'
+import { credentialWarning, sidecarErrorMessage } from '@/lib/chat-sidebar-banner'
+import { titleFromSessionInfoPayload } from '@/lib/chat-title'
 import {
   EVENTS_MAX_RECONNECT_ATTEMPTS,
   eventsGaveUpMessage,
@@ -49,13 +52,9 @@ import {
   isEventsFeedMessage,
   shouldRetryEventsClose
 } from '@/lib/events-reconnect'
-import { credentialWarning, sidecarErrorMessage } from '@/lib/chat-sidebar-banner'
-import { titleFromSessionInfoPayload } from '@/lib/chat-title'
-
+import { EventsFeedClient } from '@/lib/eventsFeedClient'
+import { type ConnectionState, GatewayClient } from '@/lib/gatewayClient'
 import { cn } from '@/lib/utils'
-import { AlertCircle, ChevronDown, KeyRound, RefreshCw } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
 
 interface SessionInfo {
   cwd?: string
@@ -374,12 +373,12 @@ export function ChatSidebar({
       offError()
       gw.close()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [gw, version])
 
   // Event subscriber WebSocket — receives the rebroadcast of every
   // dispatcher emit from the PTY child's gateway.  See /api/pub +
-  // /api/events in hermes_cli/web_server.py for the broadcast hop.
+  // /api/events in agent_cli/web_server.py for the broadcast hop.
   //
   // Framing, dispatch and connect timeout come from the shared JSON-RPC
   // client (`EventsFeedClient`); this effect owns only the retry policy and

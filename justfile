@@ -5,13 +5,13 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 [group('setup')]
 [unix]
 setup:
-    bash setup-hermes.sh --runtime-only --test-environment
+    bash setup-agent.sh --runtime-only --test-environment
 
 # Provision the PM tools, Python runtime and test environment
 [group('setup')]
 [windows]
 setup:
-    powershell.exe -NoProfile -ExecutionPolicy Bypass -File setup-hermes.ps1 -RuntimeOnly
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File setup-agent.ps1 -RuntimeOnly
 
 # Install the JS workspaces from pnpm-lock.yaml
 [group('setup')]
@@ -37,12 +37,12 @@ electron-runtime:
 [group('check')]
 [positional-arguments]
 check *args:
-    scripts/hermes-python scripts/check "$@"
+    scripts/agent-python scripts/check "$@"
 
 # Apply ruff and JS workspace autofixes to the tree
 [group('check')]
 fix:
-    scripts/hermes-python -m scripts.code_health.ruff_runner check --fix .
+    scripts/agent-python -m scripts.code_health.ruff_runner check --fix .
     pnpm -r fix
 
 # Run every JS workspace check
@@ -78,7 +78,7 @@ lint-docker:
 # Validate every plugin-catalog entry's structure (no clone, no install)
 [group('check')]
 check-plugin-catalog:
-    scripts/hermes-python scripts/validate_plugin_catalog.py plugin-catalog/
+    scripts/agent-python scripts/validate_plugin_catalog.py plugin-catalog/
 
 # Run the flake's checks (needs nix with flakes)
 [group('check')]
@@ -96,16 +96,15 @@ test +args:
 test-all:
     scripts/run_tests.sh
 
-# Run every JS workspace's tests (builds @hermes/ink first, as the TUI's check does)
+# Run every retained JS workspace's tests
 [group('test')]
 test-js:
-    pnpm --dir ui-tui run build:ink
     pnpm -r test
 
 # Run the plugin-catalog tests, the files scripts/ci/catalog_test_files.py selects
 [group('test')]
 test-catalog:
-    scripts/hermes-python scripts/ci/catalog_test_files.py | scripts/run_tests.sh --files-from -
+    scripts/agent-python scripts/ci/catalog_test_files.py | scripts/run_tests.sh --files-from -
 
 # Run the WhatsApp bridge's node tests (after `just js-install-whatsapp-bridge`)
 [group('test')]
@@ -127,11 +126,6 @@ desktop:
 desktop-build:
     pnpm --dir apps/desktop run build
 
-# Start the TUI in watch mode
-[group('dev')]
-tui:
-    pnpm --dir ui-tui run dev
-
 # Run a command against a throwaway HERMES_HOME (scripts/dev-sandbox.sh)
 [group('dev')]
 [positional-arguments]
@@ -148,16 +142,37 @@ icons:
 docs-install:
     npm ci --prefix website
 
-# Build the English docs site
+# Validate the complete bilingual docs site
 [group('docs')]
 docs-build:
-    npm run build:fast --prefix website
+    npm run build --prefix website
+
+# Prepare every native docs page/locale/catalog and shared feed for a capable source host.
+[group('docs')]
+docs-release-source output='website/build/source':
+    npm run release:source --prefix website -- {{ quote(output) }}
+
+# Pages publishes resources only, never the multi-GiB full HTML documentation export.
+[group('docs')]
+docs-stage-resources source='website/build/source' output='_site':
+    node website/scripts/stage-resources.mjs {{ quote(source) }} {{ quote(output) }}
+
+# Optional complete static export for a separately approved capable host; not the Pages job.
+[group('docs')]
+docs-export:
+    npm run export --prefix website
 
 # Regenerate the skills dashboard data and the per-skill docs pages
 [group('docs')]
 docs-generate:
-    scripts/hermes-python website/scripts/extract-skills.py
-    scripts/hermes-python website/scripts/generate-skill-docs.py
+    scripts/agent-python website/scripts/extract-skills.py
+    scripts/agent-python website/scripts/generate-skill-docs.py
+    node website/scripts/preserve-anchors.mjs --generated
+
+# Refresh local blueprint and agent-index data without rewriting source pages
+[group('docs')]
+docs-generate-data:
+    node website/scripts/refresh-doc-data.mjs
 
 # Run every docs check CI runs, after regenerating the skill docs
 [group('docs')]
@@ -172,12 +187,12 @@ docs-check-generated:
 # Fail on cross-page links that break on GitHub or on the site
 [group('docs')]
 docs-check-links:
-    scripts/hermes-python website/scripts/check_doc_links.py
+    scripts/agent-python website/scripts/check_doc_links.py
 
 # Lint docs for ASCII box diagrams (pm installs the pinned ascii-guard on first run)
 [group('docs')]
 docs-lint-diagrams:
-    scripts/hermes-python -m scripts.ci.python_packages ascii-guard==2.3.0 ruamel.yaml==0.18.17 -- -m ascii_guard.cli lint --exclude-code-blocks website/docs
+    scripts/agent-python -m scripts.ci.python_packages ascii-guard==2.3.0 ruamel.yaml==0.18.17 -- -m ascii_guard.cli lint --exclude-code-blocks website/docs
 
 # Stage pinned bionic pm packages and their runtime libraries into a Termux payload
 [group('dev')]
@@ -194,7 +209,7 @@ lock:
 [group('hooks')]
 [positional-arguments]
 ruff +files:
-    scripts/hermes-python -m scripts.code_health.ruff_runner check --config ruff.pre-commit.toml "$@"
+    scripts/agent-python -m scripts.code_health.ruff_runner check --config ruff.pre-commit.toml "$@"
 
 # Pre-commit: eslint on the given files, from the calling workspace
 [group('hooks')]

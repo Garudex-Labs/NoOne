@@ -1,36 +1,44 @@
 ---
-title: "Actual Setup — Set up Actual Computer (actual.inc) inference in Hermes"
-sidebar_label: "Actual Setup"
-description: "Set up Actual Computer (actual.inc) inference in Hermes"
+title: "Actual Setup — Set up Actual Computer (actual.inc) inference in the agent"
+sidebarTitle: "Actual Setup"
+description: "Set up Actual Computer (actual.inc) inference in the agent"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Actual Setup
+# Actual Setup {#actual-setup}
 
-Set up Actual Computer (actual.inc) inference in Hermes.
+Set up Actual Computer (actual.inc) inference in {{app-name}}.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/devops/actual-setup` |
+| Source | Optional — install with `noone skills install official/devops/actual-setup` |
 | Path | `optional-skills/devops/actual-setup` |
 | Version | `2.0.0` |
-| Author | shl0ms + Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `actual`, `actual-inc`, `provider`, `local-inference`, `relay`, `gguf`, `setup` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Actual Computer Setup Skill
+<div className="doc-callout-title">
 
-Sets up [actual.inc](https://actual.inc) (Actual Computer) as a Hermes inference
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Actual Computer Setup Skill {#actual-computer-setup-skill}
+
+Sets up [actual.inc](https://actual.inc) (Actual Computer) as a {{app-name}} inference
 provider. Actual turns the user's own hardware into a private inference cluster
 and exposes an OpenAI-compatible API two ways: a hosted end-to-end-encrypted
 relay at `https://api.actual.inc` (authenticated with an `ac_` key), and a local
@@ -38,18 +46,18 @@ on-device daemon at `http://127.0.0.1:8080` (no auth on loopback). This skill
 does not install the Actual daemon for the user — device authorization requires
 a human in a browser.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User wants to add actual.inc as an inference provider (cloud relay or local).
-- User has an `ac_` key and wants Hermes routed through their Actual cluster.
+- User has an `ac_` key and wants {{app-name}} routed through their Actual cluster.
 - User wants fully-local, on-device inference via the Actual daemon.
 - Troubleshooting: Actual requests failing with cryptic 400s or empty streams.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
-- Hermes has **first-class `actual` provider support** (provider id `actual`,
+- {{app-name}} has **first-class `actual` provider support** (provider id `actual`,
   aliases `actual-computer`, `actualcomputer`, `aci`). Do NOT configure Actual
-  as a `custom_providers` / `providers.actual.*` entry on current Hermes — the
+  as a `custom_providers` / `providers.actual.*` entry on current {{app-name}} — the
   built-in provider owns the name and handles base-url normalization, the
   Responses transport, and local no-auth automatically.
 - Relay mode: an Actual account and an `ac_` inference key from
@@ -61,9 +69,9 @@ a human in a browser.
   user and WAIT — never invent an email or authorize on their behalf. Codes
   expire in 5 minutes; re-run `actual` for a fresh one.
 
-## How to Run
+## How to Run {#how-to-run}
 
-### Relay / API mode
+### Relay / API mode {#relay--api-mode}
 
 1. Put the key in `.env` (secrets only — never config.yaml):
    append `ACTUAL_API_KEY=ac_...` to `~/.hermes/.env`.
@@ -73,15 +81,15 @@ a human in a browser.
    ```
 3. Select provider + model:
    ```bash
-   hermes config set model.provider actual
-   hermes config set model.default "MODEL_ID_FROM_DISCOVERY"
+   noone config set model.provider actual
+   noone config set model.default "MODEL_ID_FROM_DISCOVERY"
    ```
 4. Verify end-to-end:
    ```bash
-   hermes chat -Q -q "Reply with exactly: ACTUAL_OK" --provider actual -m MODEL_ID
+   noone chat -Q -q "Reply with exactly: ACTUAL_OK" --provider actual -m MODEL_ID
    ```
 
-### Local mode
+### Local mode {#local-mode}
 
 1. Human has installed + authorized the daemon (see Prerequisites).
 2. Download and load a model (scriptable once authorized):
@@ -92,19 +100,19 @@ a human in a browser.
    actual models list        # note the INSTALLED name (differs from download id)
    actual models load "qwen2.5-0.5b-instruct-q4_k_m"   # load by installed name
    ```
-3. Point Hermes at the daemon. `ACTUAL_BASE_URL` with a loopback host flips the
+3. Point {{app-name}} at the daemon. `ACTUAL_BASE_URL` with a loopback host flips the
    built-in provider into local no-auth mode automatically — no key needed:
    append `ACTUAL_BASE_URL=http://127.0.0.1:8080` to `~/.hermes/.env`, then:
    ```bash
-   hermes config set model.provider actual
-   hermes config set model.default "INSTALLED_MODEL_NAME"
+   noone config set model.provider actual
+   noone config set model.default "INSTALLED_MODEL_NAME"
    ```
 4. Verify (reduced toolset — see context-window pitfall below):
    ```bash
-   hermes chat -Q -q "Reply with exactly: LOCAL_OK" --provider actual -m INSTALLED_NAME -t file,web
+   noone chat -Q -q "Reply with exactly: LOCAL_OK" --provider actual -m INSTALLED_NAME -t file,web
    ```
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Thing | Value |
 |---|---|
@@ -117,19 +125,19 @@ a human in a browser.
 | Cluster pinning | `X-Cluster-ID` header via `providers.actual.extra_headers` in config.yaml |
 | Model size guide | 0.5B Q4_K_M ~470MB (toy), 7-8B Q4_K_M ~4.5GB (daily driver), 32B ~20GB |
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
-1. **reasoning_effort trap (handled by Hermes since the first-class provider).**
+1. **reasoning_effort trap (handled by {{app-name}} since the first-class provider).**
    Actual's SGLang/vLLM backends accept only `none/low/medium/high/max`;
    `xhigh`/`ultra` used to fail with a cryptic
    `Expecting value: line 1 column 1 (char 0)` (a wrapped HTTP 400). The
    built-in provider clamps `xhigh→high` and `ultra→max` on the wire. If a
-   request still 400s this way on an old Hermes, set a per-model cap:
+   request still 400s this way on an old {{app-name}}, set a per-model cap:
    `agent.reasoning_overrides.<model>: high` in config.yaml.
-2. **Context-window overflow on small local models.** Hermes' default toolset
+2. **Context-window overflow on small local models.** {{app-name}}' default toolset
    is ~26k tokens of schemas plus a ~9k-token system prompt. A model loaded
    with a 32k context overflows before the first turn, and llama.cpp-family
-   servers emit a bare `data: [DONE]` — Hermes reports
+   servers emit a bare `data: [DONE]` — {{app-name}} reports
    `Provider returned an empty stream with no finish_reason`. This is NOT an
    SSE bug. Fixes: restrict tools (`-t file,web`), load the model with a
    larger `n_ctx`, or pick a >=64k-context model for the full toolset.
@@ -145,19 +153,19 @@ a human in a browser.
    assuming failure.
 5. **Do not create a custom provider named `actual`.** Older setup guides
    (pre first-class support) wrote `providers.actual.*` config blocks. On
-   current Hermes the built-in provider wins the name; stale custom blocks
+   current {{app-name}} the built-in provider wins the name; stale custom blocks
    are ignored or conflict. Remove them and use the env vars + model.provider
    flow above.
 
-## Verification
+## Verification {#verification}
 
 ```bash
 # Relay:
-hermes chat -Q -q "Reply with exactly: ACTUAL_OK" --provider actual -m MODEL
+noone chat -Q -q "Reply with exactly: ACTUAL_OK" --provider actual -m MODEL
 # Local (small model — reduced toolset):
-hermes chat -Q -q "Reply with exactly: LOCAL_OK" --provider actual -m MODEL -t file,web
+noone chat -Q -q "Reply with exactly: LOCAL_OK" --provider actual -m MODEL -t file,web
 # Provider status (local no-auth shows key_source=local-offline):
-hermes status
+noone status
 ```
 
 For other OpenAI-compatible clients (e.g. OpenCode), see

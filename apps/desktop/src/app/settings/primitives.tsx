@@ -1,3 +1,4 @@
+import type { IconComponent } from '@noone/ui/icons'
 import type { ComponentProps, ReactNode } from 'react'
 import { createContext, useContext } from 'react'
 
@@ -6,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { triggerHaptic } from '@/lib/haptics'
-import type { IconComponent } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { PAGE_INSET_X } from '../layout-constants'

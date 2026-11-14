@@ -1,9 +1,9 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 
+import type { AgentConfigRecord } from '@/agent-client'
 import { setApiRequestConnection } from '@/api/client'
-import type { HermesApiRequest } from '@/global'
-import type { HermesConfigRecord } from '@/hermes'
+import type { AgentApiRequest } from '@/global'
 import { $gateway } from '@/store/gateway'
 import { $activeGatewayProfile } from '@/store/profile'
 import { $connection, $gatewayState } from '@/store/session'
@@ -46,16 +46,16 @@ afterEach(() => {
 // Regression for #113980: exercise the real provider, API origin binding and
 // profile routing, including an explicit pick before leaving and a fresh mount.
 it('reads and persists the owning profile through A → B → A and restart', async () => {
-  const configs: Record<string, HermesConfigRecord> = {
+  const configs: Record<string, AgentConfigRecord> = {
     default: { display: { language: 'en' } },
     coder: { display: { language: 'zh', skin: 'mono' } }
   }
 
-  const api = vi.fn(async (request: HermesApiRequest) => {
+  const api = vi.fn(async (request: AgentApiRequest) => {
     const key = request.profile || 'default'
 
     if (request.method === 'PUT') {
-      configs[key] = structuredClone((request.body as { config: HermesConfigRecord }).config)
+      configs[key] = structuredClone((request.body as { config: AgentConfigRecord }).config)
 
       return { ok: true }
     }
@@ -91,12 +91,12 @@ it('reads and persists the owning profile through A → B → A and restart', as
 })
 
 it('isolates stale reads and failed saves when the same profile moves between connections', async () => {
-  let finishBoot!: (config: HermesConfigRecord) => void
-  let finishSaveRead!: (config: HermesConfigRecord) => void
+  let finishBoot!: (config: AgentConfigRecord) => void
+  let finishSaveRead!: (config: AgentConfigRecord) => void
   let rejectSave!: (reason: Error) => void
   let reads = 0
 
-  const api = vi.fn((request: HermesApiRequest) => {
+  const api = vi.fn((request: AgentApiRequest) => {
     if (request.method === 'PUT') {
       return new Promise((_, reject) => {
         rejectSave = reject
@@ -153,27 +153,27 @@ it('isolates stale reads and failed saves when the same profile moves between co
   await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('ar'))
 })
 
-// A backend whose hermes-lang-ko pack carries Desktop strings.
-function koPackRequest() {
+// A backend whose noone-lang-pl pack carries Desktop strings.
+function polishPackRequest() {
   return vi.fn(async (method: string) =>
     method === 'i18n.languages'
       ? {
           languages: [
             {
-              id: 'ko',
-              endonym: '한국어',
+              id: 'pl',
+              endonym: 'Polski',
               rtl: false,
-              source: 'plugin:hermes-lang-ko',
-              surfaces: ['core', 'tui', 'desktop']
+              source: 'plugin:noone-lang-pl',
+              surfaces: ['core', 'desktop']
             }
           ]
         }
-      : { lang: 'ko', surface: 'desktop', messages: { 'common.save': '저장' } }
+      : { lang: 'pl', surface: 'desktop', messages: { 'common.save': 'Zapisz' } }
   )
 }
 
-// A saved `display.language: ko` with an OS-language probe the test resolves.
-function savedKoWithDeferredProbe() {
+// A saved `display.language: pl` with an OS-language probe the test resolves.
+function savedPolishWithDeferredProbe() {
   let resolveProfile: (profile: { locale: string }) => void = () => undefined
 
   const machineProfile = new Promise<{ locale: string }>(resolve => {
@@ -181,7 +181,7 @@ function savedKoWithDeferredProbe() {
   })
 
   window.hermesDesktop = {
-    api: vi.fn(async () => ({ display: { language: 'ko' } })),
+    api: vi.fn(async () => ({ display: { language: 'pl' } })),
     getMachineProfile: vi.fn(() => machineProfile)
   } as never
 
@@ -205,39 +205,39 @@ function mountWithOpenSocket() {
 
 // Boot reports the socket `open` before the client is published in `$gateway`.
 // The backend-pack sync must still run once the client arrives, or a language
-// only a pack renders (ko via hermes-lang-ko) never leaves English.
+// only a pack renders (pl via noone-lang-pl) never leaves English.
 it('pulls the backend language pack once the gateway client is published after the socket opened', async () => {
-  window.hermesDesktop = { api: vi.fn(async () => ({ display: { language: 'ko' } })) } as never
-  const request = koPackRequest()
+  window.hermesDesktop = { api: vi.fn(async () => ({ display: { language: 'pl' } })) } as never
+  const request = polishPackRequest()
 
   mountWithOpenSocket()
   await waitFor(() => expect(window.hermesDesktop.api).toHaveBeenCalled())
   expect(request).not.toHaveBeenCalled()
 
   act(() => $gateway.set({ request } as never))
-  await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('ko'))
-  expect(request).toHaveBeenCalledWith('i18n.catalog', { lang: 'ko', surface: 'desktop' })
+  await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pl'))
+  expect(request).toHaveBeenCalledWith('i18n.catalog', { lang: 'pl', surface: 'desktop' })
 })
 
 // The OS-language probe can finish after the pack sync promoted the saved
 // language; the probe's answer must not replace it.
 it('keeps a pack-rendered saved language when the OS-language probe resolves after the pack', async () => {
-  const resolveProbe = savedKoWithDeferredProbe()
+  const resolveProbe = savedPolishWithDeferredProbe()
 
   mountWithOpenSocket()
   await waitFor(() => expect(window.hermesDesktop.getMachineProfile).toHaveBeenCalled())
 
-  act(() => $gateway.set({ request: koPackRequest() } as never))
-  await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('ko'))
+  act(() => $gateway.set({ request: polishPackRequest() } as never))
+  await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pl'))
 
   await resolveProbe('en-US')
-  expect(screen.getByTestId('locale').textContent).toBe('ko')
+  expect(screen.getByTestId('locale').textContent).toBe('pl')
 })
 
 // The other order: the OS guess applies first, then the pack promotes the
 // saved language.
 it('promotes a saved pack language that arrives after the OS-language probe', async () => {
-  const resolveProbe = savedKoWithDeferredProbe()
+  const resolveProbe = savedPolishWithDeferredProbe()
 
   mountWithOpenSocket()
   await waitFor(() => expect(window.hermesDesktop.getMachineProfile).toHaveBeenCalled())
@@ -245,6 +245,6 @@ it('promotes a saved pack language that arrives after the OS-language probe', as
   await resolveProbe('en-US')
   expect(screen.getByTestId('locale').textContent).toBe('en')
 
-  act(() => $gateway.set({ request: koPackRequest() } as never))
-  await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('ko'))
+  act(() => $gateway.set({ request: polishPackRequest() } as never))
+  await waitFor(() => expect(screen.getByTestId('locale').textContent).toBe('pl'))
 })

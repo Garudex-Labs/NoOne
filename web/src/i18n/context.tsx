@@ -1,47 +1,33 @@
-import { applyDocumentLocale, LOCALE_ENDONYMS } from "@hermes/shared/i18n";
+import { applyDocumentLocale, LOCALE_ENDONYMS } from "@noone/shared/i18n";
+import { $appName, withAppIdentity } from "@noone/shared/application-identity";
+import { useMemo, useSyncExternalStore } from "react";
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import type { Locale, Translations } from "./types";
 import { en } from "./en";
 import { zh } from "./zh";
-import { zhHant } from "./zh-hant";
+import { hi } from "./hi";
 import { ja } from "./ja";
 import { de } from "./de";
 import { es } from "./es";
 import { fr } from "./fr";
-import { tr } from "./tr";
-import { uk } from "./uk";
-import { af } from "./af";
 import { ko } from "./ko";
-import { it } from "./it";
-import { ga } from "./ga";
-import { pt } from "./pt";
-import { ru } from "./ru";
-import { hu } from "./hu";
 import { ar } from "./ar";
 
 const TRANSLATIONS: Record<Locale, Translations> = {
   en,
   zh,
-  "zh-hant": zhHant,
   ja,
+  hi,
   de,
   es,
   fr,
-  tr,
-  uk,
-  af,
   ko,
-  it,
-  ga,
-  pt,
-  ru,
-  hu,
   ar,
 };
 
 const SUPPORTED_LOCALES = Object.keys(TRANSLATIONS) as Locale[];
 
-// Display metadata for the language picker — endonyms from @hermes/shared so the
+// Display metadata for the language picker — endonyms from @noone/shared so the
 // desktop and web pickers can never disagree on a language's native name.
 export const LOCALE_META: Record<Locale, { name: string }> = Object.fromEntries(
   SUPPORTED_LOCALES.map((id) => [id, { name: LOCALE_ENDONYMS[id] }]),
@@ -64,12 +50,14 @@ function getInitialLocale(): Locale {
 }
 
 interface I18nContextValue {
+  appName: string;
   locale: Locale;
   setLocale: (l: Locale) => void;
   t: Translations;
 }
 
 const I18nContext = createContext<I18nContextValue>({
+  appName: $appName.get(),
   locale: "en",
   setLocale: () => {},
   t: en,
@@ -77,6 +65,9 @@ const I18nContext = createContext<I18nContextValue>({
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+  const appName = useSyncExternalStore($appName.listen, $appName.get, $appName.get);
+  const translations = useMemo(() => withAppIdentity(TRANSLATIONS[locale], appName), [locale, appName]);
+  useEffect(() => { document.title = `${appName} - Dashboard`; }, [appName]);
 
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);
@@ -92,9 +83,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [locale]);
 
   const value: I18nContextValue = {
+    appName,
     locale,
     setLocale,
-    t: TRANSLATIONS[locale],
+    t: translations,
   };
 
   return (

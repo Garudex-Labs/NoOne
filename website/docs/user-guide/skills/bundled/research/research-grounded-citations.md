@@ -1,35 +1,43 @@
 ---
 title: "Grounded Citations — Ground answers and documents in cited, verifiable sources"
-sidebar_label: "Grounded Citations"
+sidebarTitle: "Grounded Citations"
 description: "Ground answers and documents in cited, verifiable sources"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Grounded Citations
+# Grounded Citations {#grounded-citations}
 
 Ground answers and documents in cited, verifiable sources.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/research/grounded-citations` |
 | Version | `1.2.0` |
-| Author | Hermes Agent + Teknium |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Research`, `Citations`, `Grounding`, `Sources`, `Web`, `Reports` |
 | Related skills | [`arxiv`](../../bundled/research/research-arxiv.md), [`pdf`](../../bundled/productivity/productivity-pdf.md), [`reddit-reading`](../../optional/social-media/social-media-reddit-reading.md), [`rss-feeds`](../../optional/research/research-rss-feeds.md), [`youtube-content`](../../bundled/media/media-youtube-content.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Grounded Citations
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Grounded Citations {#grounded-citations-1}
 
 Every claim taken from an outside source gets an inline numbered citation and a
 `Sources:` list, Perplexity-style. A ledger script owns the `url → [n]` mapping
@@ -46,7 +54,7 @@ slides), and research reports. It does not cover academic BibTeX pipelines —
 for conference papers use the `arxiv` skill, which this skill
 feeds (see `references/citation-formats.md`).
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use whenever an answer or artifact rests on information you fetched rather than
 knew:
@@ -61,7 +69,7 @@ Skip inline citations when the retrieval is incidental to another task — a
 quick syntax/version lookup mid-coding, casual conversation, creative writing.
 Mention a URL only if the user would plausibly want the link.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 None beyond the standard toolset. `scripts/sources.py` is stdlib-only Python 3.
 Retrieval comes from whatever is configured: `web_search`, `web_extract`,
@@ -70,7 +78,7 @@ Retrieval comes from whatever is configured: `web_search`, `web_extract`,
 Ledger location: `$HERMES_HOME/cache/citations/ledger.json` (profile-aware).
 Override per task with `--ledger <path>` or `HERMES_CITATION_LEDGER`.
 
-## How to Run
+## How to Run {#how-to-run}
 
 ```bash
 S=~/.hermes/skills/research/grounded-citations/scripts/sources.py
@@ -86,7 +94,7 @@ python "$S" verify draft.md                        # catch bad citations
 `add` is idempotent and URL-normalized: the same page always returns the same
 id within a ledger, so ids stay stable across many search/extract rounds.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Action | Command |
 |---|---|
@@ -101,7 +109,7 @@ id within a ledger, so ids stay stable across many search/extract rounds.
 | Rewrite a draft's Sources block in place | `sources.py render --replace-in draft.md` |
 | Check a draft's citations | `sources.py verify draft.md [--strict] [--min-coverage 0.6] [--evidence]` |
 
-## Procedure
+## Procedure {#procedure}
 
 ① **Reset the ledger** at the start of a task that will produce a grounded
 answer or document. Skip the reset when continuing work whose ids are already
@@ -143,7 +151,7 @@ sources, cite inline, end with the rendered `Sources:` list. For a short answer
 you may render the block from `sources.py render --only <ids>` instead of
 writing to a file.
 
-## Multi-Platform Sweeps
+## Multi-Platform Sweeps {#multi-platform-sweeps}
 
 "What are people saying about X" / "research X across the web" is not one
 `web_search`. Fan out across source types, collect in parallel, then synthesise
@@ -159,8 +167,8 @@ with every claim attributed to the platform it came from:
 | X/Twitter | `xurl` (needs API access) | announcements, developer chatter |
 
 The `reddit-reading` and `rss-feeds` skills are optional. If absent, install with
-`hermes skills install official/social-media/reddit-reading` or
-`hermes skills install official/research/rss-feeds` before using them.
+`noone skills install official/social-media/reddit-reading` or
+`noone skills install official/research/rss-feeds` before using them.
 
 Register every URL from every route in the ledger as it arrives (step ②). Keep
 opinion and measurement apart: a Reddit thread is evidence that users *report*
@@ -168,7 +176,7 @@ something, not that it is true; pair it with a primary source or label it as
 sentiment. Report per-platform coverage gaps ("Reddit search returned nothing
 newer than March") rather than silently narrowing to what worked.
 
-## Fact-Checking Mode
+## Fact-Checking Mode {#fact-checking-mode}
 
 For work where the reader must be able to check the chain — medical, legal,
 financial, safety, disputed claims, or when the user asks for fact-checking —
@@ -230,7 +238,7 @@ Provenance is declared by either a `[n]` citation or an `[unverified]` marker,
 so a sentence carrying both counts once. Run `verify` without a threshold first
 and read the `info: stats:` line to see the counts before picking a number.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Registering after writing.** The ledger must be populated from tool output,
   not reconstructed from the draft — that reintroduces exactly the hallucinated
@@ -261,7 +269,7 @@ and read the `info: stats:` line to see the counts before picking a number.
 - **Hand-editing the Sources block.** Use `render --replace-in <draft>`; slicing
   the file yourself risks a stale or duplicated block that `verify` then flags.
 
-## Verification
+## Verification {#verification}
 
 ```bash
 python "$S" verify report.md --strict --min-coverage 0.5

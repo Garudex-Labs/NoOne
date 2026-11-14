@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 // Typed /undo /retry /steer /queue lines (en_session_commands.ts is the source).
 export const arSessionCommands = {
   undoUsage: 'الاستخدام: /undo [N]',
@@ -7,7 +8,7 @@ export const arSessionCommands = {
   retryNothing: 'لا يوجد ما يمكن إعادة محاولته',
   retryUnsupported: '/retry: لا يمكن إعادة محاولة الوسائط أو أجزاء المحتوى غير المعروفة',
   busy: (command: string) =>
-    `الجلسة مشغولة — ما زال Hermes يرد. أوقف الرد الحالي أولاً (زر الإيقاف، أو Ctrl+C في الطرفية)، ثم شغّل /${command}.`,
+    `الجلسة مشغولة — ما زال ${appText('{app_name}')} يرد. أوقف الرد الحالي أولاً (زر الإيقاف، أو Ctrl+C في الطرفية)، ثم شغّل /${command}.`,
   busyCompressing: (command: string) =>
     `الجلسة مشغولة — يجري تنفيذ /compress؛ شغّل /${command} عند انتهائه.`,
   steerUsage: 'الاستخدام: /steer <الطلب>',
@@ -22,5 +23,5 @@ export const arSessionCommands = {
   queueEditKept: 'بدأت أو رُفضت قبل حفظ تعديلك. نصك المعدّل موجود في مربع الكتابة.',
   queueEditUnconfirmedTitle: 'لم يتم تأكيد التعديل',
   queueEditUnconfirmed:
-    'تعذّر على Hermes تأكيد تعديلك. احفظ مرة أخرى لإعادة محاولة التعديل نفسه؛ لن يُضاف إلى قائمة الانتظار مرتين.'
+    'تعذّر على {app_name} تأكيد تعديلك. احفظ مرة أخرى لإعادة محاولة التعديل نفسه؛ لن يُضاف إلى قائمة الانتظار مرتين.'
 }

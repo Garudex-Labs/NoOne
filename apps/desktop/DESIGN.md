@@ -429,7 +429,7 @@ from their root base tokens; do not multiply the global tokens or nest CSS zoom.
   Active dictation or voice conversation pins the recipient until capture ends,
   keeping the microphone's stop controls and shortcut attached to its owner.
 - Status-stack rows use `StatusRow` with a leading `dismiss` action, a state
-  icon and optional trailing actions. `StatusDismissButton` owns the Codicon
+  icon and optional trailing actions. `StatusDismissButton` owns the shared SVG
   close button for previews, background tasks and queued prompts; do not swap
   it for a trash icon or a CSS glyph. Icons and controls align to the first text
   line, including messages with attachment metadata.
@@ -463,15 +463,14 @@ from their root base tokens; do not multiply the global tokens or nest CSS zoom.
 
 ## Iconography & brand
 
-- **Tabler** is the default component/chrome set. Import its curated aliases and
-  `iconSize` scale from `src/lib/icons.ts`; do not import icon packages directly
+- **Tabler** is the single generic component/chrome set. Import its curated aliases and
+  `iconSize` scale from `@noone/ui/icons`; do not import icon packages directly
   in feature code.
-- **`Codicon`** is the compact editor/tool/status vocabulary. Use
-  `src/components/ui/codicon.tsx`, including `codiconIcon()` where a
-  Tabler-shaped component is required.
-- Pick the vocabulary by semantic context and reuse the existing icon for an
-  action. Do not introduce a third icon set or mix styles within one control
-  group.
+- **`AppIcon`** maps dynamic editor/tool/status names to the same Tabler SVG family. Use
+  `@noone/ui/app-icon`, including `getAppIcon()` where a
+  named icon component is required.
+- Reuse the existing semantic icon for an action. Static controls use named
+  exports; dynamic tool/menu names use `AppIcon`. Do not add another generic icon set.
 - **`BrandMark`** (`src/components/brand-mark.tsx`) is the brand glyph — the
   `nous-girl` mark on a fixed tile, theme-aware: black girl on white in light
   mode, white girl on the `#0d1117` dark tile in dark mode (keyed off

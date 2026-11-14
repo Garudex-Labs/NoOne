@@ -1,4 +1,4 @@
-import { JsonRpcGatewayError } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@noone/shared'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
@@ -23,7 +23,7 @@ vi.mock('@/lib/plugin-catalog', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   lookupPluginCatalogEntry
 }))
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   getProfiles: async () => ({ profiles: [] })
 }))
@@ -46,7 +46,7 @@ const REPO = 'https://github.com/example/pkg'
 
 const ADMISSION_REFUSAL =
   'invalid params for plugins.manage: inspected_sha: Extra inputs are not permitted — the client and the ' +
-  'Hermes backend are out of sync (different versions); run `hermes update` and restart both'
+  'Hermes backend are out of sync (different versions); run `noone update` and restart both'
 
 const callsFor = (action: string) =>
   requestGateway.mock.calls.filter(([method, params]) => method === 'plugins.manage' && params?.action === action)

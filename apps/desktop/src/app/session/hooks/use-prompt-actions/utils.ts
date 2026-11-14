@@ -1,5 +1,5 @@
 import type { AppendMessage } from '@assistant-ui/react'
-import { JsonRpcGatewayError } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@noone/shared'
 
 import { translateNow, type Translations } from '@/i18n'
 import type { ChatMessage } from '@/lib/chat-messages'
@@ -306,7 +306,7 @@ export function isCompressionBusyError(error: unknown): boolean {
 }
 
 /** prompt.submit refused because this principal's submission id on this session is ALREADY admitted
- *  with another payload (hermes_state_runtime.ADMITTED_REQUEST_CONFLICT): the send was delivered.
+ *  with another payload (agent_state_runtime.ADMITTED_REQUEST_CONFLICT): the send was delivered.
  *  Every other `admission_conflict` (route, binding, lineage) names no such field and stays an error. */
 export function isAdmittedSubmissionConflict(error: unknown): boolean {
   const data = error instanceof JsonRpcGatewayError ? (error.data as { field?: unknown; reason?: unknown } | undefined) : null

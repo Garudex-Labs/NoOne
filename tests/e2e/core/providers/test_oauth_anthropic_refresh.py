@@ -1,6 +1,6 @@
 """Anthropic OAuth access token expires mid-turn: one refresh, the turn completes, the rotation persists.
 
-Real ``hermes -z`` process (the aux-call cell: a real ``tui_gateway`` session, since
+Real ``hermes -z`` process (the aux-call cell: a real ``agent_backend`` session, since
 one-shots send no title call), native ``anthropic`` provider on the OAuth route
 (``sk-ant-oat…`` pool credential), inference against the SDK-oracle loopback
 Messages endpoint (accepted base-URL override ``http://127.0.0.1:<port>/anthropic``),
@@ -127,10 +127,10 @@ def _run_turn(tmp_path, *, aux_401: bool, clock_expired: bool):
 
 
 def _tui_turn(rig, prompt: str) -> subprocess.CompletedProcess:
-    """One turn through a real ``tui_gateway`` session; returncode 0 once ``message.complete`` arrives."""
+    """One turn through a real ``agent_backend`` session; returncode 0 once ``message.complete`` arrives."""
     from tests.e2e.core.parity._drive_rpc import RpcClient, StreamCapture
 
-    proc = subprocess.Popen([sys.executable, "-m", "tui_gateway.entry"], cwd=str(rig.fh.root),
+    proc = subprocess.Popen([sys.executable, "-m", "agent_backend.entry"], cwd=str(rig.fh.root),
                             env=rig.fh.env(rig.child_env), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, text=True, bufsize=1)
     cap = StreamCapture().start(proc)

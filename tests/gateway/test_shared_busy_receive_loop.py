@@ -1,6 +1,6 @@
 """A busy-session follow-up releases the adapter's serial receive loop once it is durably queued.
 
-IRC and Signal await ``handle_message`` before reading their next frame. With the shared runtime
+Signal awaits ``handle_message`` before reading their next frame. With the shared runtime
 a busy follow-up is admitted into the session FIFO; the adapter must return as soon as that row
 is committed, not when the queued turn finally answers, while still delivering exactly one reply.
 """
@@ -59,7 +59,7 @@ async def _busy_owner(monkeypatch, turns):
 
 
 def _statuses(authority):
-    from hermes_state_runtime import list_session_admissions
+    from agent_state_runtime import list_session_admissions
     return {row['payload']['text']: row['status'] for session_id in authority.sessions
             for row in list_session_admissions(authority.db, session_id=session_id, pending_only=False)}
 

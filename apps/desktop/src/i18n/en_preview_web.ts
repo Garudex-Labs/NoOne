@@ -1,5 +1,6 @@
-import type { Translations } from './types'
+import { appText } from '@noone/shared/application-identity'
 
+import type { Translations } from './types'
 // The in-app browser pane's copy (`preview.web`), composed by en.ts.
 export const enPreviewWeb: Translations['preview']['web'] = {
   embeddedPreviewHint: 'Some sites block embedded previews. Open the original page in a browser tab.',
@@ -9,11 +10,11 @@ export const enPreviewWeb: Translations['preview']['web'] = {
     'This address points at the machine running your agent, not this one. The browser pane loads pages locally, so a remote dev server needs a port forward or a reachable hostname.',
   failedToLoad: 'Preview failed to load',
   tryAgain: 'Try again',
-  restarting: 'Hermes is restarting...',
-  askRestart: 'Ask Hermes to restart the server',
-  lookingRestart: taskId => `Hermes is looking for a preview server to restart (${taskId})`,
+  restarting: '{app_name} is restarting...',
+  askRestart: 'Ask {app_name} to restart the server',
+  lookingRestart: taskId => `${appText('{app_name}')} is looking for a preview server to restart (${taskId})`,
   restartingTitle: 'Restarting preview server',
-  restartingMessage: 'Hermes is working in the background. Watch the preview console for progress.',
+  restartingMessage: '{app_name} is working in the background. Watch the preview console for progress.',
   startRestartFailed: message => `Could not start server restart: ${message}`,
   restartFailed: 'Server restart failed',
   hideConsole: 'Hide preview console',
@@ -25,16 +26,16 @@ export const enPreviewWeb: Translations['preview']['web'] = {
   reload: 'Reload page',
   address: 'Address',
   addressPlaceholder: 'Enter address',
-  blankPageBody: 'Type an address above to browse, or ask Hermes to open a page.',
-  finishedRestarting: message => `Hermes finished restarting the preview server${message ? `: ${message}` : ''}`,
+  blankPageBody: 'Type an address above to browse, or ask {app_name} to open a page.',
+  finishedRestarting: message => `${appText('{app_name}')} finished restarting the preview server${message ? `: ${message}` : ''}`,
   failedRestarting: message => `Server restart failed: ${message}`,
   unknownError: 'unknown error',
   restartedTitle: 'Preview server restarted',
   reloadingNow: 'Reloading the preview now.',
   restartFailedTitle: 'Preview restart failed',
-  restartFailedMessage: 'Hermes could not restart the server.',
+  restartFailedMessage: '{app_name} could not restart the server.',
   stillWorking:
-    'Hermes is still working, but no restart result has arrived yet. The server command may be running in the foreground.',
+    '{app_name} is still working, but no restart result has arrived yet. The server command may be running in the foreground.',
   workspaceReloading: 'Workspace changed, reloading preview',
   fileChanged: url => `File changed, reloading preview: ${url}`,
   filesChanged: (count, url) => `${count} file changes, reloading preview: ${url}`,

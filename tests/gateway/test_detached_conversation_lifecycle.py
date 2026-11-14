@@ -1,6 +1,6 @@
 """The lifecycle of a conversation its chat moved past (review of #144840 at 03d04918dde).
 
-Teknium's ruling: once a messaging chat names another conversation, nothing the old one produces
+once a messaging chat names another conversation, nothing the old one produces
 reaches the chat, and the old one stays fully usable from the apps. Real GatewayRunner, DiscordAdapter
 (``send`` recorded), SessionAuthority, drain and SessionStore over a real SessionDB; the agent run is
 the stand-in of ``test_authority_lane_moves_on``.
@@ -142,7 +142,7 @@ def _process_event(runner, live, session_id, kind='completion', **fields):
 
 
 def _automation_rows(authority, session_id, route):
-    from hermes_state_runtime import list_session_admissions
+    from agent_state_runtime import list_session_admissions
     return [row for row in list_session_admissions(authority.db, session_id=session_id, pending_only=False)
             if row['principal_id'] == 'automation:' + route]
 

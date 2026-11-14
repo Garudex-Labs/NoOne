@@ -1,7 +1,7 @@
 import { atom } from 'nanostores'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type * as HermesModule from '@/hermes'
+import type * as AgentModule from '@/agent-client'
 import { $activeGatewayProfile } from '@/store/profile'
 
 // Voice mode and the Appearance display toggles write `config.set` for the
@@ -12,9 +12,9 @@ import { $activeGatewayProfile } from '@/store/profile'
 
 const sockets = vi.hoisted(() => [] as Array<{ requests: Array<[string, unknown]>; wsUrl: string }>)
 
-vi.mock('@/hermes', async importOriginal => ({
-  ...(await importOriginal<typeof HermesModule>()),
-  HermesGateway: class {
+vi.mock('@/agent-client', async importOriginal => ({
+  ...(await importOriginal<typeof AgentModule>()),
+  AgentGateway: class {
     connectionState = 'closed'
     record = { requests: [] as Array<[string, unknown]>, wsUrl: '' }
     constructor() {

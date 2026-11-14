@@ -19,7 +19,7 @@ import {
   setSelectedStoredSessionId,
   workspaceCwdBelongsToSelectedSession
 } from '@/store/session'
-import type { SessionInfo, SessionResumeResult } from '@/types/hermes'
+import type { SessionInfo, SessionResumeResult } from '@/types/agent-client'
 
 import {
   appendLiveSessionProjection,
@@ -944,7 +944,7 @@ describe('preserveLocalPendingTurnMessages', () => {
   })
 
   // #67603: the gateway persists model-switch / personality notices as role=user
-  // ([System: …], tui_gateway/server.py). A single trailing marker is already
+  // ([System: …], agent_backend/server.py). A single trailing marker is already
   // handled by the latestAuthoritativeUser guard above, but TWO switches around
   // one turn put a marker BEFORE the committed prompt (shifting its ordinal) and
   // another AFTER it (so the prompt is no longer the last user row, so the text

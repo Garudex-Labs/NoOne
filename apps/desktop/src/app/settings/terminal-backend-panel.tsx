@@ -1,14 +1,14 @@
+import { AlertTriangle, Check, Loader2, RefreshCw } from '@noone/ui/icons'
 import { useCallback, useEffect, useState } from 'react'
 
+import { getTerminalBackends, selectTerminalBackend } from '@/agent-client'
 import type { ProfileScope } from '@/api/client'
 import { Button } from '@/components/ui/button'
-import { getTerminalBackends, selectTerminalBackend } from '@/hermes'
 import { useI18n } from '@/i18n'
-import { AlertTriangle, Check, Loader2, RefreshCw } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { confirm } from '@/store/confirm'
 import { notify, notifyError } from '@/store/notifications'
-import type { TerminalBackendInfo, TerminalBackendsResponse } from '@/types/hermes'
+import type { TerminalBackendInfo, TerminalBackendsResponse } from '@/types/agent-client'
 
 import { Pill } from './primitives'
 

@@ -135,3 +135,13 @@ def test_case_collision_uses_casefold(emails_dir):
     (emails_dir / "strasse@example.com").write_text("someone\n")
     assert add_contributor("STRASSE@example.com", "someone") == 1
     assert add_contributor("straße@example.com", "someone") == 1
+
+
+def test_declared_roster_contains_only_the_project_maintainer():
+    assert authors.declared_contributors() == {"rawx18.dev@gmail.com": "RAWx18"}
+    assert authors.resolve_author("RAWx18", "rawx18.dev@gmail.com") == "@RAWx18"
+
+
+def test_unmapped_historical_authors_are_not_reattributed_to_the_maintainer():
+    assert authors.resolve_author("Original Author", "original@example.test") == "Original Author"
+    assert authors.resolve_author("Original Author", "12345+original@users.noreply.github.com") == "@original"

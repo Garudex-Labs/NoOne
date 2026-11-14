@@ -1,8 +1,8 @@
-import { compactNumber } from '@hermes/shared'
+import { compactNumber } from '@noone/shared'
 import { useLocation, useNavigate } from 'react-router'
 
+import type { ProfileScope } from '@/agent-client'
 import { PanelEmpty } from '@/app/overlays/panel'
-import type { ProfileScope } from '@/hermes'
 import { useI18n } from '@/i18n'
 
 import type { McpServersController } from '../mcp/use-mcp-servers'

@@ -2,6 +2,8 @@ import { type ChildProcessWithoutNullStreams, spawn } from 'node:child_process'
 import { statSync } from 'node:fs'
 import path from 'node:path'
 
+import { appText } from '@noone/shared/application-identity'
+
 import type { GatewayTicketPurpose } from './local-gateway'
 import { hiddenWindowsChildOptions, windowsShellCommand } from './windows-child-options'
 
@@ -21,8 +23,8 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 with redirect_stdout(sys.stderr):
-    from hermes_cli.gateway_client import _session_ticket
-    from hermes_cli.gateway_runtime_discovery import DiscoveryError, _private_node
+    from agent_cli.gateway_client import _session_ticket
+    from agent_cli.gateway_runtime_discovery import DiscoveryError, _private_node
 while True:
     line = sys.stdin.buffer.readline(65537)
     if not line:
@@ -174,7 +176,7 @@ const RUNTIME_COMMAND_TIMEOUT_MS = 30_000
 /** Ask an installation launcher for its interpreter; it owns ABI and store selection. */
 function launcherRuntimePython(backend: ResolvedTicketBackend & { root: string }): Promise<string> {
   return new Promise((resolve, reject) => {
-    const fail = (detail: string) => reject(new Error(`Gateway ticket bootstrap could not resolve the installed Hermes Python runtime: ${detail}`))
+    const fail = (detail: string) => reject(new Error(appText(`Gateway ticket bootstrap could not resolve the installed {app_name} Python runtime: ${detail}`)))
 
     // A .cmd override is a shell backend: quote it as the backend spawn does, or cmd.exe
     // splits a launcher path with a space at the first one (#74064).
@@ -241,7 +243,7 @@ export async function ticketRuntimeFor(backend: ResolvedTicketBackend): Promise<
     return { command: python, env: { ...backend.env, PYTHONPATH: backend.root } }
   }
 
-  throw new Error('Gateway ticket bootstrap requires the installed Hermes Python runtime')
+  throw new Error(appText('Gateway ticket bootstrap requires the installed {app_name} Python runtime'))
 }
 
 export function createGatewayTicketResolver(resolveBackend: () => Promise<ResolvedTicketBackend>, cwd: () => string) {

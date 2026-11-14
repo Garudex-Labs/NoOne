@@ -23,7 +23,7 @@ for _stream in (sys.stdout, sys.stderr):
     if hasattr(_stream, "reconfigure"):
         with suppress(ValueError, TypeError):
             _stream.reconfigure(encoding="utf-8", errors="replace")
-from hermes_constants import get_bundled_skills_dir, get_hermes_home, get_optional_skills_dir
+from agent_constants import get_bundled_skills_dir, get_agent_home, get_optional_skills_dir
 from agent.skill_utils import ESSENTIAL_SKILLS, is_excluded_skill_path
 from tools.skill_usage import read_skill_name
 from tools.skills_sync_optional import (
@@ -33,7 +33,7 @@ from utils import atomic_write_text
 
 logger = logging.getLogger(__name__)
 
-HERMES_HOME = get_hermes_home()
+HERMES_HOME = get_agent_home()
 SKILLS_DIR = HERMES_HOME / "skills"
 MANIFEST_FILE = SKILLS_DIR / ".bundled_manifest"
 
@@ -44,7 +44,7 @@ MANIFEST_FILE = SKILLS_DIR / ".bundled_manifest"
 # Same bug class and same fix as skills_tool (f8723c478) and skill_manager_tool (c6a3d412d): long-lived
 # multi-profile runtimes (Dashboard console, TUI/Desktop backend, cron, kanban workers) import this module
 # once under the launch HERMES_HOME and later scope requests to a different profile via
-# set_hermes_home_override(). See #65828.
+# set_agent_home_override(). See #65828.
 _HERMES_HOME_AT_IMPORT = HERMES_HOME
 _SKILLS_DIR_AT_IMPORT = SKILLS_DIR
 _MANIFEST_FILE_AT_IMPORT = MANIFEST_FILE
@@ -56,7 +56,7 @@ def _live(configured, at_import: Path, fallback) -> Path:
 
 
 def _hermes_home() -> Path:
-    return _live(HERMES_HOME, _HERMES_HOME_AT_IMPORT, get_hermes_home)
+    return _live(HERMES_HOME, _HERMES_HOME_AT_IMPORT, get_agent_home)
 
 
 def _skills_dir() -> Path:
@@ -67,8 +67,8 @@ def _manifest_file() -> Path:
     return _live(MANIFEST_FILE, _MANIFEST_FILE_AT_IMPORT, lambda: _skills_dir() / ".bundled_manifest")
 
 
-# Written by `hermes profile create --no-skills` / installer `--no-skills`: sync seeds only
-# essential skills. Mirrors hermes_cli.profiles.NO_BUNDLED_SKILLS_MARKER (no CLI import here).
+# Written by `noone profile create --no-skills` / installer `--no-skills`: sync seeds only
+# essential skills. Mirrors agent_cli.profiles.NO_BUNDLED_SKILLS_MARKER (no CLI import here).
 NO_BUNDLED_SKILLS_MARKER = ".no-bundled-skills"
 
 
@@ -158,8 +158,8 @@ def _read_suppressed_names() -> set:
 
 def _write_manifest(entries: dict[str, str]):
     """Atomic v2 write, preserving an existing file's mode/owner (not mkstemp's 0600)."""
-    from hermes_constants import mkdir_under_hermes_home
-    mkdir_under_hermes_home(_manifest_file().parent)
+    from agent_constants import mkdir_under_agent_home
+    mkdir_under_agent_home(_manifest_file().parent)
     try:
         data = "".join(f"{n}:{h}\n" for n, h in sorted(entries.items()))
         atomic_write_text(_manifest_file(), data, tmp_prefix=".bundled_manifest_", preserve_mode=True)
@@ -247,7 +247,7 @@ def _recover_renamed_skill(st: "_SyncState", skill_name: str, dest: Path) -> Opt
             st.say(
                 f"  ⚠ {skill_name}: upstream moved this skill to {_rel_skills_posix(dest)}, but your "
                 f"modified copy at {rel} was kept — it will not receive updates. "
-                f"Run `hermes skills reset {skill_name} --restore` to move to the new location.")
+                f"Run `noone skills reset {skill_name} --restore` to move to the new location.")
             continue
         try:
             _move_dir(candidate, dest)
@@ -317,7 +317,7 @@ def _install_new_skill(st: _SyncState, skill_name: str, skill_src: Path, dest: P
             else:
                 st.say(
                     f"  ⚠ {skill_name}: bundled version shipped but you already have a local skill "
-                    f"by this name — yours was kept. Run `hermes skills reset {skill_name}` to "
+                    f"by this name — yours was kept. Run `noone skills reset {skill_name}` to "
                     f"replace it with the bundled version.")
         else:
             _copy_dir(skill_src, dest)

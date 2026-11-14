@@ -266,13 +266,13 @@ async def test_run_restart_excluded_from_stop_cancel_loop():
 @pytest.mark.asyncio
 async def test_restart_from_served_profile_chat_restarts_the_host_gateway(monkeypatch):
     """A /restart handled inside a served profile's runtime scope restarts the HOST gateway: the
-    detached watcher relaunches `hermes gateway restart` under the launch home (under a named
+    detached watcher relaunches `noone gateway restart` under the launch home (under a named
     profile's home it exits 78 and nothing comes back), and stop() - which flushes pending
-    messages under get_hermes_home() - runs outside the requester's profile scope."""
+    messages under get_agent_home() - runs outside the requester's profile scope."""
     from agent.secret_scope import current_secret_scope
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
-    launch_home = get_hermes_home()
+    launch_home = get_agent_home()
     profile_home = launch_home / "profiles" / "research"
     profile_home.mkdir(parents=True)
     (profile_home / ".env").write_text("RESEARCH_ONLY_TOKEN=x\n", encoding="utf-8")
@@ -281,7 +281,7 @@ async def test_restart_from_served_profile_chat_restarts_the_host_gateway(monkey
     seen = {}
 
     async def _recording_stop(**_kwargs):
-        seen["stop_home"] = get_hermes_home()
+        seen["stop_home"] = get_agent_home()
         seen["stop_secret_scope"] = current_secret_scope()
 
     runner.stop = _recording_stop
@@ -292,7 +292,7 @@ async def test_restart_from_served_profile_chat_restarts_the_host_gateway(monkey
     )
 
     async with gateway_run._async_profile_runtime_scope(profile_home):
-        assert get_hermes_home() == profile_home
+        assert get_agent_home() == profile_home
         assert runner.request_restart(detached=True, via_service=False) is True
     await runner._restart_task
 
@@ -313,7 +313,7 @@ async def test_windows_detached_restart_scrubs_gateway_marker(monkeypatch, tmp_p
     monkeypatch.setattr(gateway_run.os, "getpid", lambda: 321)
     monkeypatch.setenv("_HERMES_GATEWAY", "1")
 
-    import hermes_cli._subprocess_compat as subprocess_compat
+    import agent_cli._subprocess_compat as subprocess_compat
 
     monkeypatch.setattr(
         subprocess_compat,
@@ -335,7 +335,7 @@ async def test_windows_detached_restart_scrubs_gateway_marker(monkeypatch, tmp_p
     assert kwargs["env"].get("_HERMES_GATEWAY") is None
     # The watcher is an installation-bound command: PM's bootstrap selects the
     # dependency generation at child start, no venv is captured in its env.
-    from hermes_cli._launchers import runtime_command
+    from agent_cli._launchers import runtime_command
     from pathlib import Path
     assert cmd[:3] == runtime_command(Path(gateway_run.__file__).resolve().parent.parent)[:3]
     assert kwargs["stdout"] is subprocess.DEVNULL
@@ -364,7 +364,7 @@ async def test_windows_detached_restart_watcher_keeps_console_python(monkeypatch
     monkeypatch.setattr(gateway_run.os, "getpid", lambda: 321)
     monkeypatch.setenv("VIRTUAL_ENV", str(venv_dir))
 
-    import hermes_cli._subprocess_compat as subprocess_compat
+    import agent_cli._subprocess_compat as subprocess_compat
 
     monkeypatch.setattr(
         subprocess_compat,
@@ -396,7 +396,7 @@ async def test_shutdown_notification_uses_persisted_origin_for_colon_ids():
     runner, adapter = make_restart_runner()
     adapter.send = AsyncMock()
     source = make_restart_source(chat_id="!room123:example.org", chat_type="group")
-    source.platform = gateway_run.Platform.MATRIX
+    source.platform = gateway_run.Platform.MATTERMOST
     session_key = build_session_key(source)
     runner._running_agents[session_key] = MagicMock()
     runner.session_store._entries = {
@@ -410,7 +410,7 @@ async def test_shutdown_notification_uses_persisted_origin_for_colon_ids():
             chat_type=source.chat_type,
         )
     }
-    runner.adapters = {gateway_run.Platform.MATRIX: adapter}
+    runner.adapters = {gateway_run.Platform.MATTERMOST: adapter}
 
     await runner._notify_active_sessions_of_shutdown()
 
@@ -477,7 +477,7 @@ def _live_agent(idle_seconds: float = 1.0) -> MagicMock:
 async def test_request_restart_skips_wait_when_only_wedged_turns(monkeypatch):
     """A turn idle past agent.gateway_timeout must not defer the restart.
 
-    Regression: a WhatsApp turn wedged for 30+ min pinned `hermes update`
+    Regression: a WhatsApp turn wedged for 30+ min pinned `noone update`
     in "draining" for the full restart_after_turn_timeout cap — the
     after-turn wait counted the wedged agent as active work even though
     the inactivity watchdog had already declared it dead (Aug 2026).
@@ -553,7 +553,7 @@ def test_wedged_agent_count_ignores_sentinels_and_bad_summaries(monkeypatch):
 async def test_request_restart_skips_wait_for_cron_run_past_inflight_allowance(monkeypatch, tmp_path):
     """A cron run older than the scheduler's stale-inflight allowance is wedged: the restart proceeds.
 
-    #115469 Defect B: a no-agent job whose delivery hung pinned ``hermes update`` in "draining" for the
+    #115469 Defect B: a no-agent job whose delivery hung pinned ``noone update`` in "draining" for the
     full ``restart_after_turn_timeout`` because ``_wedged_agent_count`` only ever looked at chat agents,
     so the cron unit was structurally un-skippable ("0 wedged and excluded").
     """

@@ -1,8 +1,10 @@
-import { compactNumber } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { compactNumber } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo } from 'react'
 import type * as React from 'react'
 
+import type { SessionInfo } from '@/agent-client'
 import { PrTag } from '@/app/chat/pr-tag'
 import { ProfileTag } from '@/app/chat/profile-tag'
 import { startSessionDrag } from '@/app/chat/session-drag'
@@ -10,10 +12,8 @@ import { PlatformAvatar } from '@/app/messaging/platform-icon'
 import { openSession } from '@/app/open-session'
 import { formatMessageTimestamp } from '@/components/assistant-ui/thread/timestamp'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { RowButton } from '@/components/ui/row-button'
 import { OverflowTip, Tip } from '@/components/ui/tooltip'
-import type { SessionInfo } from '@/hermes'
 import { type Translations, useI18n } from '@/i18n'
 import { sessionTitle } from '@/lib/chat-runtime'
 import { pathLeaf } from '@/lib/display-path'
@@ -289,7 +289,7 @@ function SidebarSessionRowImpl({
   // the lead slot the dot would occupy instead of adding a column of its own.
   const lead = session.archived ? (
     <SidebarRowLeadGlyph className="text-(--ui-text-quaternary)">
-      <Codicon name="archive" size="0.75rem" />
+      <AppIcon name="archive" size="0.75rem" />
     </SidebarRowLeadGlyph>
   ) : null
 
@@ -349,7 +349,7 @@ function SidebarSessionRowImpl({
           size="icon"
           variant="ghost"
         >
-          <Codicon name="kebab-vertical" size="0.875rem" />
+          <AppIcon name="kebab-vertical" size="0.875rem" />
         </Button>
       </SessionActionsMenu>
     </div>
@@ -660,7 +660,7 @@ function SidebarSessionRowImpl({
 
 // The sidebar re-renders on every stream tick ($sessions/$workingSessionIds
 // churn), and it stays mounted beneath every overlay — so an unmemoized row
-// re-rendered the whole list (and its Codicon/label/status-dot subtree) on each
+// re-rendered the whole list (and its AppIcon/label/status-dot subtree) on each
 // delta, bleeding churn into Settings, Cron, Profiles, Artifacts, etc.
 //
 // The callback props (onArchive/onResume/…) are fresh closures every render by

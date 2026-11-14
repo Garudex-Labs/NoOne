@@ -18,7 +18,7 @@ export type LaunchSource = NonNullable<CanonicalCreateParams['source']>
  *  other keys. */
 export interface ClientIdentity { name: string; version?: string }
 
-/** Who is launching: the policy label (default `'tui'`, the terminal-client policy) and, optionally,
+/** Who is launching: the policy label (default `'cli'`, the CLI policy) and, optionally,
  *  the client's own name. */
 export interface LaunchIdentity { source?: LaunchSource; client?: ClientIdentity }
 
@@ -32,15 +32,13 @@ export function canonicalRequest(
   const params = { ...original }
 
   if (method === 'session.create') {
-    const source = identity.source ?? 'tui'
-    // Ink launches as 'tui' with no client name and keeps its TUI wording; any other launch reads neutral.
-    const neutral = source !== 'tui' || identity.client !== undefined
+    const source = identity.source ?? 'cli'
     delete params.cols
     params.source = source
     params.request_id ??= randomUuid()
 
     if (!contract?.sources.includes(source)) {
-      throw new Error(neutral ? text('canonical.launch.noSourcePolicy', source) : text('canonical.launch.noTuiPolicy'))
+      throw new Error(text('canonical.launch.noSourcePolicy', source))
     }
 
     // The shell's environment is context, not a launch option: a gateway predating it runs the session
@@ -55,7 +53,7 @@ export function canonicalRequest(
     const unsupported = Object.keys(params).filter(key => !contract.parameters.includes(key))
 
     if (unsupported.length) {
-      throw new Error(text(neutral ? 'canonical.launch.unsupportedSessionOptions' : 'canonical.launch.unsupportedOptions',
+      throw new Error(text('canonical.launch.unsupportedSessionOptions',
         unsupported.join(', ')))
     }
   }

@@ -1,37 +1,45 @@
 ---
 title: "Systematic Debugging — 4-phase root cause debugging: understand bugs before fixing"
-sidebar_label: "Systematic Debugging"
+sidebarTitle: "Systematic Debugging"
 description: "4-phase root cause debugging: understand bugs before fixing"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Systematic Debugging
+# Systematic Debugging {#systematic-debugging}
 
 4-phase root cause debugging: understand bugs before fixing.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/software-development/systematic-debugging` |
 | Version | `1.1.0` |
-| Author | Hermes Agent (adapted from obra/superpowers) |
+| Author | {{app-name}} (adapted from obra/superpowers) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `debugging`, `troubleshooting`, `problem-solving`, `root-cause`, `investigation` |
 | Related skills | [`test-driven-development`](../../bundled/software-development/software-development-test-driven-development.md), [`subagent-driven-development`](../../optional/software-development/software-development-subagent-driven-development.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Systematic Debugging
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Systematic Debugging {#systematic-debugging-1}
+
+## Overview {#overview}
 
 Random fixes waste time and create new bugs. Quick patches mask underlying issues.
 
@@ -39,7 +47,7 @@ Random fixes waste time and create new bugs. Quick patches mask underlying issue
 
 **Violating the letter of this process is violating the spirit of debugging.**
 
-## The Iron Law
+## The Iron Law {#the-iron-law}
 
 ```
 NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
@@ -47,13 +55,13 @@ NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
 
 If you haven't completed Phase 1, you cannot propose fixes.
 
-## The Feedback Loop Rule
+## The Feedback Loop Rule {#the-feedback-loop-rule}
 
 The feedback loop is the debugging work. Before reading code to build a theory, create or identify a **tight** command that can go red on the user's exact symptom and green when the bug is fixed. A tight loop is fast, deterministic, agent-runnable, and specific enough to catch this bug — not merely "doesn't crash".
 
 When a clean repro is hard, spend disproportionate effort building the loop. Guessing without a red-capable loop is the failure mode this skill exists to prevent.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use for ANY technical issue:
 - Test failures
@@ -75,17 +83,17 @@ Use for ANY technical issue:
 - You're in a hurry (rushing guarantees rework)
 - Someone wants it fixed NOW (systematic is faster than thrashing)
 
-## The Four Phases
+## The Four Phases {#the-four-phases}
 
 You MUST complete each phase before proceeding to the next.
 
 ---
 
-## Phase 1: Root Cause Investigation
+## Phase 1: Root Cause Investigation {#phase-1-root-cause-investigation}
 
 **BEFORE attempting ANY fix:**
 
-### 1. Read Error Messages Carefully
+### 1. Read Error Messages Carefully {#1-read-error-messages-carefully}
 
 - Don't skip past errors or warnings
 - They often contain the exact solution
@@ -94,7 +102,7 @@ You MUST complete each phase before proceeding to the next.
 
 **Action:** Use `read_file` on the relevant source files. Use `search_files` to find the error string in the codebase.
 
-### 2. Build a Tight Feedback Loop
+### 2. Build a Tight Feedback Loop {#2-build-a-tight-feedback-loop}
 
 - Can you trigger the user's exact symptom with one command?
 - Does the command fail for this bug and only pass once the bug is fixed?
@@ -136,7 +144,7 @@ python scripts/repro_bug.py
 for i in {1..100}; do pytest tests/test_flake.py::test_name -q || break; done
 ```
 
-### 3. Check Recent Changes
+### 3. Check Recent Changes {#3-check-recent-changes}
 
 - What changed that could cause this?
 - Git diff, recent commits
@@ -155,7 +163,7 @@ git diff
 git log -p --follow src/problematic_file.py | head -100
 ```
 
-### 4. Gather Evidence in Multi-Component Systems
+### 4. Gather Evidence in Multi-Component Systems {#4-gather-evidence-in-multi-component-systems}
 
 **WHEN system has multiple components (API → service → database, CI → build → deploy):**
 
@@ -171,7 +179,7 @@ Run once to gather evidence showing WHERE it breaks.
 THEN analyze evidence to identify the failing component.
 THEN investigate that specific component.
 
-### 5. Trace Data Flow
+### 5. Trace Data Flow {#5-trace-data-flow}
 
 **WHEN error is deep in the call stack:**
 
@@ -190,7 +198,7 @@ search_files("function_name(", path="src/", file_glob="*.py")
 search_files("variable_name\\s*=", path="src/", file_glob="*.py")
 ```
 
-### Phase 1 Completion Checklist
+### Phase 1 Completion Checklist {#phase-1-completion-checklist}
 
 - [ ] Error messages fully read and understood
 - [ ] A tight loop command exists and has been run at least once
@@ -205,17 +213,17 @@ search_files("variable_name\\s*=", path="src/", file_glob="*.py")
 
 ---
 
-## Phase 2: Pattern Analysis
+## Phase 2: Pattern Analysis {#phase-2-pattern-analysis}
 
 **Find the pattern before fixing:**
 
-### 0. Minimize the Reproduction
+### 0. Minimize the Reproduction {#0-minimize-the-reproduction}
 
 Once the loop is red, shrink the repro to the smallest scenario that still goes red. Cut inputs, callers, config, data, and steps **one at a time**, re-running the loop after each cut. Keep only what is load-bearing for the failure.
 
 Done when removing any remaining element makes the loop go green. A minimal repro narrows the hypothesis space and often becomes the cleanest regression test.
 
-### 1. Find Working Examples
+### 1. Find Working Examples {#1-find-working-examples}
 
 - Locate similar working code in the same codebase
 - What works that's similar to what's broken?
@@ -226,19 +234,19 @@ Done when removing any remaining element makes the loop go green. A minimal repr
 search_files("similar_pattern", path="src/", file_glob="*.py")
 ```
 
-### 2. Compare Against References
+### 2. Compare Against References {#2-compare-against-references}
 
 - If implementing a pattern, read the reference implementation COMPLETELY
 - Don't skim — read every line
 - Understand the pattern fully before applying
 
-### 3. Identify Differences
+### 3. Identify Differences {#3-identify-differences}
 
 - What's different between working and broken?
 - List every difference, however small
 - Don't assume "that can't matter"
 
-### 4. Understand Dependencies
+### 4. Understand Dependencies {#4-understand-dependencies}
 
 - What other components does this need?
 - What settings, config, environment?
@@ -246,11 +254,11 @@ search_files("similar_pattern", path="src/", file_glob="*.py")
 
 ---
 
-## Phase 3: Hypothesis and Testing
+## Phase 3: Hypothesis and Testing {#phase-3-hypothesis-and-testing}
 
 **Scientific method:**
 
-### 1. Form Ranked Falsifiable Hypotheses
+### 1. Form Ranked Falsifiable Hypotheses {#1-form-ranked-falsifiable-hypotheses}
 
 - Generate 3–5 plausible hypotheses before testing any single one.
 - Rank them by likelihood and cheapness to falsify.
@@ -259,7 +267,7 @@ search_files("similar_pattern", path="src/", file_glob="*.py")
 
 If the user is present, show the ranked list before testing. They may have domain knowledge that instantly re-ranks it. If the user is AFK, proceed with your ranking.
 
-### 2. Test Minimally
+### 2. Test Minimally {#2-test-minimally}
 
 - Test the highest-ranked hypothesis with the smallest possible probe.
 - Change one variable at a time.
@@ -267,13 +275,13 @@ If the user is present, show the ranked list before testing. They may have domai
 - Prefer debugger/REPL inspection when available; one breakpoint beats ten logs.
 - If you add logs, tag every temporary line with a unique prefix such as `[DEBUG-a4f2]` so cleanup is a single search.
 
-### 3. Verify Before Continuing
+### 3. Verify Before Continuing {#3-verify-before-continuing}
 
 - Did it work? → Phase 4
 - Didn't work? → Form NEW hypothesis
 - DON'T add more fixes on top
 
-### 4. When You Don't Know
+### 4. When You Don't Know {#4-when-you-dont-know}
 
 - Say "I don't understand X"
 - Don't pretend to know
@@ -282,25 +290,25 @@ If the user is present, show the ranked list before testing. They may have domai
 
 ---
 
-## Phase 4: Implementation
+## Phase 4: Implementation {#phase-4-implementation}
 
 **Fix the root cause, not the symptom:**
 
-### 1. Create Failing Test Case
+### 1. Create Failing Test Case {#1-create-failing-test-case}
 
 - Simplest possible reproduction
 - Automated test if possible
 - MUST have before fixing
 - Use the `test-driven-development` skill
 
-### 2. Implement Single Fix
+### 2. Implement Single Fix {#2-implement-single-fix}
 
 - Address the root cause identified
 - ONE change at a time
 - No "while I'm here" improvements
 - No bundled refactoring
 
-### 3. Verify Fix
+### 3. Verify Fix {#3-verify-fix}
 
 ```bash
 # Run the specific regression test
@@ -310,7 +318,7 @@ pytest tests/test_module.py::test_regression -v
 pytest tests/ -q
 ```
 
-### 4. If Fix Doesn't Work — The Rule of Three
+### 4. If Fix Doesn't Work — The Rule of Three {#4-if-fix-doesnt-work--the-rule-of-three}
 
 - **STOP.**
 - Count: How many fixes have you tried?
@@ -318,7 +326,7 @@ pytest tests/ -q
 - **If ≥ 3: STOP and question the architecture (step 5 below)**
 - DON'T attempt Fix #4 without architectural discussion
 
-### 5. If 3+ Fixes Failed: Question Architecture
+### 5. If 3+ Fixes Failed: Question Architecture {#5-if-3-fixes-failed-question-architecture}
 
 **Pattern indicating an architectural problem:**
 - Each fix reveals new shared state/coupling in a different place
@@ -336,7 +344,7 @@ This is NOT a failed hypothesis — this is a wrong architecture.
 
 ---
 
-## Red Flags — STOP and Follow Process
+## Red Flags — STOP and Follow Process {#red-flags--stop-and-follow-process}
 
 If you catch yourself thinking:
 - "Quick fix for now, investigate later"
@@ -355,7 +363,7 @@ If you catch yourself thinking:
 
 **If 3+ fixes failed:** Question the architecture (Phase 4 step 5).
 
-## Common Rationalizations
+## Common Rationalizations {#common-rationalizations}
 
 | Excuse | Reality |
 |--------|---------|
@@ -368,7 +376,7 @@ If you catch yourself thinking:
 | "I see the problem, let me fix it" | Seeing symptoms ≠ understanding root cause. |
 | "One more fix attempt" (after 2+ failures) | 3+ failures = architectural problem. Question the pattern, don't fix again. |
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Phase | Key Activities | Success Criteria |
 |-------|---------------|------------------|
@@ -377,18 +385,18 @@ If you catch yourself thinking:
 | **3. Hypothesis** | Form theory, test minimally, one variable at a time | Confirmed or new hypothesis |
 | **4. Implementation** | Create regression test, fix root cause, verify | Bug resolved, all tests pass |
 
-## Hermes Agent Integration
+## {{app-name}} Integration {#hermes-agent-integration}
 
-### Investigation Tools
+### Investigation Tools {#investigation-tools}
 
-Use these Hermes tools during Phase 1:
+Use these {{app-name}} tools during Phase 1:
 
 - **`search_files`** — Find error strings, trace function calls, locate patterns
 - **`read_file`** — Read source code with line numbers for precise analysis
 - **`terminal`** — Run tests, check git history, reproduce bugs
 - **`web_search`/`web_extract`** — Research error messages, library docs
 
-### With delegate_task
+### With delegate_task {#with-delegate_task}
 
 For complex multi-component debugging, dispatch investigation subagents:
 
@@ -410,7 +418,7 @@ delegate_task(
 )
 ```
 
-### With test-driven-development
+### With test-driven-development {#with-test-driven-development}
 
 When fixing bugs:
 1. Write a test that reproduces the bug (RED)
@@ -418,7 +426,7 @@ When fixing bugs:
 3. Fix the root cause (GREEN)
 4. The test proves the fix and prevents regression
 
-## Real-World Impact
+## Real-World Impact {#real-world-impact}
 
 From debugging sessions:
 - Systematic approach: 15-30 minutes to fix

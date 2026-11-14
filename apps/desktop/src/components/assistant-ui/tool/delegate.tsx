@@ -1,17 +1,17 @@
 'use client'
 
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertCircle, CheckCircle2 } from '@noone/ui/icons'
 import { type FC, type ReactNode, useMemo } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'
 import { useElapsedSeconds } from '@/components/chat/activity-timer'
 import { ActivityTimerText } from '@/components/chat/activity-timer-text'
 import { SCAFFOLD_GLYPH_CLASS, SCAFFOLD_LABEL_CLASS, SCAFFOLD_META_CLASS } from '@/components/chat/scaffold-row'
-import { Codicon } from '@/components/ui/codicon'
 import { FadeText } from '@/components/ui/fade-text'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { useI18n } from '@/i18n'
-import { AlertCircle, CheckCircle2 } from '@/lib/icons'
 import { displayModelName } from '@/lib/model-status-label'
 import { useSessionSlice } from '@/lib/use-session-slice'
 import { cn } from '@/lib/utils'
@@ -110,7 +110,7 @@ function DelegateRowView({ row }: { row: DelegateRow }) {
         </button>
         {meta.length > 0 && <span className={SCAFFOLD_META_CLASS}>{meta.join(' · ')}</span>}
         {live && <ActivityTimerText className={cn(SCAFFOLD_META_CLASS, 'ml-auto')} seconds={elapsed} />}
-        <Codicon className="ml-auto shrink-0 text-(--conversation-scaffold-text)" name="agent" size="0.625rem" />
+        <AppIcon className="ml-auto shrink-0 text-(--conversation-scaffold-text)" name="agent" size="0.625rem" />
       </div>
       {activity.length > 0 && (
         <div className="min-w-0 max-w-full pl-5">

@@ -1,9 +1,9 @@
 """The session owner's server→client requests to a local viewer, and who may settle them.
 
-The owner sends a request frame (``tui_gateway/contracts/server_requests.py``: ``sudo``, ``secret``,
+The owner sends a request frame (``agent_backend/contracts/server_requests.py``: ``sudo``, ``secret``,
 ``clarify``, the Desktop UI requests) to the viewers attached to a session's event stream and blocks the
 agent thread until one answers, the turn is interrupted, or it times out: the canonical side of main's
-sidecar ``tui_gateway/server_requests.py``. A viewer answers with a JSON-RPC response frame
+sidecar ``agent_backend/server_requests.py``. A viewer answers with a JSON-RPC response frame
 (:func:`resolve`) or, for a batch clarify, per question with ``clarify.lock`` (:func:`lock_answer`); both go
 through :func:`may_settle`, and a batch's terminal result comes from ``tools.clarify_batch.settle_batch``,
 the rule the sidecar uses too. Values are never published, journaled or logged: they travel only in the
@@ -58,7 +58,7 @@ def may_settle(authority, actor, session_id, events) -> bool:
     profiles and ``_open`` is process-wide), *actor* holds ``session:respond`` there, and *actor* is
     attached to that session, the same set of connections the request frame was written to."""
     from gateway.session_contract import SessionRef
-    from hermes_state_runtime import RuntimeStoreError
+    from agent_state_runtime import RuntimeStoreError
     if not owned_by(authority, session_id, events):
         return False
     try:
@@ -202,7 +202,7 @@ def _ask(events, session_id, method, params, *, cancelled, timeout, qids=None, r
     # Settled by a viewer (a response frame or the last ``clarify.lock``): every OTHER viewer still
     # shows the card, and a classic CLI is parked inside its modal callback. Withdraw it everywhere
     # with ``reason: resolved`` (``RequestCancelReason``) so each renderer closes the matching card and
-    # the CLI's connection thread releases its modal (``hermes_cli.gateway_agent``). No answer rides it.
+    # the CLI's connection thread releases its modal (``agent_cli.gateway_agent``). No answer rides it.
     with contextlib.suppress(Exception):
         events.publish(session_id, {"id": request_id, "method": method, "reason": "resolved"},
                        event_type="request.cancel")

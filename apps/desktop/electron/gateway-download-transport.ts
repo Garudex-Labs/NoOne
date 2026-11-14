@@ -1,6 +1,8 @@
 import http from 'node:http'
 import https from 'node:https'
 
+import { appText } from '@noone/shared/application-identity'
+
 import { downloadAgentFor, withRetry } from './api-transport'
 import { destroyStalledBody } from './gateway-file-download'
 import { DEFAULT_FETCH_TIMEOUT_MS, resolveTimeoutMs } from './hardening'
@@ -11,7 +13,7 @@ export async function downloadViaTokenToFile(url, token, ctx, finalizeGatewayDow
   const parsed = new URL(url)
 
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-    throw new Error(`Unsupported Hermes backend URL protocol: ${parsed.protocol}`)
+    throw new Error(appText(`Unsupported {app_name} backend URL protocol: ${parsed.protocol}`))
   }
 
   const res: http.IncomingMessage = await withRetry(async () => {
@@ -31,7 +33,7 @@ export async function downloadViaTokenToFile(url, token, ctx, finalizeGatewayDow
       })
 
       req.on('error', reject)
-      req.setTimeout(timeoutMs, () => req.destroy(new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`)))
+      req.setTimeout(timeoutMs, () => req.destroy(new Error(appText(`Timed out connecting to {app_name} backend after ${timeoutMs}ms`))))
       req.end()
     })
   }, { method: 'GET' })

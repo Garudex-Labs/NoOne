@@ -1,16 +1,10 @@
-import { registryBackendScopeKey } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { registryBackendScopeKey } from '@noone/shared'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import type { MutableRefObject } from 'react'
 import { useEffect, useRef } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { PRIMARY_SESSION_VIEW } from '@/app/chat/session-view'
-import { NO_PROJECT_ID } from '@/app/chat/sidebar/projects/workspace-groups'
-import { resolveSessionRpcOwner } from '@/app/contrib/wiring-routing'
-import { $terminalTakeover, setTerminalTakeover } from '@/app/right-sidebar/store'
-import { group } from '@/components/pane-shell/tree/model'
-import { $activeTreeGroup, $layoutTree, noteActiveTreeGroup, revealTreePane } from '@/components/pane-shell/tree/store'
 import {
   deleteSession,
   getAllSessionMessages,
@@ -20,7 +14,13 @@ import {
   type SessionInfo,
   type SessionResumeResult,
   setSessionArchived
-} from '@/hermes'
+} from '@/agent-client'
+import { PRIMARY_SESSION_VIEW } from '@/app/chat/session-view'
+import { NO_PROJECT_ID } from '@/app/chat/sidebar/projects/workspace-groups'
+import { resolveSessionRpcOwner } from '@/app/contrib/wiring-routing'
+import { $terminalTakeover, setTerminalTakeover } from '@/app/right-sidebar/store'
+import { group } from '@/components/pane-shell/tree/model'
+import { $activeTreeGroup, $layoutTree, noteActiveTreeGroup, revealTreePane } from '@/components/pane-shell/tree/store'
 import { createClientSessionState } from '@/lib/chat-runtime'
 import { $clarifyRequests, clearClarifyRequest, setClarifyRequest } from '@/store/clarify'
 import { clearSessionDraft, stashSessionDraft, takeSessionDraft } from '@/store/composer'
@@ -126,7 +126,7 @@ import {
 import type { TranscriptViewCutoff } from './use-session-actions/transcript-provenance'
 import { useSessionStateCache } from './use-session-state-cache'
 
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   deleteSession: vi.fn(),
   getSession: vi.fn(),
@@ -6771,7 +6771,7 @@ describe('removeSession / archiveSession profile routing (#78836)', () => {
       winefox: ['tg-1'],
       default: ['desk-keep']
     })
-    setMessagingSessions([storedSession({ id: 'tg-1', source: 'telegram', title: 'QQ/TG' })])
+    setMessagingSessions([storedSession({ id: 'tg-1', source: 'telegram', title: 'Telegram' })])
     mockGetSession.mockImplementation(async (id: string, scope?: ProfileScope) => {
       expect($messagingSessions.get().some(session => session.id === 'tg-1')).toBe(true)
       const profile = scope && typeof scope === 'object' ? scope.profile : scope
@@ -6890,7 +6890,7 @@ describe('removeSession / archiveSession profile routing (#78836)', () => {
   })
 
   it('fails closed when a listed profile-less messaging DELETE cannot resolve an owner', async () => {
-    const row = storedSession({ id: 'tg-unresolved', source: 'telegram', title: 'QQ/TG' })
+    const row = storedSession({ id: 'tg-unresolved', source: 'telegram', title: 'Telegram' })
     setMessagingSessions([row])
     $pinnedSessionIds.set(['tg-unresolved'])
     $sessionSeenCounts.set({

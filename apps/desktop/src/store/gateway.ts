@@ -7,12 +7,13 @@ import {
   registryBackendScopeKey,
   resolveGatewayWsUrl,
   type ServerRequest
-} from '@hermes/shared'
+} from '@noone/shared'
+import { appText } from '@noone/shared/application-identity'
 import { atom, batch } from 'nanostores'
 
+import { AgentGateway } from '@/agent-client'
 import { canonicalOwnerProfile } from '@/api/canonical-protocol'
-import type { HermesConnection } from '@/global'
-import { HermesGateway } from '@/hermes'
+import type { AgentConnection } from '@/global'
 import { translateNow } from '@/i18n'
 import { UnservedProfileError } from '@/lib/browser-served-profiles'
 import {
@@ -58,7 +59,7 @@ export { useGatewayActivationEpoch } from '@/store/gateway-activation-epoch'
 const normKey = (profile: string | null | undefined): string => (profile ?? '').trim() || 'default'
 
 // Dial intent callers attach to a user-initiated open. The canonical
-// `hermes gateway ensure` path has no local slot pool, so the hint changes
+// `noone gateway ensure` path has no local slot pool, so the hint changes
 // nothing about the dial itself; it survives as the option shape the SDK,
 // Settings scopes and session creation pass so an explicit user gesture stays
 // distinguishable from ambient hydration at the call site.
@@ -66,7 +67,7 @@ export type SpawnPriority = 'foreground' | 'background'
 
 // Read connection state through a call so TS control-flow analysis doesn't
 // narrow the getter to a constant across guards (it genuinely changes).
-const isOpen = (gateway: HermesGateway | null): boolean => gateway?.connectionState === 'open'
+const isOpen = (gateway: AgentGateway | null): boolean => gateway?.connectionState === 'open'
 
 // ── Secondary (pool) backends ──────────────────────────────────────────────
 // How long a mid-dial activation holds its prune lease: it must outlast every
@@ -96,7 +97,7 @@ const ACTIVATION_LEASE_MS = SOURCE_SWITCH_DIAL_TIMEOUT_MS + 15_000
 // runtime behavior is identical to plain module state.
 interface GatewayRegistryState {
   config: RegistryConfig | null
-  primaryGateway: HermesGateway | null
+  primaryGateway: AgentGateway | null
   primaryProfile: string
   activeKey: string
   secondaries: Map<string, Secondary>
@@ -113,7 +114,7 @@ interface GatewayRegistryState {
   turnLeases: Map<string, () => void>
   /** Debounced releases so an immediate chained turn can reuse its lease. */
   turnLeaseReleaseTimers: Map<string, ReturnType<typeof setTimeout>>
-  $gateway: ReturnType<typeof atom<HermesGateway | null>>
+  $gateway: ReturnType<typeof atom<AgentGateway | null>>
   $activeProfile: ReturnType<typeof atom<string>>
 }
 
@@ -135,7 +136,7 @@ function createRegistryState(): GatewayRegistryState {
     // The active gateway instance, exposed for inline message-stream
     // components (inline ClarifyTool, model overlays) that call gateway
     // methods without the instance threaded down through props.
-    $gateway: atom<HermesGateway | null>(null),
+    $gateway: atom<AgentGateway | null>(null),
     // The PROFILE the active gateway is routed to (bare profile name, never a
     // composite registry scope). Owned exclusively by applyActive() so the
     // published profile can never diverge from the socket actually selected —
@@ -201,7 +202,7 @@ export function activeGatewayProfileKey(): string {
 export function gatewayRouteState(
   connectionId: null | string,
   profile: string
-): { gateway: HermesGateway | null; key: string; open: boolean } {
+): { gateway: AgentGateway | null; key: string; open: boolean } {
   const key = normKey(profile)
   const scope = registryBackendScopeKey(connectionId, key)
   const onPrimary = key === g.primaryProfile && (scope === key || isPrimaryRegistryRoute(connectionId, key))
@@ -263,7 +264,7 @@ function primaryConnectionId(): null | string {
 // to the primary the route was resolved against.
 const primaryIdentity = (): PrimaryIdentity => ({ connectionId: primaryConnectionId(), gateway: g.primaryGateway })
 
-export function setPrimaryGateway(gateway: HermesGateway | null, profile = 'default'): void {
+export function setPrimaryGateway(gateway: AgentGateway | null, profile = 'default'): void {
   const next = normKey(profile)
 
   if (g.primaryGateway !== gateway) {
@@ -335,7 +336,7 @@ export function dialedGatewayModeFor(connectionId: null | string, profile: strin
 
 /** Publish the registry source owned by the window primary socket. */
 export function setPrimaryGatewayConnection(
-  connection: Pick<HermesConnection, 'connectionId' | 'mode'> | null,
+  connection: Pick<AgentConnection, 'connectionId' | 'mode'> | null,
   profile?: string
 ): void {
   setPrimaryGatewayConnectionId(connection?.connectionId, connection?.mode, profile)
@@ -418,7 +419,7 @@ async function requestOnPrimaryGateway<T>(
   const gateway = g.primaryGateway
 
   if (!gateway || !isOpen(gateway)) {
-    throw new Error('Hermes gateway unavailable')
+    throw new Error(appText('{app_name} gateway unavailable'))
   }
 
   return timeoutMs === undefined && signal === undefined
@@ -435,7 +436,7 @@ export function gatewayActivationEpoch(): number {
   return Number.isFinite($gatewayActivationEpoch.get()) ? $gatewayActivationEpoch.get() : 0
 }
 
-export function activeGateway(): HermesGateway | null {
+export function activeGateway(): AgentGateway | null {
   if (g.activeKey === g.primaryProfile) {
     return g.primaryGateway
   }
@@ -596,7 +597,7 @@ function applyActive(profile: string, activationEpoch: number): boolean {
   return true
 }
 
-function publishActiveConnection(connection: HermesConnection): void {
+function publishActiveConnection(connection: AgentConnection): void {
   if (g.config?.onActiveConnectionChanged) {
     g.config.onActiveConnectionChanged(connection)
   } else {
@@ -912,7 +913,7 @@ async function reconnectSecondary(entry: Secondary): Promise<void> {
 
     // An ensure refusal no redial can fix (incompatible runtime, no ensure protocol, an invalid
     // endpoint, an unsafe control path): each automatic redial would spawn another
-    // `hermes gateway ensure` against the same install forever. Park at once, keeping the entry:
+    // `noone gateway ensure` against the same install forever. Park at once, keeping the entry:
     // an explicit open, focus/wake nudge or Reconnect re-arms it after the user's repair.
     if (isPermanentLocalGatewayEnsureError(error)) {
       console.warn(`[gateway] parking scope="${entry.scope}": local gateway ensure refused permanently`, error)
@@ -943,7 +944,7 @@ async function reconnectSecondary(entry: Secondary): Promise<void> {
 }
 
 function createSecondary(profile: string, connectionId: null | string = null): Secondary {
-  const gateway = new HermesGateway()
+  const gateway = new AgentGateway()
   const scope = registryBackendScopeKey(connectionId, profile)
 
   const entry: Secondary = {
@@ -1023,7 +1024,7 @@ async function gatewayForProfile(
   profile: string,
   leaseRequest = false,
   spawnPriority: SpawnPriority = 'background'
-): Promise<{ gateway: HermesGateway | null; key: string; release: () => void; scopeProfile: boolean }> {
+): Promise<{ gateway: AgentGateway | null; key: string; release: () => void; scopeProfile: boolean }> {
   const key = normKey(profile)
   const noRelease = () => undefined
 
@@ -1114,7 +1115,7 @@ export async function requestGatewayForProfile<T>(
 
   try {
     if (!route.gateway) {
-      throw new Error(`Hermes gateway unavailable for profile "${route.key}"`)
+      throw new Error(appText(`{app_name} gateway unavailable for profile "${route.key}"`))
     }
 
     const routedParams = route.scopeProfile ? { ...params, profile: route.key } : params
@@ -1186,7 +1187,7 @@ export async function requestGatewayForAgent<T>(
   traceAgentRoute(scope, 'secondary')
 
   if (!window.hermesDesktop?.getConnectionFor) {
-    throw new Error('This Desktop build cannot dial registry connections. Update Hermes Desktop.')
+    throw new Error(appText('This Desktop build cannot dial registry connections. Update {app_name} Desktop.'))
   }
 
   const entry = g.secondaries.get(scope) ?? createSecondary(key, connectionId)
@@ -1667,14 +1668,14 @@ export async function openGatewayForAgent(
 
   if (await ridesPrimaryBackend(connectionId, profile)) {
     if (!isOpen(g.primaryGateway)) {
-      throw new Error('Hermes gateway unavailable')
+      throw new Error(appText('{app_name} gateway unavailable'))
     }
 
     return
   }
 
   if (!window.hermesDesktop?.getConnectionFor) {
-    throw new Error('This Desktop build cannot dial registry connections. Update Hermes Desktop.')
+    throw new Error(appText('This Desktop build cannot dial registry connections. Update {app_name} Desktop.'))
   }
 
   const entry = g.secondaries.get(scope) ?? createSecondary(profile, connectionId)
@@ -1728,7 +1729,7 @@ export async function ensureGatewayForAgent(
   }
 
   if (!window.hermesDesktop?.getConnectionFor) {
-    throw new Error('This Desktop build cannot dial registry connections. Update Hermes Desktop.')
+    throw new Error(appText('This Desktop build cannot dial registry connections. Update {app_name} Desktop.'))
   }
 
   let entry = g.secondaries.get(scope)
@@ -1865,7 +1866,7 @@ export async function ensureGatewayForProfile(profile: string): Promise<void> {
 // retries; only a user gesture (`explicit`: the Reconnect action) may redial it.
 export async function ensureActiveGatewayOpen({
   explicit = false
-}: { explicit?: boolean } = {}): Promise<HermesGateway | null> {
+}: { explicit?: boolean } = {}): Promise<AgentGateway | null> {
   if (g.activeKey === g.primaryProfile) {
     return g.primaryGateway
   }

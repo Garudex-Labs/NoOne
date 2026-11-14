@@ -1,18 +1,26 @@
 ---
-sidebar_position: 9
+
 ---
 
-# Adding a Platform Adapter
+# Adding a Platform Adapter {#adding-a-platform-adapter}
 
-This guide covers adding a new messaging platform to the Hermes gateway. A platform adapter connects Hermes to an external messaging service (Telegram, Discord, WeCom, etc.) so users can interact with the agent through that service.
+This guide covers adding a new messaging platform to the {{app-name}} gateway. A platform adapter connects {{app-name}} to an external messaging service (Telegram, Discord, LINE, etc.) so users can interact with the agent through that service.
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 There are two ways to add a platform:
 - **Plugin** (recommended for community/third-party): Drop a plugin directory into `~/.hermes/plugins/` — zero core code changes needed. See [Plugin Path](#plugin-path-recommended) below.
 - **Built-in**: Modify 20+ files across code, config, and docs. Use the [Built-in Checklist](#step-by-step-checklist-built-in-path) below.
-:::
 
-## Architecture Overview
+</Tip>
+
+## Architecture Overview {#architecture-overview}
 
 ```
 User ↔ Messaging Platform ↔ Platform Adapter ↔ Gateway Runner ↔ AIAgent
@@ -28,9 +36,9 @@ Every adapter extends `BasePlatformAdapter` from `gateway/platforms/base.py` and
 
 Inbound messages are received by the adapter and forwarded via `self.handle_message(event)`, which the base class routes to the gateway runner.
 
-## Plugin Path (Recommended)
+## Plugin Path (Recommended) {#plugin-path-recommended}
 
-The plugin system lets you add a platform adapter without modifying any core Hermes code. Your plugin is a directory with two files:
+The plugin system lets you add a platform adapter without modifying any core {{app-name}} code. Your plugin is a directory with two files:
 
 ```
 ~/.hermes/plugins/my-platform/
@@ -38,9 +46,9 @@ The plugin system lets you add a platform adapter without modifying any core Her
   adapter.py       # Adapter class + register() entry point
 ```
 
-### plugin.yaml
+### plugin.yaml {#pluginyaml}
 
-Plugin metadata. The `requires_env` and `optional_env` blocks auto-populate `hermes config` UI entries (see [Surfacing Env Vars](#surfacing-env-vars-in-hermes-config) below).
+Plugin metadata. The `requires_env` and `optional_env` blocks auto-populate `noone config` UI entries (see [Surfacing Env Vars](#surfacing-env-vars-in-hermes-config) below).
 
 ```yaml
 name: my-platform
@@ -61,7 +69,7 @@ optional_env:
     password: false
 ```
 
-#### Outbound client tools: `provides_tools`
+#### Outbound client tools: `provides_tools` {#outbound-client-tools-provides_tools}
 
 `kind: platform` plugins are **deferred**: the adapter module (and its SDK
 imports) only load when a gateway, cron, or `send_message` path first asks the
@@ -76,7 +84,7 @@ provides_tools:
   - my_platform_list
 ```
 
-With `provides_tools` declared, Hermes imports only `tools.py` during plugin
+With `provides_tools` declared, {{app-name}} imports only `tools.py` during plugin
 discovery and registers the client tools in every process — CLI and TUI
 included — while the adapter stays deferred. Keep the package `__init__.py`
 import-light and pull the adapter in from inside `register()` so the eager
@@ -84,12 +92,12 @@ import stays cheap. Without the field, nothing changes: the whole plugin stays
 deferred.
 
 Users enable the toolset per platform like any other, e.g.
-`hermes tools enable my_platform --platform cli`, or by listing the toolset
+`noone tools enable my_platform --platform cli`, or by listing the toolset
 key under `platform_toolsets` in `config.yaml`. Plugin platform names are
 also valid `--platform` targets, so an inbound session on your platform can
 be granted its own outbound tools.
 
-### adapter.py
+### adapter.py {#adapterpy}
 
 ```python
 from gateway.platforms._shared import extra_or_secret, get_scoped_secret, seed_extra_from_env
@@ -155,7 +163,7 @@ def register(ctx):
         # ensure_deps_fn=ensure_requirements,
         validate_config=validate_config,
         required_env=["MY_PLATFORM_TOKEN"],
-        install_hint="Declare my-platform-sdk in this plugin's Python dependencies, then retry hermes plugins enable my-platform",
+        install_hint="Declare my-platform-sdk in this plugin's Python dependencies, then retry noone plugins enable my-platform",
         # Env-driven auto-configuration — seeds PlatformConfig.extra from
         # env vars before adapter construction. See "Env-Driven Auto-
         # Configuration" section below.
@@ -187,7 +195,7 @@ def register(ctx):
     )
 ```
 
-### Configuration
+### Configuration {#configuration}
 
 Users configure the platform in `config.yaml`:
 
@@ -203,7 +211,7 @@ gateway:
 
 Or via environment variables (which the adapter reads in `__init__`).
 
-### What the Plugin System Handles Automatically
+### What the Plugin System Handles Automatically {#what-the-plugin-system-handles-automatically}
 
 When you call `ctx.register_platform()`, the following integration points are handled for you — no core code changes needed:
 
@@ -216,7 +224,7 @@ When you call `ctx.register_platform()`, the following integration points are ha
 | Env-only auto-enable | `env_enablement_fn` seeds `PlatformConfig.extra` + `home_channel` |
 | YAML config bridge | `apply_yaml_config_fn` translates `config.yaml` keys into env vars / extras |
 | Cron delivery | `cron_deliver_env_var` makes `deliver=<name>` work |
-| `hermes config` UI entries | `requires_env` / `optional_env` in `plugin.yaml` auto-populate |
+| `noone config` UI entries | `requires_env` / `optional_env` in `plugin.yaml` auto-populate |
 | send engine (`tools/send_message_tool.py`) | Routes through live gateway adapter |
 | Webhook cross-platform delivery | Registry checked for known platforms |
 | `/update` command access | `allow_update_command` flag |
@@ -224,16 +232,16 @@ When you call `ctx.register_platform()`, the following integration points are ha
 | System prompt hints | `platform_hint` injected into LLM context; `platform_hint_tool_notes` (`{tool: sentence}`) appended only when the session has that tool |
 | Message chunking | `max_message_length` for smart splitting |
 | PII redaction | `pii_safe` flag |
-| `hermes status` | Lists plugin platforms alongside built-ins, one row each, using the gateway's own configured check |
-| `hermes gateway setup` | Plugin platforms appear in setup menu |
-| `hermes tools` / `hermes skills` | Plugin platforms in per-platform config |
+| `noone status` | Lists plugin platforms alongside built-ins, one row each, using the gateway's own configured check |
+| `noone gateway setup` | Plugin platforms appear in setup menu |
+| `noone tools` / `noone skills` | Plugin platforms in per-platform config |
 | Token lock (multi-profile) | Use `acquire_scoped_lock()` in your `connect()` |
 | Orphaned config warning | Descriptive log when plugin is missing |
 | Service-event authorization | `trusted_inbound=True` skips user allowlists/pairing (see below) |
 | Display defaults | `display_tier` picks the built-in tool-progress/streaming tier |
 | Profile clone credential strip | `shared_env_prefixes` keeps tool-shared keys when the adapter is not in use |
 
-### Service adapters: `trusted_inbound`, `display_tier`, `shared_env_prefixes`
+### Service adapters: `trusted_inbound`, `display_tier`, `shared_env_prefixes` {#service-adapters-trusted_inbound-display_tier-shared_env_prefixes}
 
 Three optional `ctx.register_platform(...)` / `PlatformEntry` fields exist for adapters that bridge a
 service rather than a chat network. The [Home Assistant plugin](https://github.com/NousResearch/hermes-official-plugins/tree/main/homeassistant)
@@ -269,16 +277,16 @@ def register(ctx):
 ```
 
 Feature-detect these fields with `dataclasses.fields(PlatformEntry)` as above so the plugin stays loadable on
-older Hermes cores that predate them.
+older {{app-name}} cores that predate them.
 
-## Authorization fields for chat platforms
+## Authorization fields for chat platforms {#authorization-fields-for-chat-platforms}
 
 Two more optional `PlatformEntry` fields carry gateway authorization behaviour that core used to
 hard-code for its bundled platforms. Declare them and a plugin platform behaves the same way:
 
 | Field | Type / default | Effect |
 |---|---|---|
-| `group_allowed_chats_env` | `str = ''` | Env var holding comma-separated group/forum **chat** IDs. Any message from a listed chat is authorized, even without a `user_id` (anonymous admins, channel posts). Telegram declares `TELEGRAM_GROUP_ALLOWED_CHATS` and QQ Bot declares `QQ_GROUP_ALLOWED_USERS`. |
+| `group_allowed_chats_env` | `str = ''` | Env var holding comma-separated group/forum **chat** IDs. Any message from a listed chat is authorized, even without a `user_id` (anonymous admins, channel posts). Telegram declares `TELEGRAM_GROUP_ALLOWED_CHATS`. |
 | `allowlist_suppresses_pairing` | `bool = False` | When the platform's `allowed_users_env` (or `group_allowed_chats_env`) is set, unknown DM senders are ignored rather than sent a pairing code: the owner already restricted access. Most bundled chat platforms set it. |
 
 ```python
@@ -292,11 +300,11 @@ for key, value in (("group_allowed_chats_env", "MY_CHAT_GROUP_ALLOWED_CHATS"),
 ctx.register_platform(**kwargs)
 ```
 
-## Public helpers for platform plugins
+## Public helpers for platform plugins {#public-helpers-for-platform-plugins}
 
-A platform adapter needs more of core than a tool plugin does. These names are public: `hermes plugins
+A platform adapter needs more of core than a tool plugin does. These names are public: `noone plugins
 validate` raises no private-import warning for them, and they keep their names and signatures across
-releases. Anything else under `gateway.*`, `tools.*` or `hermes_cli.*` is internal, and the validator
+releases. Anything else under `gateway.*`, `tools.*` or `agent_cli.*` is internal, and the validator
 lists each import of it.
 
 | Need | Import |
@@ -310,7 +318,7 @@ lists each import of it.
 | Refuse a click from someone who may not answer the approval (not its requester when `approvals.approvers` is narrowed; not allowed `/approve` / `/deny` when the chat sets `allow_admin_from`) | `from gateway.approval_actor import approval_refusal, refusal_text`: call `approval_refusal(session_key, clicker_id, extra=self.config.extra, request_id=..., choice=choice)` before resolving (the `choice` lets the chat's slash admin gate check the answer's own `/approve` or `/deny`); a non-`None` result is the requester's name, reply privately with `refusal_text(name)` and leave the approval pending. Then settle with `resolve_gateway_approval_card(session_key, choice, request_id, actor_id=clicker_id, extra=self.config.extra)`, which rechecks the clicker against the entry it settles in the same critical section. Slash-confirm and clarify taps use `slash_confirm_refusal(session_key, confirm_id, clicker_id, extra=...)` and `clarify_refusal(clarify_id, clicker_id, extra=...)` the same way, before `slash_confirm.resolve` / `resolve_gateway_clarify` / `mark_awaiting_text` |
 | Refuse a picker-card (`send_model_picker` / `send_choice_picker`) or `/update` prompt click from someone other than its opener | `from gateway.approval_actor import picker_refusal, update_prompt_refusal, refusal_text`: `picker_refusal(on_selected, clicker_id, extra=self.config.extra)` with the callback the picker was sent with, or `update_prompt_refusal(clicker_id, extra=self.config.extra)`; a non-`None` result is the opener's name: reply privately with `refusal_text(name)` and leave the card open. The opener and the chat scope's admins always pass |
 | Native clarify buttons | `tools.clarify_gateway`: `get_pending(clarify_id)` (the pending entry or `None`; read `session_key`, `choices`, `multi_select`), `resolve_gateway_clarify(clarify_id, text)`, `mark_awaiting_text(clarify_id)`, `SKIPPED` |
-| `setup_fn` wizard steps | `hermes_cli.gateway_setup_wizard`: `print_setup_header(title)`, `confirm_reconfigure(label, *env_vars)`, `offer_home_channel(home_var, user_id, what)`, `save_env_values(**values)`, `prompt_csv(text, default)`; prompts from `hermes_cli.setup` (`prompt`, `prompt_choice`, `prompt_yes_no`); output from `hermes_cli.cli_output` (`print_info`, `print_success`, `print_warning`, `print_error`); `.env` access through `hermes_cli.config` (`save_env_value`, `get_env_value`) |
+| `setup_fn` wizard steps | `agent_cli.gateway_setup_wizard`: `print_setup_header(title)`, `confirm_reconfigure(label, *env_vars)`, `offer_home_channel(home_var, user_id, what)`, `save_env_values(**values)`, `prompt_csv(text, default)`; prompts from `agent_cli.setup` (`prompt`, `prompt_choice`, `prompt_yes_no`); output from `agent_cli.cli_output` (`print_info`, `print_success`, `print_warning`, `print_error`); `.env` access through `agent_cli.config` (`save_env_value`, `get_env_value`) |
 
 ```python
 from gateway.platforms.helpers import platform_http_client
@@ -324,7 +332,7 @@ async def connect(self) -> bool:
 `get_pending()` returns `None` once the clarify was answered, timed out or cleared, so compare the
 result by identity with the entry your card was rendered for before acting on a click.
 
-### Read a conversation's model settings
+### Read a conversation's model settings {#read-a-conversations-model-settings}
 
 `BasePlatformAdapter.get_session_model_settings(source)` is a synchronous, read-only
 accessor for native settings sheets. The named consumer is the **Inline platform plugin**:
@@ -373,7 +381,7 @@ use this display URL to construct provider requests. This is an in-process platf
 adapter API, not a hosted-plugin RPC. It adds no setters or reasoning API,
 and leaves the legacy override view and all existing model-switch behavior unchanged.
 
-### List a conversation's model picker providers
+### List a conversation's model picker providers {#list-a-conversations-model-picker-providers}
 
 `BasePlatformAdapter.list_session_model_picker_providers(source, *, max_models=100,
 include_moa=True)` is the synchronous catalog counterpart. It shares the display accessor's
@@ -429,10 +437,10 @@ not upgrade an already-installed plugin. Inline must adopt the methods and users
 separately update their installed plugin; its private model-switch command remains outside
 this read-only contract.
 
-## Standalone send-path extensions
+## Standalone send-path extensions {#standalone-send-path-extensions}
 
 A standalone platform can participate in host-driven outbound delivery through
-direct `hermes send --to ...` and cron `deliver=platform:...` by declaring send
+direct `noone send --to ...` and cron `deliver=platform:...` by declaring send
 behavior on the same `PlatformEntry` created by `ctx.register_platform()`.
 `send_message` is intentionally not an agent-callable model tool; plugins must
 not register an equivalent model surface that lets the agent initiate outbound
@@ -487,9 +495,9 @@ instead of silently attempting delivery. Plugin force-reload/profile
 transitions unregister owned entries, so parsers and handlers cannot leak into
 the next profile.
 
-## Env-Driven Auto-Configuration
+## Env-Driven Auto-Configuration {#env-driven-auto-configuration}
 
-Most users set up a platform by dropping env vars into `~/.hermes/.env` rather than editing `config.yaml`. The `env_enablement_fn` hook lets your plugin pick those env vars up **before** the adapter is constructed, so `hermes gateway status`, `get_connected_platforms()`, and cron delivery see the correct state without instantiating the platform SDK.
+Most users set up a platform by dropping env vars into `~/.hermes/.env` rather than editing `config.yaml`. The `env_enablement_fn` hook lets your plugin pick those env vars up **before** the adapter is constructed, so `noone gateway status`, `get_connected_platforms()`, and cron delivery see the correct state without instantiating the platform SDK.
 
 Read env through `gateway.platforms._shared.get_scoped_secret` — never `os.getenv`. Under `gateway.multiplex_profiles` the process env holds the DEFAULT profile's values; a secondary profile's `.env` exists only in its secret scope, and a raw read would enable your platform for the wrong profile with the wrong credentials. `seed_extra_from_env` builds the seed dict from a `(ENV_VAR, extra_key, conv)` table through that reader.
 
@@ -531,7 +539,7 @@ def register(ctx):
 ```
 
 
-## YAML→env Config Bridge
+## YAML→env Config Bridge {#yamlenv-config-bridge}
 
 Some users prefer setting `config.yaml` keys (`my_platform.require_mention`, `my_platform.allowed_channels`, etc.) over env vars. The `apply_yaml_config_fn` hook lets your plugin own this translation instead of forcing core `gateway/config.py` to know your platform's YAML schema.
 
@@ -574,7 +582,7 @@ The hook is invoked during `load_gateway_config()` after the generic shared-key 
 Exceptions raised by the hook are swallowed and logged at debug level — a misbehaving plugin never aborts gateway config load.
 
 
-## Cron Delivery
+## Cron Delivery {#cron-delivery}
 
 To let `deliver=my_platform` cron jobs route to a configured home channel, set `cron_deliver_env_var` to the env var name that holds the default chat/room/channel ID:
 
@@ -588,9 +596,9 @@ ctx.register_platform(
 
 The scheduler reads this env var when resolving the home target for `deliver=my_platform` jobs, and also treats the platform as a valid cron target in `_KNOWN_DELIVERY_PLATFORMS`-style checks. If your `env_enablement_fn` seeds a `home_channel` dict (see above), that takes precedence — `cron_deliver_env_var` is the fallback for cron jobs that run before env seeding.
 
-### Out-of-process cron delivery
+### Out-of-process cron delivery {#out-of-process-cron-delivery}
 
-`cron_deliver_env_var` makes your platform a recognized `deliver=` target. To make the actual send succeed when the cron job runs in a separate process from the gateway (i.e., `hermes cron run` separate from `hermes gateway`), register a `standalone_sender_fn`:
+`cron_deliver_env_var` makes your platform a recognized `deliver=` target. To make the actual send succeed when the cron job runs in a separate process from the gateway (i.e., `noone cron run` separate from `noone gateway`), register a `standalone_sender_fn`:
 
 ```python
 async def _standalone_send(
@@ -615,13 +623,13 @@ ctx.register_platform(
 )
 ```
 
-Why this hook is necessary: the live adapter is only reachable through `_gateway_runner_ref()`, which returns `None` outside the gateway process, so without `standalone_sender_fn` the cron-side send fails with `No live adapter for platform '<name>'`. The bundled platforms use this same hook: Telegram's out-of-process sender (`hermes send`, the `send_message` tool, standalone cron delivery) is `plugins/platforms/telegram/standalone.py::standalone_send` and Signal's is `plugins/platforms/signal/standalone.py`; core reaches them only through the platform registry.
+Why this hook is necessary: the live adapter is only reachable through `_gateway_runner_ref()`, which returns `None` outside the gateway process, so without `standalone_sender_fn` the cron-side send fails with `No live adapter for platform '<name>'`. The bundled platforms use this same hook: Telegram's out-of-process sender (`noone send`, the `send_message` tool, standalone cron delivery) is `plugins/platforms/telegram/standalone.py::standalone_send` and Signal's is `plugins/platforms/signal/standalone.py`; core reaches them only through the platform registry.
 
-The function receives the same `pconfig` and `chat_id` that the live adapter would, plus optional `thread_id`, `media_files`, and `force_document` keyword arguments. Optional keywords added later are forwarded only to a sender that declares them (by name or through `**kwargs`), so a sender written to the signature above keeps working: `notify=True` (cron's `cron.delivery.notify`: this delivery should ring even under a quiet notification mode) is one; Telegram's sender takes it. Returning `{"success": True, "message_id": ...}` is treated as a successful delivery; returning `{"error": "..."}` surfaces the message in cron's `delivery_errors`. Exceptions raised inside the function are caught by the dispatcher and reported as `Plugin standalone send failed: <reason>`. Reference implementations live in `plugins/platforms/{irc,teams,google_chat}/adapter.py`.
+The function receives the same `pconfig` and `chat_id` that the live adapter would, plus optional `thread_id`, `media_files`, and `force_document` keyword arguments. Optional keywords added later are forwarded only to a sender that declares them (by name or through `**kwargs`), so a sender written to the signature above keeps working: `notify=True` (cron's `cron.delivery.notify`: this delivery should ring even under a quiet notification mode) is one; Telegram's sender takes it. Returning `{"success": True, "message_id": ...}` is treated as a successful delivery; returning `{"error": "..."}` surfaces the message in cron's `delivery_errors`. Exceptions raised inside the function are caught by the dispatcher and reported as `Plugin standalone send failed: <reason>`. Reference implementations live in `plugins/platforms/{line,teams,google_chat}/adapter.py`.
 
-## Surfacing Env Vars in `hermes config`
+## Surfacing Env Vars in `noone config` {#surfacing-env-vars-in-hermes-config}
 
-`hermes_cli/config.py` scans `plugins/platforms/*/plugin.yaml` at import time and auto-populates `OPTIONAL_ENV_VARS` from `requires_env` and (optional) `optional_env` blocks. Use the rich-dict form to contribute proper descriptions, prompts, password flags, and URLs — the CLI setup UI picks them up for free.
+`agent_cli/config.py` scans `plugins/platforms/*/plugin.yaml` at import time and auto-populates `OPTIONAL_ENV_VARS` from `requires_env` and (optional) `optional_env` blocks. Use the rich-dict form to contribute proper descriptions, prompts, password flags, and URLs — the CLI setup UI picks them up for free.
 
 ```yaml
 # plugins/platforms/my_platform/plugin.yaml
@@ -630,7 +638,7 @@ label: My Platform
 kind: platform
 version: 1.0.0
 description: >
-  My Platform gateway adapter for Hermes Agent.
+  My Platform gateway adapter for NoOne.
 author: Your Name
 requires_env:
   - name: MY_PLATFORM_TOKEN
@@ -657,7 +665,7 @@ optional_env:
 
 Bare-string entries (`- MY_PLATFORM_TOKEN`) still work — they get a generic description auto-derived from the plugin's `label`. If a hardcoded entry for the same var already exists in `OPTIONAL_ENV_VARS`, it wins (back-compat); the plugin.yaml form acts as the fallback.
 
-## Platform-Specific Slow-LLM UX
+## Platform-Specific Slow-LLM UX {#platform-specific-slow-llm-ux}
 
 Some platforms have constraints that change how a slow LLM response should be presented:
 
@@ -667,7 +675,7 @@ Some platforms have constraints that change how a slow LLM response should be pr
 
 These are real constraints the base `BasePlatformAdapter` can't anticipate. The plugin surface intentionally leaves the room for an adapter to layer platform-specific UX on top of the base typing loop without expanding the kwarg list.
 
-### Pattern: subclass `_keep_typing` to layer mid-flight UX
+### Pattern: subclass `_keep_typing` to layer mid-flight UX {#pattern-subclass-_keep_typing-to-layer-mid-flight-ux}
 
 `BasePlatformAdapter._keep_typing` is the typing-indicator heartbeat — it runs as a background task while the LLM is generating, and is cancelled when the response is delivered. To layer a platform-specific behavior at a threshold (e.g. send a "still thinking" bubble at 45s), override `_keep_typing` in your adapter, schedule your own task alongside `super()._keep_typing()`, and tear it down in `finally`:
 
@@ -707,7 +715,7 @@ Key points:
 - **Tear down the side task in `finally`.** When the LLM finishes (or `/stop` cancels the run), the gateway cancels the typing task. Your side task must observe that cancellation too, otherwise it lingers and may fire after the response was already delivered.
 - **Pair with `interrupt_session_activity`** to resolve any orphan UX state when the user issues `/stop`. For LINE, this means transitioning the postback cache entry from `PENDING` to `ERROR` so the persistent "Get answer" button delivers a "Run was interrupted" message instead of looping.
 
-### Pattern: subclass `send` to route through a cache instead of sending immediately
+### Pattern: subclass `send` to route through a cache instead of sending immediately {#pattern-subclass-send-to-route-through-a-cache-instead-of-sending-immediately}
 
 If your slow-response UX caches the response for later retrieval (LINE's postback flow), your `send` override needs to recognize three modes:
 
@@ -728,7 +736,7 @@ async def send(self, chat_id: str, content: str, **kw) -> SendResult:
 
 `_SYSTEM_BYPASS_PREFIXES` are the gateway's own busy-acknowledgment prefixes (`⚡`, `⏳`, `⏩`, `💾`). Always let those through visibly, regardless of cached UX state.
 
-### When this pattern is appropriate
+### When this pattern is appropriate {#when-this-pattern-is-appropriate}
 
 Use the typing-loop override approach when:
 
@@ -742,23 +750,31 @@ Use the simpler `slow_response_threshold = 0` always-Push path when:
 
 LINE supports both: the threshold defaults to 45s for free postback fetch, and `LINE_SLOW_RESPONSE_THRESHOLD=0` reverts to "always Push fallback."
 
-### Reference Implementation
+### Reference Implementation {#reference-implementation}
 
 See `plugins/platforms/line/adapter.py` for the full LINE postback implementation — a `RequestCache` state machine (`PENDING → READY → DELIVERED`, plus `ERROR` for `/stop`), a `_keep_typing` override that fires the Template Buttons bubble at threshold, a `send` override that routes through the cache, and an `interrupt_session_activity` override that resolves orphan PENDING entries.
 
-### Reference Implementations (Plugin Path)
+### Reference Implementations (Plugin Path) {#reference-implementations-plugin-path}
 
-See `plugins/platforms/irc/` in the repo for a complete working example — a full async IRC adapter with zero external dependencies. `plugins/platforms/teams/` covers Bot Framework / Adaptive Cards, `plugins/platforms/google_chat/` covers OAuth-based REST APIs, and `plugins/platforms/line/` covers webhook-driven Messaging APIs with platform-specific slow-LLM UX.
+See `plugins/platforms/a2a/` in the repo for a complete working example — a full async A2A adapter with zero external dependencies. `plugins/platforms/teams/` covers Bot Framework / Adaptive Cards, `plugins/platforms/google_chat/` covers OAuth-based REST APIs, and `plugins/platforms/line/` covers webhook-driven Messaging APIs with platform-specific slow-LLM UX.
 
 ---
 
-## Step-by-Step Checklist (Built-in Path)
+## Step-by-Step Checklist (Built-in Path) {#step-by-step-checklist-built-in-path}
 
-:::note
-This checklist is for adding a platform directly to the Hermes core codebase — typically done by core contributors for officially supported platforms. Community/third-party platforms should use the [Plugin Path](#plugin-path-recommended) above.
-:::
+<Note>
 
-### 1. Platform Enum
+<div className="doc-callout-title">
+
+NOTE
+
+</div>
+
+This checklist is for adding a platform directly to the {{app-name}} core codebase — typically done by core contributors for officially supported platforms. Community/third-party platforms should use the [Plugin Path](#plugin-path-recommended) above.
+
+</Note>
+
+### 1. Platform Enum {#1-platform-enum}
 
 Add your platform to the `Platform` enum in `gateway/config.py`:
 
@@ -768,7 +784,7 @@ class Platform(Enum):
     NEWPLAT = "newplat"
 ```
 
-### 2. Adapter File
+### 2. Adapter File {#2-adapter-file}
 
 Create `plugins/platforms/newplat/adapter.py`:
 
@@ -825,7 +841,7 @@ event = MessageEvent(
 await self.handle_message(event)
 ```
 
-### 3. Gateway Config (`gateway/config.py`)
+### 3. Gateway Config (`gateway/config.py`) {#3-gateway-config-gatewayconfigpy}
 
 Three touchpoints:
 
@@ -833,7 +849,7 @@ Three touchpoints:
 2. **`load_gateway_config()`** — Add token env map entry: `Platform.NEWPLAT: "NEWPLAT_TOKEN"`
 3. **`_apply_env_overrides()`** — Map all `NEWPLAT_*` env vars to config
 
-### 4. Gateway Runner (`gateway/run.py` + `gateway/run_*.py` siblings)
+### 4. Gateway Runner (`gateway/run.py` + `gateway/run_*.py` siblings) {#4-gateway-runner-gatewayrunpy--gatewayrun_py-siblings}
 
 Six touchpoints:
 
@@ -844,31 +860,31 @@ Six touchpoints:
 5. **Startup `_BUILTIN_ALLOW_ALL_VARS`** (`gateway/run_startup.py`) — derived from the same `_ALLOWLIST_ENV_PLATFORMS` tuple; nothing extra to add
 6. **`_UPDATE_ALLOWED_PLATFORMS` frozenset** — Add `Platform.NEWPLAT`
 
-### 5. Cross-Platform Delivery
+### 5. Cross-Platform Delivery {#5-cross-platform-delivery}
 
 1. **`gateway/platforms/webhook.py`** — Add `"newplat"` to the delivery type tuple
 2. **`cron/scheduler_delivery.py`** — Add to `_KNOWN_DELIVERY_PLATFORMS` frozenset and `_deliver_result()` platform map
 
-### 6. CLI Integration
+### 6. CLI Integration {#6-cli-integration}
 
-1. **`hermes_cli/config.py`** — Add all `NEWPLAT_*` vars to `_EXTRA_ENV_KEYS`
-2. **`hermes_cli/gateway.py`** — Add entry to `_PLATFORMS` list with key, label, emoji, token_var, setup_instructions, and vars
-3. **`hermes_cli/platforms.py`** — Add `PlatformInfo` entry with label and default_toolset (used by `skills_config` and `tools_config` TUIs)
-4. **`hermes_cli/setup.py`** — Add `_setup_newplat()` function (can delegate to `gateway.py`) and add tuple to the messaging platforms list
-5. **`hermes_cli/status.py`** — Add platform detection entry: `"NewPlat": ("NEWPLAT_TOKEN", "NEWPLAT_HOME_CHANNEL")`
-6. **`hermes_cli/dump.py`** — Add `"newplat": "NEWPLAT_TOKEN"` to platform detection dict
+1. **`agent_cli/config.py`** — Add all `NEWPLAT_*` vars to `_EXTRA_ENV_KEYS`
+2. **`agent_cli/gateway.py`** — Add entry to `_PLATFORMS` list with key, label, emoji, token_var, setup_instructions, and vars
+3. **`agent_cli/platforms.py`** — Add `PlatformInfo` entry with label and default_toolset (used by `skills_config` and `tools_config` TUIs)
+4. **`agent_cli/setup.py`** — Add `_setup_newplat()` function (can delegate to `gateway.py`) and add tuple to the messaging platforms list
+5. **`agent_cli/status.py`** — Add platform detection entry: `"NewPlat": ("NEWPLAT_TOKEN", "NEWPLAT_HOME_CHANNEL")`
+6. **`agent_cli/dump.py`** — Add `"newplat": "NEWPLAT_TOKEN"` to platform detection dict
 
-### 7. Tools
+### 7. Tools {#7-tools}
 
 1. **`tools/send_message_tool.py`** — Add `"newplat": Platform.NEWPLAT` to platform map
 2. **`tools/cronjob_tools.py`** — Add `newplat` to the delivery target description string
 
-### 8. Toolsets
+### 8. Toolsets {#8-toolsets}
 
-1. **`toolsets.py`** — Add `"hermes-newplat"` toolset definition with `_HERMES_CORE_TOOLS`
+1. **`toolsets.py`** — Add `"hermes-newplat"` toolset definition with `_CORE_AGENT_TOOLS`
 2. **`toolsets.py`** — Add `"hermes-newplat"` to the `"hermes-gateway"` includes list
 
-### 9. Optional: Platform Hints
+### 9. Optional: Platform Hints {#9-optional-platform-hints}
 
 **`platform_hint=`** on `ctx.register_platform` — If your platform has specific rendering limitations (no markdown, message length limits, etc.), declare a hint on its registry entry (keep the text in a light sibling such as `adapter_hint.py`). It is injected into the system prompt; `agent/prompt_builder.py::PLATFORM_HINTS` holds only core surfaces:
 
@@ -881,7 +897,7 @@ PLATFORM_HINT = (
 
 Not all platforms need hints — only add one if the agent's behavior should differ.
 
-### 10. Tests
+### 10. Tests {#10-tests}
 
 Create `tests/gateway/test_newplat.py` covering:
 
@@ -890,7 +906,7 @@ Create `tests/gateway/test_newplat.py` covering:
 - Send method (mock the external API)
 - Platform-specific features (encryption, routing, etc.)
 
-### 11. Documentation
+### 11. Documentation {#11-documentation}
 
 | File | What to add |
 |------|-------------|
@@ -903,13 +919,13 @@ Create `tests/gateway/test_newplat.py` covering:
 | `website/docs/developer-guide/architecture.md` | Adapter count + listing |
 | `website/docs/developer-guide/gateway-internals.md` | Adapter file listing |
 
-## Parity Audit
+## Parity Audit {#parity-audit}
 
 Before marking a new platform PR as complete, run a parity audit against an established platform:
 
 ```bash
 # Find every .py file mentioning the reference platform
-search_files "bluebubbles" output_mode="files_only" file_glob="*.py"
+search_files "line" output_mode="files_only" file_glob="*.py"
 
 # Find every .py file mentioning the new platform
 search_files "newplat" output_mode="files_only" file_glob="*.py"
@@ -919,9 +935,9 @@ search_files "newplat" output_mode="files_only" file_glob="*.py"
 
 Repeat for `.md` and `.ts` files. Investigate each gap — is it a platform enumeration (needs updating) or a platform-specific reference (skip)?
 
-## Common Patterns
+## Common Patterns {#common-patterns}
 
-### Long-Poll Adapters
+### Long-Poll Adapters {#long-poll-adapters}
 
 If your adapter uses long-polling (like Telegram or Weixin), use a polling loop task:
 
@@ -937,9 +953,9 @@ async def _poll_loop(self):
             await self.handle_message(self._build_event(msg))
 ```
 
-### Callback/Webhook Adapters
+### Callback/Webhook Adapters {#callbackwebhook-adapters}
 
-If the platform pushes messages to your endpoint (like WeCom Callback), run an HTTP server:
+If the platform pushes messages to your endpoint (like LINE Callback), run an HTTP server:
 
 ```python
 async def connect(self):
@@ -954,9 +970,9 @@ async def _handle_callback(self, request):
     return web.Response(text="success")  # Acknowledge immediately
 ```
 
-For platforms with tight response deadlines (e.g., WeCom's 5-second limit), always acknowledge immediately and deliver the agent's reply proactively via API later. Agent sessions run 3–30 minutes — inline replies within a callback response window are not feasible.
+For platforms with tight response deadlines , always acknowledge immediately and deliver the agent's reply proactively via API later. Agent sessions run 3–30 minutes — inline replies within a callback response window are not feasible.
 
-### Inbound Deduplication
+### Inbound Deduplication {#inbound-deduplication}
 
 Platforms redeliver: websocket resumes replay recent events, webhooks retry, and an unacknowledged poll batch comes back. Drop repeats with the shared helper, keyed on the platform's message ID:
 
@@ -971,7 +987,7 @@ if self._dedup.is_duplicate(msg_id):  # in the inbound handler
 
 When the gateway's reconnect watcher replaces a failed adapter with a new instance, it copies every `MessageDeduplicator` attribute's live IDs from the old instance to the new one, so a replay right after the reconnect is still dropped. A cache kept in another structure (a plain dict or set) starts empty on the new instance.
 
-### Token Locks
+### Token Locks {#token-locks}
 
 If the adapter holds a persistent connection with a unique credential, add a scoped lock to prevent two profiles from using the same credential:
 
@@ -989,11 +1005,8 @@ async def disconnect(self):
     release_scoped_lock("newplat", self._token)
 ```
 
-## Reference Implementations
+## Reference Implementations {#reference-implementations}
 
 | Adapter | Pattern | Complexity | Good reference for |
 |---------|---------|------------|-------------------|
-| `plugins/platforms/bluebubbles/adapter.py` | REST + webhook | Medium | Simple REST API integration |
 | `plugins/platforms/weixin/adapter.py` | Long-poll + CDN | High | Media handling, encryption |
-| `plugins/platforms/wecom/callback_adapter.py` | Callback/webhook | Medium | HTTP server, AES crypto, multi-app |
-| `plugins/platforms/irc/adapter.py` | Long-poll + IRC protocol | High | Full-featured plugin adapter with scoped token lock |

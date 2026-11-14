@@ -5,8 +5,8 @@
  */
 
 import {
+  AppIcon,
   Button,
-  Codicon,
   host,
   Input,
   Select,
@@ -18,7 +18,7 @@ import {
   useMutation,
   useQuery,
   useQueryClient
-} from '@hermes/plugin-sdk'
+} from '@noone/plugin-sdk'
 import { useState } from 'react'
 
 import {
@@ -123,7 +123,7 @@ function ProfileDescriptionRow({ profile }: { profile: KanbanProfile }) {
         <span className={auto.isPending ? 'invisible' : ''}>{k.auto}</span>
         {auto.isPending && (
           <span className="absolute inset-0 grid place-items-center">
-            <Codicon className="animate-spin [animation-duration:1.2s]" name="loading" size="0.75rem" />
+            <AppIcon className="animate-spin [animation-duration:1.2s]" name="loading" size="0.75rem" />
           </span>
         )}
       </Button>

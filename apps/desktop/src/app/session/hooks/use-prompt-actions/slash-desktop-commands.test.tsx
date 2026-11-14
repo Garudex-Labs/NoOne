@@ -9,7 +9,7 @@ import { resolveDesktopCommand } from '@/lib/desktop-slash-commands'
 import { $connection } from '@/store/session'
 import { dropSessionState } from '@/store/session-states'
 
-import { useHermesConfig } from '../use-hermes-config'
+import { useAgentConfig } from '../use-agent-config'
 
 import { actRender, Harness, type HarnessHandle, RUNTIME_SESSION_ID } from './index-test-utils'
 import { clearSingleFlightSessionResumeState } from './single-flight-resume'
@@ -18,7 +18,7 @@ import { formatHistory } from './slash-desktop-commands'
 // T11 (#134889): Desktop commands the shared gateway refused as `slash.exec`, or that Desktop never
 // offered, run on the owner's existing verbs instead.
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   getLatestSessionMessages: vi.fn(async () => ({ messages: [], session_id: 'session' })),
   getProfiles: vi.fn(async () => ({ profiles: [] })),
   getHermesConfig: vi.fn(async () => ({ display: { timestamps: false } })),
@@ -294,7 +294,7 @@ describe('/config', () => {
   })
 
   it('fails closed on a legacy raw config: only the canonical allowlist renders', async () => {
-    // A standalone `hermes serve` answers config.get key=full with the raw effective config.
+    // A standalone `noone serve` answers config.get key=full with the raw effective config.
     const S = 'PROBE-SECRET'
 
     const requestGateway = gateway(method =>
@@ -496,7 +496,7 @@ describe('/timestamps, /palette, /worktree, /snapshot', () => {
   it('/timestamps is a window override that survives an ordinary config refresh', async () => {
     const { $displayTimestamps } = await import('@/store/display-timestamps')
     $displayTimestamps.set(false)
-    const config = renderHook(() => useHermesConfig({ activeSessionIdRef: { current: RUNTIME_SESSION_ID } }))
+    const config = renderHook(() => useAgentConfig({ activeSessionIdRef: { current: RUNTIME_SESSION_ID } }))
     const handle = await mount(gateway(() => undefined))
 
     await handle.submitText('/timestamps on')

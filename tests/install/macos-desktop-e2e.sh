@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Prove a macOS user who installed OLD via the published desktop installer
-# (Hermes-Setup.dmg from the website) can reach HEAD.
+# (NoOne-Setup.dmg from the website) can reach HEAD.
 #
 # The macOS sibling of tests/install/windows-e2e.ps1's desktop-installer
 # arm, sharing the staging trick: every git process is pointed at a local
@@ -187,7 +187,7 @@ phase_install() {
   # shellcheck disable=SC1090
   . "$STATE"
   arm_redirect
-  step "installing OLD ($OLD_REF) via the published Hermes-Setup.dmg"
+  step "installing OLD ($OLD_REF) via the published NoOne-Setup.dmg"
 
   # Pair both historical inputs. Today's downloaded install.sh can call helpers
   # absent from OLD (e.g. ensure-rolldown-binding.mjs). Use the published
@@ -230,10 +230,10 @@ phase_install() {
     --install-dir "$INSTALL_DIR" \
     --proof-dir "$LOG_DIR" 2>&1 \
     | ts_prefix > "$LOG_DIR/bootstrap-install.log" || rc=$?
-  log_group "Hermes-Setup (dmg bootstrap) transcript" "$LOG_DIR/bootstrap-install.log"
+  log_group "NoOne-Setup (dmg bootstrap) transcript" "$LOG_DIR/bootstrap-install.log"
   local bootstrap_log="$LOG_DIR/bootstrap-logs/bootstrap-installer.log"
   if [ -f "$bootstrap_log" ]; then
-    log_group "Hermes-Setup inner installer log" "$bootstrap_log"
+    log_group "NoOne-Setup inner installer log" "$bootstrap_log"
   fi
   hdiutil detach "$mount" >/dev/null 2>&1 || true
   [ "$rc" -eq 0 ] || fail "dmg bootstrap exited $rc; transcript above"
@@ -249,8 +249,8 @@ phase_install() {
   hermes="$(source_hermes "$INSTALL_DIR")" || fail "no installed command after install"
   python3 -B "$ASSETS/source_driver.py" --root "$INSTALL_DIR" --launcher "$hermes" --desktop present \
     || fail "read-only verification failed after install"
-  HERMES_DISABLE_LAZY_INSTALLS=1 PYTHONDONTWRITEBYTECODE=1 source_build_env "$hermes" --version 2>&1 | ts_prefix > "$LOG_DIR/version-old.log" || fail "hermes --version failed after install"
-  ok "hermes --version works: $(head -c 120 "$LOG_DIR/version-old.log" | tr -d '\n')"
+  HERMES_DISABLE_LAZY_INSTALLS=1 PYTHONDONTWRITEBYTECODE=1 source_build_env "$hermes" --version 2>&1 | ts_prefix > "$LOG_DIR/version-old.log" || fail "noone --version failed after install"
+  ok "noone --version works: $(head -c 120 "$LOG_DIR/version-old.log" | tr -d '\n')"
   find_installed_app >/dev/null || fail "no installed Hermes.app after the dmg bootstrap"
   ok "installed app: $(find_installed_app)"
   # The bootstrap can leave its launched app running. Preserve that handoff,
@@ -328,7 +328,7 @@ phase_update() {
       # The CLI route a dmg user takes from a terminal. Probe the installed
       # help for both flags: this fixture stages unpublished main in serve.git,
       # so newer updaters need explicit --branch main (not the channel object).
-      local hermes help
+      local noone help
       hermes="$(source_hermes "$INSTALL_DIR")" || fail "no installed update command"
       help="$(source_build_env "$hermes" update --help 2>&1)" || fail "installed update --help failed: $help"
       build_source_update_command "$hermes" "$help"
@@ -337,8 +337,8 @@ phase_update() {
       printf '\n'
       local rc=0
       (cd "$INSTALL_DIR" && source_build_env "${update_cmd[@]}" < /dev/null 2>&1 | ts_prefix > "$LOG_DIR/update.log") || rc=$?
-      log_group "hermes update transcript" "$LOG_DIR/update.log"
-      [ "$rc" -eq 0 ] || fail "hermes update exited $rc; transcript above"
+      log_group "noone update transcript" "$LOG_DIR/update.log"
+      [ "$rc" -eq 0 ] || fail "noone update exited $rc; transcript above"
       ;;
     installer-script)
       # A dmg user re-running today's install one-liner.
@@ -359,7 +359,7 @@ phase_update() {
     open-app-update)
       # The installed app IS the user surface here (double-click the .app);
       # hand-build the spec Playwright launches from. Env: the redirect set,
-      # which is exactly what the app's children (git, hermes update) need.
+      # which is exactly what the app's children (git, noone update) need.
       local app app_bin
       app="$(find_installed_app)" || fail "no installed app to launch"
       app_bin="$(find "$app/Contents/MacOS" -type f -perm +111 | head -1)"
@@ -442,8 +442,8 @@ PYEOF
   python3 -B "$ASSETS/source_driver.py" --root "$INSTALL_DIR" --launcher "$command" --desktop present \
     || fail "read-only verification failed after update; no repair was attempted"
   HERMES_DISABLE_LAZY_INSTALLS=1 PYTHONDONTWRITEBYTECODE=1 source_build_env "$command" --version 2>&1 | ts_prefix > "$LOG_DIR/version-head.log" \
-    || fail "hermes --version failed after update"
-  ok "hermes --version works post-update"
+    || fail "noone --version failed after update"
+  ok "noone --version works post-update"
   preserve_after_upgrade
   desktop_checkpoint new "$TARGET_SHA" "$UPDATE_METHOD"
   step "PASS: $OLD_REF -> $TARGET_LABEL via $UPDATE_METHOD"

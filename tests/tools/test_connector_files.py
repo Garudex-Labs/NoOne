@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_constants import CONNECTOR_DOWNLOADS_SUBDIR, get_hermes_home
+from agent_constants import CONNECTOR_DOWNLOADS_SUBDIR, get_agent_home
 from tools.connectors.gateway import files
 from tools.connectors.gateway.bridge import connector_describe, run_remote
 from tools.connectors.gateway.client import ConnectorClient
@@ -156,7 +156,7 @@ def test_every_path_in_an_array_input_is_staged_and_the_cache_spares_a_second_lo
 
 
 @pytest.mark.parametrize(("make_path", "code"), [
-    (lambda tmp: _pdf(get_hermes_home() / ".env"), "FILE_NOT_ALLOWED"),  # credential store: denied
+    (lambda tmp: _pdf(get_agent_home() / ".env"), "FILE_NOT_ALLOWED"),  # credential store: denied
     (lambda tmp: tmp / "missing.pdf", "FILE_NOT_FOUND"),
     (lambda tmp: tmp, "FILE_NOT_FOUND"),  # a directory is not a regular file
 ])
@@ -200,7 +200,7 @@ def test_a_returned_file_is_saved_and_the_model_sees_only_its_path():
     (saved,) = entry["response"]["attachments"]
     assert set(saved) == {"name", "mimetype", "path"}
     path = Path(saved["path"])
-    assert path.parent == get_hermes_home() / CONNECTOR_DOWNLOADS_SUBDIR
+    assert path.parent == get_agent_home() / CONNECTOR_DOWNLOADS_SUBDIR
     assert path.name.endswith("-invoice.pdf") and path.read_bytes() == b"%PDF received"
     assert [request["headers"] for request in storage.requests] == [{}]
     assert "X-Amz" not in json.dumps(entry)
@@ -222,7 +222,7 @@ def test_a_failed_download_keeps_the_result_and_names_the_file_error():
     assert entry["response"]["subject"] == "hi"
     assert entry["response"]["file"]["error"].startswith("download failed")
     assert "url" not in entry["response"]["file"]
-    assert not list((get_hermes_home() / CONNECTOR_DOWNLOADS_SUBDIR).iterdir())
+    assert not list((get_agent_home() / CONNECTOR_DOWNLOADS_SUBDIR).iterdir())
 
 
 def test_a_replayed_file_without_a_link_passes_through():

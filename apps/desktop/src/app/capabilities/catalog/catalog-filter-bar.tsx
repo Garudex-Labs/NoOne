@@ -1,4 +1,4 @@
-import { IconCategory, IconDatabase, IconFilter2, IconRosetteDiscountCheck } from '@tabler/icons-react'
+import { IconCategory, IconDatabase, IconFilter2, IconRosetteDiscountCheck } from '@noone/ui/icons'
 import { type ReactNode, useId, useState } from 'react'
 
 import { Button } from '@/components/ui/button'

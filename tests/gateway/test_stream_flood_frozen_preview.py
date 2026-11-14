@@ -198,7 +198,7 @@ async def test_finishing_edit_carries_the_topic_routing_metadata():
 
 @pytest.mark.asyncio
 async def test_an_edit_that_would_truncate_leaves_the_normal_send():
-    """Google Chat, Slack and DingTalk cut an oversized edit short and still report success: a
+    """Google Chat and Slack cut an oversized edit short and still report success: a
     reply longer than one message is never "finished in place" there, the normal send owns it."""
     gate = asyncio.Event()
 

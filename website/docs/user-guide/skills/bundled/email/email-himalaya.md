@@ -1,16 +1,16 @@
 ---
 title: "Himalaya — Himalaya CLI: IMAP/SMTP email from terminal"
-sidebar_label: "Himalaya"
+sidebarTitle: "Himalaya"
 description: "Himalaya CLI: IMAP/SMTP email from terminal"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Himalaya
+# Himalaya {#himalaya}
 
 Himalaya CLI: IMAP/SMTP email from terminal.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
@@ -22,33 +22,41 @@ Himalaya CLI: IMAP/SMTP email from terminal.
 | Platforms | linux, macos, windows |
 | Tags | `Email`, `IMAP`, `SMTP`, `CLI`, `Communication` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Himalaya Email CLI
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Himalaya Email CLI {#himalaya-email-cli}
 
 Himalaya is a CLI email client that lets you manage emails from the terminal using IMAP, SMTP, Notmuch, or Sendmail backends.
 
-This skill is separate from the Hermes Email gateway adapter. The gateway
-adapter lets people email the agent and uses Hermes' built-in IMAP/SMTP
+This skill is separate from the {{app-name}} Email gateway adapter. The gateway
+adapter lets people email the agent and uses {{app-name}}' built-in IMAP/SMTP
 adapter; this skill lets the agent operate a mailbox from terminal tools and
 requires the external `himalaya` CLI.
 
-## References
+## References {#references}
 
 - `references/configuration.md` (config file setup + IMAP/SMTP authentication)
 - `references/message-composition.md` (MML syntax for composing emails)
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 1. Himalaya CLI installed (`himalaya --version` to verify)
 2. A configuration file at `~/.config/himalaya/config.toml`
 3. IMAP/SMTP credentials configured (password stored securely)
 
-### Installation
+### Installation {#installation}
 
 ```bash
 # Pre-built binary (Linux/macOS — recommended)
@@ -61,7 +69,7 @@ brew install himalaya
 cargo install himalaya --locked
 ```
 
-## Configuration Setup
+## Configuration Setup {#configuration-setup}
 
 Run the interactive wizard to set up an account:
 
@@ -114,22 +122,22 @@ folder.aliases.trash = "Trash"
 > emails to recipients. Always use `folder.aliases.X` (plural, dotted
 > keys, directly under `[accounts.NAME]`).
 
-## Hermes Integration Notes
+## {{app-name}} Integration Notes {#hermes-integration-notes}
 
 - **Reading, listing, searching, moving, deleting** all work directly through the terminal tool
 - **Composing/replying/forwarding** — piped input (`cat << EOF | himalaya template send`) is recommended for reliability. Interactive `$EDITOR` mode works with `pty=true` + background + process tool, but requires knowing the editor and its commands
 - Use `--output json` for structured output that's easier to parse programmatically
 - The `himalaya account configure` wizard requires interactive input — use PTY mode: `terminal(command="himalaya account configure", pty=true)`
 
-## Common Operations
+## Common Operations {#common-operations}
 
-### List Folders
+### List Folders {#list-folders}
 
 ```bash
 himalaya folder list
 ```
 
-### List Emails
+### List Emails {#list-emails}
 
 List emails in INBOX (default):
 
@@ -149,13 +157,13 @@ List with pagination:
 himalaya envelope list --page 1 --page-size 20
 ```
 
-### Search Emails
+### Search Emails {#search-emails}
 
 ```bash
 himalaya envelope list from john@example.com subject meeting
 ```
 
-### Read an Email
+### Read an Email {#read-an-email}
 
 Read email by ID (shows plain text):
 
@@ -169,9 +177,9 @@ Export raw MIME:
 himalaya message export 42 --full
 ```
 
-### Reply to an Email
+### Reply to an Email {#reply-to-an-email}
 
-To reply non-interactively from Hermes, read the original message, compose a reply, and pipe it:
+To reply non-interactively from {{app-name}}, read the original message, compose a reply, and pipe it:
 
 ```bash
 # Get the reply template, edit it, and send
@@ -197,16 +205,16 @@ Reply-all (interactive — needs $EDITOR, use template approach above instead):
 himalaya message reply 42 --all
 ```
 
-### Forward an Email
+### Forward an Email {#forward-an-email}
 
 ```bash
 # Get forward template and pipe with modifications
 himalaya template forward 42 | sed 's/^To:.*/To: newrecipient@example.com/' | himalaya template send
 ```
 
-### Write a New Email
+### Write a New Email {#write-a-new-email}
 
-**Non-interactive (use this from Hermes)** — pipe the message via stdin:
+**Non-interactive (use this from {{app-name}})** — pipe the message via stdin:
 
 ```bash
 cat << 'EOF' | himalaya template send
@@ -226,7 +234,7 @@ himalaya message write -H "To:recipient@example.com" -H "Subject:Test" "Message 
 
 Note: `himalaya message write` without piped input opens `$EDITOR`. This works with `pty=true` + background mode, but piping is simpler and more reliable.
 
-### Move/Copy Emails
+### Move/Copy Emails {#movecopy-emails}
 
 Move to folder (target folder comes first, then the message ID):
 
@@ -240,13 +248,13 @@ Copy to folder (target folder comes first, then the message ID):
 himalaya message copy "Important" 42
 ```
 
-### Delete an Email
+### Delete an Email {#delete-an-email}
 
 ```bash
 himalaya message delete 42
 ```
 
-### Manage Flags
+### Manage Flags {#manage-flags}
 
 Add flag:
 
@@ -260,7 +268,7 @@ Remove flag:
 himalaya flag remove 42 --flag seen
 ```
 
-## Multiple Accounts
+## Multiple Accounts {#multiple-accounts}
 
 List accounts:
 
@@ -274,7 +282,7 @@ Use a specific account:
 himalaya --account work envelope list
 ```
 
-## Attachments
+## Attachments {#attachments}
 
 Save attachments from a message:
 
@@ -288,7 +296,7 @@ Save to specific directory:
 himalaya attachment download 42 --downloads-dir ~/Downloads
 ```
 
-## Output Formats
+## Output Formats {#output-formats}
 
 Most commands support `--output` for structured output:
 
@@ -297,7 +305,7 @@ himalaya envelope list --output json
 himalaya envelope list --output plain
 ```
 
-## Debugging
+## Debugging {#debugging}
 
 Enable debug logging:
 
@@ -311,7 +319,7 @@ Full trace with backtrace:
 RUST_LOG=trace RUST_BACKTRACE=1 himalaya envelope list
 ```
 
-## Tips
+## Tips {#tips}
 
 - Use `himalaya --help` or `himalaya <command> --help` for detailed usage.
 - Message IDs are relative to the current folder; re-list after folder changes.

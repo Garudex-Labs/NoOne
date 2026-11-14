@@ -27,7 +27,7 @@ def _adopt_and_resolve(home, legacy_route, source='tui', billing=None):
     from gateway.session_authority import initialize_session_authority
     from gateway.session_local_migration import bind_native_transport, resolve_local_target
     from gateway.session_policy import restore_policy
-    from hermes_state_local import local_receipt
+    from agent_state_local import local_receipt
 
     store = SessionStore(home / 'sessions', GatewayConfig())
     runner = SimpleNamespace(session_store=store, _session_db=store._db, adapters={}, _draining=False,
@@ -216,7 +216,7 @@ def test_billing_only_custom_endpoint_the_profile_moved_off_resumes_on_the_profi
 
 @pytest.mark.parametrize('shape', ['desktop-custom', 'auto-base-url', 'stored-api-key', 'cli-billing-auto'])
 def test_v0_21_19_row_shapes_go_to_their_own_endpoint_with_its_own_key(monkeypatch, shape):
-    """v0.21.19 row shapes beyond the TUI/CLI ones: a Desktop chat (tui_gateway with ``source='desktop'``,
+    """v0.21.19 row shapes beyond the TUI/CLI ones: a Desktop chat (agent_backend with ``source='desktop'``,
     same ``model_config`` writer), a route whose provider is ``auto`` with a base_url (in model_config,
     or the CLI's ``billing_provider='auto'`` bucket), and a row whose model_config carries an
     ``api_key`` (no v0.21.19 writer stores one; a hand-edited or imported row may). Each turn reaches

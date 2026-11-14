@@ -1,53 +1,61 @@
 ---
 title: "Obliteratus — OBLITERATUS: abliterate LLM refusals (diff-in-means)"
-sidebar_label: "Obliteratus"
+sidebarTitle: "Obliteratus"
 description: "OBLITERATUS: abliterate LLM refusals (diff-in-means)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Obliteratus
+# Obliteratus {#obliteratus}
 
 OBLITERATUS: abliterate LLM refusals (diff-in-means).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/obliteratus` |
+| Source | Optional — install with `noone skills install official/mlops/obliteratus` |
 | Path | `optional-skills/mlops/obliteratus` |
 | Version | `2.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Dependencies | `obliteratus`, `torch`, `transformers`, `bitsandbytes`, `accelerate`, `safetensors` |
 | Platforms | linux, macos |
 | Tags | `Abliteration`, `Uncensoring`, `Refusal-Removal`, `LLM`, `Weight-Projection`, `SVD`, `Mechanistic-Interpretability`, `HuggingFace`, `Model-Surgery` |
 | Related skills | [`serving-llms-vllm`](../../optional/mlops/mlops-inference-serving-llms-vllm.md), [`llama-cpp`](../../optional/mlops/mlops-inference-llama-cpp.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# OBLITERATUS Skill
+<div className="doc-callout-title">
 
-## What's inside
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# OBLITERATUS Skill {#obliteratus-skill}
+
+## What's inside {#whats-inside}
 
 9 CLI methods, 28 analysis modules, 116 model presets across 5 compute tiers, tournament evaluation, and telemetry-driven recommendations.
 
 Remove refusal behaviors (guardrails) from open-weight LLMs without retraining or fine-tuning. Uses mechanistic interpretability techniques — including diff-in-means, SVD, whitened SVD, LEACE concept erasure, SAE decomposition, Bayesian kernel projection, and more — to identify and surgically excise refusal directions from model weights while preserving reasoning capabilities.
 
-**License warning:** OBLITERATUS is AGPL-3.0. NEVER import it as a Python library. Always invoke via CLI (`obliteratus` command) or subprocess. This keeps Hermes Agent's MIT license clean.
+**License warning:** OBLITERATUS is AGPL-3.0. NEVER import it as a Python library. Always invoke via CLI (`obliteratus` command) or subprocess. This keeps {{app-name}}'s MIT license clean.
 
-## Video Guide
+## Video Guide {#video-guide}
 
-Walkthrough of OBLITERATUS used by a Hermes agent to abliterate Gemma:
+Walkthrough of OBLITERATUS used by a {{app-name}} agent to abliterate Gemma:
 https://www.youtube.com/watch?v=8fG9BrNTeHs ("OBLITERATUS: An AI Agent Removed Gemma 4's Safety Guardrails")
 
 Useful when the user wants a visual overview of the end-to-end workflow before running it themselves.
 
-## When to Use This Skill
+## When to Use This Skill {#when-to-use-this-skill}
 
 Trigger when the user:
 - Wants to "uncensor" or "abliterate" an LLM
@@ -57,7 +65,7 @@ Trigger when the user:
 - Wants to analyze how a model's refusal mechanism works
 - References OBLITERATUS, abliterator, or refusal directions
 
-## Step 1: Installation
+## Step 1: Installation {#step-1-installation}
 
 Check if already installed:
 ```bash
@@ -75,7 +83,7 @@ pip install -e .
 
 **IMPORTANT:** Confirm with user before installing. This pulls in ~5-10GB of dependencies (PyTorch, Transformers, bitsandbytes, etc.).
 
-## Step 2: Check Hardware
+## Step 2: Check Hardware {#step-2-check-hardware}
 
 Before anything, check what GPU is available:
 ```bash
@@ -96,7 +104,7 @@ else:
 "
 ```
 
-### VRAM Requirements (with 4-bit quantization)
+### VRAM Requirements (with 4-bit quantization) {#vram-requirements-with-4-bit-quantization}
 
 | VRAM     | Max Model Size  | Example Models                              |
 |:---------|:----------------|:--------------------------------------------|
@@ -107,7 +115,7 @@ else:
 | 48 GB+   | ~72B+ params    | Qwen2.5-72B, DeepSeek-R1                    |
 | Multi-GPU| 200B+ params    | Llama 3.1 405B, DeepSeek-V3 (685B MoE)      |
 
-## Step 3: Browse Available Models & Get Recommendations
+## Step 3: Browse Available Models & Get Recommendations {#step-3-browse-available-models--get-recommendations}
 
 ```bash
 # Browse models by compute tier
@@ -121,9 +129,9 @@ obliteratus recommend <model_name>
 obliteratus recommend <model_name> --insights  # global cross-architecture rankings
 ```
 
-## Step 4: Choose a Method
+## Step 4: Choose a Method {#step-4-choose-a-method}
 
-### Method Selection Guide
+### Method Selection Guide {#method-selection-guide}
 **Default / recommended for most cases: `advanced`.** It uses multi-direction SVD with norm-preserving projection and is well-tested.
 
 | Situation                         | Recommended Method | Why                                      |
@@ -138,7 +146,7 @@ obliteratus recommend <model_name> --insights  # global cross-architecture ranki
 | Maximum quality, time no object   | `optimized`        | Bayesian search for best parameters      |
 | Experimental auto-detection       | `informed`         | Auto-detects alignment type — experimental, may not always outperform advanced |
 
-### 9 CLI Methods
+### 9 CLI Methods {#9-cli-methods}
 - **basic** — Single refusal direction via diff-in-means. Fast (~5-10 min for 8B).
 - **advanced** (DEFAULT, RECOMMENDED) — Multiple SVD directions, norm-preserving projection, 2 refinement passes. Medium speed (~10-20 min).
 - **aggressive** — Whitened SVD + jailbreak-contrastive + attention head surgery. Higher risk of coherence damage.
@@ -149,18 +157,18 @@ obliteratus recommend <model_name> --insights  # global cross-architecture ranki
 - **inverted** — Flips the refusal direction. Model becomes actively willing.
 - **nuclear** — Maximum force combo for stubborn MoE models. Expert-granular.
 
-### Direction Extraction Methods (--direction-method flag)
+### Direction Extraction Methods (--direction-method flag) {#direction-extraction-methods---direction-method-flag}
 - **diff_means** (default) — Simple difference-in-means between refused/complied activations. Robust.
 - **svd** — Multi-direction SVD extraction. Better for complex alignment.
 - **leace** — LEACE (Linear Erasure via Closed-form Estimation). Optimal linear erasure.
 
-### 4 Python-API-Only Methods
+### 4 Python-API-Only Methods {#4-python-api-only-methods}
 (NOT available via CLI — require Python import, which violates AGPL boundary. Mention to user only if they explicitly want to use OBLITERATUS as a library in their own AGPL project.)
 - failspy, gabliteration, heretic, rdo
 
-## Step 5: Run Abliteration
+## Step 5: Run Abliteration {#step-5-run-abliteration}
 
-### Standard usage
+### Standard usage {#standard-usage}
 ```bash
 # Default method (advanced) — recommended for most models
 obliteratus obliterate <model_name> --method advanced --output-dir ./abliterated-models
@@ -172,7 +180,7 @@ obliteratus obliterate <model_name> --method advanced --quantization 4bit --outp
 obliteratus obliterate <model_name> --method advanced --quantization 4bit --large-model --output-dir ./abliterated-models
 ```
 
-### Fine-tuning parameters
+### Fine-tuning parameters {#fine-tuning-parameters}
 ```bash
 obliteratus obliterate <model_name> \
   --method advanced \
@@ -185,7 +193,7 @@ obliteratus obliterate <model_name> \
   --contribute  # opt-in telemetry for community research
 ```
 
-### Key flags
+### Key flags {#key-flags}
 | Flag | Description | Default |
 |:-----|:------------|:--------|
 | `--method` | Abliteration method | advanced |
@@ -200,7 +208,7 @@ obliteratus obliterate <model_name> \
 | `--verify-sample-size` | Number of test prompts for refusal check | 20 |
 | `--dtype` | Model dtype (float16, bfloat16) | auto |
 
-### Other execution modes
+### Other execution modes {#other-execution-modes}
 ```bash
 # Interactive guided mode (hardware → model → preset)
 obliteratus interactive
@@ -215,7 +223,7 @@ obliteratus run config.yaml --preset quick
 obliteratus tourney <model_name>
 ```
 
-## Step 6: Verify Results
+## Step 6: Verify Results {#step-6-verify-results}
 
 After abliteration, check the output metrics:
 
@@ -226,19 +234,19 @@ After abliteration, check the output metrics:
 | KL divergence | &lt; 0.1 | > 0.5 means significant distribution shift |
 | Coherence | High / passes qualitative check | Degraded responses, repetition |
 
-### If refusals persist (> 10%)
+### If refusals persist (> 10%) {#if-refusals-persist--10}
 1. Try `aggressive` method
 2. Increase `--n-directions` (e.g., 8 or 16)
 3. Add `--refinement-passes 3`
 4. Try `--direction-method svd` instead of diff_means
 
-### If coherence is damaged (perplexity > 15% increase)
+### If coherence is damaged (perplexity > 15% increase) {#if-coherence-is-damaged-perplexity--15-increase}
 1. Reduce `--n-directions` (try 2)
 2. Increase `--regularization` (try 0.3)
 3. Reduce `--refinement-passes` to 1
 4. Try `basic` method (gentler)
 
-## Step 7: Use the Abliterated Model
+## Step 7: Use the Abliterated Model {#step-7-use-the-abliterated-model}
 
 The output is a standard HuggingFace model directory.
 
@@ -260,7 +268,7 @@ huggingface-cli upload <username>/<model-name>-abliterated ./abliterated-models/
 vllm serve ./abliterated-models/<model>
 ```
 
-## CLI Command Reference
+## CLI Command Reference {#cli-command-reference}
 
 | Command | Description |
 |:--------|:------------|
@@ -276,12 +284,12 @@ vllm serve ./abliterated-models/<model>
 | `obliteratus ui` | Launch Gradio web interface |
 | `obliteratus aggregate` | Summarize community telemetry data |
 
-## Analysis Modules
+## Analysis Modules {#analysis-modules}
 
 OBLITERATUS includes 28 analysis modules for mechanistic interpretability.
 See `skill_view(name="obliteratus", file_path="references/analysis-modules.md")` for the full reference.
 
-### Quick analysis commands
+### Quick analysis commands {#quick-analysis-commands}
 ```bash
 # Run specific analysis modules
 obliteratus run analysis-config.yaml --preset quick
@@ -294,14 +302,14 @@ obliteratus run analysis-config.yaml --preset quick
 # - causal_tracing: Causally necessary components
 ```
 
-### Steering Vectors (Reversible Alternative)
+### Steering Vectors (Reversible Alternative) {#steering-vectors-reversible-alternative}
 Instead of permanent weight modification, use inference-time steering:
 ```python
 # Python API only — for user's own projects
 from obliteratus.analysis.steering_vectors import SteeringVectorFactory, SteeringHookManager
 ```
 
-## Ablation Strategies
+## Ablation Strategies {#ablation-strategies}
 
 Beyond direction-based abliteration, OBLITERATUS includes structural ablation strategies:
 - **Embedding Ablation** — Target embedding layer components
@@ -311,7 +319,7 @@ Beyond direction-based abliteration, OBLITERATUS includes structural ablation st
 
 List all available: `obliteratus strategies`
 
-## Evaluation
+## Evaluation {#evaluation}
 
 OBLITERATUS includes built-in evaluation tools:
 - Refusal rate benchmarking
@@ -320,25 +328,25 @@ OBLITERATUS includes built-in evaluation tools:
 - Head-to-head competitor comparison
 - Baseline performance tracking
 
-## Platform Support
+## Platform Support {#platform-support}
 
 - **CUDA** — Full support (NVIDIA GPUs)
 - **Apple Silicon (MLX)** — Supported via MLX backend
 - **CPU** — Supported for tiny models (&lt; 1B params)
 
-## YAML Config Templates
+## YAML Config Templates {#yaml-config-templates}
 
 Load templates for reproducible runs via `skill_view`:
 - `templates/abliteration-config.yaml` — Standard single-model config
 - `templates/analysis-study.yaml` — Pre-abliteration analysis study
 - `templates/batch-abliteration.yaml` — Multi-model batch processing
 
-## Telemetry
+## Telemetry {#telemetry}
 
 OBLITERATUS can optionally contribute anonymized run data to a global research dataset.
 Enable with `--contribute` flag. No personal data is collected — only model name, method, metrics.
 
-## Common Pitfalls
+## Common Pitfalls {#common-pitfalls}
 
 1. **Don't use `informed` as default** — it's experimental and slower. Use `advanced` for reliable results.
 2. **Models under ~1B respond poorly to abliteration** — their refusal behaviors are shallow and fragmented, making clean direction extraction difficult. Expect partial results (20-40% remaining refusal). Models 3B+ have cleaner refusal directions and respond much better (often 0% refusal with `advanced`).
@@ -353,7 +361,7 @@ Enable with `--contribute` flag. No personal data is collected — only model na
 11. **Large models (70B+)** — always use `--large-model` flag for conservative defaults.
 12. **Spectral certification RED is common** — the spectral check often flags "incomplete" even when practical refusal rate is 0%. Check actual refusal rate rather than relying on spectral certification alone.
 
-## Complementary Skills
+## Complementary Skills {#complementary-skills}
 
 - **vllm** — Serve abliterated models with high throughput
 - **gguf** — Convert abliterated models to GGUF for llama.cpp

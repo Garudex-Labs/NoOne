@@ -1,12 +1,12 @@
 ---
 title: Deliverable Mode (Artifacts in Chat)
-sidebar_label: Deliverable Mode
+sidebarTitle: Deliverable Mode
 description: How the agent ships generated charts, PDFs, spreadsheets, and other files as native attachments in messaging platforms.
 ---
 
-# Deliverable Mode
+# Deliverable Mode {#deliverable-mode}
 
-When Hermes Agent runs inside a messaging gateway (Slack, Discord, Telegram,
+When {{app-name}} runs inside a messaging gateway (Slack, Discord, Telegram,
 WhatsApp, Signal, etc.), it can deliver generated files directly into the
 chat — not as paths the user has to copy, but as native attachments.
 
@@ -17,7 +17,7 @@ and mentions its absolute path in the response. The gateway picks the path
 out of the text, removes it from the visible message, and uploads the
 file natively.
 
-## How it works
+## How it works {#how-it-works}
 
 Three pieces fit together:
 
@@ -35,7 +35,7 @@ Three pieces fit together:
    platform supports it; videos embed inline; audio routes to voice/audio
    attachments; everything else uploads as a file attachment.
 
-## Supported file extensions
+## Supported file extensions {#supported-file-extensions}
 
 | Category | Extensions | Delivery |
 |---|---|---|
@@ -53,7 +53,7 @@ Three pieces fit together:
 the agent doesn't auto-ship arbitrary source files; if you want to send code
 to the user, use a code block.
 
-## Encouraging the agent to produce artifacts
+## Encouraging the agent to produce artifacts {#encouraging-the-agent-to-produce-artifacts}
 
 The agent doesn't reach for artifacts by default — it has to know to.
 Two ways to nudge it:
@@ -75,9 +75,9 @@ plain text in the reply. The gateway does the rest. Paths inside
 fenced code blocks or backticks are ignored so code samples are never
 mutilated.
 
-## Kanban: artifacts ride completion notifications
+## Kanban: artifacts ride completion notifications {#kanban-artifacts-ride-completion-notifications}
 
-If you use Hermes' kanban multi-agent workflow, workers can attach
+If you use {{app-name}}' kanban multi-agent workflow, workers can attach
 deliverable files to their `kanban_complete` call:
 
 ```python
@@ -97,7 +97,7 @@ summary in one place.
 
 Files that don't exist on disk when the notifier runs are silently skipped.
 
-## Connecting more services with MCP
+## Connecting more services with MCP {#connecting-more-services-with-mcp}
 
 Beyond the artifact-delivery pipeline, the agent can reach into other
 services via MCP (Model Context Protocol). The MCP ecosystem ships
@@ -117,11 +117,11 @@ community servers for most popular tools — install whichever you need:
 Install MCP servers via `~/.hermes/config.yaml` under the `mcp_servers`
 section. See [MCP integration](./mcp.md) for the full setup guide.
 
-## Comparison to Perplexity Computer in Slack
+## Comparison to Perplexity Computer in Slack {#comparison-to-perplexity-computer-in-slack}
 
 Perplexity Computer's Slack integration is built around the same idea:
 the agent generates a deliverable (chart, PDF, slide deck) and posts it
-back into the thread as a native attachment. Hermes Agent's deliverable
+back into the thread as a native attachment. {{app-name}}'s deliverable
 mode provides the same user-facing pattern locally:
 
 - Generation happens in the user's own venv / sandbox (no remote tenant).

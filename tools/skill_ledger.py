@@ -24,7 +24,7 @@ from datetime import datetime, timezone, UTC
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ def derive_actor() -> str:
 
 
 def _skills_dir() -> Path:
-    return get_hermes_home() / "skills"
+    return get_agent_home() / "skills"
 
 
 def ledger_path() -> Path:
@@ -86,7 +86,7 @@ def ledger_path() -> Path:
 
 
 def blobs_dir() -> Path:
-    return get_hermes_home() / ".curator_backups" / "blobs"
+    return get_agent_home() / ".curator_backups" / "blobs"
 
 
 def _ledger_lock():
@@ -103,7 +103,7 @@ def _skills_cfg(key: str, default):
     """``skills.<key>`` from the read-only merged config (no deepcopy), or *default* when the
     read fails. Lazy import keeps this module importable without the CLI."""
     try:
-        from hermes_cli.config import cfg_get, load_config_readonly  # read-only hot path: no deepcopy
+        from agent_cli.config import cfg_get, load_config_readonly  # read-only hot path: no deepcopy
         return cfg_get(load_config_readonly(), "skills", key, default=default)
     except Exception as e:  # pragma: no cover — best-effort config read
         logger.debug("skill_ledger: config read failed (%s); skills.%s defaults to %r", e, key, default)
@@ -269,7 +269,7 @@ def fill_snapshot_from_curator_backup(
         if not parts:
             continue
         dest = (dest_root if dest_root is not None else skills).joinpath(*parts)
-        if not _is_within(skills, dest) or not _is_within(get_hermes_home(), dest):
+        if not _is_within(skills, dest) or not _is_within(get_agent_home(), dest):
             continue
         rel_key = _rel_posix(dest, skills)
         if rel_key is None or rel_key in have:
@@ -557,7 +557,7 @@ def get_entry(entry_id: str) -> Optional[dict[str, Any]]:
 def _validate_entry_paths(entry: dict[str, Any]) -> Optional[str]:
     """Every entry path must be under HERMES_HOME — a hand-edited ledger must not
     become a write-anywhere primitive."""
-    home = get_hermes_home()
+    home = get_agent_home()
     for section in ("before", "after"):
         for item in entry.get(section) or []:
             p = Path(str(item.get("path", "")))

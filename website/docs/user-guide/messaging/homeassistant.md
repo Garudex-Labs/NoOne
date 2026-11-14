@@ -1,21 +1,20 @@
 ---
 title: Home Assistant
-description: Control your smart home with Hermes Agent via the Home Assistant plugin from the plugin catalog.
-sidebar_label: Home Assistant
-sidebar_position: 5
+description: Control your smart home with the agent via the Home Assistant plugin from the plugin catalog.
+sidebarTitle: Home Assistant
 ---
 
-# Home Assistant Integration
+# Home Assistant Integration {#home-assistant-integration}
 
-Hermes Agent integrates with [Home Assistant](https://www.home-assistant.io/) through the official **`homeassistant` plugin** from the [plugin catalog](../features/plugins.md). The plugin is maintained by Nous Research in [NousResearch/hermes-official-plugins](https://github.com/NousResearch/hermes-official-plugins/tree/main/homeassistant) and is not part of Hermes core. It provides two things:
+NoOne integrates with [Home Assistant](https://www.home-assistant.io/) through the official **`homeassistant` plugin** from the [plugin catalog](../features/plugins.md). The plugin is maintained by Nous Research in [NousResearch/hermes-official-plugins](https://github.com/NousResearch/hermes-official-plugins/tree/main/homeassistant) and is not part of {{app-name}} core. It provides two things:
 
 1. **Gateway platform** — subscribes to real-time state changes via WebSocket and responds to events
 2. **Smart home tools** — four LLM-callable tools (the `homeassistant` toolset) for querying and controlling devices via the REST API
 
-## Install
+## Install {#install}
 
 ```bash
-hermes plugins install homeassistant
+noone plugins install homeassistant
 ```
 
 Plugins are installed per profile. To use Home Assistant in another profile, install it there too:
@@ -26,23 +25,31 @@ hermes -p <profile> plugins install homeassistant
 
 The plugin declares its own Python dependency (`aiohttp`), so there is no pip extra to install. The old `hermes-agent[homeassistant]` extra has been removed.
 
-:::info Upgrading from a release that bundled Home Assistant
-Nothing to do. Every profile that was already using Home Assistant — `HASS_TOKEN` in its `.env`, `platforms.homeassistant` enabled (or given a `token`) in `config.yaml`, or the `homeassistant` toolset listed in `platform_toolsets` — gets the plugin installed automatically from the catalog by `hermes update` (for all profiles sharing the install). If that step could not run, Hermes installs it the first time the profile starts (agent or gateway start; this honours `security.allow_lazy_installs`). After a failed attempt (offline, catalog unreachable) starts retry at most once an hour; `hermes update` always retries. The outcome is reported in the terminal, the Desktop app and chat. This happens once per profile: if you later remove the plugin (`hermes plugins remove homeassistant`), it stays removed.
+<Info>
+
+<div className="doc-callout-title">
+
+Upgrading from a release that bundled Home Assistant
+
+</div>
+
+Nothing to do. Every profile that was already using Home Assistant — `HASS_TOKEN` in its `.env`, `platforms.homeassistant` enabled (or given a `token`) in `config.yaml`, or the `homeassistant` toolset listed in `platform_toolsets` — gets the plugin installed automatically from the catalog by `noone update` (for all profiles sharing the install). If that step could not run, {{app-name}} installs it the first time the profile starts (agent or gateway start; this honours `security.allow_lazy_installs`). After a failed attempt (offline, catalog unreachable) starts retry at most once an hour; `noone update` always retries. The outcome is reported in the terminal, the Desktop app and chat. This happens once per profile: if you later remove the plugin (`noone plugins remove homeassistant`), it stays removed.
 
 Your configuration carries over unchanged: the same `HASS_TOKEN` / `HASS_URL` variables, the same `homeassistant` platform name and `platforms.homeassistant` keys, the same `homeassistant` toolset and tool names, and the same cron `deliver: homeassistant:<notify target>` syntax. One difference: like every plugin tool, the `ha_*` tools sit behind [Tool Search](../features/tools.md) (`tool_search` / `tool_call`) when it is on, instead of being listed directly.
-:::
 
-## Setup
+</Info>
 
-### 1. Create a Long-Lived Access Token
+## Setup {#setup}
+
+### 1. Create a Long-Lived Access Token {#1-create-a-long-lived-access-token}
 
 1. Open your Home Assistant instance
 2. Go to your **Profile** (click your name in the sidebar)
 3. Scroll to **Long-Lived Access Tokens**
-4. Click **Create Token**, give it a name like "Hermes Agent"
+4. Click **Create Token**, give it a name like "{{app-name}}"
 5. Copy the token
 
-### 2. Configure Environment Variables
+### 2. Configure Environment Variables {#2-configure-environment-variables}
 
 ```bash
 # Add to ~/.hermes/.env
@@ -57,23 +64,31 @@ HASS_URL=http://192.168.1.100:8123
 HASS_HOME_CHANNEL=mobile_app_my_phone
 ```
 
-:::info
-With the plugin installed, the `homeassistant` toolset is enabled automatically when `HASS_TOKEN` is set. Both the gateway platform and the device control tools activate from this single token.
-:::
+<Info>
 
-### 3. Start the Gateway
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+With the plugin installed, the `homeassistant` toolset is enabled automatically when `HASS_TOKEN` is set. Both the gateway platform and the device control tools activate from this single token.
+
+</Info>
+
+### 3. Start the Gateway {#3-start-the-gateway}
 
 ```bash
-hermes gateway
+noone gateway
 ```
 
 Home Assistant will appear as a connected platform alongside any other messaging platforms (Telegram, Discord, etc.).
 
-## Available Tools
+## Available Tools {#available-tools}
 
 The plugin registers four tools for smart home control in the `homeassistant` toolset:
 
-### `ha_list_entities`
+### `ha_list_entities` {#ha_list_entities}
 
 List Home Assistant entities, optionally filtered by domain or area.
 
@@ -88,7 +103,7 @@ List all lights in the living room
 
 Returns entity IDs, states, and friendly names.
 
-### `ha_get_state`
+### `ha_get_state` {#ha_get_state}
 
 Get detailed state of a single entity, including all attributes (brightness, color, temperature setpoint, sensor readings, etc.).
 
@@ -102,7 +117,7 @@ What's the current state of climate.thermostat?
 
 Returns: state, all attributes, last changed/updated timestamps.
 
-### `ha_list_services`
+### `ha_list_services` {#ha_list_services}
 
 List available services (actions) for device control. Shows what actions can be performed on each device type and what parameters they accept.
 
@@ -114,7 +129,7 @@ List available services (actions) for device control. Shows what actions can be 
 What services are available for climate devices?
 ```
 
-### `ha_call_service`
+### `ha_call_service` {#ha_call_service}
 
 Call a Home Assistant service to control a device.
 
@@ -143,15 +158,23 @@ Set living room lights to blue at 50% brightness
     entity_id="light.living_room", data={"brightness": 128, "color_name": "blue"})
 ```
 
-## Gateway Platform: Real-Time Events
+## Gateway Platform: Real-Time Events {#gateway-platform-real-time-events}
 
 The Home Assistant gateway adapter connects via WebSocket and subscribes to `state_changed` events. When a device state changes and matches your filters, it's forwarded to the agent as a message.
 
-### Event Filtering
+### Event Filtering {#event-filtering}
 
-:::warning Required Configuration
+<Warning>
+
+<div className="doc-callout-title">
+
+Required Configuration
+
+</div>
+
 By default, **no events are forwarded**. You must configure at least one of `watch_domains`, `watch_entities`, or `watch_all` to receive events. Without filters, a warning is logged at startup and all state changes are silently dropped.
-:::
+
+</Warning>
 
 Configure which events the agent sees in `~/.hermes/config.yaml` under the Home Assistant platform's `extra` section:
 
@@ -184,11 +207,19 @@ platforms:
 | `ignore_entities` | *(none)* | Always ignore these entities (applied before domain/entity filters) |
 | `cooldown_seconds` | `30` | Minimum seconds between events for the same entity |
 
-:::tip
-Start with a focused set of domains — `climate`, `binary_sensor`, and `alarm_control_panel` cover the most useful automations. Add more as needed. Use `ignore_entities` to suppress noisy sensors like CPU temperature or uptime counters.
-:::
+<Tip>
 
-### Event Formatting
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+Start with a focused set of domains — `climate`, `binary_sensor`, and `alarm_control_panel` cover the most useful automations. Add more as needed. Use `ignore_entities` to suppress noisy sensors like CPU temperature or uptime counters.
+
+</Tip>
+
+### Event Formatting {#event-formatting}
 
 State changes are formatted as human-readable messages based on domain:
 
@@ -201,13 +232,13 @@ State changes are formatted as human-readable messages based on domain:
 | `alarm_control_panel` | "alarm state changed from 'armed_away' to 'triggered'" |
 | *(other)* | "changed from 'old' to 'new'" |
 
-### Agent Responses
+### Agent Responses {#agent-responses}
 
-Outbound messages from the agent are delivered as **Home Assistant persistent notifications** (via `persistent_notification.create`). These appear in the HA notification panel with the title "Hermes Agent".
+Outbound messages from the agent are delivered as **Home Assistant persistent notifications** (via `persistent_notification.create`). These appear in the HA notification panel with the title "{{app-name}}".
 
 The platform uses the `minimal` display defaults (no tool-progress or streaming chatter in notifications). Override them under `display.platforms.homeassistant` in `config.yaml` if you want more.
 
-### Cron and Webhook Delivery
+### Cron and Webhook Delivery {#cron-and-webhook-delivery}
 
 Scheduled jobs and webhook routes can deliver to Home Assistant:
 
@@ -218,18 +249,25 @@ deliver: homeassistant                       # uses HASS_HOME_CHANNEL
 
 The bare `homeassistant` form needs `HASS_HOME_CHANNEL` set to a default notify target. See [Scheduled Tasks](../features/cron.md) and [Webhooks](webhooks.md).
 
-### Connection Management
+### Connection Management {#connection-management}
 
 - **WebSocket** with 30-second heartbeat for real-time events
 - **Automatic reconnection** with backoff: 5s → 10s → 30s → 60s
 - **REST API** for outbound notifications (separate session to avoid WebSocket conflicts)
 - **Authorization** — HA events are always authorized (no user allowlist or pairing needed: `HASS_TOKEN` authenticates the connection and there is no human sender)
 
-## Security
+## Security {#security}
 
 The Home Assistant tools enforce security restrictions:
 
-:::warning Blocked Domains
+<Warning>
+
+<div className="doc-callout-title">
+
+Blocked Domains
+
+</div>
+
 The following service domains are **blocked** to prevent arbitrary code execution on the HA host:
 
 - `shell_command` — arbitrary shell commands
@@ -240,13 +278,14 @@ The following service domains are **blocked** to prevent arbitrary code executio
 - `rest_command` — HTTP requests from HA server (SSRF vector)
 
 Attempting to call services in these domains returns an error.
-:::
+
+</Warning>
 
 Entity IDs are validated against the pattern `^[a-z_][a-z0-9_]*\.[a-z0-9_]+$` to prevent injection attacks.
 
-## Example Automations
+## Example Automations {#example-automations}
 
-### Morning Routine
+### Morning Routine {#morning-routine}
 
 ```
 User: Start my morning routine
@@ -260,7 +299,7 @@ Agent:
      entity_id="media_player.kitchen_speaker")
 ```
 
-### Security Check
+### Security Check {#security-check}
 
 ```
 User: Is the house secure?
@@ -275,7 +314,7 @@ Agent:
 4. Reports: "All doors closed, alarm is armed_away, all locks engaged."
 ```
 
-### Reactive Automation (via Gateway Events)
+### Reactive Automation (via Gateway Events) {#reactive-automation-via-gateway-events}
 
 When connected as a gateway platform, the agent can react to events:
 
@@ -289,18 +328,18 @@ Agent automatically:
 3. Sends notification: "Front door opened. Hallway lights turned on."
 ```
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 **Platform or tools missing.**
 Check that the plugin is installed and enabled in the active profile with
-`hermes plugins list`. If it is missing, run `hermes plugins install homeassistant`
+`noone plugins list`. If it is missing, run `noone plugins install homeassistant`
 (or `hermes -p <profile> plugins install homeassistant`) and restart the gateway.
 With `security.allow_lazy_installs` turned off, the automatic first-start install
 is skipped and you must install the plugin yourself.
 
 **Environment variables not picked up.**
 The adapter reads credentials from `~/.hermes/.env` (auto-merged at startup) or
-from `config.yaml`. Double-check the file lives under the active Hermes profile
+from `config.yaml`. Double-check the file lives under the active {{app-name}} profile
 home and that there's no stray quoting around the URL/token. Restart the gateway
 after editing — env changes are only applied on process start.
 
@@ -309,5 +348,5 @@ The token must be a *Long-Lived Access Token* created from your HA user profile
 page (**Profile → Security → Long-lived access tokens**). Short-lived UI
 session tokens won't work. Also verify the base URL includes the scheme and
 port (e.g. `http://homeassistant.local:8123`) and is reachable from the host
-running Hermes — `curl -H "Authorization: Bearer <token>" <url>/api/` should
+running {{app-name}} — `curl -H "Authorization: Bearer <token>" <url>/api/` should
 return `{"message": "API running."}`.

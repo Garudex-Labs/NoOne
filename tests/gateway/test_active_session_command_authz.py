@@ -28,7 +28,7 @@ HELD_TEXT = "and add the Q3 numbers"
 
 class _Adapter(BasePlatformAdapter):
     def __init__(self):
-        super().__init__(PlatformConfig(enabled=True, token="t"), Platform.MATRIX)
+        super().__init__(PlatformConfig(enabled=True, token="t"), Platform.SLACK)
         self.sent: list[str] = []
 
     async def connect(self, *, is_reconnect: bool = False):
@@ -48,7 +48,7 @@ class _Adapter(BasePlatformAdapter):
 def _event(user_id: str, text: str) -> MessageEvent:
     # A thread in a shared room: the session key carries no user part, so everyone in the
     # thread lands on the same session.
-    source = SessionSource(platform=Platform.MATRIX, chat_id="!room:hs", chat_type="group",
+    source = SessionSource(platform=Platform.SLACK, chat_id="!room:hs", chat_type="group",
                           user_id=user_id, thread_id="$thread")
     return MessageEvent(text=text, message_type=MessageType.TEXT, source=source,
                         message_id=f"{user_id}:{text}")
@@ -210,7 +210,7 @@ async def test_a_pre_gateway_dispatch_rewrite_does_not_hide_an_accepted_stop(mon
     still reach the event the adapter dispatched, or an accepted /stop never cancels the turn."""
     async def rewrite(name, **kwargs):
         return [{"action": "rewrite", "text": kwargs["event"].text}] if name == "pre_gateway_dispatch" else []
-    monkeypatch.setattr("hermes_cli.plugins.ainvoke_hook", rewrite)
+    monkeypatch.setattr("agent_cli.plugins.ainvoke_hook", rewrite)
     runner, event, _reply = await _runner_busy_stop("222")
     runner._interrupt_and_clear_session.assert_awaited_once()
     assert getattr(event, "_interrupt_accepted", False) is True
@@ -223,7 +223,7 @@ async def test_accepted_stop_drops_a_held_burst_before_its_slow_reply(monkeypatc
     from gateway.session_ingress_burst import holds_busy_burst
     from tests.gateway.test_busy_burst_serial_reader import _busy_owner, _signal
     adapter, source = _signal(monkeypatch)
-    monkeypatch.setattr(adapter, "serial_receive_loop", False, raising=False)  # Telegram/Matrix-like
+    monkeypatch.setattr(adapter, "serial_receive_loop", False, raising=False)  # Telegram-like
     owner = await _busy_owner(monkeypatch, adapter, source, busy_text_mode="queue", busy_text_timing=(0.3, 1.0))
     burst = asyncio.create_task(adapter.handle_message(MessageEvent(text="B", source=source, message_id="B")))
     await async_wait_until(lambda: holds_busy_burst(adapter, owner.key), timeout=5)

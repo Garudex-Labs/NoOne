@@ -1,10 +1,9 @@
 ---
-sidebar_position: 10
 title: "Tutorial: GitHub PR Review Agent"
 description: "Build an automated AI code reviewer that monitors your repos, reviews pull requests, and delivers feedback — hands-free"
 ---
 
-# Tutorial: Build a GitHub PR Review Agent
+# Tutorial: Build a GitHub PR Review Agent {#tutorial-build-a-github-pr-review-agent}
 
 **The problem:** Your team opens PRs faster than you can review them. PRs sit for days waiting for eyeballs. Junior devs merge bugs because nobody had time to check. You spend your mornings catching up on diffs instead of building.
 
@@ -15,7 +14,7 @@ description: "Build an automated AI code reviewer that monitors your repos, revi
 ```
 ┌───────────────────────────────────────────────────────────────────┐
 │                                                                   │
-│   Cron Timer  ──▶  Hermes Agent  ──▶  GitHub API  ──▶  Review     │
+│   Cron Timer  ──▶  NoOne  ──▶  GitHub API  ──▶  Review     │
 │   (every 2h)       + gh CLI           (PR diffs)       delivery   │
 │                    + skill                             (Telegram, │
 │                    + memory                            Discord,   │
@@ -26,20 +25,28 @@ description: "Build an automated AI code reviewer that monitors your repos, revi
 
 This guide uses **cron jobs** to poll for PRs on a schedule — no server or public endpoint needed. Works behind NAT and firewalls.
 
-:::tip Want real-time reviews instead?
-If you have a public endpoint available, check out [Automated GitHub PR Comments with Webhooks](./webhook-github-pr-review.md) — GitHub pushes events to Hermes instantly when PRs are opened or updated.
-:::
+<Tip>
+
+<div className="doc-callout-title">
+
+Want real-time reviews instead?
+
+</div>
+
+If you have a public endpoint available, check out [Automated GitHub PR Comments with Webhooks](./webhook-github-pr-review.md) — GitHub pushes events to {{app-name}} instantly when PRs are opened or updated.
+
+</Tip>
 
 ---
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
-- **Hermes Agent installed** — see the [Installation guide](../getting-started/installation.md)
+- **{{app-name}} installed** — see the [Installation guide](../getting-started/installation.md)
 - **Gateway running** for cron jobs:
   ```bash
-  hermes gateway install   # Install as a service
+  noone gateway install   # Install as a service
   # or
-  hermes gateway           # Run in foreground
+  noone gateway           # Run in foreground
   ```
 - **GitHub CLI (`gh`) installed and authenticated**:
   ```bash
@@ -52,15 +59,23 @@ If you have a public endpoint available, check out [Automated GitHub PR Comments
   ```
 - **Messaging configured** (optional) — [Telegram](../user-guide/messaging/telegram.md) or [Discord](../user-guide/messaging/discord.md)
 
-:::tip No messaging? No problem
+<Tip>
+
+<div className="doc-callout-title">
+
+No messaging? No problem
+
+</div>
+
 Use `deliver: "local"` to save reviews to `~/.hermes/cron/output/`. Great for testing before wiring up notifications.
-:::
+
+</Tip>
 
 ---
 
-## Step 1: Verify the Setup
+## Step 1: Verify the Setup {#step-1-verify-the-setup}
 
-Make sure Hermes can access GitHub. Start a chat:
+Make sure {{app-name}} can access GitHub. Start a chat:
 
 ```bash
 hermes
@@ -69,25 +84,25 @@ hermes
 Test with a simple command:
 
 ```
-Run: gh pr list --repo NousResearch/hermes-agent --state open --limit 3
+Run: gh pr list --repo Garudex-Labs/NoOne --state open --limit 3
 ```
 
 You should see a list of open PRs. If this works, you're ready.
 
 ---
 
-## Step 2: Try a Manual Review
+## Step 2: Try a Manual Review {#step-2-try-a-manual-review}
 
-Still in the chat, ask Hermes to review a real PR:
+Still in the chat, ask {{app-name}} to review a real PR:
 
 ```
 Review this pull request. Read the diff, check for bugs, security issues,
 and code quality. Be specific about line numbers and quote problematic code.
 
-Run: gh pr diff 3888 --repo NousResearch/hermes-agent
+Run: gh pr diff 3888 --repo Garudex-Labs/NoOne
 ```
 
-Hermes will:
+{{app-name}} will:
 1. Execute `gh pr diff` to fetch the code changes
 2. Read through the entire diff
 3. Produce a structured review with specific findings
@@ -96,9 +111,9 @@ If you're happy with the quality, time to automate it.
 
 ---
 
-## Step 3: Create a Review Skill
+## Step 3: Create a Review Skill {#step-3-create-a-review-skill}
 
-A skill gives Hermes consistent review guidelines that persist across sessions and cron runs. Without one, review quality varies.
+A skill gives {{app-name}} consistent review guidelines that persist across sessions and cron runs. Without one, review quality varies.
 
 ```bash
 mkdir -p ~/.hermes/skills/code-review
@@ -141,9 +156,9 @@ Verify it loaded — start `hermes` and you should see `code-review` in the skil
 
 ---
 
-## Step 4: Teach It Your Conventions
+## Step 4: Teach It Your Conventions {#step-4-teach-it-your-conventions}
 
-This is what makes the reviewer actually useful. Start a session and teach Hermes your team's standards:
+This is what makes the reviewer actually useful. Start a session and teach {{app-name}} your team's standards:
 
 ```
 Remember: In our backend repo, we use Python with FastAPI.
@@ -162,12 +177,12 @@ These memories persist forever — the reviewer will enforce your conventions wi
 
 ---
 
-## Step 5: Create the Automated Cron Job
+## Step 5: Create the Automated Cron Job {#step-5-create-the-automated-cron-job}
 
 Now wire it all together. Create a cron job that runs every 2 hours:
 
 ```bash
-hermes cron create "0 */2 * * *" \
+noone cron create "0 */2 * * *" \
   "Check for new open PRs and review them.
 
 Repos to monitor:
@@ -196,10 +211,10 @@ If no new PRs found, say: No new PRs to review." \
 Verify it's scheduled:
 
 ```bash
-hermes cron list
+noone cron list
 ```
 
-### Other useful schedules
+### Other useful schedules {#other-useful-schedules}
 
 | Schedule | When |
 |----------|------|
@@ -210,12 +225,12 @@ hermes cron list
 
 ---
 
-## Step 6: Run It On Demand
+## Step 6: Run It On Demand {#step-6-run-it-on-demand}
 
 Don't want to wait for the schedule? Trigger it manually:
 
 ```bash
-hermes cron run pr-review
+noone cron run pr-review
 ```
 
 Or from within a chat session:
@@ -226,9 +241,9 @@ Or from within a chat session:
 
 ---
 
-## Going Further
+## Going Further {#going-further}
 
-### Post Reviews Directly to GitHub
+### Post Reviews Directly to GitHub {#post-reviews-directly-to-github}
 
 Instead of delivering to Telegram, have the agent comment on the PR itself:
 
@@ -241,16 +256,24 @@ After reviewing, post your review:
 - For clean PRs: gh pr review NUMBER --repo REPO --approve --body "Looks good"
 ```
 
-:::caution
-Make sure `gh` has a token with `repo` scope. Reviews are posted as whoever `gh` is authenticated as.
-:::
+<Warning>
 
-### Weekly PR Dashboard
+<div className="doc-callout-title">
+
+CAUTION
+
+</div>
+
+Make sure `gh` has a token with `repo` scope. Reviews are posted as whoever `gh` is authenticated as.
+
+</Warning>
+
+### Weekly PR Dashboard {#weekly-pr-dashboard}
 
 Create a Monday morning overview of all your repos:
 
 ```bash
-hermes cron create "0 9 * * 1" \
+noone cron create "0 9 * * 1" \
   "Generate a weekly PR dashboard:
 - myorg/backend-api
 - myorg/frontend-app
@@ -267,34 +290,34 @@ Format as a clean summary." \
   --deliver telegram
 ```
 
-### Multi-Repo Monitoring
+### Multi-Repo Monitoring {#multi-repo-monitoring}
 
 Scale up by adding more repos to the prompt. The agent processes them sequentially — no extra setup needed.
 
 ---
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
-### "gh: command not found"
+### "gh: command not found" {#gh-command-not-found}
 The gateway runs in a minimal environment. Ensure `gh` is in the system PATH and restart the gateway.
 
-### Reviews are too generic
+### Reviews are too generic {#reviews-are-too-generic}
 1. Add the `code-review` skill (Step 3)
-2. Teach Hermes your conventions via memory (Step 4)
+2. Teach {{app-name}} your conventions via memory (Step 4)
 3. The more context it has about your stack, the better the reviews
 
-### Cron job doesn't run
+### Cron job doesn't run {#cron-job-doesnt-run}
 ```bash
-hermes gateway status    # Is the gateway running?
-hermes cron list         # Is the job enabled?
+noone gateway status    # Is the gateway running?
+noone cron list         # Is the job enabled?
 ```
 
-### Rate limits
+### Rate limits {#rate-limits}
 GitHub allows 5,000 API requests/hour for authenticated users. Each PR review uses ~3-5 requests (list + diff + optional comments). Even reviewing 100 PRs/day stays well within limits.
 
 ---
 
-## What's Next?
+## What's Next? {#whats-next}
 
 - **[Webhook-Based PR Reviews](./webhook-github-pr-review.md)** — get instant reviews when PRs are opened (requires a public endpoint)
 - **[Daily Briefing Bot](./daily-briefing-bot.md)** — combine PR reviews with your morning news digest

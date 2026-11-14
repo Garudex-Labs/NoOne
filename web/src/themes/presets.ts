@@ -1,5 +1,7 @@
-import { parseColor, THEME_PRESET_PALETTES, type ThemePresetPalette } from "@hermes/shared";
-import type { DashboardTheme, ThemePalette, ThemeTypography, ThemeLayout } from "./types";
+import { parseColor, THEME_PRESET_PALETTES, type ThemePresetPalette } from "@noone/shared";
+import { FONT_MONO, FONT_SANS } from '@noone/ui/typography'
+
+import type { DashboardTheme, ThemeLayout, ThemePalette, ThemeTypography } from "./types";
 
 /**
  * Built-in dashboard themes.
@@ -9,10 +11,10 @@ import type { DashboardTheme, ThemePalette, ThemeTypography, ThemeLayout } from 
  * corner-radius all shift to match the theme's personality.
  *
  * Theme names must stay in sync with the backend's
- * `_BUILTIN_DASHBOARD_THEMES` list in `hermes_cli/web_server.py`.
+ * `_BUILTIN_DASHBOARD_THEMES` list in `agent_cli/web_server.py`.
  *
  * Presets that also ship on the desktop (midnight, ember, mono, cyberpunk)
- * take their colours from `@hermes/shared` `THEME_PRESET_PALETTES` so both
+ * take their colours from `@noone/shared` `THEME_PRESET_PALETTES` so both
  * surfaces render one palette; only typography/layout/overrides live here.
  */
 
@@ -21,10 +23,8 @@ import type { DashboardTheme, ThemePalette, ThemeTypography, ThemeLayout } from 
 // ---------------------------------------------------------------------------
 
 /** Default system stack — neutral, safe fallback for every platform. */
-const SYSTEM_SANS =
-  'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-const SYSTEM_MONO =
-  'ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace';
+const SYSTEM_SANS = FONT_SANS;
+const SYSTEM_MONO = FONT_MONO;
 
 const DEFAULT_TYPOGRAPHY: ThemeTypography = {
   fontSans: SYSTEM_SANS,
@@ -91,10 +91,8 @@ export const midnightTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Inter", ${SYSTEM_SANS}`,
-    fontMono: `"JetBrains Mono", ${SYSTEM_MONO}`,
-    fontUrl:
-      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap",
+    fontSans: SYSTEM_SANS,
+    fontMono: SYSTEM_MONO,
     letterSpacing: "-0.005em",
   },
   layout: {
@@ -113,10 +111,8 @@ export const emberTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Spectral", Georgia, "Times New Roman", serif`,
-    fontMono: `"IBM Plex Mono", ${SYSTEM_MONO}`,
-    fontUrl:
-      "https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap",
+    fontSans: SYSTEM_SANS,
+    fontMono: SYSTEM_MONO,
   },
   layout: {
     ...DEFAULT_LAYOUT,
@@ -138,10 +134,8 @@ export const monoTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"IBM Plex Sans", ${SYSTEM_SANS}`,
-    fontMono: `"IBM Plex Mono", ${SYSTEM_MONO}`,
-    fontUrl:
-      "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
+    fontSans: SYSTEM_SANS,
+    fontMono: SYSTEM_MONO,
   },
   layout: {
     ...DEFAULT_LAYOUT,
@@ -159,10 +153,8 @@ export const cyberpunkTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Share Tech Mono", "JetBrains Mono", ${SYSTEM_MONO}`,
-    fontMono: `"Share Tech Mono", "JetBrains Mono", ${SYSTEM_MONO}`,
-    fontUrl:
-      "https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&display=swap",
+    fontSans: SYSTEM_SANS,
+    fontMono: SYSTEM_MONO,
   },
   layout: {
     ...DEFAULT_LAYOUT,
@@ -188,10 +180,8 @@ export const roseTheme: DashboardTheme = {
   },
   typography: {
     ...DEFAULT_TYPOGRAPHY,
-    fontSans: `"Fraunces", Georgia, serif`,
-    fontMono: `"DM Mono", ${SYSTEM_MONO}`,
-    fontUrl:
-      "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Mono:wght@400;500&display=swap",
+    fontSans: SYSTEM_SANS,
+    fontMono: SYSTEM_MONO,
   },
   layout: {
     ...DEFAULT_LAYOUT,

@@ -1,5 +1,6 @@
-import { fileUrlToNativePath } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { fileUrlToNativePath } from '@noone/shared'
+import { Check, Pencil, X } from '@noone/ui/icons'
 import type * as React from 'react'
 import type {
   ComponentProps,
@@ -34,7 +35,6 @@ import {
   writeDesktopFileText
 } from '@/lib/desktop-fs'
 import { ExternalLink } from '@/lib/external-link'
-import { Check, Pencil, X } from '@/lib/icons'
 import { createMemoizedMathPlugin } from '@/lib/katex-memo'
 import { isComposerChord } from '@/lib/keybinds/chords'
 import { normalizeOrLocalPreviewTarget } from '@/lib/local-preview'

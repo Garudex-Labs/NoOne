@@ -43,10 +43,6 @@ ANCHORS: dict[str, str | tuple[str, ...]] = {
     "telegram": "telegram",
     "discord": "discord",
     "slack": "slack_bolt",
-    "matrix": ("mautrix", "asyncpg", "aiosqlite", "markdown", "aiohttp_socks"),
-    "dingtalk": "dingtalk_stream",
-    "feishu": "lark_oapi",
-    "wecom": "defusedxml",
     "keychain": "keyring",
     "teams": "microsoft_teams.apps",
     "modal": "modal",
@@ -112,7 +108,8 @@ def _platform_gates() -> dict[str, str]:
     try:
         with (repo_root() / "pyproject.toml").open("rb") as f:
             data = tomllib.load(f)
-        table = data.get("tool", {}).get("hermes", {}).get("extras-platforms", {})
+        tool = data.get("tool", {})
+        table = tool.get("agent", tool.get("hermes", {})).get("extras-platforms", {})
         if isinstance(table, dict):
             gates = {str(k): str(v) for k, v in table.items()}
     except (OSError, ValueError):
@@ -211,7 +208,7 @@ def suppress_interactive_install_prompts():
 
 def install_hint(extra: str) -> str:
     """The one command users are told to run for a missing extra."""
-    return f"hermes pm install --extra {extra}"
+    return f"noone pm install --extra {extra}"
 
 
 def ensure_import(extra: str) -> None:
@@ -322,7 +319,7 @@ def declined_extras_path(project_root: Path | None = None) -> Path:
 
 
 def declined_extras(project_root: Path | None = None) -> frozenset[str]:
-    """Extras the user dropped with ``hermes pm install --without NAME``.
+    """Extras the user dropped with ``noone pm install --without NAME``.
 
     Recorded beside the dependency facts, so a carried selection (legacy
     migration, recorded extras, configured-feature auto-installs) never
@@ -503,7 +500,7 @@ def venv_selection_recorded(project_root: Path) -> bool:
 
 def first_generation_selection(project_root: Path) -> list[str] | None:
     """The extras a sync of the install's whole selection requests: ``None`` once PM recorded a
-    selection (that ledger owns the extras), else ``[all]``, as ``hermes pm install`` selects.
+    selection (that ledger owns the extras), else ``[all]``, as ``noone pm install`` selects.
 
     The update's completion bootstrap, the historical takeover, the launch migration and the
     ``venv_sync`` entry pass this; without it a first sync would reach only the core. The old
@@ -517,8 +514,8 @@ def pre_pm_baseline(project_root: Path) -> list[str]:
     """What a request on a pre-PM tree unions into: the old venv's selection, or ``[]``.
 
     PM unions a request into the recorded selection. A tree with a main-era venv and no recorded
-    selection runs that venv, so its extras are the selection every sync extends (``hermes setup``
-    adding ``telegram``, ``hermes pm update``'s venv step); otherwise its first generation records
+    selection runs that venv, so its extras are the selection every sync extends (``noone setup``
+    adding ``telegram``, ``noone pm update``'s venv step); otherwise its first generation records
     the request alone and the re-scan that would carry the rest never runs again. ``[]`` once a
     selection is recorded, and on a tree with no old venv (nothing to keep).
     """

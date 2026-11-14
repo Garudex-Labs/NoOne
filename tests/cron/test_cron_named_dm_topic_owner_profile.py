@@ -10,10 +10,10 @@ def test_shared_bot_named_topic_is_persisted_in_the_bot_owners_config(tmp_path, 
     """A credentialless satellite's cron job delivers through the primary's bot (exact profile route).
     The topic that bot creates, and the one the router recreates after thread-not-found, belong to the
     bot's profile: the satellite's config.yaml must not gain Telegram dm_topics."""
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
     from cron.scheduler_preflight import SharedRouteAdapters
     from gateway.profile_routing import ProfileRoute
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
     from tests.gateway.conftest import _ensure_telegram_mock
 
     _ensure_telegram_mock()
@@ -57,14 +57,14 @@ def test_shared_bot_named_topic_is_persisted_in_the_bot_owners_config(tmp_path, 
     config = MagicMock()
     config.platforms = {}
     config.get_home_channel = lambda p: None
-    token = set_hermes_home_override(satellite)  # the multiplexed cron tick runs the job in its profile
+    token = set_agent_home_override(satellite)  # the multiplexed cron tick runs the job in its profile
     try:
         with patch("gateway.config.load_gateway_config", return_value=config), \
              patch("cron.scheduler.load_config", return_value={"cron": {"wrap_response": False}}), \
              patch("asyncio.run_coroutine_threadsafe", side_effect=run_now):
             error = _deliver_result(job, "daily brief", adapters=shared, loop=loop)
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
     assert error is None and sent == ["4242", "5151"]
     owner_cfg = yaml.safe_load((owner / "config.yaml").read_text())

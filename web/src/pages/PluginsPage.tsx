@@ -1,12 +1,27 @@
+import { externalUrlTarget } from "@noone/shared";
+import { appText } from '@noone/shared/application-identity';
+import { ExternalLink, Eye, EyeOff, RefreshCw, Trash2 } from "@noone/ui/icons";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
+import { Badge } from "@nous-research/ui/ui/components/badge";
+import { Button } from "@nous-research/ui/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
+import { CommandBlock, CopyButton } from "@nous-research/ui/ui/components/command-block";
+import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
+import { Input } from "@nous-research/ui/ui/components/input";
+import { Label } from "@nous-research/ui/ui/components/label";
+import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Switch } from "@nous-research/ui/ui/components/switch";
+import { Toast } from "@nous-research/ui/ui/components/toast";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { ExternalLink, RefreshCw, Trash2, Eye, EyeOff } from "lucide-react";
-import type { Translations } from "@/i18n/types";
 import { Link } from "react-router";
-import { externalUrlTarget } from "@hermes/shared";
+
+import { usePageHeader } from "@/contexts/usePageHeader";
+import { useAppName } from '@/hooks/useAppName';
+import { useI18n } from "@/i18n";
+import { en } from "@/i18n/en";
+import type { Translations } from "@/i18n/types";
 import { api } from "@/lib/api";
-import { runDashboardPluginUpdate } from "@/lib/plugin-update";
-import { InstalledPluginsHeader } from "@/pages/PluginsPage_updateAll";
-import { setupHasDetails, setupHasInstallableSteps } from "@/lib/memory-provider-setup";
 import type {
   CatalogEntry,
   CatalogRemovedEntry,
@@ -18,24 +33,11 @@ import type {
   MemoryProviderSetupResult,
   PluginsHubResponse,
 } from "@/lib/api";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
-import { Switch } from "@nous-research/ui/ui/components/switch";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { CommandBlock, CopyButton } from "@nous-research/ui/ui/components/command-block";
-import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
-import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Label } from "@nous-research/ui/ui/components/label";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { useI18n } from "@/i18n";
-import { en } from "@/i18n/en";
-import { PluginSlot } from "@/plugins";
+import { setupHasDetails, setupHasInstallableSteps } from "@/lib/memory-provider-setup";
+import { runDashboardPluginUpdate } from "@/lib/plugin-update";
 import { cn } from "@/lib/utils";
-import { usePageHeader } from "@/contexts/usePageHeader";
-
+import { InstalledPluginsHeader } from "@/pages/PluginsPage_updateAll";
+import { PluginSlot } from "@/plugins";
 /** Select value for built-in memory (`config` uses empty string). Never use `""` — UI Select maps empty value to an empty label. */
 const MEMORY_PROVIDER_BUILTIN = "__hermes_memory_builtin__";
 
@@ -150,6 +152,7 @@ function MemoryProviderSetupHint({
   provider: MemoryProviderInfo;
   results: MemoryProviderSetupResult[] | null;
 }) {
+  const appName = useAppName();
   const setup = provider.setup;
   const hasDetails = setupHasDetails(setup);
   const hasInstallableSteps = setupHasInstallableSteps(setup);
@@ -161,14 +164,12 @@ function MemoryProviderSetupHint({
     hasResults ||
     needsDependencySetup ||
     (provider.status === "unavailable" && hasDetails && !dependenciesInstalled);
-
   if (!shouldShow) return null;
 
   if (!hasDetails || !setup) {
     return (
       <p className="border border-destructive/50 px-3 py-2 text-xs text-destructive">
-        This provider is installed but unavailable. It may need local dependencies or a manual setup step before Hermes can activate it.
-      </p>
+        {appText("This provider is installed but unavailable. It may need local dependencies or a manual setup step before {app_name} can activate it.\n      ", appName)}</p>
     );
   }
 
@@ -250,8 +251,7 @@ function MemoryProviderSetupHint({
       {setup.required_env.length && needsDependencySetup ? (
         <div className="grid gap-2">
           <p className="text-muted-foreground">
-            Required environment values. Fill the matching fields below, or set them in the Hermes environment.
-          </p>
+            {appText("Required environment values. Fill the matching fields below, or set them in the {app_name} environment.\n          ", appName)}</p>
           <div className="flex flex-wrap gap-2">
             {setup.required_env.map((envKey) => (
               <code
@@ -294,7 +294,7 @@ export default function PluginsPage() {
   const [rowBusy, setRowBusy] = useState<string | null>(null);
 
   const { toast, showToast } = useToast();
-  const { t } = useI18n();
+  const { appName, t } = useI18n();
   const { setAfterTitle } = usePageHeader();
 
   const loadHub = useCallback((memorySelection?: string) => {
@@ -615,8 +615,7 @@ export default function PluginsPage() {
 
                   {!selectedMemoryName && (
                     <p className="text-xs text-muted-foreground">
-                      Hermes will use the built-in MEMORY.md and USER.md files.
-                    </p>
+                      {appText("{app_name} will use the built-in MEMORY.md and USER.md files.\n                    ", appName)}</p>
                   )}
 
                   {activeMemoryInfo?.status === "missing" && (
@@ -907,7 +906,7 @@ export default function PluginsPage() {
               {t.pluginsPage.catalogEmpty ?? "No catalog entries match."}{" "}
               <a
                 className="underline"
-                href="https://hermes-agent.nousresearch.com/docs/plugins"
+                href="https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/plugins.mdx"
                 target="_blank"
                 rel="noreferrer"
               >

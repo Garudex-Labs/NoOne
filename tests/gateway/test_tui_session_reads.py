@@ -101,12 +101,12 @@ async def test_tui_context_with_a_live_agent_renders_the_category_table(owner, m
 @pytest.mark.asyncio
 async def test_tui_cron_is_the_classic_overview_with_the_profile_jobs(owner):
     from cron.jobs import create_job
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
-    token = set_hermes_home_override(str(owner.home))
+    from agent_constants import reset_agent_home_override, set_agent_home_override
+    token = set_agent_home_override(str(owner.home))
     try:
         create_job('Summarize the news', '0 9 * * *', name='daily-digest')
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
     sid = (await owner.call('session.create', request_id='t', source='tui', cwd=str(owner.workdir)))['session_id']
     out = await _exec(owner, sid, 'cron')
     assert '(^_^) Scheduled Tasks' in out and '/cron list' in out, out
@@ -150,12 +150,12 @@ async def test_cron_writes_stay_refused_on_a_viewer_connection_and_reads_list_al
     created the session, a classic CLI session included. Its reads still list, ``-a`` included (main's TUI
     alias)."""
     from cron.jobs import create_job, pause_job
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
-    token = set_hermes_home_override(str(owner.home))
+    from agent_constants import reset_agent_home_override, set_agent_home_override
+    token = set_agent_home_override(str(owner.home))
     try:
         pause_job(create_job('ping', 'every 2h', name='parked')['id'])
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
     for source in ('cli', 'tui', 'gui', 'acp'):
         sid = (await owner.call('session.create', request_id=source, source=source,
                                 cwd=str(owner.workdir)))['session_id']

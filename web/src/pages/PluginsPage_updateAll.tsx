@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw } from "@noone/ui/icons";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Label } from "@nous-research/ui/ui/components/label";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Switch } from "@nous-research/ui/ui/components/switch";
+import { useEffect, useState } from "react";
+
 import type { Translations } from "@/i18n/types";
-import { api, type AgentPluginsUpdateAllResponse, type PluginAutoUpdateState } from "@/lib/api";
+import { type AgentPluginsUpdateAllResponse, api, type PluginAutoUpdateState } from "@/lib/api";
 
 type ShowToast = (msg: string, variant: "success" | "error") => void;
 

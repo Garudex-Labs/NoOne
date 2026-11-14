@@ -1,28 +1,35 @@
 ---
-sidebar_position: 6
 title: "Signal"
-description: "Set up Hermes Agent as a Signal messenger bot via signal-cli daemon"
+description: "Set up the agent as a Signal messenger bot via signal-cli daemon"
 ---
 
-# Signal Setup
+# Signal Setup {#signal-setup}
 
-Hermes connects to Signal through the [signal-cli](https://github.com/AsamK/signal-cli) daemon running in HTTP mode. The adapter streams messages in real-time via SSE (Server-Sent Events) and sends responses via JSON-RPC.
+{{app-name}} connects to Signal through the [signal-cli](https://github.com/AsamK/signal-cli) daemon running in HTTP mode. The adapter streams messages in real-time via SSE (Server-Sent Events) and sends responses via JSON-RPC.
 
 Signal is the most privacy-focused mainstream messenger — end-to-end encrypted by default, open-source protocol, minimal metadata collection. This makes it ideal for security-sensitive agent workflows.
 
-:::info No New Python Dependencies
-The Signal adapter uses `httpx` (already a core Hermes dependency) for all communication. No additional Python packages are required. You just need signal-cli installed externally.
-:::
+<Info>
+
+<div className="doc-callout-title">
+
+No New Python Dependencies
+
+</div>
+
+The Signal adapter uses `httpx` (already a core {{app-name}} dependency) for all communication. No additional Python packages are required. You just need signal-cli installed externally.
+
+</Info>
 
 ---
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **signal-cli** — Java-based Signal client ([GitHub](https://github.com/AsamK/signal-cli))
 - **Java 17+** runtime — required by signal-cli
 - **A phone number** with Signal installed (for linking as a secondary device)
 
-### Installing signal-cli
+### Installing signal-cli {#installing-signal-cli}
 
 ```bash
 # macOS
@@ -36,13 +43,21 @@ sudo tar xf "signal-cli-${VERSION}.tar.gz" -C /opt
 sudo ln -sf "/opt/signal-cli-${VERSION}/bin/signal-cli" /usr/local/bin/
 ```
 
-:::caution
+<Warning>
+
+<div className="doc-callout-title">
+
+CAUTION
+
+</div>
+
 signal-cli is **not** in apt or snap repositories. The Linux install above downloads directly from [GitHub releases](https://github.com/AsamK/signal-cli/releases).
-:::
+
+</Warning>
 
 ---
 
-## Step 1: Link Your Signal Account
+## Step 1: Link Your Signal Account {#step-1-link-your-signal-account}
 
 Signal-cli works as a **linked device** — like WhatsApp Web, but for Signal. Your phone stays the primary device.
 
@@ -58,16 +73,24 @@ signal-cli link -n "HermesAgent"
 
 ---
 
-## Step 2: Start the signal-cli Daemon
+## Step 2: Start the signal-cli Daemon {#step-2-start-the-signal-cli-daemon}
 
 ```bash
 # Replace +1234567890 with your Signal phone number (E.164 format)
 signal-cli --account +1234567890 daemon --http 127.0.0.1:8080
 ```
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 Keep this running in the background. You can use `systemd`, `tmux`, `screen`, or run it as a service.
-:::
+
+</Tip>
 
 Verify it's running:
 
@@ -78,12 +101,12 @@ curl http://127.0.0.1:8080/api/v1/check
 
 ---
 
-## Step 3: Configure Hermes
+## Step 3: Configure {{app-name}} {#step-3-configure-hermes}
 
 The easiest way:
 
 ```bash
-hermes gateway setup
+noone gateway setup
 ```
 
 Select **Signal** from the platform menu. The wizard will:
@@ -94,7 +117,7 @@ Select **Signal** from the platform menu. The wizard will:
 4. Ask for your account phone number
 5. Configure allowed users and access policies
 
-### Manual Configuration
+### Manual Configuration {#manual-configuration}
 
 Add to `~/.hermes/.env`:
 
@@ -114,24 +137,24 @@ SIGNAL_HOME_CHANNEL=+1234567890                  # Default delivery target for c
 Then start the gateway:
 
 ```bash
-hermes gateway              # Foreground
-hermes gateway install      # Install as a user service
-sudo hermes gateway install --system   # Linux only: boot-time system service
+noone gateway              # Foreground
+noone gateway install      # Install as a user service
+sudo noone gateway install --system   # Linux only: boot-time system service
 ```
 
 ---
 
-## Access Control
+## Access Control {#access-control}
 
-### DM Access
+### DM Access {#dm-access}
 
-DM access follows the same pattern as all other Hermes platforms:
+DM access follows the same pattern as all other {{app-name}} platforms:
 
 1. **`SIGNAL_ALLOWED_USERS` set** → only those users can message
 2. **No allowlist set** → unknown users get a DM pairing code (approve via `hermes pairing approve signal CODE`)
 3. **`SIGNAL_ALLOW_ALL_USERS=true`** → anyone can message (use with caution)
 
-### Group Access
+### Group Access {#group-access}
 
 Group access is controlled by the `SIGNAL_GROUP_ALLOWED_USERS` env var:
 
@@ -143,9 +166,9 @@ Group access is controlled by the `SIGNAL_GROUP_ALLOWED_USERS` env var:
 
 ---
 
-## Features
+## Features {#features}
 
-### Attachments
+### Attachments {#attachments}
 
 The adapter supports sending and receiving media in both directions.
 
@@ -167,45 +190,53 @@ The agent can send media files via `MEDIA:` tags in responses. The following del
 All outgoing media goes through Signal's standard attachment API. Unlike some platforms, Signal does not distinguish between voice messages and file attachments at the protocol level.
 
 Attachment size limit: **100 MB** (both directions).
-:::warning
-**Signal servers will rate-limit attachment uploads**, the adapter uses a scheduler for multiple image sending that batches images in groups of 32 and throttles uploads to match the Signal server policy.
-:::
+<Warning>
 
-### Native Formatting, Reply Quotes, and Reactions
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
+**Signal servers will rate-limit attachment uploads**, the adapter uses a scheduler for multiple image sending that batches images in groups of 32 and throttles uploads to match the Signal server policy.
+
+</Warning>
+
+### Native Formatting, Reply Quotes, and Reactions {#native-formatting-reply-quotes-and-reactions}
 
 Signal messages render with **native formatting** instead of literal markdown characters. The adapter converts markdown (`**bold**`, `*italic*`, `` `code` ``, `~~strike~~`, `||spoiler||`, headings) into Signal `bodyRanges` so the text shows up with real styling on the recipient's client rather than as visible `**` / `` ` `` characters.
 
-**Reply quotes.** When Hermes replies to a specific message, it now posts a native reply that quotes the original — same UI affordance Signal users see when they use "Reply" themselves. This is automatic for replies generated in response to an inbound message.
+**Reply quotes.** When {{app-name}} replies to a specific message, it now posts a native reply that quotes the original — same UI affordance Signal users see when they use "Reply" themselves. This is automatic for replies generated in response to an inbound message.
 
 **Reactions.** The agent can react to messages via the standard reaction API; reactions surface in Signal as emoji reactions on the referenced message rather than as extra text.
 
-None of this requires additional config — it ships on by default in recent signal-cli builds. If your `signal-cli` version is too old, Hermes falls back to plaintext delivery and logs a one-time warning.
+None of this requires additional config — it ships on by default in recent signal-cli builds. If your `signal-cli` version is too old, {{app-name}} falls back to plaintext delivery and logs a one-time warning.
 
-### Long Messages
+### Long Messages {#long-messages}
 
-Signal caps a single message at **8,000 characters**. Hermes splits longer responses into numbered chunks (`(1/3)`, `(2/3)`, …) automatically instead of truncating them. This applies to every delivery path — live conversation replies, cron job deliveries, `hermes send`, and MCP `send_message` calls — and native formatting (bold, italic, code, spoilers) is preserved across chunk boundaries.
+Signal caps a single message at **8,000 characters**. {{app-name}} splits longer responses into numbered chunks (`(1/3)`, `(2/3)`, …) automatically instead of truncating them. This applies to every delivery path — live conversation replies, cron job deliveries, `noone send`, and MCP `send_message` calls — and native formatting (bold, italic, code, spoilers) is preserved across chunk boundaries.
 
-### Typing Indicators
+### Typing Indicators {#typing-indicators}
 
 The bot sends typing indicators while processing messages, refreshing every 8 seconds.
 
-### Tool Progress Display
+### Tool Progress Display {#tool-progress-display}
 
-Signal does not support editing already-sent messages. Hermes therefore suppresses gateway tool-progress bubbles on Signal, even when `/verbose` is enabled and saves a non-`off` mode for the platform.
+Signal does not support editing already-sent messages. {{app-name}} therefore suppresses gateway tool-progress bubbles on Signal, even when `/verbose` is enabled and saves a non-`off` mode for the platform.
 
 You can still see tool activity in the CLI, and final Signal replies can include normal assistant output. If you need live per-tool progress in chat, use a messaging platform with message editing support.
 
-### Phone Number Redaction
+### Phone Number Redaction {#phone-number-redaction}
 
 All phone numbers are automatically redacted in logs:
 - `+15551234567` → `+155****4567`
-- This applies to both Hermes gateway logs and the global redaction system
+- This applies to both {{app-name}} gateway logs and the global redaction system
 
-### Note to Self (Single-Number Setup)
+### Note to Self (Single-Number Setup) {#note-to-self-single-number-setup}
 
-If you run signal-cli as a **linked secondary device** on your own phone number (rather than a separate bot number), you can interact with Hermes through Signal's "Note to Self" feature.
+If you run signal-cli as a **linked secondary device** on your own phone number (rather than a separate bot number), you can interact with {{app-name}} through Signal's "Note to Self" feature.
 
-Just send a message to yourself from your phone — signal-cli picks it up and Hermes responds in the same conversation.
+Just send a message to yourself from your phone — signal-cli picks it up and {{app-name}} responds in the same conversation.
 
 **How it works:**
 - "Note to Self" messages arrive as `syncMessage.sentMessage` envelopes
@@ -214,7 +245,7 @@ Just send a message to yourself from your phone — signal-cli picks it up and H
 
 **No extra configuration needed.** This works automatically as long as `SIGNAL_ACCOUNT` matches your phone number.
 
-### Health Monitoring
+### Health Monitoring {#health-monitoring}
 
 The adapter monitors the SSE connection and automatically reconnects if:
 - The connection drops (with exponential backoff: 2s → 60s)
@@ -222,7 +253,7 @@ The adapter monitors the SSE connection and automatically reconnects if:
 
 ---
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Problem | Solution |
 |---------|----------|
@@ -236,11 +267,19 @@ The adapter monitors the SSE connection and automatically reconnects if:
 
 ---
 
-## Security
+## Security {#security}
 
-:::warning
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
 **Always configure access controls.** The bot has terminal access by default. Without `SIGNAL_ALLOWED_USERS` or DM pairing, the gateway denies all incoming messages as a safety measure.
-:::
+
+</Warning>
 
 - Phone numbers are redacted in all log output
 - Use DM pairing or explicit allowlists for safe onboarding of new users
@@ -250,7 +289,7 @@ The adapter monitors the SSE connection and automatically reconnects if:
 
 ---
 
-## Environment Variables Reference
+## Environment Variables Reference {#environment-variables-reference}
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|

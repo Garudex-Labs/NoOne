@@ -5,7 +5,7 @@ stdin at EOF, setup wizard skipped) inside the bwrap sandbox with an empty fake 
 only a fresh distro's dotfiles. Its git clone is redirected to a local bare clone of this
 checkout (``_install_helpers``); uv comes from the host's warm cache. After the install the
 user's shell resolves ``hermes`` from ``~/.local/bin`` (the installer wires PATH into the
-shell rc), ``hermes --version`` answers from the installed checkout, and a one-shot turn reaches
+shell rc), ``noone --version`` answers from the installed checkout, and a one-shot turn reaches
 the (fake) provider and is persisted.
 
 Re-running the installer on that live install (what users do to "repair" or to update) must be
@@ -103,7 +103,7 @@ def _turn(sb: I.Sandbox, provider: FakeLLMServer, marker: str) -> None:
 
 def _configure(sb: I.Sandbox, provider: FakeLLMServer) -> None:
     py = sb.python
-    ver = sb.run([py, "-c", "from hermes_cli.config_defaults import DEFAULT_CONFIG as D; print(D['_config_version'])"])
+    ver = sb.run([py, "-c", "from agent_cli.config_defaults import DEFAULT_CONFIG as D; print(D['_config_version'])"])
     assert ver.returncode == 0, I.describe(ver)
     version = int(ver.stdout.strip().splitlines()[-1])
     (sb.hermes_home / "config.yaml").write_text(I.provider_config(provider.base_url, version), encoding="utf-8")
@@ -121,7 +121,7 @@ def test_fresh_install_serves_head_and_runs_a_turn(installed, provider):
     assert I.git("status", "--porcelain", "--untracked-files=no", cwd=sb.checkout) == "", "installer dirtied the checkout"
     ver = sb.cli("--version")
     assert ver.returncode == 0 and I.TRACEBACK not in ver.stdout + ver.stderr, I.describe(ver)
-    probe = sb.run([sb.python, "-c", "import hermes_cli, run_agent; print(hermes_cli.__file__); print(run_agent.__file__)"])
+    probe = sb.run([sb.python, "-c", "import agent_cli, run_agent; print(agent_cli.__file__); print(run_agent.__file__)"])
     assert probe.returncode == 0, I.describe(probe)
     workspace = Path(sb.python).parent.parent.parent / "workspace"
     for line in probe.stdout.split():

@@ -1,39 +1,47 @@
 ---
 title: "Concept Diagrams — Generate flat, minimal educational SVG visuals as HTML"
-sidebar_label: "Concept Diagrams"
+sidebarTitle: "Concept Diagrams"
 description: "Generate flat, minimal educational SVG visuals as HTML"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Concept Diagrams
+# Concept Diagrams {#concept-diagrams}
 
 Generate flat, minimal educational SVG visuals as HTML.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/concept-diagrams` |
+| Source | Optional — install with `noone skills install official/creative/concept-diagrams` |
 | Path | `optional-skills/creative/concept-diagrams` |
 | Version | `0.1.0` |
-| Author | v1k22 (original PR), ported into hermes-agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `diagrams`, `svg`, `visualization`, `education`, `physics`, `chemistry`, `engineering` |
 | Related skills | [`architecture-diagram`](../../bundled/creative/creative-architecture-diagram.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Concept Diagrams
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Concept Diagrams {#concept-diagrams-1}
 
 Generate production-quality SVG diagrams with a unified flat, minimal design system. Output is a single self-contained HTML file that renders identically in any modern browser, with automatic light/dark mode.
 
-## Scope
+## Scope {#scope}
 
 **Best suited for:**
 - Physics setups, chemistry mechanisms, math curves, biology
@@ -52,7 +60,7 @@ Generate production-quality SVG diagrams with a unified flat, minimal design sys
 
 If a more specialized skill is available for the subject, prefer that. If none fits, this skill can serve as a general-purpose SVG diagram fallback — the output will carry the clean educational aesthetic described below, which is a reasonable default for almost any subject.
 
-## Workflow
+## Workflow {#workflow}
 
 1. Decide on the diagram type (see Diagram Types below).
 2. Lay out components using the Design System rules.
@@ -71,16 +79,16 @@ The template embeds the full CSS design system (`c-*` color classes, text classe
 
 ---
 
-## Design System
+## Design System {#design-system}
 
-### Philosophy
+### Philosophy {#philosophy}
 
 - **Flat**: no gradients, drop shadows, blur, glow, or neon effects.
 - **Minimal**: show the essential. No decorative icons inside boxes.
 - **Consistent**: same colors, spacing, typography, and stroke widths across every diagram.
 - **Dark-mode ready**: all colors auto-adapt via CSS classes — no per-mode SVG.
 
-### Color Palette
+### Color Palette {#color-palette}
 
 9 color ramps, each with 7 stops. Put the class name on a `<g>` or shape element; the template CSS handles both modes.
 
@@ -96,7 +104,7 @@ The template embeds the full CSS design system (`c-*` color classes, text classe
 | `c-amber`  | #FAEEDA | #FAC775 | #EF9F27 | #BA7517 | #854F0B | #633806 | #412402 |
 | `c-red`    | #FCEBEB | #F7C1C1 | #F09595 | #E24B4A | #A32D2D | #791F1F | #501313 |
 
-#### Color Assignment Rules
+#### Color Assignment Rules {#color-assignment-rules}
 
 Color encodes **meaning**, not sequence. Never cycle through colors like a rainbow.
 
@@ -110,7 +118,7 @@ Light/dark stop mapping (handled by the template CSS — just use the class):
 - Light mode: 50 fill + 600 stroke + 800 title / 600 subtitle
 - Dark mode:  800 fill + 200 stroke + 100 title / 200 subtitle
 
-### Typography
+### Typography {#typography}
 
 Only two font sizes. No exceptions.
 
@@ -130,7 +138,7 @@ Only two font sizes. No exceptions.
 - 12px weight 400: ~6.5px per character
 - Always verify: `box_width >= (char_count × px_per_char) + 48` (24px padding each side)
 
-### Spacing & Layout
+### Spacing & Layout {#spacing--layout}
 
 - **ViewBox**: `viewBox="0 0 680 H"` where H = content height + 40px buffer.
 - **Safe area**: x=40 to x=640, y=40 to y=(H-40).
@@ -142,13 +150,13 @@ Only two font sizes. No exceptions.
 - **Container padding**: 20px minimum inside every container.
 - **Max nesting**: 2-3 levels deep. Deeper gets unreadable at 680px width.
 
-### Stroke & Shape
+### Stroke & Shape {#stroke--shape}
 
 - **Stroke width**: 0.5px on all node borders. Not 1px, not 2px.
 - **Rect rounding**: `rx="8"` for nodes, `rx="12"` for inner containers, `rx="16"` to `rx="20"` for outer containers.
 - **Connector paths**: MUST have `fill="none"`. SVG defaults to `fill: black` otherwise.
 
-### Arrow Marker
+### Arrow Marker {#arrow-marker}
 
 Include this `<defs>` block at the start of **every** SVG:
 
@@ -164,7 +172,7 @@ Include this `<defs>` block at the start of **every** SVG:
 
 Use `marker-end="url(#arrow)"` on lines. The arrowhead inherits the line color via `context-stroke`.
 
-### CSS Classes (Provided by the Template)
+### CSS Classes (Provided by the Template) {#css-classes-provided-by-the-template}
 
 The template page provides:
 
@@ -176,7 +184,7 @@ You do **not** need to redefine these — just apply them in your SVG. The templ
 
 ---
 
-## SVG Boilerplate
+## SVG Boilerplate {#svg-boilerplate}
 
 Every SVG inside the template page starts with this exact structure:
 
@@ -197,7 +205,7 @@ Every SVG inside the template page starts with this exact structure:
 
 Replace `{HEIGHT}` with the actual computed height (last element bottom + 40px).
 
-### Node Patterns
+### Node Patterns {#node-patterns}
 
 **Single-line node (44px):**
 ```xml
@@ -232,7 +240,7 @@ Replace `{HEIGHT}` with the actual computed height (last element bottom + 40px).
 
 ---
 
-## Diagram Types
+## Diagram Types {#diagram-types}
 
 Choose the layout that fits the subject:
 
@@ -249,7 +257,7 @@ For physical, infrastructure, and dashboard diagrams, load the matching referenc
 
 ---
 
-## Validation Checklist
+## Validation Checklist {#validation-checklist}
 
 Before finalizing any SVG, verify ALL of the following:
 
@@ -268,9 +276,9 @@ Before finalizing any SVG, verify ALL of the following:
 
 ---
 
-## Output & Preview
+## Output & Preview {#output--preview}
 
-### Default: standalone HTML file
+### Default: standalone HTML file {#default-standalone-html-file}
 
 Write a single `.html` file the user can open directly. No server, no dependencies, works offline. Pattern:
 
@@ -300,7 +308,7 @@ open ./sn2-mechanism.html
 xdg-open ./sn2-mechanism.html
 ```
 
-### Optional: local preview server (multi-diagram gallery)
+### Optional: local preview server (multi-diagram gallery) {#optional-local-preview-server-multi-diagram-gallery}
 
 Only use this when the user explicitly wants a browsable gallery of multiple diagrams.
 
@@ -329,7 +337,7 @@ If the user insists on a fixed port, use `127.0.0.1:<port>` — still never `0.0
 
 ---
 
-## Examples Reference
+## Examples Reference {#examples-reference}
 
 The `examples/` directory ships 15 complete, tested diagrams. Browse them for working patterns before writing a new diagram of a similar type:
 
@@ -358,7 +366,7 @@ skill_view(name="concept-diagrams", file_path="examples/<filename>")
 
 ---
 
-## Quick Reference: What to Use When
+## Quick Reference: What to Use When {#quick-reference-what-to-use-when}
 
 | User says | Diagram type | Suggested colors |
 |-----------|--------------|------------------|

@@ -1,4 +1,4 @@
-import type { SessionInfo } from '@/hermes'
+import type { SessionInfo } from '@/agent-client'
 import { isActivePrimary, openGatewayForAgent, openGatewayForProfile } from '@/store/gateway'
 import { $showAllProfiles, ensureGatewayAgent, ensureGatewayProfile, normalizeProfileKey } from '@/store/profile'
 import { $connection, setSessionOwnerHint } from '@/store/session'

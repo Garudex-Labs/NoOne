@@ -1,11 +1,12 @@
+import { BarChart3, X } from "@noone/ui/icons";
 import { useEffect, useState } from "react";
-import { BarChart3, X } from "lucide-react";
-import { api, type SharedMetricsConsent } from "@/lib/api";
+
 import { useProfileScope } from "@/contexts/useProfileScope";
 import { useI18n } from "@/i18n";
+import { api, type SharedMetricsConsent } from "@/lib/api";
 
 const DOCS_URL =
-  "https://hermes-agent.nousresearch.com/docs/developer-guide/relay-shared-metrics";
+  "https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/developer-guide/relay-shared-metrics.md";
 const STORAGE_KEY = "sharedMetricsOfferDismissed";
 
 /**

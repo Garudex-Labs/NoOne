@@ -1,6 +1,6 @@
 /**
  * The plugin authoring contract. A plugin is a file that default-exports a
- * `HermesPlugin`; it never touches the registry directly — it receives a
+ * `AgentPlugin`; it never touches the registry directly — it receives a
  * scoped `PluginContext` whose `register` auto-tags provenance
  * (`source: 'plugin:<id>'`) and namespaces the contribution id
  * (`<id>:<localId>`), so authors write plain contributions and collisions
@@ -14,7 +14,7 @@
 
 import type { ReadableAtom } from 'nanostores'
 
-import { pluginRest, type PluginRestOptions, pluginSocket } from '@/hermes'
+import { pluginRest, type PluginRestOptions, pluginSocket } from '@/agent-client'
 import { createPluginI18n, type PluginI18n } from '@/i18n'
 import {
   listPluginAppActions,
@@ -40,8 +40,8 @@ export type { PluginPreview } from './plugin-preview'
 import type { Contribution } from './types'
 
 export type { PluginSettingsPage, PluginSettingsSubpage } from './settings-pages'
-export type { PluginRestOptions } from '@/hermes'
-export type { HermesOpenTarget } from '@/lib/hermes-open-target'
+export type { PluginRestOptions } from '@/agent-client'
+export type { AgentOpenTarget } from '@/lib/agent-open-target'
 export type { PluginAppActionId, PluginAppActionInfo, PluginRunActionResult } from '@/lib/keybinds/plugin-actions'
 export type { PluginNativeNotificationInput, PluginNotificationAction } from '@/store/native-notifications'
 export type { PetMessageTone, PetSayOptions } from '@/store/pet-plugin-messages'
@@ -192,7 +192,7 @@ export interface PluginContext {
   i18n: PluginI18n
 }
 
-export interface HermesPlugin {
+export interface AgentPlugin {
   /** Stable slug — becomes the `plugin:<id>` source and the id namespace. */
   id: string
   /** Human name for settings / about UI. */
@@ -362,7 +362,7 @@ function createPluginLifetime(track: (dispose: () => void) => () => void) {
 }
 
 /** The declared capabilities of a plugin export, strings only. */
-export function declaredCapabilities(plugin: Pick<HermesPlugin, 'capabilities'>): string[] {
+export function declaredCapabilities(plugin: Pick<AgentPlugin, 'capabilities'>): string[] {
   return Array.isArray(plugin.capabilities)
     ? plugin.capabilities.filter((entry): entry is string => typeof entry === 'string')
     : []

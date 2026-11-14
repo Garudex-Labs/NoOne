@@ -1,35 +1,43 @@
 ---
 title: "Github — GitHub via gh CLI: PRs, issues, reviews, repos, auth"
-sidebar_label: "Github"
+sidebarTitle: "Github"
 description: "GitHub via gh CLI: PRs, issues, reviews, repos, auth"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Github
+# Github {#github}
 
 GitHub via gh CLI: PRs, issues, reviews, repos, auth.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/software-development/github` |
 | Version | `2.0.0` |
-| Author | Ben Barclay (benbarclay), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `github`, `gh`, `git`, `pull-requests`, `issues`, `code-review`, `repos`, `auth`, `ci` |
 | Related skills | [`codebase-inspection`](../../bundled/software-development/software-development-codebase-inspection.md), [`requesting-code-review`](../../bundled/software-development/software-development-requesting-code-review.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# GitHub
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# GitHub {#github-1}
 
 Work GitHub end to end with the `gh` CLI (REST fallback where noted): auth,
 issues, the PR lifecycle, issue-to-PR delivery, code review, and repo
@@ -37,7 +45,7 @@ management. This skill consolidates six former skills; each workflow lives
 complete in its reference file — ALWAYS read the matching reference before
 starting that workflow, the body below only routes.
 
-## Routing
+## Routing {#routing}
 
 | Task | Read first |
 |---|---|
@@ -53,7 +61,7 @@ Supporting assets: `scripts/gh-env.sh` + `scripts/git-credential-token.py`
 `references/ci-troubleshooting.md`, `references/conventional-commits.md`,
 `references/github-api-cheatsheet.md`, `references/review-output-template.md`.
 
-## Core discipline (applies to every workflow)
+## Core discipline (applies to every workflow) {#core-discipline-applies-to-every-workflow}
 
 - Preflight once per session: `gh auth status` — if it fails, go to
   `references/auth.md` before anything else.
@@ -66,7 +74,7 @@ Supporting assets: `scripts/gh-env.sh` + `scripts/git-credential-token.py`
 - Sweep for duplicates before creating anything:
   `gh pr list --search` / `gh issue list --search`.
 
-## Verification
+## Verification {#verification}
 
 - The workflow's own reference file defines done for that task.
 - Cross-cutting: every claim about remote state (CI, merge, release,

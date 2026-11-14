@@ -1,10 +1,13 @@
-"""Stop an already-running old updater before its retired npm retry path."""
+"""Legacy import boundary; implementation lives in agent_cli.npm_engine.
 
-from typing import NoReturn
+Retained for shipped updater/plugin compatibility, sharing the canonical module.
+"""
+from importlib import import_module
+import sys
 
-from hermes_cli._old_updater import stop_for_relaunch
+from agent_cli.npm_engine import (
+    maybe_repair_npm_engine,
+)
 
-
-def maybe_repair_npm_engine(*args, **kwargs) -> NoReturn:
-    # Returning would let old callers retry or continue their stale update.
-    stop_for_relaunch()
+_current = import_module('agent_cli.npm_engine')
+sys.modules[__name__] = _current

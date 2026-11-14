@@ -15,6 +15,7 @@ import tempfile
 import time
 from datetime import datetime, timedelta, timezone, UTC
 from pathlib import Path
+from agent_cli.version_info import is_project_release_commit
 
 from scripts.releases import lanes as lane_set
 from scripts.releases.progress import error as log_error, group, log, logged_run, notice
@@ -236,6 +237,8 @@ def discover(repository: str, run=output) -> list[dict]:
         "+refs/tags/abandoned-rc.*:refs/tags/abandoned-rc.*",
     ])
     refs = _remote_tags(run)
+    refs = {name: row for name, row in refs.items()
+            if is_project_release_commit(row.get("commit") or row.get("object", ""))}
     attempts = sorted(tag for tag in refs if parse_attempt_ref(tag))
     log(f"Found {len(refs)} remote stable refs: {len(attempts)} attempt refs, "
         f"{sum(1 for tag in refs if version_from_tag(tag))} receipt tags, "

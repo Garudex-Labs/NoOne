@@ -1,7 +1,7 @@
 
+import { getSession } from '@/agent-client'
 import { resolveSessionRpcOwner } from '@/app/contrib/wiring-routing'
 import { textWithoutReferenceLines } from '@/components/assistant-ui/reference-kinds'
-import { getSession } from '@/hermes'
 import { concatPartsByToolCall, sameAttachmentTurn, spliceOlderPreservedRows } from '@/lib/chat-messages'
 import {
   assistantTextPart,
@@ -63,7 +63,7 @@ import { runtimeSessionOwner, sessionTileOwnerRoute } from '@/store/session-stat
 export { sessionMatchesStoredId }
 import { sessionOwnerRouteFromRow, type SessionOwnerScope } from '@/store/session-request-router'
 import { reportBackendContract, reportInstallMethodWarning } from '@/store/updates'
-import type { SessionCreateResponse, SessionInfo, SessionResumeResult, SessionRuntimeInfo } from '@/types/hermes'
+import type { SessionCreateResponse, SessionInfo, SessionResumeResult, SessionRuntimeInfo } from '@/types/agent-client'
 
 import type { ClientSessionState } from '../../../types'
 
@@ -346,7 +346,7 @@ export function reconcileResumeMessages(nextMessages: ChatMessage[], previousMes
  * (#75825).
  *
  * Gateway bookkeeping markers (the model-switch / personality notices written
- * by tui_gateway/server.py) are persisted as role=user but are not user turns.
+ * by agent_backend/server.py) are persisted as role=user but are not user turns.
  * They must not take part in ordinal pairing on either side: a stored marker
  * between two real user turns shifts every later user ordinal, so the optimistic
  * row misses its committed copy and is appended a second time at the end of the
@@ -1877,7 +1877,7 @@ function upsertResolvedSession(
   ]
 
   // A resolve can observe a source move (cross-room /resume rewrites the row to
-  // source='matrix', #113827): the row belongs to its current slice, and the
+  // source='slack', #113827): the row belongs to its current slice, and the
   // stale copy in every other slice must go or the session shows twice.
   // Identity-stable when nothing matched — every sidebar memo keys on these
   // arrays, and a resolve runs on each row open.
@@ -2059,7 +2059,7 @@ export async function probeStoredSession(
  * Recovery `session.resume` calls (stale runtime id, session-not-found, wedged
  * loop) must re-register the conversation on ITS backend, not on whichever
  * profile happens to be live. Omitting the profile lets the gateway fall back to
- * the launch-profile DB (tui_gateway/server.py), which is how a session bleeds
+ * the launch-profile DB (agent_backend/server.py), which is how a session bleeds
  * from one profile into another (#67603, second symptom). A cache-only lookup
  * misses any session outside the paginated sidebar window, so route through the
  * resolver, which probes uncached ids across profiles.

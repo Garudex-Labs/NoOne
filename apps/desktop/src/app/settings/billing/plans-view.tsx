@@ -1,9 +1,9 @@
+import { ChevronLeft, ExternalLink } from '@noone/ui/icons'
 import { useEffect, useRef } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { type Translations, useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
-import { ChevronLeft, ExternalLink } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { Pill } from '../primitives'

@@ -1,20 +1,20 @@
 ---
 title: "Faiss — Fast vector similarity search at billion scale"
-sidebar_label: "Faiss"
+sidebarTitle: "Faiss"
 description: "Fast vector similarity search at billion scale"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Faiss
+# Faiss {#faiss}
 
 Fast vector similarity search at billion scale.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/faiss` |
+| Source | Optional — install with `noone skills install official/mlops/faiss` |
 | Path | `optional-skills/mlops/faiss` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ Fast vector similarity search at billion scale.
 | Platforms | linux, macos |
 | Tags | `RAG`, `FAISS`, `Similarity Search`, `Vector Search`, `Facebook AI`, `GPU Acceleration`, `Billion-Scale`, `K-NN`, `HNSW`, `High Performance`, `Large Scale` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# FAISS - Efficient Similarity Search
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# FAISS - Efficient Similarity Search {#faiss---efficient-similarity-search}
 
 Facebook AI's library for billion-scale vector similarity search.
 
-## When to use FAISS
+## When to use FAISS {#when-to-use-faiss}
 
 **Use FAISS when:**
 - Need fast similarity search on large vector datasets (millions/billions)
@@ -53,9 +61,9 @@ Facebook AI's library for billion-scale vector similarity search.
 - **Weaviate**: Need full database features
 - **Annoy**: Simpler, fewer features
 
-## Quick start
+## Quick start {#quick-start}
 
-### Installation
+### Installation {#installation}
 
 ```bash
 # CPU only
@@ -65,7 +73,7 @@ pip install faiss-cpu
 pip install faiss-gpu
 ```
 
-### Basic usage
+### Basic usage {#basic-usage}
 
 ```python
 import faiss
@@ -89,9 +97,9 @@ print(f"Nearest neighbors: {indices}")
 print(f"Distances: {distances}")
 ```
 
-## Index types
+## Index types {#index-types}
 
-### 1. Flat (exact search)
+### 1. Flat (exact search) {#1-flat-exact-search}
 
 ```python
 # L2 (Euclidean) distance
@@ -103,7 +111,7 @@ index = faiss.IndexFlatIP(d)
 # Slowest, most accurate
 ```
 
-### 2. IVF (inverted file) - Fast approximate
+### 2. IVF (inverted file) - Fast approximate {#2-ivf-inverted-file---fast-approximate}
 
 ```python
 # Create quantizer
@@ -124,7 +132,7 @@ index.nprobe = 10
 distances, indices = index.search(query, k)
 ```
 
-### 3. HNSW (Hierarchical NSW) - Best quality/speed
+### 3. HNSW (Hierarchical NSW) - Best quality/speed {#3-hnsw-hierarchical-nsw---best-qualityspeed}
 
 ```python
 # HNSW index
@@ -138,7 +146,7 @@ index.add(vectors)
 distances, indices = index.search(query, k)
 ```
 
-### 4. Product Quantization - Memory efficient
+### 4. Product Quantization - Memory efficient {#4-product-quantization---memory-efficient}
 
 ```python
 # PQ reduces memory by 16-32×
@@ -151,7 +159,7 @@ index.train(vectors)
 index.add(vectors)
 ```
 
-## Save and load
+## Save and load {#save-and-load}
 
 ```python
 # Save index
@@ -164,7 +172,7 @@ index = faiss.read_index("large.index")
 distances, indices = index.search(query, k)
 ```
 
-## GPU acceleration
+## GPU acceleration {#gpu-acceleration}
 
 ```python
 # Single GPU
@@ -178,7 +186,7 @@ index_gpu = faiss.index_cpu_to_all_gpus(index_cpu)
 # 10-100× faster than CPU
 ```
 
-## LangChain integration
+## LangChain integration {#langchain-integration}
 
 ```python
 from langchain_community.vectorstores import FAISS
@@ -201,7 +209,7 @@ vectorstore = FAISS.load_local(
 results = vectorstore.similarity_search("query", k=5)
 ```
 
-## LlamaIndex integration
+## LlamaIndex integration {#llamaindex-integration}
 
 ```python
 from llama_index.vector_stores.faiss import FaissVectorStore
@@ -214,7 +222,7 @@ faiss_index = faiss.IndexFlatL2(d)
 vector_store = FaissVectorStore(faiss_index=faiss_index)
 ```
 
-## Best practices
+## Best practices {#best-practices}
 
 1. **Choose right index type** - Flat for &lt;10K, IVF for 10K-1M, HNSW for quality
 2. **Normalize for cosine** - Use IndexFlatIP with normalized vectors
@@ -224,7 +232,7 @@ vector_store = FaissVectorStore(faiss_index=faiss_index)
 6. **Monitor memory** - PQ for large datasets
 7. **Batch queries** - Better GPU utilization
 
-## Performance
+## Performance {#performance}
 
 | Index Type | Build Time | Search Time | Memory | Accuracy |
 |------------|------------|-------------|--------|----------|
@@ -233,7 +241,7 @@ vector_store = FaissVectorStore(faiss_index=faiss_index)
 | HNSW | Slow | Fastest | High | 99% |
 | PQ | Medium | Fast | Low | 90-95% |
 
-## Resources
+## Resources {#resources}
 
 - **GitHub**: https://github.com/facebookresearch/faiss ⭐ 31,700+
 - **Wiki**: https://github.com/facebookresearch/faiss/wiki

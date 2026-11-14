@@ -1,7 +1,7 @@
-"""Acceptance harness: ``hermes serve`` beside a running gateway that owns the same profile.
+"""Acceptance harness: ``noone serve`` beside a running gateway that owns the same profile.
 
 Refs #145171 (EP-2, EP-3). After #106742 the gateway owns sessions for local surfaces, but
-``hermes serve`` still runs agents in its own process when the gateway's ledger holds no work for
+``noone serve`` still runs agents in its own process when the gateway's ledger holds no work for
 the session. Three gaps, one cell each:
 
 1. a prompt sent through serve's ``/api/ws`` is not admitted through the gateway's session
@@ -12,7 +12,7 @@ the session. Three gaps, one cell each:
 Each gap is a ``known_failure`` (reason ``serve-cutover:``): it XFAILs while main fails exactly that
 way and passes once the serve cutover lands; delete the wrappers then. The control cell proves the
 same observables pass for a turn the gateway's own ``/api/ws`` admits. Real processes: a
-``hermes gateway run`` and a ``hermes serve`` in one hermetic home, a loopback model that holds the
+``noone gateway run`` and a ``noone serve`` in one hermetic home, a loopback model that holds the
 turn open (so "mid-turn" is deterministic) and names the process that called it. Boot failures and
 timeouts fail loudly; they are never mistaken for a gap.
 """
@@ -49,7 +49,7 @@ pytestmark = [pytest.mark.platforms("linux"),  # caller attribution reads /proc/
 BOOT_S = 180.0
 TURN_S = 90.0
 REPLY = "serve-ownership-reply"
-REASON = "serve-cutover: hermes serve still runs turns in-process beside the gateway (#145171 EP-3)"
+REASON = "serve-cutover: noone serve still runs turns in-process beside the gateway (#145171 EP-3)"
 
 
 class _Model(FakeLLMServer):
@@ -210,7 +210,7 @@ def scenario(tmp_path_factory: pytest.TempPathFactory):
     out, sinks, facts = open(log, "wb"), [], {}
 
     def spawn(*argv: str, **extra: str) -> subprocess.Popen:
-        return subprocess.Popen([python_exe(), "-m", "hermes_cli.main", *argv], cwd=str(home),
+        return subprocess.Popen([python_exe(), "-m", "agent_cli.main", *argv], cwd=str(home),
                                 env={**env, **extra}, stdin=subprocess.DEVNULL, stdout=out,
                                 stderr=subprocess.STDOUT)
     try:

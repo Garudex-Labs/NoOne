@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { DesktopConnectionsRegistry, DesktopProfileRoute, HermesConnection } from '@/global'
+import type { AgentConnection, DesktopConnectionsRegistry, DesktopProfileRoute } from '@/global'
 import { deferred } from '@/test/deferred'
 
 import { _resetConnectionsForTests, initializeConnectionsRegistry } from './connections'
@@ -27,7 +27,7 @@ const registry: DesktopConnectionsRegistry = {
   version: 2
 }
 
-function descriptor(connectionId: string, profile: string): HermesConnection {
+function descriptor(connectionId: string, profile: string): AgentConnection {
   return {
     baseUrl: 'http://localhost:7070',
     connectionId,

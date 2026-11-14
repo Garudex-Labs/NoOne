@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { Zap, ZapFilled } from '@noone/ui/icons'
 import { useEffect, useMemo } from 'react'
 
 import type { StatusbarItem } from '@/app/shell/statusbar-controls'
@@ -9,7 +10,6 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { useI18n } from '@/i18n'
-import { Zap, ZapFilled } from '@/lib/icons'
 import {
   $approvalModes,
   type ApprovalMode,

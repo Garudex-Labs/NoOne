@@ -10,13 +10,13 @@ from gateway import hosted_room_driver as driver
 from aiohttp import web
 
 from gateway.platforms import api_server_runs
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 from tests.gateway.test_session_group_peer_discard import (
     _never_admitted_deferred_turn, gateway as gateway_fixture, linked_peer as linked_peer_fixture,
 )
 from tests.gateway.test_session_group_peers import call
-from tui_gateway.hosted_room_peer_http import PeerRunsHTTPClient, PeerRunsHTTPError
-from tui_gateway.hosted_room_peer_transport import build_member_dispatch
+from agent_backend.hosted_room_peer_http import PeerRunsHTTPClient, PeerRunsHTTPError
+from agent_backend.hosted_room_peer_transport import build_member_dispatch
 
 gateway, linked_peer = gateway_fixture, linked_peer_fixture
 

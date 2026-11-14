@@ -2,7 +2,7 @@
 name: brag-slim
 description: Launch video from a project or URL, upstream-maintained.
 version: 0.4.0
-author: Shunit Haviv Hakimi (shunithaviv)
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

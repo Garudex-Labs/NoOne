@@ -1,33 +1,40 @@
 ---
 title: Tool Search
-sidebar_position: 95
 ---
 
-# Tool Search
+# Tool Search {#tool-search}
 
 When you have many MCP servers or non-core plugin tools attached to a
 session, their JSON schemas can consume a substantial fraction of the
 context window on every turn — even when only a few of them are relevant
 to what the user actually asked for.
 
-**Tool Search** is Hermes' opt-in progressive-disclosure layer for that
+**Tool Search** is {{app-name}}' opt-in progressive-disclosure layer for that
 problem. When activated, MCP and plugin tools are replaced in the
 model-visible tools array by three bridge tools, and the model loads each
 specific tool's schema on demand.
 
-:::info Built-in tools and explicit deferral
-Hermes keeps its working-set core tools (`terminal`, `read_file`, `write_file`,
+<Info>
+
+<div className="doc-callout-title">
+
+Built-in tools and explicit deferral
+
+</div>
+
+{{app-name}} keeps its working-set core tools (`terminal`, `read_file`, `write_file`,
 `patch`, `search_files`, `todo`, `memory`, `browser_*`, `web_search`,
 `web_extract`, `clarify`, `execute_code`, `delegate_task`, and the rest of
-`_HERMES_CORE_TOOLS`) loaded directly by default. Cold, event-triggered built-ins
+`_CORE_AGENT_TOOLS`) loaded directly by default. Cold, event-triggered built-ins
 may be deferred when they are named in `tools.tool_search.defer`; the shipped
 curated list covers tools such as `computer_use`, `session_search`, and selected
 desktop helpers. MCP and non-core plugin tools remain eligible automatically.
 An explicit `defer` list replaces the curated list, and `defer: []` keeps every
 tool eager.
-:::
 
-## How it works
+</Info>
+
+## How it works {#how-it-works}
 
 When Tool Search activates for a turn, the model sees three new tools in
 place of the deferred ones:
@@ -74,7 +81,7 @@ miss is not mistaken for a missing capability.
 `tool_describe` resolves every requested name in one call; unknown names
 are reported in `not_found` without failing the rest of the batch.
 
-When the model invokes `tool_call`, Hermes **unwraps the bridge** and
+When the model invokes `tool_call`, {{app-name}} **unwraps the bridge** and
 dispatches the underlying tool exactly as if the model had called it
 directly. Pre-tool-call hooks, guardrails, approval prompts, and
 post-tool-call hooks all run against the real tool name — not against
@@ -83,7 +90,7 @@ see the underlying tool, not the bridge. A deferred tool the model calls by
 its real name is rewritten into a `tool_call` first, so it runs through the
 same checks instead of failing as an unknown tool.
 
-## When does it activate?
+## When does it activate? {#when-does-it-activate}
 
 Tool Search uses **tiered disclosure**: the presence of *any* deferred
 tool (MCP/plugin or explicitly named built-in) activates the bridge; what
@@ -101,7 +108,7 @@ The decision is re-evaluated every time the tools array is built, so
 adding or removing MCP servers mid-session moves the session between
 tiers on the next assembly.
 
-## Configuration
+## Configuration {#configuration}
 
 ```yaml
 tools:
@@ -125,7 +132,7 @@ tools:
 ```
 
 The default `defer` list also includes the selected desktop GUI helpers listed
-in `hermes_cli/config_defaults.py`. It is the single source of truth for the
+in `agent_cli/config_defaults.py`. It is the single source of truth for the
 shipped curated set; the runtime fallback uses the same value.
 
 | Key | Default | Meaning |
@@ -141,7 +148,7 @@ shipped curated set; the runtime fallback uses the same value.
 Per-call array caps are internal safety bounds, not configuration. Over-cap
 calls return an error so the model can retry with a smaller batch.
 
-### Why the listing exists
+### Why the listing exists {#why-the-listing-exists}
 
 Without it, deferred capabilities are *invisible* — live benchmarking showed
 models substituting visible core tools (running `gh` in the terminal instead
@@ -159,7 +166,7 @@ tools:
   tool_search: true   # equivalent to {enabled: auto}
 ```
 
-## Connectors (remote tools)
+## Connectors (remote tools) {#connectors-remote-tools}
 
 The bridge also reaches **connectors**: remote tools served by the managed tool
 gateway. They are
@@ -240,7 +247,7 @@ parsed like the array form. Approvals settle per entry before
 dispatch, and a `/stop` between entries leaves the unstarted ones unsent
 (their slots report `INTERRUPTED`).
 
-## When NOT to use it
+## When NOT to use it {#when-not-to-use-it}
 
 Tool Search trades a fixed per-turn token cost (the three bridge tool
 schemas plus the catalog listing) and at least one extra round trip on
@@ -253,7 +260,7 @@ eager loading's task success while costing less than the bare bridge.
 If you want the old always-eager behavior for a small toolset, set
 `enabled: off`.
 
-## Trade-offs that don't go away
+## Trade-offs that don't go away {#trade-offs-that-dont-go-away}
 
 These come from the prompt-cache integrity invariant — they are inherent
 to any progressive-disclosure design, not specific to this implementation:
@@ -268,9 +275,9 @@ to any progressive-disclosure design, not specific to this implementation:
   prefix.
 - **No provider-native validation for deferred schemas.** `tool_describe`
   lets the model read a deferred tool's schema, but the provider still sees
-  only the generic `tool_call.arguments` object. Hermes therefore coerces and
+  only the generic `tool_call.arguments` object. {{app-name}} therefore coerces and
   validates the underlying arguments locally before dispatch; the concrete
-  tool or MCP server remains responsible for schemas Hermes cannot safely
+  tool or MCP server remains responsible for schemas {{app-name}} cannot safely
   validate, such as malformed schemas or external references.
 - **Model-quality dependence.** Tool Search assumes the model can write a
   reasonable search query for the tool it wants. Smaller models do this
@@ -282,7 +289,7 @@ to any progressive-disclosure design, not specific to this implementation:
   count of deferred tools) and the catalog, so the prompt cache is
   invalidated. This is the same trade-off as any toolset edit.
 
-## Implementation details
+## Implementation details {#implementation-details}
 
 - **Retrieval:** BM25 over tokenized tool name, source name (the MCP
   server or plugin toolset the tool belongs to, so searching `"linear"`
@@ -321,12 +328,12 @@ to any progressive-disclosure design, not specific to this implementation:
   discover or call a tool outside that subset — the deferred catalog is
   the deferrable slice of the session's own enabled/disabled toolsets,
   not the whole process registry.
-- **No JS sandbox.** Hermes uses the simpler "structured tools" mode
+- **No JS sandbox.** {{app-name}} uses the simpler "structured tools" mode
   (search / describe / call as plain functions). The JS-sandbox "code
   mode" some other implementations offer is a large surface area; we
   skip it.
 
-## See also
+## See also {#see-also}
 
 - `tools/tool_search.py` — the implementation
 - `tests/tools/test_tool_search.py` — the regression suite

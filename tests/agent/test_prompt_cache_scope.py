@@ -16,7 +16,7 @@ import pytest
 
 from agent.prompt_cache_scope import resolve_prompt_cache_scope
 from agent.transports.codex import _cache_scope_from_session_id, _content_cache_key
-from hermes_state import SessionDB
+from agent_state import SessionDB
 
 
 @pytest.fixture()
@@ -515,7 +515,7 @@ class TestPerResponseRunNonceIsolation:
         identity would arrive through the conversation contextvar, not from
         re-reading this id.
         """
-        from agent.portal_tags import (
+        from agent.conversation_scope import (
             reset_conversation_context,
             set_conversation_context,
         )

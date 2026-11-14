@@ -96,9 +96,9 @@ def _launch_profile_scope():
     if not is_multiplex_active():
         return contextlib.nullcontext()
     from gateway.run import _profile_runtime_scope  # late import to avoid cycle
-    from hermes_constants import get_process_hermes_home
+    from agent_constants import get_process_agent_home
 
-    return _profile_runtime_scope(get_process_hermes_home())
+    return _profile_runtime_scope(get_process_agent_home())
 
 
 def _env_or_cfg(env_var: str, cfg_key: str) -> str:
@@ -124,10 +124,10 @@ def relay_explicitly_disabled() -> bool:
     """
     from gateway.config import Platform, PlatformConfig
     from gateway.config_loader import bridge_platform_shared_keys, merge_platform_sections, read_yaml_layers
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
     try:
-        cfg = read_yaml_layers(get_hermes_home())
+        cfg = read_yaml_layers(get_agent_home())
     except Exception:
         return False
     if not isinstance(cfg, dict):
@@ -257,7 +257,7 @@ def relay_display_name() -> Optional[str]:
     value = os.environ.get("GATEWAY_RELAY_DISPLAY_NAME", "").strip()
     if not value:
         try:
-            from hermes_cli.skin_engine import get_active_skin  # late import: boot-safe
+            from agent_cli.skin_engine import get_active_skin  # late import: boot-safe
 
             value = str(get_active_skin().get_branding("agent_name", "") or "").strip()
         except Exception:
@@ -444,7 +444,7 @@ def _post_provision(
 def _resolve_relay_identity_token() -> str:
     """Resolve the caller-identity bearer token the connector introspects to a tenant.
 
-    Canonical resolver shared by runtime self-provision and ``hermes gateway enroll``.
+    Canonical resolver shared by runtime self-provision and ``noone gateway enroll``.
     Modes, in precedence order:
       1.  Generic OIDC client-credentials (self-hosted IdP): ``gateway.idp.token_url``
           (``GATEWAY_RELAY_IDP_TOKEN_URL``) set together with client id + secret ->
@@ -470,7 +470,6 @@ def _resolve_relay_identity_token() -> str:
     token_url, client_id, client_secret, scope = (env[k] for k in _IDP_KEYS)
 
     if not token_url:
-        from hermes_cli.auth import resolve_nous_access_token
 
         # Only the Nous refresh is scoped: the gateway config read above and the IdP modes below
         # keep resolving ``${VAR}`` refs from the launch env, as they always have.

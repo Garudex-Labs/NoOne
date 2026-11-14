@@ -1,3 +1,5 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { ExternalLink, Eye, EyeOff, KeyRound, Trash2 } from '@noone/ui/icons'
 import type * as React from 'react'
 
 import {
@@ -8,11 +10,9 @@ import {
   renderActionItem
 } from '@/components/ui/actions-menu'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
 import { triggerHaptic } from '@/lib/haptics'
-import { ExternalLink, Eye, EyeOff, KeyRound, Trash2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 interface EnvVarActions {
@@ -174,7 +174,7 @@ export function EnvVarActionsTrigger({
       variant="ghost"
       {...props}
     >
-      <Codicon name="ellipsis" size="0.875rem" />
+      <AppIcon name="ellipsis" size="0.875rem" />
     </Button>
   )
 }

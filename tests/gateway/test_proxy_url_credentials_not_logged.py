@@ -3,7 +3,7 @@
 the host, never the userinfo: ``RedactingFormatter`` deliberately passes
 ``user:pass@`` through for http(s) URLs, so the log line itself is the last line
 of defence. Slack already logs through ``safe_url_for_log``; these tests pin the
-same contract for Telegram, Discord, Matrix and the standalone Telegram sender."""
+same contract for Telegram, Discord and the standalone Telegram sender."""
 
 import asyncio
 import logging
@@ -43,16 +43,6 @@ def test_telegram_request_builder_logs_proxy_without_credentials(monkeypatch, ca
     _assert_host_logged_without_secret(caplog)
 
 
-def test_matrix_adapter_logs_proxy_without_credentials(monkeypatch, caplog):
-    from plugins.platforms.matrix import adapter as matrix_adapter
-
-    monkeypatch.setenv("MATRIX_PROXY", PROXY)
-    with caplog.at_level(logging.INFO):
-        adapter = matrix_adapter.MatrixAdapter(PlatformConfig(
-            enabled=True, token="syt_test_token",
-            extra={"homeserver": "https://matrix.example.org", "user_id": "@bot:example.org"}))
-    assert adapter._proxy_url == PROXY
-    _assert_host_logged_without_secret(caplog)
 
 
 def test_discord_connect_logs_proxy_without_credentials(monkeypatch, caplog):
@@ -121,35 +111,8 @@ def test_shared_socks_connector_warning_logs_proxy_without_credentials(monkeypat
     _assert_socks_warning_without_secret(caplog)
 
 
-def test_matrix_socks_session_warning_logs_proxy_without_credentials(monkeypatch, caplog):
-    import sys
-
-    from plugins.platforms.matrix import adapter as matrix_adapter
-
-    monkeypatch.setitem(sys.modules, "aiohttp_socks", None)
-    monkeypatch.setitem(sys.modules, "aiohttp", types.SimpleNamespace(ClientSession=lambda **kw: kw))
-    with caplog.at_level(logging.WARNING):
-        matrix_adapter._create_matrix_session(SOCKS_PROXY)
-    _assert_socks_warning_without_secret(caplog)
 
 
-@pytest.mark.parametrize("proxy", [
-    "http://alice:S3cretPass@[::1",  # unparseable (unclosed IPv6 bracket)
-    "alice:S3cretPass@127.0.0.1:3128",  # no scheme
-    "http:/alice:S3cretPass@127.0.0.1:3128",  # no authority
-])
-def test_malformed_proxy_url_never_echoes_credentials(monkeypatch, caplog, proxy):
-    """A mistyped proxy URL reaches the connect log before anything validates it."""
-    from plugins.platforms.matrix import adapter as matrix_adapter
-
-    monkeypatch.setenv("MATRIX_PROXY", proxy)
-    with caplog.at_level(logging.INFO):
-        matrix_adapter.MatrixAdapter(PlatformConfig(
-            enabled=True, token="syt_test_token",
-            extra={"homeserver": "https://matrix.example.org", "user_id": "@bot:example.org"}))
-    lines = _proxy_lines(caplog)
-    assert lines, "the adapter must still announce that a proxy is in use"
-    assert all(SECRET not in line and "alice" not in line for line in lines), lines
 
 
 TOKEN = "Zq9xK7tWv3"
@@ -197,19 +160,14 @@ def test_proxy_secret_never_logged_in_any_shape(monkeypatch, caplog, shape):
     import telegram
     import telegram.request
     from gateway.platforms import base as gw_base
-    from plugins.platforms.matrix import adapter as matrix_adapter
     from plugins.platforms.telegram import standalone as send_message_senders  # 150996 moved _telegram_bot here
 
     proxy = shape.format(T=TOKEN)
-    monkeypatch.setenv("MATRIX_PROXY", proxy)
     monkeypatch.setenv("TELEGRAM_PROXY", proxy)
     monkeypatch.setitem(sys.modules, "aiohttp_socks", None)
     monkeypatch.setattr(sys.modules["telegram"], "Bot", lambda **kw: MagicMock())
     monkeypatch.setattr(sys.modules["telegram.request"], "HTTPXRequest", lambda **kw: kw)
     with caplog.at_level(logging.INFO):
-        matrix_adapter.MatrixAdapter(PlatformConfig(
-            enabled=True, token="syt_test_token",
-            extra={"homeserver": "https://matrix.example.org", "user_id": "@bot:example.org"}))
         send_message_senders._telegram_bot("123456:TOKEN")
         gw_base._aiohttp_socks_connector("socks5://" + proxy.split("://", 1)[-1])
     assert _proxy_lines(caplog), "the adapter must still announce that a proxy is in use"
@@ -262,7 +220,7 @@ def test_gateway_proxy_mode_logs_upstream_url_without_credentials(monkeypatch, c
             return False
 
     aiohttp_stub = types.SimpleNamespace(ClientSession=lambda **kw: _Session(), ClientTimeout=MagicMock())
-    source = SessionSource(platform=Platform.MATRIX, chat_id="!r:s", chat_type="group", user_id="@u:s")
+    source = SessionSource(platform=Platform.MATTERMOST, chat_id="!r:s", chat_type="group", user_id="@u:s")
     with patch.dict("sys.modules", {"aiohttp": aiohttp_stub}), \
             patch("gateway.run._load_gateway_config", return_value={}), \
             caplog.at_level(logging.INFO):
@@ -293,7 +251,7 @@ def test_gateway_proxy_mode_malformed_url_error_never_echoes_secret(monkeypatch,
     runner = object.__new__(GatewayRunner)
     runner.adapters, runner._running_agents, runner._agent_cache = {}, {}, {}
     runner.config = MagicMock()
-    source = SessionSource(platform=Platform.MATRIX, chat_id="!r:s", chat_type="group", user_id="@u:s")
+    source = SessionSource(platform=Platform.MATTERMOST, chat_id="!r:s", chat_type="group", user_id="@u:s")
     with patch("gateway.run._load_gateway_config", return_value={}), caplog.at_level(logging.INFO):
         result = asyncio.run(runner._run_agent_via_proxy(
             message="hi", context_prompt="", history=[], source=source, session_id="s"))

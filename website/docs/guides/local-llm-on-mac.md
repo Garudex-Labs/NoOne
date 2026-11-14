@@ -1,18 +1,25 @@
 ---
-sidebar_position: 2
 title: "Run Local LLMs on Mac"
 description: "Set up a local OpenAI-compatible LLM server on macOS with llama.cpp or MLX, including model selection, memory optimization, and real benchmarks on Apple Silicon"
 ---
 
-# Run Local LLMs on Mac
+# Run Local LLMs on Mac {#run-local-llms-on-mac}
 
-:::tip Desktop users: there's a one-click path
-On the Hermes desktop app, **Settings → Providers → Local Models** installs
+<Tip>
+
+<div className="doc-callout-title">
+
+Desktop users: there's a one-click path
+
+</div>
+
+On the {{app-name}} desktop app, **Settings → Providers → Local Models** installs
 and manages a local llama.cpp server for you — model downloads, memory
 fitting, and context sizing included. See [Local Models](../user-guide/local-models.md).
 This guide is for manual setup: MLX, custom builds, or servers you want to
 run yourself.
-:::
+
+</Tip>
 
 This guide walks you through running a local LLM server on macOS with an OpenAI-compatible API. You get full privacy, zero API costs, and surprisingly good performance on Apple Silicon.
 
@@ -23,15 +30,23 @@ We cover two backends:
 | **llama.cpp** | `brew install llama.cpp` | Fastest time-to-first-token, quantized KV cache for low memory | GGUF |
 | **omlx** | [omlx.ai](https://omlx.ai) | Fastest token generation, native Metal optimization | MLX (safetensors) |
 
-Both expose an OpenAI-compatible `/v1/chat/completions` endpoint. Hermes works with either one — just point it at `http://localhost:8080` or `http://localhost:8000`.
+Both expose an OpenAI-compatible `/v1/chat/completions` endpoint. {{app-name}} works with either one — just point it at `http://localhost:8080` or `http://localhost:8000`.
 
-:::info Apple Silicon only
+<Info>
+
+<div className="doc-callout-title">
+
+Apple Silicon only
+
+</div>
+
 This guide targets Macs with Apple Silicon (M1 and later). Intel Macs will work with llama.cpp but without GPU acceleration — expect significantly slower performance.
-:::
+
+</Info>
 
 ---
 
-## Choosing a model
+## Choosing a model {#choosing-a-model}
 
 For getting started, we recommend **Qwen3.5-9B** — it's a strong reasoning model that fits comfortably in 8GB+ of unified memory with quantization.
 
@@ -46,11 +61,11 @@ For larger models (27B, 35B), you'll need 32 GB+ of unified memory. The 9B is th
 
 ---
 
-## Option A: llama.cpp
+## Option A: llama.cpp {#option-a-llamacpp}
 
 llama.cpp is the most portable local LLM runtime. On macOS it uses Metal for GPU acceleration out of the box.
 
-### Install
+### Install {#install}
 
 ```bash
 brew install llama.cpp
@@ -58,7 +73,7 @@ brew install llama.cpp
 
 This gives you the `llama-server` command globally.
 
-### Download the model
+### Download the model {#download-the-model}
 
 You need a GGUF-format model. The easiest source is Hugging Face via the `huggingface-cli`:
 
@@ -72,11 +87,19 @@ Then download:
 huggingface-cli download unsloth/Qwen3.5-9B-GGUF Qwen3.5-9B-Q4_K_M.gguf --local-dir ~/models
 ```
 
-:::tip Gated models
-Some models on Hugging Face require authentication. Run `huggingface-cli login` first if you get a 401 or 404 error.
-:::
+<Tip>
 
-### Start the server
+<div className="doc-callout-title">
+
+Gated models
+
+</div>
+
+Some models on Hugging Face require authentication. Run `huggingface-cli login` first if you get a 401 or 404 error.
+
+</Tip>
+
+### Start the server {#start-the-server}
 
 ```bash
 llama-server -m ~/models/Qwen3.5-9B-Q4_K_M.gguf \
@@ -108,7 +131,7 @@ main: server is listening on http://0.0.0.0:8080
 srv  update_slots: all slots are idle
 ```
 
-### Memory optimization for constrained systems
+### Memory optimization for constrained systems {#memory-optimization-for-constrained-systems}
 
 The `--cache-type-k q4_0 --cache-type-v q4_0` flags are the most important optimization for systems with limited memory. Here's the impact at 128K context:
 
@@ -118,11 +141,11 @@ The `--cache-type-k q4_0 --cache-type-v q4_0` flags are the most important optim
 | q8_0 | ~8 GB |
 | **q4_0** | **~4 GB** |
 
-On an 8 GB Mac, use `q4_0` KV cache and choose a smaller model that can still fit Hermes' 64K minimum context. On 16 GB, you can comfortably do 128K context. On 32 GB+, you can run larger models or multiple parallel slots.
+On an 8 GB Mac, use `q4_0` KV cache and choose a smaller model that can still fit {{app-name}}' 64K minimum context. On 16 GB, you can comfortably do 128K context. On 32 GB+, you can run larger models or multiple parallel slots.
 
-If you're still running out of memory, reduce context only while staying at or above Hermes' 64K minimum; otherwise switch to a smaller model or smaller quantization (Q3_K_M instead of Q4_K_M).
+If you're still running out of memory, reduce context only while staying at or above {{app-name}}' 64K minimum; otherwise switch to a smaller model or smaller quantization (Q3_K_M instead of Q4_K_M).
 
-### Test it
+### Test it {#test-it}
 
 ```bash
 curl -s http://localhost:8080/v1/chat/completions \
@@ -134,7 +157,7 @@ curl -s http://localhost:8080/v1/chat/completions \
   }' | jq .choices[0].message.content
 ```
 
-### Get the model name
+### Get the model name {#get-the-model-name}
 
 If you forget the model name, query the models endpoint:
 
@@ -144,23 +167,23 @@ curl -s http://localhost:8080/v1/models | jq '.data[].id'
 
 ---
 
-## Option B: MLX via omlx
+## Option B: MLX via omlx {#option-b-mlx-via-omlx}
 
 [omlx](https://omlx.ai) is a macOS-native app that manages and serves MLX models. MLX is Apple's own machine learning framework, optimized specifically for Apple Silicon's unified memory architecture.
 
-### Install
+### Install {#install-1}
 
 Download and install from [omlx.ai](https://omlx.ai). It provides a GUI for model management and a built-in server.
 
-### Download the model
+### Download the model {#download-the-model-1}
 
 Use the omlx app to browse and download models. Search for `Qwen3.5-9B-mlx-lm-mxfp4` and download it. Models are stored locally (typically in `~/.omlx/models/`).
 
-### Start the server
+### Start the server {#start-the-server-1}
 
 omlx serves models on `http://127.0.0.1:8000` by default. Start serving from the app UI, or use the CLI if available.
 
-### Test it
+### Test it {#test-it-1}
 
 ```bash
 curl -s http://127.0.0.1:8000/v1/chat/completions \
@@ -172,7 +195,7 @@ curl -s http://127.0.0.1:8000/v1/chat/completions \
   }' | jq .choices[0].message.content
 ```
 
-### List available models
+### List available models {#list-available-models}
 
 omlx can serve multiple models simultaneously:
 
@@ -182,11 +205,11 @@ curl -s http://127.0.0.1:8000/v1/models | jq '.data[].id'
 
 ---
 
-## Benchmarks: llama.cpp vs MLX
+## Benchmarks: llama.cpp vs MLX {#benchmarks-llamacpp-vs-mlx}
 
 Both backends tested on the same machine (Apple M5 Max, 128 GB unified memory) running the same model (Qwen3.5-9B) at comparable quantization levels (Q4_K_M for GGUF, mxfp4 for MLX). Five diverse prompts, three runs each, backends tested sequentially to avoid resource contention.
 
-### Results
+### Results {#results}
 
 | Metric | llama.cpp (Q4_K_M) | MLX (mxfp4) | Winner |
 |--------|-------------------|-------------|--------|
@@ -196,7 +219,7 @@ Both backends tested on the same machine (Apple M5 Max, 128 GB unified memory) r
 | **Generation (p50)** | 70 tok/s | **96 tok/s** | MLX (37% faster) |
 | **Total time (512 tokens)** | 7.3s | **5.5s** | MLX (25% faster) |
 
-### What this means
+### What this means {#what-this-means}
 
 - **llama.cpp** excels at prompt processing — its flash attention + quantized KV cache pipeline gets you the first token in ~66ms. If you're building interactive applications where perceived responsiveness matters (chatbots, autocomplete), this is a meaningful advantage.
 
@@ -204,7 +227,7 @@ Both backends tested on the same machine (Apple M5 Max, 128 GB unified memory) r
 
 - Both backends are **extremely consistent** — variance across runs was negligible. You can rely on these numbers.
 
-### Which one should you pick?
+### Which one should you pick? {#which-one-should-you-pick}
 
 | Use case | Recommendation |
 |----------|---------------|
@@ -216,21 +239,21 @@ Both backends tested on the same machine (Apple M5 Max, 128 GB unified memory) r
 
 ---
 
-## Connect to Hermes
+## Connect to {{app-name}} {#connect-to-hermes}
 
 Once your local server is running:
 
 ```bash
-hermes model
+noone model
 ```
 
 Select **Custom endpoint** and follow the prompts. It will ask for the base URL and model name — use the values from whichever backend you set up above.
 
 ---
 
-## Timeouts
+## Timeouts {#timeouts}
 
-Hermes automatically detects local endpoints (localhost, LAN IPs) and relaxes its streaming timeouts. No configuration needed for most setups.
+{{app-name}} automatically detects local endpoints (localhost, LAN IPs) and relaxes its streaming timeouts. No configuration needed for most setups.
 
 If you still hit timeout errors (e.g. very large contexts on slow hardware), you can override the streaming read timeout:
 
@@ -247,6 +270,14 @@ HERMES_STREAM_READ_TIMEOUT=1800
 
 The stream read timeout is the one most likely to cause issues — it's the socket-level deadline for receiving the next chunk of data. During prefill on large contexts, local models may produce no output for minutes while processing the prompt. The auto-detection handles this transparently.
 
-:::tip A silent first turn is usually prefill, not a hang
-Hermes sends its system prompt and tool schemas on every call, so on slower hardware the first turn can involve minutes of silence while the model processes that prompt before generating anything. That's prefill at work, not a stalled session. See [Slow first response (prefill)](./local-ollama-setup.md#slow-first-response-prefill) in the Ollama guide for mitigations like keeping the model loaded and trimming the fixed prompt with `hermes prompt-size`.
-:::
+<Tip>
+
+<div className="doc-callout-title">
+
+A silent first turn is usually prefill, not a hang
+
+</div>
+
+{{app-name}} sends its system prompt and tool schemas on every call, so on slower hardware the first turn can involve minutes of silence while the model processes that prompt before generating anything. That's prefill at work, not a stalled session. See [Slow first response (prefill)](./local-ollama-setup.md#slow-first-response-prefill) in the Ollama guide for mitigations like keeping the model loaded and trimming the fixed prompt with `hermes prompt-size`.
+
+</Tip>

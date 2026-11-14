@@ -4,7 +4,7 @@ goes through the real ``AuthorityConnection.dispatch`` (contract parse, handler,
 import pytest
 
 from gateway import run_api
-from hermes_state_runtime import list_session_admissions
+from agent_state_runtime import list_session_admissions
 from tests.gateway.test_prompt_queued_controls import _call, _connection
 from tests.gateway.test_session_authority_cancel_settlement import _authority
 
@@ -14,11 +14,11 @@ def voice_owner(tmp_path, monkeypatch):
     from types import SimpleNamespace
 
     from gateway.config import Platform
-    from tui_gateway import server
+    from agent_backend import server
     db, authority = _authority(tmp_path, monkeypatch, platform=Platform.LOCAL)  # TUI-26 is the local voice chat
     # The owner's voice mode is keyed by the session's source (``_voice_key_for_source``). Ending the
     # LOCAL push-to-talk capture is ``set_local_voice_mode``'s job, pinned in
-    # tests/tui_gateway/test_canonical_voice_mode_writers.py.
+    # tests/agent_backend/test_canonical_voice_mode_writers.py.
     authority.sessions['s'].source.chat_id = 's'
     # A LOCAL session belongs to its launching user: the viewer ``_connection`` attaches as.
     from gateway.session_identity import authenticated_subject
@@ -129,7 +129,7 @@ async def test_other_busy_corrections_still_reach_the_turn(voice_owner):
 
 
 def test_the_canonical_contract_declares_the_voice_stopped_reply():
-    from tui_gateway.contracts.registry import CANONICAL_METHODS
+    from agent_backend.contracts.registry import CANONICAL_METHODS
     contract = CANONICAL_METHODS['prompt.submit']
     contract.result.model_validate({'voice_stopped': True})
     with pytest.raises(Exception):

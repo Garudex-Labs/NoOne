@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 import { sessionMatchesSearch } from './session-search'
 
@@ -63,7 +63,7 @@ describe('sessionMatchesSearch', () => {
     expect(sessionMatchesSearch(makeSession({ source: 'whatsapp' }), 'WhatsApp')).toBe(true)
     expect(sessionMatchesSearch(makeSession({ source: 'whatsapp' }), 'wa')).toBe(true)
     expect(sessionMatchesSearch(makeSession({ source: 'slack' }), 'slack')).toBe(true)
-    expect(sessionMatchesSearch(makeSession({ source: 'bluebubbles' }), 'imessage')).toBe(true)
+    expect(sessionMatchesSearch(makeSession({ source: 'photon' }), 'imessage')).toBe(true)
   })
 
   it('does not match unrelated queries', () => {

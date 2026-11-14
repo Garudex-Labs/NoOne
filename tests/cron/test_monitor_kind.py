@@ -38,10 +38,10 @@ def hermes_env(tmp_path, monkeypatch, cron_owner):
 
     monkeypatch.setenv("HERMES_HOME", str(home))
 
-    # Reload modules that cache get_hermes_home() at import time.
+    # Reload modules that cache get_agent_home() at import time.
     import importlib
-    import hermes_constants
-    importlib.reload(hermes_constants)
+    import agent_constants
+    importlib.reload(agent_constants)
     import cron.jobs
     importlib.reload(cron.jobs)
     import cron.monitor
@@ -87,7 +87,7 @@ def _install_agent_stubs(monkeypatch, observed: dict):
     fake_mod.AIAgent = FakeAgent
     monkeypatch.setitem(sys.modules, "run_agent", fake_mod)
 
-    from hermes_cli import runtime_provider as _rtp
+    from agent_cli import runtime_provider as _rtp
     monkeypatch.setattr(
         _rtp,
         "resolve_runtime_provider",

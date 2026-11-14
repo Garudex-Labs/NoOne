@@ -96,35 +96,6 @@ def test_failure_delivery_lane_survives_durable_handoff(tmp_path, monkeypatch):
     )
 
 
-def test_legacy_queue_schema_adds_failure_lane_before_enqueue(tmp_path, monkeypatch):
-    import cron.delivery_queue as queue
-
-    db = tmp_path / "deliveries.db"
-    with sqlite3.connect(db) as conn:
-        conn.execute(
-            """CREATE TABLE deliveries (
-                 execution_id TEXT PRIMARY KEY,
-                 job_json TEXT NOT NULL,
-                 content TEXT NOT NULL,
-                 status TEXT NOT NULL,
-                 owner_process_id TEXT,
-                 owner_pid INTEGER,
-                 owner_started_at INTEGER,
-                 created_at TEXT NOT NULL,
-                 finished_at TEXT,
-                 error TEXT
-               )"""
-        )
-    monkeypatch.setattr(queue, "DELIVERY_DB", db)
-
-    queue.enqueue(
-        "exec-migrated",
-        {"id": "job-migrated"},
-        "failed",
-        for_failure=True,
-    )
-
-    assert queue.get_status("exec-migrated")["for_failure"] == 1
 
 
 def test_wait_timeout_marks_inflight_delivery_unknown_without_retry(

@@ -1,5 +1,5 @@
 """Every desktop bundle that carries an agent payload plants the prebuilt Webapp beside the TUI and
-the dashboard: the payload has no sources to build one from, so `hermes webapp` in the app serves it."""
+the dashboard: the payload has no sources to build one from, so `noone webapp` in the app serves it."""
 from __future__ import annotations
 
 import contextlib
@@ -16,16 +16,11 @@ from scripts.bundles import desktop
 def _compile(argv: list[str], **_kwargs) -> None:
     """Stands in for the product compilers: each writes its product, marked with its builder's name."""
     script = Path(argv[1]).name
-    if script not in {"tui.mjs", "web.mjs", "webapp.mjs"}:
+    if script not in {"web.mjs", "webapp.mjs"}:
         return
     out = Path(argv[argv.index("--out") + 1])
-    if script == "tui.mjs":
-        (out / "dist").mkdir(parents=True)
-        (out / "dist/entry.js").write_text(script, encoding="utf-8")
-        (out / "package.json").write_text('{"type": "module"}', encoding="utf-8")
-    else:
-        out.mkdir(parents=True)
-        (out / "index.html").write_text(script, encoding="utf-8")
+    out.mkdir(parents=True)
+    (out / "index.html").write_text(script, encoding="utf-8")
 
 
 @pytest.mark.parametrize("variant", ["bundled", "store"])
@@ -57,8 +52,7 @@ def test_every_payload_bundle_plants_the_prebuilt_webapp(tmp_path, monkeypatch, 
     desktop._build_prepared(prepared, [], variant)
 
     assert (payload / "apps/desktop/dist-webapp/index.html").read_text(encoding="utf-8") == "webapp.mjs"
-    assert (payload / "hermes_cli/web_dist/index.html").read_text(encoding="utf-8") == "web.mjs"
-    assert (payload / "hermes_cli/tui_dist/entry.js").read_text(encoding="utf-8") == "tui.mjs"
+    assert (payload / "agent_cli/web_dist/index.html").read_text(encoding="utf-8") == "web.mjs"
 
 
 def test_source_bundle_staging_plants_the_prebuilt_webapp(tmp_path, monkeypatch):
@@ -88,4 +82,4 @@ def test_source_bundle_staging_plants_the_prebuilt_webapp(tmp_path, monkeypatch)
     assert stage.main(["--out", str(tmp_path / "out")]) == 0
 
     assert (payload / "apps/desktop/dist-webapp/index.html").read_text(encoding="utf-8") == "webapp.mjs"
-    assert (payload / "hermes_cli/web_dist/index.html").read_text(encoding="utf-8") == "web.mjs"
+    assert (payload / "agent_cli/web_dist/index.html").read_text(encoding="utf-8") == "web.mjs"

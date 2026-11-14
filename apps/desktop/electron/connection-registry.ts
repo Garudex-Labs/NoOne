@@ -9,7 +9,7 @@
  * separately, so this module is deliberately storage-shaped, not
  * transport-shaped.
  *
- * Design rules (agreed with Teknium, Aug 2026):
+ * Design rules (Aug 2026):
  *  - Every connection carries a REQUIRED, registry-unique `label` (the
  *    "device name"). Uniqueness is case-insensitive so `Homelab` and
  *    `homelab` can't coexist and produce two identical badges.
@@ -27,8 +27,8 @@
  * these into the IPC layer and owns file I/O + secret encryption.
  */
 
-// Relative, not `@hermes/shared`: esbuild bundles electron/ without tsconfig paths.
-import { HERMES_CLOUD_MANAGED, isHermesCloudUrl } from '../../shared/src/hermes-cloud'
+// Relative, not `@noone/shared`: esbuild bundles electron/ without tsconfig paths.
+import { HERMES_CLOUD_MANAGED, isHermesCloudUrl } from '../../shared/src/cloud-connection'
 
 import {
   hostLabelFromBaseUrl,
@@ -178,7 +178,7 @@ export function agentHandle(profile: string, connectionLabel: string, duplicated
  * profile names).
  *
  * NOTE: the renderer's socket registry uses the twin implementation in
- * apps/shared/src/backend-scope.ts (`@hermes/shared`) — tsconfig project
+ * apps/shared/src/backend-scope.ts (`@noone/shared`) — tsconfig project
  * boundaries prevent a single physical module here. The two are pinned
  * byte-identical by the cross-copy contract test in
  * connection-registry.test.ts; change BOTH or that test fails.
@@ -902,7 +902,7 @@ export interface UpdateEligibility {
 
 /**
  * Whether "Update all instances" may drive this connection. Hermes Cloud
- * instances are platform-managed — we never run `hermes update` against them,
+ * instances are platform-managed — we never run `noone update` against them,
  * including one saved as a plain URL remote. Local, remote, and ssh sources
  * are all eligible (reachability and busy checks happen at dispatch time).
  */

@@ -1,12 +1,11 @@
 ---
-sidebar_position: 18
 title: "Desktop Native Sign-In (RFC 8252)"
-description: "How the Hermes Desktop app signs in to a gated gateway using your system browser and PKCE — no embedded webview, no session cookies"
+description: "How the the agent Desktop app signs in to a gated gateway using your system browser and PKCE — no embedded webview, no session cookies"
 ---
 
-# Desktop Native Sign-In (RFC 8252)
+# Desktop Native Sign-In (RFC 8252) {#desktop-native-sign-in-rfc-8252}
 
-When the Hermes Desktop app connects to a **gated gateway** (a hosted or
+When the {{app-name}} Desktop app connects to a **gated gateway** (a hosted or
 self-hosted dashboard that sits behind an OAuth provider), it can sign in two
 ways:
 
@@ -23,7 +22,7 @@ ways:
 You don't choose between these — the app detects what the gateway supports and
 picks the best one. This page explains what happens and why.
 
-## Why native sign-in
+## Why native sign-in {#why-native-sign-in}
 
 Embedding a browser inside a native app for OAuth has well-known downsides:
 the login page can't see your existing browser session (so you re-type
@@ -33,7 +32,7 @@ and the app relies on reading a session cookie out of a private webview. RFC
 all of that: **do the authorization in the system browser and hand the app its
 own tokens.**
 
-For Hermes specifically, native sign-in means:
+For {{app-name}} specifically, native sign-in means:
 
 - **No embedded webview.** The authorization happens in Safari / Chrome /
   Firefox / Edge — whatever you use — with your logins, extensions, and
@@ -44,7 +43,7 @@ For Hermes specifically, native sign-in means:
   Settings → Gateway is on. REST calls and WebSocket tickets are authenticated
   with an `Authorization: Bearer` header, not a cookie jar.
 
-## How it works
+## How it works {#how-it-works}
 
 ```
 Desktop app                Gateway (/auth/native/*)          Nous Portal (IDP)
@@ -70,7 +69,7 @@ experience: its own PKCE pair, its own loopback redirect, and tokens it owns.
 useless without the code verifier, which never leaves the app. The code is
 single-use and short-lived.
 
-## Capability detection & fallback
+## Capability detection & fallback {#capability-detection--fallback}
 
 The desktop reads the gateway's public `/api/status` endpoint, which advertises
 an `auth_flows` array:
@@ -85,7 +84,7 @@ If native sign-in is advertised but fails for a local reason — e.g. a security
 tool blocks the loopback listener, or you close the browser tab — the app
 **falls back to the embedded flow automatically** so you can still sign in.
 
-## Token lifecycle
+## Token lifecycle {#token-lifecycle}
 
 - **Access token**: short-lived (minutes). Sent as `Authorization: Bearer` on
   every REST call and when minting a WebSocket ticket.
@@ -98,7 +97,7 @@ tool blocks the loopback listener, or you close the browser tab — the app
 - **Sign out**: clears both the stored native tokens and any legacy session
   cookie for that gateway.
 
-## For gateway operators
+## For gateway operators {#for-gateway-operators}
 
 Native sign-in is available automatically on any gated gateway with an
 interactive session provider registered. No configuration is required — the
@@ -118,8 +117,8 @@ The relevant endpoints (all public, pre-auth bootstrap, same as the existing
 - `POST /auth/native/token` — exchanges the loopback code + verifier for tokens
 - `POST /auth/native/refresh` — rotates tokens from the app's refresh token
 
-## See also
+## See also {#see-also}
 
 - [OAuth over SSH / Remote Hosts](./oauth-over-ssh.md) — the loopback-callback
   pattern for provider/MCP OAuth on remote machines.
-- [Run Hermes with Nous Portal](./run-hermes-with-nous-portal.md)
+- [Run {{app-name}} with Nous Portal](./run-hermes-with-nous-portal.md)

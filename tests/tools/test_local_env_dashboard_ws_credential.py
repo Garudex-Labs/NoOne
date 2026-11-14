@@ -20,8 +20,8 @@ KEPT = {"HERMES_TUI_MAX_TURNS": "7", "MY_CUSTOM_VAR": "x"}
 @pytest.mark.parametrize("builder", [
     pytest.param(lambda: local._make_run_env({}), id="terminal"),
     pytest.param(lambda: local.build_subprocess_env(scrub_secrets=True), id="background"),
-    pytest.param(lambda: local.hermes_subprocess_env(), id="helper"),
-    pytest.param(lambda: local.hermes_subprocess_env(inherit_credentials=True), id="inherit_credentials"),
+    pytest.param(lambda: local.agent_subprocess_env(), id="helper"),
+    pytest.param(lambda: local.agent_subprocess_env(inherit_credentials=True), id="inherit_credentials"),
 ])
 @pytest.mark.usefixtures("child_env")
 def test_dashboard_ws_credential_urls_never_reach_spawned_children(monkeypatch, builder):

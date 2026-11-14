@@ -10,6 +10,17 @@ import {
   useThreadRuntime
 } from '@assistant-ui/react'
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import {
+  AudioLines,
+  GitForkIcon,
+  Loader2Icon,
+  MoreHorizontal,
+  RefreshCwIcon,
+  SmilePlusIcon,
+  VolumeXIcon,
+  XIcon
+} from '@noone/ui/icons'
 import { type FC, type ReactNode, useCallback, useContext, useEffect, useId, useMemo, useState } from 'react'
 import { useInRouterContext, useNavigate } from 'react-router'
 
@@ -45,7 +56,6 @@ import { formatElapsed } from '@/components/chat/activity-timer'
 import { PreviewAttachment } from '@/components/chat/preview-attachment'
 import { ActionsMenu, renderActionItem } from '@/components/ui/actions-menu'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { CopyButton } from '@/components/ui/copy-button'
 import { useI18n } from '@/i18n'
 import type { Translations } from '@/i18n/types'
@@ -67,16 +77,6 @@ import {
 import { errorCardText, errorProviderName } from '@/lib/error-surface-copy'
 import { openExternalLink } from '@/lib/external-link'
 import { triggerHaptic } from '@/lib/haptics'
-import {
-  AudioLines,
-  GitForkIcon,
-  Loader2Icon,
-  MoreHorizontal,
-  RefreshCwIcon,
-  SmilePlusIcon,
-  VolumeXIcon,
-  XIcon
-} from '@/lib/icons'
 import { extractPreviewTargets } from '@/lib/preview-targets'
 import { markAssistantIdSpoken } from '@/lib/spoken-reply'
 import { $touchPointer } from '@/lib/touch-interaction'
@@ -186,7 +186,7 @@ export const AssistantMessage: FC<AssistantMessageProps> = props => {
 const InterAgentCollapsedNotice: FC<{ sender: string }> = ({ sender }) => (
   <div className="flex max-w-[min(86%,44rem)] flex-col gap-0.5 self-center px-2 py-0.5 text-[0.6875rem] leading-5 text-muted-foreground/60">
     <span className="flex items-center justify-center gap-1.5">
-      <Codicon className="shrink-0 text-muted-foreground/55" name="arrow-small-right" size="0.8125rem" />
+      <AppIcon className="shrink-0 text-muted-foreground/55" name="arrow-small-right" size="0.8125rem" />
       <span className="wrap-anywhere">Replied to {sender}</span>
     </span>
     <details className="self-center">
@@ -377,7 +377,7 @@ const StoppedNotice: FC = () => {
       className="flex items-center gap-1 px-(--message-text-indent) pt-1 text-[0.72rem] text-(--ui-text-tertiary)"
       data-slot="aui_assistant-message-stopped"
     >
-      <Codicon className="size-3" name="debug-stop" />
+      <AppIcon className="size-3" name="debug-stop" />
       {t.assistant.thread.responseStopped}
     </div>
   )
@@ -1532,13 +1532,13 @@ const AssistantFooter: FC<MessageActionProps & { durationS?: number }> = ({ dura
         hideWhenSingleBranch
       >
         <BranchPickerPrimitive.Previous className="grid size-6 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-35">
-          <Codicon name="chevron-left" size="0.875rem" />
+          <AppIcon name="chevron-left" size="0.875rem" />
         </BranchPickerPrimitive.Previous>
         <span className="tabular-nums">
           <BranchPickerPrimitive.Number /> / <BranchPickerPrimitive.Count />
         </span>
         <BranchPickerPrimitive.Next className="grid size-6 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-35">
-          <Codicon name="chevron-right" size="0.875rem" />
+          <AppIcon name="chevron-right" size="0.875rem" />
         </BranchPickerPrimitive.Next>
       </BranchPickerPrimitive.Root>
       <AssistantActionBar durationS={durationS} {...props} />

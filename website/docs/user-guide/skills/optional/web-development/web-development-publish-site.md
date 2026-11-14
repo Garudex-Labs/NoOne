@@ -1,40 +1,48 @@
 ---
 title: "Publish Site — Versioned site deploys to GitHub/Cloudflare/Netlify Pages"
-sidebar_label: "Publish Site"
+sidebarTitle: "Publish Site"
 description: "Versioned site deploys to GitHub/Cloudflare/Netlify Pages"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Publish Site
+# Publish Site {#publish-site}
 
 Versioned site deploys to GitHub/Cloudflare/Netlify Pages.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/web-development/publish-site` |
+| Source | Optional — install with `noone skills install official/web-development/publish-site` |
 | Path | `optional-skills/web-development/publish-site` |
 | Version | `1.0.0` |
-| Author | Hermes Agent (Nous Research) |
+| Author | Garudex Labs |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `publish`, `deploy`, `hosting`, `github-pages`, `cloudflare-pages`, `netlify`, `static-site`, `versioning`, `rollback`, `web-development` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Publish Site
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Publish Site {#publish-site-1}
 
 Take a website, dashboard, or web app the user built (or you built for them) and put it online on infrastructure the user owns — GitHub Pages by default, Cloudflare Pages or Netlify when they need more. The discipline: preview locally for sign-off, version every deploy with a git tag, deploy through a provider ladder, verify the live URL with a real HTTP check, and keep rollback one command away.
 
 This skill covers static sites and SPA build output (plain HTML/CSS/JS, or the `dist/`/`build/` folder from Vite/Next-export/Astro/etc.). It does not cover server-side runtimes — for throwaway serverless deploys with zero account setup, use the `cloudflare-temporary-deploy` optional skill instead.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Load this skill when the user asks to:
 
@@ -44,7 +52,7 @@ Load this skill when the user asks to:
 - **Roll back** a bad deploy to the previous version
 - **Pick a host** — they don't care where, they just want a URL
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 At least ONE authenticated provider CLI (check in this order):
 
@@ -57,13 +65,13 @@ Plus:
 - A directory of static output to publish (site root or a `dist/`/`build/` folder). If the project needs a build step, run it first and publish the output directory, never the source.
 - For local preview sharing: `cloudflared` (optional — `python3 -m http.server` covers local-only preview).
 
-## How to Run
+## How to Run {#how-to-run}
 
 All commands below run via the `terminal` tool from the site's project directory. The pipeline is always the same five moves:
 
 1. Build → 2. Preview for sign-off → 3. Commit + tag (version-before-deploy) → 4. Deploy via the provider ladder → 5. Verify the live URL with `curl` and report it.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Step | Command |
 |---|---|
@@ -77,9 +85,9 @@ All commands below run via the `terminal` tool from the site's project directory
 | Rollback | `git checkout <previous-tag> -- . && redeploy` (or provider dashboard) |
 | Verify live | `curl -sS -o /dev/null -w '%{http_code}' <url>` → expect `200` |
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. Build and preview locally
+### 1. Build and preview locally {#1-build-and-preview-locally}
 
 Build if needed (`npm run build`, etc.) and identify the output directory. Serve it:
 
@@ -95,7 +103,7 @@ cloudflared tunnel --url http://localhost:8080
 
 Give the user the `https://*.trycloudflare.com` URL and get sign-off before deploying. Kill the tunnel afterwards.
 
-### 2. Version before deploy — no exceptions
+### 2. Version before deploy — no exceptions {#2-version-before-deploy--no-exceptions}
 
 Every deploy must come from a git commit, so every deploy is reproducible and rollback is trivial.
 
@@ -107,7 +115,7 @@ git tag "deploy-$(date +%Y%m%d-%H%M)"
 
 If the project already has a repo, just commit + tag. Never deploy uncommitted files.
 
-### 3. Deploy — provider ladder
+### 3. Deploy — provider ladder {#3-deploy--provider-ladder}
 
 **Rung 1 — GitHub Pages (default: free, zero extra accounts if `gh` is authed):**
 
@@ -136,7 +144,7 @@ netlify deploy --prod --dir dist
 
 `netlify deploy --dir dist` (no `--prod`) gives a draft URL — useful as a second preview stage.
 
-### 4. Rollback
+### 4. Rollback {#4-rollback}
 
 Rollback = redeploy a previous tag. Never hand-edit live output.
 
@@ -147,12 +155,12 @@ git checkout deploy-<previous> -- .   # or: git checkout deploy-<previous>; rebu
 
 Cloudflare Pages and Netlify also keep per-deploy history in their dashboards ("Rollback to this deploy"), which is faster when the CLI isn't handy.
 
-### 5. Secrets and environment variables
+### 5. Secrets and environment variables {#5-secrets-and-environment-variables}
 
 - **NEVER commit secrets, API keys, or `.env` files** — they'd be public on Pages hosting. Check with `git status` before the first commit and keep `.env*` in `.gitignore`.
 - Runtime env vars belong in the provider's dashboard: Cloudflare Pages → Settings → Environment variables; Netlify → Site settings → Environment variables. GitHub Pages is static-only — no server env; anything embedded in the bundle is public by definition. Warn the user if their build inlines a key.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **SPA routes 404 on GitHub Pages.** Pages has no rewrite rules. Copy `index.html` to `404.html` in the output dir (`cp dist/index.html dist/404.html`) so client-side routing recovers. Cloudflare Pages and Netlify handle SPAs via `_redirects` (`/* /index.html 200`).
 - **GitHub Pages build lag.** The site can take 1–10 minutes to appear after the first enable, and ~1 minute per subsequent push. Don't declare failure on the first 404 — poll `curl` a few times before investigating.
@@ -162,7 +170,7 @@ Cloudflare Pages and Netlify also keep per-deploy history in their dashboards ("
 - **DNS propagation on custom domains.** New CNAMEs can take minutes to hours. Verify against the provider's default URL (`*.pages.dev`, `*.netlify.app`, `*.github.io`) first, then check the custom domain separately — don't conflate the two failures.
 - **Deploying source instead of build output.** Publishing the repo root when the real site lives in `dist/` yields a directory listing or raw JSX. Always confirm the output dir contains an `index.html`.
 
-## Verification
+## Verification {#verification}
 
 Do NOT report success from the deploy log alone. Before telling the user anything:
 

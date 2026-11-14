@@ -11,9 +11,9 @@ from aiohttp.test_utils import TestServer
 from gateway.session_api_turn import admit_api_turn
 from gateway.session_controls import AuthorityConnection
 from gateway.session_hosted_service import CanonicalHostedRoomService
-from hermes_state_runtime import claim_session_input, settle_session_input
-from tests.tui_gateway.test_hosted_room_two_gateway_peer import _target_app
-from tui_gateway.hosted_room_peer_http import PeerRunsHTTPClient, PeerRunsHTTPError
+from agent_state_runtime import claim_session_input, settle_session_input
+from tests.agent_backend.test_hosted_room_two_gateway_peer import _target_app
+from agent_backend.hosted_room_peer_http import PeerRunsHTTPClient, PeerRunsHTTPError
 
 
 @pytest_asyncio.fixture
@@ -109,7 +109,7 @@ async def test_groups_approve_refusal_matches_local_nonpending_approval(lender, 
     # The home still runs that attempt (#148877 refuses an approval for an attempt it no longer runs):
     # the refusal under test is the lender's.
     from gateway import hosted_room_driver
-    from tui_gateway import hosted_room_service
+    from agent_backend import hosted_room_service
     attempt = {'identity': hosted_room_driver.TaskIdentity('room-1', 'task', 'thread', 'turn'),
                'execution_generation': 7, 'status': 'running', 'payload': {'target_member_id': 'member-peer'}}
     monkeypatch.setattr(hosted_room_service.driver, 'list_tasks', lambda *_a, **_kw: [attempt])

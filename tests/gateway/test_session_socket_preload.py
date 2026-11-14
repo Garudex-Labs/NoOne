@@ -11,14 +11,14 @@ from gateway import run_api
 
 @pytest.fixture
 def unloaded(monkeypatch):
-    """``tui_gateway.ws`` absent from sys.modules; record which thread imports it."""
+    """``agent_backend.ws`` absent from sys.modules; record which thread imports it."""
     import importlib
-    monkeypatch.delitem(sys.modules, "tui_gateway.ws", raising=False)
+    monkeypatch.delitem(sys.modules, "agent_backend.ws", raising=False)
     seen = {}
     real = importlib.import_module
 
     def spy(name, *args, **kwargs):
-        if name == "tui_gateway.ws":
+        if name == "agent_backend.ws":
             seen["thread"] = threading.current_thread()
             return SimpleNamespace(handle_ws=None)
         return real(name, *args, **kwargs)
@@ -63,7 +63,7 @@ async def test_a_preload_never_awaited_logs_no_unretrieved_exception(monkeypatch
 
     def boom(name, *args, **kwargs):
         raise ImportError("broken handler")
-    monkeypatch.delitem(sys.modules, "tui_gateway.ws", raising=False)
+    monkeypatch.delitem(sys.modules, "agent_backend.ws", raising=False)
     monkeypatch.setattr(importlib, "import_module", boom)
     seen = []
     loop = asyncio.get_running_loop()
@@ -88,8 +88,8 @@ async def _attach_while_loading(tmp_path, monkeypatch, *, during_load, purpose='
     while the handler fetch is pending. Returns (whether the handler ran, the ASGI messages sent)."""
     from gateway.run_api import GatewayRuntimeAPI
     from gateway.runtime_bootstrap import TicketStore
-    from hermes_cli import web_server as web
-    from hermes_cli import web_server_chat
+    from agent_cli import web_server as web
+    from agent_cli import web_server_chat
 
     tickets = TicketStore('owner', [str(tmp_path)])
     ticket = tickets.mint(profile_id=str(tmp_path), subject='human', purpose=purpose)

@@ -1,7 +1,7 @@
 /**
  * The update marker `HERMES_HOME/.hermes-update-in-progress` (#50238), format v2.
  *
- * One file, shared by every updater (Python `hermes_cli/update_lock.py`, the Rust
+ * One file, shared by every updater (Python `agent_cli/update_lock.py`, the Rust
  * `UpdateMarkerGuard`, `scripts/desktop-update/{windows.ps1,posix.sh}`) and this
  * Desktop. While it names a LIVE owner, a Desktop reopened mid-update must not
  * spawn a backend on the runtime being replaced, and no second update may start.
@@ -525,7 +525,7 @@ export interface ClaimResult {
  * Pre-write for the staged Tauri updater (`hermes-setup.exe --update`): the
  * child IS the updater there, so the marker names its pid AND its creation
  * time. A v2 body takes this path off the v1 20-minute ceiling, lets the
- * updater adopt it as its own claim, and lets the `hermes update` it runs add
+ * updater adopt it as its own claim, and lets the `noone update` it runs add
  * its delegate line. Exclusive create ONLY (A7 rule 3): over any existing
  * marker — live or dead — the pre-write is skipped and the staged updater
  * claims (and reclaims) for itself.

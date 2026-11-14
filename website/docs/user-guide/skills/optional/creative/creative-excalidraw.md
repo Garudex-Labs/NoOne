@@ -1,49 +1,57 @@
 ---
 title: "Excalidraw — Hand-drawn Excalidraw JSON diagrams (arch, flow, seq)"
-sidebar_label: "Excalidraw"
+sidebarTitle: "Excalidraw"
 description: "Hand-drawn Excalidraw JSON diagrams (arch, flow, seq)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Excalidraw
+# Excalidraw {#excalidraw}
 
 Hand-drawn Excalidraw JSON diagrams (arch, flow, seq).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/excalidraw` |
+| Source | Optional — install with `noone skills install official/creative/excalidraw` |
 | Path | `optional-skills/creative/excalidraw` |
 | Version | `1.0.1` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Excalidraw`, `Diagrams`, `Flowcharts`, `Architecture`, `Visualization`, `JSON` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Excalidraw Diagram Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Excalidraw Diagram Skill {#excalidraw-diagram-skill}
 
 Create diagrams by writing standard Excalidraw element JSON and saving as `.excalidraw` files. These files can be drag-and-dropped onto [excalidraw.com](https://excalidraw.com) for viewing and editing. No accounts, no API keys, no rendering libraries -- just JSON.
 
-## When to use
+## When to use {#when-to-use}
 
 Generate `.excalidraw` files for architecture diagrams, flowcharts, sequence diagrams, concept maps, and more. Files can be opened at excalidraw.com or uploaded for shareable links.
 
-## Workflow
+## Workflow {#workflow}
 
 1. **Load this skill** (you already did)
 2. **Write the elements JSON** -- an array of Excalidraw element objects
 3. **Save the file** using `write_file` to create a `.excalidraw` file
 4. **Optionally upload** for a shareable link using `scripts/upload.py` via `terminal`
 
-### Saving a Diagram
+### Saving a Diagram {#saving-a-diagram}
 
 Wrap your elements array in the standard `.excalidraw` envelope and save with `write_file`:
 
@@ -61,7 +69,7 @@ Wrap your elements array in the standard `.excalidraw` envelope and save with `w
 
 Save to any path, e.g. `~/diagrams/my_diagram.excalidraw`.
 
-### Uploading for a Shareable Link
+### Uploading for a Shareable Link {#uploading-for-a-shareable-link}
 
 Run the upload script (located in this skill's `scripts/` directory) via terminal:
 
@@ -73,12 +81,12 @@ This uploads to excalidraw.com (no account needed) and prints a shareable URL. R
 
 ---
 
-## Element Format Reference
+## Element Format Reference {#element-format-reference}
 
-### Required Fields (all elements)
+### Required Fields (all elements) {#required-fields-all-elements}
 `type`, `id` (unique string), `x`, `y`, `width`, `height`
 
-### Defaults (skip these -- they're applied automatically)
+### Defaults (skip these -- they're applied automatically) {#defaults-skip-these----theyre-applied-automatically}
 - `strokeColor`: `"#1e1e1e"`
 - `backgroundColor`: `"transparent"`
 - `fillStyle`: `"solid"`
@@ -88,7 +96,7 @@ This uploads to excalidraw.com (no account needed) and prints a shareable URL. R
 
 Canvas background is white.
 
-### Element Types
+### Element Types {#element-types}
 
 **Rectangle**:
 ```json
@@ -157,7 +165,7 @@ The shape needs `boundElements` listing the text, and the text needs `containerI
 - `endArrowhead`: `null` | `"arrow"` | `"bar"` | `"dot"` | `"triangle"`
 - `strokeStyle`: `"solid"` (default) | `"dashed"` | `"dotted"`
 
-### Arrow Bindings (connect arrows to shapes)
+### Arrow Bindings (connect arrows to shapes) {#arrow-bindings-connect-arrows-to-shapes}
 
 ```json
 {
@@ -170,14 +178,14 @@ The shape needs `boundElements` listing the text, and the text needs `containerI
 
 `fixedPoint` coordinates: `top=[0.5,0]`, `bottom=[0.5,1]`, `left=[0,0.5]`, `right=[1,0.5]`
 
-### Drawing Order (z-order)
+### Drawing Order (z-order) {#drawing-order-z-order}
 - Array order = z-order (first = back, last = front)
 - Emit progressively: background zones → shape → its bound text → its arrows → next shape
 - BAD: all rectangles, then all texts, then all arrows
 - GOOD: bg_zone → shape1 → text_for_shape1 → arrow1 → arrow_label_text → shape2 → text_for_shape2 → ...
 - Always place the bound text element immediately after its container shape
 
-### Sizing Guidelines
+### Sizing Guidelines {#sizing-guidelines}
 
 **Font sizes:**
 - Minimum `fontSize`: **16** for body text, labels, descriptions
@@ -190,7 +198,7 @@ The shape needs `boundElements` listing the text, and the text needs `containerI
 - Leave 20-30px gaps between elements minimum
 - Prefer fewer, larger elements over many tiny ones
 
-### Color Palette
+### Color Palette {#color-palette}
 
 See `references/colors.md` for full color tables. Quick reference:
 
@@ -204,7 +212,7 @@ See `references/colors.md` for full color tables. Quick reference:
 | Notes / Decisions | Light Yellow | `#fff3bf` |
 | Storage / Data | Light Teal | `#c3fae8` |
 
-### Tips
+### Tips {#tips}
 - Use the color palette consistently across the diagram
 - **Text contrast is CRITICAL** -- never use light gray on white backgrounds. Minimum text color on white: `#757575`
 - Do NOT use emoji in text -- they don't render in Excalidraw's font

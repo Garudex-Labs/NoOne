@@ -1,40 +1,48 @@
 ---
 title: "Polymarket — Query Polymarket: markets, prices, orderbooks, history"
-sidebar_label: "Polymarket"
+sidebarTitle: "Polymarket"
 description: "Query Polymarket: markets, prices, orderbooks, history"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Polymarket
+# Polymarket {#polymarket}
 
 Query Polymarket: markets, prices, orderbooks, history.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/finance/polymarket` |
+| Source | Optional — install with `noone skills install official/finance/polymarket` |
 | Path | `optional-skills/finance/polymarket` |
 | Version | `1.0.0` |
-| Author | Hermes Agent + Teknium |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Polymarket — Prediction Market Data
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Polymarket — Prediction Market Data {#polymarket--prediction-market-data}
 
 Query prediction market data from Polymarket using their public REST APIs.
 All endpoints are read-only and require zero authentication.
 
 See `references/api-endpoints.md` for the full endpoint reference with curl examples.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks about prediction markets, betting odds, or event probabilities
 - User wants to know "what are the odds of X happening?"
@@ -42,7 +50,7 @@ See `references/api-endpoints.md` for the full endpoint reference with curl exam
 - User wants market prices, orderbook data, or price history
 - User asks to monitor or track prediction market movements
 
-## Key Concepts
+## Key Concepts {#key-concepts}
 
 - **Events** contain one or more **Markets** (1:many relationship)
 - **Markets** are binary outcomes with Yes/No prices between 0.00 and 1.00
@@ -52,13 +60,13 @@ See `references/api-endpoints.md` for the full endpoint reference with curl exam
 - `conditionId` field: hex string used for price history queries
 - Volume is in USDC (US dollars)
 
-## Three Public APIs
+## Three Public APIs {#three-public-apis}
 
 1. **Gamma API** at `gamma-api.polymarket.com` — Discovery, search, browsing
 2. **CLOB API** at `clob.polymarket.com` — Real-time prices, orderbooks, history
 3. **Data API** at `data-api.polymarket.com` — Trades, open interest
 
-## Typical Workflow
+## Typical Workflow {#typical-workflow}
 
 When a user asks about prediction market odds:
 
@@ -67,7 +75,7 @@ When a user asks about prediction market odds:
 3. **Present** market question, current prices as percentages, and volume
 4. **Deep dive** if asked — use clobTokenIds for orderbook, conditionId for history
 
-## Presenting Results
+## Presenting Results {#presenting-results}
 
 Format prices as percentages for readability:
 - outcomePrices `["0.652", "0.348"]` becomes "Yes: 65.2%, No: 34.8%"
@@ -76,20 +84,20 @@ Format prices as percentages for readability:
 
 Example: `"Will X happen?" — 65.2% Yes ($1.2M volume)`
 
-## Parsing Double-Encoded Fields
+## Parsing Double-Encoded Fields {#parsing-double-encoded-fields}
 
 The Gamma API returns `outcomePrices`, `outcomes`, and `clobTokenIds` as JSON strings
 inside JSON responses (double-encoded). When processing with Python, parse them with
 `json.loads(market['outcomePrices'])` to get the actual array.
 
-## Rate Limits
+## Rate Limits {#rate-limits}
 
 Generous — unlikely to hit for normal usage:
 - Gamma: 4,000 requests per 10 seconds (general)
 - CLOB: 9,000 requests per 10 seconds (general)
 - Data: 1,000 requests per 10 seconds (general)
 
-## Limitations
+## Limitations {#limitations}
 
 - This skill is read-only — it does not support placing trades
 - Trading requires wallet-based crypto authentication (EIP-712 signatures)

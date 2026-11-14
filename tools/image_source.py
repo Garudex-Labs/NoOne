@@ -228,13 +228,13 @@ def _is_local_terminal_backend() -> bool:
 # (gateway inbound media + the tools' own download temp dirs).
 _MEDIA_CACHE_SUBDIRS = (
     "cache",  # cache/images, cache/vision, cache/video(s), cache/audio
-    "images",  # desktop/clipboard/PDF uploads (tui_gateway)
+    "images",  # desktop/clipboard/PDF uploads (agent_backend)
     "image_cache", "audio_cache", "video_cache", "temp_vision_images", "temp_video_files")
 
 
 def _media_cache_roots() -> list:
-    from hermes_constants import get_hermes_home
-    home = get_hermes_home()
+    from agent_constants import get_agent_home
+    home = get_agent_home()
     return [home / sub for sub in _MEDIA_CACHE_SUBDIRS]
 
 

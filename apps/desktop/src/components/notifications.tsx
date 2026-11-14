@@ -1,15 +1,15 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertCircle, AlertTriangle, CheckCircle2, type IconComponent, Info } from '@noone/ui/icons'
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { CardStack, type CardStackAction } from '@/components/ui/card-stack'
-import { Codicon } from '@/components/ui/codicon'
 import { CopyButton } from '@/components/ui/copy-button'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { AlertCircle, AlertTriangle, CheckCircle2, type IconComponent, Info } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { noticeIdForToast, recordFriction } from '@/store/desktop-metrics'
 import {
@@ -282,7 +282,7 @@ function NotificationItem({ notification, stack }: { notification: AppNotificati
       variant={styles.variant}
     >
       {notification.icon ? (
-        <Codicon className={styles.iconClass} name={notification.icon} size="1rem" style={iconStyle} />
+        <AppIcon className={styles.iconClass} name={notification.icon} size="1rem" style={iconStyle} />
       ) : (
         <Icon className={styles.iconClass} style={iconStyle} />
       )}
@@ -345,7 +345,7 @@ function NotificationItem({ notification, stack }: { notification: AppNotificati
         type="button"
         variant="ghost"
       >
-        <Codicon name="close" size="0.875rem" />
+        <AppIcon name="close" size="0.875rem" />
       </Button>
     </Alert>
   )

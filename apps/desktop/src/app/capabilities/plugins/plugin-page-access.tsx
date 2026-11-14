@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 
-import { Codicon } from '@/components/ui/codicon'
 import { PREVIEW_SCRIPT_CAPABILITY } from '@/contrib/plugin-preview'
 import type { PluginRecord } from '@/contrib/plugins-store'
 import { useI18n } from '@/i18n'
@@ -57,7 +57,7 @@ export function PluginPageAccess({ plugin, pluginName }: PluginPageAccessProps) 
               }}
               type="button"
             >
-              <Codicon name="close" size="0.7rem" />
+              <AppIcon name="close" size="0.7rem" />
             </button>
           </Pill>
         ))

@@ -96,7 +96,7 @@ def load_wake_word_config() -> dict[str, Any]:
     """Return the ``wake_word`` config section, shape-guarded to a dict."""
     cfg = None
     with suppress(Exception):
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         cfg = load_config().get("wake_word")
     return cfg if isinstance(cfg, dict) else {}
 
@@ -192,7 +192,7 @@ def wake_surface_enabled(surface: str, cfg: Optional[dict[str, Any]] = None) -> 
 
 def _active_profile_name() -> str:
     with suppress(Exception):
-        from hermes_cli.profiles import get_active_profile_name
+        from agent_cli.profiles import get_active_profile_name
         return get_active_profile_name() or "default"
     return "default"
 
@@ -203,8 +203,8 @@ def enrolled_profile_phrases() -> dict[str, str]:
     ``"hey <profile>"``; the sherpa engine listens for all and routes to the match. Unreadable → skipped."""
     phrases: dict[str, str] = {}
     with suppress(Exception):
-        from hermes_cli.config import read_user_config_raw
-        from hermes_cli.profiles import get_profile_dir, list_profiles
+        from agent_cli.config import read_user_config_raw
+        from agent_cli.profiles import get_profile_dir, list_profiles
         for info in list_profiles():
             name = getattr(info, "name", None) or str(info)
             with suppress(Exception):
@@ -405,7 +405,7 @@ def check_wake_word_requirements(cfg: Optional[dict[str, Any]] = None, *,
         missing = " and ".join(
             name for name, ok in (("speech-to-text", stt_ok), ("text-to-speech", tts_ok)) if not ok
         )
-        hint = (f"Wake word needs {missing} configured — run `hermes tools` "
+        hint = (f"Wake word needs {missing} configured — run `noone tools` "
                 f"(Voice section) or see the voice-mode docs.")
 
     capture_mode = resolve_capture_mode(cfg)
@@ -755,7 +755,7 @@ class WakeWordDetector:
                 self.on_failure(self)
 
 
-# ── Process-wide singleton (mirrors hermes_cli.voice's continuous API) ──
+# ── Process-wide singleton (mirrors agent_cli.voice's continuous API) ──
 
 _detector: Optional[WakeWordDetector] = None
 _detector_owner: object | None = None
@@ -764,8 +764,8 @@ _detector_lock = threading.Lock()
 
 
 def _lock_path() -> Path:
-    from hermes_constants import get_default_hermes_root
-    return get_default_hermes_root() / "runtime" / "wake-word.lock"
+    from agent_constants import get_default_agent_root
+    return get_default_agent_root() / "runtime" / "wake-word.lock"
 
 
 def _flock(handle, acquire: bool) -> None:

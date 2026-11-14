@@ -35,7 +35,7 @@ let profileSwitchHandler: (() => void) | null = null
 
 // Keep the real read-origin helpers (WeakMap peek/bind) live: the shared
 // config hook reaches them through the barrel, and a bare mock would throw.
-vi.mock('@/hermes', async () => ({
+vi.mock('@/agent-client', async () => ({
   ...(await vi.importActual<typeof ConfigApi>('@/api/config')),
   getGlobalModelInfo: (profile?: null | string) => getGlobalModelInfo(profile),
   getGlobalModelOptions: (opts?: unknown, profile?: null | string) => getGlobalModelOptions(opts, profile),
@@ -585,7 +585,7 @@ describe('ModelSettings', () => {
     expect(screen.getByText('nous')).toBeTruthy()
   })
 
-  it.each(['zh', 'zh-hant'] as const)(
+  it.each(['zh',] as const)(
     'localizes stale auxiliary warnings in %s without resetting assignments',
     async locale => {
       getAuxiliaryModels.mockResolvedValueOnce({
@@ -806,7 +806,7 @@ describe('ModelSettings MoA preset editor', () => {
     saveMoaModels.mockImplementation((body: unknown) => Promise.resolve(body))
   })
 
-  it.each(['zh', 'zh-hant', 'ja'] as const)(
+  it.each(['zh', 'ja'] as const)(
     'localizes MoA preset and reference controls in %s without changing their saved identities',
     async locale => {
       const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })

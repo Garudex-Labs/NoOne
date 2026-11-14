@@ -41,7 +41,7 @@ describe('ingestBackendSkin', () => {
     expect($pendingSkinApply.get()).toBeNull()
 
     // The activation event was missed (skin set while disconnected / backend
-    // restarted). Hermes re-affirms it — `hermes config set display.skin neon`
+    // restarted). Hermes re-affirms it — `noone config set display.skin neon`
     // or a `hermes skin set` recolor. That explicit event must repaint even
     // though the name matches the seed.
     ingestBackendSkin(skin('neon'), { apply: true })

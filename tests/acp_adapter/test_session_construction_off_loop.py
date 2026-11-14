@@ -14,7 +14,7 @@ import pytest
 
 from acp.schema import TextContentBlock
 
-from acp_adapter.server import HermesACPAgent
+from acp_adapter.server import ACPAgent
 from acp_adapter.session import SessionManager
 
 BUILD_SECONDS = 0.5
@@ -31,7 +31,7 @@ def _slow_factory():
 @pytest.mark.asyncio
 async def test_new_session_keeps_the_event_loop_free():
     """A concurrent coroutine keeps ticking while the agent is built."""
-    server = HermesACPAgent(session_manager=SessionManager(agent_factory=_slow_factory))
+    server = ACPAgent(session_manager=SessionManager(agent_factory=_slow_factory))
     ticks = 0
     done = asyncio.Event()
 
@@ -66,7 +66,7 @@ async def test_handlers_restore_unknown_sessions_off_the_loop(call):
         time.sleep(BUILD_SECONDS)
 
     manager._restore = slow_restore
-    server = HermesACPAgent(session_manager=manager)
+    server = ACPAgent(session_manager=manager)
     ticks = 0
     done = asyncio.Event()
 

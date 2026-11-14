@@ -13,7 +13,7 @@ from gateway.config import GatewayConfig, Platform, PlatformConfig
 from gateway.platforms.event import MessageEvent, MessageType
 from gateway.run import GatewayRunner
 from gateway.session_authority import SessionAuthority, initialize_session_authority
-from hermes_state_runtime import list_session_admissions
+from agent_state_runtime import list_session_admissions
 from tests.gateway.test_shared_busy_receive_loop import Adapter
 from tests.waiting import async_wait_until
 
@@ -78,7 +78,7 @@ async def test_media_then_quick_text_keep_arrival_order(tmp_path, monkeypatch, b
         await asyncio.to_thread(entered.wait, 5)
         text = MessageEvent(text='what is this?', source=source, message_id='t1')
         second = asyncio.create_task(adapter.handle_message(text))
-        # A serial reader (Signal, IRC) awaits this: it returns once the text queues behind the
+        # A serial reader (Signal) awaits this: it returns once the text queues behind the
         # video, without acknowledging it (main commits the text here, ahead of the video).
         assert second in (await asyncio.wait({second}, timeout=2.0))[0], 'the reader waited for the capture'
         assert 't1' not in _order(authority) and text._gateway_accepted is False

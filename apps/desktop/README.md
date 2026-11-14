@@ -1,25 +1,25 @@
-# Hermes Desktop ☤
+# the agent Desktop ☤
 
 <p align="center">
-  <a href="https://github.com/NousResearch/hermes-agent/releases"><img src="https://img.shields.io/badge/Download-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-FFD700?style=for-the-badge" alt="Download"></a>
-  <a href="https://hermes-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
+  <a href="https://github.com/Garudex-Labs/NoOne/releases"><img src="https://img.shields.io/badge/Download-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux-FFD700?style=for-the-badge" alt="Download"></a>
+  <a href="https://github.com/Garudex-Labs/NoOne/tree/main/website/docs"><img src="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
   <a href="https://discord.gg/NousResearch"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-  <a href="https://github.com/NousResearch/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://github.com/Garudex-Labs/NoOne/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
 </p>
 
-**The native desktop app for [Hermes Agent](../../README.md) — the self-improving AI agent from [Nous Research](https://nousresearch.com).** Same agent, same skills, same memory as the CLI and gateway, in a polished native window — chat with streaming tool output, side-by-side previews, a file browser, voice, and settings, no terminal required. Available for **macOS, Windows, and Linux**.
+**The native desktop app for [NoOne](../../README.md) — the self-improving AI agent maintained by RAWx18.** Same agent, same skills, same memory as the CLI and gateway, in a polished native window — chat with streaming tool output, side-by-side previews, a file browser, voice, and settings, no terminal required. Available for **macOS, Windows, and Linux**.
 
-> **Intel Macs:** the `Hermes-Setup.dmg` bootstrap installer is built for
+> **Intel Macs:** the `NoOne-Setup.dmg` bootstrap installer is built for
 > Apple Silicon (arm64) only, so on an Intel Mac it reports "not supported on
 > this Mac". No release builds a native `darwin-x64` bundle; install the
 > [CLI](../../README.md) and run `hermes desktop`. See
 > [Platform Support](../../website/docs/getting-started/platform-support.md#build-targets-and-support-priority).
 
 <table>
-<tr><td><b>Chat with the full agent</b></td><td>Streaming responses, live tool activity, structured tool summaries, and the same conversation history as every other Hermes surface.</td></tr>
+<tr><td><b>Chat with the full agent</b></td><td>Streaming responses, live tool activity, structured tool summaries, and the same conversation history as every other the agent surface.</td></tr>
 <tr><td><b>Side-by-side previews</b></td><td>Render web pages, files, and tool outputs in a right-hand pane while you keep chatting.</td></tr>
 <tr><td><b>File browser</b></td><td>Explore and preview the working directory without leaving the app.</td></tr>
-<tr><td><b>Voice</b></td><td>Talk to Hermes and hear it back.</td></tr>
+<tr><td><b>Voice</b></td><td>Talk to the agent and hear it back.</td></tr>
 <tr><td><b>Settings & onboarding</b></td><td>Manage providers, models, tools, and credentials from a real UI. First-run setup gets you to your first message in seconds.</td></tr>
 <tr><td><b>Stays current</b></td><td>Built-in updates pull the latest agent and rebuild the app in place.</td></tr>
 </table>
@@ -28,19 +28,19 @@
 
 ## Install
 
-### Install with Hermes (recommended)
+### Install with the agent (recommended)
 
-Already have the Hermes CLI? Just run:
+Already have the the agent CLI? Just run:
 
 ```bash
 hermes desktop
 ```
 
-It builds and launches the GUI against your existing install — same config, keys, sessions, and skills. If Desktop cannot find a usable runtime or saved remote connection, first launch lets you connect to an existing Hermes gateway or install Hermes locally. Local onboarding then walks you through choosing a provider and model.
+It builds and launches the GUI against your existing install — same config, keys, sessions, and skills. If Desktop cannot find a usable runtime or saved remote connection, first launch lets you connect to an existing the agent gateway or install the agent locally. Local onboarding then walks you through choosing a provider and model.
 
 ### Prebuilt installers
 
-Prebuilt installers are built and distributed via [the Hermes Desktop website.](https://hermes-agent.nousresearch.com/).
+Prebuilt installers are built and distributed via [the the agent Desktop website.](https://github.com/Garudex-Labs/NoOne/tree/main/website/docs).
 
 ---
 
@@ -50,7 +50,7 @@ Update through the owner of the installed artifact: Windows App Installer for
 sideload MSIX, Microsoft Store for Store packages, and `electron-updater` for
 macOS bundles. Source-built apps use the checkout update handoff.
 
-`hermes update` updates managed source checkouts; it does not rewrite a bundled
+`noone update` updates managed source checkouts; it does not rewrite a bundled
 payload. See [BUILDING.md](BUILDING.md) for package and release contracts.
 
 ---
@@ -58,8 +58,8 @@ payload. See [BUILDING.md](BUILDING.md) for package and release contracts.
 ## Screenshot shortcut (macOS)
 
 Enable **Settings → Keyboard Shortcuts → Screenshot shortcut**, then press the
-left and right Command keys together in any app. Hermes captures that app's
-frontmost window and attaches the image to the last-active Hermes composer,
+left and right Command keys together in any app. the agent captures that app's
+frontmost window and attaches the image to the last-active the agent composer,
 including split-pane chats. It does not send the draft or capture the whole
 screen. Release both keys before taking another screenshot.
 
@@ -131,8 +131,8 @@ The app has three boundaries:
   filesystem/git/window capabilities, and exposes a narrow preload bridge.
 - **React** owns the Desktop routes, panes, interaction state, and
   `@assistant-ui/react` transcript.
-- **Hermes Agent** runs as a headless `hermes serve` process and exposes the
-  `tui_gateway` JSON-RPC/WebSocket API. The renderer connects through
+- **the agent** runs as a headless `noone serve` process and exposes the
+  `agent_backend` JSON-RPC/WebSocket API. The renderer connects through
   [`apps/shared`](../shared/), which is also used by the browser dashboard.
 
 A bundled artifact uses its payload. If that payload is unusable, the app
@@ -160,12 +160,12 @@ Before changing the app, read:
 
 ### Connections, projects, and switching
 
-Desktop supports a managed local backend, explicit remote gateways, and Hermes
+Desktop supports a managed local backend, explicit remote gateways, and the agent
 Cloud connections. Remote and cloud modes use the same remote-capability path;
 authentication and discovery differ, not the renderer feature model.
 
 When no usable local runtime or saved remote connection exists, the first-run
-screen offers **Connect to existing Hermes** before starting the local installer.
+screen offers **Connect to existing the agent** before starting the local installer.
 Desktop probes the gateway to discover token or OAuth authentication, requires a
 successful HTTP and WebSocket connection test, and saves the connection using
 the same encrypted Desktop configuration used by Settings. A saved remote
@@ -174,7 +174,7 @@ still includes the local-install option; this is a remote operating mode, not a
 separate client-only application.
 
 In remote mode the gateway host is the execution boundary: agent tools,
-terminal commands, and file operations run against the remote Hermes host, not
+terminal commands, and file operations run against the remote the agent host, not
 the computer displaying the Desktop UI.
 
 Remote gateways that sit behind an access proxy may require extra headers on
@@ -239,7 +239,7 @@ Boot logs land in `HERMES_HOME/logs/desktop.log` (includes backend output and re
 
 ```bash
 # Force a clean first-launch setup
-rm "$HOME/.hermes/hermes-agent/.hermes-bootstrap-complete"
+rm "$HOME/.hermes/hermes-agent/.agent-bootstrap-complete"
 # Rebuild a broken Python venv
 rm -rf "$HOME/.hermes/hermes-agent/venv"
 # Reset a stuck macOS microphone prompt (macOS only)
@@ -250,20 +250,20 @@ tccutil reset Microphone com.nousresearch.hermes
 
 ```powershell
 # Force a clean first-launch setup
-Remove-Item "$env:LOCALAPPDATA\hermes\hermes-agent\.hermes-bootstrap-complete"
+Remove-Item "$env:LOCALAPPDATA\hermes\hermes-agent\.agent-bootstrap-complete"
 # Rebuild a broken Python venv
 Remove-Item -Recurse -Force "$env:LOCALAPPDATA\hermes\hermes-agent\venv"
 ```
 
-> The default Hermes home on Windows is `%LOCALAPPDATA%\hermes`. Set the `HERMES_HOME` env var if you've relocated it.
+> The default the agent home on Windows is `%LOCALAPPDATA%\hermes`. Set the `HERMES_HOME` env var if you've relocated it.
 
 ---
 
 ## Community
 
 - 💬 [Discord](https://discord.gg/NousResearch)
-- 📖 [Documentation](https://hermes-agent.nousresearch.com/docs/)
-- 🐛 [Issues](https://github.com/NousResearch/hermes-agent/issues)
+- 📖 [Documentation](https://github.com/Garudex-Labs/NoOne/tree/main/website/docs)
+- 🐛 [Issues](https://github.com/Garudex-Labs/NoOne/issues)
 
 ---
 
@@ -271,4 +271,4 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\hermes\hermes-agent\venv"
 
 MIT — see [LICENSE](../../LICENSE).
 
-Built by [Nous Research](https://nousresearch.com).
+Maintained by **RAWx18** — [rawx18.dev@gmail.com](mailto:rawx18.dev@gmail.com).

@@ -117,9 +117,9 @@ def test_a_hosted_read_under_a_hermes_directory_is_still_a_secret_file(provider,
 
 def test_a_local_config_yaml_under_the_hermes_home_is_still_recognized():
     from agent.redact import _is_under_hermes_home
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     from tools.file_tools import read_file_tool
-    home = get_hermes_home()
+    home = get_agent_home()
     home.mkdir(parents=True, exist_ok=True)
     (home / "config.yaml").write_text(CONFIG, encoding="utf-8")
     assert _is_under_hermes_home(str(home / "config.yaml"))

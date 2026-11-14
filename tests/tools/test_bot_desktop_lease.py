@@ -131,7 +131,7 @@ def test_unreadable_lease_file_fails_closed_and_takeover_keeps_the_agents_reason
     """Missing file = fresh profile (agent). A file that exists but cannot be parsed must not read as
     "agent holds": a torn write must never let the agent act on a human's screen. Taking over after a
     request keeps the agent's reason so the human still sees WHY while they act."""
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
 
     home = str(tmp_path)
     assert lease.get(profile_key=home).holder == lease.AGENT
@@ -151,7 +151,7 @@ def test_unreadable_lease_file_fails_closed_and_takeover_keeps_the_agents_reason
 
     held = lease.acquire("desk-1", reason="log in to the bank, 2FA on your phone", profile_key=home)
     assert held.reason == "log in to the bank, 2FA on your phone"
-    assert hermes_home_key(home)  # sanity: the key derivation used by the bridge is available
+    assert agent_home_key(home)  # sanity: the key derivation used by the bridge is available
 
 
 def test_lease_works_without_fcntl(tmp_path):
@@ -186,7 +186,7 @@ def test_lease_files_are_private_even_when_the_lease_is_written_before_the_scree
     home = tmp_path / "deep" / "home"
     home.mkdir(parents=True)
     monkeypatch.setenv("HERMES_HOME", str(home))
-    monkeypatch.setattr(lease, "get_hermes_home", lambda: home)
+    monkeypatch.setattr(lease, "get_agent_home", lambda: home)
     old = os.umask(0o022)
     try:
         lease.acquire("v1")

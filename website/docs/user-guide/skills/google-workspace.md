@@ -1,32 +1,39 @@
 ---
-sidebar_position: 2
-sidebar_label: "Google Workspace"
+sidebarTitle: "Google Workspace"
 title: "Google Workspace — Gmail, Calendar, Drive, Sheets & Docs"
 description: "Send email, manage calendar events, search Drive, read/write Sheets, and access Docs — all through OAuth2-authenticated Google APIs"
 ---
 
-# Google Workspace Skill
+# Google Workspace Skill {#google-workspace-skill}
 
-Gmail, Calendar, Drive, Contacts, Sheets, and Docs integration for Hermes. Uses OAuth2 with automatic token refresh. Prefers the [Google Workspace CLI (`gws`)](https://github.com/googleworkspace/cli) when available for broader coverage, and falls back to Google's Python client libraries otherwise.
+Gmail, Calendar, Drive, Contacts, Sheets, and Docs integration for {{app-name}}. Uses OAuth2 with automatic token refresh. Prefers the [Google Workspace CLI (`gws`)](https://github.com/googleworkspace/cli) when available for broader coverage, and falls back to Google's Python client libraries otherwise.
 
 **Skill path:** `skills/productivity/google-workspace/`
 
-## Setup
+## Setup {#setup}
 
-The setup is fully agent-driven — ask Hermes to set up Google Workspace and it walks you through each step. The flow:
+The setup is fully agent-driven — ask {{app-name}} to set up Google Workspace and it walks you through each step. The flow:
 
 1. **Create a Google Cloud project** and enable the required APIs (Gmail, Calendar, Drive, Sheets, Docs, People)
 2. **Create OAuth 2.0 credentials** (Desktop app type) and download the client secret JSON
-3. **Authorize** — Hermes generates an auth URL, you approve in the browser, paste back the redirect URL
+3. **Authorize** — {{app-name}} generates an auth URL, you approve in the browser, paste back the redirect URL
 4. **Done** — token auto-refreshes from that point on
 
-:::tip Email-only users
+<Tip>
+
+<div className="doc-callout-title">
+
+Email-only users
+
+</div>
+
 If you only need email (no Calendar/Drive/Sheets), use the **himalaya** skill instead — it works with a Gmail App Password and takes 2 minutes. No Google Cloud project needed.
-:::
 
-## Gmail
+</Tip>
 
-### Searching
+## Gmail {#gmail}
+
+### Searching {#searching}
 
 ```bash
 $GAPI gmail search "is:unread" --max 10
@@ -36,7 +43,7 @@ $GAPI gmail search "has:attachment filename:pdf newer_than:7d"
 
 Returns JSON with `id`, `from`, `subject`, `date`, `snippet`, and `labels` for each message.
 
-### Reading
+### Reading {#reading}
 
 ```bash
 $GAPI gmail get MESSAGE_ID
@@ -44,7 +51,7 @@ $GAPI gmail get MESSAGE_ID
 
 Returns the full message body as text (prefers plain text, falls back to HTML).
 
-### Sending
+### Sending {#sending}
 
 ```bash
 # Basic send
@@ -63,7 +70,7 @@ $GAPI gmail send --to user@example.com --cc "team@example.com" \
   --subject "Update" --body "FYI"
 ```
 
-### Custom From Header
+### Custom From Header {#custom-from-header}
 
 The `--from` flag lets you customize the sender display name on outgoing emails. This is useful when multiple agents share the same Gmail account but you want recipients to see different names:
 
@@ -88,7 +95,7 @@ $GAPI gmail reply MESSAGE_ID \
   --from '"Support Bot" <shared@company.com>' --body "We're on it"
 ```
 
-### Replying
+### Replying {#replying}
 
 ```bash
 $GAPI gmail reply MESSAGE_ID --body "Thanks, that works for me."
@@ -96,7 +103,7 @@ $GAPI gmail reply MESSAGE_ID --body "Thanks, that works for me."
 
 Automatically threads the reply (sets `In-Reply-To` and `References` headers) and uses the original message's thread ID.
 
-### Labels
+### Labels {#labels}
 
 ```bash
 # List all labels
@@ -107,7 +114,7 @@ $GAPI gmail modify MESSAGE_ID --add-labels LABEL_ID
 $GAPI gmail modify MESSAGE_ID --remove-labels UNREAD
 ```
 
-## Calendar
+## Calendar {#calendar}
 
 ```bash
 # List events (defaults to next 7 days)
@@ -127,18 +134,26 @@ $GAPI calendar create --summary "Lunch" \
 $GAPI calendar delete EVENT_ID
 ```
 
-:::warning
-Calendar times **must** include a timezone offset (e.g. `-07:00`) or use UTC (`Z`). Bare datetimes like `2026-03-01T10:00:00` are ambiguous and will be treated as UTC.
-:::
+<Warning>
 
-## Drive
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
+Calendar times **must** include a timezone offset (e.g. `-07:00`) or use UTC (`Z`). Bare datetimes like `2026-03-01T10:00:00` are ambiguous and will be treated as UTC.
+
+</Warning>
+
+## Drive {#drive}
 
 ```bash
 $GAPI drive search "quarterly report" --max 10
 $GAPI drive search "mimeType='application/pdf'" --raw-query --max 5
 ```
 
-## Sheets
+## Sheets {#sheets}
 
 ```bash
 # Read a range
@@ -151,7 +166,7 @@ $GAPI sheets update SHEET_ID "Sheet1!A1:B2" --values '[["Name","Score"],["Alice"
 $GAPI sheets append SHEET_ID "Sheet1!A:C" --values '[["new","row","data"]]'
 ```
 
-## Docs
+## Docs {#docs}
 
 ```bash
 $GAPI docs get DOC_ID
@@ -159,13 +174,13 @@ $GAPI docs get DOC_ID
 
 Returns the document title and full text content.
 
-## Contacts
+## Contacts {#contacts}
 
 ```bash
 $GAPI contacts list --max 20
 ```
 
-## Output Format
+## Output Format {#output-format}
 
 All commands return JSON. Key fields per service:
 
@@ -180,11 +195,11 @@ All commands return JSON. Key fields per service:
 | `contacts list` | `name`, `emails`, `phones` |
 | `sheets get` | 2D array of cell values |
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Problem | Fix |
 |---------|-----|
-| `NOT_AUTHENTICATED` | Run setup (ask Hermes to set up Google Workspace) |
+| `NOT_AUTHENTICATED` | Run setup (ask {{app-name}} to set up Google Workspace) |
 | `REFRESH_FAILED` | Token revoked — re-run authorization steps |
 | `HttpError 403: Insufficient Permission` | Missing scope — revoke and re-authorize with the right services |
 | `HttpError 403: Access Not Configured` | API not enabled in Google Cloud Console |

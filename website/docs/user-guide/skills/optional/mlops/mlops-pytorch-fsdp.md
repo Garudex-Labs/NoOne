@@ -1,20 +1,20 @@
 ---
 title: "Pytorch Fsdp — Fully sharded data-parallel training for large models"
-sidebar_label: "Pytorch Fsdp"
+sidebarTitle: "Pytorch Fsdp"
 description: "Fully sharded data-parallel training for large models"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Pytorch Fsdp
+# Pytorch Fsdp {#pytorch-fsdp}
 
 Fully sharded data-parallel training for large models.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/pytorch-fsdp` |
+| Source | Optional — install with `noone skills install official/mlops/pytorch-fsdp` |
 | Path | `optional-skills/mlops/pytorch-fsdp` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ Fully sharded data-parallel training for large models.
 | Platforms | linux, macos |
 | Tags | `Distributed Training`, `PyTorch`, `FSDP`, `Data Parallel`, `Sharding`, `Mixed Precision`, `CPU Offloading`, `FSDP2`, `Large-Scale Training` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Pytorch-Fsdp Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Pytorch-Fsdp Skill {#pytorch-fsdp-skill}
 
 Assistance with pytorch-fsdp development, generated from official documentation.
 
-## When to Use This Skill
+## When to Use This Skill {#when-to-use-this-skill}
 
 This skill should be triggered when:
 - Working with pytorch-fsdp
@@ -42,14 +50,14 @@ This skill should be triggered when:
 - Debugging pytorch-fsdp code
 - Learning pytorch-fsdp best practices
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 The full common-patterns catalog (~157k chars of runnable FSDP snippets) lives in
 `references/common-patterns.md` — load it with `read_file` when you need wrapping,
 sharding-strategy, checkpoint, or mixed-precision examples. Start there rather than
 reconstructing FSDP incantations from memory.
 
-## Reference Files
+## Reference Files {#reference-files}
 
 This skill includes comprehensive documentation in `references/`:
 
@@ -57,40 +65,40 @@ This skill includes comprehensive documentation in `references/`:
 
 Use `view` to read specific reference files when detailed information is needed.
 
-## Working with This Skill
+## Working with This Skill {#working-with-this-skill}
 
-### For Beginners
+### For Beginners {#for-beginners}
 Start with the getting_started or tutorials reference files for foundational concepts.
 
-### For Specific Features
+### For Specific Features {#for-specific-features}
 Use the appropriate category reference file (api, guides, etc.) for detailed information.
 
-### For Code Examples
+### For Code Examples {#for-code-examples}
 The quick reference section above contains common patterns extracted from the official docs.
 
-## Resources
+## Resources {#resources}
 
-### references/
+### references/ {#references}
 Organized documentation extracted from official sources. These files contain:
 - Detailed explanations
 - Code examples with language annotations
 - Links to original documentation
 - Table of contents for quick navigation
 
-### scripts/
+### scripts/ {#scripts}
 Add helper scripts here for common automation tasks.
 
-### assets/
+### assets/ {#assets}
 Add templates, boilerplate, or example projects here.
 
-## Notes
+## Notes {#notes}
 
 - This skill was automatically generated from official documentation
 - Reference files preserve the structure and examples from source docs
 - Code examples include language detection for better syntax highlighting
 - Quick reference patterns are extracted from common usage examples in the docs
 
-## Updating
+## Updating {#updating}
 
 To refresh this skill with updated documentation:
 1. Re-run the scraper with the same configuration

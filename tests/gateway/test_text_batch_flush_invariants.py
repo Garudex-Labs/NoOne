@@ -1,7 +1,7 @@
 """Invariants for BasePlatformAdapter's inbound text-batch flush.
 
 Every adapter that batches inbound text used to carry its own ``_flush_text_batch``; only Discord
-shielded the dispatch (#12444) and only WeCom/Weixin checked task identity before the pop. Both
+shielded the dispatch (#12444) and only Weixin checked task identity before the pop. Both
 fixes now live in the base flush; these tests pin them against the base class and sweep every
 adapter that still overrides the flush (Telegram keeps a hold-queue variant) for the same contract.
 """

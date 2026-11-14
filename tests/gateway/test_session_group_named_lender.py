@@ -18,7 +18,7 @@ from gateway.config import GatewayConfig, Platform, PlatformConfig
 from gateway.platforms.api_server import APIServerAdapter
 from gateway.platforms.api_server_run_idempotency import RunIdempotencyStore
 from gateway.session_group_peers import dispatch_target, room_link
-from hermes_state import SessionDB
+from agent_state import SessionDB
 from tests.waiting import async_wait_until
 
 ROOM = dict(room_id='lent', home_install_id='install:home', authority_gateway_id='install:home',
@@ -131,13 +131,13 @@ def test_a_single_profile_gateway_never_advertises_the_root_gateways_listener(le
 @pytest.mark.asyncio
 async def test_a_granted_run_executes_in_the_lent_profile_and_its_grant_answers_nowhere_else(lender, monkeypatch):
     from gateway.hosted_room_peer import PROTOCOL_VERSION
-    from hermes_constants import get_hermes_home
-    from hermes_cli.config import load_config
+    from agent_constants import get_agent_home
+    from agent_cli.config import load_config
     seen = []
 
     class Agent:
         def run_conversation(self, **kwargs):
-            seen.append({'home': get_hermes_home(), 'secret': secret_scope.get_secret('ROOMLINK_PROBE_KEY'),
+            seen.append({'home': get_agent_home(), 'secret': secret_scope.get_secret('ROOMLINK_PROBE_KEY'),
                          'max_turns': load_config()['agent']['max_turns'], 'prompt': kwargs['user_message']})
             return {'final_response': 'helper reply'}
 

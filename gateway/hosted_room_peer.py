@@ -89,10 +89,10 @@ def gateway_room_grant_secret(root: Path | str | None = None) -> bytes:
     or capability RPCs, and is shared only by this installation's gateway processes.
     """
     if root is None:
-        from hermes_constants import get_hermes_home
+        from agent_constants import get_agent_home
         # Profile routing uses a context-local HERMES_HOME override; the process environment
         # retains the installation root and is the authority here.
-        root = os.environ.get("HERMES_HOME") or get_hermes_home()
+        root = os.environ.get("HERMES_HOME") or get_agent_home()
     return _gateway_room_grant_secret_for_home(str(Path(root).expanduser().resolve()))
 
 
@@ -101,8 +101,8 @@ def gateway_room_grant_secret_available(root: Path | str | None = None) -> bool:
     read-only capability probe must never create the file (``gateway_room_grant_secret`` does,
     when a grant is first issued)."""
     if root is None:
-        from hermes_constants import get_hermes_home
-        root = os.environ.get("HERMES_HOME") or get_hermes_home()
+        from agent_constants import get_agent_home
+        root = os.environ.get("HERMES_HOME") or get_agent_home()
     home = Path(root).expanduser().resolve()
     path = home / _ROOM_GRANT_SECRET_FILE
     try:
@@ -320,12 +320,12 @@ def served_room_link_endpoint(target_profile: str) -> dict[str, Any]:
     if target_profile == "default":
         return local_room_link_endpoint()
     from agent.secret_scope import is_multiplex_active
-    from hermes_cli.profiles import get_profile_dir
+    from agent_cli.profiles import get_profile_dir
     override = os.getenv("HERMES_ROOM_LINK_URL")
     if override is None and (own := _room_link_url_from_config(str(get_profile_dir(target_profile)))):
         return local_room_link_endpoint(own)
-    from hermes_constants import get_default_hermes_root
-    root_listener = _room_link_url_from_config(str(get_default_hermes_root())) if is_multiplex_active() else None
+    from agent_constants import get_default_agent_root
+    root_listener = _room_link_url_from_config(str(get_default_agent_root())) if is_multiplex_active() else None
     inherited = str((override if override is not None else root_listener) or "").strip()
     if not inherited:
         return {"available": False, "reason": "not_configured"}
@@ -336,15 +336,15 @@ def served_room_link_endpoint(target_profile: str) -> dict[str, Any]:
 def _room_link_url_from_config(home: str) -> str | None:
     """Read the restart-scoped user setting without polling config on probes."""
     from gateway.config import load_gateway_config
-    from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
-    if str(get_hermes_home()) == home:
+    from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
+    if str(get_agent_home()) == home:
         value = load_gateway_config().room_link_url
     else:
-        token = set_hermes_home_override(home)
+        token = set_agent_home_override(home)
         try:
             value = load_gateway_config().room_link_url
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
     return value.strip() if isinstance(value, str) and value.strip() else None
 
 
@@ -352,13 +352,13 @@ def _configured_room_link_url() -> str | None:
     """Resolve the explicit endpoint: env override > profile config > root config."""
     if (override := os.getenv("HERMES_ROOM_LINK_URL")) is not None:
         return override
-    from hermes_constants import get_default_hermes_root, get_hermes_home
-    home = get_hermes_home()
+    from agent_constants import get_default_agent_root, get_agent_home
+    home = get_agent_home()
     if configured := _room_link_url_from_config(str(home)):
         return configured
     # RoomLink is a gateway reachability property, not a Bot personality setting: named profiles may
     # override it but otherwise inherit the process gateway's root endpoint.
-    root = get_default_hermes_root()
+    root = get_default_agent_root()
     return _room_link_url_from_config(str(root)) if root != home else None
 
 

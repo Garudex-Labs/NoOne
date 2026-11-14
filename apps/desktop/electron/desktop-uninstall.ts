@@ -1,3 +1,4 @@
+import path from 'node:path'
 /**
  * desktop-uninstall.ts
  *
@@ -25,7 +26,7 @@
  * shape as the self-update swap-and-relaunch flow already in main.ts.
  */
 
-import path from 'node:path'
+import { appText } from '@noone/shared/application-identity'
 
 import type { InstallStamp } from './install-stamp'
 import { ownAppImage } from './relaunch-target'
@@ -197,7 +198,7 @@ function allowedUninstallModes(kind: InstallKind): string[] {
 function nativeRemovalInstructions(kind, platform, appPath = null) {
   if (kind === 'nix') {
     return (
-      'This Hermes desktop app was installed by Nix. Uninstall it the same way you installed it: ' +
+      appText('This {app_name} desktop app was installed by Nix. Uninstall it the same way you installed it: ') +
       'remove hermes-agent from your flake or profile, then rebuild.'
     )
   }
@@ -205,7 +206,7 @@ function nativeRemovalInstructions(kind, platform, appPath = null) {
   if (kind === 'external') {
     // Deleting a package manager's files by hand leaves the package registered with missing files.
     return (
-      'Another package manager installed this Hermes desktop app. ' +
+      appText('Another package manager installed this {app_name} desktop app. ') +
       'Uninstall it with that package manager, the same way you installed it.'
     )
   }
@@ -230,13 +231,13 @@ function nativeRemovalInstructions(kind, platform, appPath = null) {
     return `Delete the app directory at ${appPath}.`
   }
 
-  return 'Delete the Hermes AppImage (or app directory) from wherever you saved it.'
+  return appText('Delete the {app_name} AppImage (or app directory) from wherever you saved it.')
 }
 
 /**
- * Map an uninstall mode to the `python -m hermes_cli.uninstall` argv (after the
+ * Map an uninstall mode to the `python -m agent_cli.uninstall` argv (after the
  * python executable). Uses the dedicated lightweight module entrypoint (not
- * `hermes_cli.main`) so it can run under a system Python OUTSIDE the venv that
+ * `agent_cli.main`) so it can run under a system Python OUTSIDE the venv that
  * lite/full delete — see the Finding-3 note in buildWindowsCleanupScript.
  * Throws on an unknown mode so a typo can't silently become a full wipe.
  */
@@ -245,7 +246,7 @@ function uninstallArgsForMode(mode: string) {
     throw new Error(`Unknown uninstall mode: ${mode}`)
   }
 
-  return ['-m', 'hermes_cli.uninstall', '--mode', mode]
+  return ['-m', 'agent_cli.uninstall', '--mode', mode]
 }
 
 /** True when `mode` removes the agent code (lite/full), false otherwise. */
@@ -340,7 +341,7 @@ function shouldRemoveAppBundle(isPackaged, appPath) {
  *   3. removes the app bundle if one was resolved.
  *
  * `pythonExe` should be a Python OUTSIDE the venv for lite/full (the venv is
- * being deleted); `pythonPath` is prepended to PYTHONPATH so `import hermes_cli`
+ * being deleted); `pythonPath` is prepended to PYTHONPATH so `import agent_cli`
  * resolves from the agent source. `q()` single-quote-escapes for the shell
  * (closes-escapes-reopens any embedded apostrophe), defending against spaces.
  */
@@ -386,7 +387,7 @@ function buildPosixCleanupScript({ desktopPid, pythonExe, pythonPath, agentRoot,
  * the venv that contains `python.exe`. A running .exe is mandatory-locked on
  * Windows, so running the uninstall from the venv's OWN python half-fails. The
  * desktop passes a system Python (findSystemPython) as `pythonExe` for those
- * modes + `pythonPath`=agentRoot so `import hermes_cli` resolves from source
+ * modes + `pythonPath`=agentRoot so `import agent_cli` resolves from source
  * while the venv is torn down. gui-only doesn't touch the venv, so it can use
  * either interpreter.
  *

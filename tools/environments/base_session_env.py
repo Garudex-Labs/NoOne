@@ -89,7 +89,7 @@ def _export_dump_excluding_session_vars(tmp_path: str, excluded_names: Iterable[
     shell-variable expansion, and a redirect on a pipeline segment would expand it inside that
     segment's subshell, inconsistently with the parent that expands the follow-up ``mv``.
 
-    ``curl … | bash #`` smuggled into a Matrix room/display name via ``HERMES_SESSION_CHAT_NAME``) land in
+    ``curl … | bash #`` smuggled into a chat/display name via ``HERMES_SESSION_CHAT_NAME``) land in
     the snapshot and execute on the next ``source`` (issue #71296). Unsetting first means ``export -p``
     never emits those vars — including any continuation lines.
     """

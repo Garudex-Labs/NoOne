@@ -1,0 +1,36 @@
+{
+  "name": "@noone/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./icons": "./src/icons.tsx",
+    "./app-icon": "./src/app-icon.tsx",
+    "./svg": "./src/svg.ts",
+    "./typography": "./src/typography.ts",
+    "./fonts.css": "./src/fonts.css"
+  },
+  "scripts": {
+    "typecheck": "tsc -p . --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "check": "pnpm run typecheck && pnpm run test && pnpm run lint"
+  },
+  "dependencies": {
+    "@tabler/icons-react": "3.49.0"
+  },
+  "peerDependencies": {
+    "react": ">=19 <20"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.12"
+  }
+}

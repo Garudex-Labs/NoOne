@@ -12,7 +12,7 @@
  */
 
 /** The docs site served from Vercel. */
-export const HERMES_HUB_ORIGIN = 'https://hermes-agent.nousresearch.com'
+export const HERMES_HUB_ORIGIN = 'https://github.com/Garudex-Labs/NoOne/tree/main/website/docs'
 /** The equivalent GitHub Pages deployment of the same site. */
 export const HERMES_HUB_FALLBACK_ORIGIN = 'https://nousresearch.github.io'
 

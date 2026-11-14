@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { ChevronDown, ChevronUp, X } from '@noone/ui/icons'
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
 
@@ -335,9 +336,7 @@ export function FindBar() {
           onClick={findPrevious}
           type="button"
         >
-          <svg height="14" viewBox="0 0 16 16" width="14">
-            <path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
+          <ChevronUp size={14} />
         </button>
       </Tip>
 
@@ -348,9 +347,7 @@ export function FindBar() {
           onClick={findNext}
           type="button"
         >
-          <svg height="14" viewBox="0 0 16 16" width="14">
-            <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
+          <ChevronDown size={14} />
         </button>
       </Tip>
 
@@ -360,9 +357,7 @@ export function FindBar() {
         onClick={closeFindBar}
         type="button"
       >
-        <svg height="12" viewBox="0 0 12 12" width="12">
-          <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
+        <X size={12} />
       </button>
     </div>
   )

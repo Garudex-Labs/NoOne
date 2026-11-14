@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { Plug } from '@noone/ui/icons'
 import { useMemo, useState } from 'react'
 
 import {
@@ -26,7 +27,6 @@ import { FadeScroll } from '@/components/ui/fade-scroll'
 import { SearchField } from '@/components/ui/search-field'
 import { useI18n } from '@/i18n'
 import { connectorIconUrl } from '@/lib/connector-tools'
-import { Plug } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import type { ConnectionOwner } from '@/store/connection-request'
 import { $freeTierStatus } from '@/store/free-tier'

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesReadDirResult } from '@/global'
-import type * as HermesModule from '@/hermes'
+import type * as AgentModule from '@/agent-client'
+import type { AgentReadDirResult } from '@/global'
 import { $previewScriptGrants, grantPreviewScript } from '@/store/plugin-preview-grants'
 
 import { emitGatewayEvent } from './events'
@@ -18,13 +18,13 @@ import {
 // remote mode. The disk scanner must NOT derive the plugin root from it (#66899).
 const getStatus = vi.fn(async () => ({ hermes_home: '/remote/box/.hermes' }))
 
-vi.mock('@/hermes', async importActual => ({
-  ...(await importActual<typeof HermesModule>()),
+vi.mock('@/agent-client', async importActual => ({
+  ...(await importActual<typeof AgentModule>()),
   getStatus: () => getStatus()
 }))
 
 const desktopPluginsRoot = vi.fn<() => Promise<string>>()
-const readDir = vi.fn<(path: string) => Promise<HermesReadDirResult>>()
+const readDir = vi.fn<(path: string) => Promise<AgentReadDirResult>>()
 const readFileText = vi.fn<(path: string) => Promise<{ text: string; truncated?: boolean }>>()
 const readPluginSource = vi.fn<(path: string) => Promise<{ text: string; truncated?: boolean }>>()
 const watchDirectory = vi.fn<(path: string) => Promise<{ id: string }>>()
@@ -366,7 +366,7 @@ describe('plugin source reads (512 KiB preview-cap bug)', () => {
 
     try {
       const source = `
-        import { host } from '@hermes/plugin-sdk'
+        import { host } from '@noone/plugin-sdk'
         export default {
           id: 'runtime-event-reload',
           register() {
@@ -521,7 +521,7 @@ describe('bundled-shadowed disk copies', () => {
       const id = await loadRuntimePlugin(
         'export default { id: "hermes-bots", name: "Bot Mode", register() {} }',
         'hermes-bots',
-        { file: '/local/.hermes/desktop-plugins/hermes-bots/plugin.js' }
+        { file: '/local/.hermes/desktop-plugins/bot-mode/plugin.js' }
       )
 
       // Skipped — the bundled copy stays the only live registration...
@@ -533,7 +533,7 @@ describe('bundled-shadowed disk copies', () => {
       expect($pluginRecords.get()['hermes-bots:disk-shadowed']).toMatchObject({
         kind: 'disk',
         status: 'disabled',
-        file: '/local/.hermes/desktop-plugins/hermes-bots/plugin.js'
+        file: '/local/.hermes/desktop-plugins/bot-mode/plugin.js'
       })
     } finally {
       createObjectURL.mockRestore()
@@ -640,13 +640,13 @@ describe('specifier scanning is limited to code (strings/comments never load-blo
       ;(globalThis as unknown as { __captured?: string }).__captured = undefined
 
       const id = await loadRuntimePlugin(
-        `const doc = "from '@hermes/plugin-sdk'"
+        `const doc = "from '@noone/plugin-sdk'"
 export default { id: 'quoted-spec', register: () => { globalThis.__captured = doc } }`,
         'quoted-spec'
       )
 
       expect(id).toBe('quoted-spec')
-      expect((globalThis as unknown as { __captured?: string }).__captured).toBe("from '@hermes/plugin-sdk'")
+      expect((globalThis as unknown as { __captured?: string }).__captured).toBe("from '@noone/plugin-sdk'")
     } finally {
       unloadRuntimePlugin('quoted-spec')
       delete (globalThis as unknown as { __captured?: string }).__captured
@@ -680,7 +680,7 @@ export default { id: 'quoted-spec', register: () => { globalThis.__captured = do
 
     try {
       const id = await loadRuntimePlugin(
-        "var htmlReplacer = /[\\t\\n\\f!-,./:-@[-`{-}\\^@-\\uFFFF]/g;\nimport { host } from '@hermes/plugin-sdk'\nconst label = `ok`\nexport default { id: 'entities-re', register() { void host; void label; void htmlReplacer } }",
+        "var htmlReplacer = /[\\t\\n\\f!-,./:-@[-`{-}\\^@-\\uFFFF]/g;\nimport { host } from '@noone/plugin-sdk'\nconst label = `ok`\nexport default { id: 'entities-re', register() { void host; void label; void htmlReplacer } }",
         'entities-re'
       )
 
@@ -699,7 +699,7 @@ export default { id: 'quoted-spec', register: () => { globalThis.__captured = do
 
     try {
       const id = await loadRuntimePlugin(
-        "const total = 10, count = 4, earned = 6\nconst half = total / count + earned / 2\nimport { host } from '@hermes/plugin-sdk'\nconst label = `n=${half}`\nexport default { id: 'division', register() { void host; void label } }",
+        "const total = 10, count = 4, earned = 6\nconst half = total / count + earned / 2\nimport { host } from '@noone/plugin-sdk'\nconst label = `n=${half}`\nexport default { id: 'division', register() { void host; void label } }",
         'division'
       )
 
@@ -739,7 +739,7 @@ export default { id: 'quoted-spec', register: () => { globalThis.__captured = do
 
     try {
       const id = await loadRuntimePlugin(
-        "import { host } from '@hermes/plugin-sdk'\nexport default { id: 'real-mapped', register() { void host } }",
+        "import { host } from '@noone/plugin-sdk'\nexport default { id: 'real-mapped', register() { void host } }",
         'real-mapped'
       )
 
@@ -788,7 +788,7 @@ describe('register() failure isolation', () => {
 
     try {
       const source = `
-        import { host } from '@hermes/plugin-sdk'
+        import { host } from '@noone/plugin-sdk'
         export default {
           id: 'register-throw',
           register() {
@@ -1094,7 +1094,7 @@ describe('loader hardening: hangs, leaks, duplicate ids, stale incarnations', ()
     counters.__staleHits = 0
 
     let source = `
-      import { host } from '@hermes/plugin-sdk'
+      import { host } from '@noone/plugin-sdk'
       export default {
         id: 'stale',
         register() { host.onEvent('bot_relay.outbox.pending', () => { globalThis.__staleHits++ }) }

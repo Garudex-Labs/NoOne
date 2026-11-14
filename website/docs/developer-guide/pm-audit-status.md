@@ -1,4 +1,4 @@
-# PM audit remediation status
+# PM audit remediation status {#pm-audit-remediation-status}
 
 This is a historical audit record, not a current-head release status page.
 Counts and native receipts below apply only to the revisions they name.
@@ -8,13 +8,13 @@ retroactively extend earlier test receipts.
 
 For current implementation contracts, use [Package management](../reference/package-management.md),
 [shared bundle builds](shared-bundle-builds.md), [stable releases](stable-releases.md),
-and [bundled update acceptance](https://github.com/NousResearch/hermes-agent/blob/main/tests/install/BUNDLED_UPDATES.md).
+and [bundled update acceptance](https://github.com/Garudex-Labs/NoOne/blob/main/tests/install/BUNDLED_UPDATES.md).
 
 This change integrates repairs from the aggregate branch audit. It is not a
 release certificate. The audit compared `49945b14029e09fef608db9ede899377cdb54e11`
 with merge base `433f7196760e5d76f77ea6d5464ee7f1b602a4ee`.
 
-## Runtime repairs after the documentation audit
+## Runtime repairs after the documentation audit {#runtime-repairs-after-the-documentation-audit}
 
 The audit found a Python-layout mismatch in Electron, a fixed Python family in
 Nix, contradictory cryptography requirements, and failures in clean Windows setup.
@@ -42,7 +42,7 @@ updates, or Nix builds. The broader PM plugin/config YAML coupling remains uncha
 The [developer workflow](../reference/package-management.md#developer-workflow)
 distinguishes runtime activation from independent test and editor environments.
 
-## Implemented repairs
+## Implemented repairs {#implemented-repairs}
 
 | Findings | Implementation |
 | --- | --- |
@@ -66,11 +66,11 @@ The updater, backup, setup, voice-text helpers, and several plugins now use
 one implementation per reconciled concern. Runtime paths have a shared owner
 in `pm/environments.py`.
 
-## Closure implementation
+## Closure implementation {#closure-implementation}
 
 | Contract | Owner and proof |
 | --- | --- |
-| Interrupted publication | `hermes_cli/runtime_state.py` journals the old config and the proposed config hash. Startup recovers before dependency activation. Recovery refuses to overwrite unrelated edits. Real subprocess tests terminate before and after facts publication. |
+| Interrupted publication | `agent_cli/runtime_state.py` journals the old config and the proposed config hash. Startup recovers before dependency activation. Recovery refuses to overwrite unrelated edits. Real subprocess tests terminate before and after facts publication. |
 | Live-generation collection | Startup holds a generation lease under the publication lock. `pm gc` removes only unselected, lease-managed generations without live readers. Tests keep a real reader alive while collection runs. |
 | Receipt correlation | PM completions carry the invoking update ID. The updater embeds that completion, including failed steps and refusal reasons. Nested commands and copied contexts cannot finalize an enclosing receipt. |
 | Warning surfaces | Doctor uses the update checker's local provenance rules. The desktop reads sync status and distinguishes a healthy no-op from an embedded failure. |
@@ -78,7 +78,7 @@ in `pm/environments.py`.
 | Windows relaunch | A detached PowerShell waiter snapshots package identity before quit, waits for the original process to exit, then waits for the installed version to change. A failed registration produces a manual-reopen warning. |
 | Test integrity | TCC behavior uses actual host markers. Installer source-grep assertions were removed. Runtime and installer behavior tests remain. |
 
-## Verified execution
+## Verified execution {#verified-execution}
 
 - The latest complete native-Windows Python run reported 44,557 passed, one
   failed, and 1,404 skipped tests across 3,746 files. Python source hashes stayed
@@ -106,7 +106,7 @@ in `pm/environments.py`.
 
 - A separate fresh bundled MSIX was produced from payload tree `60c9fb44...`.
   The unpacked artifact's own CLI ran, imports resolved inside its payload,
-  and `hermes serve` answered HTTP 200. The Sandbox deployment attempt failed
+  and `noone serve` answered HTTP 200. The Sandbox deployment attempt failed
   on an incorrect unpacked path. It does not prove bundled installation.
 - Plugin checks now run from the first housekeeping tick, with the configured
   interval gate controlling network checks. A real isolated gateway wrote two
@@ -116,7 +116,7 @@ These receipts cover different layers. Thin-package deployment and unpacked
 runtime startup do not prove bundled installation or App Installer-triggered
 relaunch. No tests sent an LLM request as evidence of this acceptance pass.
 
-## Merge-ready closeout
+## Merge-ready closeout {#merge-ready-closeout}
 
 The branch includes upstream `5bd439d3ed4ae5f099857813383389dcd0ab4369`.
 The following limits from the earlier audit are resolved:
@@ -140,7 +140,7 @@ The following limits from the earlier audit are resolved:
   teardown and opens the local file. It does not require the disabled
   `ms-appinstaller:` protocol.
 
-## Non-E2E closeout
+## Non-E2E closeout {#non-e2e-closeout}
 
 The full CI workflow on `a27cd5902a446eb4f1e457e09904d75edc616c2e`
 completed successfully:
@@ -170,7 +170,7 @@ The browser BOM regression failed before the read fix and passed after it.
 Its file passed 79 tests with two host skips. The full Windows-footgun and
 plugin-compat checks passed.
 
-## Bundle acceptance (separate workstream)
+## Bundle acceptance (separate workstream) {#bundle-acceptance-separate-workstream}
 
 The actual bundled Windows ARM64 MSIX built from
 `07ee9299790e5635fd917da1769f969f14fc8030` installed in a disposable
@@ -186,7 +186,7 @@ subsequent upstream integration and the compute-host fix. Bundle E2E work
 belongs to the existing install/update test family, not a second local
 Sandbox pipeline.
 
-## Remaining gates
+## Remaining gates {#remaining-gates}
 
 - Final-head native CI must confirm the latest fixes without retry-only failures.
 - Maintainers must decide the `needs-decision` disposition and apply
@@ -197,7 +197,7 @@ PR #95281 was closed as superseded by #102765, following the triage request
 for one canonical PM PR. The duplicate label was removed. No approval
 label was self-applied.
 
-[Verified CI at a27cd5902a](https://github.com/NousResearch/hermes-agent/actions/runs/34059149746).
+[Verified CI at a27cd5902a](https://github.com/Garudex-Labs/NoOne/actions/runs/34059149746).
 The exact-head validation uses the same workflow on an upstream validation
 branch. Earlier GitHub graph failures reported
 `resource_exhausted: gitmon refuses to schedule us: fail-fast:network`.

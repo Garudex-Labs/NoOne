@@ -1,20 +1,20 @@
 ---
 title: "Hyperframes — Render MP4/WebM videos from HTML compositions"
-sidebar_label: "Hyperframes"
+sidebarTitle: "Hyperframes"
 description: "Render MP4/WebM videos from HTML compositions"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Hyperframes
+# Hyperframes {#hyperframes}
 
 Render MP4/WebM videos from HTML compositions.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/hyperframes` |
+| Source | Optional — install with `noone skills install official/creative/hyperframes` |
 | Path | `optional-skills/creative/hyperframes` |
 | Version | `1.0.0` |
 | Author | heygen-com |
@@ -23,19 +23,27 @@ Render MP4/WebM videos from HTML compositions.
 | Tags | `creative`, `video`, `animation`, `html`, `gsap`, `motion-graphics` |
 | Related skills | [`manim-video`](../../bundled/creative/creative-manim-video.md), [`meme-generation`](../../optional/creative/creative-meme-generation.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# HyperFrames
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# HyperFrames {#hyperframes-1}
 
 HTML is the source of truth for video. A composition is an HTML file with `data-*` attributes for timing, a GSAP timeline for animation, and CSS for appearance. The HyperFrames engine captures the page frame-by-frame and encodes to MP4/WebM with FFmpeg.
 
 **Complement to `manim-video`:** Use `manim-video` for mathematical/geometric explainers (equations, 3B1B-style). Use `hyperframes` for motion-graphics, talking-head with captions, product tours, social overlays, shader transitions, and anything driven by real video/audio media.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks for a rendered video from text, a script, or a website
 - Animated title cards, lower thirds, or typographic intros
@@ -51,7 +59,7 @@ Do **not** use this skill for:
 - Image generation or memes (→ `meme-generation`, image models)
 - Live video conferencing or streaming
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 ```bash
 npx hyperframes init my-video               # scaffold a project
@@ -66,9 +74,9 @@ npx hyperframes doctor                      # diagnose environment issues
 
 Render flags: `--quality draft|standard|high` · `--fps 24|30|60` · `--format mp4|webm` · `--docker` (reproducible) · `--strict`.
 
-Full CLI reference: [references/cli.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/cli.md).
+Full CLI reference: [references/cli.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/cli.md).
 
-## Setup (one-time)
+## Setup (one-time) {#setup-one-time}
 
 ```bash
 bash "$(dirname "$(find ~/.hermes/skills -path '*/hyperframes/SKILL.md' 2>/dev/null | head -1)")/scripts/setup.sh"
@@ -80,11 +88,11 @@ The script:
 3. Pre-caches `chrome-headless-shell` via Puppeteer — **required** for best-quality rendering via Chrome's `HeadlessExperimental.beginFrame` capture path.
 4. Runs `npx hyperframes doctor` and reports the result.
 
-See [references/troubleshooting.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/troubleshooting.md) if setup fails.
+See [references/troubleshooting.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/troubleshooting.md) if setup fails.
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. Plan before writing HTML
+### 1. Plan before writing HTML {#1-plan-before-writing-html}
 
 Before touching code, articulate at a high level:
 - **What** — narrative arc, key moments, emotional beats
@@ -103,7 +111,7 @@ Before touching code, articulate at a high level:
 
    Then generate a `DESIGN.md` from the answers. Every composition must trace its palette and typography back to `DESIGN.md` or explicit user direction.
 
-### 2. Scaffold
+### 2. Scaffold {#2-scaffold}
 
 ```bash
 npx hyperframes init my-video --non-interactive
@@ -111,15 +119,15 @@ npx hyperframes init my-video --non-interactive
 
 Templates: `blank`, `warm-grain`, `play-mode`, `swiss-grid`, `vignelli`, `decision-tree`, `kinetic-type`, `product-promo`, `nyt-graph`. Pass `--example <name>` to pick one, `--video clip.mp4` or `--audio track.mp3` to seed with media.
 
-### 3. Layout before animation
+### 3. Layout before animation {#3-layout-before-animation}
 
 Write the static HTML+CSS for the **hero frame first** — no GSAP yet. The `.scene-content` container must fill the scene (`width:100%; height:100%; padding:Npx`) with `display:flex` + `gap`. Use padding to push content inward — never `position: absolute; top: Npx` on a content container (content overflows when taller than the remaining space).
 
 Only after the hero frame looks right, add `gsap.from()` entrances (animate **to** the CSS position) and `gsap.to()` exits (animate **from** it).
 
-See [references/composition.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/composition.md) for the full data-attribute schema and composition rules.
+See [references/composition.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/composition.md) for the full data-attribute schema and composition rules.
 
-### 4. Animate with GSAP
+### 4. Animate with GSAP {#4-animate-with-gsap}
 
 Every composition must:
 - Register its timeline: `window.__timelines["<composition-id>"] = tl`
@@ -128,9 +136,9 @@ Every composition must:
 - Be deterministic — no `Math.random()`, `Date.now()`, or wall-clock logic. Use a seeded PRNG if you need pseudo-randomness.
 - Build synchronously — no `async`/`await`, `setTimeout`, or Promises around timeline construction.
 
-See [references/gsap.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/gsap.md) for the core GSAP API (tweens, eases, stagger, timelines).
+See [references/gsap.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/gsap.md) for the core GSAP API (tweens, eases, stagger, timelines).
 
-### 5. Transitions between scenes
+### 5. Transitions between scenes {#5-transitions-between-scenes}
 
 Multi-scene compositions require transitions. Rules:
 1. **Always use a transition between scenes** — no jump cuts.
@@ -140,7 +148,7 @@ Multi-scene compositions require transitions. Rules:
 
 Use `npx hyperframes add <transition-name>` to install shader transitions (`flash-through-white`, `liquid-wipe`, etc.). Full list: `npx hyperframes add --list`.
 
-### 6. Audio, captions, TTS, audio-reactive, highlighting
+### 6. Audio, captions, TTS, audio-reactive, highlighting {#6-audio-captions-tts-audio-reactive-highlighting}
 
 - **Audio:** always a separate `<audio>` element (video is `muted playsinline`).
 - **TTS:** `npx hyperframes tts "Script text" --voice af_nova --output narration.wav`. List voices with `--list`. Voice ID first letter encodes language (`a`/`b`=English, `e`=Spanish, `f`=French, `j`=Japanese, `z`=Mandarin, etc.) — the CLI auto-infers the phonemizer locale; pass `--lang` only to override. Non-English phonemization requires `espeak-ng` installed system-wide.
@@ -149,7 +157,7 @@ Use `npx hyperframes add <transition-name>` to install shader transitions (`flas
 - **Marker-style highlighting:** highlight, circle, burst, scribble, sketchout effects for text emphasis are deterministic CSS+GSAP — see `references/features.md#marker-highlighting`. Fully seekable, no animated SVG filters.
 - **Scene transitions:** every multi-scene composition MUST use transitions (no jump cuts). Pick from CSS primitives (push slide, blur crossfade, zoom through, staggered blocks) or shader transitions (`flash-through-white`, `liquid-wipe`, `cross-warp-morph`, `chromatic-split`, etc.) via `npx hyperframes add`. Mood and energy tables live in `references/features.md#transitions`. Do not mix CSS and shader transitions in the same composition.
 
-### 7. Lint, validate, inspect, preview, render
+### 7. Lint, validate, inspect, preview, render {#7-lint-validate-inspect-preview-render}
 
 ```bash
 npx hyperframes lint              # catches missing data-composition-id, overlapping tracks, unregistered timelines
@@ -162,11 +170,11 @@ npx hyperframes render --quality high --output final.mp4     # final delivery
 
 `hyperframes validate` samples background pixels behind every text element and warns on contrast ratios below 4.5:1 (or 3:1 for large text). `hyperframes inspect` is the layout-side companion — runs the page at multiple timestamps and flags issues that a static lint can't see (a caption that wraps past the safe area only at 4.5s, a card that overflows when its title is the longest variant, an element that ends up behind a transition shader). Run `inspect` especially on compositions with speech bubbles, cards, captions, or tight typography.
 
-### 8. Website-to-video (if the user gives a URL)
+### 8. Website-to-video (if the user gives a URL) {#8-website-to-video-if-the-user-gives-a-url}
 
-Use the 7-step capture-to-video workflow in [references/website-to-video.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/website-to-video.md): capture → DESIGN.md → SCRIPT.md → storyboard → composition → render → deliver.
+Use the 7-step capture-to-video workflow in [references/website-to-video.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/website-to-video.md): capture → DESIGN.md → SCRIPT.md → storyboard → composition → render → deliver.
 
-## Cleanup
+## Cleanup {#cleanup}
 
 `render` is one-shot (workers exit when it finishes). `preview` is **not** — it runs a background Next.js server that keeps Chrome workers resident until you stop it. Never leave one running: on GPU-less hosts each idle worker's swiftshader process pegs a CPU core, and a preview left open for days stacks up multiple.
 
@@ -177,13 +185,13 @@ pkill -f "hyperframes.*preview"     # the Studio server (frees port 3002)
 pkill -f chrome-headless-shell      # its render workers; only safe if nothing else uses them
 ```
 
-If unsure whether other tools use `chrome-headless-shell`, check first: `pgrep -af chrome-headless-shell`. Recover a wedged host (many idle workers spinning CPU) the same way — see [references/troubleshooting.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/troubleshooting.md#runaway-cpu-from-leftover-preview-workers).
+If unsure whether other tools use `chrome-headless-shell`, check first: `pgrep -af chrome-headless-shell`. Recover a wedged host (many idle workers spinning CPU) the same way — see [references/troubleshooting.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/troubleshooting.md#runaway-cpu-from-leftover-preview-workers).
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Leaving `preview` running** — it's a long-lived server holding Chrome workers; on WSL/containers/CI those idle workers spin a CPU core each (software WebGL). Stop it when done — see [Cleanup](#cleanup).
 
-- **`HeadlessExperimental.beginFrame' wasn't found`** — Chromium 147+ removed this protocol. Ensure you're on `hyperframes@>=0.4.2` (auto-detects and falls back to screenshot mode). Escape hatch: `export PRODUCER_FORCE_SCREENSHOT=true`. See [hyperframes#294](https://github.com/heygen-com/hyperframes/issues/294) and [references/troubleshooting.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/troubleshooting.md).
+- **`HeadlessExperimental.beginFrame' wasn't found`** — Chromium 147+ removed this protocol. Ensure you're on `hyperframes@>=0.4.2` (auto-detects and falls back to screenshot mode). Escape hatch: `export PRODUCER_FORCE_SCREENSHOT=true`. See [hyperframes#294](https://github.com/heygen-com/hyperframes/issues/294) and [references/troubleshooting.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/troubleshooting.md).
 - **System Chrome (not `chrome-headless-shell`)** — renders hang for 120s then timeout. Run `npx puppeteer browsers install chrome-headless-shell` (setup.sh does this). `hyperframes doctor` reports which binary will be used.
 - **`repeat: -1` anywhere** — breaks the capture engine. Always compute a finite repeat count.
 - **`gsap.set()` on clip elements that enter later** — the element doesn't exist at page load. Use `tl.set(selector, vars, timePosition)` inside the timeline instead, at or after the clip's `data-start`.
@@ -194,7 +202,7 @@ If unsure whether other tools use `chrome-headless-shell`, check first: `pgrep -
 - **Standalone `index.html` wrapped in `<template>`** — hides all content from the browser. Only **sub-compositions** loaded via `data-composition-src` use `<template>`.
 - **Using video for audio** — always muted `<video>` + separate `<audio>`.
 
-## Verification
+## Verification {#verification}
 
 Before and after rendering:
 
@@ -212,11 +220,11 @@ Before and after rendering:
 
 If `hyperframes render` fails, run `npx hyperframes doctor` and attach its output when reporting.
 
-## References
+## References {#references}
 
-- [composition.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/composition.md) — data attributes, timeline contract, non-negotiable rules, typography/asset rules
-- [cli.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/cli.md) — every CLI command (init, capture, lint, validate, inspect, preview, render, transcribe, tts, doctor, browser, info, upgrade, benchmark)
-- [gsap.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/gsap.md) — GSAP core API for HyperFrames (tweens, eases, stagger, timelines, matchMedia)
-- [features.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/features.md) — captions, TTS, audio-reactive, marker highlighting, transitions (load on demand)
-- [website-to-video.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/website-to-video.md) — 7-step capture-to-video workflow
-- [troubleshooting.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/hyperframes/references/troubleshooting.md) — OpenClaw fix, env vars, common render errors
+- [composition.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/composition.md) — data attributes, timeline contract, non-negotiable rules, typography/asset rules
+- [cli.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/cli.md) — every CLI command (init, capture, lint, validate, inspect, preview, render, transcribe, tts, doctor, browser, info, upgrade, benchmark)
+- [gsap.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/gsap.md) — GSAP core API for HyperFrames (tweens, eases, stagger, timelines, matchMedia)
+- [features.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/features.md) — captions, TTS, audio-reactive, marker highlighting, transitions (load on demand)
+- [website-to-video.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/website-to-video.md) — 7-step capture-to-video workflow
+- [troubleshooting.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/hyperframes/references/troubleshooting.md) — OpenClaw fix, env vars, common render errors

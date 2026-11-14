@@ -105,12 +105,12 @@ function canonicalJson(value: FixtureManifest): string {
   return JSON.stringify(value)
 }
 
-/** R2 channel record per hermes_cli.release_channels.validate_record. */
+/** R2 channel record per agent_cli.release_channels.validate_record. */
 function channelRecord(channel: 'stable' | 'canary', sequence: number): FixtureRecord {
   return {
     schema: 1,
     name: channel,
-    repository: 'NousResearch/hermes-agent',
+    repository: 'Garudex-Labs/NoOne',
     policy: channel === 'stable' ? 'stable-release' : 'canary-release',
     state: 'active',
     revision: 1,
@@ -134,7 +134,7 @@ function channelRecord(channel: 'stable' | 'canary', sequence: number): FixtureR
   }
 }
 
-/** Build manifest per hermes_cli.release_channels.validate_manifest. */
+/** Build manifest per agent_cli.release_channels.validate_manifest. */
 function buildManifest(
   channel: 'stable' | 'canary',
   sha: string,
@@ -160,7 +160,7 @@ function buildManifest(
       schema: 1,
       buildId: id,
       channel,
-      repository: 'NousResearch/hermes-agent',
+      repository: 'Garudex-Labs/NoOne',
       commit: sha,
       sourceVersion: tag.replace(/^v/, '').split('+')[0],
       releaseTag: tag,
@@ -258,16 +258,16 @@ it('carries each install channel from Python publication checks into the source 
         })
       )
       responses.set(`/${manifestKey(channel)}`, body)
-      responses.set(`/repos/NousResearch/hermes-agent/releases/tags/${tags[channel]}`, {
+      responses.set(`/repos/Garudex-Labs/NoOne/releases/tags/${tags[channel]}`, {
         tag_name: tags[channel],
         draft: false,
         prerelease: channel === 'canary'
       })
-      responses.set(`/repos/NousResearch/hermes-agent/commits/${tags[channel]}`, { sha })
+      responses.set(`/repos/Garudex-Labs/NoOne/commits/${tags[channel]}`, { sha })
     }
 
     // Stable IS the latest published GitHub release; no R2 record is consulted for it.
-    responses.set('/repos/NousResearch/hermes-agent/releases/latest', {
+    responses.set('/repos/Garudex-Labs/NoOne/releases/latest', {
       tag_name: tags.stable,
       draft: false,
       prerelease: false
@@ -282,7 +282,7 @@ it('carries each install channel from Python publication checks into the source 
     })
     const address: AddressInfo = server.address() as AddressInfo
     // Redirect only network transport. Selection, config, tag validation and Git are real.
-    fs.cpSync(path.join(repository, 'hermes_cli'), path.join(root, 'hermes_cli'), { recursive: true })
+    fs.cpSync(path.join(repository, 'agent_cli'), path.join(root, 'agent_cli'), { recursive: true })
     fs.writeFileSync(
       path.join(root, 'transport.py'),
       `import sys, os
@@ -338,7 +338,7 @@ if not getattr(urllib.request, '_hermes_loopback', False):
         python,
         [
           '-c',
-          'import sys; from pathlib import Path; from hermes_cli.update_channel import set_install_channel; set_install_channel(sys.argv[1], Path(sys.argv[2]))',
+          'import sys; from pathlib import Path; from agent_cli.update_channel import set_install_channel; set_install_channel(sys.argv[1], Path(sys.argv[2]))',
           channel,
           install
         ],
@@ -346,7 +346,7 @@ if not getattr(urllib.request, '_hermes_loopback', False):
       )
     }
 
-    const checkerPath: string = path.join(root, 'hermes_cli', 'source_check.py')
+    const checkerPath: string = path.join(root, 'agent_cli', 'source_check.py')
     fs.writeFileSync(
       checkerPath,
       fs
@@ -421,9 +421,9 @@ if not getattr(urllib.request, '_hermes_loopback', False):
         updateAvailable: true
       })
       fs.rmSync(scriptDirectory, { recursive: true, force: true })
-      expect(await strategy.apply()).toMatchObject({ manual: true, command: `hermes update --channel ${channel}` })
+      expect(await strategy.apply()).toMatchObject({ manual: true, command: `noone update --channel ${channel}` })
       deps.resolveUpdaterBinary = (): string => path.join(temporary, 'frozen-updater')
-      expect(await strategy.apply()).toMatchObject({ manual: true, command: `hermes update --channel ${channel}` })
+      expect(await strategy.apply()).toMatchObject({ manual: true, command: `noone update --channel ${channel}` })
       expect(spawned).toHaveLength(0)
       fs.mkdirSync(scriptDirectory, { recursive: true })
       fs.writeFileSync(script, '')
@@ -475,7 +475,7 @@ if not getattr(urllib.request, '_hermes_loopback', False):
     )
     fs.rmSync(markerPath(home), { force: true })
     fs.rmSync(scriptDirectory, { recursive: true, force: true })
-    expect(await strategy.apply()).toMatchObject({ manual: true, command: 'hermes update --branch feature/gui' })
+    expect(await strategy.apply()).toMatchObject({ manual: true, command: 'noone update --branch feature/gui' })
     // main IS the git branch: re-resolving it reads no channel record and makes no
     // GitHub or artifact request, so a WAF that 403s the record can't stop the update.
     expect(requests.slice(count)).toEqual([])

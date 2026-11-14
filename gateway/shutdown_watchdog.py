@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
 from gateway.restart import GATEWAY_SERVICE_RESTART_EXIT_CODE
-from hermes_constants import get_hermes_home, get_process_hermes_home
+from agent_constants import get_agent_home, get_process_agent_home
 from utils import atomic_json_write
 
 logger = logging.getLogger(__name__)
@@ -159,14 +159,14 @@ def _hard_exit(exit_code: int) -> None:
 def _mark_exited_quietly(exit_code: int, reason: str) -> None:
     """Best-effort terminal stamp on BOTH lifecycle records before ``os._exit`` skips teardown:
     the lifecycle ledger (so the next boot names the watchdog, not SIGKILL/OOM) and
-    ``gateway_state.json`` (so ``hermes gateway status`` and every other reader of that file stop
+    ``gateway_state.json`` (so ``noone gateway status`` and every other reader of that file stop
     seeing ``running`` for a process the watchdog killed — #113372). The runtime-status write goes
     LAST: it is the record housekeeping refreshes, so nothing may overwrite it after we stamp it."""
     with contextlib.suppress(Exception):
         from gateway.lifecycle_ledger import mark_exited
         mark_exited(exit_code, reason=reason)
     with contextlib.suppress(Exception):  # os._exit skips atexit: stamp the exit-metrics marker now
-        from hermes_cli.observability.shared_metrics_process import stamp_exit
+        from agent_cli.observability.shared_metrics_process import stamp_exit
         stamp_exit("watchdog")
     with contextlib.suppress(Exception):
         from gateway.status import write_runtime_status
@@ -179,7 +179,7 @@ def _mark_exited_quietly(exit_code: int, reason: str) -> None:
 
 def _process_hermes_home() -> Path:
     """HERMES_HOME for process-level identity files (ignore profile overrides)."""
-    return get_process_hermes_home() if os.environ.get("HERMES_HOME", "").strip() else get_hermes_home()
+    return get_process_agent_home() if os.environ.get("HERMES_HOME", "").strip() else get_agent_home()
 
 
 def _home(home: Optional[Path]) -> Path:
@@ -302,7 +302,7 @@ def arm_shutdown_watchdog(
             remove_pid_file()
             release_gateway_runtime_lock()
         with contextlib.suppress(Exception):
-            from hermes_logging import drain_log_queue
+            from agent_logging import drain_log_queue
             drain_log_queue(timeout=1.0)
         _mark_exited_quietly(exit_code, "shutdown_watchdog")
         _hard_exit(exit_code)

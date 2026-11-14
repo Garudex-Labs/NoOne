@@ -1,34 +1,42 @@
 ---
 title: "Hyperliquid — Hyperliquid market data, account history, trade review"
-sidebar_label: "Hyperliquid"
+sidebarTitle: "Hyperliquid"
 description: "Hyperliquid market data, account history, trade review"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Hyperliquid
+# Hyperliquid {#hyperliquid}
 
 Hyperliquid market data, account history, trade review.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/blockchain/hyperliquid` |
+| Source | Optional — install with `noone skills install official/blockchain/hyperliquid` |
 | Path | `optional-skills/blockchain/hyperliquid` |
 | Version | `0.1.0` |
-| Author | Hugo Sequier (Hugo-SEQUIER), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Hyperliquid`, `Blockchain`, `Crypto`, `Trading`, `Perpetuals`, `Spot`, `DeFi` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Hyperliquid Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Hyperliquid Skill {#hyperliquid-skill}
 
 Query Hyperliquid market and account data through the public `/info` endpoint.
 Read-only — no API key, no signing, no order placement.
@@ -39,7 +47,7 @@ Read-only — no API key, no signing, no order placement.
 
 ---
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks for Hyperliquid perp or spot market data, candles, funding, or L2 book
 - User wants to inspect a wallet's perp positions, spot balances, fills, or orders
@@ -49,7 +57,7 @@ Read-only — no API key, no signing, no order placement.
 
 ---
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 Stdlib only — no external packages, no API key.
 
@@ -67,7 +75,7 @@ Helper script: `~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_clie
 
 ---
 
-## How to Run
+## How to Run {#how-to-run}
 
 Invoke through the `terminal` tool:
 
@@ -79,7 +87,7 @@ Add `--json` to any command for machine-readable output.
 
 ---
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 ```bash
 hyperliquid_client.py dexs
@@ -101,9 +109,9 @@ optional when `HYPERLIQUID_USER_ADDRESS` is set in `${HERMES_HOME:-~/.hermes}/.e
 
 ---
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. Discover DEXs and Markets
+### 1. Discover DEXs and Markets {#1-discover-dexs-and-markets}
 
 ```bash
 python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py dexs
@@ -119,7 +127,7 @@ python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
 - Spot pairs may show as `PURR/USDC` or aliases like `@107`.
 - HIP-3 markets prefix the coin with the dex, e.g. `mydex:BTC`.
 
-### 2. Pull Historical Market Data
+### 2. Pull Historical Market Data {#2-pull-historical-market-data}
 
 ```bash
 python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
@@ -132,7 +140,7 @@ python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
 Time-range endpoints paginate. For larger windows, repeat with a later
 `startTime` or use `export` (below).
 
-### 3. Inspect Live Order Book
+### 3. Inspect Live Order Book {#3-inspect-live-order-book}
 
 ```bash
 python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
@@ -142,7 +150,7 @@ python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
 Use when asked about book depth, near-term liquidity, or potential market
 impact of a large order.
 
-### 4. Review an Account
+### 4. Review an Account {#4-review-an-account}
 
 ```bash
 python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
@@ -156,7 +164,7 @@ python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
 Use these for "how are my positions?", "what am I holding?", "how much is
 withdrawable?".
 
-### 5. Review Fills and Orders
+### 5. Review Fills and Orders {#5-review-fills-and-orders}
 
 ```bash
 python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
@@ -166,7 +174,7 @@ python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
   orders --limit 25
 ```
 
-### 6. Generate a Trade Review
+### 6. Generate a Trade Review {#6-generate-a-trade-review}
 
 ```bash
 python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
@@ -185,7 +193,7 @@ or windows → pull `fills` and `orders` for that period → pull `candles`
 and `funding` for each traded coin → judge decision quality separately
 from outcome quality.
 
-### 7. Export a Reusable Dataset
+### 7. Export a Reusable Dataset {#7-export-a-reusable-dataset}
 
 ```bash
 python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \
@@ -201,7 +209,7 @@ normalized candle rows, normalized funding rows, summary stats. Use
 
 ---
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Public info endpoints are rate-limited. Large historical queries may
   return capped windows; iterate with later `startTime` values.
@@ -218,7 +226,7 @@ normalized candle rows, normalized funding rows, summary stats. Use
 
 ---
 
-## Verification
+## Verification {#verification}
 
 ```bash
 python ~/.hermes/skills/blockchain/hyperliquid/scripts/hyperliquid_client.py \

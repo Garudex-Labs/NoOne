@@ -1,34 +1,42 @@
 ---
 title: "Tldraw Offline — Drive and script tldraw offline canvases with an agent"
-sidebar_label: "Tldraw Offline"
+sidebarTitle: "Tldraw Offline"
 description: "Drive and script tldraw offline canvases with an agent"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Tldraw Offline
+# Tldraw Offline {#tldraw-offline}
 
 Drive and script tldraw offline canvases with an agent.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/tldraw-offline` |
+| Source | Optional — install with `noone skills install official/creative/tldraw-offline` |
 | Path | `optional-skills/creative/tldraw-offline` |
 | Version | `1.0.0` |
-| Author | Teknium + Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `tldraw`, `canvas`, `whiteboard`, `document-script`, `diagramming` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# tldraw offline Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# tldraw offline Skill {#tldraw-offline-skill}
 
 Work with the tldraw offline desktop app (offline.tldraw.com): read the open
 canvas, make edits, and write **document scripts** — JavaScript embedded in a
@@ -39,7 +47,7 @@ demo (Codex editing a canvas live) works. The agent does NOT use computer-use /
 GUI clicking, and does NOT hand-edit the `.tldraw` file directly. Keep tldraw
 offline open while you work.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - The user has tldraw offline open and asks you to build or modify a canvas
   (diagrams, wireframes, layouts).
@@ -49,7 +57,7 @@ offline open while you work.
 Do NOT hand-place shapes to imitate a drawing — write the code that generates
 them. Agents are far better at scripting the canvas than at drawing on it.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **tldraw offline installed and running**, with a document open. Releases:
   https://github.com/tldraw/tldraw-offline/releases/latest (macOS DMG, Windows
@@ -57,7 +65,7 @@ them. Agents are far better at scripting the canvas than at drawing on it.
 - **Agent skills installed in the app**: `Develop → Install Agent Skills`. The
   app writes its own tldraw skill into `~/.codex/skills/`, `~/.claude/skills/`,
   `~/.cursor/skills/`, and `~/.gemini/skills/` — teaching that agent the `curl`
-  recipes below. (This Hermes skill mirrors that guidance for Hermes.)
+  recipes below. (This {{app-name}} skill mirrors that guidance for {{app-name}}.)
 - **The local control API.** On launch the app writes `server.json` to its config
   dir (Linux `~/.config/tldraw/`, macOS `~/Library/Application Support/tldraw/`,
   Windows `%APPDATA%\tldraw\`) with `port` (default `7236`), a bearer `token`,
@@ -71,7 +79,7 @@ them. Agents are far better at scripting the canvas than at drawing on it.
   `PORT=$(jq -r .port <server.json>); TOKEN=$(jq -r .token <server.json>)`.
 - No account or network needed for local editing.
 
-## How to Run
+## How to Run {#how-to-run}
 
 Two distinct workflows. Pick by whether the change must survive a reload.
 
@@ -105,7 +113,7 @@ curl -s "$BASE/api/doc/$DOC/script-status" -H "Authorization: Bearer $TOKEN"
 
 The ready-to-adapt document script is `scripts/main.js`.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 The document-script contract (verified against the app's bundled
 `script-context.d.ts`):
@@ -137,7 +145,7 @@ export default function ({ editor, helpers, signal }) {
 - `config.js` (separate file) registers custom shape/tool/component utils and
   runs before mount; `main.js` runs against the mounted editor and reruns on save.
 
-## Interactive UI (clickable buttons that drive state)
+## Interactive UI (clickable buttons that drive state) {#interactive-ui-clickable-buttons-that-drive-state}
 
 Drawn shapes can behave like a real app — the thing a static whiteboard can't do.
 Full example: `scripts/counter.js` (a number display + MINUS/RESET/PLUS buttons).
@@ -204,7 +212,7 @@ export default function ({ editor, helpers, signal }) {
 - For continuous motion use `editor.on('tick', fn)`; for a moving anchor with
   attached pieces use `helpers.onShapeTranslate(id, fn, { signal })`.
 
-### Shipping a self-running scripted `.tldraw`
+### Shipping a self-running scripted `.tldraw` {#shipping-a-self-running-scripted-tldraw}
 
 A `.tldraw` is a zip of `metadata.json` + `session.json` + `db.sqlite` + `assets/`
 + `script/` (only those entries are packable). For the script to auto-run without
@@ -217,7 +225,7 @@ the "This document contains a script → Run Script" consent dialog:
   (`{ "trusted": ["<digest>"] }`, or `$TLDRAW_SCRIPT_TRUST`). The app skips consent
   when `isScriptTrusted(digest)` is true.
 
-## Procedure
+## Procedure {#procedure}
 
 1. Read the current token/port from `server.json`. Find the target doc with
    `api.getFocusedDoc()` (or `api.getDocs()`); name it explicitly if several are
@@ -236,7 +244,7 @@ the "This document contains a script → Run Script" consent dialog:
    `helpers.onShapeTranslate(anchorId, fn, { signal })` over a broad store
    listener — a broad listener can turn your own writes into feedback loops.
 
-## Shape props (validated against tldraw SDK v5 schema)
+## Shape props (validated against tldraw SDK v5 schema) {#shape-props-validated-against-tldraw-sdk-v5-schema}
 
 `editor.createShape` / `createShapeIfMissing` accept partial props (shape utils
 fill defaults). When building **raw records** for a file snapshot, every prop
@@ -253,7 +261,7 @@ below is required (run `scripts/validate_shapes.mjs`):
 `black grey light-violet violet blue light-blue yellow orange green light-green
 light-red red white`. `font` enum: `draw sans serif mono`.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **`store.listen` fires on the tick AFTER a commit, not synchronously.** If you
   write a shape and immediately read state expecting the listener to have run, it
@@ -278,7 +286,7 @@ light-red red white`. `font` enum: `draw sans serif mono`.
   (`server.listen(0)` picks one) — always read the file, don't hardcode `7236`.
 - **Only `tldraw` / `react` / `react-dom` import** — not a Node project.
 
-## Verification
+## Verification {#verification}
 
 - **Shape schema (offline, no app):** `node scripts/validate_shapes.mjs` — builds
   the real tldraw schema and validates note/text/frame. Passing prints `3/3`.

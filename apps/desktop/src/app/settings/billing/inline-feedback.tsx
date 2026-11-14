@@ -1,7 +1,8 @@
+import { ExternalLink } from '@noone/ui/icons'
+
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
-import { ExternalLink } from '@/lib/icons'
 
 import type { BillingRefusal } from './api'
 import { resolveRefusal } from './errors'

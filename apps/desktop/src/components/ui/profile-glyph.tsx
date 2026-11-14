@@ -1,8 +1,8 @@
+import { AppIcon } from '@noone/ui/app-icon'
+
 import { profileColorSoft } from '@/lib/profile-color'
 import { profileShortLabel } from '@/lib/profile-short-label'
 import { cn } from '@/lib/utils'
-
-import { Codicon } from './codicon'
 
 /** A profile's mark, in one place: the default profile is the `home` icon (it
  *  has no color of its own and an initial would read as just another named
@@ -22,7 +22,7 @@ export function ProfileGlyph({
   if (isDefault) {
     return (
       <span className={cn('grid size-4 shrink-0 place-items-center', className)} {...props}>
-        <Codicon className="text-(--ui-text-quaternary)" name="home" size="0.75rem" />
+        <AppIcon className="text-(--ui-text-quaternary)" name="home" size="0.75rem" />
       </span>
     )
   }

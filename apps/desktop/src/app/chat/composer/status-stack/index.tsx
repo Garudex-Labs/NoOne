@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { type ReactNode, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -14,7 +15,6 @@ import { FreeTierNoticeStrip, useFreeTierNoticeOwner } from '@/components/free-t
 import { usePaneVisible } from '@/components/pane-shell/pane-visibility'
 import { SharedMetricsConsentStrip } from '@/components/shared-metrics/consent-strip'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { Tip, TipKeybindLabel } from '@/components/ui/tooltip'
 import { type Translations, useI18n } from '@/i18n'
@@ -291,7 +291,7 @@ export function ComposerStatusStack({ onSubmit, queue, sessionId }: ComposerStat
             ) : undefined
           }
           defaultCollapsed={group.type !== 'todo'}
-          icon={<Codicon className="text-muted-foreground/70" name={GROUP_ICON[group.type]} size="0.8rem" />}
+          icon={<AppIcon className="text-muted-foreground/70" name={GROUP_ICON[group.type]} size="0.8rem" />}
           label={groupLabel(group, t.statusStack)}
         >
           {group.items.map(item => (
@@ -317,7 +317,7 @@ export function ComposerStatusStack({ onSubmit, queue, sessionId }: ComposerStat
       node: (
         <StatusSection
           defaultCollapsed
-          icon={<Codicon className="text-muted-foreground/70" name="checklist" size="0.8rem" />}
+          icon={<AppIcon className="text-muted-foreground/70" name="checklist" size="0.8rem" />}
           label={t.statusStack.previousTodos(done, retainedTodos.length)}
         >
           {todoTree(retainedTodos).map(([todo, depth]) => (

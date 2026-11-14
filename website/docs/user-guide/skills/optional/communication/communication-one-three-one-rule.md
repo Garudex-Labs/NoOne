@@ -1,38 +1,46 @@
 ---
 title: "One Three One Rule — 1-3-1 decision briefs: problem, three options, one pick"
-sidebar_label: "One Three One Rule"
+sidebarTitle: "One Three One Rule"
 description: "1-3-1 decision briefs: problem, three options, one pick"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# One Three One Rule
+# One Three One Rule {#one-three-one-rule}
 
 1-3-1 decision briefs: problem, three options, one pick.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/communication/one-three-one-rule` |
+| Source | Optional — install with `noone skills install official/communication/one-three-one-rule` |
 | Path | `optional-skills/communication/one-three-one-rule` |
 | Version | `1.0.0` |
-| Author | Willard Moore |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `communication`, `decision-making`, `proposals`, `trade-offs` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# 1-3-1 Communication Rule
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# 1-3-1 Communication Rule {#1-3-1-communication-rule}
 
 Structured decision-making format for when a task has multiple viable approaches and the user needs a clear recommendation. Produces a concise problem framing, three options with trade-offs, and an actionable plan for the recommended path.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - The user explicitly asks for a "1-3-1" response.
 - The user says "give me options" or "what are my choices" for a technical decision.
@@ -41,7 +49,7 @@ Structured decision-making format for when a task has multiple viable approaches
 
 Do NOT use for simple questions with one obvious answer, debugging sessions, or tasks where the user has already decided on an approach.
 
-## Procedure
+## Procedure {#procedure}
 
 1. **Problem** (one sentence)
    - State the core decision or desired outcome in a single concise sentence.
@@ -67,7 +75,7 @@ Do NOT use for simple questions with one obvious answer, debugging sessions, or 
    - Include specific commands, tools, or actions where applicable.
    - If the user picks a different option, revise this section to match.
 
-## Verification
+## Verification {#verification}
 
 - Response has exactly one Problem sentence.
 - Response has exactly three Options (A, B, C) with pros and cons for each.
@@ -75,7 +83,7 @@ Do NOT use for simple questions with one obvious answer, debugging sessions, or 
 - Definition of Done and Implementation Plan align with the recommended option.
 - If the user selects a different option, Recommendation, DoD, and Implementation Plan update accordingly.
 
-## Example
+## Example {#example}
 
 User: "Give me a 1-3-1 for adding retry logic to our API client."
 

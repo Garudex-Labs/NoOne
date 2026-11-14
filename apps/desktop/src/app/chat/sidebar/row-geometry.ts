@@ -51,5 +51,5 @@ export const SIDEBAR_ROW_LABEL = cn(
 /** Inbox-style card (workspace + age, title + preview, model + size). */
 export const SIDEBAR_ROW_CARD_MIN_H = 'min-h-[3.375rem]' as const
 
-/** Codicon size in sidebar row leads — matches the file tree (`tree.tsx`). */
+/** AppIcon size in sidebar row leads — matches the file tree (`tree.tsx`). */
 export const SIDEBAR_LEAD_ICON_SIZE = '0.875rem' as const

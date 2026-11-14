@@ -30,11 +30,11 @@ function request(sequence: number = 65536, token: string = 'ab12cd34ef56ab78'): 
       token,
       displayName: 'Hermes no-registry-needed',
       appId: `com.nousresearch.hermes-channel-${token}`,
-      appNamePascal: `HermesChannel${token}`,
-      artifactNamePascal: `HermesChannel${token}`,
+      appNamePascal: `AgentChannel${token}`,
+      artifactNamePascal: `AgentChannel${token}`,
       cliName: 'hermes-no-registry-needed',
       windowsExecutableName: 'hermes-no-registry-needed',
-      msixAppIdWithOrg: `NousResearch.HermesChannel${token}`
+      msixAppIdWithOrg: `NousResearch.AgentChannel${token}`
     },
     bundleEnv: { HERMES_PREVIEW_FULL_CONNECTORS: '1' },
     publicBase: 'https://builds.example.test'
@@ -386,10 +386,10 @@ test('actual MSIX manifest writer consumes the channel quad across rollover inst
       'scripts/release-content-types.json',
       'scripts/build/python.mjs',
       'scripts/bundles/desktop_prepare.py',
-      'hermes_cli/update_channel.py',
-      'hermes_cli/release_channels.py',
-      'hermes_cli/__init__.py',
-      'hermes_constants.py'
+      'agent_cli/update_channel.py',
+      'agent_cli/release_channels.py',
+      'agent_cli/__init__.py',
+      'agent_constants.py'
     ]) {
       const destination: string = path.join(root, file)
       fs.mkdirSync(path.dirname(destination), { recursive: true })
@@ -464,7 +464,7 @@ test('actual MSIX manifest writer consumes the channel quad across rollover inst
       assert.equal(row.semver, build.version)
       assert.match(row.xml, new RegExp(`Version="${build.windowsVersion.replaceAll('.', '\\.')}"`))
       assert.equal((row.xml.match(/Category="windows.appExecutionAlias"/g) || []).length, 2)
-      assert.match(row.xml, /HermesChannelab12cd34ef56ab78Cli1/)
+      assert.match(row.xml, /AgentChannelab12cd34ef56ab78Cli1/)
 
       const recordScript: string = `
 import json, pathlib, sys, zipfile, xml.etree.ElementTree as ET

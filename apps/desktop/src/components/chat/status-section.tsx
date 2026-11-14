@@ -14,7 +14,7 @@ interface StatusSectionProps {
   defaultCollapsed?: boolean
   /** Compact live content stays visible while the full roster is collapsed. */
   preview?: ReactNode
-  /** Optional glyph between the caret and the label (e.g. a `Codicon`). */
+  /** Optional glyph between the caret and the label (e.g. a `AppIcon`). */
   icon?: ReactNode
   label: ReactNode
 }

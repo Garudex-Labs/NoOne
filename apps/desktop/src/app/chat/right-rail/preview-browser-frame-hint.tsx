@@ -1,7 +1,8 @@
+import { ExternalLink } from '@noone/ui/icons'
+
 import { Button } from '@/components/ui/button'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { ExternalLink } from '@/lib/icons'
 import { openPreviewTargetInBrowser } from '@/lib/local-preview'
 import { notifyError } from '@/store/notifications'
 import type { PreviewTarget } from '@/store/preview'

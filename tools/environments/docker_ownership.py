@@ -38,7 +38,7 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from hermes_constants import get_default_hermes_root
+from agent_constants import get_default_agent_root
 from tools.environments.base import get_sandbox_dir
 from tools.environments.remote_common import run_capture
 
@@ -118,7 +118,7 @@ def _sandbox_binds(info: dict) -> list[tuple[str, str]]:
     ``/workspace``) as ``(realpath, destination)``. *root* is derived on this host only, never from
     container metadata (labels and binds are settable via extra args or the image): this process's
     ``<sandbox>/docker`` or the default one of any profile of this Hermes root (shared containers)."""
-    hermes_root = get_default_hermes_root()
+    hermes_root = get_default_agent_root()
     roots = {os.path.realpath(d / "sandboxes" / "docker") for d in [hermes_root, *hermes_root.glob("profiles/*")]}
     roots.add(os.path.realpath(get_sandbox_dir() / "docker"))
     binds = [(os.path.realpath(m.get("Source") or "/nonexistent"), m.get("Destination")) for m in info.get("Mounts") or []

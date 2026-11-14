@@ -45,7 +45,7 @@ DEFAULT_ENVELOPE_TTL_SECONDS = 900  # older envelopes are refused at drain with 
 # settles failed with a transient error, ONE retry under a derived identity (``gateway.session_bot._maybe_retry``).
 TURN_ATTEMPT_TIMEOUT_SECONDS = 600
 TURN_MAX_ATTEMPTS = 2  # first admission + the owner's one transient-failure retry (gateway.session_bot)
-# Mirrors RELAY_DELIVER_TIMEOUT_MS in apps/desktop/src/plugins/hermes-bots/relay-budget.ts; both test suites pin it.
+# Mirrors RELAY_DELIVER_TIMEOUT_MS in apps/desktop/src/plugins/bot-mode/relay-budget.ts; both test suites pin it.
 DESKTOP_DELIVER_SETTLEMENT_MARGIN_SECONDS = 180
 DESKTOP_DELIVER_TIMEOUT_SECONDS = (
     TURN_WAIT_SECONDS_FALLBACK + TURN_ATTEMPT_TIMEOUT_SECONDS * TURN_MAX_ATTEMPTS + DESKTOP_DELIVER_SETTLEMENT_MARGIN_SECONDS
@@ -90,8 +90,8 @@ def relay_root(root: Path | str) -> Path:
 def _ensure_dirs(root: Path | str) -> Path:
     base = relay_root(root)
     for sub in (OUTBOX_DIR, CLAIMED_DIR, REPLIES_DIR):
-        from hermes_constants import mkdir_under_hermes_home
-        mkdir_under_hermes_home(base / sub)
+        from agent_constants import mkdir_under_agent_home
+        mkdir_under_agent_home(base / sub)
     return base
 
 
@@ -103,7 +103,7 @@ def _bot_mode_cfg(key: str, *, loader: str) -> Any:
     """``bot_mode.<key>`` from config, read lazily (tools/ must not import CLI
     config at import time); None when absent or the config is unreadable."""
     try:
-        import hermes_cli.config as cfgmod
+        import agent_cli.config as cfgmod
 
         cfg = getattr(cfgmod, loader)() or {}
         return (cfg.get("bot_mode") or {}).get(key)
@@ -480,7 +480,7 @@ def waiter_command(root: Path | str, envelope: dict) -> str:
     return shlex.join(argv)
 
 
-def _hermes_cli() -> str:
+def _agent_cli() -> str:
     """Prefer this install's published launcher, then interpreter/PATH fallbacks.
 
     A long-lived caller can still run in an older dependency generation. Its
@@ -566,7 +566,7 @@ def delivery_env(author: Optional[dict], profile_home: str | Path | None = None)
     home."""
     from agent.secret_scope import current_secret_scope, is_multiplex_active
     from agent.turn_author import TURN_AUTHOR_ENV, turn_author_env
-    from hermes_constants import get_hermes_home_override, get_routing_process_hermes_home
+    from agent_constants import get_agent_home_override, get_routing_process_agent_home
     from tools.environments.local import served_profile_child_env
 
     # ``_profile_home`` answers None for the launch profile by design and a relay RPC binds no scope,
@@ -575,9 +575,9 @@ def delivery_env(author: Optional[dict], profile_home: str | Path | None = None)
     # inside ``served_profile_child_env``, so fill it only when both are absent; a single-profile host
     # keeps its pass-through env.
     target_home = profile_home
-    if (not target_home and is_multiplex_active() and not get_hermes_home_override()
+    if (not target_home and is_multiplex_active() and not get_agent_home_override()
             and current_secret_scope() is None):
-        target_home = get_routing_process_hermes_home()
+        target_home = get_routing_process_agent_home()
     env = served_profile_child_env(base=os.environ, target_home=target_home, inherit_credentials=True)
     env.pop(TURN_AUTHOR_ENV, None)
     for name in _delivery_child_session_env_names():

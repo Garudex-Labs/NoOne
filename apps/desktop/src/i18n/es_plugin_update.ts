@@ -1,5 +1,6 @@
-import type { PluginUpdateTranslations } from './types_plugin_update'
+import { appText } from '@noone/shared/application-identity'
 
+import type { PluginUpdateTranslations } from './types_plugin_update'
 /** Copy for updating an installed plugin (Plugins tab): catalog re-pin consent and the security-scan override. */
 export const esPluginUpdate: PluginUpdateTranslations = {
   folderAccess: {
@@ -12,7 +13,7 @@ export const esPluginUpdate: PluginUpdateTranslations = {
     pickerTitle: (name: string) => `Elige una carpeta para ${name}`,
     pickerButton: 'Permitir acceso',
     refusedProtected: (name: string) =>
-      `${name} no puede usar esa carpeta: contiene ajustes, claves o datos de plugins de Hermes. Elige una carpeta que no los contenga.`,
+      `${name} no puede usar esa carpeta: contiene ajustes, claves o datos de plugins de ${appText('{app_name}')}. Elige una carpeta que no los contenga.`,
     loadFailed: (name: string) => `No se pudieron cargar las carpetas compartidas con ${name}.`
   },
   updateToPin: (sha: string) => `Actualizar a ${sha}`,

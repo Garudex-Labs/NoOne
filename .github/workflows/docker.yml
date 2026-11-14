@@ -50,6 +50,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 # Concurrency: push/release runs are NEVER cancelled so every merge gets
 # its own image.  PR runs reuse a PR-scoped group with
@@ -62,7 +63,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  IMAGE_NAME: nousresearch/hermes-agent
+  IMAGE_NAME: ghcr.io/garudex-labs/noone
   # A stable run is on the default branch, so GITHUB_SHA is not the candidate.
   CANDIDATE_COMMIT: ${{ inputs.commit || github.sha }}
 
@@ -146,7 +147,7 @@ jobs:
     needs: [mode]
     if: >-
       !cancelled() && needs.mode.result == 'success' &&
-      ((needs.mode.outputs.release != 'true' && github.repository == 'NousResearch/hermes-agent' && needs.mode.outputs.build == 'true') || needs.mode.outputs.phase == 'test')
+      ((needs.mode.outputs.release != 'true' && github.repository == 'Garudex-Labs/NoOne' && needs.mode.outputs.build == 'true') || needs.mode.outputs.phase == 'test')
     strategy:
       fail-fast: false
       matrix:
@@ -338,7 +339,7 @@ jobs:
   publish:
     if: >-
       needs.mode.outputs.release != 'true' &&
-      github.repository == 'NousResearch/hermes-agent' &&
+      github.repository == 'Garudex-Labs/NoOne' &&
       github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [mode, build]
     environment: container-publish
@@ -395,11 +396,12 @@ jobs:
         if: steps.buildx.outcome == 'failure'
         uses: useblacksmith/setup-docker-builder@19215110ab936351210feebdfa5b440b4493e184  # v2
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # Push by digest only (no tag). The merge job assembles the tagged
       # manifest list after both architecture publishers complete.
@@ -443,7 +445,7 @@ jobs:
   merge:
     # `needs` is the whole 4-leg matrix: only publish both :main variants
     # after every arch and variant publisher succeeds.
-    if: ${{ !cancelled() && needs.mode.outputs.release != 'true' && github.repository == 'NousResearch/hermes-agent' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: ${{ !cancelled() && needs.mode.outputs.release != 'true' && github.repository == 'Garudex-Labs/NoOne' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     # GitHub-hosted with docker/setup-buildx-action, as before the runner migration: on
     # Blacksmith `imagetools create` cannot commit a manifest list to Docker Hub (404 on the
     # index commit, any buildx version): v0.22.3 rc.1-rc.4 died on it in the versioned manifest.
@@ -480,11 +482,12 @@ jobs:
         if: steps.buildx.outcome == 'failure'
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create manifest list and push
         working-directory: /tmp/digests
@@ -593,11 +596,12 @@ jobs:
               raise SystemExit('Loaded Docker image differs from tested image')
           PY
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push tested image with per-arch release tag
         run: |
@@ -663,11 +667,12 @@ jobs:
         if: steps.buildx.outcome == 'failure'
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create both immutable versioned manifest lists
         env:
@@ -739,7 +744,7 @@ jobs:
           import json, sys
           manifest = json.load(open("/tmp/manifest/manifest.json"))
           manifest["list-digest"] = sys.argv[2]
-          manifest["image"] = "nousresearch/hermes-agent"
+          manifest["image"] = "ghcr.io/garudex-labs/noone"
           manifest["tags"] = [sys.argv[1]]
           json.dump(manifest, open("/tmp/manifest/manifest.json", "w"), indent=2)
           EOF

@@ -1,7 +1,7 @@
 """The desktop window bridges for a local viewer's turn on the session authority.
 
-Main's TUI sidecar wired two things per session (``tui_gateway/session_notifications.py::
-_wire_desktop_sinks`` and ``tui_gateway/agent_callbacks.py::_agent_cbs``):
+Main's TUI sidecar wired two things per session (``agent_backend/session_notifications.py::
+_wire_desktop_sinks`` and ``agent_backend/agent_callbacks.py::_agent_cbs``):
 
 * the ``tools.desktop_ui`` emitter, so ``desktop_preview`` open/close, ``focus_pane``,
   ``close_terminal`` and the other window events reach the renderer as ``event`` frames;
@@ -38,7 +38,7 @@ CALLBACK_ATTRS = ("read_terminal_callback", "read_preview_callback", "drive_prev
                   "read_window_below_callback", "theme_callback", "tour_callback", "setup_beat_callback",
                   "connection_callback")
 
-# main: tui_gateway/agent_callbacks.py ``_read_block`` budgets and tui_gateway/server.py's preview.act ladder.
+# main: agent_backend/agent_callbacks.py ``_read_block`` budgets and agent_backend/server.py's preview.act ladder.
 _TERMINAL_READ_TIMEOUT_S = 30
 _PREVIEW_READ_TIMEOUT_S = 45
 _WINDOW_READ_TIMEOUT_S = 30
@@ -53,7 +53,7 @@ _PREVIEW_ACTION_BRIDGE_UNAVAILABLE = json.dumps({
               "listening. Update the Hermes Desktop app, open a page with open_preview, and try "
               "again in this session after a short cooldown.")})
 
-# main: tui_gateway/theme_bridge.py and tui_gateway/server.py's tour ladder.
+# main: agent_backend/theme_bridge.py and agent_backend/server.py's tour ladder.
 _THEME_TIMEOUT_S = 15
 _THEME_PICK_TIMEOUT_S = 300
 _THEME_UNANSWERED = {"success": False, "error": "No Hermes Desktop window answered the theme request."}
@@ -87,7 +87,7 @@ def _emit(sid, event, payload) -> None:
         publish = next((_turns[key] for key in keys if key and key in _turns), None)
     if publish is None:
         # Raised outside a local-viewer turn (a messaging route, a background thread): no window.
-        raise RuntimeError("no Hermes desktop window is attached to this turn")
+        raise RuntimeError("no agent desktop window is attached to this turn")
     publish(event, dict(payload or {}))
 
 
@@ -106,7 +106,7 @@ def _publish_process(session, event_type, payload) -> None:
     with _lock:
         route = _process_routes.get(key) if key else None
     if route is None:
-        raise RuntimeError("no Hermes desktop window owns this process")
+        raise RuntimeError("no agent desktop window owns this process")
     authority, session_id = route
     live = authority.sessions.get(session_id)
     if live is None:
@@ -137,15 +137,15 @@ def _install_connection_hook() -> None:
         return
 
     def on_change(operation, change, snapshot):
-        from hermes_constants import hermes_home_key
+        from agent_constants import agent_home_key
         with _lock:
             route = _process_routes.get(operation.session_key)
         live = route[0].sessions.get(route[1]) if route is not None else None
-        if live is None or hermes_home_key(route[0].profile_id) != operation.profile_key:
+        if live is None or agent_home_key(route[0].profile_id) != operation.profile_key:
             if previous is not None:
                 previous(operation, change, snapshot)
             return
-        from tui_gateway.connector_payload import connector_ui_payload
+        from agent_backend.connector_payload import connector_ui_payload
         payload = {**snapshot, "settled": snapshot.get("settled_at") is not None, **(change or {}),
                    "owner": {"type": "session", "session_id": route[1]}}
         live.event_stream.publish(route[1], connector_ui_payload(payload), event_type="connection.update")

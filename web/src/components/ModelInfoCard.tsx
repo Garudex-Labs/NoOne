@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { Brain, Eye, Gauge, Lightbulb, Wrench } from "lucide-react";
+import { compactNumber } from "@noone/shared";
+import { Brain, Eye, Gauge, Lightbulb, Wrench } from "@noone/ui/icons";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { useEffect, useRef, useState } from "react";
+
 import { api } from "@/lib/api";
 import type { ModelInfoResponse } from "@/lib/api";
-import { compactNumber } from "@hermes/shared";
 
 interface ModelInfoCardProps {
   /** Current model string from config state — used to detect changes */

@@ -1,9 +1,9 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { Fragment, memo, type ReactNode } from 'react'
 
 import { openAgentTerminal } from '@/app/right-sidebar/terminal/terminals'
 import { StatusPendingIcon } from '@/components/chat/status-pending-icon'
 import { StatusRow } from '@/components/chat/status-row'
-import { Codicon } from '@/components/ui/codicon'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { type Translations, useI18n } from '@/i18n'
 import { capitalize } from '@/lib/text'
@@ -26,11 +26,11 @@ const TODO_GLYPHS: Record<Exclude<TodoStatus, 'in_progress' | 'pending'>, { icon
 function leadingGlyph(item: ComposerStatusItem, s: Translations['statusStack'], historical = false): ReactNode {
   if (item.type === 'goal') {
     if (item.goalStatus === 'paused') {
-      return <Codicon className="text-muted-foreground/60" name="debug-pause" size="0.8rem" />
+      return <AppIcon className="text-muted-foreground/60" name="debug-pause" size="0.8rem" />
     }
 
     if (item.goalStatus === 'done') {
-      return <Codicon className="text-emerald-500/80" name="pass-filled" size="0.8rem" />
+      return <AppIcon className="text-emerald-500/80" name="pass-filled" size="0.8rem" />
     }
 
     return (
@@ -49,7 +49,7 @@ function leadingGlyph(item: ComposerStatusItem, s: Translations['statusStack'], 
   if (item.todoStatus && item.todoStatus !== 'in_progress') {
     const glyph = TODO_GLYPHS[item.todoStatus]
 
-    return <Codicon className={glyph.tone} name={glyph.icon} size="0.8rem" />
+    return <AppIcon className={glyph.tone} name={glyph.icon} size="0.8rem" />
   }
 
   if (item.state === 'running') {
@@ -122,7 +122,7 @@ export const StatusItemRow = memo(function StatusItemRow({
         onActivate={onActivate}
         trailing={
           canOpen ? (
-            <Codicon aria-hidden className="text-muted-foreground/55" name="link-external" size="0.85rem" />
+            <AppIcon aria-hidden className="text-muted-foreground/55" name="link-external" size="0.85rem" />
           ) : undefined
         }
       >

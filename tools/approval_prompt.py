@@ -184,7 +184,7 @@ def _ask_human(command: str, description: str, timeout_seconds: int, allow_perma
 
 def get_plugin_manager():
     """Lazy plugin-manager seam used by tests and early tool-only imports."""
-    from hermes_cli.plugins import discover_plugins, get_plugin_manager as _get_manager
+    from agent_cli.plugins import discover_plugins, get_plugin_manager as _get_manager
     # Approval can be imported before model_tools (which triggers discovery); make an explicitly selected transport
     # available on the first approval instead of treating the undiscovered registry as unavailable.
     discover_plugins()
@@ -220,7 +220,7 @@ def _present_with_selected_transport(*, command: str, description: str, pattern_
 
     try:
         from agent.redact import redact_approval_display
-        from hermes_cli.approval_transport import ApprovalRequest, invoke_approval_transport
+        from agent_cli.approval_transport import ApprovalRequest, invoke_approval_transport
 
         timeout_seconds = _ctx._get_approval_timeout()
         request = ApprovalRequest.create(
@@ -349,7 +349,7 @@ def request_elicitation_consent(message: str, description: str, *,
             return "cancel"  # nobody answered (timeout / prompt withdrawn) — not a user refusal
         return _remembered_consent(session_key, decision.get("choice"), remember_key, "decline")
 
-    # Nobody can answer a -q, cron or unattended-platform worker. A `hermes chat -q` turn still has the CLI's
+    # Nobody can answer a -q, cron or unattended-platform worker. A `noone chat -q` turn still has the CLI's
     # panel callback registered, which would wait the full approval timeout before failing closed.
     if _ctx._no_user_can_answer():
         logger.info("Elicitation consent (%s) declined: no user can answer in this session", surface)

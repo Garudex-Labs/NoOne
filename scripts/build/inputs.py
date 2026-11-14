@@ -80,7 +80,7 @@ class AgentInputs:
             raise ValueError("bin_dir must be one output-relative directory")
         if self.resources.keys() - RESOURCE_ENV.keys():
             raise ValueError("unknown resource names")
-        if self.frontends.keys() - {"tui", "web", "webapp"}:
+        if self.frontends.keys() - {"web", "webapp"}:
             raise ValueError("unknown frontend names")
         paths = [self.project, self.code, self.python, self.site_packages, self.environment,
                  self.pm_runtime, *self.resources.values(), *self.frontends.values()]
@@ -116,7 +116,7 @@ class AgentInputs:
 
 def validate_frontends(frontends: dict[str, Path]) -> None:
     for name, path in frontends.items():
-        required = ("dist/entry.js", "package.json") if name == "tui" else ("index.html",)
+        required = ("index.html",)
         for entry in required:
             if not (path / entry).is_file():
                 raise FileNotFoundError(path / entry)

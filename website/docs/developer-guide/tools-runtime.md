@@ -1,12 +1,11 @@
 ---
-sidebar_position: 9
 title: "Tools Runtime"
 description: "Runtime behavior of the tool registry, toolsets, dispatch, and terminal environments"
 ---
 
-# Tools Runtime
+# Tools Runtime {#tools-runtime}
 
-Hermes tools are self-registering functions grouped into toolsets and executed through a central registry/dispatch system.
+{{app-name}} tools are self-registering functions grouped into toolsets and executed through a central registry/dispatch system.
 
 Primary files:
 
@@ -16,13 +15,13 @@ Primary files:
 - `tools/terminal_tool.py`
 - `tools/environments/*`
 
-## Tool registration model
+## Tool registration model {#tool-registration-model}
 
 Each tool module calls `registry.register(...)` at import time.
 
 `model_tools.py` is responsible for importing/discovering tool modules and building the schema list used by the model.
 
-### How `registry.register()` works
+### How `registry.register()` works {#how-registryregister-works}
 
 Every tool file in `tools/` calls `registry.register()` at module level to declare itself. The function signature is:
 
@@ -44,7 +43,7 @@ Each call creates a `ToolEntry` stored in the singleton `ToolRegistry._tools` di
 
 `schema["description"]` is the authoritative model-facing description. The separate `description=` argument populates `ToolEntry.description`; when it is omitted, the registry metadata falls back to the schema description. `get_definitions()` builds the OpenAI function definition from `entry.schema` and does not copy `entry.description` into a schema that lacks `description`. Therefore, `description=` alone does not describe the tool to the model, and when both values differ the model sees the schema value. Prefer defining the description once in the schema unless a registry consumer intentionally needs different metadata.
 
-### Discovery: `discover_builtin_tools()`
+### Discovery: `discover_builtin_tools()` {#discovery-discover_builtin_tools}
 
 When `model_tools.py` is imported, it calls `discover_builtin_tools()` from `tools/registry.py`. This function scans every `tools/*.py` file using AST parsing to find modules that contain top-level `registry.register()` calls, then imports them:
 
@@ -66,9 +65,9 @@ Each import triggers the module's `registry.register()` calls. Errors in optiona
 After core tool discovery, MCP tools and plugin tools are also discovered:
 
 1. **MCP tools** — `tools.mcp_tool_discovery.discover_mcp_tools()` (re-exported by the `tools.mcp_tool` facade) reads MCP server config and registers tools from external servers.
-2. **Plugin tools** — `hermes_cli.plugins.discover_plugins()` loads user/project/pip plugins that may register additional tools.
+2. **Plugin tools** — `agent_cli.plugins.discover_plugins()` loads user/project/pip plugins that may register additional tools.
 
-## Tool availability checking (`check_fn`)
+## Tool availability checking (`check_fn`) {#tool-availability-checking-check_fn}
 
 Each tool can optionally provide a `check_fn` — a callable that returns `True` when the tool is available and `False` otherwise. Typical checks include:
 
@@ -94,16 +93,16 @@ Key behaviors:
 - Exceptions in `check_fn()` are treated as "unavailable" (fail-safe).
 - The `is_toolset_available()` method checks whether a toolset's `check_fn` passes, used for UI display and toolset resolution.
 
-## Toolset resolution
+## Toolset resolution {#toolset-resolution}
 
-Toolsets are named bundles of tools. Hermes resolves them through:
+Toolsets are named bundles of tools. {{app-name}} resolves them through:
 
 - explicit enabled/disabled toolset lists
 - platform presets (`hermes-cli`, `hermes-telegram`, etc.)
 - dynamic MCP toolsets
 - curated special-purpose sets like `hermes-acp`
 
-### How `get_tool_definitions()` filters tools
+### How `get_tool_definitions()` filters tools {#how-get_tool_definitions-filters-tools}
 
 The main entry point is `model_tools.get_tool_definitions(enabled_toolsets, disabled_toolsets, quiet_mode)`:
 
@@ -117,15 +116,15 @@ The main entry point is `model_tools.get_tool_definitions(enabled_toolsets, disa
 
 5. **Dynamic schema patching** — after filtering, schemas such as `execute_code`, `browser_cdp` and `delegate_task` are dynamically adjusted to only reference tools that actually passed filtering (prevents model hallucination of unavailable tools).
 
-### Legacy toolset names
+### Legacy toolset names {#legacy-toolset-names}
 
 Old toolset names with `_tools` suffixes (e.g., `web_tools`, `terminal_tools`) are mapped to their modern tool names via `_LEGACY_TOOLSET_MAP` for backward compatibility.
 
-## Dispatch
+## Dispatch {#dispatch}
 
 At runtime, tools are dispatched through the central registry, with agent-loop exceptions for some agent-level tools such as memory/todo/session-search handling.
 
-### Dispatch flow: model tool_call → handler execution
+### Dispatch flow: model tool_call → handler execution {#dispatch-flow-model-tool_call--handler-execution}
 
 When the model returns a `tool_call`, the flow is:
 
@@ -152,7 +151,7 @@ Return result string (or JSON error)
 [Plugin post-hook] → invoke_hook("post_tool_call", ...)
 ```
 
-### Error wrapping
+### Error wrapping {#error-wrapping}
 
 All tool execution is wrapped in error handling at two levels:
 
@@ -162,7 +161,7 @@ All tool execution is wrapped in error handling at two levels:
 
 This ensures the model always receives a well-formed JSON string, never an unhandled exception.
 
-### Agent-loop tools
+### Agent-loop tools {#agent-loop-tools}
 
 Four tools are intercepted before registry dispatch because they need agent-level state (TodoStore, MemoryStore, etc.):
 
@@ -173,7 +172,7 @@ Four tools are intercepted before registry dispatch because they need agent-leve
 
 These tools' schemas are still registered in the registry (for `get_tool_definitions`), but their handlers return a stub error if dispatch somehow reaches them directly.
 
-### Async bridging
+### Async bridging {#async-bridging}
 
 When a tool handler is async, `_run_async()` bridges it to the sync dispatch path:
 
@@ -181,7 +180,7 @@ When a tool handler is async, `_run_async()` bridges it to the sync dispatch pat
 - **Gateway path (running loop)** — spins up a disposable thread with `asyncio.run()`
 - **Worker threads (parallel tools)** — uses per-thread persistent loops stored in thread-local storage
 
-## The DANGEROUS_PATTERNS approval flow
+## The DANGEROUS_PATTERNS approval flow {#the-dangerous_patterns-approval-flow}
 
 The terminal tool integrates a dangerous-command approval system defined in `tools/approval.py`:
 
@@ -205,7 +204,7 @@ The terminal tool integrates a dangerous-command approval system defined in `too
 
 5. **Permanent allowlist** — the "allow permanently" option writes the pattern to `config.yaml`'s `command_allowlist`, persisting across sessions.
 
-## Terminal/runtime environments
+## Terminal/runtime environments {#terminalruntime-environments}
 
 The terminal system supports multiple backends:
 
@@ -238,11 +237,11 @@ CLI and non-notifying processes, and preserves the producer's profile context in
 reader threads. Receipt redaction is forced independently of live-output opt-out;
 retention is bounded by age and count.
 
-## Concurrency
+## Concurrency {#concurrency}
 
 Tool calls may execute sequentially or concurrently depending on the tool mix and interaction requirements.
 
-## Related docs
+## Related docs {#related-docs}
 
 - [Toolsets Reference](../reference/toolsets-reference.md)
 - [Built-in Tools Reference](../reference/tools-reference.md)

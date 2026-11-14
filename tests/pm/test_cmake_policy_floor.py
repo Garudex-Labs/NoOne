@@ -2,8 +2,7 @@
 
 cmake 4.x removed compatibility with ``cmake_minimum_required(VERSION < 3.5)``,
 so an sdist that still declares an older minimum aborts at CONFIGURE time
-before a compiler is ever reached. python-olm 3.2.16 (pulled in by
-``mautrix[encryption]``) vendors libolm with ``VERSION 3.4``. Without
+before a compiler is ever reached. Without
 ``CMAKE_POLICY_VERSION_MINIMUM`` the install dies, so this pins the contract on
 the env uv actually spawns build backends with — the ``uv sync`` tier and the
 ``uv pip install`` requirements tier alike, since they are the two ways a
@@ -43,7 +42,7 @@ def test_both_install_tiers_receive_the_cmake_policy_floor(tmp_path, monkeypatch
     seen = _record_uv_envs(monkeypatch)
 
     _environment(tmp_path).sync(tmp_path)
-    _environment(tmp_path).install_requirements(["python-olm==3.2.16"])
+    _environment(tmp_path).install_requirements(["example-native==1.0.0"])
 
     # One spawn each: sync, then the requirements tier.
     assert len(seen) == 2

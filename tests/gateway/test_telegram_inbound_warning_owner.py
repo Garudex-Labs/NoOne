@@ -9,7 +9,7 @@ import pytest
 from gateway.config import GatewayConfig, PlatformConfig
 from gateway.profile_routing import ProfileRoute
 from gateway.run import GatewayRunner
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from plugins.platforms.telegram.adapter import TelegramAdapter
 from tests.gateway.test_telegram_documents import _make_document, _make_message, _make_update
 
@@ -48,7 +48,7 @@ async def test_inbound_cache_failure_keeps_owner_policy_and_context(
         msg.reply_to_message = msg.quote = None
         sent_homes = []
         async def reply(*args, **kwargs):
-            sent_homes.append(get_hermes_home())
+            sent_homes.append(get_agent_home())
         msg.reply_text = AsyncMock(side_effect=reply)
         await adapter._handle_media_message(_make_update(msg), SimpleNamespace())
         event = adapter.handle_message.call_args.args[0]
@@ -59,6 +59,6 @@ async def test_inbound_cache_failure_keeps_owner_policy_and_context(
         assert "could not be downloaded" in event.text
         assert ("asked to retry" in event.text) is not suppressed
         assert not event.media_urls
-        assert get_hermes_home() == root
+        assert get_agent_home() == root
     assert "download failure retained" in caplog.text
     assert adapter.handle_message.await_count == 3

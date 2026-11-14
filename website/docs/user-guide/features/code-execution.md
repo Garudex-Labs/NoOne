@@ -1,19 +1,18 @@
 ---
-sidebar_position: 8
 title: "Code Execution"
 description: "Programmatic Python execution with RPC tool access — collapse multi-step workflows into a single turn"
 ---
 
-# Code Execution (Programmatic Tool Calling)
+# Code Execution (Programmatic Tool Calling) {#code-execution-programmatic-tool-calling}
 
-The `execute_code` tool lets the agent write Python scripts that call Hermes tools programmatically, collapsing multi-step workflows into a single LLM turn. The script runs in a child process on the agent host, communicating with Hermes over a Unix domain socket RPC.
+The `execute_code` tool lets the agent write Python scripts that call {{app-name}} tools programmatically, collapsing multi-step workflows into a single LLM turn. The script runs in a child process on the agent host, communicating with {{app-name}} over a Unix domain socket RPC.
 
-## How It Works
+## How It Works {#how-it-works}
 
 1. The agent writes a Python script using `from hermes_tools import ...`
-2. Hermes generates a `hermes_tools.py` stub module with RPC functions
-3. Hermes opens a Unix domain socket and starts an RPC listener thread
-4. The script runs in a child process — tool calls travel over the socket back to Hermes
+2. {{app-name}} generates a `hermes_tools.py` stub module with RPC functions
+3. {{app-name}} opens a Unix domain socket and starts an RPC listener thread
+4. The script runs in a child process — tool calls travel over the socket back to {{app-name}}
 5. Only the script's `print()` output is returned to the LLM; intermediate tool results never enter the context window
 
 ```python
@@ -29,7 +28,7 @@ print(summary)
 
 **Available tools inside scripts:** `web_search`, `web_extract`, `read_file`, `write_file`, `search_files`, `patch`, `terminal` (foreground only).
 
-## When the Agent Uses This
+## When the Agent Uses This {#when-the-agent-uses-this}
 
 The agent uses `execute_code` when there are:
 
@@ -39,9 +38,9 @@ The agent uses `execute_code` when there are:
 
 The key benefit: intermediate tool results never enter the context window — only the final `print()` output comes back, dramatically reducing token usage.
 
-## Practical Examples
+## Practical Examples {#practical-examples}
 
-### Data Processing Pipeline
+### Data Processing Pipeline {#data-processing-pipeline}
 
 ```python
 from hermes_tools import search_files, read_file
@@ -57,7 +56,7 @@ for match in matches.get("matches", []):
 print(json.dumps(configs, indent=2))
 ```
 
-### Multi-Step Web Research
+### Multi-Step Web Research {#multi-step-web-research}
 
 ```python
 from hermes_tools import web_search, web_extract
@@ -79,7 +78,7 @@ for r in results["data"]["web"]:
 print(json.dumps(summaries, indent=2))
 ```
 
-### Bulk File Refactoring
+### Bulk File Refactoring {#bulk-file-refactoring}
 
 ```python
 from hermes_tools import search_files, read_file, patch
@@ -100,7 +99,7 @@ for match in matches.get("matches", []):
 print(f"Fixed {fixed} files out of {len(matches.get('matches', []))} matches")
 ```
 
-### Build and Test Pipeline
+### Build and Test Pipeline {#build-and-test-pipeline}
 
 ```python
 from hermes_tools import terminal, read_file
@@ -126,14 +125,14 @@ report = {
 print(json.dumps(report, indent=2))
 ```
 
-## Execution Mode
+## Execution Mode {#execution-mode}
 
 `execute_code` has two execution modes controlled by `code_execution.mode` in `~/.hermes/config.yaml`:
 
 | Mode | Working directory | Python interpreter |
 |------|-------------------|--------------------|
-| **`project`** (default) | The session's working directory (same as `terminal()`) | Active `VIRTUAL_ENV` / `CONDA_PREFIX` python, falling back to Hermes's own python |
-| `strict` | A temp staging directory isolated from the user's project | `sys.executable` (Hermes's own python) |
+| **`project`** (default) | The session's working directory (same as `terminal()`) | Active `VIRTUAL_ENV` / `CONDA_PREFIX` python, falling back to {{app-name}}'s own python |
+| `strict` | A temp staging directory isolated from the user's project | `sys.executable` ({{app-name}}'s own python) |
 
 **When to leave it on `project`:** you want `import pandas`, `from my_project import foo`, or relative paths like `open(".env")` to work the same way they do in `terminal()`. This is almost always what you want.
 
@@ -155,7 +154,7 @@ Security-critical invariants are identical across both modes:
 
 Switching mode changes where scripts run and which interpreter runs them, not what credentials they can see or which tools they can call.
 
-## Persistent session kernel
+## Persistent session kernel {#persistent-session-kernel}
 
 Calls reuse a Python child for the same session, execution mode, interpreter,
 working directory, and tool set. Imports, variables, and loaded data can persist
@@ -166,7 +165,7 @@ can also lose it. Do not assume that a later terminal environment change is
 already visible inside an existing kernel. The old `code_execution.kernel_mode`
 setting is no longer a separate switch.
 
-## Resource Limits
+## Resource Limits {#resource-limits}
 
 | Resource | Limit | Notes |
 |----------|-------|-------|
@@ -185,7 +184,7 @@ code_execution:
   max_tool_calls: 50 # Max tool calls per execution (default: 50)
 ```
 
-## State Between Calls (the session kernel)
+## State Between Calls (the session kernel) {#state-between-calls-the-session-kernel}
 
 On the local terminal backend, `execute_code` does not start a fresh interpreter for every call. Each session owns a persistent Python kernel, so variables, imports, and loaded data from one call are available in the next. The agent can load a dataset once and query it across several turns instead of re-reading it every time. Subagents get their own kernel; kernels are never shared across sessions. A subagent's kernel lives exactly as long as the subagent: it is exempt from the live-kernel cap while the subagent runs (a wide fan-out no longer evicts a sibling's kernel mid-task) and is disposed when the subagent finishes.
 
@@ -206,11 +205,11 @@ code_execution:
   max_session_kernels: 4      # kernels kept alive at once; oldest is evicted past this
 ```
 
-**Remote backends** (Docker, SSH, Modal) run a remote session kernel with the same contract. If the kernel cannot be spawned on the backend, Hermes falls back to running each call as a standalone script and says so in the result.
+**Remote backends** (Docker, SSH, Modal) run a remote session kernel with the same contract. If the kernel cannot be spawned on the backend, {{app-name}} falls back to running each call as a standalone script and says so in the result.
 
 **Large output.** Stdout over 50 KB is shown head-and-tail inline, and the full text is saved under `~/.hermes/cache/exec/` with the path included in the result, so the agent can page through it with `read_file` instead of re-running the script.
 
-## How Tool Calls Work Inside Scripts
+## How Tool Calls Work Inside Scripts {#how-tool-calls-work-inside-scripts}
 
 When your script calls a function like `web_search("query")`:
 
@@ -221,7 +220,7 @@ When your script calls a function like `web_search("query")`:
 
 This means tool calls inside scripts behave identically to normal tool calls — same rate limits, same error handling, same capabilities. The only restriction is that `terminal()` is foreground-only (no `background` or `pty` parameters).
 
-## Error Handling
+## Error Handling {#error-handling}
 
 When a script fails, the agent receives structured error information:
 
@@ -232,17 +231,25 @@ When a script fails, the agent receives structured error information:
 
 The response always includes `status` (success/error/timeout/interrupted), `output`, `tool_calls_made`, and `duration_seconds`.
 
-## Security
+## Security {#security}
 
-:::danger Security Model
+<Danger>
+
+<div className="doc-callout-title">
+
+Security Model
+
+</div>
+
 The child process runs with a **minimal environment**. API keys, tokens, and credentials are stripped by default. The script accesses tools exclusively via the RPC channel — it cannot read secrets from environment variables unless explicitly allowed.
-:::
+
+</Danger>
 
 Environment variables containing `KEY`, `TOKEN`, `SECRET`, `PASSWORD`, `CREDENTIAL`, `PASSWD`, or `AUTH` in their names are excluded. Only safe system variables (`PATH`, `HOME`, `LANG`, `SHELL`, `PYTHONPATH`, `VIRTUAL_ENV`, etc.) are passed through.
 
-Approvals: gateway sessions approve a script as a whole before it runs. In a local CLI, TUI, Desktop or ACP session, a turn you typed gets no whole-script prompt: Python-level file and process operations in the script run unprompted and only its `terminal()` calls ask. Injected and automation turns keep the whole-script prompt. See [`execute_code` scripts](../security.md#execute-code-scripts).
+Approvals: gateway sessions approve a script as a whole before it runs. In a local CLI, Desktop or ACP session, a turn you typed gets no whole-script prompt: Python-level file and process operations in the script run unprompted and only its `terminal()` calls ask. Injected and automation turns keep the whole-script prompt. See [`execute_code` scripts](../security.md#execute-code-scripts).
 
-### Skill Environment Variable Passthrough
+### Skill Environment Variable Passthrough {#skill-environment-variable-passthrough}
 
 When a skill declares `required_environment_variables` in its frontmatter, those variables are **automatically passed through** to both `execute_code` and `terminal` child processes after the skill is loaded. This lets skills use their declared API keys without weakening the security posture for arbitrary code.
 
@@ -257,7 +264,7 @@ terminal:
 
 See the [Security guide](../security.md#environment-variable-passthrough) for full details.
 
-### `HERMES_*` variables in the child
+### `HERMES_*` variables in the child {#hermes_-variables-in-the-child}
 
 The child process receives only a small, fixed set of operational `HERMES_*`
 variables by exact name:
@@ -267,10 +274,17 @@ variables by exact name:
 - `HERMES_CONFIG`
 - `HERMES_ENV`
 
-(plus `HERMES_RPC_DIR` / `HERMES_RPC_SOCKET` / `TZ` / `HOME`, which Hermes
+(plus `HERMES_RPC_DIR` / `HERMES_RPC_SOCKET` / `TZ` / `HOME`, which {{app-name}}
 injects explicitly so the RPC channel works).
 
-:::note Behavior change
+<Note>
+
+<div className="doc-callout-title">
+
+Behavior change
+
+</div>
+
 Earlier versions passed **any** variable whose name began with `HERMES_`
 through to the child. That broad prefix was removed for security hardening: it
 could leak `HERMES_*`-named configuration that doesn't match a secret substring
@@ -281,11 +295,12 @@ If an `execute_code` script — or a repo/plugin module it imports at import tim
 — relied on a `HERMES_*` variable outside the four operational names above, it
 will now find that variable **unset** in the child. The drop is intentional,
 not a bug.
-:::
+
+</Note>
 
 **Workaround — opt the variable back in explicitly.** Both routes pass the
 variable through `execute_code` *and* `terminal` children, and neither weakens
-the secret-stripping guarantee (Hermes-managed provider credentials can never
+the secret-stripping guarantee ({{app-name}}-managed provider credentials can never
 be re-allowed this way):
 
 1. **Per-machine, in `config.yaml`** — add the exact variable name to the
@@ -307,15 +322,15 @@ be re-allowed this way):
    ```
 
 **Diagnosing it.** When the child drops one or more non-allowlisted `HERMES_*`
-variables, Hermes emits a one-line `debug` log naming them and pointing at the
-`env_passthrough` escape hatch. Run with debug logging (`hermes logs --level
+variables, {{app-name}} emits a one-line `debug` log naming them and pointing at the
+`env_passthrough` escape hatch. Run with debug logging (`noone logs --level
 DEBUG`, or check `~/.hermes/logs/agent.log`) and look for
 `execute_code: dropped N non-allowlisted HERMES_* var(s)` if a script behaves
 as though a `HERMES_*` variable is missing.
 
-Hermes always writes the script and the auto-generated `hermes_tools.py` RPC stub into a temp staging directory that is cleaned up after execution. In `strict` mode the script also *runs* there; in `project` mode it runs in the session's working directory (the staging directory stays on `PYTHONPATH` so imports still resolve). The child process runs in its own process group so it can be cleanly killed on timeout or interruption.
+{{app-name}} always writes the script and the auto-generated `hermes_tools.py` RPC stub into a temp staging directory that is cleaned up after execution. In `strict` mode the script also *runs* there; in `project` mode it runs in the session's working directory (the staging directory stays on `PYTHONPATH` so imports still resolve). The child process runs in its own process group so it can be cleanly killed on timeout or interruption.
 
-## execute_code vs terminal
+## execute_code vs terminal {#execute_code-vs-terminal}
 
 | Use Case | execute_code | terminal |
 |----------|-------------|----------|
@@ -327,8 +342,8 @@ Hermes always writes the script and the auto-generated `hermes_tools.py` RPC stu
 | Interactive/background processes | ❌ | ✅ |
 | Needs API keys in environment | ⚠️ Only via [passthrough](../security.md#environment-variable-passthrough) | ✅ (most pass through) |
 
-**Rule of thumb:** Use `execute_code` when you need to call Hermes tools programmatically with logic between calls. Use `terminal` for running shell commands, builds, and processes.
+**Rule of thumb:** Use `execute_code` when you need to call {{app-name}} tools programmatically with logic between calls. Use `terminal` for running shell commands, builds, and processes.
 
-## Platform Support
+## Platform Support {#platform-support}
 
-Code execution is available on **Linux, macOS, and Windows**. On Linux and macOS the RPC channel uses a Unix domain socket; on Windows, where `AF_UNIX` is unreliable, Hermes automatically falls back to a loopback TCP socket for the sandbox RPC transport. Remote terminal backends (Docker/SSH/Modal/etc.) use a file-based RPC transport instead and additionally require Python 3 inside the backend.
+Code execution is available on **Linux, macOS, and Windows**. On Linux and macOS the RPC channel uses a Unix domain socket; on Windows, where `AF_UNIX` is unreliable, {{app-name}} automatically falls back to a loopback TCP socket for the sandbox RPC transport. Remote terminal backends (Docker/SSH/Modal/etc.) use a file-based RPC transport instead and additionally require Python 3 inside the backend.

@@ -1,4 +1,15 @@
 import { useStore } from '@nanostores/react'
+import {
+  Download,
+  FileText,
+  LayoutDashboard,
+  PanelBottom,
+  PanelTop,
+  SlidersHorizontal,
+  Upload,
+  Users,
+  Zap
+} from '@noone/ui/icons'
 import { atom, computed } from 'nanostores'
 import type { CSSProperties, ReactElement, PointerEvent as ReactPointerEvent } from 'react'
 
@@ -40,17 +51,6 @@ import { registry } from '@/contrib/registry'
 import { discoverRuntimePlugins } from '@/contrib/runtime-loader'
 import { LocalizedTabTitle, translateNow } from '@/i18n'
 import { NEW_SESSION_TITLE, sessionTitle as storedSessionTitle } from '@/lib/chat-runtime'
-import {
-  Download,
-  FileText,
-  LayoutDashboard,
-  PanelBottom,
-  PanelTop,
-  SlidersHorizontal,
-  Upload,
-  Users,
-  Zap
-} from '@/lib/icons'
 import { type KeybindContribution, KEYBINDS_AREA } from '@/lib/keybinds/actions'
 import { TRANSCRIPT_DIRECTIVE_AREA, type TranscriptDirectiveContribution } from '@/lib/transcript-directives'
 import { setYoloEnabled } from '@/lib/yolo-session'

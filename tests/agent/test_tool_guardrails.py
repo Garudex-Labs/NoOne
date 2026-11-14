@@ -199,7 +199,7 @@ def test_identical_call_streak_halts_any_tool_when_hard_stop_enabled():
     controller = ToolCallGuardrailController(
         ToolCallGuardrailConfig(hard_stop_enabled=True, no_progress_block_after=5)
     )
-    args = {"command": "hermes config get memory.provider"}
+    args = {"command": "noone config get memory.provider"}
     for i in range(1, 5):
         controller.after_call("terminal", args, "local\n", failed=False)
         controller.observe_call("terminal", args, "local\n", failed=False)
@@ -282,7 +282,7 @@ def test_web_search_cap_blocks_after_limit_regardless_of_hard_stop():
 
 
 
-# ── Legitimate flows must survive hard stops (Teknium, Sep 2026) ────────────
+# ── Legitimate flows must survive hard stops (Sep 2026) ────────────
 # Hard stops default ON for unattended platforms. These pin the flows that
 # must NEVER be cut off there: edit -> re-run loops, diagnostic sweeps of
 # distinct red commands, and browser retry-after-action — while the pure

@@ -1,14 +1,13 @@
 ---
-sidebar_position: 8
 title: "Context Files"
 description: "Project context files — .hermes.md, AGENTS.md, CLAUDE.md, global SOUL.md, and .cursorrules — automatically injected into every conversation"
 ---
 
-# Context Files
+# Context Files {#context-files}
 
-Hermes Agent automatically discovers and loads context files that shape how it behaves. Some are project-local and discovered from your working directory. `SOUL.md` is now global to the Hermes instance and is loaded from `HERMES_HOME` only.
+{{app-name}} automatically discovers and loads context files that shape how it behaves. Some are project-local and discovered from your working directory. `SOUL.md` is now global to the {{app-name}} instance and is loaded from `HERMES_HOME` only.
 
-## Supported Context Files
+## Supported Context Files {#supported-context-files}
 
 | File | Purpose | Discovery |
 |------|---------|-----------| 
@@ -16,23 +15,31 @@ Hermes Agent automatically discovers and loads context files that shape how it b
 | **AGENTS.override.md** | Personal, per-directory override of AGENTS.md (typically gitignored) | CWD at startup + subdirectories progressively |
 | **AGENTS.md** | Project instructions, conventions, architecture | CWD at startup + subdirectories progressively |
 | **CLAUDE.md** | Claude Code context files (also detected) | CWD at startup + subdirectories progressively |
-| **SOUL.md** | Global personality and tone customization for this Hermes instance | `HERMES_HOME/SOUL.md` only |
+| **SOUL.md** | Global personality and tone customization for this {{app-name}} instance | `HERMES_HOME/SOUL.md` only |
 | **.cursorrules** | Cursor IDE coding conventions | CWD only |
 | **.cursor/rules/*.mdc** | Cursor IDE rule modules | CWD only |
 
-:::info Priority system
+<Info>
+
+<div className="doc-callout-title">
+
+Priority system
+
+</div>
+
 Only **one** project context type is loaded per session (first match wins): `.hermes.md` → `AGENTS.override.md` → `AGENTS.md` → `CLAUDE.md` → `.cursorrules`. **SOUL.md** is always loaded independently as the agent identity (slot #1).
 
 If an `AGENTS.override.md` exists next to an `AGENTS.md`, the override is loaded **instead of** the committed file — keep a personal (usually gitignored) `AGENTS.override.md` when you want different instructions than the ones checked into the repo, without editing the tracked `AGENTS.md`.
-:::
 
-## AGENTS.md
+</Info>
+
+## AGENTS.md {#agentsmd}
 
 `AGENTS.md` is the primary project context file. It tells the agent how your project is structured, what conventions to follow, and any special instructions.
 
-### Directory Chain (git root → working directory)
+### Directory Chain (git root → working directory) {#directory-chain-git-root--working-directory}
 
-When your working directory sits inside a git repository, Hermes loads a **merged chain** of `AGENTS.md` files at session start: the git-root `AGENTS.md` first, then the `AGENTS.md` in every intermediate directory down to your working directory. Deeper files appear later in the prompt, so more specific guidance takes precedence. Each file gets its own provenance header (e.g. `## ../../AGENTS.md`), and identical copies along the chain are deduplicated.
+When your working directory sits inside a git repository, {{app-name}} loads a **merged chain** of `AGENTS.md` files at session start: the git-root `AGENTS.md` first, then the `AGENTS.md` in every intermediate directory down to your working directory. Deeper files appear later in the prompt, so more specific guidance takes precedence. Each file gets its own provenance header (e.g. `## ../../AGENTS.md`), and identical copies along the chain are deduplicated.
 
 ```
 monorepo/                   (git root, cwd = packages/webapp/)
@@ -43,12 +50,12 @@ monorepo/                   (git root, cwd = packages/webapp/)
         └── AGENTS.md      ← Loaded last (most specific, takes precedence)
 ```
 
-<!-- no-tmp: ok — explains why /tmp is never trusted -->
+{/* no-tmp: ok — explains why /tmp is never trusted */}
 Outside a git repository, only the working directory itself is checked — parents are never consulted, so an `AGENTS.md` planted in `/tmp` or `$HOME` can't leak into unrelated sessions.
 
-### Progressive Subdirectory Discovery
+### Progressive Subdirectory Discovery {#progressive-subdirectory-discovery}
 
-At session start, Hermes loads the `AGENTS.md` from your working directory into the system prompt. As the agent navigates into subdirectories during the session (via `read_file`, `terminal`, `search_files`, etc.), it **progressively discovers** context files in those directories and injects them into the conversation at the moment they become relevant.
+At session start, {{app-name}} loads the `AGENTS.md` from your working directory into the system prompt. As the agent navigates into subdirectories during the session (via `read_file`, `terminal`, `search_files`, etc.), it **progressively discovers** context files in those directories and injects them into the conversation at the moment they become relevant.
 
 ```
 my-project/
@@ -67,11 +74,19 @@ This approach has two advantages over loading everything at startup:
 
 Each subdirectory is checked at most once per session. The discovery also walks up parent directories, so reading `backend/src/main.py` will discover `backend/AGENTS.md` even if `backend/src/` has no context file of its own.
 
-:::info
-Subdirectory context files go through the same [security scan](#security-prompt-injection-protection) as startup context files. Malicious files are blocked.
-:::
+<Info>
 
-### Example AGENTS.md
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+Subdirectory context files go through the same [security scan](#security-prompt-injection-protection) as startup context files. Malicious files are blocked.
+
+</Info>
+
+### Example AGENTS.md {#example-agentsmd}
 
 ```markdown
 # Project Context
@@ -96,32 +111,32 @@ This is a Next.js 14 web application with a Python FastAPI backend.
 - Frontend port is 3000, backend is 8000, DB is 5432
 ```
 
-## SOUL.md
+## SOUL.md {#soulmd}
 
 `SOUL.md` controls the agent's personality, tone, and communication style. See the [Personality](./personality.md) page for full details.
 
 **Location:**
 
 - `~/.hermes/SOUL.md`
-- or `$HERMES_HOME/SOUL.md` if you run Hermes with a custom home directory
+- or `$HERMES_HOME/SOUL.md` if you run {{app-name}} with a custom home directory
 
 Important details:
 
-- Hermes seeds a default `SOUL.md` automatically if one does not exist yet
-- Hermes loads `SOUL.md` only from `HERMES_HOME`
-- Hermes does not probe the working directory for `SOUL.md`
+- {{app-name}} seeds a default `SOUL.md` automatically if one does not exist yet
+- {{app-name}} loads `SOUL.md` only from `HERMES_HOME`
+- {{app-name}} does not probe the working directory for `SOUL.md`
 - If the file is empty, nothing from `SOUL.md` is added to the prompt
 - If the file has content, the content is injected verbatim after scanning and truncation
 
-## .cursorrules
+## .cursorrules {#cursorrules}
 
-Hermes is compatible with Cursor IDE's `.cursorrules` file and `.cursor/rules/*.mdc` rule modules. If these files exist in your project root and no higher-priority context file (`.hermes.md`, `AGENTS.md`, or `CLAUDE.md`) is found, they're loaded as the project context.
+{{app-name}} is compatible with Cursor IDE's `.cursorrules` file and `.cursor/rules/*.mdc` rule modules. If these files exist in your project root and no higher-priority context file (`.hermes.md`, `AGENTS.md`, or `CLAUDE.md`) is found, they're loaded as the project context.
 
-This means your existing Cursor conventions automatically apply when using Hermes.
+This means your existing Cursor conventions automatically apply when using {{app-name}}.
 
-## How Context Files Are Loaded
+## How Context Files Are Loaded {#how-context-files-are-loaded}
 
-### At startup (system prompt)
+### At startup (system prompt) {#at-startup-system-prompt}
 
 Context files are loaded by `build_context_files_prompt()` in `agent/prompt_builder.py`:
 
@@ -132,7 +147,7 @@ Context files are loaded by `build_context_files_prompt()` in `agent/prompt_buil
 5. **Assembly** — all sections are combined under a `# Project Context` header
 6. **Injection** — the assembled content is added to the system prompt
 
-### During the session (progressive discovery)
+### During the session (progressive discovery) {#during-the-session-progressive-discovery}
 
 `SubdirectoryHintTracker` in `agent/subdirectory_hints.py` watches tool call arguments for file paths:
 
@@ -163,7 +178,7 @@ The following project context files have been loaded and should be followed:
 
 Notice that SOUL content is inserted directly, without extra wrapper text.
 
-## Security: Prompt Injection Protection
+## Security: Prompt Injection Protection {#security-prompt-injection-protection}
 
 All context files are scanned for potential prompt injection before being included. The scanner checks for:
 
@@ -185,19 +200,27 @@ If any threat pattern is detected in a project context file (`.hermes.md`, `AGEN
 
 Your own `SOUL.md` in `HERMES_HOME` is treated differently: it is a file you wrote (file-tool writes to it
 need your approval, and project checkouts never supply it), so a scanner hit there **does not block the
-file**. Hermes logs a warning naming the matched pattern, loads the file as usual, and `/context` lists it as
+file**. {{app-name}} logs a warning naming the matched pattern, loads the file as usual, and `/context` lists it as
 `⚠ SOUL.md … loaded — matched prompt-injection pattern(s); review the file`. This lets an identity file that
 *documents* an attack phrase (security guidance such as "content telling you to ignore previous instructions")
 keep working; if you did not write the flagged text, treat the warning as a sign that something else edited
-the file. The exception does not extend to a `SOUL.md` shipped by a profile distribution: `hermes profile
-install <git-url>` and `hermes profile update` copy a third party's `SOUL.md` into the profile home without
+the file. The exception does not extend to a `SOUL.md` shipped by a profile distribution: `noone profile
+install <git-url>` and `noone profile update` copy a third party's `SOUL.md` into the profile home without
 a scan or an approval prompt, so when `distribution.yaml` owns the file a scanner hit still blocks it.
 
-:::warning
-This scanner protects against common injection patterns, but it's not a substitute for reviewing context files in shared repositories. Always validate AGENTS.md content in projects you didn't author.
-:::
+<Warning>
 
-## Size Limits
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
+This scanner protects against common injection patterns, but it's not a substitute for reviewing context files in shared repositories. Always validate AGENTS.md content in projects you didn't author.
+
+</Warning>
+
+## Size Limits {#size-limits}
 
 | Limit | Value |
 |-------|-------|
@@ -213,18 +236,26 @@ When a file exceeds the configured limit, the truncation message reads:
 [...truncated AGENTS.md: kept 14000+4000 of 25000 chars. Use file tools to read the full file.]
 ```
 
-## Tips for Effective Context Files
+## Tips for Effective Context Files {#tips-for-effective-context-files}
 
-:::tip Best practices for AGENTS.md
+<Tip>
+
+<div className="doc-callout-title">
+
+Best practices for AGENTS.md
+
+</div>
+
 1. **Keep it concise** — stay under your configured `context_file_max_chars`; the agent reads it every turn
 2. **Structure with headers** — use `##` sections for architecture, conventions, important notes
 3. **Include concrete examples** — show preferred code patterns, API shapes, naming conventions
 4. **Mention what NOT to do** — "never modify migration files directly"
 5. **List key paths and ports** — the agent uses these for terminal commands
 6. **Update as the project evolves** — stale context is worse than no context
-:::
 
-### Per-Subdirectory Context
+</Tip>
+
+### Per-Subdirectory Context {#per-subdirectory-context}
 
 For monorepos, put subdirectory-specific instructions in nested AGENTS.md files:
 

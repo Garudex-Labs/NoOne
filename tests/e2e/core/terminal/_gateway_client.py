@@ -1,6 +1,6 @@
-"""Real ``hermes serve`` backend + WebSocket JSON-RPC clients for the terminal lane E2E suites.
+"""Real ``noone serve`` backend + WebSocket JSON-RPC clients for the terminal lane E2E suites.
 
-One backend per test module: a real ``python -m hermes_cli.main serve --port 0`` subprocess (the
+One backend per test module: a real ``python -m agent_cli.main serve --port 0`` subprocess (the
 exact argv Desktop spawns, see ``apps/desktop/electron/backend-command.ts``) with an isolated
 HOME/HERMES_HOME, no inherited provider credentials, and only the recording fake LLM provider
 configured. Clients speak the Desktop wire protocol over ``/api/ws`` (newline JSON-RPC,
@@ -88,7 +88,7 @@ def _minimal_env(home: Path, hermes_home: Path, token: str, extra: dict[str, str
 
 
 class Backend:
-    """One real ``hermes serve`` process wired to a :class:`FakeLLMServer`."""
+    """One real ``noone serve`` process wired to a :class:`FakeLLMServer`."""
 
     def __init__(self, root: Path, responder, *, extra_config: str = "", env: dict[str, str] | None = None,
                  aux=None) -> None:
@@ -113,7 +113,7 @@ class Backend:
         self._stderr = open(self.root / "serve.stderr.log", "wb")
         # Own process group: stop() signals exactly the tree this fixture spawned, never a pattern match.
         self.proc = subprocess.Popen(
-            [sys.executable, "-m", "hermes_cli.main", "serve", "--host", "127.0.0.1", "--port", "0"],
+            [sys.executable, "-m", "agent_cli.main", "serve", "--host", "127.0.0.1", "--port", "0"],
             cwd=str(self.root), env=_minimal_env(self.home, self.hermes_home, self.token, self.extra_env),
             stdin=subprocess.DEVNULL, stdout=self._stdout, stderr=self._stderr, start_new_session=True)
 
@@ -121,7 +121,7 @@ class Backend:
 
         def ready() -> int | None:
             if proc.poll() is not None:
-                raise AssertionError(f"hermes serve exited {proc.returncode} before ready:\n{self.logs()}")
+                raise AssertionError(f"noone serve exited {proc.returncode} before ready:\n{self.logs()}")
             match = READY_RE.search((self.root / "serve.stdout.log").read_text(errors="replace"))
             return int(match.group(1)) if match else None
 

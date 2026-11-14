@@ -2,6 +2,8 @@ import babel from '@rolldown/plugin-babel'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
+import { applicationIdentityHtml } from '../../scripts/build/application-identity.mjs'
+
 /** React Compiler preset scoped to modules that can actually contain
  *  components/hooks (JSX syntax or a react-ish import). The preset's default
  *  code filter matches any PascalCase/use* declaration — effectively every TS
@@ -137,7 +139,7 @@ const emojibaseAssets = () => ({
 
 export default defineConfig(({ command }) => ({
   base: './',
-  plugins: [react(), cachedCompilerPass(command), tailwindcss(), emojibaseAssets()],
+  plugins: [applicationIdentityHtml(), react(), cachedCompilerPass(command), tailwindcss(), emojibaseAssets()],
   css: {
     // Pin an explicit (empty) PostCSS config. Tailwind is handled entirely by
     // `@tailwindcss/vite`, so the renderer needs no PostCSS plugins — and
@@ -235,10 +237,10 @@ export default defineConfig(({ command }) => ({
     alias: {
       '@/debug/dev-only': debugEntry(command, process.env as Record<string, string>),
       '@': path.resolve(__dirname, './src'),
-      '@hermes/plugin-sdk': path.resolve(__dirname, './src/sdk/index.ts'),
-      '@hermes/shared/billing': path.resolve(__dirname, '../shared/src/billing-types.ts'),
-      '@hermes/shared/color': path.resolve(__dirname, '../shared/src/color.ts'),
-      '@hermes/shared': path.resolve(__dirname, '../shared/src'),
+      '@noone/plugin-sdk': path.resolve(__dirname, './src/sdk/index.ts'),
+      '@noone/shared/billing': path.resolve(__dirname, '../shared/src/billing-types.ts'),
+      '@noone/shared/color': path.resolve(__dirname, '../shared/src/color.ts'),
+      '@noone/shared': path.resolve(__dirname, '../shared/src'),
       // The tour tool's preview surface injects driver.js's prebuilt IIFE into
       // the pane's guest page as raw source; the package's exports map doesn't
       // expose that dist file (nor ./package.json), so resolve the main entry

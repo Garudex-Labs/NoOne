@@ -12,7 +12,7 @@ from dataclasses import asdict, dataclass, field, fields, is_dataclass
 from typing import Dict, List, Optional, Any, Callable
 from enum import Enum
 
-from hermes_cli.config import get_hermes_home
+from agent_cli.config import get_agent_home
 from agent.secret_scope import current_secret_scope, get_secret as _get_secret
 from gateway.shutdown_watchdog import (
     DEFAULT_LOOP_WATCHDOG_INTERVAL_S,
@@ -73,7 +73,7 @@ def _env_on_all_adapters_down_override() -> str | None:
 
     ``None`` when unset, blank, or unrecognized so the caller keeps the config.yaml value
     (env > config > default). Launchers without a supervising service manager (the desktop app
-    spawns ``hermes serve`` directly) set ``stay_alive``: a failure exit there only severs the
+    spawns ``noone serve`` directly) set ``stay_alive``: a failure exit there only severs the
     UI's websocket connections and drops in-flight assistant messages (#118080).
     """
     raw = os.getenv("GATEWAY_ON_ALL_ADAPTERS_DOWN")
@@ -179,7 +179,7 @@ _REPLY_TO_MODES = frozenset({"off", "first", "all"})
 
 def _reply_to_mode_choice(value: Any) -> str:
     """``reply_to_mode`` as one of off/first/all. YAML 1.1 reads a bare ``off`` as ``False`` (and
-    ``hermes config set ... off`` writes it that way), so ``False`` means ``off``; an unknown value
+    ``noone config set ... off`` writes it that way), so ``False`` means ``off``; an unknown value
     warns and keeps the ``first`` default rather than passing a non-mode to the adapters."""
     if value is None:
         return "first"
@@ -234,7 +234,7 @@ def _bundled_platform_manifest_name(plugin_dir: Path) -> Optional[str]:
 
 class Platform(Enum):
     """Supported messaging platforms. Plugin platforms are dynamic members created on
-    demand by ``_missing_`` and cached so ``Platform("irc") is Platform("irc")`` holds."""
+    demand by ``_missing_`` and cached so ``Platform("line") is Platform("line")`` holds."""
     LOCAL = "local"
     TELEGRAM = "telegram"
     DISCORD = "discord"
@@ -243,19 +243,12 @@ class Platform(Enum):
     SLACK = "slack"
     SIGNAL = "signal"
     MATTERMOST = "mattermost"
-    MATRIX = "matrix"
     EMAIL = "email"
     SMS = "sms"
-    DINGTALK = "dingtalk"
     API_SERVER = "api_server"
     WEBHOOK = "webhook"
     MSGRAPH_WEBHOOK = "msgraph_webhook"
-    FEISHU = "feishu"
-    WECOM = "wecom"
-    WECOM_CALLBACK = "wecom_callback"
     WEIXIN = "weixin"
-    BLUEBUBBLES = "bluebubbles"
-    QQBOT = "qqbot"
     RELAY = "relay"  # generic relay adapter fronted by the connector (EXPERIMENTAL)
 
     @classmethod
@@ -298,7 +291,7 @@ class Platform(Enum):
         manifest ``name:`` keys that differ from their directory (alias -> directory name). Aliases
         never shadow a directory name, so the directory stays the canonical platform value."""
         try:
-            from hermes_cli.plugins import get_bundled_plugins_dir
+            from agent_cli.plugins import get_bundled_plugins_dir
             platforms_dir = get_bundled_plugins_dir() / "platforms"
             dirs = [
                 child for child in (platforms_dir.iterdir() if platforms_dir.is_dir() else ())
@@ -323,11 +316,9 @@ _BUILTIN_PLATFORM_VALUES = frozenset(m.value for m in Platform.__members__.value
 # profile's port-binder is built in shared-listener mode and served at /p/<profile>/<path> on the
 # default's listener (gateway/platforms/shared_ingress.py); api_server/webhook are mirrored there.
 PORT_BINDING_PLATFORM_VALUES = frozenset({
-    "webhook", "api_server", "msgraph_webhook", "feishu", "wecom_callback",
-    "bluebubbles", "sms", "whatsapp_cloud", "line", "teams",
+    "webhook", "api_server", "msgraph_webhook",
+     "sms", "whatsapp_cloud", "line", "teams",
 })
-# Platforms that only bind in one connection mode (Feishu's default websocket mode is outbound).
-PORT_BINDING_CONDITIONAL_MODES: dict[str, str] = {"feishu": "webhook"}
 # Port-binders whose /p/<profile>/ surface is a MIRROR served by the default's own adapter; a secondary
 # never gets an instance of these (api_server: /p/<profile>/v1/..., webhook: profile-bound routes).
 SHARED_LISTENER_MIRROR_PLATFORMS = frozenset({"api_server", "webhook"})
@@ -340,10 +331,7 @@ SHARED_LISTENER_MIRROR_PATHS: dict[str, str] = {"api_server": "/v1", "webhook": 
 
 def platform_binds_port(platform_value: str, extra: Optional[dict] = None) -> bool:
     """True when *platform_value* actually binds a port for *extra* config."""
-    if platform_value not in PORT_BINDING_PLATFORM_VALUES:
-        return False
-    expected_mode = PORT_BINDING_CONDITIONAL_MODES.get(platform_value)
-    return expected_mode is None or str((extra or {}).get("connection_mode", "websocket")).strip().lower() == expected_mode
+    return platform_value in PORT_BINDING_PLATFORM_VALUES
 
 _DISCORD_CHANNEL_LINK_RE = re.compile(
     r"https://(?:(?:ptb|canary)\.)?discord(?:app)?\.com/channels/(?:[0-9]+|@me)/([0-9]+)/?")
@@ -387,7 +375,7 @@ class HomeChannel:
 
 def persist_home_channel(home: HomeChannel, *, enabled_if_new: bool = False) -> None:
     """Persist a logical home without falsely enabling a Relay-fronted adapter."""
-    from hermes_cli.config import load_config, save_config
+    from agent_cli.config import load_config, save_config
     config = load_config()
     platform_config = _dict_slot(_dict_slot(config, "platforms"), home.platform.value)
     if enabled_if_new:
@@ -422,7 +410,6 @@ PLATFORM_TOKEN_ENV_NAMES: dict[Platform, str] = {
     Platform.DISCORD: "DISCORD_BOT_TOKEN",
     Platform.SLACK: "SLACK_BOT_TOKEN",
     Platform.MATTERMOST: "MATTERMOST_TOKEN",
-    Platform.MATRIX: "MATRIX_ACCESS_TOKEN",
     Platform.WEIXIN: "WEIXIN_TOKEN",
 }
 
@@ -471,7 +458,7 @@ class PlatformConfig:
         data = _coerce_dict(data)
         home = data.get("home_channel")
         # Adapters read their settings from ``extra`` (``config.extra.get("port")``), but users
-        # write them where the docs and ``hermes config set platforms.webhook.port`` put them:
+        # write them where the docs and ``noone config set platforms.webhook.port`` put them:
         # directly under the platform block. Promote every non-typed top-level key so neither
         # spelling is silently dropped (#10206); an explicit ``extra:`` value wins on a clash.
         extra = {**{k: v for k, v in data.items() if k not in cls._TYPED_KEYS}, **_coerce_dict(data.get("extra", {}))}
@@ -572,7 +559,7 @@ def _has_usable_api_server_key(key: object) -> bool:
     if not key:
         return False
     try:
-        from hermes_cli.auth import has_usable_secret
+        from agent_cli.auth import has_usable_secret
         return has_usable_secret(key, min_length=16)
     except ImportError:
         return len(str(key).strip()) >= 16
@@ -598,7 +585,7 @@ def _discovered_registry_entry(platform: Platform):
     passive "is the SDK importable?" probe — must never make a platform the user never opted into
     look connected (``_platform_status`` was fixed for the same bug class in commit 7849a3d73)."""
     with contextlib.suppress(Exception):
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
         discover_plugins()
     with contextlib.suppress(Exception):  # registry not initialised yet during early import
         from gateway.platform_registry import platform_registry
@@ -619,7 +606,7 @@ class GatewayConfig:
     platforms: dict[Platform, PlatformConfig] = field(default_factory=dict)
     reset_triggers: list[str] = field(default_factory=lambda: ["/new", "/reset"])
     quick_commands: dict[str, Any] = field(default_factory=dict)  # slash commands that bypass the agent loop
-    sessions_dir: Path = field(default_factory=lambda: get_hermes_home() / "sessions")
+    sessions_dir: Path = field(default_factory=lambda: get_agent_home() / "sessions")
     # Legacy sessions.json mirror of the routing index (primary: state.db) for external tooling / downgrades.
     # The primary copy lives in state.db (gateway_routing table, #9006). Default True for backward
     # compatibility with external tooling and downgrade safety; set gateway.write_sessions_json: false in
@@ -636,7 +623,7 @@ class GatewayConfig:
     max_concurrent_sessions: Optional[int] = None  # Positive int caps simultaneous active sessions
     # The default profile's gateway serves every profile on the host (profiles stamped into session
     # keys, per-profile adapters/credentials). On by default (DEFAULT_CONFIG), but UNSET here is
-    # ``None``: a request the gateway settles at boot, not a verdict. ``hermes_cli.gateway_multiplex_mode
+    # ``None``: a request the gateway settles at boot, not a verdict. ``agent_cli.gateway_multiplex_mode
     # .resolve_multiplex_mode`` runs the migration preflight (default profile, >= 2 profiles, no
     # secondary running its own gateway, no blocker, migratable host) and only then writes True/False.
     # An explicit value (config.yaml, GATEWAY_MULTIPLEX_PROFILES, a constructor argument) is honoured
@@ -663,7 +650,7 @@ class GatewayConfig:
     # What happens when the LAST messaging adapter goes down. ``exit`` (default) shuts the gateway
     # down with the failure verdict so a supervising service manager (systemd/launchd) restarts it;
     # ``stay_alive`` keeps the process running and leaves recovery to the reconnect watcher — for
-    # launchers with no supervisor (the desktop app spawns ``hermes serve`` directly), where a
+    # launchers with no supervisor (the desktop app spawns ``noone serve`` directly), where a
     # failure exit only severs the UI's websockets and drops in-flight assistant messages (#118080).
     # Retryable failures are recoverable in both modes; non-retryable adapter loss always exits.
     on_all_adapters_down: str = "exit"  # "exit" | "stay_alive"; GATEWAY_ON_ALL_ADAPTERS_DOWN overrides
@@ -806,7 +793,7 @@ class GatewayConfig:
             platforms=by_platform("platforms", PlatformConfig.from_dict, dicts_only=True),
             reset_triggers=data.get("reset_triggers", ["/new", "/reset"]),
             quick_commands=_coerce_dict(data.get("quick_commands", {})),
-            sessions_dir=Path(data["sessions_dir"]) if "sessions_dir" in data else get_hermes_home() / "sessions",
+            sessions_dir=Path(data["sessions_dir"]) if "sessions_dir" in data else get_agent_home() / "sessions",
             **{name: _coerce_bool(data.get(name), default) for name, default in _TOPLEVEL_BOOL_DEFAULTS.items()},
             stt_enabled=_coerce_bool(stt_setting("stt_enabled", "enabled"), True),
             stt_echo_transcripts=_coerce_bool(stt_setting("stt_echo_transcripts", "echo_transcripts"), True),
@@ -851,20 +838,14 @@ def load_gateway_config() -> GatewayConfig:
     """Load gateway configuration. Priority: env > ~/.hermes/config.yaml > legacy gateway.json > defaults."""
     from gateway import config_loader
 
-    _home = get_hermes_home()
+    _home = get_agent_home()
     gw_data = config_loader.load_legacy_gateway_json(_home)
     try:
         config_loader.load_yaml_layer(_home, gw_data)
     except Exception as e:
         logger.warning(
-            # DingTalk settings → env vars: migrated to the dingtalk plugin's apply_yaml_config_fn hook
-            # (plugins/platforms/dingtalk/adapter.py). #41112 / #3823.
             # Mattermost config bridge moved into plugins/platforms/mattermost/
             # adapter.py::_apply_yaml_config — see #25443 (apply_yaml_config_fn).
-            # Matrix settings → env vars: migrated to the matrix plugin's apply_yaml_config_fn hook
-            # (plugins/platforms/matrix/adapter.py). #41112 / #3823.
-            # Feishu settings → env vars: migrated to the feishu plugin's apply_yaml_config_fn hook
-            # (plugins/platforms/feishu/adapter.py). #41112 / #3823.
             "Failed to process config.yaml — falling back to .env / gateway.json values. "
             "Check %s for syntax errors. Error: %s",
             _home / "config.yaml", e,
@@ -882,7 +863,7 @@ def _validate_gateway_config(config: GatewayConfig) -> None:
         # Reject known-weak placeholder tokens. Ported from openclaw/openclaw#64586: users who copy
         # .env.example without changing placeholder values get a clear startup error instead of a confusing
         # "auth failed" from the platform API.
-        from hermes_cli.auth import has_usable_secret
+        from agent_cli.auth import has_usable_secret
     except ImportError:
         has_usable_secret = None
 

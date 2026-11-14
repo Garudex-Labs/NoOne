@@ -1,20 +1,5 @@
-import { compactNumber } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
-import { type MouseEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
-import { LogSearchField, useLogSearch } from '@/components/chat/log-search'
-import { LogTail } from '@/components/chat/log-tail'
-import { PageLoader } from '@/components/page-loader'
-import { Button } from '@/components/ui/button'
-import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { SearchField } from '@/components/ui/search-field'
-import { SegmentedControl } from '@/components/ui/segmented-control'
-import { ResponsiveTabs } from '@/components/ui/tab-dropdown'
-import { Tip } from '@/components/ui/tooltip'
-import { getActionStatus, getLogs, getStatus, getUsageAnalytics, restartGateway, updateHermes } from '@/hermes'
-import type { ActionStatusResponse, AnalyticsResponse, SessionInfo, StatusResponse } from '@/hermes'
-import { useI18n } from '@/i18n'
-import { sessionTitle } from '@/lib/chat-runtime'
+import { compactNumber } from '@noone/shared'
 import {
   Activity,
   AlertCircle,
@@ -25,7 +10,22 @@ import {
   MessageCircle,
   Trash2,
   Wrench
-} from '@/lib/icons'
+} from '@noone/ui/icons'
+import { type MouseEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import { getActionStatus, getLogs, getStatus, getUsageAnalytics, restartGateway, updateHermes } from '@/agent-client'
+import type { ActionStatusResponse, AnalyticsResponse, SessionInfo, StatusResponse } from '@/agent-client'
+import { LogSearchField, useLogSearch } from '@/components/chat/log-search'
+import { LogTail } from '@/components/chat/log-tail'
+import { PageLoader } from '@/components/page-loader'
+import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { SearchField } from '@/components/ui/search-field'
+import { SegmentedControl } from '@/components/ui/segmented-control'
+import { ResponsiveTabs } from '@/components/ui/tab-dropdown'
+import { Tip } from '@/components/ui/tooltip'
+import { useI18n } from '@/i18n'
+import { sessionTitle } from '@/lib/chat-runtime'
 import { exportSession } from '@/lib/session-export'
 import { isSignedOutStatus } from '@/lib/signed-out-status'
 import { fmtDateTime } from '@/lib/time'

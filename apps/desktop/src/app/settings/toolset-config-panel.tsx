@@ -1,9 +1,7 @@
+import { Check, Loader2, Save, Terminal } from '@noone/ui/icons'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
-import { SETTINGS_ROUTE } from '@/app/routes'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   deleteEnvVar,
   getActionStatus,
@@ -17,9 +15,11 @@ import {
   selectToolsetProvider,
   setEnvVar,
   startOAuthLogin
-} from '@/hermes'
+} from '@/agent-client'
+import { SETTINGS_ROUTE } from '@/app/routes'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useI18n } from '@/i18n'
-import { Check, Loader2, Save, Terminal } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { upsertDesktopActionTask } from '@/store/activity'
 import { confirm } from '@/store/confirm'
@@ -31,7 +31,7 @@ import type {
   ToolProviderStatus,
   ToolsetConfig,
   ToolsetModelsResponse
-} from '@/types/hermes'
+} from '@/types/agent-client'
 
 import { EnvVarActionsMenu, EnvVarActionsTrigger, EnvVarContextMenu } from './env-var-actions-menu'
 import { prettyName } from './helpers'
@@ -273,7 +273,7 @@ interface PostSetupRunnerProps {
 /**
  * Runs a provider's post-setup install hook (npm / pip / binary) via the
  * `/api/tools/toolsets/{name}/post-setup` spawn-action and tails the resulting
- * log inline — the GUI equivalent of the install step `hermes tools` runs
+ * log inline — the GUI equivalent of the install step `noone tools` runs
  * after you pick a backend that needs extra dependencies.
  *
  * Idempotent UX: when the backend's readiness status says the install is

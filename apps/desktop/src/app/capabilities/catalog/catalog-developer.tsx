@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
 import { PLUGIN_CATALOG_DOCS_URL, SKILLS_DOCS_URL, SUBMIT_MOD_URL } from '@/lib/plugin-catalog'
@@ -24,10 +24,10 @@ export function CatalogDeveloper({ kind, actions }: { kind: CatalogKind; actions
           <p className="text-sm text-(--ui-text-secondary)">{d.pitch}<br />{d.pitchFollowUp}</p>
           <div className="catalog-developer-ctas">
             <Button onClick={() => void openExternalLink(SUBMIT_MOD_URL)} size="sm" variant="default">
-              {d.submit}<Codicon name="arrow-up-right" />
+              {d.submit}<AppIcon name="arrow-up-right" />
             </Button>
             <Button onClick={() => void openExternalLink(kind === 'plugins' ? PLUGIN_CATALOG_DOCS_URL : SKILLS_DOCS_URL)} size="sm" variant="secondary">
-              {d.docs}<Codicon name="arrow-up-right" />
+              {d.docs}<AppIcon name="arrow-up-right" />
             </Button>
           </div>
         </div>

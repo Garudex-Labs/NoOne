@@ -3,9 +3,9 @@ title: "Network Egress Isolation (Docker)"
 description: "Segment Docker networks so the agent sandbox can only reach allowlisted hosts"
 ---
 
-# Network Egress Isolation for Docker Deployments
+# Network Egress Isolation for Docker Deployments {#network-egress-isolation-for-docker-deployments}
 
-When running Hermes inside Docker, the default `network_mode: host` gives the
+When running {{app-name}} inside Docker, the default `network_mode: host` gives the
 agent process unrestricted outbound network access. This guide shows how to
 segment traffic so the agent core can only reach the services it needs, while
 blocking arbitrary outbound connections.
@@ -14,9 +14,9 @@ This is primarily a defense against prompt injection attacks that attempt to
 exfiltrate data via `curl`, `wget`, or raw HTTP from tool-generated shell
 commands.
 
-## Threat Model
+## Threat Model {#threat-model}
 
-The Hermes [SECURITY.md](https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md) §2 defines the trust model. The
+The {{app-name}} [SECURITY.md](https://github.com/Garudex-Labs/NoOne/blob/main/SECURITY.md) §2 defines the trust model. The
 terminal backend is the primary execution boundary. However, when running with
 `network_mode: host`, any command the agent executes can reach any endpoint on
 the network, including external ones.
@@ -25,7 +25,7 @@ Network egress isolation adds a second layer: even if a malicious command
 executes inside the container, it cannot reach endpoints outside the
 explicitly allowlisted set.
 
-## Architecture
+## Architecture {#architecture}
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -64,7 +64,7 @@ The gateway service is dual-homed (attached to both networks) so it can
 receive inbound messages from Telegram/Slack/etc. and forward them to the
 agent on the internal network.
 
-## Compose Configuration
+## Compose Configuration {#compose-configuration}
 
 Override the default `docker-compose.yml` with a
 `docker-compose.override.yml`:
@@ -100,7 +100,7 @@ services:
       - internal            # internal only, no egress needed
 ```
 
-### With an Egress Proxy (Recommended)
+### With an Egress Proxy (Recommended) {#with-an-egress-proxy-recommended}
 
 For tighter control, route all outbound traffic through an HTTP proxy with
 an explicit allowlist:
@@ -158,7 +158,7 @@ http_access deny all
 
 Adjust the allowlist to match your LLM provider and messaging platform.
 
-## Validating the Setup
+## Validating the Setup {#validating-the-setup}
 
 After bringing up the stack, verify isolation:
 
@@ -176,7 +176,7 @@ docker compose exec gateway \
   curl -sf --max-time 5 --proxy http://egress-proxy:3128 https://api.openai.com/v1/models && echo "OK" || echo "FAIL"
 ```
 
-## Limitations
+## Limitations {#limitations}
 
 - **DNS resolution:** The `internal` network can still resolve external DNS
   names unless you also run a local DNS resolver that blocks external queries.
@@ -193,9 +193,9 @@ docker compose exec gateway \
   to reach messaging platform APIs. If you add new platform adapters, add their
   API endpoints to the proxy allowlist.
 
-## Related
+## Related {#related}
 
-- [SECURITY.md](https://github.com/NousResearch/hermes-agent/blob/main/SECURITY.md) — Hermes trust model and vulnerability reporting
-- [Docker](../docker.md) — running Hermes in a container
+- [SECURITY.md](https://github.com/Garudex-Labs/NoOne/blob/main/SECURITY.md) — {{app-name}} trust model and vulnerability reporting
+- [Docker](../docker.md) — running {{app-name}} in a container
 - [Egress proxy](iron-proxy.md) — credential-injection firewall for the sandbox
-- [docker-compose.yml](https://github.com/NousResearch/hermes-agent/blob/main/docker-compose.yml) — default compose configuration
+- [docker-compose.yml](https://github.com/Garudex-Labs/NoOne/blob/main/docker-compose.yml) — default compose configuration

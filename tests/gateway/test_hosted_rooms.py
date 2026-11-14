@@ -11,9 +11,9 @@ import pytest
 
 from gateway import hosted_room_driver as driver
 from gateway import hosted_rooms as rooms
-import hermes_state_wal
+import agent_state_wal
 from gateway.hosted_room_policy_checkpoint import HostedRoomPolicyCheckpoint
-from hermes_state import SessionDB
+from agent_state import SessionDB
 
 USER = {"kind": "user", "id": "desktop-user", "display_name": "User"}
 GATEWAY_A = {"kind": "gateway", "id": "gateway-a"}
@@ -168,7 +168,7 @@ def test_first_database_open_retries_only_transient_journal_lock(
     tmp_path,
     monkeypatch,
 ):
-    original = hermes_state_wal.apply_wal_with_fallback
+    original = agent_state_wal.apply_wal_with_fallback
     attempts = 0
 
     def transient_lock(conn, **kwargs):
@@ -178,7 +178,7 @@ def test_first_database_open_retries_only_transient_journal_lock(
             raise sqlite3.OperationalError("database is locked")
         return original(conn, **kwargs)
 
-    monkeypatch.setattr(hermes_state_wal, "apply_wal_with_fallback", transient_lock)
+    monkeypatch.setattr(agent_state_wal, "apply_wal_with_fallback", transient_lock)
 
     assert _create(tmp_path / "state.db")["room_id"] == "room-1"
     assert attempts == 3
@@ -198,7 +198,7 @@ def test_first_database_open_does_not_retry_other_journal_errors(
         )
 
     monkeypatch.setattr(
-        hermes_state_wal, "apply_wal_with_fallback",
+        agent_state_wal, "apply_wal_with_fallback",
         configured_delete_refusal,
     )
 
@@ -1061,46 +1061,8 @@ def test_policy_sync_cannot_recreate_projection_after_room_pruning(
             assert conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == 0
 
 
-def test_pre_actor_draft_database_migrates_with_explicit_legacy_identity(tmp_path):
-    db = tmp_path / "state.db"
-    _create_pre_actor_database(db)
-
-    replay = rooms.read_events(db, room_id="room-1")
-    assert replay["events"][0]["actor"] == {"kind": "system", "id": "legacy"}
-    state = rooms.room_state(db, room_id="room-1")
-    assert state["authority_gateway_id"] == "legacy"
-    assert state["authority_epoch"] == 1
-    adopted = rooms.create_room(
-        db,
-        room_id="room-1",
-        name="Legacy",
-        members=[],
-        authority_gateway_id="gateway-a",
-        now=2,
-    )
-    assert adopted["authority_gateway_id"] == "gateway-a"
-    assert adopted["authority_epoch"] == 2
-    assert adopted["adopted"] is True
-    assert adopted["claim_event"]["seq"] == 2
-    assert adopted["claim_event"]["payload"]["previous_gateway_id"] == "legacy"
 
 
-def test_migration_reserves_existing_disbanded_room_id_before_pruning(tmp_path):
-    db = tmp_path / "state.db"
-    _create_pre_actor_database(db)
-    with sqlite3.connect(db) as conn:
-        conn.execute("UPDATE hosted_rooms SET disbanded_at=20 WHERE room_id='room-1'")
-        conn.commit()
-
-    assert (
-        rooms.prune_disbanded_rooms(
-            db,
-            now=20 + rooms.DISBANDED_ROOM_RETENTION_SECONDS + 1,
-        )
-        == 1
-    )
-
-    _assert_retired_identity_stays_reserved(db, "room-1", fresh_id="room-new")
 
 
 def test_legacy_adoption_fills_missing_targets_but_rejects_target_changes(tmp_path):
@@ -1153,96 +1115,14 @@ def test_legacy_adoption_fills_missing_targets_but_rejects_target_changes(tmp_pa
         )
 
 
-def test_draft_schema_migration_is_safe_across_processes(tmp_path):
-    db = tmp_path / "state.db"
-    _create_pre_actor_database(db)
-
-    with ProcessPoolExecutor(max_workers=4) as pool:
-        results = list(pool.map(_read_legacy_state, [str(db)] * 4))
-
-    assert results == [("legacy", 1)] * 4
-    replay = rooms.read_events(db, room_id="room-1")
-    assert replay["events"][0]["actor"] == {"kind": "system", "id": "legacy"}
 
 
-def test_legacy_remote_run_receipt_migrates_without_current_lineage_access(
-    tmp_path,
-):
-    db = tmp_path / "state.db"
-    with sqlite3.connect(db) as conn:
-        conn.execute(
-            """CREATE TABLE hosted_room_remote_runs (
-                room_id TEXT NOT NULL,
-                member_id TEXT NOT NULL,
-                task_id TEXT NOT NULL,
-                execution_generation INTEGER NOT NULL,
-                target_install_id TEXT NOT NULL,
-                target_profile TEXT NOT NULL,
-                run_id TEXT NOT NULL,
-                session_id TEXT NOT NULL,
-                created_at REAL NOT NULL,
-                updated_at REAL NOT NULL,
-                PRIMARY KEY (task_id, execution_generation)
-            )"""
-        )
-        conn.execute(
-            """INSERT INTO hosted_room_remote_runs VALUES(
-                'room-1', 'member-reviewer', 'task-1', 1, 'install-peer',
-                'reviewer', 'run-legacy', 'session-legacy', 1, 1
-            )"""
-        )
-
-    current = {
-        "room_id": "room-1",
-        "home_install_id": "install-home",
-        "authority_gateway_id": "gateway-home",
-        "authority_epoch": 2,
-        "member_id": "member-reviewer",
-        "target_install_id": "install-peer",
-        "target_profile": "reviewer",
-        "task_id": "task-1",
-        "execution_generation": 1,
-    }
-    assert rooms.remote_run_receipt(db, record=current) is None
-    legacy = rooms.list_remote_run_receipts(db)
-    assert legacy[0]["home_install_id"] == "legacy"
-    assert legacy[0]["authority_gateway_id"] == "legacy"
-
-    rooms.upsert_remote_run_receipt(
-        db,
-        record={**current, "run_id": "run-current", "session_id": "session-current"},
-    )
-    assert rooms.remote_run_receipt(db, record=current)["run_id"] == "run-current"
 
 
-def test_interrupted_draft_schema_migration_rolls_back_atomically(
-    tmp_path,
-    monkeypatch,
-):
-    db = tmp_path / "state.db"
-    _create_pre_actor_database(db)
-    original = rooms._initialize_schema
-
-    def interrupt_after_first_alter(conn):
-        conn.execute(
-            "ALTER TABLE hosted_rooms "
-            "ADD COLUMN authority_gateway_id TEXT NOT NULL DEFAULT 'legacy'"
-        )
-        raise RuntimeError("simulated migration interruption")
-
-    monkeypatch.setattr(rooms, "_initialize_schema", interrupt_after_first_alter)
-    with pytest.raises(RuntimeError, match="simulated migration interruption"):
-        rooms.list_rooms(db)
-    with sqlite3.connect(db) as conn:
-        columns = {row[1] for row in conn.execute("PRAGMA table_info(hosted_rooms)")}
-    assert "authority_gateway_id" not in columns
-
-    monkeypatch.setattr(rooms, "_initialize_schema", original)
-    assert rooms.room_state(db, room_id="room-1")["authority_gateway_id"] == "legacy"
 
 
 def test_gateway_event_budget_leaves_pre_update_snapshot_headroom():
-    from hermes_cli import update_cmd
+    from agent_cli import update_cmd
 
     # SQLite stores room ids and index entries beyond the logical payload
     # accounting, while session data shares the same file. Keep at least an
@@ -1318,77 +1198,8 @@ def test_default_db_path_never_names_the_master_session_store(tmp_path, monkeypa
     assert from_root.name != "state.db"
 
 
-def test_upgrade_keeps_rooms_from_before_the_shared_state_db_split(tmp_path):
-    """Rooms an install already had stay reachable after the move to ``shared-state.db``.
-
-    ``0e422e0ece`` repointed the store at ``shared-state.db`` but left the hosted_room* rows in
-    the root ``state.db``, so every pre-existing room resolved to "hosted room not found" (#109775).
-    This is that upgrade: rooms and their events already in ``state.db``, nothing in the new file.
-    """
-    legacy = tmp_path / "state.db"
-    _create(legacy)
-    _append(
-        legacy,
-        room_id="room-1",
-        event_id="event-1",
-        kind="message.user",
-        actor=USER,
-        payload={"text": "before the upgrade"},
-        now=11,
-    )
-
-    store = tmp_path / "shared-state.db"
-
-    assert [room["room_id"] for room in rooms.list_rooms(store)] == ["room-1"]
-    assert rooms.room_state(store, room_id="room-1")["latest_seq"] == 1
-    assert [
-        event["event_id"] for event in rooms.read_events(store, room_id="room-1")["events"]
-    ] == ["event-1"]
 
 
-def test_legacy_import_is_a_one_shot_and_skips_driver_liveness_state(tmp_path):
-    """The copy runs once, never overwrites, and leaves the driver's lease behind (#109775)."""
-    legacy = tmp_path / "state.db"
-    _create(legacy)
-
-    def now() -> float:
-        return 100.0
-
-    driver.admit_task(
-        legacy,
-        driver.TaskIdentity(room_id="room-1", task_id="task-1", thread_id="thread-1", turn_id="turn-1"),
-        payload={"target_profile": "ops", "prompt": "ping", "source_event_seq": 1},
-        clock=now,
-    )
-    driver.acquire_lease(
-        legacy,
-        room_id="room-1",
-        gateway_id="gateway-a",
-        authority_epoch=1,
-        process_generation="process-a",
-        ttl_seconds=30,
-        clock=now,
-    )
-
-    store = tmp_path / "shared-state.db"
-    assert [room["room_id"] for room in rooms.list_rooms(store)] == ["room-1"]
-    with sqlite3.connect(store) as conn:
-        # Durable work follows the room across; the lease is liveness state and stays behind.
-        assert conn.execute("SELECT COUNT(*) FROM hosted_room_driver_tasks").fetchone()[0] == 1
-        assert conn.execute(
-            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='hosted_room_driver_leases'"
-        ).fetchone()[0] == 0
-
-    # Forcing a second import (marker cleared) must not replace what this store already owns.
-    rooms.rename_room(store, room_id="room-1", event_id="rename-1", name="Renamed", now=12)
-    with sqlite3.connect(store) as conn:
-        conn.execute("DELETE FROM hosted_room_legacy_imports")
-    assert rooms.room_state(store, room_id="room-1")["name"] == "Renamed"
-
-    # And the record of the import is what keeps a purge from being undone by a later open.
-    with sqlite3.connect(store) as conn:
-        conn.execute("DELETE FROM hosted_rooms")
-    assert rooms.list_rooms(store) == []
 
 
 def test_legacy_import_skips_a_room_this_store_already_owns_as_a_unit(tmp_path):
@@ -1412,33 +1223,3 @@ def test_legacy_import_skips_a_room_this_store_already_owns_as_a_unit(tmp_path):
     assert [event["event_id"] for event in rooms.read_events(store, room_id="same")["events"]] == ["own-1"]
     _append(store, room_id="same", event_id="own-2", kind="message.user", actor=USER, payload={"text": "t"}, now=30)
     assert rooms.room_state(store, room_id="same")["latest_seq"] == 2
-
-
-def test_legacy_import_reads_layouts_from_before_the_actor_and_authority_columns(tmp_path):
-    """A legacy store without authority_gateway_id/actor_json imports with the migration's defaults.
-
-    ``INSERT OR IGNORE`` used to swallow the NOT NULL violations, drop every row and still record
-    the marker with rooms=0, losing the rooms permanently.
-    """
-    _create_pre_actor_database(str(tmp_path / "state.db"))
-    store = tmp_path / "shared-state.db"
-
-    assert _read_legacy_state(str(store)) == ("legacy", 1)
-    assert [event["event_id"] for event in rooms.read_events(store, room_id="room-1")["events"]] == ["legacy-event"]
-    with sqlite3.connect(store) as conn:
-        assert conn.execute("SELECT rooms FROM hosted_room_legacy_imports").fetchone() == (1,)
-        assert conn.execute("SELECT event_bytes FROM hosted_rooms").fetchone()[0] > 0
-
-
-def test_unreadable_legacy_store_is_reported_once_per_process(tmp_path, caplog):
-    """A corrupt legacy file leaves the marker unset but does not re-warn on every poll."""
-    (tmp_path / "state.db").write_bytes(b"not a sqlite file" * 100)
-    store = tmp_path / "shared-state.db"
-
-    with caplog.at_level(logging.WARNING, logger="gateway.hosted_rooms_legacy_import"):
-        for _ in range(4):
-            assert rooms.list_rooms(store) == []
-    assert len([record for record in caplog.records if "could not import" in record.message]) == 1
-    with sqlite3.connect(store) as conn:
-        assert not conn.execute(
-            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='hosted_room_legacy_imports'").fetchone()

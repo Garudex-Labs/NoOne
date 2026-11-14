@@ -1,5 +1,6 @@
+import { AppIcon } from '@noone/ui/app-icon'
+
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 
 interface StatusDismissButtonProps {
   label: string
@@ -22,7 +23,7 @@ export function StatusDismissButton({ label, onDismiss }: StatusDismissButtonPro
       type="button"
       variant="ghost"
     >
-      <Codicon name="close" size="0.8rem" />
+      <AppIcon name="close" size="0.8rem" />
     </Button>
   )
 }

@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import type * as React from 'react'
 
 import { ActionsContextMenu, ActionsMenu, type MenuKit, renderActionItem } from '@/components/ui/actions-menu'
-import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
@@ -68,7 +68,7 @@ export function WorkspaceAddButton({
         onPointerDown={onPointerDown}
         type="button"
       >
-        <Codicon name="add" size="0.75rem" />
+        <AppIcon name="add" size="0.75rem" />
       </button>
     </Tip>
   )
@@ -97,7 +97,7 @@ export function WorkspaceShowMoreRow({
       >
         <SidebarRowLead>
           <SidebarRowLeadGlyph>
-            <Codicon name="ellipsis" size={SIDEBAR_LEAD_ICON_SIZE} />
+            <AppIcon name="ellipsis" size={SIDEBAR_LEAD_ICON_SIZE} />
           </SidebarRowLeadGlyph>
         </SidebarRowLead>
         <SidebarRowLabel className="text-xs underline-offset-4 group-hover/more:underline">{label}</SidebarRowLabel>
@@ -129,7 +129,7 @@ export function WorkspaceShowMoreButton({
         onClick={onClick}
         type="button"
       >
-        <Codicon name="ellipsis" size="0.75rem" />
+        <AppIcon name="ellipsis" size="0.75rem" />
       </button>
     </Tip>
   )
@@ -192,7 +192,7 @@ export function WorkspaceMenu({ path, onRemove }: { path: null | string; onRemov
         onClick={event => event.stopPropagation()}
         type="button"
       >
-        <Codicon name="kebab-vertical" size="0.75rem" />
+        <AppIcon name="kebab-vertical" size="0.75rem" />
       </button>
     </ActionsMenu>
   )
@@ -247,7 +247,7 @@ export function StartWorkButton({
         onClick={() => void openWorktreeDialog({ owner: projectOwnerRoute(project), repoPath: project.path ?? '' })}
         type="button"
       >
-        <Codicon name="git-branch" size="0.75rem" />
+        <AppIcon name="git-branch" size="0.75rem" />
       </button>
     </Tip>
   )

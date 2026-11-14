@@ -1,19 +1,19 @@
-"""`hermes update` on a realistic user home: everything the user owns survives, sessions resume.
+"""`noone update` on a realistic user home: everything the user owns survives, sessions resume.
 
 One real install (HEAD's ``scripts/install.sh`` into an empty sandbox HOME, git redirected to a
 local bare origin), then a home built the way users build it, mostly through the real CLI:
 
-* three profiles (default + two made with ``hermes profile create``), each with a hand-edited
+* three profiles (default + two made with ``noone profile create``), each with a hand-edited
   config.yaml carrying comments and a key HEAD does not know, its own .env, SOUL.md and
   MEMORY.md, and sessions in its own state.db from real one-shot turns. The default profile's
   config sits at the oldest ``_config_version`` HEAD still migrates and ``work``'s one version
   behind, so the update's config migration (active profile + siblings) runs; ``research`` is
   current and must come through byte-for-byte;
-* a custom skill, a user plugin under ``~/.hermes/plugins/``, a cron job made by ``hermes cron``;
+* a custom skill, a user plugin under ``~/.hermes/plugins/``, a cron job made by ``noone cron``;
 * two broken profiles next to them (a dangling symlink, a profile whose config.yaml is not YAML);
 * local files the user dropped inside the checkout (an untracked notes file and an extension dir).
 
-Upstream then publishes a new commit and the user runs ``hermes update --yes``. A second leg
+Upstream then publishes a new commit and the user runs ``noone update --yes``. A second leg
 publishes a commit that touches a file the user edited in the checkout (the autostash cannot be
 restored cleanly) while an untracked extension dir sits in the tree (#120179).
 
@@ -28,7 +28,7 @@ import os
 import shutil
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from tests.e2e.core.upgrade import _helpers as H
 from tests.e2e.core.upgrade import _install_helpers as I
@@ -45,8 +45,8 @@ pytestmark = [
 
 UPDATE_TIMEOUT = 1500
 PROFILES = ("default", "work", "research")
-_VERSIONS_PY = ("from hermes_cli.config_defaults import DEFAULT_CONFIG as D; "
-                "from hermes_cli.config_migrations import SUPPORT_FLOOR_VERSION as F; "
+_VERSIONS_PY = ("from agent_cli.config_defaults import DEFAULT_CONFIG as D; "
+                "from agent_cli.config_migrations import SUPPORT_FLOOR_VERSION as F; "
                 "print(D['_config_version'], F)")
 
 
@@ -172,7 +172,7 @@ def world(tmp_path_factory, provider):
 
 def test_update_on_a_realistic_home_exits_clean_at_the_new_commit(world):
     sb, up = world["sb"], world["update"]
-    assert up.returncode == 0, "hermes update failed on a realistic home:\n" + I.describe(up)
+    assert up.returncode == 0, "noone update failed on a realistic home:\n" + I.describe(up)
     assert I.TRACEBACK not in up.stdout + up.stderr, I.describe(up)
     assert I.git("rev-parse", "HEAD", cwd=sb.checkout) == world["target"], "update exited 0 but HEAD is not the target"
     assert not (sb.checkout / ".git" / "index.lock").exists()

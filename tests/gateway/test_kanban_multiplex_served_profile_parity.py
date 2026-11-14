@@ -14,11 +14,11 @@ import pytest
 from agent.secret_scope import set_multiplex_active
 from gateway.config import Platform
 from gateway.run import GatewayRunner
-from hermes_cli import kanban_db as kb
-from hermes_cli import kanban_db_connect as kbc
-from hermes_cli import kanban_db_dispatch as kbd
-from hermes_cli import kanban_db_notify as kbn
-from hermes_constants import get_hermes_home
+from agent_cli import kanban_db as kb
+from agent_cli import kanban_db_connect as kbc
+from agent_cli import kanban_db_dispatch as kbd
+from agent_cli import kanban_db_notify as kbn
+from agent_constants import get_agent_home
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def served(tmp_path, monkeypatch):
     monkeypatch.setenv("TERMINAL_ENV", "docker")
     monkeypatch.setenv("HERMES_KANBAN_DB", str(tmp_path / "board.db"))
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    monkeypatch.setattr("hermes_constants.get_default_hermes_root", lambda *, home=None: root)
+    monkeypatch.setattr("agent_constants.get_default_agent_root", lambda *, home=None: root)
     set_multiplex_active(True)
     try:
         yield SimpleNamespace(root=root, alpha=alpha)
@@ -68,7 +68,7 @@ def test_worker_for_served_profile_gets_its_own_env_and_toolset_pin(served, monk
     env = spawned["env"]
     assert env["HERMES_HOME"] == str(served.alpha)
     assert "HERMES_MODEL" not in env and "TERMINAL_ENV" not in env
-    assert spawned["argv"][-2:] == ["-m", "hermes_cli.kanban_worker_client"]
+    assert spawned["argv"][-2:] == ["-m", "agent_cli.kanban_worker_client"]
 
 
 class RecordingAdapter:
@@ -77,7 +77,7 @@ class RecordingAdapter:
 
     async def send(self, chat_id, text, metadata=None):
         from gateway.media_policy import media_delivery_strict
-        self.sent.append({"text": text, "home": str(get_hermes_home()), "strict": media_delivery_strict()})
+        self.sent.append({"text": text, "home": str(get_agent_home()), "strict": media_delivery_strict()})
         return SimpleNamespace(success=True, error=None)
 
     async def handle_message(self, event):

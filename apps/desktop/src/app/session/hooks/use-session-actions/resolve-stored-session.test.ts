@@ -1,17 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as HermesModule from '@/hermes'
-import { getSession } from '@/hermes'
+import type * as AgentModule from '@/agent-client'
+import { getSession } from '@/agent-client'
 import { $activeGatewayProfile, $profiles } from '@/store/profile'
 import { $projectTree } from '@/store/projects'
 import { $cronSessions, $messagingSessions, $sessions, $unlistedSessionOwnerRows } from '@/store/session'
 import { $removedSessionIds, tombstoneSessions, untombstoneSessions } from '@/store/session-removal'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 import { cachedSessionRow, resolveStoredSession } from './utils'
 
-vi.mock('@/hermes', async importActual => ({
-  ...(await importActual<typeof HermesModule>()),
+vi.mock('@/agent-client', async importActual => ({
+  ...(await importActual<typeof AgentModule>()),
   getSession: vi.fn()
 }))
 
@@ -68,14 +68,14 @@ describe('resolveStoredSession profile ownership', () => {
   })
 
   it('routes a moved resolve into its current slice instead of duplicating it', async () => {
-    // Cross-room /resume rewrote the row to source='matrix' (#113827): the
+    // Cross-room /resume rewrote the row to source='slack' (#113827): the
     // stale regular-sessions copy must go and the row must land in messaging.
     $sessions.set([session({ id: 's1' })])
-    mockGetSession.mockResolvedValueOnce(session({ id: 's1', profile: 'meta', source: 'matrix' }))
+    mockGetSession.mockResolvedValueOnce(session({ id: 's1', profile: 'meta', source: 'slack' }))
 
     const resolved = await resolveStoredSession('s1')
 
-    expect(resolved?.source).toBe('matrix')
+    expect(resolved?.source).toBe('slack')
     expect($sessions.get()).toEqual([])
     expect($messagingSessions.get().map(s => s.id)).toEqual(['s1'])
   })

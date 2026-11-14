@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from tools.thread_context import propagate_context_to_thread
 from tools.registry import registry, tool_error
 
-from hermes_time import get_timezone_name
+from agent_time import get_timezone_name
 from tools.code_execution_env import _resolve_child_cwd, _resolve_child_python
 from tools.code_execution_rpc import (
     _execute_checked, _private_dirs_cmd, _remote_write, _rpc_poll_loop, tool_errors_since,
@@ -89,7 +89,7 @@ def _spill_full_stdout(stdout_text: str, env: Any = None) -> Optional[str]:
     output is the tenant's and this host keeps none of it."""
     try:
         import hashlib
-        from hermes_constants import get_hermes_dir
+        from agent_constants import get_agent_dir
         from tools.spill_safety import write_text_exclusive
         from tools.tool_result_storage import _persist_hosted
         if len(stdout_text) > MAX_SPILLED_STDOUT_BYTES:
@@ -98,7 +98,7 @@ def _spill_full_stdout(stdout_text: str, env: Any = None) -> Optional[str]:
         digest = hashlib.sha256(stdout_text.encode("utf-8", errors="replace")).hexdigest()[:12]
         if (hosted_path := _persist_hosted(stdout_text, f"exec-stdout-{digest}", env)) is not None:
             return hosted_path or None
-        cache_dir = get_hermes_dir("cache/exec", "exec_spill")
+        cache_dir = get_agent_dir("cache/exec", "exec_spill")
         cache_dir.mkdir(parents=True, exist_ok=True)
         path = cache_dir / f"stdout-{digest}.txt"
         write_text_exclusive(path, stdout_text, private=False, overwrite=True)
@@ -790,7 +790,7 @@ def execute_code(
     if _guard.get("user_approved"):
         from tools.interrupt import clear_current_thread_interrupt
         clear_current_thread_interrupt()
-    from hermes_cli.observability.shared_metrics_loop import record_execution_backend
+    from agent_cli.observability.shared_metrics_loop import record_execution_backend
     from tools.environments.sandbox_scope import hosted_scope
     # A hosted agent's code runs only in its sandbox, never in a kernel on this host.
     if env_type != "local" or hosted_scope() is not None:
@@ -838,7 +838,7 @@ def _load_config() -> dict:
     """Effective ``code_execution`` section (defaults + user file + managed overlay) — runs while the
     module-level schema is built at tool discovery, so it must not import ``cli``."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
         cfg = load_config_readonly().get("code_execution", {})
         return cfg if isinstance(cfg, dict) else {}
     except Exception:

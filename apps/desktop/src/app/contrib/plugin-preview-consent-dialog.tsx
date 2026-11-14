@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { ShieldLock } from '@noone/ui/icons'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -10,7 +11,6 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { useI18n } from '@/i18n'
-import { ShieldLock } from '@/lib/icons'
 import { $previewScriptConsentQueue, answerPreviewScriptConsent } from '@/store/plugin-preview-grants'
 
 /**

@@ -85,7 +85,8 @@ def opt_in_extras(repo_dir: Path) -> list[str]:
 
     with (repo_dir / "pyproject.toml").open("rb") as f:
         data = tomllib.load(f)
-    names = data.get("tool", {}).get("hermes", {}).get("opt-in-extras", [])
+    tool = data.get("tool", {})
+    names = tool.get("agent", tool.get("hermes", {})).get("opt-in-extras", [])
     declared = set(data.get("project", {}).get("optional-dependencies", {}))
     unknown = sorted(set(names) - declared)
     if unknown:

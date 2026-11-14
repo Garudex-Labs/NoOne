@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { setApiRequestConnection, setApiRequestProfile } from '@/hermes'
+import { setApiRequestConnection, setApiRequestProfile } from '@/agent-client'
 
 import { type VoiceLiveHandlers, VoiceLiveSession } from './voice-live'
 

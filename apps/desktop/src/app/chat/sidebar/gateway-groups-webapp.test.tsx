@@ -5,7 +5,7 @@ import { afterEach, expect, it } from 'vitest'
 
 import { setApiRequestConnection } from '@/api/client'
 import { SidebarProvider } from '@/components/ui/sidebar'
-import type { HermesConnection } from '@/global'
+import type { AgentConnection } from '@/global'
 import { $connectionsRegistry } from '@/store/connection-registry-state'
 import { setPrimaryGatewayConnection } from '@/store/gateway'
 import { $sidebarRowMeta, setSidebarGrouping } from '@/store/layout'
@@ -159,7 +159,7 @@ it.each([
       setPrimaryGatewayConnection(
         primary ? { connectionId: primary === 'remote' ? 'remote-1' : 'local', mode: primary } : null
       )
-      $connection.set(active ? ({ mode: active } as HermesConnection) : null)
+      $connection.set(active ? ({ mode: active } as AgentConnection) : null)
       setApiRequestConnection('local')
       $connectionsRegistry.set({
         version: 2,

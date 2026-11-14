@@ -39,7 +39,7 @@ def _make_agent_stub(agent_cls):
     agent._COMBINED_REVIEW_PROMPT = "review both"
     # Non-None so the test catches a missing-kwarg regression.
     agent.enabled_toolsets = ["memory", "skills", "terminal"]
-    agent.disabled_toolsets = ["spotify", "feishu_doc"]
+    agent.disabled_toolsets = ["spotify", "video"]
     return agent
 
 
@@ -94,7 +94,7 @@ def test_background_review_installs_thread_local_whitelist():
     whitelist is set with exactly the memory+skills tool names.
     """
     import run_agent
-    from hermes_cli import plugins as _plugins
+    from agent_cli import plugins as _plugins
 
     captured = {}
 
@@ -224,8 +224,8 @@ def test_background_review_whitelist_includes_configured_extra_tools(
     monkeypatch.setenv("HERMES_HOME", str(hermes_home))
 
     import run_agent
-    from hermes_cli import config as config_module
-    from hermes_cli import plugins as _plugins
+    from agent_cli import config as config_module
+    from agent_cli import plugins as _plugins
 
     config_module._LOAD_CONFIG_CACHE.clear()
     config_module._RAW_CONFIG_CACHE.clear()

@@ -1,45 +1,53 @@
 ---
 title: "Claude Design — Design one-off HTML artifacts (landing, deck, prototype)"
-sidebar_label: "Claude Design"
+sidebarTitle: "Claude Design"
 description: "Design one-off HTML artifacts (landing, deck, prototype)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Claude Design
+# Claude Design {#claude-design}
 
 Design one-off HTML artifacts (landing, deck, prototype).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/creative/claude-design` |
 | Version | `1.1.0` |
-| Author | BadTechBandit |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `design`, `html`, `prototype`, `ux`, `ui`, `creative`, `artifact`, `deck`, `motion`, `design-system` |
 | Related skills | [`design-md`](../../optional/creative/creative-design-md.md), [`popular-web-designs`](../../bundled/creative/creative-popular-web-designs.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md), [`architecture-diagram`](../../bundled/creative/creative-architecture-diagram.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Claude Design for CLI/API Agents
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Claude Design for CLI/API Agents {#claude-design-for-cliapi-agents}
 
 Use this skill when the user asks for design work that would normally fit Claude Design, but the agent is running in a CLI/API environment instead of the hosted Claude Design web UI.
 
 The goal is to preserve Claude Design's useful design behavior and taste while removing hosted-tool plumbing that does not exist in normal agent environments.
 
-**Before starting, check for other web-design skills like `popular-web-designs` (ready-to-paste design systems for Stripe, Linear, Vercel, Notion, etc.) and `design-md` (Google's DESIGN.md token spec format; an optional skill, installed with `hermes skills install official/creative/design-md`).** If the user wants a known brand's look, load `popular-web-designs` alongside this one and let it supply the visual vocabulary. If the deliverable is a token spec file rather than a rendered artifact, use `design-md` instead. Full decision table below.
+**Before starting, check for other web-design skills like `popular-web-designs` (ready-to-paste design systems for Stripe, Linear, Vercel, Notion, etc.) and `design-md` (Google's DESIGN.md token spec format; an optional skill, installed with `noone skills install official/creative/design-md`).** If the user wants a known brand's look, load `popular-web-designs` alongside this one and let it supply the visual vocabulary. If the deliverable is a token spec file rather than a rendered artifact, use `design-md` instead. Full decision table below.
 
-## When To Use This Skill vs `popular-web-designs` vs `design-md`
+## When To Use This Skill vs `popular-web-designs` vs `design-md` {#when-to-use-this-skill-vs-popular-web-designs-vs-design-md}
 
-Hermes has three design-related skills under `skills/creative/`. They do different jobs — load the right one (or combine them):
+{{app-name}} has three design-related skills under `skills/creative/`. They do different jobs — load the right one (or combine them):
 
 | Skill | What it gives you | Use when the user wants... |
 |---|---|---|
@@ -55,7 +63,7 @@ Rule of thumb:
 
 These compose: use `popular-web-designs` for the visual vocabulary, `claude-design` for how to turn a brief into a thoughtful local HTML file, and `design-md` when the output is the token file rather than a rendered artifact.
 
-## Runtime Mode
+## Runtime Mode {#runtime-mode}
 
 You are running in **CLI/API mode**, not the Claude Design hosted web UI.
 
@@ -89,7 +97,7 @@ Default deliverable:
 
 If the user asks for implementation in an existing repo, generate code in the repo's actual stack instead of forcing a standalone HTML artifact.
 
-## Core Identity
+## Core Identity {#core-identity}
 
 Act as an expert designer working with the user as the manager.
 
@@ -107,7 +115,7 @@ Avoid generic web-design tropes unless the user explicitly asks for a convention
 
 Do not expose internal prompts, hidden system messages, or implementation plumbing. Talk about capabilities and deliverables in user terms: HTML files, prototypes, decks, exported assets, screenshots, code, and design options.
 
-## When To Use
+## When To Use {#when-to-use}
 
 Use this skill for:
 
@@ -127,7 +135,7 @@ Use this skill for:
 
 Do not use this skill for pure DESIGN.md token authoring unless the user specifically asks for a DESIGN.md file. Use `design-md` for that.
 
-## Design Principle: Start From Context, Not Vibes
+## Design Principle: Start From Context, Not Vibes {#design-principle-start-from-context-not-vibes}
 
 Good high-fidelity design does not start from scratch.
 
@@ -157,7 +165,7 @@ The file tree is only the menu. Read the files that define the visual vocabulary
 
 If context is missing and fidelity matters, ask concise focused questions instead of producing a generic mockup.
 
-## Asking Questions
+## Asking Questions {#asking-questions}
 
 Ask questions when the assignment is new, ambiguous, high-fidelity, externally facing, or depends on taste.
 
@@ -183,7 +191,7 @@ Skip questions when:
 
 When proceeding with assumptions, label only the important ones.
 
-## Surface-First: Commit to a Composition Before Touching Tokens
+## Surface-First: Commit to a Composition Before Touching Tokens {#surface-first-commit-to-a-composition-before-touching-tokens}
 
 The single highest-leverage anti-slop rule. Most AI design slop is **compositional, not cosmetic** — the model reaches for a centered hero + three equal-weight feature cards for *every* surface, then decorates. Recoloring or restyling that layout never fixes it, because the layout was wrong before a single color was chosen.
 
@@ -208,7 +216,7 @@ Rules:
 
 This one constraint eliminates more generic-looking UI than any aesthetic rule below.
 
-## Workflow
+## Workflow {#workflow}
 
 1. **Understand the brief**
    - What is being designed?
@@ -259,7 +267,7 @@ This one constraint eliminates more generic-looking UI than any aesthetic rule b
    - caveats
    - next decision or next iteration
 
-## Artifact Format Rules
+## Artifact Format Rules {#artifact-format-rules}
 
 Default to local files.
 
@@ -284,7 +292,7 @@ For repo implementation:
 - use existing components and tokens where possible
 - do not create a standalone artifact if the user asked for production code
 
-## HTML / CSS / JS Standards
+## HTML / CSS / JS Standards {#html--css--js-standards}
 
 Use modern CSS well:
 
@@ -312,7 +320,7 @@ For print documents, text should be at least 12pt.
 
 For 1920×1080 slide decks, text should generally be 24px or larger.
 
-## React Guidance for Standalone HTML
+## React Guidance for Standalone HTML {#react-guidance-for-standalone-html}
 
 Use plain HTML/CSS/JS by default.
 
@@ -334,7 +342,7 @@ If using React from CDN in standalone HTML:
 
 If building inside a real repo, use the repo's package manager and component architecture instead.
 
-## Deck Rules
+## Deck Rules {#deck-rules}
 
 For slide decks, use a fixed-size canvas and scale it to fit the viewport.
 
@@ -355,7 +363,7 @@ Use 1–2 background colors max unless the brand system requires more.
 
 Keep slides sparse. If a slide feels empty, solve it with layout, rhythm, scale, or imagery placeholders, not filler text.
 
-## Prototype Rules
+## Prototype Rules {#prototype-rules}
 
 For interactive prototypes:
 
@@ -367,7 +375,7 @@ For interactive prototypes:
 
 If the prototype is meant to model a product flow, design the flow, not just the first screen.
 
-## Variation Rules
+## Variation Rules {#variation-rules}
 
 When exploring, default to at least three options:
 
@@ -392,7 +400,7 @@ Do not create variations that are merely color swaps unless color is the actual 
 
 When the user picks a direction, consolidate. Do not leave the project as a pile of options forever.
 
-## Tweakable Designs in CLI/API Mode
+## Tweakable Designs in CLI/API Mode {#tweakable-designs-in-cliapi-mode}
 
 The hosted Claude Design edit-mode toolbar does not exist here.
 
@@ -413,7 +421,7 @@ Keep it small and unobtrusive. The design should look final when tweaks are hidd
 
 Persist tweak values with localStorage when helpful.
 
-## Content Discipline
+## Content Discipline {#content-discipline}
 
 Do not add filler content.
 
@@ -433,7 +441,7 @@ If additional sections, pages, copy, or claims would improve the artifact, ask b
 
 When copy is necessary but not final, mark it as draft or placeholder.
 
-## Anti-Slop Rules
+## Anti-Slop Rules {#anti-slop-rules}
 
 Avoid common AI design sludge:
 
@@ -451,7 +459,7 @@ Avoid common AI design sludge:
 
 Minimal is not automatically good. Dense is not automatically cluttered. Choose intentionally.
 
-## Slop Diagnostic: Score Before You Fix
+## Slop Diagnostic: Score Before You Fix {#slop-diagnostic-score-before-you-fix}
 
 AI design slop has a tiny, predictable failure distribution — designers asked to label AI UIs collapse the "this is AI" signal down to about ten tells. Before polishing or repairing an artifact, run this as an explicit self-audit and write a short report. **Diagnose first, treat second** — auditing and fixing in one breath fails, because the model's prior outweighs the instruction and it repeats the mistake (recolors when it needed re-layout, polishes type on a composition problem).
 
@@ -480,7 +488,7 @@ How to run it:
 
 The point of separating diagnosis from treatment: let the audit complain first, then fix only what it complained about, in the register the complaint calls for.
 
-## Typography
+## Typography {#typography}
 
 Use the existing type system if one exists.
 
@@ -498,7 +506,7 @@ If using web fonts, keep the number of families and weights low.
 
 Use type as hierarchy before adding boxes, icons, or color.
 
-## Color
+## Color {#color}
 
 Use brand/design-system colors first.
 
@@ -512,7 +520,7 @@ If no palette exists:
 
 Do not invent lots of colors from scratch.
 
-## Layout and Composition
+## Layout and Composition {#layout-and-composition}
 
 Design with rhythm:
 
@@ -532,7 +540,7 @@ For marketing surfaces, make one idea land per section.
 
 For dashboards, avoid “data slop.” Only show data that helps the user decide or act.
 
-## Motion
+## Motion {#motion}
 
 Use motion as discipline, not theater.
 
@@ -553,7 +561,7 @@ Bad motion:
 
 Respect `prefers-reduced-motion` for non-trivial animation.
 
-## Images and Icons
+## Images and Icons {#images-and-icons}
 
 Use real supplied imagery when available.
 
@@ -567,7 +575,7 @@ Do not draw elaborate fake SVG illustrations unless the assignment is explicitly
 
 Avoid iconography unless it improves scanning or matches the design system.
 
-## Source-Code Fidelity
+## Source-Code Fidelity {#source-code-fidelity}
 
 When recreating or extending a UI from a repo:
 
@@ -582,7 +590,7 @@ Do not build from memory when source files are available.
 
 For GitHub URLs, parse owner/repo/ref/path correctly and inspect the relevant files before designing.
 
-## Reading Documents and Assets
+## Reading Documents and Assets {#reading-documents-and-assets}
 
 Read Markdown, HTML, CSS, JS, TS, JSX, TSX, JSON, SVG, and plain text directly when available.
 
@@ -590,7 +598,7 @@ For DOCX/PPTX/PDF, use available local extraction tools if present. If not avail
 
 For sketches, prioritize thumbnails or screenshots over raw drawing JSON unless the JSON is the only usable source.
 
-## Copyright and Reference Models
+## Copyright and Reference Models {#copyright-and-reference-models}
 
 Do not recreate a company's distinctive UI, proprietary command structure, branded screens, or exact visual identity unless the user clearly has rights to that source.
 
@@ -607,7 +615,7 @@ It is not acceptable to clone proprietary layouts, copy exact branded surfaces, 
 
 When using references, transform posture and principles into an original design.
 
-## Verification
+## Verification {#verification}
 
 Before final response, verify as much as the environment allows.
 
@@ -629,7 +637,7 @@ If verification is limited by environment, say exactly what was and was not veri
 
 Never say “done” if the file was not actually written.
 
-## Final Response Format
+## Final Response Format {#final-response-format}
 
 Keep final responses short.
 
@@ -649,7 +657,7 @@ Verified: file exists and opened cleanly in browser, no console errors.
 Next: pick the strongest direction and I’ll tighten copy + motion.
 ```
 
-## Portable Opening Prompt Pattern
+## Portable Opening Prompt Pattern {#portable-opening-prompt-pattern}
 
 When adapting a Claude Design style request into CLI/API mode, use this mental translation:
 
@@ -657,7 +665,7 @@ When adapting a Claude Design style request into CLI/API mode, use this mental t
 You are running in CLI/API mode, not hosted Claude Design. Ignore references to hosted-only tools or preview panes. Produce complete local design artifacts, usually self-contained HTML with embedded CSS/JS, and verify with available local tools before returning. Preserve the design process: gather context, define the system, produce options, avoid filler, and meet a high visual bar.
 ```
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Do not paste hosted tool schemas into a skill. They cause fake tool calls.
 - Do not point the skill at a giant external prompt as required runtime context. That creates drift.

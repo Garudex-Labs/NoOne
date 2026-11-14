@@ -1,34 +1,33 @@
 ---
-sidebar_position: 5
 title: "Adding Providers"
-description: "How to add a new inference provider to Hermes Agent — auth, runtime resolution, CLI flows, adapters, tests, and docs"
+description: "How to add a new inference provider to the agent — auth, runtime resolution, CLI flows, adapters, tests, and docs"
 ---
 
-# Adding Providers
+# Adding Providers {#adding-providers}
 
-Hermes can already talk to any OpenAI-compatible endpoint through the custom provider path. Do not add a built-in provider unless you want first-class UX for that service:
+{{app-name}} can already talk to any OpenAI-compatible endpoint through the custom provider path. Do not add a built-in provider unless you want first-class UX for that service:
 
 - provider-specific auth or token refresh
 - a curated model catalog
-- setup / `hermes model` menu entries
+- setup / `noone model` menu entries
 - provider aliases for `provider:model` syntax
 - a non-OpenAI API shape that needs an adapter
 
 If the provider is just "another OpenAI-compatible base URL and API key", a named custom provider may be enough.
 
-## The mental model
+## The mental model {#the-mental-model}
 
 A built-in provider has to line up across a few layers:
 
-1. `hermes_cli/auth.py` decides how credentials are found.
-2. `hermes_cli/runtime_provider.py` turns that into runtime data:
+1. `agent_cli/auth.py` decides how credentials are found.
+2. `agent_cli/runtime_provider.py` turns that into runtime data:
    - `provider`
    - `api_mode`
    - `base_url`
    - `api_key`
    - `source`
 3. `run_agent.py` uses `api_mode` to decide how requests are built and sent.
-4. `hermes_cli/models.py` and `hermes_cli/main.py` make the provider show up in the CLI. (`hermes_cli/setup.py` delegates to `main.py` automatically — no changes needed there.)
+4. `agent_cli/models.py` and `agent_cli/main.py` make the provider show up in the CLI. (`agent_cli/setup.py` delegates to `main.py` automatically — no changes needed there.)
 5. `agent/auxiliary_client.py` and `agent/model_metadata.py` keep side tasks and token budgeting working.
 
 The important abstraction is `api_mode`.
@@ -39,13 +38,13 @@ The important abstraction is `api_mode`.
 - Anthropic uses `anthropic_messages`.
 - A new non-OpenAI protocol usually means adding a new adapter and a new `api_mode` branch.
 
-### Tool-call wire format
+### Tool-call wire format {#tool-call-wire-format}
 
-Hermes stores conversation history in the OpenAI chat-completions shape internally, so the `chat_completions` transport's `convert_messages` / `convert_tools` (`agent/transports/chat_completions.py`) are near-identity, and every other transport converts *from* that shape into its native protocol. The canonical reference for the shape — `tools` definitions with JSON-schema `parameters`, assistant `tool_calls` entries with stringified `function.arguments`, and `role: "tool"` result messages keyed by `tool_call_id` — is the [OpenAI chat completions API reference](https://platform.openai.com/docs/api-reference/chat/create). When you write a native adapter, that page defines the input side of your conversion; your provider's docs define the output side.
+{{app-name}} stores conversation history in the OpenAI chat-completions shape internally, so the `chat_completions` transport's `convert_messages` / `convert_tools` (`agent/transports/chat_completions.py`) are near-identity, and every other transport converts *from* that shape into its native protocol. The canonical reference for the shape — `tools` definitions with JSON-schema `parameters`, assistant `tool_calls` entries with stringified `function.arguments`, and `role: "tool"` result messages keyed by `tool_call_id` — is the [OpenAI chat completions API reference](https://platform.openai.com/docs/api-reference/chat/create). When you write a native adapter, that page defines the input side of your conversion; your provider's docs define the output side.
 
-## Choose the implementation path first
+## Choose the implementation path first {#choose-the-implementation-path-first}
 
-### Path A — OpenAI-compatible provider
+### Path A — OpenAI-compatible provider {#path-a--openai-compatible-provider}
 
 Use this when the provider accepts standard chat-completions style requests.
 
@@ -60,7 +59,7 @@ Typical work:
 
 You usually do not need a new adapter or a new `api_mode`.
 
-### Path B — Native provider
+### Path B — Native provider {#path-b--native-provider}
 
 Use this when the provider does not behave like OpenAI chat completions.
 
@@ -75,30 +74,38 @@ This path includes everything from Path A plus:
 - `run_agent.py` branches for request building, dispatch, usage extraction, interrupt handling, and response normalization
 - adapter tests
 
-## File checklist
+## File checklist {#file-checklist}
 
-### Required for every built-in provider
+### Required for every built-in provider {#required-for-every-built-in-provider}
 
-1. `hermes_cli/auth.py`
-2. `hermes_cli/models.py`
-3. `hermes_cli/runtime_provider.py`
-4. `hermes_cli/main.py`
+1. `agent_cli/auth.py`
+2. `agent_cli/models.py`
+3. `agent_cli/runtime_provider.py`
+4. `agent_cli/main.py`
 5. `agent/auxiliary_client.py`
 6. `agent/model_metadata.py`
 7. tests
 8. user-facing docs under `website/docs/`
 
-:::tip
-`hermes_cli/setup.py` does **not** need changes. The setup wizard delegates provider/model selection to `select_provider_and_model()` in `main.py` — any provider added there is automatically available in `hermes setup`.
-:::
+<Tip>
 
-### Additional for native / non-OpenAI providers
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+`agent_cli/setup.py` does **not** need changes. The setup wizard delegates provider/model selection to `select_provider_and_model()` in `main.py` — any provider added there is automatically available in `noone setup`.
+
+</Tip>
+
+### Additional for native / non-OpenAI providers {#additional-for-native--non-openai-providers}
 
 10. `agent/<provider>_adapter.py`
 11. `run_agent.py`
 12. `pyproject.toml` if a provider SDK is required
 
-## Fast path: Simple API-key providers
+## Fast path: Simple API-key providers {#fast-path-simple-api-key-providers}
 
 If your provider is just an OpenAI-compatible endpoint that authenticates with a single API key, you do not need to touch `auth.py`, `runtime_provider.py`, `main.py`, or any of the other files in the full checklist below.
 
@@ -117,8 +124,8 @@ When you add a plugin and it calls `register_provider()`, the following wire up 
 4. `env_vars` checked in priority order for the API key
 5. `fallback_models` list registered for the provider
 6. `--provider` CLI flag accepts the provider id
-7. `hermes model` menu includes the provider
-8. `hermes setup` wizard delegates to `main.py` automatically
+7. `noone model` menu includes the provider
+8. `noone setup` wizard delegates to `main.py` automatically
 9. `provider:model` alias syntax works
 10. Runtime resolver returns the correct `base_url` and `api_key`
 11. `--provider <name>` CLI flag accepts the provider id
@@ -128,7 +135,7 @@ User plugins at `$HERMES_HOME/plugins/model-providers/<name>/` override bundled 
 
 See `plugins/model-providers/nvidia/` or `plugins/model-providers/gmi/` as a template, and the full [Model Provider Plugin guide](./model-provider-plugin.md) for field reference, hook idioms, and end-to-end examples.
 
-## Full path: OAuth and complex providers
+## Full path: OAuth and complex providers {#full-path-oauth-and-complex-providers}
 
 Use the full checklist below when your provider needs any of the following:
 
@@ -136,9 +143,9 @@ Use the full checklist below when your provider needs any of the following:
 - A non-OpenAI API shape that requires a new adapter (Anthropic Messages, Codex Responses)
 - Custom endpoint detection or multi-region probing (z.ai, Kimi)
 - A curated static model catalog or live `/models` fetch
-- Provider-specific `hermes model` menu entries with bespoke auth flows
+- Provider-specific `noone model` menu entries with bespoke auth flows
 
-## Step 1: Pick one canonical provider id
+## Step 1: Pick one canonical provider id {#step-1-pick-one-canonical-provider-id}
 
 Choose a single provider id and use it everywhere.
 
@@ -150,17 +157,17 @@ Examples from the repo:
 
 That same id should appear in:
 
-- `PROVIDER_REGISTRY` in `hermes_cli/auth.py`
-- `_PROVIDER_LABELS` in `hermes_cli/models_catalog_static.py` (re-exported by `hermes_cli/models.py`)
-- `_PROVIDER_ALIASES` in both `hermes_cli/auth.py` and `hermes_cli/models_catalog_static.py`
-- CLI `--provider` choices in `hermes_cli/main.py`
+- `PROVIDER_REGISTRY` in `agent_cli/auth.py`
+- `_PROVIDER_LABELS` in `agent_cli/models_catalog_static.py` (re-exported by `agent_cli/models.py`)
+- `_PROVIDER_ALIASES` in both `agent_cli/auth.py` and `agent_cli/models_catalog_static.py`
+- CLI `--provider` choices in `agent_cli/main.py`
 - setup / model selection branches
 - auxiliary-model defaults
 - tests
 
 If the id differs between those files, the provider will feel half-wired: auth may work while `/model`, setup, or runtime resolution silently misses it.
 
-## Step 2: Add auth metadata in `hermes_cli/auth.py`
+## Step 2: Add auth metadata in `agent_cli/auth.py` {#step-2-add-auth-metadata-in-hermes_cliauthpy}
 
 For API-key providers, add a `ProviderConfig` entry to `PROVIDER_REGISTRY` with:
 
@@ -182,14 +189,14 @@ Use the existing providers as templates:
 
 Questions to answer here:
 
-- What env vars should Hermes check, and in what priority order?
+- What env vars should {{app-name}} check, and in what priority order?
 - Does the provider need base-URL overrides?
 - Does it need endpoint probing or token refresh?
 - What should the auth error say when credentials are missing?
 
 If the provider needs something more than "look up an API key", add a dedicated credential resolver instead of shoving logic into unrelated branches.
 
-## Step 3: Add model catalog and aliases in `hermes_cli/models.py`
+## Step 3: Add model catalog and aliases in `agent_cli/models.py` {#step-3-add-model-catalog-and-aliases-in-hermes_climodelspy}
 
 Update the provider catalog so the provider works in menus and in `provider:model` syntax.
 
@@ -212,7 +219,7 @@ kimi:model-name
 
 If aliases are missing here, the provider may authenticate correctly but still fail in `/model` parsing.
 
-## Step 4: Resolve runtime data in `hermes_cli/runtime_provider.py`
+## Step 4: Resolve runtime data in `agent_cli/runtime_provider.py` {#step-4-resolve-runtime-data-in-hermes_cliruntime_providerpy}
 
 `resolve_runtime_provider()` is the shared path used by CLI, gateway, cron, ACP, and helper clients.
 
@@ -231,13 +238,13 @@ Add a branch that returns a dict with at least:
 
 If the provider is OpenAI-compatible, `api_mode` should usually stay `chat_completions`.
 
-Be careful with API-key precedence. Hermes already contains logic to avoid leaking an OpenRouter key to unrelated endpoints. A new provider should be equally explicit about which key goes to which base URL.
+Be careful with API-key precedence. {{app-name}} already contains logic to avoid leaking an OpenRouter key to unrelated endpoints. A new provider should be equally explicit about which key goes to which base URL.
 
-## Step 5: Wire the CLI in `hermes_cli/main.py`
+## Step 5: Wire the CLI in `agent_cli/main.py` {#step-5-wire-the-cli-in-hermes_climainpy}
 
-A provider is not discoverable until it shows up in the interactive `hermes model` flow.
+A provider is not discoverable until it shows up in the interactive `noone model` flow.
 
-Update these in `hermes_cli/main.py`:
+Update these in `agent_cli/main.py`:
 
 - `provider_labels` dict
 - `providers` list in `select_provider_and_model()`
@@ -246,15 +253,23 @@ Update these in `hermes_cli/main.py`:
 - login/logout choices if the provider supports those flows
 - a `_model_flow_<provider>()` function, or reuse `_model_flow_api_key_provider()` if it fits
 
-:::tip
-`hermes_cli/setup.py` does not need changes — it calls `select_provider_and_model()` from `main.py`, so your new provider appears in both `hermes model` and `hermes setup` automatically.
-:::
+<Tip>
 
-## Step 6: Keep auxiliary calls working
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+`agent_cli/setup.py` does not need changes — it calls `select_provider_and_model()` from `main.py`, so your new provider appears in both `noone model` and `noone setup` automatically.
+
+</Tip>
+
+## Step 6: Keep auxiliary calls working {#step-6-keep-auxiliary-calls-working}
 
 Two files matter here:
 
-### `agent/auxiliary_client.py`
+### `agent/auxiliary_client.py` {#agentauxiliary_clientpy}
 
 Add a cheap / fast default aux model to `_API_KEY_PROVIDER_AUX_MODELS` if this is a direct API-key provider.
 
@@ -266,11 +281,11 @@ Auxiliary tasks include things like:
 
 If the provider has no sensible aux default, side tasks may fall back badly or use an expensive main model unexpectedly.
 
-### `agent/model_metadata.py`
+### `agent/model_metadata.py` {#agentmodel_metadatapy}
 
 Add context lengths for the provider's models so token budgeting, compression thresholds, and limits stay sane.
 
-## Step 7: If the provider is native, add an adapter and `run_agent.py` support
+## Step 7: If the provider is native, add an adapter and `run_agent.py` support {#step-7-if-the-provider-is-native-add-an-adapter-and-run_agentpy-support}
 
 If the provider is not plain chat completions, isolate the provider-specific logic in `agent/<provider>_adapter.py`.
 
@@ -278,7 +293,7 @@ Keep `run_agent.py` focused on orchestration. It should call adapter helpers, no
 
 A native provider usually needs work in these places:
 
-### New adapter file
+### New adapter file {#new-adapter-file}
 
 Typical responsibilities:
 
@@ -289,7 +304,7 @@ Typical responsibilities:
 - normalize provider responses back into what `run_agent.py` expects
 - extract usage and finish-reason data
 
-### `run_agent.py`
+### `run_agent.py` {#run_agentpy}
 
 Search for `api_mode` and audit every switch point. At minimum, verify:
 
@@ -306,7 +321,7 @@ Search for `api_mode` and audit every switch point. At minimum, verify:
 
 Also search `run_agent.py` for `self.client.`. Any code path that assumes the standard OpenAI client exists can break when a native provider uses a different client object or `self.client = None`.
 
-### Prompt caching and provider-specific request fields
+### Prompt caching and provider-specific request fields {#prompt-caching-and-provider-specific-request-fields}
 
 Prompt caching and provider-specific knobs are easy to regress.
 
@@ -316,18 +331,18 @@ Examples already in-tree:
 - OpenRouter gets provider-routing fields
 - not every provider should receive every request-side option
 
-When you add a native provider, double-check that Hermes is only sending fields that provider actually understands.
+When you add a native provider, double-check that {{app-name}} is only sending fields that provider actually understands.
 
-## Step 8: Tests
+## Step 8: Tests {#step-8-tests}
 
 At minimum, touch the tests that guard provider wiring.
 
 Common places:
 
-- `tests/hermes_cli/test_runtime_provider_resolution.py`
-- `tests/hermes_cli/test_cli_provider_resolution.py`
-- `tests/hermes_cli/test_model_switch_custom_providers.py` (and adjacent `tests/hermes_cli/test_model_switch_*.py`)
-- `tests/hermes_cli/test_setup_model_provider.py`
+- `tests/agent_cli/test_runtime_provider_resolution.py`
+- `tests/agent_cli/test_cli_provider_resolution.py`
+- `tests/agent_cli/test_model_switch_custom_providers.py` (and adjacent `tests/agent_cli/test_model_switch_*.py`)
+- `tests/agent_cli/test_setup_model_provider.py`
 - `tests/agent/test_provider_parity.py`
 - `tests/agent/test_run_agent.py`
 - `tests/agent/test_<provider>_adapter.py` for a native provider
@@ -341,12 +356,12 @@ For docs-only examples, the exact file set may differ. The point is to cover:
 - provider:model parsing
 - any adapter-specific message conversion
 
-Prepare the [independent test environment](./contributing.md#manual-development-and-test-environment),
+Prepare the [independent test environment](./contribution-guide.md#manual-development-and-test-environment),
 then use the canonical runner, which isolates each file and scrubs credentials:
 
 ```bash
 
-scripts/run_tests.sh tests/hermes_cli/test_runtime_provider_resolution.py tests/hermes_cli/test_cli_provider_resolution.py tests/hermes_cli/test_setup_model_provider.py tests/agent/test_provider_parity.py -q
+scripts/run_tests.sh tests/agent_cli/test_runtime_provider_resolution.py tests/agent_cli/test_cli_provider_resolution.py tests/agent_cli/test_setup_model_provider.py tests/agent/test_provider_parity.py -q
 ```
 
 For deeper changes, run the full suite before pushing:
@@ -355,7 +370,7 @@ For deeper changes, run the full suite before pushing:
 scripts/run_tests.sh tests/ -q
 ```
 
-## Step 9: Live verification
+## Step 9: Live verification {#step-9-live-verification}
 
 After tests, run a real smoke test from the checkout using the
 [PM developer workflow](../reference/package-management.md#developer-workflow) and
@@ -363,20 +378,20 @@ its isolated development home. Leave any test venv before PM activation.
 
 ```bash
 source ./activate
-python hermes chat -q "Say hello" --provider your-provider --model your-model
+python noone chat -q "Say hello" --provider your-provider --model your-model
 ```
 
 Also test the interactive flows if you changed menus:
 
 ```bash
 source ./activate
-python hermes model
-python hermes setup
+python noone model
+python noone setup
 ```
 
 For native providers, verify at least one tool call too, not just a plain text response.
 
-## Step 10: Update user-facing docs
+## Step 10: Update user-facing docs {#step-10-update-user-facing-docs}
 
 If the provider is meant to ship as a first-class option, update the user docs too:
 
@@ -386,21 +401,21 @@ If the provider is meant to ship as a first-class option, update the user docs t
 
 A developer can wire the provider perfectly and still leave users unable to discover the required env vars or setup flow.
 
-## OpenAI-compatible provider checklist
+## OpenAI-compatible provider checklist {#openai-compatible-provider-checklist}
 
 Use this if the provider is standard chat completions.
 
-- [ ] `ProviderConfig` added in `hermes_cli/auth.py`
-- [ ] aliases added in `hermes_cli/auth.py` and `hermes_cli/models.py`
-- [ ] model catalog added in `hermes_cli/models.py`
-- [ ] runtime branch added in `hermes_cli/runtime_provider.py`
-- [ ] CLI wiring added in `hermes_cli/main.py` (setup.py inherits automatically)
+- [ ] `ProviderConfig` added in `agent_cli/auth.py`
+- [ ] aliases added in `agent_cli/auth.py` and `agent_cli/models.py`
+- [ ] model catalog added in `agent_cli/models.py`
+- [ ] runtime branch added in `agent_cli/runtime_provider.py`
+- [ ] CLI wiring added in `agent_cli/main.py` (setup.py inherits automatically)
 - [ ] aux model added in `agent/auxiliary_client.py`
 - [ ] context lengths added in `agent/model_metadata.py`
 - [ ] runtime / CLI tests updated
 - [ ] user docs updated
 
-## Native provider checklist
+## Native provider checklist {#native-provider-checklist}
 
 Use this when the provider needs a new protocol path.
 
@@ -413,37 +428,37 @@ Use this when the provider needs a new protocol path.
 - [ ] adapter tests added
 - [ ] live smoke test passes
 
-## Common pitfalls
+## Common pitfalls {#common-pitfalls}
 
-### 1. Adding the provider to auth but not to model parsing
+### 1. Adding the provider to auth but not to model parsing {#1-adding-the-provider-to-auth-but-not-to-model-parsing}
 
 That makes credentials resolve correctly while `/model` and `provider:model` inputs fail.
 
-### 2. Forgetting that `config["model"]` can be a string or a dict
+### 2. Forgetting that `config["model"]` can be a string or a dict {#2-forgetting-that-configmodel-can-be-a-string-or-a-dict}
 
 A lot of provider-selection code has to normalize both forms.
 
-### 3. Assuming a built-in provider is required
+### 3. Assuming a built-in provider is required {#3-assuming-a-built-in-provider-is-required}
 
 If the service is just OpenAI-compatible, a custom provider may already solve the user problem with less maintenance.
 
-### 4. Forgetting auxiliary paths
+### 4. Forgetting auxiliary paths {#4-forgetting-auxiliary-paths}
 
 The main chat path can work while summarization, memory flushes, or vision helpers fail because aux routing was never updated.
 
-### 5. Native-provider branches hiding in `run_agent.py`
+### 5. Native-provider branches hiding in `run_agent.py` {#5-native-provider-branches-hiding-in-run_agentpy}
 
 Search for `api_mode` and `self.client.`. Do not assume the obvious request path is the only one.
 
-### 6. Sending OpenRouter-only knobs to other providers
+### 6. Sending OpenRouter-only knobs to other providers {#6-sending-openrouter-only-knobs-to-other-providers}
 
 Fields like provider routing belong only on the providers that support them.
 
-### 7. Updating `hermes model` but not `hermes setup`
+### 7. Updating `noone model` but not `noone setup` {#7-updating-hermes-model-but-not-hermes-setup}
 
 Both flows need to know about the provider.
 
-## Good search targets while implementing
+## Good search targets while implementing {#good-search-targets-while-implementing}
 
 If you are hunting for all the places a provider touches, search these symbols:
 
@@ -457,8 +472,8 @@ If you are hunting for all the places a provider touches, search these symbols:
 - `_API_KEY_PROVIDER_AUX_MODELS`
 - `self.client.`
 
-## Related docs
+## Related docs {#related-docs}
 
 - [Provider Runtime Resolution](./provider-runtime.md)
 - [Architecture](./architecture.md)
-- [Contributing](./contributing.md)
+- [Contributing](./contribution-guide.md)

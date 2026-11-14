@@ -1,35 +1,43 @@
 ---
 title: "Qmd — Hybrid local search over notes, docs, and transcripts"
-sidebar_label: "Qmd"
+sidebarTitle: "Qmd"
 description: "Hybrid local search over notes, docs, and transcripts"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Qmd
+# Qmd {#qmd}
 
 Hybrid local search over notes, docs, and transcripts.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/qmd` |
+| Source | Optional — install with `noone skills install official/research/qmd` |
 | Path | `optional-skills/research/qmd` |
 | Version | `1.0.0` |
-| Author | Hermes Agent + Teknium |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | macos, linux |
 | Tags | `Search`, `Knowledge-Base`, `RAG`, `Notes`, `MCP`, `Local-AI` |
 | Related skills | [`obsidian`](../../bundled/note-taking/note-taking-obsidian.md), [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md), [`arxiv`](../../bundled/research/research-arxiv.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# QMD — Query Markup Documents
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# QMD — Query Markup Documents {#qmd--query-markup-documents}
 
 Local, on-device search engine for personal knowledge bases. Indexes markdown
 notes, meeting transcripts, documentation, and any text-based files, then
@@ -38,7 +46,7 @@ LLM-powered reranking — all running locally with no cloud dependencies.
 
 Created by [Tobi Lütke](https://github.com/tobi/qmd). MIT licensed.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks to search their notes, docs, knowledge base, or meeting transcripts
 - User wants to find something across a large collection of markdown/text files
@@ -47,9 +55,9 @@ Created by [Tobi Lütke](https://github.com/tobi/qmd). MIT licensed.
 - User asks to set up a local knowledge base or document search system
 - Keywords: "search my notes", "find in my docs", "knowledge base", "qmd"
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
-### Node.js >= 22 (required)
+### Node.js >= 22 (required) {#nodejs--22-required}
 
 ```bash
 # Check version
@@ -65,7 +73,7 @@ sudo apt-get install -y nodejs
 nvm install 22 && nvm use 22
 ```
 
-### SQLite with Extension Support (macOS only)
+### SQLite with Extension Support (macOS only) {#sqlite-with-extension-support-macos-only}
 
 macOS system SQLite lacks extension loading. Install via Homebrew:
 
@@ -73,7 +81,7 @@ macOS system SQLite lacks extension loading. Install via Homebrew:
 brew install sqlite
 ```
 
-### Install qmd
+### Install qmd {#install-qmd}
 
 ```bash
 npm install -g @tobilu/qmd
@@ -89,14 +97,14 @@ First run auto-downloads 3 local GGUF models (~2GB total):
 | qwen3-reranker-0.6b-q8_0 | Result reranking | ~640MB |
 | qmd-query-expansion-1.7B | Query expansion | ~1.1GB |
 
-### Verify Installation
+### Verify Installation {#verify-installation}
 
 ```bash
 qmd --version
 qmd status
 ```
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Command | What It Does | Speed |
 |---------|-------------|-------|
@@ -112,9 +120,9 @@ qmd status
 | `qmd mcp` | Start MCP server (stdio) | persistent |
 | `qmd mcp --http --daemon` | Start MCP server (HTTP, warm models) | persistent |
 
-## Setup Workflow
+## Setup Workflow {#setup-workflow}
 
-### 1. Add Collections
+### 1. Add Collections {#1-add-collections}
 
 Point qmd at directories containing your documents:
 
@@ -132,7 +140,7 @@ qmd collection add ~/meetings --name meetings
 qmd collection list
 ```
 
-### 2. Add Context Descriptions
+### 2. Add Context Descriptions {#2-add-context-descriptions}
 
 Context metadata helps the search engine understand what each collection
 contains. This significantly improves retrieval quality:
@@ -143,7 +151,7 @@ qmd context add qmd://project-docs "Technical documentation for the main project
 qmd context add qmd://meetings "Meeting transcripts and action items from team syncs"
 ```
 
-### 3. Generate Embeddings
+### 3. Generate Embeddings {#3-generate-embeddings}
 
 ```bash
 qmd embed
@@ -152,15 +160,15 @@ qmd embed
 This processes all documents in all collections and generates vector
 embeddings. Re-run after adding new documents or collections.
 
-### 4. Verify
+### 4. Verify {#4-verify}
 
 ```bash
 qmd status   # shows index health, collection stats, model info
 ```
 
-## Search Patterns
+## Search Patterns {#search-patterns}
 
-### Fast Keyword Search (BM25)
+### Fast Keyword Search (BM25) {#fast-keyword-search-bm25}
 
 Best for: exact terms, code identifiers, names, known phrases.
 No models loaded — near-instant results.
@@ -170,7 +178,7 @@ qmd search "authentication middleware"
 qmd search "handleError async"
 ```
 
-### Semantic Vector Search
+### Semantic Vector Search {#semantic-vector-search}
 
 Best for: natural language questions, conceptual queries.
 Loads embedding model (~3s first query).
@@ -180,7 +188,7 @@ qmd vsearch "how does the rate limiter handle burst traffic"
 qmd vsearch "ideas for improving onboarding flow"
 ```
 
-### Hybrid Search with Reranking (Best Quality)
+### Hybrid Search with Reranking (Best Quality) {#hybrid-search-with-reranking-best-quality}
 
 Best for: important queries where quality matters most.
 Uses all 3 models — query expansion, parallel BM25+vector, reranking.
@@ -189,7 +197,7 @@ Uses all 3 models — query expansion, parallel BM25+vector, reranking.
 qmd query "what decisions were made about the database migration"
 ```
 
-### Structured Multi-Mode Queries
+### Structured Multi-Mode Queries {#structured-multi-mode-queries}
 
 Combine different search types in a single query for precision:
 
@@ -201,7 +209,7 @@ qmd query $'lex: rate limiter\nvec: how does throttling work under load'
 qmd query $'expand: database migration plan\nlex: "schema change"'
 ```
 
-### Query Syntax (lex/BM25 mode)
+### Query Syntax (lex/BM25 mode) {#query-syntax-lexbm25-mode}
 
 | Syntax | Effect | Example |
 |--------|--------|---------|
@@ -209,7 +217,7 @@ qmd query $'expand: database migration plan\nlex: "schema change"'
 | `"phrase"` | Exact phrase | `"rate limiter"` |
 | `-term` | Exclude term | `performance -sports` |
 
-### HyDE (Hypothetical Document Embeddings)
+### HyDE (Hypothetical Document Embeddings) {#hyde-hypothetical-document-embeddings}
 
 For complex topics, write what you expect the answer to look like:
 
@@ -217,14 +225,14 @@ For complex topics, write what you expect the answer to look like:
 qmd query $'hyde: The migration plan involves three phases. First, we add the new columns without dropping the old ones. Then we backfill data. Finally we cut over and remove legacy columns.'
 ```
 
-### Scoping to Collections
+### Scoping to Collections {#scoping-to-collections}
 
 ```bash
 qmd search "query" --collection notes
 qmd query "query" --collection project-docs
 ```
 
-### Output Formats
+### Output Formats {#output-formats}
 
 ```bash
 qmd search "query" --json        # JSON output (best for parsing)
@@ -235,14 +243,14 @@ qmd get "file.md:50" -l 100     # Get specific line range
 qmd multi-get "journals/*.md" --json  # Batch retrieve by glob
 ```
 
-## MCP Integration (Recommended)
+## MCP Integration (Recommended) {#mcp-integration-recommended}
 
 qmd exposes an MCP server that provides search tools directly to
-Hermes Agent via the native MCP client. This is the preferred
+{{app-name}} via the native MCP client. This is the preferred
 integration — once configured, the agent gets qmd tools automatically
 without needing to load this skill.
 
-### Option A: Stdio Mode (Simple)
+### Option A: Stdio Mode (Simple) {#option-a-stdio-mode-simple}
 
 Add to `~/.hermes/config.yaml`:
 
@@ -261,7 +269,7 @@ This registers tools: `mcp_qmd_search`, `mcp_qmd_vsearch`,
 **Tradeoff:** Models load on first search call (~19s cold start),
 then stay warm for the session. Acceptable for occasional use.
 
-### Option B: HTTP Daemon Mode (Fast, Recommended for Heavy Use)
+### Option B: HTTP Daemon Mode (Fast, Recommended for Heavy Use) {#option-b-http-daemon-mode-fast-recommended-for-heavy-use}
 
 Start the qmd daemon separately — it keeps models warm in memory:
 
@@ -272,7 +280,7 @@ qmd mcp --http --daemon
 # Runs on http://localhost:8181 by default
 ```
 
-Then configure Hermes Agent to connect via HTTP:
+Then configure {{app-name}} to connect via HTTP:
 
 ```yaml
 mcp_servers:
@@ -284,9 +292,9 @@ mcp_servers:
 **Tradeoff:** Uses ~2GB RAM while running, but every query is fast
 (~2-3s). Best for users who search frequently.
 
-### Keeping the Daemon Running
+### Keeping the Daemon Running {#keeping-the-daemon-running}
 
-#### macOS (launchd)
+#### macOS (launchd) {#macos-launchd}
 
 ```bash
 cat > ~/Library/LaunchAgents/com.qmd.daemon.plist << 'EOF'
@@ -319,7 +327,7 @@ EOF
 launchctl load ~/Library/LaunchAgents/com.qmd.daemon.plist
 ```
 
-#### Linux (systemd user service)
+#### Linux (systemd user service) {#linux-systemd-user-service}
 
 ```bash
 mkdir -p ~/.config/systemd/user
@@ -344,7 +352,7 @@ systemctl --user enable --now qmd-daemon
 systemctl --user status qmd-daemon
 ```
 
-### MCP Tools Reference
+### MCP Tools Reference {#mcp-tools-reference}
 
 Once connected, these tools are available as `mcp_qmd_*`:
 
@@ -369,7 +377,7 @@ The MCP tools accept structured JSON queries for multi-mode search:
 }
 ```
 
-## CLI Usage (Without MCP)
+## CLI Usage (Without MCP) {#cli-usage-without-mcp}
 
 When MCP is not configured, use qmd directly via terminal:
 
@@ -386,7 +394,7 @@ terminal(command="qmd embed")
 terminal(command="qmd status")
 ```
 
-## How the Search Pipeline Works
+## How the Search Pipeline Works {#how-the-search-pipeline-works}
 
 Understanding the internals helps choose the right search mode:
 
@@ -404,7 +412,7 @@ Understanding the internals helps choose the right search mode:
 code blocks, blank lines) targeting ~900 tokens with 15% overlap. Code
 blocks are never split mid-block.
 
-## Best Practices
+## Best Practices {#best-practices}
 
 1. **Always add context descriptions** — `qmd context add` dramatically
    improves retrieval accuracy. Describe what each collection contains.
@@ -421,39 +429,39 @@ blocks are never split mid-block.
 7. **First query in structured search gets 2x weight** — put the most
    important/certain query first when combining lex and vec.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
-### "Models downloading on first run"
+### "Models downloading on first run" {#models-downloading-on-first-run}
 Normal — qmd auto-downloads ~2GB of GGUF models on first use.
 This is a one-time operation.
 
-### Cold start latency (~19s)
+### Cold start latency (~19s) {#cold-start-latency-19s}
 This happens when models aren't loaded in memory. Solutions:
 - Use HTTP daemon mode (`qmd mcp --http --daemon`) to keep warm
 - Use `qmd search` (BM25 only) when models aren't needed
 - MCP stdio mode loads models on first search, stays warm for session
 
-### macOS: "unable to load extension"
+### macOS: "unable to load extension" {#macos-unable-to-load-extension}
 Install Homebrew SQLite: `brew install sqlite`
 Then ensure it's on PATH before system SQLite.
 
-### "No collections found"
+### "No collections found" {#no-collections-found}
 Run `qmd collection add <path> --name <name>` to add directories,
 then `qmd embed` to index them.
 
-### Embedding model override (CJK/multilingual)
+### Embedding model override (CJK/multilingual) {#embedding-model-override-cjkmultilingual}
 Set `QMD_EMBED_MODEL` environment variable for non-English content:
 ```bash
 export QMD_EMBED_MODEL="your-multilingual-model"
 ```
 
-## Data Storage
+## Data Storage {#data-storage}
 
 - **Index & vectors:** `~/.cache/qmd/index.sqlite`
 - **Models:** Auto-downloaded to local cache on first run
 - **No cloud dependencies** — everything runs locally
 
-## References
+## References {#references}
 
 - [GitHub: tobi/qmd](https://github.com/tobi/qmd)
 - [QMD Changelog](https://github.com/tobi/qmd/blob/main/CHANGELOG.md)

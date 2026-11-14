@@ -35,7 +35,7 @@ def _prefix_names_served_profile(profile: str) -> bool:
     """True when a /p/<profile>/ prefix names the profile this gateway serves. Fail closed: a
     single-profile gateway answering /p/<x>/ served the owner's toolsets under another URL."""
     try:
-        from hermes_cli.profiles import profile_matches_home
+        from agent_cli.profiles import profile_matches_home
         return profile_matches_home(profile)
     except Exception:
         return False
@@ -130,7 +130,7 @@ from gateway.readiness import collect_runtime_readiness
 from gateway.parked_route_refusal import ParkedRouteRefused
 from gateway.platforms._shared import coerce_port as _coerce_port, get_scoped_secret as _get_scoped_secret
 from gateway.platforms.tcp_site import start_tcp_site
-from hermes_state_errors import SessionActiveWriteGuardError
+from agent_state_errors import SessionActiveWriteGuardError
 
 
 logger = logging.getLogger(__name__)
@@ -146,7 +146,7 @@ async def _call_verifier(verifier, *args, **kwargs):
 
 def _hermes_version() -> str:
     """Canonical base version for API protocol and compatibility payloads."""
-    from hermes_cli.version_info import get_version_info
+    from agent_cli.version_info import get_version_info
     return get_version_info().base_version
 
 
@@ -254,7 +254,7 @@ def _apply_runtime_agent_overrides(
 def _resolve_request_runtime_agent_kwargs(provider: str, target_model: Optional[str] = None) -> dict[str, Any]:
     """gateway.run._resolve_runtime_agent_kwargs() for an explicit provider/model, so an API
     caller uses the same authenticated provider catalog without mutating config.yaml."""
-    from hermes_cli.runtime_provider import resolve_runtime_provider, format_runtime_provider_error, _get_model_config
+    from agent_cli.runtime_provider import resolve_runtime_provider, format_runtime_provider_error, _get_model_config
     try:
         runtime = resolve_runtime_provider(requested=provider, target_model=target_model)
     except Exception as exc:
@@ -869,9 +869,9 @@ def _names_launch_profile(profile: str) -> bool:
     """True when a /p/<profile>/ prefix names the profile this process was LAUNCHED as: its
     un-prefixed and prefixed requests are one profile and must key one session."""
     try:
-        from hermes_cli.profiles import profile_matches_home
-        from hermes_constants import get_routing_process_hermes_home
-        return profile_matches_home(profile, home=get_routing_process_hermes_home())
+        from agent_cli.profiles import profile_matches_home
+        from agent_constants import get_routing_process_agent_home
+        return profile_matches_home(profile, home=get_routing_process_agent_home())
     except Exception:
         return False
 
@@ -939,7 +939,7 @@ class _ProviderAuthResolutionError(RuntimeError):
     def is_rate_limited(self) -> bool:
         """A quota/429 cap with valid credentials must not be labelled an authentication
         failure — the cause chain (RuntimeError -> AuthError) tells them apart (#89401)."""
-        from hermes_cli.auth import is_rate_limited_auth_error
+        from agent_cli.auth import is_rate_limited_auth_error
 
         cause = self.__cause__
         cause = getattr(cause, "__cause__", None) if isinstance(cause, RuntimeError) else cause
@@ -1079,9 +1079,9 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         self._app: Optional[web.Application] = None
         self._runner: Optional[web.AppRunner] = None
         self._site: Optional[web.TCPSite] = None
-        from hermes_constants import get_hermes_home
+        from agent_constants import get_agent_home
         self._response_store = ResponseStore()  # this home's; a /p/<profile>/ route gets its own
-        self._response_store_home = str(get_hermes_home())
+        self._response_store_home = str(get_agent_home())
         self._response_stores: dict[str, ResponseStore] = {}
         self._response_store_lock = threading.Lock()
         _api_runs._initialize_run_state(self, store_factory=RunIdempotencyStore)
@@ -1219,7 +1219,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
     def _resolve_api_server_int(key: str, *, default: int) -> int:
         """Integer setting under gateway.api_server (unreadable config -> default; negatives -> 0)."""
         try:
-            from hermes_cli.config import cfg_get, load_config
+            from agent_cli.config import cfg_get, load_config
             value = int(cfg_get(load_config(), "gateway", "api_server", key, default=default))
         except Exception:
             return default
@@ -1311,11 +1311,11 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
     @staticmethod
     def _resolve_model_name(explicit: str) -> str:
         """Advertised /v1/models name: explicit override > active profile name > "hermes-agent"
-        (precedence owned by ``hermes_cli.model_switch.resolve_effective_model``)."""
-        from hermes_cli.model_switch import resolve_effective_model
+        (precedence owned by ``agent_cli.model_switch.resolve_effective_model``)."""
+        from agent_cli.model_switch import resolve_effective_model
         profile_name = ""
         with suppress(Exception):
-            from hermes_cli.profiles import get_active_profile_name
+            from agent_cli.profiles import get_active_profile_name
             profile = get_active_profile_name()  # launch profile, pre-identity (advertised model name)
             if profile and profile not in {"default", "custom"}:
                 profile_name = profile
@@ -1393,7 +1393,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             return self._api_key
         try:
             from agent.secret_scope import get_secret
-            from hermes_cli.auth import has_usable_secret
+            from agent_cli.auth import has_usable_secret
             key = get_secret("API_SERVER_KEY", "") or ""
             return key if has_usable_secret(key, min_length=16) else ""
         except Exception as exc:
@@ -1516,11 +1516,11 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
                 from agent.secret_scope import is_multiplex_active
                 if is_multiplex_active():
                     from gateway.run import _profile_runtime_scope
-                    from hermes_constants import get_hermes_home
-                    return _profile_runtime_scope(get_hermes_home())
+                    from agent_constants import get_agent_home
+                    return _profile_runtime_scope(get_agent_home())
             return nullcontext()
         from gateway.run import _profile_runtime_scope
-        from hermes_cli.profiles import get_profile_dir
+        from agent_cli.profiles import get_profile_dir
         return _profile_runtime_scope(get_profile_dir(profile))
 
     async def _handle_profile_ingress(self, request: web.Request) -> web.StreamResponse:
@@ -1678,8 +1678,8 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
     def _current_response_store(self) -> ResponseStore:
         """Responses state of the routed profile's home. Conversation names are client-chosen, so one
         shared store let any profile's key read, chain onto and overwrite another's (#84253)."""
-        from hermes_constants import get_hermes_home
-        home = get_hermes_home()
+        from agent_constants import get_agent_home
+        home = get_agent_home()
         if str(home) == self._response_store_home:
             return self._response_store
         with self._response_store_lock:
@@ -1696,7 +1696,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         if self.gateway_runner is not None:
             from gateway.platforms.api_server_store import selected_session_db
             return selected_session_db(self, home)
-        from hermes_state_registry import acquire
+        from agent_state_registry import acquire
         key = str(home)
         with self._session_db_cache_lock:
             if self._session_db_cache_closed:
@@ -1709,7 +1709,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
 
     def _cached_session_db_locked(self, key: str) -> Optional[Any]:
         """Caller holds ``_session_db_cache_lock``. A profile unserve/delete tears the home's
-        generation down through ``hermes_state_registry.close_all_under`` (clearing
+        generation down through ``agent_state_registry.close_all_under`` (clearing
         ``_shared_registry_owned``) without telling this cache; serving that handle would keep
         raising ``StateDbReplacedError`` after a recreate, so drop it and let the caller reopen."""
         db = self._session_dbs.get(key)
@@ -1729,23 +1729,23 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             if db is shared_db:
                 continue
             try:
-                from hermes_state_registry import release_or_close
+                from agent_state_registry import release_or_close
                 release_or_close(db)
             except Exception:
                 logger.debug("Failed to close API-server SessionDB", exc_info=True)
 
     def _ensure_session_db(self):
-        """SessionDB for the active profile home (the runtime scope redirects ``get_hermes_home()``
+        """SessionDB for the active profile home (the runtime scope redirects ``get_agent_home()``
         per profile). Sync, for ``_create_agent``; handlers use ``_ensure_session_db_async``."""
         if self.gateway_runner is not None:
-            from hermes_constants import get_hermes_home
+            from agent_constants import get_agent_home
             from gateway.platforms.api_server_store import selected_session_db
-            return selected_session_db(self, get_hermes_home())
+            return selected_session_db(self, get_agent_home())
         if self._session_db is not None:
             return self._session_db
         try:
-            from hermes_constants import get_hermes_home
-            return self._open_and_cache_session_db(get_hermes_home())
+            from agent_constants import get_agent_home
+            return self._open_and_cache_session_db(get_agent_home())
         except Exception as e:
             logger.debug("SessionDB unavailable for API server: %s", e)
             return None
@@ -1754,14 +1754,14 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         """Async variant: the profile home is captured on the loop thread (its scope is invisible
         inside ``to_thread``), only the blocking open runs in the worker, single-flight locked."""
         if self.gateway_runner is not None:
-            from hermes_constants import get_hermes_home
+            from agent_constants import get_agent_home
             from gateway.platforms.api_server_store import selected_session_db
-            return selected_session_db(self, get_hermes_home())
+            return selected_session_db(self, get_agent_home())
         if self._session_db is not None:
             return self._session_db
         try:
-            from hermes_constants import get_hermes_home
-            home = get_hermes_home()
+            from agent_constants import get_agent_home
+            home = get_agent_home()
             key = str(home)
             with self._session_db_cache_lock:
                 cached = self._cached_session_db_locked(key)
@@ -2079,10 +2079,10 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
     def _recover_or_record_model(self, model: str, runtime_kwargs: dict[str, Any], gateway_session_key) -> str:
         """Fill an empty resolved model: provider's default catalog model, then the last-known-good
         model for this key / process-wide. Non-empty non-virtual models are recorded instead."""
-        # No model.default but a provider resolved (e.g. `hermes auth add` without `hermes model`).
+        # No model.default but a provider resolved (e.g. `noone auth add` without `noone model`).
         if not model and runtime_kwargs.get("provider"):
             with suppress(Exception):
-                from hermes_cli.models import get_default_model_for_provider
+                from agent_cli.models import get_default_model_for_provider
                 model = get_default_model_for_provider(runtime_kwargs["provider"])
                 if model:
                     logger.info(
@@ -2125,8 +2125,8 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         current_provider = _clean_request_string(runtime_kwargs.get("provider"))
         session_override = None if confirmed_runtime_lock else self._session_model_override_for(session_key)
         # Model-string precedence (override > session-persisted > global) is owned by
-        # hermes_cli.model_switch.resolve_effective_model.
-        from hermes_cli.model_switch import resolve_effective_model
+        # agent_cli.model_switch.resolve_effective_model.
+        from agent_cli.model_switch import resolve_effective_model
         if session_override:
             model = resolve_effective_model(session_override, None, model)
             self._apply_provider_runtime(
@@ -2193,7 +2193,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         from gateway.run import (
             _checkpoint_agent_kwargs, _current_max_iterations, _resolve_runtime_agent_kwargs,
             _resolve_gateway_model, _load_gateway_config, GatewayRunner)
-        from hermes_cli.tools_config import _get_platform_tools
+        from agent_cli.tools_config import _get_platform_tools
         # RuntimeError is caught ONLY here (sole provider-auth raiser); the typed subclass keeps
         # run_conversation() errors distinct.
         try:
@@ -2337,7 +2337,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         include_unconfigured = _coerce_request_bool(
             request.query.get("include_unconfigured"), default=True)
         try:
-            from hermes_cli.inventory import build_model_options_payload, load_picker_context
+            from agent_cli.inventory import build_model_options_payload, load_picker_context
 
             def _build_payload() -> dict[str, Any]:
                 return build_model_options_payload(
@@ -2398,10 +2398,8 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         """GET /v1/toolsets — each toolset the api_server agent exposes: enabled/configured state
         plus the concrete tool names it expands to."""
         try:
-            from hermes_cli.config import load_config
-            from hermes_cli.tools_config import (
-                _get_effective_configurable_toolsets, _get_platform_tools, _toolset_has_keys,
-                get_nous_subscription_features)
+            from agent_cli.config import load_config
+            from agent_cli.tools_config import _get_effective_configurable_toolsets, _get_platform_tools, _toolset_has_keys
             from toolsets import resolve_toolset
             config = load_config()
             enabled_toolsets = _get_platform_tools(config, "api_server", include_default_mcp_servers=False)
@@ -2526,7 +2524,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         offset = self._parse_nonnegative_int(request.query.get("offset"), default=0, maximum=1_000_000)
         source = request.query.get("source") or None
         include_children = _coerce_request_bool(request.query.get("include_children"), default=False)
-        # Exact-title lookup (`hermes peer dm` -> canonical "Bot Chat"). include_hidden is honored
+        # Exact-title lookup (`noone peer dm` -> canonical "Bot Chat"). include_hidden is honored
         # ONLY with a title filter: a blanket hidden listing stays off this client surface.
         title_filter = (request.query.get("title") or "").strip() or None
         include_hidden = bool(title_filter) and _coerce_request_bool(
@@ -2545,13 +2543,13 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
 
         sessions = await _list() or (await reset_local_title_owner(db, title_filter, include_hidden, source))
         if title_filter and not sessions:
-            # A canonical Bot Chat auto-archived by the orphan reaper would make `hermes peer dm`
+            # A canonical Bot Chat auto-archived by the orphan reaper would make `noone peer dm`
             # mint transient sessions: resurrect and re-list; deliberate archives stay put.
             try:
                 # Recoverable-archive resurrection (#92687): a canonical Bot Chat archived by the ws-orphan
                 # reaper / older agent cleanup is invisible to list_sessions_rich (include_archived=False),
-                # which would fail `hermes peer dm` resolution and mint transient sessions — same accident
-                # the tui_gateway lookups heal.
+                # which would fail `noone peer dm` resolution and mint transient sessions — same accident
+                # the agent_backend lookups heal.
                 from tools.bot_mode_probe import BOT_CHAT_TITLE
 
                 def _resurrect() -> bool:
@@ -2613,15 +2611,15 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         title = body.get("title")
 
         def _atomic(conn):
-            from hermes_state_mutation_retirement import create_conflict
+            from agent_state_mutation_retirement import create_conflict
             if conflict := create_conflict(conn, session_id):  # one BEGIN IMMEDIATE write: a racing create sees the row
                 return None, conflict
             conn.execute(
                 """INSERT INTO sessions (
-                   id, source, model, model_config, system_prompt, started_at
+                   id, source, model, model_config, system_prompt_hash, started_at
                 ) VALUES (?, ?, ?, ?, ?, ?)""",
                 (session_id, source, model_name, json.dumps(model_config) if model_config else None,
-                 system_prompt, time.time()))
+                 db._store_system_prompt(conn, system_prompt), time.time()))
             if title is not None:
                 clean_title = db.sanitize_title(str(title))
                 if clean_title:
@@ -2700,11 +2698,11 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         if db is None:
             return self._session_db_unavailable()
         # Same profile home the DB was resolved from (the profile middleware scopes
-        # get_hermes_home() for this request) — without it the transcript/dump scrub is skipped.
+        # get_agent_home() for this request) — without it the transcript/dump scrub is skipped.
         sessions_dir = None
         try:
-            from hermes_constants import get_hermes_home
-            sessions_dir = Path(get_hermes_home()) / "sessions"
+            from agent_constants import get_agent_home
+            sessions_dir = Path(get_agent_home()) / "sessions"
         except Exception:
             logger.debug("sessions dir unavailable for delete of %s", session_id, exc_info=True)
         try:
@@ -2954,11 +2952,11 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
     async def _answer_through_live_bot_chat(self, ctx: dict[str, Any]) -> Optional[web.Response]:
         """Hand a turn aimed at a canonical Bot Chat that a Desktop holds live to that owner.
 
-        This is the ``hermes peer dm`` transport. Running the turn here would make this process a
+        This is the ``noone peer dm`` transport. Running the turn here would make this process a
         second writer beside the lease holder: the open chat never shows the message or the reply,
         its live context never learns of them, and the two transcripts interleave in state.db.
         Local and relayed DMs already hand such a message to the owner's mailbox
-        (``tools/bot_mode_dm.py``, ``tui_gateway/methods_bot_relay.py``). This waits for the owner's
+        (``tools/bot_mode_dm.py``, ``agent_backend/methods_bot_relay.py``). This waits for the owner's
         receipt on the same budget as the local path, so the peer still gets the reply on this call.
         """
         admitted = await self._admit_to_live_bot_chat(ctx["session_id"], ctx["user_message"], ctx["run_kwargs"].get("turn_author"))
@@ -3039,7 +3037,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
     @_admit_api_agent_request
     async def _handle_session_chat(self, request: web.Request) -> web.Response:
         """POST /api/sessions/{session_id}/chat — one synchronous agent turn (plus the delivery lanes'
-        one bounded re-run of a transient failure; ``hermes peer dm`` is the client)."""
+        one bounded re-run of a transient failure; ``noone peer dm`` is the client)."""
         from tools.bot_failure_reasons import RETRY_NONE, result_retry_action
         # This turn runs through _run_agent, so it already COUNTS toward the cap (#7483).
         # Spending the budget without checking it refused every other caller while never
@@ -3061,7 +3059,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         try:
             result, usage = await self._run_agent(conversation_history=history, **ctx["run_kwargs"])
             # One policy-gated re-run of a transiently failed turn, as the local (``tools.bot_mode_dm``)
-            # and relayed (``tui_gateway.methods_bot_relay``) delivery lanes do (#93091 item 5, #115325):
+            # and relayed (``agent_backend.methods_bot_relay``) delivery lanes do (#93091 item 5, #115325):
             # transient classes re-run the SAME session once, resuming the failed attempt's unanswered
             # tail row from a fresh store read; auth/quota/config/model never re-run.
             if result_retry_action(result) != RETRY_NONE:
@@ -3437,7 +3435,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         job_id, err = self._cron_request_guard(request, need_job_id=True, check_draining=True)
         if err:
             return err
-        # Optional transient per-run context (standalone `hermes cron run` /
+        # Optional transient per-run context (standalone `noone cron run` /
         # cronjob(action='run', prompt=...)) — same cap + scan as a stored prompt.
         extra_prompt = body = None
         with suppress(Exception):
@@ -3459,7 +3457,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
         a long turn never trips NAS's timeout; the store CAS claim guards double-fire on retry."""
         # Startup-wait budget starts here so a slow JWKS fetch cannot outlast the forwarder timeout.
         received_at = asyncio.get_running_loop().time()
-        from hermes_cli.config import cfg_get, load_config
+        from agent_cli.config import cfg_get, load_config
         from plugins.cron_providers.chronos.verify import get_fire_verifier
         auth = request.headers.get("Authorization", "")
         token = auth[7:].strip() if auth.startswith("Bearer ") else ""
@@ -3912,7 +3910,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
                 self.name, self._host)
             return False
         try:
-            from hermes_cli.auth import has_usable_secret
+            from agent_cli.auth import has_usable_secret
         except Exception as exc:
             # Fail CLOSED: "could not check" must not mean "start" on a terminal-capable endpoint.
             logger.error(
@@ -3987,7 +3985,7 @@ class APIServerAdapter(OpenAICompatRoutesMixin, BasePlatformAdapter):
             if is_network_accessible(self._host):
                 _backend = "local"
                 with suppress(Exception):
-                    from hermes_cli.config import load_config as _load_cfg
+                    from agent_cli.config import load_config as _load_cfg
                     _backend = ((_load_cfg() or {}).get("terminal") or {}).get("backend", "local")
                 if str(_backend).lower() == "local":
                     logger.warning(

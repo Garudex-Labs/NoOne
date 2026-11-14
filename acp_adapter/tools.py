@@ -1,4 +1,4 @@
-"""ACP tool-call helpers for mapping hermes tools to ACP ToolKind and building content."""
+"""ACP tool-call helpers for mapping noone tools to ACP ToolKind and building content."""
 
 from __future__ import annotations
 
@@ -45,8 +45,8 @@ _POLISHED_TOOLS = {
     "vision_analyze", "image_generate", "text_to_speech",
     # Schedulers / platform integrations
     "cronjob", "send_message", "clarify", "discord", "discord_admin",
-    "feishu_doc_read", "feishu_drive_list_comments", "feishu_drive_list_comment_replies",
-    "feishu_drive_reply_comment", "feishu_drive_add_comment",
+
+
     "kanban_create", "kanban_show", "kanban_comment", "kanban_complete",
     "kanban_block", "kanban_request_review", "kanban_request_changes",
     "kanban_link", "kanban_heartbeat",

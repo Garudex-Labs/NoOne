@@ -1,4 +1,4 @@
-import type { LocalCatalogModel, LocalHardware, LocalModelsStatus, LocalRuntimeJob } from '@/types/hermes'
+import type { LocalCatalogModel, LocalHardware, LocalModelsStatus, LocalRuntimeJob } from '@/types/agent-client'
 
 import { hermesApi, profileScoped } from './client'
 

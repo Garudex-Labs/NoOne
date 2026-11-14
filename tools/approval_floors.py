@@ -64,8 +64,8 @@ def _save_blocked_payload(command: str) -> str | None:
     if not host_feature_enabled("tool_host_artifacts"):
         return None
     try:
-        from hermes_constants import get_hermes_home
-        script_dir = get_hermes_home() / "cache" / "blocked-scripts"
+        from agent_constants import get_agent_home
+        script_dir = get_agent_home() / "cache" / "blocked-scripts"
         script_dir.mkdir(parents=True, exist_ok=True)
         # Opportunistic cleanup: blocked payloads older than 7 days.
         unlink_files_older_than(script_dir, "blocked-*.sh", 7 * 86400)

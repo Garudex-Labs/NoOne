@@ -1,4 +1,4 @@
-import { LOCAL_CONNECTION_ID } from '@hermes/shared'
+import { LOCAL_CONNECTION_ID } from '@noone/shared'
 
 import { connectionScopeSuffix } from '@/lib/connection-scoped'
 import { persistString, storedString } from '@/lib/storage'

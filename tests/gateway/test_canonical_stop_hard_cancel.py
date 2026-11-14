@@ -1,5 +1,5 @@
 """Canonical Stop (Desktop, Ink, classic CLI view, ACP) hard-cancels the turn and leaves background delegations
-running: a background subagent is independent of the chat that spawned it (Teknium ruling); `/stop` ends them."""
+running: a background subagent is independent of the chat that spawned it (design rule); `/stop` ends them."""
 import asyncio
 from unittest.mock import MagicMock
 

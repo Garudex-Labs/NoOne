@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
   save: vi.fn()
 }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   saveHermesConfigRecord: (config: Record<string, unknown>, profile?: unknown) => mocks.save(config, profile)
 }))
 
@@ -43,7 +43,7 @@ vi.mock('@/store/notifications', () => ({
 
 vi.mock('../hooks/use-config-record', () => ({
   hermesConfigCacheWriter: () => (config: Record<string, unknown>) => mocks.cache(config),
-  useHermesConfigRecord: () => ({ data: mocks.loadedConfig })
+  useAgentConfigRecord: () => ({ data: mocks.loadedConfig })
 }))
 
 describe('BrowserRealProfilePanel', () => {

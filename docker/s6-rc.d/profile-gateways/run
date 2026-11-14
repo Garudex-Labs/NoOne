@@ -3,7 +3,7 @@
 # Unprivileged supervision tree for per-profile gateways.
 #
 # Gateway slots are created at runtime by the hermes user (profile
-# create/delete hooks, `hermes gateway start`, boot reconciliation), so
+# create/delete hooks, `noone gateway start`, boot reconciliation), so
 # their run/finish/log scripts are hermes-writable. They therefore must
 # not sit in the root scandir (/run/service), where a root s6-supervise
 # would execute them. Instead this service runs a nested s6-svscan AS
@@ -13,7 +13,7 @@
 # The scandir is created hermes-owned by cont-init.d/02-reconcile-profiles,
 # which also publishes the slots restored from the data volume, before
 # s6-rc starts this service. Keep the path in sync with
-# hermes_cli/service_manager.py::S6_DYNAMIC_SCANDIR.
+# agent_cli/service_manager.py::S6_DYNAMIC_SCANDIR.
 
 scandir=/run/hermes-service
 

@@ -9,8 +9,8 @@ resolves offline local path-source fixtures):
    pyproject belonging to a nested or external sidecar dir must NOT
    join the pm workspace union, because pm scans only plugin roots.
 2. Conflict admission. Through the PUBLIC admission authority
-   (hermes_cli.plugins_admission.admit_plugin_set_change — the one path
-   `hermes plugins enable/install` use), a candidate union with no
+   (agent_cli.plugins_admission.admit_plugin_set_change — the one path
+   `noone plugins enable/install` use), a candidate union with no
    valid solution is REFUSED before anything is published: the
    candidate stays unenabled (so the loader never imports it), the
    plugin trees and every home's config.yaml survive untouched, the
@@ -19,7 +19,7 @@ resolves offline local path-source fixtures):
    The retry path — re-admitting only the resolvable candidate —
    commits through the same public function.
 3. Active-home propagation. The active CONTEXT home
-   (hermes_constants.set_hermes_home_override) is what wrapper/sidecar
+   (agent_constants.set_agent_home_override) is what wrapper/sidecar
    subprocess launches must inherit through build_subprocess_env.
 """
 
@@ -33,7 +33,7 @@ import sys
 from pathlib import Path
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 import pm.workspace as ws
 from pm.plugin_inputs import Members
@@ -191,7 +191,7 @@ def test_conflicting_candidate_refused_unenabled_and_unimported(admission_env):
     plugin identity + resolver reason; the candidate is NOT published to
     config (so the plugin loader never imports it); plugin trees and
     configs survive; the receipt records the failure."""
-    from hermes_cli import plugins_admission as admission
+    from agent_cli import plugins_admission as admission
 
     tmp_path, home = admission_env
     plug_a, plug_b, *_ = _local_conflict_members(home)
@@ -330,7 +330,7 @@ def test_plugin_whose_pyproject_installs_nothing_keeps_the_environment(admission
     of locking and syncing a new one. A plugin with a real dependency still joins the workspace."""
     import tomllib
 
-    from hermes_cli import plugins_admission as admission
+    from agent_cli import plugins_admission as admission
     from pm.environments import runtime_facts_path, selected_venv
     from pm.install import sync_venv, venv_is_current
     from pm.lock import Facts
@@ -404,7 +404,7 @@ def test_update_sync_disables_plugin_excluded_by_requires_python(admission_env):
     work = yaml.safe_load((profile / "config.yaml").read_text(encoding="utf-8"))
     assert work["memory"]["provider"] == "too-old" and work["plugins"]["disabled"] == ["too-old"]
     assert "too-old" in json.dumps(_latest_receipt(home).get("warnings"))
-    assert "hermes plugins enable too-old" in json.dumps(_latest_receipt(home).get("warnings"))
+    assert "noone plugins enable too-old" in json.dumps(_latest_receipt(home).get("warnings"))
     assert venv_is_current(project_root=core) is True
 
     for plugin in (home / "plugins" / "too-old", profile / "plugins" / "too-old"):
@@ -570,7 +570,7 @@ def test_plugin_our_version_rejects_sits_out_without_being_disabled(admission_en
     from pm.install import sync_venv, venv_is_current
     from pm.lock import Facts
 
-    from hermes_cli import plugins_manifest
+    from agent_cli import plugins_manifest
 
     tmp_path, home = admission_env
     core = tmp_path / "core"
@@ -614,7 +614,7 @@ def test_plugin_requiring_a_newer_hermes_sits_out_until_hermes_fits(admission_en
     from pm.install import sync_venv, venv_is_current
     from pm.lock import Facts
 
-    from hermes_cli import plugins_manifest
+    from agent_cli import plugins_manifest
 
     tmp_path, home = admission_env
     core = tmp_path / "core"
@@ -659,8 +659,8 @@ def test_only_enabling_a_plugin_that_requires_a_newer_hermes_is_refused(admissio
     as it refuses a failing requires_hermes, although it installs nothing and is no workspace
     member. One enabled before sits out as the build leaves it out, so enabling another plugin
     beside it is admitted."""
-    from hermes_cli import plugins_admission as admission
-    from hermes_cli import plugins_manifest
+    from agent_cli import plugins_admission as admission
+    from agent_cli import plugins_manifest
 
     _tmp_path, home = admission_env
     monkeypatch.setattr(plugins_manifest, "running_hermes_version", lambda: "1.0.0")
@@ -731,13 +731,13 @@ def test_update_sync_retries_a_fetch_failure_once_before_disabling(admission_env
 
 
 def test_active_context_home_exported_to_wrapper_subprocess(monkeypatch, tmp_path):
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
     from tools.environments.local import build_subprocess_env
 
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "ambient"))
     active = tmp_path / "custom-root/profiles/worker"
     active.mkdir(parents=True)
-    token = set_hermes_home_override(active)
+    token = set_agent_home_override(active)
     try:
         child_env = build_subprocess_env()
         child = subprocess.run(
@@ -746,4 +746,4 @@ def test_active_context_home_exported_to_wrapper_subprocess(monkeypatch, tmp_pat
         )
         assert child.stdout == str(active)
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)

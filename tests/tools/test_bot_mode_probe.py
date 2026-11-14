@@ -37,7 +37,7 @@ def _make_bot_profile(root, name, *, managed=True, soul=None):
 def test_roster_excludes_infra_dirs_and_tombstones(tmp_path):
     """The teammate roster applies the same identity predicate as ``profile list``: bare
     infrastructure dirs (``@sessions``, ``@logs``) and deleted profiles are not teammates (#99392)."""
-    from hermes_constants import mark_named_profile_deleted
+    from agent_constants import mark_named_profile_deleted
 
     home = tmp_path / ".hermes"
     home.mkdir()
@@ -222,7 +222,7 @@ def test_fingerprint_changes_on_each_capability_axis(tmp_path):
     after_skill = bot_mode_probe.capability_fingerprint(home)
     assert after_skill != base
 
-    # toolset pin changed (the key `hermes tools enable/disable` writes, #124211)
+    # toolset pin changed (the key `noone tools enable/disable` writes, #124211)
     (home / "config.yaml").write_text(
         "platform_toolsets:\n  desktop: [hermes-desktop, computer_use]\n", encoding="utf-8"
     )

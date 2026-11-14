@@ -1,13 +1,17 @@
 ---
 title: "State DB Recovery"
-description: "How Hermes recovers state.db when the FTS index or the file itself is corrupt"
+description: "How the agent recovers state.db when the FTS index or the file itself is corrupt"
 ---
 
-# State database and FTS recovery
+# State database and FTS recovery {#state-database-and-fts-recovery}
 
 For the user-facing walkthrough (what to stop, what the files beside `state.db` are, why
 maintenance commands refuse while a writer is live) see
 [Session storage recovery](../user-guide/session-storage-recovery.md).
+
+For schema ownership, supported versions and fresh initialization, see the
+[NoOne database foundation](./database-foundation.md). Browsing never upgrades
+historical schemas; explicit recovery builds a separate current-schema output.
 
 `state.db` stores two different data classes:
 
@@ -17,7 +21,7 @@ maintenance commands refuse while a writer is live) see
 The derived indexes may be detached temporarily. They must not turn a live
 message write or search into an unbounded full-transcript rebuild.
 
-## Live behavior when FTS is corrupt
+## Live behavior when FTS is corrupt {#live-behavior-when-fts-is-corrupt}
 
 If an FTS write or search reports the corruption error class, `SessionDB`:
 
@@ -30,9 +34,9 @@ The failing live operation never runs `FTS5('rebuild')`. Existing recovery
 ownership remains unchanged: a later `SessionDB` open may rebuild under the
 cross-process admission lock and foreign-holder guard. If that guarded rebuild
 cannot run, FTS remains detached, canonical writes stay available, and
-`hermes doctor` reports the explicit repair command.
+`noone doctor` reports the explicit repair command.
 
-## Live behavior when the file itself is corrupt
+## Live behavior when the file itself is corrupt {#live-behavior-when-the-file-itself-is-corrupt}
 
 If a live write reports bare `SQLITE_CORRUPT` / `SQLITE_NOTADB` (`database
 disk image is malformed`, `file is not a database`) with no FTS provenance,
@@ -61,11 +65,11 @@ file: pending transcripts go to `sessions/<id>.jsonl` and the gateway
 `pending_messages/` spool instead of the retry queue, and the FTS one-shot
 rebuild never runs on the damaged file. The quarantine is per process — the
 shared handle stays poisoned for every holder until the process restarts on a
-repaired or restored file. Do not run `hermes doctor --fix` while the gateway
+repaired or restored file. Do not run `noone doctor --fix` while the gateway
 is still up. Next steps:
 
 ```bash
-hermes gateway stop
+noone gateway stop
 HERMES_HOME="$HOME/.hermes" hermes sessions recover --source "$HOME/.hermes/state.db" --inspect-only
 # if recoverable:
 HERMES_HOME="$HOME/.hermes" hermes sessions recover --source "$HOME/.hermes/state.db" --output "$HOME/recovered-state.db"
@@ -73,13 +77,13 @@ HERMES_HOME="$HOME/.hermes" hermes sessions recover --source "$HOME/.hermes/stat
 
 or restore the newest snapshot from `state-snapshots/`.
 
-## Explicit repair
+## Explicit repair {#explicit-repair}
 
 Stop every process that can open the profile database before repairing it.
 Keep them stopped for the complete repair and verification window.
 
 ```bash
-hermes gateway stop
+noone gateway stop
 HERMES_HOME="$HOME/.hermes" hermes sessions repair --check-only
 HERMES_HOME="$HOME/.hermes" hermes sessions repair
 ```

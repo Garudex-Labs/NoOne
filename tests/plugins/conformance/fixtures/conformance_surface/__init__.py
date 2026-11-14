@@ -20,13 +20,13 @@ from agent.transcription_provider import TranscriptionProvider
 from agent.tts_provider import TTSProvider
 from agent.video_gen_provider import VideoGenProvider
 from agent.web_search_provider import WebSearchProvider
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 PROVIDER_NAME = "conformance"
 
 
 def _record(event, **fields):
-    with open(get_hermes_home() / "conformance-events.jsonl", "a", encoding="utf-8") as fh:
+    with open(get_agent_home() / "conformance-events.jsonl", "a", encoding="utf-8") as fh:
         fh.write(json.dumps({"event": event, **fields}, default=repr) + "\n")
 
 

@@ -1,3 +1,4 @@
+import { AlertTriangle } from '@noone/ui/icons'
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -12,7 +13,6 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { useI18n } from '@/i18n'
-import { AlertTriangle } from '@/lib/icons'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -87,7 +87,7 @@ export function ConfirmDialog({
   // It happens on unmount only, and it clears the handle this component owns.
   // An onConfirm that unmounts the caller (disband leaves the room) resolves
   // after cleanup ran, so the timer must not be armed once unmounted.
-  // eslint-disable-next-line no-restricted-syntax
+  // eslint-disable-next-line no-restricted-syntax -- lifecycle or request bookkeeping, not a reactive atom mirror
   useEffect(() => {
     unmountedRef.current = false
 

@@ -1,7 +1,17 @@
 import { useStore } from '@nanostores/react'
+import { AlertTriangle, Globe, Plus, RefreshCw } from '@noone/ui/icons'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import {
+  createWebhook,
+  deleteWebhook,
+  enableWebhooks,
+  getWebhooks,
+  setWebhookEnabled,
+  type WebhookRoute,
+  type WebhooksResponse
+} from '@/agent-client'
 import { PageLoader } from '@/components/page-loader'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -20,17 +30,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  createWebhook,
-  deleteWebhook,
-  enableWebhooks,
-  getWebhooks,
-  setWebhookEnabled,
-  type WebhookRoute,
-  type WebhooksResponse
-} from '@/hermes'
 import { useI18n } from '@/i18n'
-import { AlertTriangle, Globe, Plus, RefreshCw } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { notify, notifyError } from '@/store/notifications'
 import { $activeGatewayProfile, normalizeProfileKey } from '@/store/profile'

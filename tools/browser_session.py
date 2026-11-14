@@ -25,8 +25,8 @@ import threading
 import uuid
 from typing import Any, Callable, Optional
 
-from hermes_cli.config import DEFAULT_CONFIG
-from hermes_constants import hermes_home_key
+from agent_cli.config import DEFAULT_CONFIG
+from agent_constants import agent_home_key
 from utils import env_int
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ def build_browser_env() -> dict:
     NO_PROXY (a macOS system proxy would capture the local CDP dial, #110565), and a short TMPDIR
     (Chrome's SingletonSocket overflows the AF_UNIX path cap under a deep scratch dir)."""
     from agent.proxy_bypass import add_loopback_no_proxy
-    from hermes_constants import socket_safe_tmpdir
+    from agent_constants import socket_safe_tmpdir
     from tools.bot_desktop.runtime import desktop_env
     from tools.environments.local import served_profile_child_env
     env = add_loopback_no_proxy(desktop_env(served_profile_child_env(inherit_credentials=False)))
@@ -352,7 +352,7 @@ def get_session_info(cache_key: Optional[str] = None) -> dict[str, Any]:
         return reused
 
     force_local = is_local_sidecar_key(key)
-    home_key = hermes_home_key()
+    home_key = agent_home_key()
     for attempt in range(_STALE_ENDPOINT_RETRIES + 1):
         generation = live_cdp_generation(home_key)
         session_info = _create_session_for_key(key, force_local)
@@ -386,7 +386,7 @@ def _atexit_cleanup() -> None:
     prompt_toolkit key-binding callback corrupts the coroutine state and makes the process unkillable."""
     try:
         from tools.browser_session_lifecycle import emergency_cleanup_all_sessions, stop_cleanup_thread
-    except ImportError:  # half-updated tree mid-`hermes update` (#112437): nothing resolvable to clean
+    except ImportError:  # half-updated tree mid-`noone update` (#112437): nothing resolvable to clean
         return
     emergency_cleanup_all_sessions()
     stop_cleanup_thread()

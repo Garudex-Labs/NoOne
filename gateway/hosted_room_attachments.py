@@ -10,12 +10,14 @@ room's frozen recipient roster.
 from __future__ import annotations
 
 from gateway.hosted_rooms import EventAttachmentConflictError
-from hermes_dir_acl import make_user_dir
+from agent_dir_acl import make_user_dir
+from gateway.hosted_room_blob_ownership import blob_root_writer, register_blob_owner
 
 import base64
 import binascii
 import hashlib
 import json
+import logging
 import os
 import re
 import secrets
@@ -25,7 +27,7 @@ import threading
 import time
 import unicodedata
 from collections import Counter
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping, Sequence
@@ -60,6 +62,8 @@ _IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]*$")
 _MIME_RE = re.compile(
     r"^[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]*$"
 )
+
+logger = logging.getLogger(__name__)
 
 
 class AttachmentError(ValueError):
@@ -324,13 +328,15 @@ class HostedRoomAttachmentStore:
         with _STARTED_LOCK:
             if self._startup_key() in _STARTED:
                 return
-            conn = self._connect()
-            try:
-                conn.execute("BEGIN IMMEDIATE")
-                self._initialize(conn)
-                conn.commit()
-            finally:
-                conn.close()
+            with blob_root_writer(self.root):
+                conn = self._connect()
+                try:
+                    conn.execute("BEGIN IMMEDIATE")
+                    self._initialize(conn)
+                    conn.commit()
+                    register_blob_owner(self.root, self.db_path)
+                finally:
+                    conn.close()
             self.reconcile_room_events()
             self.prune()
             _STARTED.add(self._startup_key())
@@ -353,69 +359,11 @@ class HostedRoomAttachmentStore:
                 pass
 
     def _initialize(self, conn: sqlite3.Connection) -> None:
-        conn.execute(
-            """CREATE TABLE IF NOT EXISTS hosted_room_attachment_blobs (
-                blob_id TEXT PRIMARY KEY,
-                sha256 TEXT NOT NULL UNIQUE,
-                size INTEGER NOT NULL CHECK (size > 0),
-                ref_count INTEGER NOT NULL CHECK (ref_count > 0),
-                created_at REAL NOT NULL
-            )"""
-        )
-        conn.execute(
-            """CREATE TABLE IF NOT EXISTS hosted_room_attachments (
-                attachment_id TEXT PRIMARY KEY,
-                upload_id TEXT NOT NULL,
-                room_id TEXT NOT NULL,
-                event_id TEXT,
-                kind TEXT NOT NULL,
-                name TEXT NOT NULL,
-                size INTEGER NOT NULL CHECK (size > 0),
-                mime TEXT NOT NULL,
-                sha256 TEXT NOT NULL,
-                blob_id TEXT NOT NULL,
-                recipient_member_ids_json TEXT NOT NULL DEFAULT '[]',
-                viewer_access INTEGER NOT NULL DEFAULT 0 CHECK (viewer_access IN (0, 1)),
-                state TEXT NOT NULL CHECK (state IN ('uploaded', 'committed', 'disbanded')),
-                created_at REAL NOT NULL,
-                updated_at REAL NOT NULL,
-                expires_at REAL,
-                UNIQUE (room_id, upload_id),
-                FOREIGN KEY (blob_id) REFERENCES hosted_room_attachment_blobs(blob_id)
-            )"""
-        )
-        columns = {
-            str(row["name"])
-            for row in conn.execute("PRAGMA table_info(hosted_room_attachments)")
-        }
-        if "viewer_access" not in columns:
-            conn.execute(
-                """ALTER TABLE hosted_room_attachments
-                   ADD COLUMN viewer_access INTEGER NOT NULL DEFAULT 0"""
-            )
-        if "catalog_name" not in columns:
-            conn.execute("ALTER TABLE hosted_room_attachments ADD COLUMN catalog_name TEXT")
-            reader = conn.execute("SELECT attachment_id, name FROM hosted_room_attachments")
-            while rows := reader.fetchmany(512):
-                conn.executemany(
-                    "UPDATE hosted_room_attachments SET catalog_name=? WHERE attachment_id=?",
-                    ((fold_catalog_text(str(row["name"])), row["attachment_id"]) for row in rows),
-                )
-        conn.execute(
-            """CREATE INDEX IF NOT EXISTS idx_hosted_room_attachments_room_state
-               ON hosted_room_attachments(room_id, state, created_at)"""
-        )
-        conn.execute(
-            """CREATE INDEX IF NOT EXISTS idx_hosted_room_attachments_expiry
-               ON hosted_room_attachments(expires_at)"""
-        )
-        conn.execute(
-            """CREATE INDEX IF NOT EXISTS idx_hosted_room_attachments_event
-               ON hosted_room_attachments(room_id, event_id)"""
-        )
+        from agent_cli.database_migrations import initialize_database
+        initialize_database(conn, "hosted_room_attachments")
 
     def _connect(self) -> sqlite3.Connection:
-        from hermes_state_wal import apply_wal_with_fallback
+        from agent_state_wal import apply_wal_with_fallback
 
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(self.db_path, timeout=10)
@@ -430,17 +378,18 @@ class HostedRoomAttachmentStore:
 
     @contextmanager
     def _transaction(self, *, immediate: bool = False) -> Iterator[sqlite3.Connection]:
-        conn = self._connect()
-        try:
-            if immediate:
-                conn.execute("BEGIN IMMEDIATE")
-            yield conn
-            conn.commit()
-        except Exception:
-            conn.rollback()
-            raise
-        finally:
-            conn.close()
+        with blob_root_writer(self.root) if immediate else nullcontext():
+            conn = self._connect()
+            try:
+                if immediate:
+                    conn.execute("BEGIN IMMEDIATE")
+                yield conn
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            finally:
+                conn.close()
 
     def _blob_path(self, blob_id: str) -> Path:
         if _BLOB_ID_RE.fullmatch(blob_id) is None:
@@ -1053,46 +1002,35 @@ class HostedRoomAttachmentStore:
                     "DELETE FROM hosted_room_attachment_blobs WHERE blob_id=?",
                     ((blob_id,) for blob_id in removed_blob_ids),
                 )
-        for blob_id in removed_blob_ids:
-            self._blob_path(blob_id).unlink(missing_ok=True)
         self._sweep_orphans()
         return removed
 
     def _sweep_orphans(self) -> None:
+        from agent_cli.database_migrations import UnsupportedDatabaseSchema
+        from gateway.hosted_room_blob_ownership import locked_blob_references
         quarantined: list[Path] = []
         with self._lock:
             try:
-                candidates = tuple(self.blob_root.iterdir())
-            except OSError:
-                return
-            with self._transaction(immediate=True) as conn:
-                live = {
-                    str(row["blob_id"])
-                    for row in conn.execute(
-                        "SELECT blob_id FROM hosted_room_attachment_blobs"
-                    )
-                }
-                for index, path in enumerate(candidates):
-                    if not (
-                        path.name.startswith((".tmp-", ".prune-"))
-                        or (
-                            _BLOB_ID_RE.fullmatch(path.name) is not None
-                            and path.name not in live
+                with locked_blob_references(self.db_path, self.root) as live:
+                    candidates = tuple(self.blob_root.iterdir())
+                    for index, path in enumerate(candidates):
+                        if not (path.name.startswith((".tmp-", ".prune-")) or (
+                            _BLOB_ID_RE.fullmatch(path.name) is not None and path.name not in live
+                        )):
+                            continue
+                        quarantine = self.blob_root / (
+                            f".prune-{os.getpid()}-{threading.get_ident()}-{time.time_ns()}-{index}"
                         )
-                    ):
-                        continue
-                    quarantine = self.blob_root / (
-                        f".prune-{os.getpid()}-{threading.get_ident()}-"
-                        f"{time.time_ns()}-{index}"
-                    )
-                    try:
-                        os.replace(path, quarantine)
-                    except OSError:
-                        continue
-                    quarantined.append(quarantine)
-            # Renaming while the write transaction is active is the atomic
-            # reference fence; unlinking the private quarantine can be slow and
-            # therefore happens only after SQLite has committed.
+                        try:
+                            os.replace(path, quarantine)
+                        except OSError:
+                            continue
+                        quarantined.append(quarantine)
+            except (OSError, ValueError, KeyError, TypeError, sqlite3.Error, UnsupportedDatabaseSchema) as exc:
+                logger.warning("Attachment byte reclamation deferred: an adjacent owner cannot be reserved (%s)", exc)
+                return
+            # All owner reservations fence the rename. Slow unlinking happens
+            # after releasing those locks; no writer can reference quarantine.
             for path in quarantined:
                 path.unlink(missing_ok=True)
 

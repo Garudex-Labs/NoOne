@@ -1,3 +1,4 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo, useCallback, useState } from 'react'
 
 import { queueKickoffIfSessionBusy } from '@/app/session/hooks/use-prompt-actions/queue-if-busy'
@@ -7,7 +8,6 @@ import { StatusPendingIcon } from '@/components/chat/status-pending-icon'
 import { StatusRow } from '@/components/chat/status-row'
 import { StatusSection } from '@/components/chat/status-section'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   ContextMenu,
@@ -232,43 +232,43 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
       <>
         {hasDetails && (
           <Item disabled={isBusy} onSelect={() => setDetailsOpen(true)}>
-            <Codicon name="eye" size="0.8rem" />
+            <AppIcon name="eye" size="0.8rem" />
             <span>{ctrl.viewDetails}</span>
           </Item>
         )}
         {visibleState !== 'done' && (
           <Item disabled={isBusy} onSelect={openAddCriterion}>
-            <Codicon name="add" size="0.8rem" />
+            <AppIcon name="add" size="0.8rem" />
             <span>{ctrl.addCriterion}</span>
           </Item>
         )}
         {(hasDetails || visibleState !== 'done') && <Sep />}
         {visibleState === 'active' && (
           <Item disabled={isBusy} onSelect={() => void handleAction('goal.pause')}>
-            <Codicon name="debug-pause" size="0.8rem" />
+            <AppIcon name="debug-pause" size="0.8rem" />
             <span>{ctrl.pauseGoal}</span>
           </Item>
         )}
         {visibleState === 'paused' && (
           <Item disabled={isBusy} onSelect={() => void handleAction('goal.resume')}>
-            <Codicon name="play" size="0.8rem" />
+            <AppIcon name="play" size="0.8rem" />
             <span>{ctrl.resumeGoal}</span>
           </Item>
         )}
         {visibleState === 'waiting' && (
           <>
             <Item disabled={isBusy} onSelect={() => void handleAction('goal.unwait')}>
-              <Codicon name="play" size="0.8rem" />
+              <AppIcon name="play" size="0.8rem" />
               <span>{ctrl.resumeNow}</span>
             </Item>
             <Item disabled={isBusy} onSelect={() => void handleAction('goal.pause')}>
-              <Codicon name="debug-pause" size="0.8rem" />
+              <AppIcon name="debug-pause" size="0.8rem" />
               <span>{ctrl.pauseGoal}</span>
             </Item>
           </>
         )}
         <Item disabled={isBusy} onSelect={confirmClearGoal} variant="destructive">
-          <Codicon name="trash" size="0.8rem" />
+          <AppIcon name="trash" size="0.8rem" />
           <span>{ctrl.clearGoal}</span>
         </Item>
       </>
@@ -317,7 +317,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
                         type="button"
                         variant="ghost"
                       >
-                        <Codicon name="ellipsis" size="0.8rem" />
+                        <AppIcon name="ellipsis" size="0.8rem" />
                       </Button>
                     </DropdownMenuTrigger>
                   </span>
@@ -326,7 +326,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
                   </DropdownMenuContent>
                 </DropdownMenu>
               }
-              icon={<Codicon className={iconClass} name="target" size="0.8rem" />}
+              icon={<AppIcon className={iconClass} name="target" size="0.8rem" />}
               label={headerLabel}
             >
               <div>
@@ -368,7 +368,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
                         className="inline-flex text-muted-foreground/70"
                         data-slot="criteria-state-marker"
                       >
-                        <Codicon name="checklist" size="0.8rem" />
+                        <AppIcon name="checklist" size="0.8rem" />
                       </span>
                     }
                     trailing={
@@ -424,7 +424,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
                                     type="button"
                                     variant="ghost"
                                   >
-                                    <Codicon name="copy" size="0.7rem" />
+                                    <AppIcon name="copy" size="0.7rem" />
                                   </Button>
                                 </Tip>
                                 <Button
@@ -436,7 +436,7 @@ export const SessionControlGoalSection = memo(function SessionControlGoalSection
                                   type="button"
                                   variant="ghost"
                                 >
-                                  <Codicon name="close" size="0.7rem" />
+                                  <AppIcon name="close" size="0.7rem" />
                                 </Button>
                               </div>
                             }

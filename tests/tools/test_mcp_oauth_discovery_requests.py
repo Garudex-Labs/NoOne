@@ -35,7 +35,7 @@ async def _make_flow(tmp_path, monkeypatch, *, registered=True):
     from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata, OAuthToken
     from pydantic import AnyUrl
 
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
     from tools.mcp_oauth_manager import _HERMES_PROVIDER_CLS, reset_manager_for_tests
 
     assert _HERMES_PROVIDER_CLS is not None
@@ -43,7 +43,7 @@ async def _make_flow(tmp_path, monkeypatch, *, registered=True):
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
     reset_manager_for_tests()
 
-    storage = HermesTokenStorage("srv")
+    storage = AgentTokenStorage("srv")
     await storage.set_tokens(
         OAuthToken(access_token="old_access", token_type="Bearer", expires_in=3600, refresh_token="old_refresh")
     )

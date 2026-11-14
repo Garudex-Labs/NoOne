@@ -291,13 +291,13 @@ class TestTeamsPluginRegistration:
 class TestTeamsInteractiveSetup:
     def test_interactive_setup_persists_credentials(self, tmp_path, monkeypatch):
         """Regression for #19173: interactive_setup must import prompt helpers
-        from hermes_cli.cli_output (not hermes_cli.config) and persist
+        from agent_cli.cli_output (not agent_cli.config) and persist
         credentials to .env without crashing.
         """
         hermes_home = tmp_path / "hermes"
         monkeypatch.setenv("HERMES_HOME", str(hermes_home))
 
-        import hermes_cli.cli_output as cli_output_mod
+        import agent_cli.cli_output as cli_output_mod
 
         answers = iter(["client-id", "client-secret", "tenant-id", "aad-1, aad-2"])
         monkeypatch.setattr(cli_output_mod, "prompt", lambda *_a, **_kw: next(answers))
@@ -516,7 +516,7 @@ class TestTeamsMessageHandling:
 class TestTeamsAttachmentClassification:
     """Document attachments must set MessageType.DOCUMENT so run.py's
     document-context injection surfaces the cached file to the agent
-    (same bug class as Signal/Email/SimpleX, PR #44695)."""
+    (same bug class as Signal/Email, PR #44695)."""
 
     def _make_adapter(self):
         adapter = TeamsAdapter(_make_config(
@@ -1146,7 +1146,7 @@ class TestTeamsRequireMention:
         (None, None, False),      # opt-in: absent key leaves every conversation ungated
         (True, None, True),
         ("false", None, False),
-        (True, "false", False),   # explicit env beats YAML, like MATRIX_/MATTERMOST_REQUIRE_MENTION
+        (True, "false", False),   # explicit env beats YAML, like MATTERMOST_REQUIRE_MENTION
         (False, "true", True),
     ])
     def test_require_mention_read_env_over_yaml(self, monkeypatch, yaml_value, env_value, expected):

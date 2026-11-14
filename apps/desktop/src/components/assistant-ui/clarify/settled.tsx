@@ -1,10 +1,10 @@
 'use client'
 
 import type { ToolCallMessagePartProps } from '@assistant-ui/react'
+import { CircleLetterA, MessageQuestion } from '@noone/ui/icons'
 
 import { ToolFallback } from '@/components/assistant-ui/tool/fallback'
 import { useI18n } from '@/i18n'
-import { CircleLetterA, MessageQuestion } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { ClarifyLine, ClarifyShell } from './core/shell'

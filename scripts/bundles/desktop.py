@@ -34,7 +34,7 @@ def flavored_assets(icons: Path, assets: Path):
     flavored (canary/commit) build cannot package from the rendered product
     directory alone. Restore the admitted files once packaging ends: the source
     custody check refuses a dirty checkout, and a build that leaves its own
-    render behind breaks every later build in that tree and `hermes update`.
+    render behind breaks every later build in that tree and `noone update`.
     """
     admitted = {path.relative_to(assets): path.read_bytes()
                 for path in assets.rglob("*") if path.is_file()}
@@ -109,14 +109,13 @@ def _build_prepared(prepared, builder_args: list[str], variant: str | None) -> N
     run([str(prepared.icon_python), "-I", str(repo / "scripts/generate_icons.py"),
          "--source", str(repo), "--out", str(icons)], cwd=repo, env=env)
     if variant != "light":
-        run([node, "scripts/build/tui.mjs", "--source", str(repo), "--out", str(products / "tui")], cwd=repo, env=env)
         run([node, "scripts/build/web.mjs", "--source", str(repo), "--icons", str(products / "icons"),
              "--out", str(products / "web")], cwd=repo, env=env)
         run([node, "scripts/build/webapp.mjs", "--source", str(repo), "--out", str(products / "webapp")],
             cwd=repo, env=env)
         if prepared.payload is None:
             raise ValueError("payload dependencies were not prepared")
-        frontends = {name: products / name for name in ("tui", "web", "webapp")}
+        frontends = {name: products / name for name in ("web", "webapp")}
         if finish_native(prepared.payload, frontends):
             raise RuntimeError("prepared payload assembly failed")
     from scripts.bundles.desktop_prepare import require_source

@@ -3,10 +3,10 @@ title: "Gateway Monitoring"
 description: "Health export, structured diagnostics, fleet queries and how to extend the monitoring plane"
 ---
 
-# Gateway Monitoring
+# Gateway Monitoring {#gateway-monitoring}
 
 Service health monitoring plus structured operational diagnostics for the
-Hermes gateway daemon, exported over OTLP/HTTP to an operator-configured
+{{app-name}} gateway daemon, exported over OTLP/HTTP to an operator-configured
 endpoint (OpenTelemetry Collector, DataDog, or any OTLP receiver).
 
 This plane is content-free by construction. It exports gateway and cron
@@ -14,10 +14,10 @@ lifecycle state, platform connector health, and content-free warning/error
 diagnostics. It never exports prompts, messages, tool arguments or results,
 job names, destinations, schedules, raw errors, session history, usage
 analytics, audit logs, or detailed execution traces. Run/model/tool trajectory
-capture is a separate plane served by Hermes's native NeMo Relay SDK
+capture is a separate plane served by {{app-name}}'s native NeMo Relay SDK
 integration and explicitly configured Relay subscribers or exporters.
 
-## What gets exported
+## What gets exported {#what-gets-exported}
 
 | Signal | OTLP route | Content |
 | --- | --- | --- |
@@ -45,7 +45,7 @@ one), matching the async pool's capacity accounting; alert it against
 and `background_work` for total live work per instance; use
 `background_delegations` for pool-saturation.
 
-## Enabling
+## Enabling {#enabling}
 
 ```yaml
 # config.yaml
@@ -73,10 +73,10 @@ off the hot path, while terminal cron events make one bounded fail-open flush
 attempt of up to one second so the final state is less likely to be lost.
 
 Works identically under systemd/launchd/s6 supervision, containers, tmux, or
-a plain `hermes gateway run`: the exporter lives in the gateway process, so
+a plain `noone gateway run`: the exporter lives in the gateway process, so
 no sidecar, agent, or collector is required on the host.
 
-## Collecting into DataDog
+## Collecting into DataDog {#collecting-into-datadog}
 
 Run a customer-owned OpenTelemetry Collector and forward:
 
@@ -100,7 +100,7 @@ service:
 Point `monitoring.export.otlp.endpoint` at the collector. Alerts belong on
 `hermes.gateway.up`, `hermes.platform.up`, and `hermes.platform.degraded`.
 
-## Generic fleet queries and alerts
+## Generic fleet queries and alerts {#generic-fleet-queries-and-alerts}
 
 The exact syntax depends on the customer's observability backend. The examples
 below use PromQL-style expressions and intentionally avoid vendor-specific
@@ -160,7 +160,7 @@ Keep alert thresholds and routing in deployment-owned configuration. Do not add
 job names, prompts, outputs, schedules, destinations, raw errors, profile names,
 or account identity merely to make a dashboard easier to read.
 
-## Release-validation scenarios
+## Release-validation scenarios {#release-validation-scenarios}
 
 Before accepting a deployment, force and verify all five cases through the real
 collector and backend:
@@ -177,7 +177,7 @@ collector and backend:
 5. **Killed gateway:** terminate one canary, verify missing-series detection,
    restart it, and confirm the same opaque instance identity returns.
 
-Hermes Agent-owned Relay transport health remains in scope. A separate gateway
+{{app-name}} Agent-owned Relay transport health remains in scope. A separate gateway
 or connector service remains authoritative for any shared connected-platform
 state that it owns and should export that state through its own telemetry path.
 
@@ -185,7 +185,7 @@ For every scenario, verify the signal and alert clear on recovery, other boxes
 remain unaffected, collector failure stays fail-open, and decoded metrics,
 spans, logs, and resource attributes remain content-free.
 
-## Local smoke test (no Docker)
+## Local smoke test (no Docker) {#local-smoke-test-no-docker}
 
 ```bash
 # terminal 1: capture collector on :4318
@@ -200,7 +200,7 @@ python scripts/observability/gateway_health_export_probe.py \
 # exit 0 prints: {"requests": 6, "paths": ["/v1/logs", "/v1/metrics", "/v1/traces"]}
 ```
 
-## Maintaining and extending this plane
+## Maintaining and extending this plane {#maintaining-and-extending-this-plane}
 
 This plane is a **fixed, enumerated, content-free vocabulary** by design. Adding
 a signal is not just "emit a new metric" — every new name and attribute must be
@@ -210,7 +210,7 @@ golden rule: **a new signal that is emitted but not declared in every layer
 looks like a code bug but is a vocabulary-registration bug — nothing errors, the
 signal just never arrives.**
 
-### Content-free invariant (applies to every change)
+### Content-free invariant (applies to every change) {#content-free-invariant-applies-to-every-change}
 
 Before adding anything, confirm it cannot carry content. Numbers, booleans,
 ages, durations, monotonic counts, and one-way hashes are safe. **Never** add an
@@ -222,7 +222,7 @@ string attributes that could touch user input must pass through
 `redaction.redact_for_export` and be truncated (see `_span_attrs` in
 `agent/monitoring/otlp_exporter.py`).
 
-### Adding a new gauge/metric
+### Adding a new gauge/metric {#adding-a-new-gaugemetric}
 
 1. Emit it in the snapshot builder (`agent/monitoring/gateway_health.py`
    `build_gateway_health_snapshot`, `cron_health.py` `build_cron_health_snapshot`,
@@ -242,7 +242,7 @@ string attributes that could touch user input must pass through
    correctly-emitted new metric never appears; call it out in the PR so the
    deploying operator updates their collector config.
 
-### Adding a new subsystem (a new family of signals)
+### Adding a new subsystem (a new family of signals) {#adding-a-new-subsystem-a-new-family-of-signals}
 
 Mirror the cron pattern (`cron_health.py` + its wiring): put the read/projection
 logic in its own module, expose one `build_<subsystem>_health_snapshot()` that
@@ -252,7 +252,7 @@ Then do the "adding a metric" checklist for each new name, and the "adding an
 attribute" checklist for each new event attribute. Add a release-validation
 scenario below for the subsystem's failure mode.
 
-### Extending the error-class / status / source / state vocabularies
+### Extending the error-class / status / source / state vocabularies {#extending-the-error-class--status--source--state-vocabularies}
 
 These are the closed enums that keep the plane bounded. Extend the SET, then the
 classifier, never one without the other:
@@ -270,7 +270,7 @@ must match on a stable keyword, not on message text that could vary; update the
 `hermes.error_class = ...` list in this file's alert section and the enum's unit
 test so the contract is asserted, not frozen as a count.
 
-### Adding a content-free attribute to an existing event/span
+### Adding a content-free attribute to an existing event/span {#adding-a-content-free-attribute-to-an-existing-eventspan}
 
 Add the key to the emitter's per-kind `keep_by_kind` allowlist in
 `agent/monitoring/otlp_exporter.py::_span_attrs` (unlisted keys are dropped), run
@@ -278,7 +278,7 @@ it through redaction if it is ever string-shaped, and — as with metrics — if
 deployment's collector has a span-attribute `keep_keys(...)` allowlist, add the
 attribute there too or it is stripped in transit.
 
-### Verify the whole chain, not just emission
+### Verify the whole chain, not just emission {#verify-the-whole-chain-not-just-emission}
 
 Emitting is necessary but not sufficient. Confirm the signal survives all the
 way to the backend, because the enums, the `metric_names` registration, the
@@ -296,11 +296,11 @@ Decode the captured OTLP payload and assert the new name/attribute is present
 AND that no content leaked. When a real collector sits in front, add its
 allowlist entries and re-verify against the backend, not just the local capture.
 
-## Boundaries and roadmap
+## Boundaries and roadmap {#boundaries-and-roadmap}
 
 The `hermes monitoring` CLI intentionally exposes `status` only. This first
-release covers only Hermes Agent-owned service-health and operational-diagnostic
-signals, including Hermes Agent-owned Relay transport health. Team Gateway's
+release covers only {{app-name}} Agent-owned service-health and operational-diagnostic
+signals, including {{app-name}} Agent-owned Relay transport health. Team Gateway's
 authoritative shared connector/platform state is explicitly out of scope, as
 are product analytics, audit/quality reporting, and detailed execution traces.
 Shared client usage metrics and enterprise trace telemetry are being designed on

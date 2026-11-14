@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
   sync: vi.fn()
 }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   saveHermesConfigRecord: async (config: Record<string, unknown>) => {
     mocks.order.push(`save:${JSON.stringify(config)}`)
 
@@ -52,7 +52,7 @@ vi.mock('@/store/notifications', () => ({
 
 vi.mock('../hooks/use-config-record', () => ({
   hermesConfigCacheWriter: () => () => undefined,
-  useHermesConfigRecord: () => ({ data: mocks.loadedConfig, writeScope: { profile: 'work' } })
+  useAgentConfigRecord: () => ({ data: mocks.loadedConfig, writeScope: { profile: 'work' } })
 }))
 
 describe('BrowserRealProfilePanel in-app browser sign-ins', () => {

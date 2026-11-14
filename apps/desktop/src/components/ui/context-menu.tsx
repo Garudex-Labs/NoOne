@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { ContextMenu as ContextMenuPrimitive } from 'radix-ui'
 import * as React from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { cn } from '@/lib/utils'
 
 function ContextMenu({ ...props }: React.ComponentProps<typeof ContextMenuPrimitive.Root>) {
@@ -83,7 +83,7 @@ function ContextMenuCheckboxItem({
     >
       {children}
       <ContextMenuPrimitive.ItemIndicator className="ml-auto flex items-center pl-2 text-foreground">
-        <Codicon name="check" size="0.75rem" />
+        <AppIcon name="check" size="0.75rem" />
       </ContextMenuPrimitive.ItemIndicator>
     </ContextMenuPrimitive.CheckboxItem>
   )
@@ -139,7 +139,7 @@ function ContextMenuSubTrigger({
       {...props}
     >
       {children}
-      <Codicon className="ml-auto text-(--ui-text-tertiary)" name="chevron-right" size="1rem" />
+      <AppIcon className="ml-auto text-(--ui-text-tertiary)" name="chevron-right" size="1rem" />
     </ContextMenuPrimitive.SubTrigger>
   )
 }

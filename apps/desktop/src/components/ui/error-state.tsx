@@ -1,14 +1,14 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertTriangle } from '@noone/ui/icons'
 import type { ReactNode } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
-import { AlertTriangle } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 // The single canonical error glyph (codicon's filled error mark). Use this
 // everywhere an error is surfaced (boundaries, dialogs, banners) so failures
 // read identically — one icon, one color, no background chip.
 export function ErrorIcon({ className, size = '1.75rem' }: { className?: string; size?: string }) {
-  return <Codicon className={cn('text-destructive', className)} name="error" size={size} />
+  return <AppIcon className={cn('text-destructive', className)} name="error" size={size} />
 }
 
 // Inline error banner for detail panes (born in Messaging's platform error,

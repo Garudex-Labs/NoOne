@@ -1,6 +1,6 @@
 """Tests for atomic_roundtrip_yaml_save() — comment-preserving full-state writes.
 
-This helper backs tui_gateway/server.py:_save_cfg(), which used to call
+This helper backs agent_backend/server.py:_save_cfg(), which used to call
 yaml.safe_dump and silently clobber user-edited config files on every
 TUI/gateway setting change (e.g. /personality, /reasoning, /details_mode).
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 
 class TestAtomicRoundtripYamlSave:
@@ -158,7 +158,7 @@ class TestAtomicRoundtripYamlSave:
         assert result["agent"]["system_prompt"] == "you are noir"
 
     def test_deletes_keys_missing_from_new_state(self, config_path):
-        """Mirrors the cfg.pop()-then-_save_cfg(cfg) pattern in tui_gateway:
+        """Mirrors the cfg.pop()-then-_save_cfg(cfg) pattern in agent_backend:
         e.g. /prompt clear removes custom_prompt entirely."""
         config_path.write_text(
             "model:\n"
@@ -253,7 +253,7 @@ class TestAtomicRoundtripYamlSave:
         return fake_open
 
     def test_refuses_to_overwrite_unreadable_existing_config(self, config_path):
-        """Shares the fail-closed contract with hermes_cli.config.atomic_config_write:
+        """Shares the fail-closed contract with agent_cli.config.atomic_config_write:
         an existing-but-unreadable config.yaml (permission error, broken mount)
         must raise rather than being silently replaced with only new_state."""
         original = "model:\n  default: test-model\n"

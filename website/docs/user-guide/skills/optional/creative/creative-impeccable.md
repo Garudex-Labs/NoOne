@@ -1,20 +1,20 @@
 ---
 title: "Impeccable — Frontend design guidance, upstream-maintained (impeccable)"
-sidebar_label: "Impeccable"
+sidebarTitle: "Impeccable"
 description: "Frontend design guidance, upstream-maintained (impeccable)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Impeccable
+# Impeccable {#impeccable}
 
 Frontend design guidance, upstream-maintained (impeccable).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/impeccable` |
+| Source | Optional — install with `noone skills install official/creative/impeccable` |
 | Path | `optional-skills/creative/impeccable` |
 | Version | `4.1.2` |
 | Author | Paul Bakaus (pbakaus) |
@@ -23,18 +23,26 @@ Frontend design guidance, upstream-maintained (impeccable).
 | Tags | `design`, `frontend`, `ui`, `ux`, `web-design`, `anti-slop` |
 | Related skills | [`claude-design`](../../bundled/creative/creative-claude-design.md), [`popular-web-designs`](../../bundled/creative/creative-popular-web-designs.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Impeccable (upstream-maintained)
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Impeccable (upstream-maintained) {#impeccable-upstream-maintained}
 
 > **Catalog stub.** This entry is maintained upstream at
 > [pbakaus/impeccable](https://github.com/pbakaus/impeccable): the project
 > ships and verifies a Hermes-native skill bundle under `.hermes/skills/`.
-> `hermes skills install impeccable` pulls the current bundle live from that
+> `noone skills install impeccable` pulls the current bundle live from that
 > repo (quarantined and scanned like any hub install) — this directory holds
 > only the catalog metadata, so the vendored copy can never go stale.
 

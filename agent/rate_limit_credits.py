@@ -14,13 +14,6 @@ logger = logging.getLogger("run_agent")
 
 
 
-def _is_nous_agent(agent) -> bool:
-    """True for the Nous provider (or a route to a nousresearch.com host)."""
-    if (getattr(agent, "provider", "") or "").strip().lower() == "nous":
-        return True
-    from utils import base_url_host_matches
-    base_url = str(getattr(agent, "base_url", "") or "")
-    return bool(base_url) and base_url_host_matches(base_url, "nousresearch.com")
 
 def _response_headers(http_response: Any):
     """Headers of a response, or None when there is nothing to parse."""
@@ -58,18 +51,6 @@ class RateLimitCreditsMixin:
         """Return the last captured RateLimitState, or None."""
         return self._rate_limit_state
 
-    def _capture_nous_model_switch(self, http_response: Any) -> None:
-        """Record the Nous gateway's ``x-nous-model-switch`` header (a named account asked for the
-        free tier's model; the gateway served its backing model and named it). Applied between
-        calls by ``hermes_cli.anon_auth.apply_model_switch``. Fail-open."""
-        headers = _response_headers(http_response)
-        if not headers:
-            return
-        try:
-            from hermes_cli.anon_auth import note_model_switch
-            note_model_switch(self, headers)
-        except Exception:
-            pass  # Never let header parsing break the agent loop
 
     def _capture_anthropic_response_headers(self, http_response: Any) -> None:
         """Capture rate-limit + credits state from Anthropic Messages response headers (the SDK's
@@ -118,7 +99,7 @@ class RateLimitCreditsMixin:
                             "(miss — producer off / non-Nous path / >TTL stale)")
             return
 
-        if state.is_usage_window and not _is_nous_agent(self):
+        if state.is_usage_window:
             return  # window headers from any other upstream are ignored (no window UI, no Keep going button)
         if state.is_usage_window and not any(k.lower() == "x-nous-credits-purchased-micros" for k in headers):
             # A refused request's headers omit the top-up balance: keep the last known one, not "no credits".
@@ -139,7 +120,7 @@ class RateLimitCreditsMixin:
         except Exception:
             logger.debug("Plan snapshot sync failed", exc_info=True)
         if dev:
-            # HERMES_DEV_CREDITS streams each capture to agent.log (`hermes logs -f`, grep 'credits ▸').
+            # HERMES_DEV_CREDITS streams each capture to agent.log (`noone logs -f`, grep 'credits ▸').
             spent = self.get_credits_spent_micros()
             logger.info(
                 "credits ▸ remaining=%d (%s) · paid=%s · denom=%s · used=%s · Δspent=%s · age=%s%s",
@@ -212,7 +193,7 @@ class RateLimitCreditsMixin:
             return cached
         enabled = True
         try:
-            from hermes_cli.config import load_config
+            from agent_cli.config import load_config
             display = (load_config() or {}).get("display")
             if isinstance(display, dict) and "credits_notices" in display:
                 enabled = bool(display["credits_notices"])

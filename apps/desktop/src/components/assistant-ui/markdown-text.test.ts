@@ -183,7 +183,7 @@ describe('preprocessMarkdown', () => {
   })
 
   it('does not autolink canonical markdown links', () => {
-    const input = '[link](https://github.com/NousResearch/hermes-agent/issues)'
+    const input = '[link](https://github.com/Garudex-Labs/NoOne/issues)'
     const output = preprocessMarkdown(input)
 
     expect(output).toBe(input)

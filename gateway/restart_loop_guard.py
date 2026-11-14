@@ -1,6 +1,6 @@
 """Auto-resume restart-loop breaker (defense-3).
 
-Defenses 1-2 (``_HERMES_GATEWAY`` guard on ``hermes gateway stop|restart`` /
+Defenses 1-2 (``_HERMES_GATEWAY`` guard on ``noone gateway stop|restart`` /
 ``terminal_tool``, cron lifecycle filter) stop the agent scheduling its own restart
 but not every SIGTERM source: the supervisor respawns, the gateway auto-resumes the
 restart-interrupted session, whose next turn re-runs the offending logic.  Boots are
@@ -21,7 +21,7 @@ import logging
 import time
 from typing import List, Optional
 
-from hermes_constants import get_hermes_home, get_process_hermes_home
+from agent_constants import get_agent_home, get_process_agent_home
 
 logger = logging.getLogger("gateway.run")
 
@@ -39,12 +39,12 @@ _MAX_STORED_BOOTS = 50
 
 
 def _state_path():
-    return get_hermes_home() / "gateway" / "restart_loop.json"
+    return get_agent_home() / "gateway" / "restart_loop.json"
 
 
 def _notice_state_path():
     # The host process's home, like the planned-restart marker it pairs with: one process, one loop.
-    return get_process_hermes_home() / "gateway" / "lifecycle_notice_loop.json"
+    return get_process_agent_home() / "gateway" / "lifecycle_notice_loop.json"
 
 
 def _load_boots(path=None) -> list[float]:

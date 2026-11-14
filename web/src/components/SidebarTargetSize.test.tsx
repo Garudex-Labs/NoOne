@@ -141,14 +141,17 @@ describe("sidebar control target sizes (WCAG 2.5.8, issue #70983)", () => {
     expect(hasClass(btn!, "py-1")).toBe(false);
   });
 
-  it("Nous Research footer link renders a >=24px hit area (min-h 24px)", async () => {
+  it("Organization footer credit retains a >=24px layout height", async () => {
     await render(
       <I18nProvider>
         <SidebarFooter status={null} />
       </I18nProvider>,
     );
-    const link = container.querySelector('a[href="https://nousresearch.com"]');
-    expect(link).not.toBeNull();
-    expect(hasClass(link!, "min-h-[24px]")).toBe(true);
+    const credit = Array.from(container.querySelectorAll("span")).find(
+      (element) => element.textContent === "RAWx18",
+    );
+    expect(credit).toBeDefined();
+    expect(hasClass(credit!, "min-h-[24px]")).toBe(true);
+    expect(credit!.closest("a")).toBeNull();
   });
 });

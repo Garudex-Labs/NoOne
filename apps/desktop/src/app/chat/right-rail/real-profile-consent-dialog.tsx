@@ -1,6 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { Check, Globe } from '@noone/ui/icons'
 import { useCallback, useEffect, useState } from 'react'
 
+import { saveHermesConfigRecord } from '@/agent-client'
 import { readUseRealProfile } from '@/app/settings/browser-real-profile-panel'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,10 +13,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import type { HermesConnection } from '@/global'
-import { saveHermesConfigRecord } from '@/hermes'
+import type { AgentConnection } from '@/global'
 import { useI18n } from '@/i18n'
-import { Check, Globe } from '@/lib/icons'
 import { claimPreviewSigninsSync, syncPreviewSignins } from '@/lib/preview-signins'
 import { notify, notifyError } from '@/store/notifications'
 import {
@@ -26,7 +26,7 @@ import {
 } from '@/store/real-profile-consent'
 import { $connection } from '@/store/session'
 
-import { hermesConfigCacheWriter, useHermesConfigRecord } from '../../hooks/use-config-record'
+import { hermesConfigCacheWriter, useAgentConfigRecord } from '../../hooks/use-config-record'
 
 interface RealProfileConsentDialogProps {
   /** The Browser tab this pane renders — used only to claim the prompt so
@@ -37,7 +37,7 @@ interface RealProfileConsentDialogProps {
 interface RealProfilePromptGate {
   claim: null | string
   configLoaded: boolean
-  connection: HermesConnection | null
+  connection: AgentConnection | null
   dismissed: boolean
   enabled: boolean
   muted: boolean
@@ -88,7 +88,7 @@ export function RealProfileConsentDialog({ tabId }: RealProfileConsentDialogProp
   const muted = useStore($realProfilePromptMuted)
   const claim = useStore($realProfilePromptClaim)
   const connection = useStore($connection)
-  const { data: config, writeScope } = useHermesConfigRecord()
+  const { data: config, writeScope } = useAgentConfigRecord()
   const setConfig = hermesConfigCacheWriter()
   const [busy, setBusy] = useState(false)
 

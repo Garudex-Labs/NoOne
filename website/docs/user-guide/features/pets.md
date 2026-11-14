@@ -1,12 +1,11 @@
 ---
-sidebar_position: 11
 title: "Pets (Petdex Mascots)"
-description: "Adopt an animated mascot that reacts to agent activity across the CLI, TUI, and desktop app"
+description: "Adopt an animated mascot that reacts to agent activity across the CLI, and desktop app"
 ---
 
-# Pets
+# Pets {#pets}
 
-Hermes can show an animated **pet** — a small mascot sprite that reacts to what
+{{app-name}} can show an animated **pet** — a small mascot sprite that reacts to what
 the agent is doing (idle, running a tool, thinking, finishing, failing) across
 the **CLI**, **TUI**, and **desktop app**. Pets come from the public
 [petdex](https://github.com/crafter-station/petdex) gallery.
@@ -15,7 +14,7 @@ Pets are purely cosmetic. They have **no effect on prompt caching, tokens, or
 the agent's behavior** — the sprite is a display concern only. The feature is
 **off by default** and stays dormant until you install and select a pet.
 
-## How it works
+## How it works {#how-it-works}
 
 - Pets are installed into your profile's `pets/` directory
   (`<HERMES_HOME>/pets/<slug>/`), so each [profile](../profiles.md) keeps its
@@ -37,9 +36,9 @@ the agent's behavior** — the sprite is a display concern only. The feature is
   | Blocked on you (a clarify/approval prompt is open) | `waiting` (falls back to `idle` on legacy 8-row sheets) |
   | Nothing happening | `idle` |
 
-## Rendering
+## Rendering {#rendering}
 
-In the terminal (CLI/TUI), Hermes renders the sprite at full fidelity when your
+In the terminal (CLI), {{app-name}} renders the sprite at full fidelity when your
 terminal supports a graphics protocol (**kitty**, **Ghostty**, **WezTerm**,
 **iTerm2**, or **sixel**). Otherwise it falls back automatically to a truecolor
 Unicode **half-block** rendering. Inside a pipe or redirect (no TTY), terminal
@@ -48,7 +47,7 @@ rendering is disabled by design.
 The desktop app draws the pet as a floating sprite on a canvas and toggles it
 from **Settings → Appearance**.
 
-## Quick start (CLI)
+## Quick start (CLI) {#quick-start-cli}
 
 ```bash
 # Browse the gallery (filter by substring)
@@ -65,7 +64,7 @@ hermes pets show
 hermes pets doctor
 ```
 
-## `hermes pets` commands
+## `hermes pets` commands {#hermes-pets-commands}
 
 | Goal | Command |
 | --- | --- |
@@ -89,7 +88,7 @@ hermes pets doctor
   `unicode`, `auto`).
 - `--scale` — override the on-screen scale (`0` = use config).
 
-## `/pet` slash command
+## `/pet` slash command {#pet-slash-command}
 
 Inside the CLI and TUI you can manage the pet without leaving the session:
 
@@ -103,27 +102,27 @@ Inside the CLI and TUI you can manage the pet without leaving the session:
 In the TUI, `/pet list` opens an interactive picker overlay; in the desktop app
 it opens the Cmd+K pet palette.
 
-## Generating a pet (`/hatch`)
+## Generating a pet (`/hatch`) {#generating-a-pet-hatch}
 
-Beyond installing pre-made pets from the gallery, Hermes can **generate a brand-new pet** from a text description — its own AI sprite-generation pipeline.
+Beyond installing pre-made pets from the gallery, {{app-name}} can **generate a brand-new pet** from a text description — its own AI sprite-generation pipeline.
 
-- CLI/TUI: `/hatch <description>` (alias `/generate-pet`), or `hermes pets` → the generate flow.
+- CLI: `/hatch <description>` (alias `/generate-pet`), or `hermes pets` → the generate flow.
 - Desktop app: the Pokédex-style **generate** UI — an animated egg, hatch FX, and a draft picker.
 
 How generation works (a two-step, cost-bounded flow):
 
 1. **Base drafts** — a handful of cheap, prompt-only "what should this pet look like" variants are generated. You pick one, or remix/retry for a fresh round.
-2. **Hatch** — the chosen base is used as a reference image to generate one grounded animation row per Hermes state (idle, thinking, tool use, etc.), which are deterministically sliced into frames and packed into a standard petdex/Codex atlas (8×9 grid of 192×208 cells). The result is a valid spritesheet you keep — and could `petdex submit`.
+2. **Hatch** — the chosen base is used as a reference image to generate one grounded animation row per {{app-name}} state (idle, thinking, tool use, etc.), which are deterministically sliced into frames and packed into a standard petdex/Codex atlas (8×9 grid of 192×208 cells). The result is a valid spritesheet you keep — and could `petdex submit`.
 
-### Image backend
+### Image backend {#image-backend}
 
 Generation uses the active [image-generation provider](./image-generation.md), but it requires **reference-image grounding** so each animation row stays the same character as the base. Reference-capable backends: **Nous Portal**, **OpenRouter**, **OpenAI** (`gpt-image-2`), and **Krea**. OpenRouter/Nous run a quality-first model chain by default.
 
 - Resolution order prefers Nous Portal → OpenAI → OpenRouter.
-- If no reference-capable backend is configured, generation surfaces an actionable error pointing you to `hermes tools` → Image Generation. (Installing/adopting existing gallery pets needs no image backend.)
+- If no reference-capable backend is configured, generation surfaces an actionable error pointing you to `noone tools` → Image Generation. (Installing/adopting existing gallery pets needs no image backend.)
 - Override the backend with the `HERMES_PET_IMAGE_PROVIDER` env var (e.g. `HERMES_PET_IMAGE_PROVIDER=openrouter`).
 
-## Desktop app
+## Desktop app {#desktop-app}
 
 In the desktop app you can manage the pet two ways:
 
@@ -135,7 +134,7 @@ In the desktop app you can manage the pet two ways:
 Both adopt/toggle/resize the floating mascot in place — size changes apply
 instantly; adopting a new pet lights it up within a moment.
 
-### Roaming
+### Roaming {#roaming}
 
 Settings → Appearance has a **Roam** toggle: when enabled, the pet wanders the
 window on its own while the agent is idle — walking surfaces, pausing, and
@@ -144,26 +143,26 @@ and the agent is at rest; any agent-driven state (working, celebrating)
 immediately takes over. The toggle is off by default and persists across
 restarts.
 
-### Alt+wheel resizing
+### Alt+wheel resizing {#altwheel-resizing}
 
 Hold **Alt** and scroll the mouse wheel over the pet to resize it in place —
 in the app window and on the popped-out overlay alike. The overlay zooms
 toward the cursor position and the resulting scale is persisted, so it
 survives restarts and stays in sync with the in-app pet.
 
-### Vibe reactions
+### Vibe reactions {#vibe-reactions}
 
 Say something nice to the agent — "good bot", "thank you", "ily", `<3`, or a
 heart emoji — and the pet reacts with floating hearts (desktop) or a heart
-flash (CLI/TUI). Detection is a curated, token-free lexicon matched locally on
+flash (CLI). Detection is a curated, token-free lexicon matched locally on
 each user message (no model call); it fires on affection and gratitude aimed at
 the agent, not general positive sentiment. All surfaces — CLI pet, TUI, desktop
 floating pet, and the pop-out overlay — react off the same signal.
 
-### Pop-out overlay
+### Pop-out overlay {#pop-out-overlay}
 
 **Shift-click** the floating pet to pop it out into its own transparent,
-always-on-top desktop window. Out there it stays visible while Hermes is
+always-on-top desktop window. Out there it stays visible while {{app-name}} is
 minimized (Codex-style), so a glance tells you what the agent is doing.
 
 Gestures once it's popped out:
@@ -183,7 +182,7 @@ quiet there.
 The overlay is a pure puppet of the in-app pet — it carries no separate gateway
 connection and never appears in the dock or app switcher.
 
-## Configuration
+## Configuration {#configuration}
 
 All settings live under `display.pet` in `config.yaml`:
 
@@ -198,7 +197,7 @@ display:
 ```
 
 - **`scale`** is the single master size knob. One number shrinks every surface:
-  the desktop canvas scales its pixels by it, and the CLI/TUI derive their
+  the desktop canvas scales its pixels by it, and the CLI derive their
   terminal column width from it. The half-block fallback clamps to a legibility
   floor — it can't shrink as far as true-pixel kitty/GUI rendering without
   turning to mush, so the same `scale` looks crisp under kitty but is floored in
@@ -209,7 +208,7 @@ display:
 - **`unicode_cols`** pins the terminal column width independently of `scale`;
   leave it at `0` to derive width from `scale`.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 Run `hermes pets doctor` — it reports:
 
@@ -226,10 +225,10 @@ Common gotchas:
 
 - A pet only shows once one is **installed AND selected** (`enabled: true`).
 - Inside a pipe/redirect (no TTY), terminal rendering is disabled by design.
-- The petdex npm CLI installs to `~/.codex/pets`; Hermes uses its own
+- The petdex npm CLI installs to `~/.codex/pets`; {{app-name}} uses its own
   profile-scoped `<HERMES_HOME>/pets/` instead — install through `hermes pets`.
 
-## See also
+## See also {#see-also}
 
 - The [`hermes-agent` skill](../skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md)
   lets the agent install and switch pets for you on request (see its

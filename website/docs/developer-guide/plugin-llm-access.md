@@ -1,10 +1,9 @@
 ---
-sidebar_position: 11
 title: "Plugin LLM Access"
 description: "Run any LLM call from inside a plugin via ctx.llm — chat or structured, sync or async. Host-owned auth, fail-closed trust gate, optional JSON Schema validation."
 ---
 
-# Plugin LLM Access
+# Plugin LLM Access {#plugin-llm-access}
 
 `ctx.llm` is the supported way for a plugin to make an LLM call.
 Chat completion, structured extraction, sync, async, with or without
@@ -22,7 +21,7 @@ the agent up for at all.
 These are jobs the agent shouldn't be in the loop on. They want one
 LLM call, a typed answer, and to be done.
 
-## The smallest possible call
+## The smallest possible call {#the-smallest-possible-call}
 
 ```python
 result = ctx.llm.complete(messages=[{"role": "user", "content": "ping"}])
@@ -34,7 +33,7 @@ SDK initialisation. The plugin runs against whatever provider and
 model the user is currently using — when they switch providers, the
 plugin follows them automatically.
 
-## A more complete chat example
+## A more complete chat example {#a-more-complete-chat-example}
 
 ```python
 result = ctx.llm.complete(
@@ -52,7 +51,7 @@ return result.text
 and in `result.audit` so operators can see which plugin made which
 call. Optional but recommended for anything that fires often.
 
-## Structured output
+## Structured output {#structured-output}
 
 When the plugin needs a typed answer, switch to the structured lane:
 
@@ -76,7 +75,7 @@ installed, and hands back a Python object on `result.parsed`. If the
 model couldn't produce valid JSON, `result.parsed` is `None` and
 `result.text` carries the raw response.
 
-## What this lane gives you
+## What this lane gives you {#what-this-lane-gives-you}
 
 * **One call, four shapes.** `complete()` for chat,
   `complete_structured()` for typed JSON, `acomplete()` and
@@ -84,7 +83,7 @@ model couldn't produce valid JSON, `result.parsed` is `None` and
   objects.
 * **Host-owned credentials.** OAuth tokens, refresh flows, the
   credential pool, per-task aux overrides — every credential
-  concept Hermes already has applies. The plugin never sees a
+  concept {{app-name}} already has applies. The plugin never sees a
   token; the host attributes the call back through `result.audit`.
 * **Bounded.** Single sync or async call. No streaming, no tool
   loops, no conversation state to manage. State the input, get the
@@ -94,13 +93,13 @@ model couldn't produce valid JSON, `result.parsed` is `None` and
   default posture is "use what the user is using." Operators opt in
   to specific overrides, per plugin, in `config.yaml`.
 
-## Quick start
+## Quick start {#quick-start}
 
 Two complete plugins below — one chat, one structured. Both ship
 inside a single `register(ctx)` function and need zero outside
 configuration to run against whatever model the user has active.
 
-### Chat completion — `/tldr`
+### Chat completion — `/tldr` {#chat-completion--tldr}
 
 ```python
 def register(ctx):
@@ -132,7 +131,7 @@ def _tldr(ctx, raw_args: str) -> str:
 `result.text` is the model's response; `result.usage` carries token
 counts; `result.provider` and `result.model` carry attribution.
 
-### Structured extraction — `/paste-to-tasks`
+### Structured extraction — `/paste-to-tasks` {#structured-extraction--paste-to-tasks}
 
 ```python
 def register(ctx):
@@ -193,7 +192,7 @@ hermes-agent itself). For the async surface (`acomplete()` /
 [`plugin-llm-async-example`](https://github.com/NousResearch/hermes-example-plugins/tree/main/plugin-llm-async-example)
 in the same repo.
 
-## When to use which
+## When to use which {#when-to-use-which}
 
 | You want… | Reach for |
 |---|---|
@@ -206,11 +205,11 @@ in the same repo.
 Everything else — provider selection, model resolution, auth, fallback,
 timeout, vision routing — is the same across all four.
 
-## API surface
+## API surface {#api-surface}
 
 `ctx.llm` is an instance of `agent.plugin_llm.PluginLlm`.
 
-### `complete()`
+### `complete()` {#complete}
 
 ```python
 result = ctx.llm.complete(
@@ -239,7 +238,7 @@ just `model=` to use the user's active provider with a different
 model on it. Set both to switch providers entirely. Either argument
 without operator opt-in raises `PluginLlmTrustError`.
 
-### `complete_structured()`
+### `complete_structured()` {#complete_structured}
 
 ```python
 result = ctx.llm.complete_structured(
@@ -278,7 +277,7 @@ against your schema if `jsonschema` is installed.
 * `result.content_type == "text"` — parsing or validation failed;
   inspect `result.text` for the raw model response.
 
-### Async
+### Async {#async}
 
 ```python
 result = await ctx.llm.acomplete(messages=..., task="classifier")
@@ -291,7 +290,7 @@ Same arguments and result types as their sync counterparts. Use
 these from gateway adapters, async hooks, or any plugin code
 already running on an asyncio loop.
 
-### Task-routed auxiliary calls
+### Task-routed auxiliary calls {#task-routed-auxiliary-calls}
 
 Pass `task=` to any of the four call shapes when a plugin needs its
 own configured auxiliary route. Register that task during plugin setup;
@@ -319,17 +318,17 @@ auxiliary:
 Plugins may supply provider/model registration defaults for their own
 tasks. Operator configuration in `auxiliary.<task>` overrides those
 defaults and controls the deployment choice. A registered task is a
-first-class slot on every model-assignment surface: the `hermes model` →
+first-class slot on every model-assignment surface: the `noone model` →
 *Configure auxiliary models* picker, the dashboard Models page, and Desktop
 Settings → Models → Auxiliary all list it (after the built-in tasks, under
 the plugin's `display_name`) and can pin, reset, or flag it as a stale
 provider pin like any built-in. A plugin can only use a task
 it registered itself; unknown or foreign task names fail before provider
 invocation. `allow_task_override: true` is an explicit operator grant for
-using Hermes built-in auxiliary tasks; it does not permit another plugin's
+using {{app-name}} built-in auxiliary tasks; it does not permit another plugin's
 tasks. Omit `task=` (or use `"auto"`) to keep the active main provider/model.
 
-#### From the plugin's frontend: a plugin RPC method
+#### From the plugin's frontend: a plugin RPC method {#from-the-plugins-frontend-a-plugin-rpc-method}
 
 A plugin's frontend (a Desktop page, or a client attached to the shared
 gateway) does not call the model itself. It calls its own Python half
@@ -412,7 +411,7 @@ the call with reason `plugin_rpc_failed`.
   does not match `json_schema` raises `ValueError` when the optional
   `jsonschema` package is installed; without it, the schema is not checked.
 
-#### Inheriting a built-in slot
+#### Inheriting a built-in slot {#inheriting-a-built-in-slot}
 
 `inherit_from` names a built-in auxiliary task (`compression`, `mcp`,
 `vision`, ...) or a task your plugin (or one loaded before it) already
@@ -449,7 +448,7 @@ The Models settings show an unpinned inheriting task as
 `GET /api/model/auxiliary` returns `inherit_from` plus an `effective`
 `{provider, model, base_url}` on such rows.
 
-### Result attributes
+### Result attributes {#result-attributes}
 
 ```python
 @dataclass
@@ -473,7 +472,7 @@ class PluginLlmStructuredResult:
 `cache_read_tokens`, `cache_write_tokens`, and `cost_usd` when the
 provider returns those fields.
 
-## Trust gate
+## Trust gate {#trust-gate}
 
 The default behaviour is fail-closed. With no `plugins.entries`
 config block, a plugin can:
@@ -502,7 +501,7 @@ plugins:
       llm:
         # Allow this plugin to choose a different Hermes provider
         # (must be one Hermes already knows about — same names as
-        # `hermes model` and config.yaml model.provider).
+        # `noone model` and config.yaml model.provider).
         allow_provider_override: true
 
         # Optionally restrict which providers. Use ["*"] for any.
@@ -532,7 +531,7 @@ The plugin id is the manifest `name:` field for flat plugins, or the
 path-derived key for nested plugins (`image_gen/openai`,
 `memory/honcho`, etc.).
 
-### What the gate enforces
+### What the gate enforces {#what-the-gate-enforces}
 
 | Override        | Default | Config key                       |
 | --------------- | ------- | -------------------------------- |
@@ -549,7 +548,7 @@ does **not** also grant `allow_provider_override` — a plugin trusted
 to pick a model is still pinned to the user's active provider unless
 it gets the provider gate as well.
 
-### What the gate does NOT need to enforce
+### What the gate does NOT need to enforce {#what-the-gate-does-not-need-to-enforce}
 
 * Request-shaping arguments — `temperature`, `max_tokens`,
   `timeout`, `system_prompt`, `purpose`, `messages`, `instructions`,
@@ -560,7 +559,7 @@ it gets the provider gate as well.
   Operators only need to think about `plugins.entries` for plugins
   that want finer routing.
 
-## What the host owns
+## What the host owns {#what-the-host-owns}
 
 A complete list of the things `ctx.llm` does for the plugin so you
 don't have to:
@@ -574,7 +573,7 @@ don't have to:
   active text model is text-only, the host falls back to the
   configured vision model automatically.
 * **Fallback chain.** If the user's primary provider 5xxs or 429s,
-  the request goes through Hermes' usual aggregator-aware fallback
+  the request goes through {{app-name}}' usual aggregator-aware fallback
   before it returns an error to the plugin.
 * **Timeout.** Honours your `timeout=` argument, falling back to
   `auxiliary.<task>.timeout` config or the global aux default.
@@ -587,7 +586,7 @@ don't have to:
 * **Audit log.** Each call writes one INFO line to `agent.log` with
   the plugin id, provider/model, purpose, and token totals.
 
-## What the plugin owns
+## What the plugin owns {#what-the-plugin-owns}
 
 * **Request shape.** `messages` for chat, `instructions` + `input`
   for structured. The plugin builds the prompt; the host runs it.
@@ -602,7 +601,7 @@ don't have to:
   loop on `complete()` for every gateway message without thinking
   about token spend.
 
-## Asking the session's own agent (`ctx.side_question`)
+## Asking the session's own agent (`ctx.side_question`) {#asking-the-sessions-own-agent-ctxside_question}
 
 `ctx.llm` runs a fresh call that knows only what the plugin sends it.
 `ctx.side_question` asks the session's *own* agent instead: the same
@@ -648,7 +647,7 @@ capabilities:
   - llm.side_question
 ```
 
-### Lease rules
+### Lease rules {#lease-rules}
 
 * `post_llm_call` receives `side_question_token` (a string) when at
   least one loaded plugin holds the capability, else `None`. Cron runs
@@ -666,7 +665,7 @@ capabilities:
 * `timeout` defaults to **15 seconds** and is capped at 60. It covers
   the whole call, including setting up the request.
 
-### What you get back
+### What you get back {#what-you-get-back}
 
 The text of the agent's reply, or `None`. `None` means the call was
 refused or failed: a Mixture-of-Agents runtime, an agent-as-provider
@@ -691,9 +690,9 @@ Observability plugins see the call as an auxiliary call:
 plugin, and the turn-scoped `pre_api_request` /
 `post_api_request` do not fire for it.
 
-## Where this fits in the plugin surface
+## Where this fits in the plugin surface {#where-this-fits-in-the-plugin-surface}
 
-Existing `ctx.*` methods extend an existing Hermes subsystem:
+Existing `ctx.*` methods extend an existing {{app-name}} subsystem:
 
 | `ctx.register_tool` | adds a tool the agent can call |
 | `ctx.register_platform` | wires a new gateway adapter |
@@ -709,10 +708,10 @@ tool the agent invokes, use `register_tool`. If it needs to react
 to a lifecycle event, use `register_hook`. If it needs to make its
 own model call — for any reason, structured or not — `ctx.llm`.
 
-## Reference
+## Reference {#reference}
 
-* Implementation: [`agent/plugin_llm.py`](https://github.com/NousResearch/hermes-agent/blob/main/agent/plugin_llm.py)
-* Tests: [`tests/agent/test_plugin_llm.py`](https://github.com/NousResearch/hermes-agent/blob/main/tests/agent/test_plugin_llm.py)
+* Implementation: [`agent/plugin_llm.py`](https://github.com/Garudex-Labs/NoOne/blob/main/agent/plugin_llm.py)
+* Tests: [`tests/agent/test_plugin_llm.py`](https://github.com/Garudex-Labs/NoOne/blob/main/tests/agent/test_plugin_llm.py)
 * Reference plugins (companion repo):
   * [`plugin-llm-example`](https://github.com/NousResearch/hermes-example-plugins/tree/main/plugin-llm-example) — sync structured extraction with image input
   * [`plugin-llm-async-example`](https://github.com/NousResearch/hermes-example-plugins/tree/main/plugin-llm-async-example) — async with `asyncio.gather()`

@@ -1,57 +1,65 @@
 ---
 title: "Google Workspace — Gmail, Calendar, Drive, Docs, Sheets via gws CLI or Python"
-sidebar_label: "Google Workspace"
+sidebarTitle: "Google Workspace"
 description: "Gmail, Calendar, Drive, Docs, Sheets via gws CLI or Python"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Google Workspace
+# Google Workspace {#google-workspace}
 
 Gmail, Calendar, Drive, Docs, Sheets via gws CLI or Python.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/productivity/google-workspace` |
 | Version | `1.2.0` |
-| Author | Nous Research |
+| Author | Garudex Labs |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Google`, `Gmail`, `Calendar`, `Drive`, `Sheets`, `Docs`, `Contacts`, `Email`, `OAuth` |
 | Related skills | [`himalaya`](../../bundled/email/email-himalaya.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Google Workspace
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Google Workspace {#google-workspace-1}
 
 Gmail, Calendar, Drive, Contacts, Sheets, and Docs — through Hermes-managed OAuth and a thin CLI wrapper. When `gws` is installed, the skill uses it as the execution backend for broader Google Workspace coverage; otherwise it falls back to the bundled Python client implementation.
 
-## References
+## References {#references}
 
 - `references/gmail-search-syntax.md` — Gmail search operators (is:unread, from:, newer_than:, etc.)
 - `references/daily-brief.md` — daily/morning brief procedure: schedule + conflicts + meeting prep + urgent mail from Gmail and Calendar. Load it when the user asks for a morning brief, meeting preparation, or "what's on my calendar and what email needs attention."
 
-## Scripts
+## Scripts {#scripts}
 
 - `scripts/setup.py` — OAuth2 setup (run once to authorize)
-- `scripts/google_api.py` — compatibility wrapper CLI. It prefers `gws` for operations when available, while preserving Hermes' existing JSON output contract.
+- `scripts/google_api.py` — compatibility wrapper CLI. It prefers `gws` for operations when available, while preserving {{app-name}}' existing JSON output contract.
 
-## First-Time Setup
+## First-Time Setup {#first-time-setup}
 
 The setup is fully non-interactive — you drive it step by step so it works
 on CLI, Telegram, Discord, or any platform.
 
-Run the setup script with Python from the Hermes environment, not an unrelated
-system Python. `--install-deps` syncs Hermes' declared Google extra through PM;
-after syncing, restart Hermes and rerun the OAuth command. If Hermes is not
-importable, use `hermes setup` first rather than installing packages with pip.
+Run the setup script with Python from the {{app-name}} environment, not an unrelated
+system Python. `--install-deps` syncs {{app-name}}' declared Google extra through PM;
+after syncing, restart {{app-name}} and rerun the OAuth command. If {{app-name}} is not
+importable, use `noone setup` first rather than installing packages with pip.
 
 Define a shorthand first:
 
@@ -59,7 +67,7 @@ Define a shorthand first:
 GSETUP="python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/setup.py"
 ```
 
-### Step 0: Check if already set up
+### Step 0: Check if already set up {#step-0-check-if-already-set-up}
 
 ```bash
 $GSETUP --check
@@ -67,7 +75,7 @@ $GSETUP --check
 
 If it prints `AUTHENTICATED`, skip to Usage — setup is already done.
 
-### Step 1: Triage — ask the user what they need
+### Step 1: Triage — ask the user what they need {#step-1-triage--ask-the-user-what-they-need}
 
 Before starting OAuth setup, ask the user TWO questions:
 
@@ -97,7 +105,7 @@ security keys required to sign in)? If you're not sure, you probably don't
 - **Yes** → Their Workspace admin must add the OAuth client ID to the org's
   allowed apps list before Step 4 will work. Let them know upfront.
 
-### Step 2: Create OAuth credentials (one-time, ~5 minutes)
+### Step 2: Create OAuth credentials (one-time, ~5 minutes) {#step-2-create-oauth-credentials-one-time-5-minutes}
 
 Tell the user:
 
@@ -118,7 +126,7 @@ Tell the user:
 >    Audience → Test users → Add users
 > 6. Download the JSON file and tell me the file path
 >
-> Important Hermes CLI note: if the file path starts with `/`, do NOT send only the bare path as its own message in the CLI, because it can be mistaken for a slash command. Send it in a sentence instead, like:
+> Important {{app-name}} CLI note: if the file path starts with `/`, do NOT send only the bare path as its own message in the CLI, because it can be mistaken for a slash command. Send it in a sentence instead, like:
 > `The JSON file path is: ~/Downloads/client_secret_....json`
 
 Once they provide the path:
@@ -132,7 +140,7 @@ write a valid Desktop OAuth JSON file for them yourself, save it somewhere
 explicit (for example `~/Downloads/hermes-google-client-secret.json`), then run
 `--client-secret` against that file.
 
-### Step 3: Get authorization URL
+### Step 3: Get authorization URL {#step-3-get-authorization-url}
 
 Use the service set chosen in Step 1. Examples:
 
@@ -151,7 +159,7 @@ Agent rules for this step:
 - Tell them to copy the ENTIRE redirected URL from the browser address bar.
 - If the user gets `Error 403: access_denied`, send them directly to `https://console.cloud.google.com/auth/audience` to add themselves as a test user.
 
-### Step 4: Exchange the code
+### Step 4: Exchange the code {#step-4-exchange-the-code}
 
 The user will paste back either a URL like `http://localhost:1/?code=4/0A...&scope=...`
 or just the code string. Either works. The `--auth-url` step stores a temporary
@@ -167,7 +175,7 @@ an older browser tab, it now returns a fresh `fresh_auth_url`. In that case,
 immediately send the new URL to the user and have them retry with the newest
 browser redirect only.
 
-### Step 5: Verify
+### Step 5: Verify {#step-5-verify}
 
 ```bash
 $GSETUP --check
@@ -175,14 +183,14 @@ $GSETUP --check
 
 Should print `AUTHENTICATED`. Setup is complete — token refreshes automatically from now on.
 
-### Notes
+### Notes {#notes}
 
 - Token is stored at `~/.hermes/google_token.json` and auto-refreshes.
 - Pending OAuth session state/verifier are stored temporarily at `~/.hermes/google_oauth_pending.json` until exchange completes.
 - If `gws` is installed, `google_api.py` points it at the same `~/.hermes/google_token.json` credentials file. Users do not need to run a separate `gws auth login` flow.
 - To revoke: `$GSETUP --revoke`
 
-## Usage
+## Usage {#usage}
 
 All commands go through the API script. Set `GAPI` as a shorthand:
 
@@ -190,7 +198,7 @@ All commands go through the API script. Set `GAPI` as a shorthand:
 GAPI="python ${HERMES_HOME:-$HOME/.hermes}/skills/productivity/google-workspace/scripts/google_api.py"
 ```
 
-### Gmail
+### Gmail {#gmail}
 
 ```bash
 # Search (returns JSON array with id, from, subject, date, snippet)
@@ -216,7 +224,7 @@ $GAPI gmail modify MESSAGE_ID --add-labels LABEL_ID
 $GAPI gmail modify MESSAGE_ID --remove-labels UNREAD
 ```
 
-### Calendar
+### Calendar {#calendar}
 
 ```bash
 # List events (defaults to next 7 days)
@@ -232,7 +240,7 @@ $GAPI calendar create --summary "Review" --start 2026-03-01T14:00:00Z --end 2026
 $GAPI calendar delete EVENT_ID
 ```
 
-### Drive
+### Drive {#drive}
 
 ```bash
 # Search existing files
@@ -267,13 +275,13 @@ $GAPI drive delete FILE_ID
 $GAPI drive delete FILE_ID --permanent
 ```
 
-### Contacts
+### Contacts {#contacts}
 
 ```bash
 $GAPI contacts list --max 20
 ```
 
-### Sheets
+### Sheets {#sheets}
 
 ```bash
 # Create a new spreadsheet
@@ -290,7 +298,7 @@ $GAPI sheets update SHEET_ID "Sheet1!A1:B2" --values '[["Name","Score"],["Alice"
 $GAPI sheets append SHEET_ID "Sheet1!A:C" --values '[["new","row","data"]]'
 ```
 
-### Docs
+### Docs {#docs}
 
 ```bash
 # Read (a tabbed Doc returns a "tabs" array; single-tab and legacy Docs also return "body")
@@ -306,7 +314,7 @@ $GAPI docs append DOC_ID --text "Additional content to append"
 $GAPI docs append DOC_ID --tab TAB_ID --text "..."   # --tab required when the Doc has multiple tabs
 ```
 
-## Output Format
+## Output Format {#output-format}
 
 All commands return JSON. Parse with `jq` or read directly. Key fields:
 
@@ -328,7 +336,7 @@ All commands return JSON. Parse with `jq` or read directly. Key fields:
 - **Docs create**: `{status: "created", documentId, title, url}`
 - **Docs append**: `{status: "appended", documentId, inserted_at, characters}`
 
-## Rules
+## Rules {#rules}
 
 1. **Never send email, create/delete calendar events, delete Drive files, share files, or modify Docs/Sheets without confirming with the user first.** Show what will be done (recipients, file IDs, content, share role) and ask for approval. For `drive delete`, prefer the default trash (reversible) over `--permanent`.
 2. **Check auth before first use** — run `setup.py --check`. If it fails, guide the user through setup.
@@ -336,7 +344,7 @@ All commands return JSON. Parse with `jq` or read directly. Key fields:
 4. **Calendar times must include timezone** — always use ISO 8601 with offset (e.g., `2026-03-01T10:00:00-06:00`) or UTC (`Z`).
 5. **Respect rate limits** — avoid rapid-fire sequential API calls. Batch reads when possible.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Problem | Fix |
 |---------|-----|
@@ -348,7 +356,7 @@ All commands return JSON. Parse with `jq` or read directly. Key fields:
 | `ModuleNotFoundError` | Run `$GSETUP --install-deps` |
 | Advanced Protection blocks auth | Workspace admin must allowlist the OAuth client ID |
 
-## Revoking Access
+## Revoking Access {#revoking-access}
 
 ```bash
 $GSETUP --revoke

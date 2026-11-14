@@ -1,6 +1,6 @@
 """A ref names a version, and the next version is derived, never read from the tree.
 
-Derivation reads the published stable head, or the seed ``0.21.5`` before one
+Derivation reads the published stable head, or the initial ``0.1.0`` before one
 exists. Attempt refs number attempts within a version and never move the line.
 """
 import json
@@ -9,7 +9,7 @@ import pytest
 
 from scripts.releases.versioning import derive_next_version, next_attempt, tag_record, version_from_tag
 
-SEED = "0.21.5"
+SEED = "0.1.0"
 
 
 def test_final_tag_is_its_version():
@@ -83,16 +83,18 @@ def test_canary_compares_equal_to_its_stable():
 
 
 def test_empty_head_seeds_the_line():
-    assert derive_next_version(published=None, bump="patch") == "0.21.6"
-    assert derive_next_version(published=None, bump="minor") == "0.22.0"
-    assert derive_next_version(published=None, bump="major") == "1.0.0"
+    assert derive_next_version(published=None, bump="patch") == "0.1.0"
+    assert derive_next_version(published=None, bump="minor") == "0.1.0"
+    assert derive_next_version(published=None, bump="major") == "0.1.0"
 
 
 def test_published_head_spends_its_version():
     assert derive_next_version(published="0.21.5", bump="patch") == "0.21.6"
 
 
-def test_canary_base_comes_from_the_validated_protected_stable_head():
+def test_canary_base_comes_from_the_validated_protected_stable_head(monkeypatch):
+    # These are synthetic, already-admitted project identities, not real Git objects.
+    monkeypatch.setattr("scripts.releases.versioning.is_project_release_commit", lambda commit: True)
     from scripts.releases.versioning import published_stable_version
 
     class Reader:
@@ -113,9 +115,11 @@ def test_canary_base_comes_from_the_validated_protected_stable_head():
     ) == "0.21.7"
 
 
-def test_a_newer_published_release_outranks_the_protected_head():
+def test_a_newer_published_release_outranks_the_protected_head(monkeypatch):
     """A release that skipped bundles never moves the R2 head, but it still spends its version."""
     from scripts.releases.versioning import published_stable_identity
+
+    monkeypatch.setattr("scripts.releases.versioning.is_project_release_commit", lambda commit: True)
 
     class Reader:
         def __init__(self, base, repository):

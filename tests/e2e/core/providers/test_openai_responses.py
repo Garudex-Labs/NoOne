@@ -10,7 +10,7 @@ Proven here:
 
 * encrypted reasoning items are replayed verbatim, in output order, on the next API call
   of the same turn, on the next user turn after a process restart (``--resume`` from
-  state.db), and across turns of one long-lived ``tui_gateway`` session;
+  state.db), and across turns of one long-lived ``agent_backend`` session;
 * parallel ``function_call`` items round-trip: every call gets exactly one
   ``function_call_output`` with its own ``call_id`` and its own result, persisted once;
 * a stale encrypted blob rejected with HTTP 400 ``invalid_encrypted_content`` is
@@ -40,7 +40,7 @@ from tests.e2e.core.providers._openai_helpers import (
     responses_provider_config,
     tool_call_args,
 )
-from tests.e2e.core.providers._openai_tui import TuiGateway
+from tests.e2e.core.providers._openai_backend import TuiGateway
 from tests.fakes.fake_llm_provider import FakeLLMServer
 from tests.fakes.providers.openai_responses import (
     FakeResponsesServer,

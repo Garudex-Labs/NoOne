@@ -25,11 +25,12 @@
  */
 
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { KeyRound } from '@noone/ui/icons'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { SETTINGS_ROUTE } from '@/app/routes'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -42,7 +43,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { KeyRound } from '@/lib/icons'
 import { $activeConnectionId } from '@/store/connections'
 import { requestGatewayForAgent } from '@/store/gateway'
 import { notify } from '@/store/notifications'
@@ -353,7 +353,7 @@ export function PreviewVaultButton({ tabId, url }: PreviewVaultButtonProps) {
               type="button"
               variant="ghost"
             >
-              <Codicon name="key" size="0.8125rem" />
+              <AppIcon name="key" size="0.8125rem" />
             </Button>
           </DropdownMenuTrigger>
         </Tip>
@@ -375,13 +375,13 @@ export function PreviewVaultButton({ tabId, url }: PreviewVaultButtonProps) {
           {locked.length > 0 && <DropdownMenuSeparator />}
           {locked.map(source => (
             <DropdownMenuItem key={source.name} onSelect={() => openUnlock(source)}>
-              <Codicon name="lock" size="0.75rem" />
+              <AppIcon name="lock" size="0.75rem" />
               {copy.vaultUnlock(source.display_name)}
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={openVaultSettings}>
-            <Codicon name="settings-gear" size="0.75rem" />
+            <AppIcon name="settings-gear" size="0.75rem" />
             {copy.vaultOpenSettings}
           </DropdownMenuItem>
         </DropdownMenuContent>

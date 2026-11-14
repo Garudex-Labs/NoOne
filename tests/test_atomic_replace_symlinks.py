@@ -20,7 +20,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 # Ensure the repo root is importable when running via `pytest tests/...`.
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -222,7 +222,7 @@ def test_atomic_roundtrip_yaml_save_restores_owner(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Mirrors the update-variant owner test for the whole-state save that
-    backs tui_gateway/server.py:_save_cfg()."""
+    backs agent_backend/server.py:_save_cfg()."""
     if os.name != "posix":
         pytest.skip("POSIX-only")
 

@@ -13,12 +13,12 @@
  * A tip blocks nothing and closes itself, so it never needs to compete.
  */
 
+import { iconSize, X } from '@noone/ui/icons'
 import { useEffect, useRef } from 'react'
 
 import { KbdCombo } from '@/components/ui/kbd'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
 import { useI18n } from '@/i18n'
-import { iconSize, X } from '@/lib/icons'
 import { useKeybindHint } from '@/lib/keybinds/use-keybind-hint'
 import type { TipSide } from '@/lib/tips/catalog'
 import type { ActiveTip } from '@/store/tips'

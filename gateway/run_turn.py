@@ -40,7 +40,7 @@ from gateway.session_transcript import TranscriptReadError
 from gateway.run_turn_bubble_cleanup import register_bubble_cleanup, settle_turn_senders
 from gateway.turn_context import TurnContext
 from gateway.turn_lease import DEFAULT_LEASE_WAIT, TurnLeaseTimeoutError
-from hermes_constants import get_hermes_home_override
+from agent_constants import get_agent_home_override
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from utils import base_url_hostname
@@ -329,7 +329,7 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
         home = self._profile_scope_key_for_source(source)
         if home is not None:
             return _async_profile_runtime_scope(home)
-        from tui_gateway.launch_profile_policy import async_launch_profile_scope_if_multiplexed
+        from agent_backend.launch_profile_policy import async_launch_profile_scope_if_multiplexed
         return async_launch_profile_scope_if_multiplexed()
 
     @staticmethod
@@ -338,13 +338,13 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
         another profile home, then the launch profile's OWN runtime scope.
 
         A native hosted room running a second profile calls
-        ``tui_gateway.launch_profile_policy.activate_multi_profile_hosting`` inside the gateway process,
+        ``agent_backend.launch_profile_policy.activate_multi_profile_hosting`` inside the gateway process,
         so ``get_secret`` fails closed for every unscoped read afterwards — including the standalone
         gateway's ordinary turns, which never bound a scope because ``multiplex_profiles`` is off
         (#112878). The launch profile is a profile too: bind its ``.env`` over the env frozen at
         activation (a key injected by systemd / ``op run`` has no file to rebuild it from), never a
         secondary's scope and never live ``os.environ``."""
-        from tui_gateway.launch_profile_policy import launch_profile_scope_if_multiplexed
+        from agent_backend.launch_profile_policy import launch_profile_scope_if_multiplexed
         return launch_profile_scope_if_multiplexed()
 
     def _media_delivery_scope_for_source(self, source: SessionSource):
@@ -394,8 +394,8 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
         ]
         if (resolved.provider or "") == "moa":
             # The preset name hides who pays: the aggregator runs every tool-loop step (#112359).
-            from hermes_cli.config import load_config
-            from hermes_cli.moa_config import normalize_moa_config
+            from agent_cli.config import load_config
+            from agent_cli.moa_config import normalize_moa_config
             agg = normalize_moa_config(load_config().get("moa"))["presets"].get(resolved.model, {}).get("aggregator") or {}
             if agg:
                 lines.append(t("gateway.session.info_acting_model", provider=agg.get("provider"), model=agg.get("model")))
@@ -410,7 +410,7 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
         """Enabled toolsets for an agent run, honoring an adapter ``toolsets_for_source()`` override
         validated through the SAME ``_get_platform_tools`` path (unknown / platform-restricted
         toolsets dropped, not trusted)."""
-        from hermes_cli.tools_config import _get_platform_tools
+        from agent_cli.tools_config import _get_platform_tools
         try:
             adapter = self._delivery_adapter_for(source)
             override = adapter.toolsets_for_source(source) if adapter is not None else None
@@ -462,7 +462,7 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
         """
         from gateway.run import _profile_runtime_scope
         multiplex = bool(getattr(self.config, "multiplex_profiles", False))
-        if multiplex and not get_hermes_home_override():
+        if multiplex and not get_agent_home_override():
             profile_home = self._resolve_profile_home_for_source(event.source)
             with _profile_runtime_scope(Path(profile_home)):
                 return await self._execute_mcp_reload(event)
@@ -560,16 +560,13 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
         if source.platform == Platform.TELEGRAM and hasattr(adapter, "pause_typing_for_chat"):
             def _pause_typing_before_finalize(_adapter=adapter, _chat_id=source.chat_id) -> None:
                 _adapter.pause_typing_for_chat(_chat_id)
-        # Non-editing platforms (QQ, WeChat) skip streaming — the partial first message could never
-        # be updated — unless they have a native-streaming transport (WeCom msgtype "stream").
+        # Non-editing platforms (WeChat) skip streaming — the partial first message could never
+        # be updated — unless they have a native-streaming transport (native streams).
         _adapter_supports_edit = getattr(adapter, "SUPPORTS_MESSAGE_EDITING", True)
         _adapter_supports_native_stream = bool(getattr(adapter, "SUPPORTS_NATIVE_STREAMING", False))
         if not _adapter_supports_edit and not _adapter_supports_native_stream and on_missing_cursor == "raise":
             raise RuntimeError("skip streaming for non-editable platform")
         _effective_cursor = scfg.cursor if _adapter_supports_edit else ""
-        # Some Matrix clients render the cursor as tofu: stream text, no cursor.
-        if source.platform == Platform.MATRIX:
-            _effective_cursor = ""
         # Fresh-final applies to Telegram only (others edit in place cheaply).
         # Fresh-final applies to Telegram only — other platforms either edit in place cheaply (Discord,
         # Slack) or don't have the timestamp-on-edit / edit-timestamp-stays-stale problem. (Ported from
@@ -638,7 +635,7 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
     ) -> dict[str, Any]:
         """Forward the message to a remote Hermes API server instead of running a local AIAgent.
 
-        Lets a Docker container handle Matrix E2EE while the agent runs on the host with full
+        Lets a Docker container handle the messaging transport while the agent runs on the host with full
         access to local files, memory, skills, and a unified session store."""
         from gateway.run import _GATEWAY_PROXY_SSE_BUFFER_MAX_CHARS
         try:
@@ -1010,23 +1007,18 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
         """Resolve where progress bubbles are threaded (platform-specific).
 
         Returns ``(progress_metadata, progress_reply_to, status_thread_metadata)``; the latter is
-        for status / approval / stream sends (Feishu topics need the triggering message id via the
-        reply API, so carry it as a fallback). Slack and Buzz honour the user's reply_in_thread
+        for status / approval / stream sends. Slack honours the user's reply_in_thread
         opt-out: never synthesise a thread for progress, or every later reply inherits it."""
         from gateway.run import _non_conversational_metadata, _resolve_progress_thread_id
-        is_buzz = str(getattr(source.platform, "value", source.platform) or "").lower() == "buzz"
         _progress_reply_in_thread = True
-        _adapter = self._delivery_adapter_for(source) if source.platform == Platform.SLACK or is_buzz else None
+        _adapter = self._delivery_adapter_for(source) if source.platform == Platform.SLACK else None
         if _adapter is not None:
             try:
-                if is_buzz:
-                    _progress_reply_in_thread = getattr(_adapter, "_reply_to_mode", "first") != "off"
-                else:
-                    # Relay lane: the adapter owns mode resolution; native lane: flat extra key.
-                    _mode_fn = getattr(_adapter, "_effective_reply_in_thread", None)
-                    _progress_reply_in_thread = bool(
-                        _mode_fn() if callable(_mode_fn) else _adapter.config.extra.get("reply_in_thread", True)
-                    )
+                # Relay lane: the adapter owns mode resolution; native lane: flat extra key.
+                _mode_fn = getattr(_adapter, "_effective_reply_in_thread", None)
+                _progress_reply_in_thread = bool(
+                    _mode_fn() if callable(_mode_fn) else _adapter.config.extra.get("reply_in_thread", True)
+                )
             except Exception:
                 _progress_reply_in_thread = True
         _progress_thread_id = _resolve_progress_thread_id(
@@ -1055,20 +1047,15 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
                 _progress_metadata.setdefault("slack_team_id", source.scope_id)
             if source.user_id:
                 _progress_metadata.setdefault("recipient_user_id", source.user_id)
-        # Buzz has no native thread_id: thread via reply-to unless the user opted out.
         _progress_reply_to = (
             event_message_id
-            if (source.platform in (Platform.FEISHU, Platform.MATTERMOST) and source.thread_id and event_message_id)
-            or (is_buzz and event_message_id and _progress_reply_in_thread)
+            if (source.platform == Platform.MATTERMOST and source.thread_id and event_message_id)
             or _relay_prospective_thread_id
             else None
         )
-        if source.platform == Platform.FEISHU and source.thread_id and event_message_id:
-            _status_thread_metadata = {"thread_id": _progress_thread_id, "reply_to_message_id": event_message_id}
-        else:
-            _status_thread_metadata = self._thread_metadata_for_progress(
-                source, event_message_id, _progress_thread_id, _relay_prospective_thread_id,
-            )
+        _status_thread_metadata = self._thread_metadata_for_progress(
+            source, event_message_id, _progress_thread_id, _relay_prospective_thread_id,
+        )
         return _progress_metadata, _progress_reply_to, _status_thread_metadata
 
     async def _run_agent_write_tool_log(self, log_queue: Any) -> None:
@@ -1552,7 +1539,7 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
             _pending_cmd_word = pending.strip().split(None, 1)[0][1:].lower()
             if _pending_cmd_word:
                 with suppress(Exception):
-                    from hermes_cli.commands import resolve_command as _rc_pending
+                    from agent_cli.commands import resolve_command as _rc_pending
                     if _rc_pending(_pending_cmd_word):
                         logger.info(
                             "Discarding command '/%s' from pending queue — "
@@ -1950,7 +1937,7 @@ class GatewayTurnMixin(GatewayBackgroundMixin, GatewayTurnPrepareMixin, GatewayT
             logger.warning(
                 "Normal final-send NOT suppressed despite active stream consumer for session %s: "
                 "streamed=%s previewed=%s content_delivered=%s transformed=%s final_len=%d — "
-                "possible duplicate send (see wecom ack-timeout RCA).",
+                "possible duplicate send (acknowledgement timeout).",
                 _sk, _streamed, _previewed, _content_delivered, _transformed, len(_final),
             )
 

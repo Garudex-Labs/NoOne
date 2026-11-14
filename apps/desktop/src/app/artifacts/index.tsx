@@ -1,7 +1,9 @@
+import { FileImage, FileText, FolderOpen, Link2 } from '@noone/ui/icons'
 import type * as React from 'react'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
+import { getSessionMessages, listAllProfileSessions } from '@/agent-client'
 import { TitlebarIcon } from '@/app/shell/titlebar-icon'
 import { ZoomableImage } from '@/components/chat/zoomable-image'
 import { PageLoader } from '@/components/page-loader'
@@ -18,7 +20,6 @@ import {
 } from '@/components/ui/pagination'
 import { RowButton } from '@/components/ui/row-button'
 import { Tip } from '@/components/ui/tooltip'
-import { getSessionMessages, listAllProfileSessions } from '@/hermes'
 import { type Translations, useI18n } from '@/i18n'
 import { resolveBrandIcon } from '@/lib/brand-icon'
 import {
@@ -29,7 +30,6 @@ import {
   urlSlugTitleLabel,
   useLinkTitle
 } from '@/lib/external-link'
-import { FileImage, FileText, FolderOpen, Link2 } from '@/lib/icons'
 import { downloadGatewayMediaFile, isArtifactFilePath, isRemoteGateway } from '@/lib/media'
 import { normalize } from '@/lib/text'
 import { fmtDayTime } from '@/lib/time'

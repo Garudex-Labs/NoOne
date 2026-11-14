@@ -1,12 +1,12 @@
-import { compactNumber } from '@hermes/shared'
+import { compactNumber } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
+import { Loader2 } from '@noone/ui/icons'
 import { useContext, useMemo } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
-import { Loader2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import type { ContextBreakdown, ContextUsageCategory, UsageStats } from '@/types/hermes'
+import type { ContextBreakdown, ContextUsageCategory, UsageStats } from '@/types/agent-client'
 
 import type { CompactConversationAction } from './hooks/use-compact-conversation'
 import { StatusbarMenuCloseContext } from './statusbar-controls'
@@ -66,7 +66,7 @@ export function ContextUsagePanel({ breakdown, compact, loading, usage }: Contex
             className="inline-flex items-center gap-1 text-muted-foreground"
             data-testid="context-panel-compressions"
           >
-            <Codicon aria-hidden="true" name="layers" size="0.6875rem" />
+            <AppIcon aria-hidden="true" name="layers" size="0.6875rem" />
             {t.shell.statusbar.compressions(usage.compressions)}
           </span>
         )}
@@ -128,7 +128,7 @@ function CompactConversationRow({ compact }: { compact: CompactConversationActio
           type="button"
           variant="ghost"
         >
-          <Codicon name="archive" size="0.75rem" />
+          <AppIcon name="archive" size="0.75rem" />
           {copy.action}
         </Button>
       )}
@@ -149,7 +149,7 @@ export function ContextMeterDetail({ bar, compressions }: { bar: string; compres
     <span className="inline-flex items-center gap-1.5">
       {bar}
       <span className="inline-flex items-center gap-0.5 tabular-nums" data-testid="context-meter-compressions">
-        <Codicon aria-hidden="true" name="layers" size="0.6875rem" />
+        <AppIcon aria-hidden="true" name="layers" size="0.6875rem" />
         {compressions}
       </span>
     </span>

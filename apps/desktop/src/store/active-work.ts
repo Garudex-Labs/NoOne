@@ -11,14 +11,14 @@
 
 import { computed } from 'nanostores'
 
-import type { HermesActiveWork } from '@/global'
+import type { AgentActiveWork } from '@/global'
 import { $sessions } from '@/store/session'
 import { $workingSessionIds } from '@/store/session-states'
 import { $voiceStreamPaintOwners } from '@/store/voice-stream-paint'
 
 const $activeWork = computed(
   [$workingSessionIds, $sessions, $voiceStreamPaintOwners],
-  (workingIds, sessions, voiceOwners): HermesActiveWork => {
+  (workingIds, sessions, voiceOwners): AgentActiveWork => {
     const titleById = new Map(sessions.map(session => [session.id, session.title?.trim() ?? '']))
 
     return {

@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from hermes_cli import projects_db as pdb
+from agent_cli import projects_db as pdb
 from tools import project_tools, terminal_tool
 from tools.registry import registry
 
@@ -137,8 +137,8 @@ def test_session_switch_to_pathless_project_sets_profile_active_pointer(monkeypa
 @pytest.fixture
 def gui_sessions(monkeypatch):
     """Live GUI sessions wired through the real gateway workspace callback."""
-    monkeypatch.setattr("hermes_cli.banner.prefetch_update_check", lambda: None)
-    from tui_gateway import server
+    monkeypatch.setattr("agent_cli.banner.prefetch_update_check", lambda: None)
+    from agent_backend import server
 
     monkeypatch.setattr(server, "_sessions", {})
     monkeypatch.setattr(terminal_tool, "_task_env_overrides", {})
@@ -211,7 +211,7 @@ def test_project_list_reports_no_project_for_a_detached_session(gui_sessions, tm
 
 def test_project_list_keeps_the_sessions_project_on_unmounted_docker(gui_sessions, tmp_path, monkeypatch):
     """Unmounted Docker registers no host cwd for the terminal, but the chat is still in its folder."""
-    from tui_gateway import server
+    from agent_backend import server
 
     monkeypatch.setenv("TERMINAL_ENV", "docker")
     monkeypatch.setenv("TERMINAL_DOCKER_MOUNT_CWD_TO_WORKSPACE", "false")

@@ -1,7 +1,7 @@
 import { cleanup } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 
-import { hermesApi, HermesGateway } from '@/api/client'
+import { AgentGateway, hermesApi } from '@/api/client'
 import { $composerAttachments } from '@/store/composer'
 import { $connectionWires, recordConnectionWire } from '@/store/connection-wire'
 import { requestGatewayForAgent } from '@/store/gateway'
@@ -17,7 +17,7 @@ interface FixtureSocket {
 vi.mock('@/api/client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()), hermesApi: vi.fn()
 }))
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   getLatestSessionMessages: vi.fn(async () => ({ messages: [], session_id: RUNTIME_SESSION_ID })),
   getProfiles: vi.fn(async () => ({ profiles: [] })), getSession: vi.fn(),
   PROMPT_SUBMIT_REQUEST_TIMEOUT_MS: 1_800_000, setApiRequestProfile: vi.fn(), transcribeAudio: vi.fn()
@@ -78,7 +78,7 @@ test.each(['public-canonical', 'public-legacy', 'native-canonical'] as const)('%
       type: 'gateway.ready', payload: canonical ? { session_authority: true } : {}
     } }))
   })
-  const client = new HermesGateway()
+  const client = new AgentGateway()
   const ready = new Promise<void>(resolve => client.on('gateway.ready', () => resolve()))
   const { port } = server.address() as { port: number }
   // The public cases have no native_dial marker or locally patched resolver.

@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { ExternalLink, X, Check, Copy } from "lucide-react";
+import { Check, Copy, ExternalLink, X } from "@noone/ui/icons";
 import { Button } from "@nous-research/ui/ui/components/button";
+import { Input } from "@nous-research/ui/ui/components/input";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { H2 } from "@nous-research/ui/ui/components/typography/h2";
-import { api, type OAuthProvider, type OAuthStartResponse } from "@/lib/api";
-import { copyTextToClipboard } from "@/lib/clipboard";
-import { Input } from "@nous-research/ui/ui/components/input";
+import { useEffect, useRef, useState } from "react";
+
 import { useI18n } from "@/i18n";
-import { cn, themedBody } from "@/lib/utils";
+import { api, type OAuthProvider, type OAuthStartResponse } from "@/lib/api";
 import { errorMessage } from "@/lib/api-error";
+import { copyTextToClipboard } from "@/lib/clipboard";
+import { cn, themedBody } from "@/lib/utils";
 
 interface Props {
   provider: OAuthProvider;
@@ -67,7 +68,7 @@ export function OAuthLoginModal({ provider, onClose, onSuccess }: Props) {
       if (copyResetTimer.current !== null)
         window.clearTimeout(copyResetTimer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // When the sign-in window lapses locally, the backend poller usually has
@@ -116,7 +117,7 @@ export function OAuthLoginModal({ provider, onClose, onSuccess }: Props) {
     if (secondsLeft !== 0) return;
     if (phase === "approved" || phase === "error") return;
     void handleLocalExpiry();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [secondsLeft, phase]);
 
   // Device-code: poll backend every 2s

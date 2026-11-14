@@ -39,8 +39,8 @@ async def probe():
     from gateway.run import GatewayRunner
     from gateway.session_authority import initialize_session_authority
     from gateway.run_api import start_gateway_api, stop_gateway_api
-    from hermes_cli import web_server
-    from hermes_cli.dashboard_auth.ws_tickets import mint_ticket
+    from agent_cli import web_server
+    from agent_cli.dashboard_auth.ws_tickets import mint_ticket
     import run_agent
     from agent.credits_tracker import AgentNotice
 
@@ -79,10 +79,10 @@ async def probe():
             while not any(f.get('params', {}).get('type') == 'message.complete' for f in frames):
                 frames.append(json.loads(await ws.recv()))
         events = [f['params'] for f in frames if f.get('method') == 'event']
-        # The classic `hermes chat` view renders what reached it on stderr.
+        # The classic `noone chat` view renders what reached it on stderr.
         import contextlib
         import io
-        from hermes_cli.gateway_chat_view import GatewayChatView
+        from agent_cli.gateway_chat_view import GatewayChatView
         view, printed = GatewayChatView(None, {'stored_session_id': sid}), io.StringIO()
         with contextlib.redirect_stderr(printed), contextlib.redirect_stdout(io.StringIO()):
             for params in events:

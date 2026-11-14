@@ -3,7 +3,7 @@
 Found by a maintainer-directed all-platform hint verification: the telegram
 hint claimed '.ogg sends as voice bubbles' but bare MEDIA:.ogg (no directive)
 ships as a document, and mp3+directive DEAD-ENDED into document delivery.
-Fix: shared transcode_to_ogg_opus in base.py; telegram/feishu send_voice
+Fix: shared transcode_to_ogg_opus in base.py; telegram send_voice
 transcode non-opus input; should_send_media_as_audio honors explicit
 is_voice for any audio ext on telegram; is_voice threaded through the three
 dispatch call sites.
@@ -37,8 +37,8 @@ class TestVoiceRouting(unittest.TestCase):
         self.assertFalse(should_send_media_as_audio("telegram", ".wav", is_voice=False))
 
     def test_other_platforms_unchanged(self):
-        self.assertTrue(should_send_media_as_audio("feishu", ".mp3", is_voice=False))
-        self.assertFalse(should_send_media_as_audio("feishu", ".qzx7", is_voice=False))
+        self.assertTrue(should_send_media_as_audio("mattermost", ".mp3", is_voice=False))
+        self.assertFalse(should_send_media_as_audio("mattermost", ".qzx7", is_voice=False))
 
 
 class TestTranscodeEngine(unittest.TestCase):

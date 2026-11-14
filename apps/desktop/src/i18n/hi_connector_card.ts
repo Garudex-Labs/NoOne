@@ -1,0 +1,46 @@
+import { appText } from '@noone/shared/application-identity'
+
+import type { Translations } from './types'
+export const hiConnectorCard: Translations['connectors'] = {
+  title: "अपने ऐप जोड़ें",
+  connect: "जोड़ें",
+  skip: "अभी नहीं",
+  cancel: "प्रतीक्षा रोकें",
+  retry: "फिर कोशिश करें",
+  grant: "फिर जोड़ें",
+  connected: "जुड़ा हुआ",
+  checking: "आपके ऐप जाँचे जा रहे हैं…",
+  notConnected: "जुड़ा नहीं है",
+  skipped: "छोड़ा गया",
+  disabled: "उपलब्ध नहीं",
+  failed: "जुड़ नहीं सका",
+  needsAuth: "पहुँच की अवधि समाप्त",
+  opening: "साइन-इन खुल रहा है…",
+  waiting: "आपके ब्राउज़र की प्रतीक्षा है…",
+  timeout: "अधिकृत होने की प्रतीक्षा जारी है।",
+  refresh: "स्थिति रीफ़्रेश करें",
+  connectError: "अधिकृत करने की प्रक्रिया शुरू नहीं हो सकी। फिर कोशिश करें।",
+  connectErrorFor: (app: string) => `${app} को अधिकृत करने की प्रक्रिया शुरू नहीं हो सकी।`,
+  unavailable: "इस सत्र में कनेक्टर उपलब्ध नहीं हैं।",
+  ownerMissing: "कनेक्शन प्रबंधित करने के लिए यह बातचीत फिर खोलें।",
+  search: "ऐप खोजें",
+  empty: "कोई मेल खाता ऐप नहीं",
+  disclaimer: "जोड़ना वैकल्पिक है। केवल वे ऐप अधिकृत करें जिन्हें {app_name} से उपयोग करवाना चाहते हैं।",
+  execution: "कनेक्टर टूल",
+  setup: server => `${server} का सेटअप करें`,
+  openInBrowser: "ब्राउज़र में खोलें",
+  setupCancel: "रद्द करें",
+  authorizedToolsUnavailable: "अधिकृत। टूल उपलब्ध नहीं।",
+  required: "आवश्यक",
+  namedAccount: (app: string, alias: string) => `${appText('{app_name}')} ने इस ${app} खाते का नाम ${alias} रखा।`,
+  renameAccount: "नाम बदलें",
+  directory: {
+    suggested: "सुझाया गया",
+    allApps: "सभी ऐप",
+    receiptConnected: apps => `जुड़े: ${apps}`,
+    receiptNone: "कोई नया ऐप नहीं जुड़ा",
+    receiptTimedOut: "10 मिनट बाद बंद हुआ",
+    finishInBrowser: "ब्राउज़र में पूरा करें",
+    signInFailed: "जुड़ नहीं सका। फिर कोशिश करने के लिए क्लिक करें"
+  }
+}

@@ -17,7 +17,7 @@
  * app session; a known "no" drops them.
  *
  * Every value is a code-defined id from the closed sets below (mirrored by
- * hermes_cli/observability/shared_metrics_contract.py, which collapses any
+ * agent_cli/observability/shared_metrics_contract.py, which collapses any
  * stranger to `other`). Never a session id, path, message, bot name or setting
  * value.
  *
@@ -29,7 +29,7 @@
  * instead of overwriting each other; the backend latches each day and area once.
  */
 
-import { randomUuid } from '@hermes/shared'
+import { randomUuid } from '@noone/shared'
 import { atom } from 'nanostores'
 
 import { $workspaceMode } from '@/components/pane-shell/workspace-scope'

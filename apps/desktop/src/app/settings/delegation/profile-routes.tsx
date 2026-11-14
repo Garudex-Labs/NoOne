@@ -1,11 +1,11 @@
+import { Users } from '@noone/ui/icons'
 import { useEffect, useState } from 'react'
 
+import type { DelegationProfileRoutes, ProfileScope } from '@/agent-client'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import type { DelegationProfileRoutes, ProfileScope } from '@/hermes'
 import { useI18n } from '@/i18n'
-import { Users } from '@/lib/icons'
 import { isSubmitEnter } from '@/lib/ime'
 
 import { Pill, SectionHeading } from '../primitives'

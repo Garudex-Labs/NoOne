@@ -74,14 +74,14 @@ it('dials the grant, describes the owner, creates a session and redials through 
   expect([socket.url, socket.protocols]).toEqual(['ws://127.0.0.1:9/api/ws', ['hermes-gateway-v1', 'hermes-gateway-ticket.t']])
   socket.open()
   await vi.waitFor(() => expect(socket.sent.some(frame => frame.method === 'runtime.describe')).toBe(true))
-  socket.reply('runtime.describe', { session_create: { sources: ['tui'], parameters: ['request_id', 'source'] } })
+  socket.reply('runtime.describe', { session_create: { sources: ['cli'], parameters: ['request_id', 'source'] } })
   await vi.waitFor(() => expect(events).toContain('gateway.ready'))
 
   const created = gw.request<{ session_id: string }>('session.create', {})
 
   await vi.waitFor(() => expect(socket.sent.some(frame => frame.method === 'session.create')).toBe(true))
   expect(Object.keys(socket.sent.find(frame => frame.method === 'session.create')!.params)).toEqual(['source', 'request_id'])
-  expect(socket.sent.find(frame => frame.method === 'session.create')!.params).toMatchObject({ source: 'tui' })
+  expect(socket.sent.find(frame => frame.method === 'session.create')!.params).toMatchObject({ source: 'cli' })
   socket.reply('session.create', { session_id: 'S1', messages: [], authority_epoch: 1 })
   expect((await created).session_id).toBe('S1')
 
@@ -108,7 +108,7 @@ async function createdFrame(options: { source?: 'cli'; client?: { name: string }
 
   socket.open()
   await vi.waitFor(() => expect(socket.sent.some(frame => frame.method === 'runtime.describe')).toBe(true))
-  socket.reply('runtime.describe', { session_create: { sources: ['cli', 'tui'], parameters } })
+  socket.reply('runtime.describe', { session_create: { sources: ['cli', 'cli'], parameters } })
   void gw.request('session.create', {}).catch(() => undefined)
   await vi.waitFor(() => expect(socket.sent.some(frame => frame.method === 'session.create')).toBe(true))
   const { request_id: _id, ...params } = socket.sent.find(frame => frame.method === 'session.create')!.params

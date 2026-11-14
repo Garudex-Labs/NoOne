@@ -1,10 +1,10 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { type KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { useMemo } from 'react'
 import { type NodeApi, type NodeRendererProps, type RowRendererProps, Tree, type TreeApi } from 'react-arborist'
 
 import { TreeSkeleton } from '@/components/chat/skeletons'
-import { Codicon } from '@/components/ui/codicon'
 import { markRightPanePerf } from '@/debug/right-pane-events'
 import { useResizeObserver } from '@/hooks/use-resize-observer'
 import { cn } from '@/lib/utils'
@@ -366,13 +366,13 @@ function ProjectTreeRow({
           expand state, so the extra glyph was pure noise. */}
       <span aria-hidden className="flex w-3.5 items-center justify-center text-(--ui-text-tertiary)">
         {isPlaceholder && !isErrorPlaceholder ? (
-          <Codicon name="loading" size="0.75rem" spinning />
+          <AppIcon name="loading" size="0.75rem" spinning />
         ) : isErrorPlaceholder ? (
-          <Codicon name="warning" size="0.75rem" />
+          <AppIcon name="warning" size="0.75rem" />
         ) : isFolder ? (
-          <Codicon name={node.isOpen ? 'folder-opened' : 'folder'} size="0.875rem" />
+          <AppIcon name={node.isOpen ? 'folder-opened' : 'folder'} size="0.875rem" />
         ) : (
-          <Codicon name="file" size="0.875rem" />
+          <AppIcon name="file" size="0.875rem" />
         )}
       </span>
       {editing ? (

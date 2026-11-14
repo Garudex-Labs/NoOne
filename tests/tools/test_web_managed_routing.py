@@ -85,7 +85,7 @@ def local_gateway(monkeypatch):
 def test_only_managed_search_may_use_billed_fallback(
     monkeypatch, tmp_path, local_gateway, selection, direct_key, expected_paths,
 ):
-    from hermes_cli.config import atomic_config_write
+    from agent_cli.config import atomic_config_write
     from tools import web_tools
     from tests.tools.conftest import register_all_web_providers
 
@@ -120,7 +120,7 @@ def test_only_managed_search_may_use_billed_fallback(
 
 
 def test_managed_search_without_identity_names_the_gateway(monkeypatch, tmp_path, local_gateway):
-    from hermes_cli.config import atomic_config_write
+    from agent_cli.config import atomic_config_write
     from tools import managed_tool_gateway, web_tools
     from tests.tools.conftest import register_all_web_providers
 
@@ -132,13 +132,13 @@ def test_managed_search_without_identity_names_the_gateway(monkeypatch, tmp_path
     register_all_web_providers()
 
     error = json.loads(web_tools.web_search_tool("local fixture", limit=3))["error"]
-    assert "no usable Nous identity" in error and "hermes tools" in error
+    assert "no usable Nous identity" in error and "noone tools" in error
     assert "PERPLEXITY_API_KEY" not in error
     assert local_gateway == []
 
 
 def test_unentitled_managed_search_gets_fast_search_but_no_billed_fallback(monkeypatch, tmp_path, local_gateway):
-    from hermes_cli.config import atomic_config_write
+    from agent_cli.config import atomic_config_write
     from tools import managed_tool_gateway, web_tools
     from tests.tools.conftest import register_all_web_providers
 

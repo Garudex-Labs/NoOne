@@ -1,12 +1,12 @@
-import type { GatewayEvent } from '@hermes/shared'
+import type { GatewayEvent } from '@noone/shared'
 import { QueryClient } from '@tanstack/react-query'
 import { act, cleanup, render } from '@testing-library/react'
 import { useRef } from 'react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
+import { getLatestSessionMessages } from '@/agent-client'
 import { useMessageStream } from '@/app/session/hooks/use-message-stream'
 import { useSessionStateCache } from '@/app/session/hooks/use-session-state-cache'
-import { getLatestSessionMessages } from '@/hermes'
 import { chatMessageText, toChatMessages } from '@/lib/chat-messages'
 import { resetLiveSync } from '@/store/live-sync'
 import {
@@ -18,11 +18,11 @@ import {
 } from '@/store/session'
 import { $sessionStates, clearAllSessionStates } from '@/store/session-states'
 import { clearSessionTodos } from '@/store/todos'
-import type { SessionMessage } from '@/types/hermes'
+import type { SessionMessage } from '@/types/agent-client'
 
 import { reconcileActiveTranscript } from './use-background-sync'
 
-vi.mock('@/hermes', async original => ({
+vi.mock('@/agent-client', async original => ({
   ...(await original<Record<string, unknown>>()),
   getLatestSessionMessages: vi.fn()
 }))

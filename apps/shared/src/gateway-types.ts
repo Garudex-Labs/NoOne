@@ -9,9 +9,9 @@ import type {
   TranscriptMessage,
   Usage
 } from './gateway-events.js'
-import type { HermesSkin } from './skin.js'
+import type { AgentSkin } from './skin.js'
 
-/** The gateway's `session.info` / resume `info` block — generated from `tui_gateway/contracts`,
+/** The gateway's `session.info` / resume `info` block — generated from `agent_backend/contracts`,
  *  plus the canonical-authority fields the legacy contract does not carry yet
  *  (`gateway/session_events.py` owner stamps and the durable admission FIFO). */
 export interface SessionInfo extends SessionLiveInfo {
@@ -35,9 +35,9 @@ export interface SlashCategory {
   pairs: [string, string][]
 }
 
-/** The cross-surface skin contract (canonical shape in `@hermes/shared`).
+/** The cross-surface skin contract (canonical shape in `@noone/shared`).
  *  Includes the paired light_colors/dark_colors overlays from #20379. */
-export type GatewaySkin = HermesSkin
+export type GatewaySkin = AgentSkin
 
 /** Generation-bound shared control published by a canonical gateway
  *  (`gateway/session_pending_controls.py::register` / `register_clarify`). Answered through
@@ -66,7 +66,7 @@ export interface CanonicalClarifyPrompt extends CanonicalSharedPrompt {
   questions?: Array<{ choices?: null | string[]; multi_select?: boolean; qid: string; question: string }>
 }
 
-/** Events the canonical gateway publishes that the generated `tui_gateway` contract does not
+/** Events the canonical gateway publishes that the generated `agent_backend` contract does not
  *  declare (it has no server→client prompt frames; controls ride the event stream). */
 export interface CanonicalGatewayEventMap {
   'approval.request': CanonicalApprovalPrompt
@@ -116,7 +116,7 @@ export interface SlashExecResponse {
 
 // ── Remote Spending (Phase 2b) ───────────────────────────────────────
 
-// Wire shapes now live in @hermes/shared for reuse by TypeScript clients.
+// Wire shapes now live in @noone/shared for reuse by TypeScript clients.
 export type {
   BillingAutoReload,
   BillingBlock,
@@ -168,17 +168,9 @@ export interface ConfigDisplayConfig {
    * turn starts delegating, via a one-time transient activity hint.  Opens
    * nothing — just advertises the command.  Default true.
    */
-  tui_agents_nudge?: boolean
-  tui_auto_resume_recent?: boolean
   tui_compact?: boolean
   /** Legacy alias for display.mouse_tracking. */
   tui_mouse?: boolean | null | number | string
-  // Forward-compat: backend may send styles this client doesn't know yet —
-  // `normalizeIndicatorStyle` falls back to 'kaomoji' for those — but the
-  // wire type is documented as `string` so consumers don't get a false
-  // narrowing-and-autocomplete contract on a value that requires runtime
-  // validation anyway.
-  tui_status_indicator?: string
   tui_statusbar?: 'bottom' | 'off' | 'on' | 'top' | boolean
   /** Theme mode pin: 'light' / 'dark' beat background auto-detection; 'auto'
    *  (default) trusts the OSC-11 probe + env signals. */

@@ -1,7 +1,7 @@
 """``llm.oneshot`` on the shared gateway: a session-bound one-shot borrows that session's model.
 
 Main's sidecar looked the session up in its own table and lent its live agent's route
-(``tui_gateway/session_registry._main_runtime_from_agent``); a session-less call (project ideas)
+(``agent_backend/session_registry._main_runtime_from_agent``); a session-less call (project ideas)
 ran on the ``task`` auxiliary backend. The sidecar's table never holds an owner session, so on the
 shared gateway every Desktop one-shot fell through to the task backend. The owner answers it here:
 the resident agent's route, else the session's own frozen launch route.
@@ -20,7 +20,7 @@ import logging
 import threading
 
 from gateway.session_busy_controls import authorize
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 logger = logging.getLogger(__name__)
 
@@ -182,7 +182,7 @@ async def _answer(pool, transport, rid, call, check):
                 check(result)
             frame = {'jsonrpc': '2.0', 'id': rid, 'result': result}
         except Exception as exc:  # the request's only answer: every failure must reach the client
-            # The sidecar's own failure code and text (tui_gateway/methods_session.py).
+            # The sidecar's own failure code and text (agent_backend/methods_session.py).
             logger.warning('llm.oneshot failed: %s', exc, exc_info=True)
             frame = {'jsonrpc': '2.0', 'id': rid,
                      'error': {'code': 5030, 'message': f'one-shot generation failed: {exc}'}}
@@ -209,7 +209,7 @@ def _session_runtime(authority, ref):
     """``main_runtime`` for the auxiliary client: the resident agent's live route (main's sidecar),
     snapshotted here on the loop, else the session's own frozen launch route as its next turn
     resolves it (read from config in the worker)."""
-    from tui_gateway.session_registry import _main_runtime_from_agent
+    from agent_backend.session_registry import _main_runtime_from_agent
     agent = authority.agent(ref)
     if agent is not None:
         runtime = _main_runtime_from_agent(agent)
@@ -243,7 +243,7 @@ async def oneshot(connection, ref, params):
             raise RuntimeStoreError('permission_denied')
         if params.get('profile'):
             from pathlib import Path
-            from hermes_cli.profiles import profile_matches_home
+            from agent_cli.profiles import profile_matches_home
             if not profile_matches_home(params['profile'], Path(authority.profile_id)):
                 raise RuntimeStoreError('profile_mismatch')
         runtime = lambda: None  # the task backend

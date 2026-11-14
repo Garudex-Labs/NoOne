@@ -1,3 +1,4 @@
+import { AlertCircle, Check, Loader2, LogIn } from '@noone/ui/icons'
 import type { ReactElement, ReactNode } from 'react'
 
 import { ListRow, Pill } from '@/app/settings/primitives'
@@ -5,7 +6,6 @@ import { WebappOauthPasteField } from '@/app/settings/webapp-oauth-paste-field'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useI18n } from '@/i18n'
-import { AlertCircle, Check, Loader2, LogIn } from '@/lib/icons'
 
 import type { RemoteSetup } from './use-remote-setup'
 

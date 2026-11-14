@@ -21,13 +21,13 @@ import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vite
 import { I18nProvider } from '@/i18n'
 import { queryClient } from '@/lib/query-client'
 import { localModelsKey, localModelsOwner, watchLocalRuntimeJobs } from '@/store/local-runtime-jobs'
-import type { LocalCatalogModel, LocalHardware, LocalModelsStatus, LocalRuntimeJob } from '@/types/hermes'
+import type { LocalCatalogModel, LocalHardware, LocalModelsStatus, LocalRuntimeJob } from '@/types/agent-client'
 
 import { LocalModelsSettings } from './local-models-settings'
 
 // Mock the API layer — the pane's contract is what it RENDERS from these
 // payloads, not transport.
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   activateLocalModel: vi.fn(),
   deleteLocalModel: vi.fn(),
   downloadBrowsedModel: vi.fn(),
@@ -51,7 +51,7 @@ vi.mock('@/hermes', () => ({
   sideloadLocalModel: vi.fn()
 }))
 
-import * as hermes from '@/hermes'
+import * as hermes from '@/agent-client'
 
 const mocked = vi.mocked(hermes)
 

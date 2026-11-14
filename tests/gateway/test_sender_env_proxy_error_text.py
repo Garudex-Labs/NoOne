@@ -21,19 +21,6 @@ pytest.importorskip("aiohttp")
 ENV_PROXY_VARS = ("HTTPS_PROXY", "HTTP_PROXY", "ALL_PROXY", "https_proxy", "http_proxy", "all_proxy")
 
 
-def _feishu(monkeypatch):
-    requests = pytest.importorskip("requests")
-    from plugins.platforms.feishu import adapter as fs
-
-    def _create(request):  # the SDK's transport: a plain requests call that reads HTTPS_PROXY
-        requests.post("https://open.feishu.cn/open-apis/im/v1/messages", json={}, timeout=5)
-
-    client = SimpleNamespace(im=SimpleNamespace(v1=SimpleNamespace(message=SimpleNamespace(create=_create))))
-    monkeypatch.setattr(fs, "_load_lark_oapi", lambda: True)
-    monkeypatch.setattr(fs.FeishuAdapter, "_build_lark_client", lambda self, domain: client)
-    monkeypatch.setattr(fs.asyncio, "sleep", _no_sleep)  # the 3-attempt retry backoff
-    cfg = SimpleNamespace(token=None, api_key=None, enabled=True, extra={"app_id": "cli_x", "app_secret": "s"})
-    return fs._standalone_send(cfg, "oc_x", "hi")
 
 
 def _google_chat(monkeypatch):
@@ -67,23 +54,10 @@ def _line(monkeypatch):
     return line._standalone_send(SimpleNamespace(extra={"channel_access_token": "tok"}), "U123", "hi")
 
 
-def _ntfy(monkeypatch):
-    from plugins.platforms.ntfy import adapter as ntfy
-
-    return ntfy._standalone_send(SimpleNamespace(extra={"server": "https://ntfy.example.com", "topic": "t"}), "t", "hi")
 
 
-def _dingtalk(monkeypatch):
-    from plugins.platforms.dingtalk import adapter as dt
-
-    return dt._standalone_send(SimpleNamespace(extra={"webhook_url": "https://oapi.dingtalk.com/robot/send"}), "c", "hi")
 
 
-def _simplex(monkeypatch):
-    pytest.importorskip("websockets")
-    from plugins.platforms.simplex import adapter as sx
-
-    return sx._standalone_send(SimpleNamespace(extra={"ws_url": "ws://127.0.0.1:5225"}), "@alice", "hi")
 
 
 def _signal(monkeypatch):
@@ -93,18 +67,14 @@ def _signal(monkeypatch):
                                "+15550000001", "hi")
 
 
-def _qqbot(monkeypatch):
-    from plugins.platforms.qqbot import send as qq
-
-    return qq.send_qqbot(SimpleNamespace(token="secret", extra={"app_id": "1"}), "c2c:abc", "hi")
 
 
 async def _no_sleep(*_args, **_kwargs):
     return None
 
 
-SENDERS = {"feishu": _feishu, "google_chat": _google_chat, "teams": _teams, "weixin": _weixin, "line": _line,
-           "ntfy": _ntfy, "dingtalk": _dingtalk, "simplex": _simplex, "signal": _signal, "qqbot": _qqbot}
+SENDERS = { "google_chat": _google_chat, "teams": _teams, "weixin": _weixin, "line": _line,
+              "signal": _signal, }
 CASES = [pytest.param(sender, shape.format(pw=pw), pw, id=f"{sender}|{pw}|{shape.split(':')[0]}")
          for sender in SENDERS for pw in PASSWORDS for shape in SHAPES]
 
@@ -133,7 +103,7 @@ def test_env_proxy_send_failure_never_carries_the_proxy_secret(monkeypatch, capl
 _SECRET = "http://bob:qzxqzxqzx@127.0.0.1:1"
 _CLEAN = "http://127.0.0.1:2"
 # Each sender's own API hosts: NO_PROXY naming them means the request went direct.
-_TARGET_HOSTS = ("127.0.0.1,localhost,.feishu.cn,.weixin.qq.com,.line.me,ntfy.example.com,.dingtalk.com,.qq.com,"
+_TARGET_HOSTS = ("127.0.0.1,localhost,.weixin.qq.com,.line.me,"
                  ".googleapis.com,.botframework.com,.trafficmanager.net,.microsoftonline.com")
 # Variables that disagree: the library may read the secret one whichever Hermes would have picked.
 # A NO_PROXY naming the targets: httpx still parses every proxy variable when the client is built.
@@ -196,43 +166,8 @@ def test_a_padded_star_no_proxy_still_redacts(monkeypatch, caplog, sender, no_pr
         assert "qzx" not in text and "qzx" not in unquote(text), text[-2000:]
 
 
-def test_simplex_trailing_dot_host_is_not_bypassed_by_its_bare_name(monkeypatch, caplog):
-    # No library strips the trailing dot: ``localhost.`` is proxied, and websockets echoes a proxy with a path.
-    pytest.importorskip("websockets")
-    from plugins.platforms.simplex import adapter as sx
-
-    secret = "http://bob:qzxqzxqzx@127.0.0.1:1/p"
-    for name in (*ENV_PROXY_VARS, "NO_PROXY", "no_proxy"):
-        monkeypatch.delenv(name, raising=False)
-    monkeypatch.setenv("HTTPS_PROXY", secret)
-    monkeypatch.setenv("HTTP_PROXY", secret)
-    monkeypatch.setenv("NO_PROXY", "localhost")
-    result = asyncio.run(asyncio.wait_for(
-        sx._standalone_send(SimpleNamespace(extra={"ws_url": "ws://localhost.:5225"}), "@alice", "hi"), 60))
-    error = str(result.get("error") or "")
-    assert re.search(r"\bInvalidProxy via ", error) and "qzx" not in unquote(error), error
 
 
-@pytest.mark.parametrize("no_proxy, ws_url", [("bücher.example", "ws://bücher.example:5225"),
-                                              ("xn--bcher-kva.example", "ws://xn--bcher-kva.example:5225")])
-def test_simplex_idna_host_is_never_treated_as_bypassed(monkeypatch, caplog, no_proxy, ws_url):
-    # urllib compares NO_PROXY raw; websockets/httpx/aiohttp IDNA-encode the host first, so they disagree.
-    pytest.importorskip("websockets")
-    from plugins.platforms.simplex import adapter as sx
-
-    secret = "http://bob:qzxqzxqzx@127.0.0.1:1/p"
-    for name in (*ENV_PROXY_VARS, "NO_PROXY", "no_proxy"):
-        monkeypatch.delenv(name, raising=False)
-    for name, value in (("HTTPS_PROXY", secret), ("HTTP_PROXY", secret), ("NO_PROXY", no_proxy)):
-        monkeypatch.setenv(name, value)
-    with caplog.at_level(logging.DEBUG):
-        result = asyncio.run(asyncio.wait_for(
-            sx._standalone_send(SimpleNamespace(extra={"ws_url": ws_url}), "@alice", "hi"), 60))
-    error = str(result.get("error") or "")
-    logs = "\n".join(logging.Formatter("%(message)s").format(r) for r in caplog.records)
-    assert re.search(r"\b\w+ via http://127.0.0.1:1\b", error), error
-    for text in (error, logs):
-        assert "qzx" not in text and "qzx" not in unquote(text), text[-2000:]
 
 
 def test_an_oddly_cased_no_proxy_alone_is_not_a_bypass(monkeypatch):
@@ -248,31 +183,6 @@ def test_an_oddly_cased_no_proxy_alone_is_not_a_bypass(monkeypatch):
     assert env_proxy_for_redaction("https://chat.googleapis.com") is None
 
 
-def test_feishu_media_download_failure_log_carries_no_proxy_secret(monkeypatch, caplog):
-    from gateway.config import PlatformConfig
-    from gateway.platforms.base import SendResult as _SendResult
-    from plugins.platforms.feishu import adapter as fs
-
-    for name in (*ENV_PROXY_VARS, "NO_PROXY", "no_proxy"):
-        monkeypatch.delenv(name, raising=False)
-    monkeypatch.setenv("HTTPS_PROXY", "http://bob:qzxqzxqzx#x@127.0.0.1:1")
-    monkeypatch.setenv("HTTP_PROXY", "http://bob:qzxqzxqzx#x@127.0.0.1:1")
-    monkeypatch.setattr("tools.url_safety.is_safe_url", lambda url: True)
-    adapter = fs.FeishuAdapter(PlatformConfig(enabled=True, extra={"app_id": "cli_x", "app_secret": "s"}))
-
-    async def _send(**_kwargs):
-        return _SendResult(success=True)
-
-    monkeypatch.setattr(adapter, "send", _send)
-    formatter = logging.Formatter("%(levelname)s %(name)s %(message)s")
-    for call in (lambda: adapter.send_image("oc_x", "https://example.com/a.png"),
-                 lambda: adapter.send_animation("oc_x", "https://example.com/a.gif")):
-        caplog.clear()
-        with caplog.at_level(logging.DEBUG):
-            asyncio.run(asyncio.wait_for(call(), 60))
-        logs = "\n".join(formatter.format(r) for r in caplog.records if "feishu" in r.name)
-        assert "Failed to download" in logs, logs
-        assert "qzx" not in logs and "qzx" not in unquote(logs), logs[-2000:]
 
 
 @pytest.mark.parametrize("scheme", ["ftp", "socks4"])

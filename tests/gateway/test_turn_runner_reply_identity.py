@@ -1,4 +1,4 @@
-"""The session-authority turn stamps its reply frames with the same wire identity as tui_gateway's ``_emit``.
+"""The session-authority turn stamps its reply frames with the same wire identity as agent_backend's ``_emit``.
 
 A viewer upserts a re-sent delta or seal by ``turn_id``/``segment``/``offset`` instead of painting a second copy.
 """

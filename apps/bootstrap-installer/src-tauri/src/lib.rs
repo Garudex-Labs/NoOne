@@ -9,6 +9,7 @@
 //! flags of the executable that consumes it.
 
 mod bootstrap;
+mod application_identity;
 mod events;
 mod install_script;
 mod marker;
@@ -22,7 +23,7 @@ use tokio::sync::Mutex;
 /// How the installer was invoked. Resolved once from the process args in
 /// `run()` and exposed to the frontend via `get_mode` so it can route to the
 /// install flow (first-run onboarding) or the update flow (driven by the
-/// desktop app handing off via `Hermes-Setup.exe --update`).
+/// desktop app handing off via `NoOne-Setup.exe --update`).
 ///
 /// Bare launch (double-click, first-run) => Install.
 /// `--update` (spawned by the desktop's "Update" button) => Update.
@@ -162,6 +163,9 @@ pub fn run() {
             // First run / repair install, or Update mode: reveal the UI.
             match app.get_webview_window("main") {
                 Some(win) => {
+                    if let Err(err) = win.set_title(application_identity::application_name()) {
+                        tracing::warn!(?err, "could not set application display title");
+                    }
                     if let Err(err) = win.show() {
                         tracing::error!(?err, "failed to show main installer window");
                     }
@@ -185,7 +189,7 @@ pub fn run() {
             bootstrap::launch_hermes_desktop,
             // Diagnostics
             paths::get_log_path,
-            paths::get_hermes_home,
+            paths::get_agent_home,
             paths::open_log_dir,
         ])
         .run(tauri::generate_context!())

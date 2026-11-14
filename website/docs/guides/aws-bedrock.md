@@ -1,18 +1,17 @@
 ---
-sidebar_position: 14
 title: "AWS Bedrock"
-description: "Use Hermes Agent with Amazon Bedrock — native Converse API, Anthropic SDK routing, OpenAI models via Bedrock Mantle, IAM authentication, Guardrails, and cross-region inference"
+description: "Use the agent with Amazon Bedrock — native Converse API, Anthropic SDK routing, OpenAI models via Bedrock Mantle, IAM authentication, Guardrails, and cross-region inference"
 ---
 
-# AWS Bedrock
+# AWS Bedrock {#aws-bedrock}
 
 Python dependency commands on this page use a
 [PM-prepared source checkout](../reference/package-management.md#developer-workflow).
-After a dependency change, reactivate the checkout and restart Hermes.
+After a dependency change, reactivate the checkout and restart {{app-name}}.
 
-Hermes Agent supports Amazon Bedrock as a native provider. This gives you full access to the Bedrock ecosystem: IAM authentication, Guardrails, cross-region inference profiles, and all foundation models.
+{{app-name}} supports Amazon Bedrock as a native provider. This gives you full access to the Bedrock ecosystem: IAM authentication, Guardrails, cross-region inference profiles, and all foundation models.
 
-Hermes routes each model family through the API that serves it best:
+{{app-name}} routes each model family through the API that serves it best:
 
 | Model family | API route | Why |
 |---|---|---|
@@ -23,7 +22,7 @@ Hermes routes each model family through the API that serves it best:
 
 All three routes share the same AWS credential chain and region resolution — no separate configuration is needed. Requests to the Mantle endpoint are authenticated with `AWS_BEARER_TOKEN_BEDROCK` when set, or SigV4-signed via the standard boto3 credential chain otherwise.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **AWS credentials** — any source supported by the [boto3 credential chain](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html):
   - IAM instance role (EC2, ECS, Lambda — zero config)
@@ -36,28 +35,36 @@ All three routes share the same AWS credential chain and region resolution — n
   - `bedrock:ListFoundationModels` and `bedrock:ListInferenceProfiles` (for model discovery)
   - `bedrock:GetInferenceProfile` (only if `model.default` is an application inference profile ARN — used to size the context window from the wrapped model)
 
-:::tip EC2 / ECS / Lambda
-On AWS compute, attach an IAM role with `AmazonBedrockFullAccess` and you're done. No API keys, no `.env` configuration — Hermes detects the instance role automatically.
-:::
+<Tip>
 
-## Quick Start
+<div className="doc-callout-title">
+
+EC2 / ECS / Lambda
+
+</div>
+
+On AWS compute, attach an IAM role with `AmazonBedrockFullAccess` and you're done. No API keys, no `.env` configuration — {{app-name}} detects the instance role automatically.
+
+</Tip>
+
+## Quick Start {#quick-start}
 
 ```bash
 # Install with Bedrock support
 cd ~/.hermes/hermes-agent && python -c "import pm; pm.sync_venv(['bedrock'], explicit=True)"
 
 # Select Bedrock as your provider
-hermes model
+noone model
 # → Choose "More providers..." → "AWS Bedrock"
 # → Select your region and model
 
 # Start chatting
-hermes chat
+noone chat
 ```
 
-## Configuration
+## Configuration {#configuration}
 
-After running `hermes model`, your `~/.hermes/config.yaml` will contain:
+After running `noone model`, your `~/.hermes/config.yaml` will contain:
 
 ```yaml
 model:
@@ -69,7 +76,7 @@ bedrock:
   region: us-east-2
 ```
 
-### Region
+### Region {#region}
 
 Set the AWS region in any of these ways (highest priority first):
 
@@ -78,7 +85,7 @@ Set the AWS region in any of these ways (highest priority first):
 3. `AWS_DEFAULT_REGION` environment variable
 4. Default: `us-east-1`
 
-### Guardrails
+### Guardrails {#guardrails}
 
 To apply [Amazon Bedrock Guardrails](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html) to all model invocations:
 
@@ -96,9 +103,9 @@ The guardrail is attached on the Converse route (`guardrailConfig`) and on the C
 
 AWS does not apply Guardrails to the Mantle Responses endpoint used by bare `openai.gpt-*` IDs ([AWS docs](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html)). Use a Converse-served model, such as a `us.` or `global.` OpenAI inference profile, when a guardrail is required.
 
-### Model Discovery
+### Model Discovery {#model-discovery}
 
-Hermes auto-discovers available models via the Bedrock control plane. You can customize discovery:
+{{app-name}} auto-discovers available models via the Bedrock control plane. You can customize discovery:
 
 ```yaml
 bedrock:
@@ -108,23 +115,23 @@ bedrock:
     refresh_interval: 3600                     # Cache for 1 hour
 ```
 
-### Prompt caching (cachePoint)
+### Prompt caching (cachePoint) {#prompt-caching-cachepoint}
 
-Hermes automatically applies prompt caching on the Bedrock **Converse API** path by inserting `cachePoint` markers after the system prompt, tool definitions, and the latest message. Because sending a `cachePoint` block to a model that doesn't support it raises a `ValidationException`, markers are only added for models on a known-good allowlist (Anthropic Claude and Amazon Nova model IDs); unknown models default to no cache markers. Claude models normally use the AnthropicBedrock SDK path, which has its own prompt caching — the Converse `cachePoint` path covers Nova and the bearer-token Claude fallback. No configuration needed; cache reads/writes show up in usage accounting.
+{{app-name}} automatically applies prompt caching on the Bedrock **Converse API** path by inserting `cachePoint` markers after the system prompt, tool definitions, and the latest message. Because sending a `cachePoint` block to a model that doesn't support it raises a `ValidationException`, markers are only added for models on a known-good allowlist (Anthropic Claude and Amazon Nova model IDs); unknown models default to no cache markers. Claude models normally use the AnthropicBedrock SDK path, which has its own prompt caching — the Converse `cachePoint` path covers Nova and the bearer-token Claude fallback. No configuration needed; cache reads/writes show up in usage accounting.
 
-### Context-window probing
+### Context-window probing {#context-window-probing}
 
-For models whose context window isn't in Hermes' static table, Hermes can probe the real limit by sending oversized requests at fixed tiers (~1.3M and ~2.2M tokens) and parsing the `maximum` reported in Bedrock's length-validation error. Probed values feed the same metadata cache as the static table; stale cached entries that under-report a model's window (e.g. entries seeded before a model's 1M window went GA) are dropped automatically in favor of the larger known value.
+For models whose context window isn't in {{app-name}}' static table, {{app-name}} can probe the real limit by sending oversized requests at fixed tiers (~1.3M and ~2.2M tokens) and parsing the `maximum` reported in Bedrock's length-validation error. Probed values feed the same metadata cache as the static table; stale cached entries that under-report a model's window (e.g. entries seeded before a model's 1M window went GA) are dropped automatically in favor of the larger known value.
 
-When the static table has no row for a model from Anthropic, OpenAI or xAI, Hermes uses that model family's window from its general model catalog (`agent/model_metadata.py`). This is how a new tier gets its real window before the Bedrock table is updated. Other vendors' catalog rows are vendor-direct windows that can exceed what Bedrock serves (Llama 3 8B is 8K on Bedrock), so those models do not borrow them.
+When the static table has no row for a model from Anthropic, OpenAI or xAI, {{app-name}} uses that model family's window from its general model catalog (`agent/model_metadata.py`). This is how a new tier gets its real window before the Bedrock table is updated. Other vendors' catalog rows are vendor-direct windows that can exceed what Bedrock serves (Llama 3 8B is 8K on Bedrock), so those models do not borrow them.
 
-When nothing knows a model, Hermes uses a 128,000-token fallback and logs a WARNING naming the model. The banner, status bar, `/usage`, `/model` and the gateway session line mark that window `fallback` so it is not mistaken for a detected limit. Set `model.context_length` (or `model_overrides.bedrock.<model id>.context_window`) in `config.yaml` to the model's real window.
+When nothing knows a model, {{app-name}} uses a 128,000-token fallback and logs a WARNING naming the model. The banner, status bar, `/usage`, `/model` and the gateway session line mark that window `fallback` so it is not mistaken for a detected limit. Set `model.context_length` (or `model_overrides.bedrock.<model id>.context_window`) in `config.yaml` to the model's real window.
 
-**Application inference profiles.** An ARN such as `arn:aws:bedrock:us-west-2:123456789012:application-inference-profile/abcdef123456` names no model, so neither the probe nor the static table can size it. Hermes calls `bedrock:GetInferenceProfile` in the ARN's region and sizes the window from the model the profile wraps (1M for a profile wrapping Claude Sonnet 4.6). Without that permission the 128,000-token default applies and a WARNING names the profile; set `model.context_length` explicitly to override either way.
+**Application inference profiles.** An ARN such as `arn:aws:bedrock:us-west-2:123456789012:application-inference-profile/abcdef123456` names no model, so neither the probe nor the static table can size it. {{app-name}} calls `bedrock:GetInferenceProfile` in the ARN's region and sizes the window from the model the profile wraps (1M for a profile wrapping Claude Sonnet 4.6). Without that permission the 128,000-token default applies and a WARNING names the profile; set `model.context_length` explicitly to override either way.
 
-## Available Models
+## Available Models {#available-models}
 
-Bedrock models use **inference profile IDs** for on-demand invocation. The `hermes model` picker shows these automatically, with recommended models at the top:
+Bedrock models use **inference profile IDs** for on-demand invocation. The `noone model` picker shows these automatically, with recommended models at the top:
 
 | Model | ID | Notes |
 |-------|-----|-------|
@@ -146,13 +153,21 @@ Bedrock models use **inference profile IDs** for on-demand invocation. The `herm
 | DeepSeek V3.2 | `deepseek.v3.2` | Strong open model |
 | Llama 4 Scout 17B | `us.meta.llama4-scout-17b-instruct-v1:0` | Meta's latest |
 
-:::info Cross-Region Inference
+<Info>
+
+<div className="doc-callout-title">
+
+Cross-Region Inference
+
+</div>
+
 Models prefixed with `us.` use cross-region inference profiles, which provide better capacity and automatic failover across AWS regions. Models prefixed with `global.` route across all available regions worldwide.
 
-OpenAI models have two endpoint forms. The bare `openai.*` ID is in-Region and Hermes sends it to Bedrock Mantle's Responses endpoint in the configured region. The `us.openai.*` and `global.openai.*` IDs are cross-Region inference profiles. Hermes sends them to `bedrock-runtime` through the Converse API, the same path as other inference profiles. Each AWS model card lists the profiles a model offers and the regions Mantle serves it in.
-:::
+OpenAI models have two endpoint forms. The bare `openai.*` ID is in-Region and {{app-name}} sends it to Bedrock Mantle's Responses endpoint in the configured region. The `us.openai.*` and `global.openai.*` IDs are cross-Region inference profiles. {{app-name}} sends them to `bedrock-runtime` through the Converse API, the same path as other inference profiles. Each AWS model card lists the profiles a model offers and the regions Mantle serves it in.
 
-## Switching Models Mid-Session
+</Info>
+
+## Switching Models Mid-Session {#switching-models-mid-session}
 
 Use the `/model` command during a conversation:
 
@@ -162,10 +177,10 @@ Use the `/model` command during a conversation:
 /model us.anthropic.claude-opus-4-6-v1
 ```
 
-## Diagnostics
+## Diagnostics {#diagnostics}
 
 ```bash
-hermes doctor
+noone doctor
 ```
 
 The doctor checks:
@@ -174,22 +189,22 @@ The doctor checks:
 - Whether the Bedrock API is reachable (ListFoundationModels)
 - Number of available models in your region
 
-## Gateway (Messaging Platforms)
+## Gateway (Messaging Platforms) {#gateway-messaging-platforms}
 
-Bedrock works with all Hermes gateway platforms (Telegram, Discord, Slack, Feishu, etc.). Configure Bedrock as your provider, then start the gateway normally:
+Bedrock works with all {{app-name}} gateway platforms (Telegram, Discord, Slack, etc.). Configure Bedrock as your provider, then start the gateway normally:
 
 ```bash
-hermes gateway setup
-hermes gateway start
+noone gateway setup
+noone gateway start
 ```
 
 The gateway reads `config.yaml` and uses the same Bedrock provider configuration.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
-### "No API key found" / "No AWS credentials"
+### "No API key found" / "No AWS credentials" {#no-api-key-found--no-aws-credentials}
 
-Hermes checks for credentials in this order:
+{{app-name}} checks for credentials in this order:
 1. `AWS_BEARER_TOKEN_BEDROCK`
 2. `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`
 3. `AWS_PROFILE`
@@ -199,17 +214,17 @@ Hermes checks for credentials in this order:
 
 If none are found, run `aws configure` or attach an IAM role to your compute instance.
 
-### "Invocation of model ID ... with on-demand throughput isn't supported"
+### "Invocation of model ID ... with on-demand throughput isn't supported" {#invocation-of-model-id--with-on-demand-throughput-isnt-supported}
 
 Use an **inference profile ID** (prefixed with `us.` or `global.`) instead of the bare foundation model ID. For example:
 - ❌ `anthropic.claude-sonnet-4-6`
 - ✅ `us.anthropic.claude-sonnet-4-6`
 
-### "ThrottlingException"
+### "ThrottlingException" {#throttlingexception}
 
-You've hit the Bedrock per-model rate limit. Hermes automatically retries with backoff. To increase limits, request a quota increase in the [AWS Service Quotas console](https://console.aws.amazon.com/servicequotas/).
+You've hit the Bedrock per-model rate limit. {{app-name}} automatically retries with backoff. To increase limits, request a quota increase in the [AWS Service Quotas console](https://console.aws.amazon.com/servicequotas/).
 
-## One-Click AWS Deployment
+## One-Click AWS Deployment {#one-click-aws-deployment}
 
 For a fully automated deployment on EC2 with CloudFormation:
 

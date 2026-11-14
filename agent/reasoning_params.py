@@ -4,9 +4,9 @@ When ``reasoning`` extra_body is safe to send, LM Studio / Ollama / endpoint-pro
 ``reasoning_content`` echo families, and strict-API tool-call sanitising.
 Extracted from ``run_agent.py``; every method resolves through ``AIAgent``'s MRO unchanged.
 """
+from agent_cli.application_identity import app_text
 import logging
 import time
-
 from agent.lazy_forward import forward as _forward, forward_static as _forward_static
 from agent.message_sanitization import matches_reasoning_echo_family
 from utils import base_url_host_matches
@@ -111,7 +111,7 @@ class ReasoningParamsMixin:
         # Live-catalog metadata first (OpenRouter /v1/models supported_parameters) — the static prefix
         # allowlist repeatedly went stale one vendor at a time. Unknown falls back to the static list.
         try:
-            from hermes_cli.models_reasoning_caps import openrouter_model_reasoning_capabilities, warm_openrouter_reasoning_caps_async
+            from agent_cli.models_reasoning_caps import openrouter_model_reasoning_capabilities, warm_openrouter_reasoning_caps_async
             caps = openrouter_model_reasoning_capabilities(self.model)
             if caps is None:
                 warm_openrouter_reasoning_caps_async()  # cache cold — warm in the background, never block
@@ -125,7 +125,7 @@ class ReasoningParamsMixin:
     def _lmstudio_reasoning_options_cached(self) -> list[str]:
         """LM Studio's published reasoning ``allowed_options`` (gate + clamp so toggle models don't 400 on ``high``)."""
         try:
-            from hermes_cli.models_local import lmstudio_model_reasoning_options
+            from agent_cli.models_local import lmstudio_model_reasoning_options
         except Exception:
             return []
         return _cached_probe(self, "_lm_reasoning_opts_cache", lmstudio_model_reasoning_options, [], bool)
@@ -133,7 +133,7 @@ class ReasoningParamsMixin:
     def _ollama_supports_thinking_cached(self) -> bool:
         """True only if Ollama's ``/api/show`` declares the ``thinking`` capability."""
         try:
-            from hermes_cli.models_local import ollama_model_supports_thinking
+            from agent_cli.models_local import ollama_model_supports_thinking
         except Exception:
             return False
         return bool(_cached_probe(self, "_ollama_thinking_cache", ollama_model_supports_thinking, None, lambda v: v is not None))
@@ -209,15 +209,15 @@ class ReasoningParamsMixin:
     def _read_reasoning_echo_from_config() -> bool:
         """Read ``model.reasoning_echo`` from config; False on any error."""
         try:
-            from hermes_cli.config import load_config_readonly
+            from agent_cli.config import load_config_readonly
             return bool((load_config_readonly().get("model") or {}).get("reasoning_echo"))
         except Exception as exc:  # health: allow BLE001 -- a config failure must fall back, not fail init
             # Log the class, never the config value or exception traceback.
             logging.getLogger("run_agent").warning(
-                "Agent configuration for model.reasoning_echo could not be loaded (%s); "
-                "using the default reasoning echo setting. Check the active Hermes Python "
-                "environment and dependencies; run 'hermes config check' after "
-                "configuration imports work again.",
+                app_text("Agent configuration for model.reasoning_echo could not be loaded (%s); "
+                "using the default reasoning echo setting. Check the active {app_name} Python "
+                "environment and dependencies; run 'noone config check' after "
+                "configuration imports work again.", percent_format=True),
                 type(exc).__name__,
             )
             return False

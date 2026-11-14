@@ -1,12 +1,12 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as HermesModule from '@/hermes'
-import type { ProfileInfo, SessionInfo } from '@/types/hermes'
+import type * as AgentModule from '@/agent-client'
+import type { ProfileInfo, SessionInfo } from '@/types/agent-client'
 
 const getSessionMock = vi.fn<(id: string, profile?: null | string) => Promise<SessionInfo>>()
 
-vi.mock('@/hermes', async importOriginal => {
-  const actual = await importOriginal<typeof HermesModule>()
+vi.mock('@/agent-client', async importOriginal => {
+  const actual = await importOriginal<typeof AgentModule>()
 
   return {
     ...actual,

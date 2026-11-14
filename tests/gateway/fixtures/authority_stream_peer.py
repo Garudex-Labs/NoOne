@@ -108,8 +108,8 @@ async def probe(peer, target):
     from gateway.run_api import start_gateway_api, stop_gateway_api
     from gateway.session import SessionSource
     from gateway.session_authority import initialize_session_authority
-    from hermes_cli import web_server
-    from hermes_state_runtime import list_session_admissions
+    from agent_cli import web_server
+    from agent_state_runtime import list_session_admissions
     from run_agent import AIAgent
 
     class NativeAdapter(BasePlatformAdapter):
@@ -276,7 +276,7 @@ def main():
         # The stalled observer must hit a mailbox bound while the session replay buffer (4 MB) still
         # holds the whole turn and the terminal frame (the whole reply) still fits the byte cap, so
         # bound it by frames: the 330 chunks below exceed this.
-        from tui_gateway.transport import FanoutTransport
+        from agent_backend.transport import FanoutTransport
         FanoutTransport._MAX_PENDING_FRAMES = 256
     peer.acks = queue.Queue()
     peer.command = 'printf owned-effect > ' + shlex.quote(str(target))

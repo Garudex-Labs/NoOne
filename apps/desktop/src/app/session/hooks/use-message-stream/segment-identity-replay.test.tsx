@@ -6,7 +6,7 @@ import { chatMessageText } from '@/lib/chat-messages'
 import { type MessageStreamHarness, renderMessageStream } from './test-harness'
 import { STREAM_DELTA_FLUSH_MS } from './utils'
 
-// A turn's frames carry their wire identity (tui_gateway/stream_segments.py):
+// A turn's frames carry their wire identity (agent_backend/stream_segments.py):
 // message.start the turn id, each delta its segment + offset, each interim the
 // segment it seals. A frame re-sent under a new seq (reconnect replay, a
 // superseded attempt re-streaming its segment) must upsert what is on screen.

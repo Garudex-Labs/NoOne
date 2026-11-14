@@ -20,8 +20,8 @@ const paths = vi.hoisted(() => [
 
 const getSessionMessages = vi.hoisted(() => vi.fn())
 
-vi.mock('@/hermes', async () => ({
-  ...(await vi.importActual('@/hermes')),
+vi.mock('@/agent-client', async () => ({
+  ...(await vi.importActual('@/agent-client')),
   listAllProfileSessions: async () => ({
     sessions: [{ id: 'artifact-session', title: 'Fixture', profile: 'origin-profile' }]
   }),

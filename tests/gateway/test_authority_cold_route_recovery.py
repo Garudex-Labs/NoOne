@@ -1,4 +1,4 @@
-"""A cold messaging-platform session mounts for a local viewer (TUI-8, NousResearch/hermes-agent#134889).
+"""A cold messaging-platform session mounts for a local viewer (TUI-8, Garudex-Labs/NoOne#134889).
 
 Before its first post-restart inbound nothing publishes a messaging-platform lane (Telegram, Weixin,
 Discord, ...) into the authority, so ``session.resume`` of its row answered ``not_found`` until
@@ -97,7 +97,7 @@ def _ref(sid, profile_id='fixture'):
 
 
 async def _refused(tmp_path, sid, reason='not_found', **cold_args):
-    from hermes_state_runtime import RuntimeStoreError
+    from agent_state_runtime import RuntimeStoreError
     cold = await _cold(tmp_path, **cold_args)
     with pytest.raises(RuntimeStoreError, match=reason):
         cold.authority.authorize(cold.actor, _ref(sid), 'session:read')
@@ -149,7 +149,7 @@ async def test_a_row_its_route_moved_past_mounts_from_its_own_origin(tmp_path):
     cold.authority.authorize(cold.actor, _ref('old'), 'session:read')
 
     live = cold.authority.sessions['old']
-    # Teknium's ruling: off the chat's route, on a key of its own (gateway/session_detached.py).
+    # off the chat's route, on a key of its own (gateway/session_detached.py).
     assert (live.route, live.source.platform, live.source.chat_id, live.source.chat_name) == (
         'agent:main:detached:old', Platform.TELEGRAM, '4242', 'from-row')
 
@@ -187,7 +187,7 @@ async def test_an_entry_without_an_origin_falls_back_to_the_row(tmp_path):
 async def test_a_row_with_neither_origin_nor_chat_id_cannot_be_rebuilt(tmp_path):
     cold = await _cold(tmp_path)
     cold.authority.db.create_session('hollow', source='telegram', session_key='agent:main:telegram:dm:x')
-    from hermes_state_runtime import RuntimeStoreError
+    from agent_state_runtime import RuntimeStoreError
     with pytest.raises(RuntimeStoreError, match='not_found'):
         cold.authority.authorize(cold.actor, _ref('hollow'), 'session:read')
     assert 'hollow' not in cold.authority.sessions
@@ -217,7 +217,7 @@ async def test_an_origin_that_contradicts_the_row_is_not_trusted(tmp_path):
 
 @pytest.mark.asyncio
 async def test_a_foreign_profile_ref_is_still_refused(tmp_path):
-    from hermes_state_runtime import RuntimeStoreError
+    from agent_state_runtime import RuntimeStoreError
     _seed(tmp_path, 'lane-foreign', _source())
     cold = await _cold(tmp_path)
     with pytest.raises(RuntimeStoreError, match='profile_mismatch'):
@@ -260,7 +260,7 @@ async def test_a_lane_of_another_profile_is_not_mounted_by_this_authority(tmp_pa
 
 @pytest.mark.asyncio
 async def test_a_draining_gateway_mounts_nothing(tmp_path):
-    from hermes_state_runtime import RuntimeStoreError
+    from agent_state_runtime import RuntimeStoreError
     _seed(tmp_path, 'lane-drain', _source())
     cold = await _cold(tmp_path)
     cold.authority.runner._draining = True
@@ -281,7 +281,7 @@ async def _superseded(tmp_path):
 @pytest.mark.asyncio
 async def test_a_row_its_route_moved_past_stays_writable_on_its_own_key(tmp_path):
     """#140183 review F2: the old row's only route was the lane's CURRENT key, so a Stop, an agent
-    lookup or a turn on it reached the successor conversation. Teknium's ruling reverses the
+    lookup or a turn on it reached the successor conversation. The design rule reverses the
     read-only answer: the row detaches onto a key of its own, so every write is accepted and acts on
     it alone; the successor's agent is never resolved through it."""
     from gateway.session_contract import SessionActor
@@ -317,7 +317,7 @@ async def test_closing_or_deleting_a_superseded_row_leaves_the_successor_route_a
     cold.authority.runner._evict_cached_agent = lambda key, **kw: touched.append(('evict', key))
     await close_viewer_session(cold.authority, 'old', 'tui_close')
     retire_live_sessions(cold.authority, ['old'])
-    # Teknium's ruling: the row acts on its own detached key, never the successor's route.
+    # the row acts on its own detached key, never the successor's route.
     keys = {kw.get('session_key') if kind != 'evict' else kw for kind, kw in touched}
     assert keys == {'agent:main:detached:old'}, touched
     assert 'old' not in cold.authority.sessions
@@ -436,7 +436,7 @@ async def test_a_live_mount_detaches_when_its_lane_publishes_another_conversatio
     cold.authority.authorize(writer, _ref('unrouted'), 'session:submit')
     fresh = cold.store.get_or_create_session(_source(), force_new=True)
     cold.authority._publish_route(_source(), fresh.session_id, fresh.session_key)
-    # Teknium's ruling: it stays writable, detached onto its own key.
+    # it stays writable, detached onto its own key.
     cold.authority.authorize(writer, _ref('unrouted'), 'session:submit')
     assert cold.authority.sessions['unrouted'].route == 'agent:main:detached:unrouted'
     cold.authority.authorize(writer, _ref(fresh.session_id), 'session:submit')

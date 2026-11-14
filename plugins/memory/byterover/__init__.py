@@ -40,7 +40,7 @@ def _coerce_bool(value: Any, default: bool = False) -> bool:
 def _load_plugin_config() -> dict[str, Any]:
     """Read ``memory.byterover``; fall back to legacy ``memory.provider_config`` (early docs used it)."""
     try:
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         memory_config = load_config().get("memory", {})
     except Exception:
         return {}
@@ -53,8 +53,8 @@ def _load_plugin_config() -> dict[str, Any]:
 
 def _get_brv_cwd() -> Path:
     """Profile-scoped working directory for the brv context tree."""
-    from hermes_constants import get_hermes_home
-    return get_hermes_home() / "byterover"
+    from agent_constants import get_agent_home
+    return get_agent_home() / "byterover"
 
 
 # brv binary resolution (cached, thread-safe): None = unresolved, "" = resolved-missing
@@ -83,12 +83,12 @@ def _brv_child_env(brv_path: str) -> dict[str, str]:
     another profile's — and the launch profile's ``.env`` residue is stripped. Outside multiplex
     the process env IS this profile's own and is passed through unchanged."""
     from agent.secret_scope import UnscopedSecretError, get_secret, is_multiplex_active
-    from hermes_constants import get_hermes_home_override
+    from agent_constants import get_agent_home_override
     from tools.environments.local import build_subprocess_env, strip_launch_profile_env
 
     env = build_subprocess_env(scrub_secrets=False)
     if is_multiplex_active():
-        env = strip_launch_profile_env(env, get_hermes_home_override())
+        env = strip_launch_profile_env(env, get_agent_home_override())
         for key in [k for k in env if k.startswith("BRV_")]:
             env.pop(key, None)
         try:

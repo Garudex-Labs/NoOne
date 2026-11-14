@@ -1,8 +1,8 @@
+import { Loader2 } from '@noone/ui/icons'
 import { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
-import { Loader2 } from '@/lib/icons'
 
 import { type AccountOperation, syncAccountOperation } from './data/account-operations'
 

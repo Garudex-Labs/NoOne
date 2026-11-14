@@ -17,7 +17,7 @@ import {
 } from './gateway-connections-store'
 import { loadNativeTokenSet, persistNativeTokenSet } from './native-token-store'
 
-// Desktop (this module) and the Webapp's Python server (hermes_cli/gateway_connections.py)
+// Desktop (this module) and the Webapp's Python server (agent_cli/gateway_connections.py)
 // keep ONE saved-gateways list. Existing Desktop users must keep everything on the move.
 const repo = path.resolve(import.meta.dirname, '../../..')
 const python = process.env.HERMES_PYTHON || 'python3'
@@ -334,7 +334,7 @@ test('the Python writer and this module share one file, one lock and each otherâ
   const env = { HERMES_HOME: root, HOME: dir, PATH: process.env.PATH, PYTHONPATH: repo }
 
   const script = [
-    'from hermes_cli import gateway_connections as g',
+    'from agent_cli import gateway_connections as g',
     'g.save_connection({"kind": "remote", "label": "From web", "url": "http://web:1", "token": "t"})',
     'print(",".join(c["id"] for c in g.read_registry()["connections"]))'
   ].join('\n')

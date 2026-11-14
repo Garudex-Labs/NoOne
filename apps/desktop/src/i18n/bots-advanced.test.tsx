@@ -1,4 +1,4 @@
-import type * as HermesSdk from '@hermes/plugin-sdk'
+import type * as AgentSdk from '@noone/plugin-sdk'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useState } from 'react'
@@ -7,10 +7,10 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { I18nProvider, useI18n } from '@/i18n'
 import type { I18nContextValue } from '@/i18n'
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
-import { BOTS_LOCALES } from '@/plugins/hermes-bots/i18n'
-import { translateBotsIn } from '@/plugins/hermes-bots/i18n-test-helper'
-import { McpSetupButton } from '@/plugins/hermes-bots/mcp-setup'
-import { AdvancedProfileConfig, applyAdvancedConfig, emptyAdvancedState } from '@/plugins/hermes-bots/profile-config'
+import { BOTS_LOCALES } from '@/plugins/bot-mode/i18n'
+import { translateBotsIn } from '@/plugins/bot-mode/i18n-test-helper'
+import { McpSetupButton } from '@/plugins/bot-mode/mcp-setup'
+import { AdvancedProfileConfig, applyAdvancedConfig, emptyAdvancedState } from '@/plugins/bot-mode/profile-config'
 
 const mocks = vi.hoisted(() => ({
   request: vi.fn(async (method: string, _params?: Record<string, unknown>): Promise<unknown> => {
@@ -37,8 +37,8 @@ const mocks = vi.hoisted(() => ({
   notify: vi.fn()
 }))
 
-vi.mock('@hermes/plugin-sdk', async importOriginal => {
-  const sdk = await importOriginal<typeof HermesSdk>()
+vi.mock('@noone/plugin-sdk', async importOriginal => {
+  const sdk = await importOriginal<typeof AgentSdk>()
 
   return {
     ...sdk,
@@ -119,8 +119,8 @@ it('localizes MCP setup actions while retaining the profile, preset and environm
   const zh = translateBotsIn('zh')
   fireEvent.click(await screen.findByRole('button', { name: zh('tools.setUp') }))
   expect(await screen.findByPlaceholderText('MY_SERVER_TOKEN')).toBeTruthy()
-  await act(() => i18n.setLocale('zh-hant'))
-  expect(screen.getByRole('button', { name: translateBotsIn('zh-hant')('tools.saveTest') })).toBeTruthy()
+  await act(() => i18n.setLocale('hi'))
+  expect(screen.getByRole('button', { name: translateBotsIn('hi')('tools.saveTest') })).toBeTruthy()
   expect(mocks.request).toHaveBeenCalledWith('mcp.servers.add', {
     profile: 'writer',
     name: 'my-server',

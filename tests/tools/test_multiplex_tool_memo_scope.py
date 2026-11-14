@@ -10,7 +10,7 @@ import json
 
 import pytest
 
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 
 @pytest.fixture
@@ -28,11 +28,11 @@ def two_profiles(tmp_path, monkeypatch):
 
 
 def _under(home, fn):
-    token = set_hermes_home_override(str(home))
+    token = set_agent_home_override(str(home))
     try:
         return fn()
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def test_checkpoint_and_snapshot_paths_follow_active_profile(two_profiles):

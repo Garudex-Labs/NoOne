@@ -1,27 +1,42 @@
 ---
-sidebar_position: 11
 title: "Automate Anything with Cron"
-description: "Real-world automation patterns using Hermes cron — monitoring, reports, pipelines, and multi-skill workflows"
+description: "Real-world automation patterns using the agent cron — monitoring, reports, pipelines, and multi-skill workflows"
 ---
 
-# Automate Anything with Cron
+# Automate Anything with Cron {#automate-anything-with-cron}
 
 The [daily briefing bot tutorial](./daily-briefing-bot.md) covers the basics. This guide goes further — five real-world automation patterns you can adapt for your own workflows.
 
 For the full feature reference, see [Scheduled Tasks (Cron)](../user-guide/features/cron.md).
 
-:::info Key Concept
-Cron jobs run in fresh agent sessions with no memory of your current chat. Prompts must be **completely self-contained** — include everything the agent needs to know.
-:::
+<Info>
 
-:::tip Don't need the LLM? You have two zero-token options.
-- **Recurring watchdog** where the script already produces the exact message (memory alerts, disk alerts, heartbeats): use [script-only cron jobs](./cron-script-only.md). Same scheduler, no LLM. You can ask Hermes to set one up for you in chat — the `cronjob_manage` tool knows when to pick `no_agent=True` and writes the script for you.
-- **One-shot from a script that's already running** (CI step, post-commit hook, deploy script, externally-scheduled monitor): use [`hermes send`](./pipe-script-output.md) to pipe stdout or a file straight to Telegram / Discord / Slack / etc. without setting up a cron entry.
-:::
+<div className="doc-callout-title">
+
+Key Concept
+
+</div>
+
+Cron jobs run in fresh agent sessions with no memory of your current chat. Prompts must be **completely self-contained** — include everything the agent needs to know.
+
+</Info>
+
+<Tip>
+
+<div className="doc-callout-title">
+
+Don't need the LLM? You have two zero-token options.
+
+</div>
+
+- **Recurring watchdog** where the script already produces the exact message (memory alerts, disk alerts, heartbeats): use [script-only cron jobs](./cron-script-only.md). Same scheduler, no LLM. You can ask {{app-name}} to set one up for you in chat — the `cronjob_manage` tool knows when to pick `no_agent=True` and writes the script for you.
+- **One-shot from a script that's already running** (CI step, post-commit hook, deploy script, externally-scheduled monitor): use [`noone send`](./pipe-script-output.md) to pipe stdout or a file straight to Telegram / Discord / Slack / etc. without setting up a cron entry.
+
+</Tip>
 
 ---
 
-## Pattern 1: Website Change Monitor
+## Pattern 1: Website Change Monitor {#pattern-1-website-change-monitor}
 
 Watch a URL for changes and get notified only when something is different.
 
@@ -70,17 +85,33 @@ Set up the cron job:
 /cron add "every 1h" "If the script output says CHANGE DETECTED, summarize what changed on the page and why it might matter. If it says NO_CHANGE, respond with just [SILENT]." --script ~/.hermes/scripts/watch-site.py --name "Pricing monitor" --deliver telegram
 ```
 
-:::tip The [SILENT] Trick
-For cron monitoring jobs, instruct the agent to respond with only `[SILENT]` when nothing changed. Cron delivery treats `[SILENT]` as the quiet marker, so you only get notified when something actually happens — no spam on quiet hours.
-:::
+<Tip>
 
-:::tip Keeping failure notices out of shared channels
-`[SILENT]` only applies to successful runs — when a job hard-fails, the engine posts a `⚠️ Cron 'X' failed…` notice to the job's delivery target. For jobs that deliver into busy shared channels, set `--failure-deliver local` to suppress those notices entirely (run state stays visible in `hermes cron list` and run history), or point failures at an ops channel with `--failure-deliver slack:C_OPS`. Same grammar as `--deliver`; omit it and failures follow `--deliver` as before.
-:::
+<div className="doc-callout-title">
+
+The [SILENT] Trick
+
+</div>
+
+For cron monitoring jobs, instruct the agent to respond with only `[SILENT]` when nothing changed. Cron delivery treats `[SILENT]` as the quiet marker, so you only get notified when something actually happens — no spam on quiet hours.
+
+</Tip>
+
+<Tip>
+
+<div className="doc-callout-title">
+
+Keeping failure notices out of shared channels
+
+</div>
+
+`[SILENT]` only applies to successful runs — when a job hard-fails, the engine posts a `⚠️ Cron 'X' failed…` notice to the job's delivery target. For jobs that deliver into busy shared channels, set `--failure-deliver local` to suppress those notices entirely (run state stays visible in `noone cron list` and run history), or point failures at an ops channel with `--failure-deliver slack:C_OPS`. Same grammar as `--deliver`; omit it and failures follow `--deliver` as before.
+
+</Tip>
 
 ---
 
-## Pattern 2: Weekly Report
+## Pattern 2: Weekly Report {#pattern-2-weekly-report}
 
 Compile information from multiple sources into a formatted summary. This runs once a week and delivers to your home channel.
 
@@ -98,7 +129,7 @@ Keep it under 500 words — highlight only what matters." --name "Weekly AI dige
 From the CLI:
 
 ```bash
-hermes cron create "0 9 * * 1" \
+noone cron create "0 9 * * 1" \
   "Generate a weekly report covering the top AI news, trending ML GitHub repos, and most-discussed HN posts. Format with sections, include links, keep under 500 words." \
   --name "Weekly AI digest" \
   --deliver telegram
@@ -108,31 +139,39 @@ The `0 9 * * 1` is a standard cron expression: 9:00 AM every Monday.
 
 ---
 
-## Pattern 3: GitHub Repository Watcher
+## Pattern 3: GitHub Repository Watcher {#pattern-3-github-repository-watcher}
 
 Monitor a repository for new issues, PRs, or releases.
 
 ```bash
-/cron add "every 6h" "Check the GitHub repository NousResearch/hermes-agent for:
+/cron add "every 6h" "Check the GitHub repository Garudex-Labs/NoOne for:
 - New issues opened in the last 6 hours
 - New PRs opened or merged in the last 6 hours
 - Any new releases
 
 Use the terminal to run gh commands:
-  gh issue list --repo NousResearch/hermes-agent --state open --json number,title,author,createdAt --limit 10
-  gh pr list --repo NousResearch/hermes-agent --state all --json number,title,author,createdAt,mergedAt --limit 10
+  gh issue list --repo Garudex-Labs/NoOne --state open --json number,title,author,createdAt --limit 10
+  gh pr list --repo Garudex-Labs/NoOne --state all --json number,title,author,createdAt,mergedAt --limit 10
 
 Filter to only items from the last 6 hours. If nothing new, respond with [SILENT].
 Otherwise, provide a concise summary of the activity." --name "Repo watcher" --deliver discord
 ```
 
-:::warning Self-Contained Prompts
+<Warning>
+
+<div className="doc-callout-title">
+
+Self-Contained Prompts
+
+</div>
+
 Notice how the prompt includes the exact `gh` commands. The cron agent has no conversation history from previous runs — spell everything out. (Persistent memory does load, so durable preferences saved to MEMORY.md carry over, but don't rely on it for job-critical details.)
-:::
+
+</Warning>
 
 ---
 
-## Pattern 4: Data Collection Pipeline
+## Pattern 4: Data Collection Pipeline {#pattern-4-data-collection-pipeline}
 
 Scrape data at regular intervals, save to files, and detect trends over time. This pattern combines a script (for collection) with the agent (for analysis).
 
@@ -182,7 +221,7 @@ The script does the mechanical collection; the agent adds the reasoning layer.
 
 ---
 
-## Pattern 5: Multi-Skill Workflow
+## Pattern 5: Multi-Skill Workflow {#pattern-5-multi-skill-workflow}
 
 Chain skills together for complex scheduled tasks. Skills are loaded in order before the prompt executes.
 
@@ -211,7 +250,7 @@ Skills are loaded in order — `arxiv` first (teaches the agent how to search pa
 
 ---
 
-## Managing Your Jobs
+## Managing Your Jobs {#managing-your-jobs}
 
 ```bash
 # List all active jobs
@@ -237,7 +276,7 @@ Skills are loaded in order — `arxiv` first (teaches the agent how to search pa
 
 ---
 
-## Delivery Targets
+## Delivery Targets {#delivery-targets}
 
 The `--deliver` flag controls where results go:
 
@@ -253,7 +292,7 @@ The `--deliver` flag controls where results go:
 | Bot Chat | `--deliver bot-chat` | Inject output into this profile's canonical Bot Chat — the bot reads it and responds |
 | Bot Chat (named) | `--deliver bot-chat:research` | Another local profile's Bot Chat |
 
-### Bot Chat delivery
+### Bot Chat delivery {#bot-chat-delivery}
 
 `bot-chat` targets deliver the job's output **into a profile's canonical "Bot
 Chat" session as a real message** — the bot receives it like any other message,
@@ -264,7 +303,7 @@ instead of just having it archived in Run history.
 Things to know:
 
 - **Machine-local.** The profile must exist on the machine running the
-  scheduler (`hermes profile list`). Names are validated at create time;
+  scheduler (`noone profile list`). Names are validated at create time;
   profiles on other gateways/machines cannot be targeted.
 - **Costs a bot turn.** Each delivery runs a full agent turn in the target
   bot's Bot Chat — budget accordingly for high-frequency jobs.
@@ -275,7 +314,7 @@ Things to know:
 
 ---
 
-## Tips
+## Tips {#tips}
 
 **Make prompts self-contained.** The agent in a cron job has no memory of your conversations. Include URLs, repo names, format preferences, and delivery instructions directly in the prompt.
 

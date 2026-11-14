@@ -41,10 +41,6 @@ def _episode(agent: Any, provider: str, entry_id: Optional[str]) -> dict[str, An
     return episode
 
 
-def nous_pool_refreshed_this_turn(agent: Any) -> bool:
-    """True once the pool spent this turn's forced Nous refresh (the singleton path must not re-POST)."""
-    counts = getattr(agent, "_auth_pool_refresh_counts", None) or {}
-    return any(key[0] == "nous" and state.get("refreshes") for key, state in counts.items())
 
 
 def _interruptible_wait(agent: Any, seconds: float) -> bool:
@@ -117,17 +113,6 @@ def recover_auth_failure(agent, pool, *, status_code, has_retried_429, error_con
     provider = agent.provider
     # Only a 401 is the "valid key refused" shape worth backing off on; a non-entitlement 403
     # keeps the capped-refresh path and fails fast.
-    nous = provider == "nous" and status_code == 401
-    entry_id = credential_id
-    if nous:
-        found = _entry_for(pool, credential_id, api_key_hint)
-        entry_id = getattr(found, "id", None) or credential_id
-        episode = _episode(agent, provider, entry_id)
-        if episode["refreshes"] >= 1:
-            # The one forced refresh of this episode already happened: never re-redeem the grant.
-            return _retry_after_backoff(
-                agent, pool, episode, failed_key=api_key_hint, entry_id=entry_id,
-                credential_id=credential_id, has_retried_429=has_retried_429)
     # Refresh the entry that supplied the failing key, not current(): refreshing a healthy entry
     # burns its single-use refresh token for a failure it never had.
     refresh_kwargs = {"api_key_hint": api_key_hint}
@@ -138,16 +123,7 @@ def recover_auth_failure(agent, pool, *, status_code, has_retried_429, error_con
         # Refresh failed; rotate (the failed entry is already marked exhausted).
         return (True, False) if rotate_and_swap(401, "auth refresh failed") else (False, has_retried_429)
     refreshed_id = getattr(refreshed, "id", None)
-    if nous:
-        episode = _episode(agent, provider, refreshed_id or entry_id)
-        episode["refreshes"] += 1
-        if api_key_hint and getattr(refreshed, "runtime_api_key", None) == api_key_hint:
-            # The "refresh" handed back the bearer that just failed: replaying it at once is
-            # the 1.5 s give-up; it is a valid key the server is refusing, so back off instead.
-            return _retry_after_backoff(
-                agent, pool, episode, failed_key=api_key_hint, entry_id=refreshed_id,
-                credential_id=credential_id, has_retried_429=has_retried_429)
-    elif refreshed_id is not None:
+    if refreshed_id is not None:
         # try_refresh_matching() reports success even when upstream keeps rejecting; cap same-entry
         # refreshes so a single-entry pool falls through to fallback.
         state = _episode(agent, provider, refreshed_id)

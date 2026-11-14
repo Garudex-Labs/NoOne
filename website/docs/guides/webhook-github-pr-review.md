@@ -1,40 +1,63 @@
 ---
-sidebar_position: 11
-sidebar_label: "GitHub PR Reviews via Webhook"
+sidebarTitle: "GitHub PR Reviews via Webhook"
 title: "Automated GitHub PR Comments with Webhooks"
-description: "Connect Hermes to GitHub so it automatically fetches PR diffs, reviews code changes, and posts comments — triggered by webhooks with no manual prompting"
+description: "Connect the agent to GitHub so it automatically fetches PR diffs, reviews code changes, and posts comments — triggered by webhooks with no manual prompting"
 ---
 
-# Automated GitHub PR Comments with Webhooks
+# Automated GitHub PR Comments with Webhooks {#automated-github-pr-comments-with-webhooks}
 
-This guide walks you through connecting Hermes Agent to GitHub so it automatically fetches a pull request's diff, analyzes the code changes, and posts a comment — triggered by a webhook event with no manual prompting.
+This guide walks you through connecting {{app-name}} to GitHub so it automatically fetches a pull request's diff, analyzes the code changes, and posts a comment — triggered by a webhook event with no manual prompting.
 
-When a PR is opened or updated, GitHub sends a webhook POST to your Hermes instance. Hermes runs the agent with a prompt that instructs it to retrieve the diff via the `gh` CLI, and the response is posted back to the PR thread.
+When a PR is opened or updated, GitHub sends a webhook POST to your {{app-name}} instance. {{app-name}} runs the agent with a prompt that instructs it to retrieve the diff via the `gh` CLI, and the response is posted back to the PR thread.
 
-:::tip Want a simpler setup without a public endpoint?
+<Tip>
+
+<div className="doc-callout-title">
+
+Want a simpler setup without a public endpoint?
+
+</div>
+
 If you don't have a public URL or just want to get started quickly, check out [Build a GitHub PR Review Agent](./github-pr-review-agent.md) — uses cron jobs to poll for PRs on a schedule, works behind NAT and firewalls.
-:::
 
-:::info Reference docs
+</Tip>
+
+<Info>
+
+<div className="doc-callout-title">
+
+Reference docs
+
+</div>
+
 For the full webhook platform reference (all config options, delivery types, dynamic subscriptions, security model) see [Webhooks](../user-guide/messaging/webhooks.md).
-:::
 
-:::warning Prompt injection risk
+</Info>
+
+<Warning>
+
+<div className="doc-callout-title">
+
+Prompt injection risk
+
+</div>
+
 Webhook payloads contain attacker-controlled data — PR titles, commit messages, and descriptions can contain malicious instructions. When your webhook endpoint is exposed to the internet, run the gateway in a sandboxed environment (Docker, SSH backend). See the [security section](#security-notes) below.
-:::
+
+</Warning>
 
 ---
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
-- Hermes Agent installed and running (`hermes gateway`)
+- {{app-name}} installed and running (`noone gateway`)
 - [`gh` CLI](https://cli.github.com/) installed and authenticated on the gateway host (`gh auth login`)
-- A publicly reachable URL for your Hermes instance (see [Local testing with ngrok](#local-testing-with-ngrok) if running locally)
+- A publicly reachable URL for your {{app-name}} instance (see [Local testing with ngrok](#local-testing-with-ngrok) if running locally)
 - Admin access to the GitHub repository (required to manage webhooks)
 
 ---
 
-## Step 1 — Enable the webhook platform
+## Step 1 — Enable the webhook platform {#step-1--enable-the-webhook-platform}
 
 Add the following to your `~/.hermes/config.yaml`:
 
@@ -88,16 +111,24 @@ platforms:
 | `deliver_extra.repo` | Resolves to e.g. `org/repo` from the payload. |
 | `deliver_extra.pr_number` | Resolves to the PR number from the payload. |
 
-:::note The payload does not contain code
+<Note>
+
+<div className="doc-callout-title">
+
+The payload does not contain code
+
+</div>
+
 The GitHub webhook payload includes PR metadata (title, description, branch names, URLs) but **not the diff**. The prompt above instructs the agent to run `gh pr diff` to fetch the actual changes. The default `hermes-webhook` toolset is deliberately constrained (web search/extract, vision, clarify — **no terminal**) because webhook payloads can carry untrusted content. To let this route run `gh`, add a per-route toolset grant: `toolsets: ["terminal", "web"]` on the route config — see [Per-route toolsets](../user-guide/messaging/webhooks.md#per-route-toolsets).
-:::
+
+</Note>
 
 ---
 
-## Step 2 — Start the gateway
+## Step 2 — Start the gateway {#step-2--start-the-gateway}
 
 ```bash
-hermes gateway
+noone gateway
 ```
 
 You should see:
@@ -115,7 +146,7 @@ curl http://localhost:8644/health
 
 ---
 
-## Step 3 — Register the webhook on GitHub
+## Step 3 — Register the webhook on GitHub {#step-3--register-the-webhook-on-github}
 
 1. Go to your repository → **Settings** → **Webhooks** → **Add webhook**
 2. Fill in:
@@ -129,9 +160,9 @@ GitHub will immediately send a `ping` event to confirm the connection. It is saf
 
 ---
 
-## Step 4 — Open a test PR
+## Step 4 — Open a test PR {#step-4--open-a-test-pr}
 
-Create a branch, push a change, and open a PR. Within 30–90 seconds (depending on PR size and model), Hermes should post a review comment.
+Create a branch, push a change, and open a PR. Within 30–90 seconds (depending on PR size and model), {{app-name}} should post a review comment.
 
 To follow the agent's progress in real time:
 
@@ -141,9 +172,9 @@ tail -f "${HERMES_HOME:-$HOME/.hermes}/logs/gateway.log"
 
 ---
 
-## Local testing with ngrok
+## Local testing with ngrok {#local-testing-with-ngrok}
 
-If Hermes is running on your laptop, use [ngrok](https://ngrok.com/) to expose it:
+If {{app-name}} is running on your laptop, use [ngrok](https://ngrok.com/) to expose it:
 
 ```bash
 ngrok http 8644
@@ -153,9 +184,17 @@ Copy the `https://...ngrok-free.app` URL and use it as your GitHub Payload URL. 
 
 You can smoke-test a static route directly with `curl` — no GitHub account or real PR needed.
 
-:::tip Use `deliver: log` when testing locally
+<Tip>
+
+<div className="doc-callout-title">
+
+Use `deliver: log` when testing locally
+
+</div>
+
 Change `deliver: github_comment` to `deliver: log` in your config while testing. Otherwise the agent will attempt to post a comment to the fake `org/repo#99` repo in the test payload, which will fail. Switch back to `deliver: github_comment` once you're satisfied with the prompt output.
-:::
+
+</Tip>
 
 ```bash
 SECRET="your-webhook-secret-here"
@@ -175,19 +214,34 @@ Then watch the agent run:
 tail -f "${HERMES_HOME:-$HOME/.hermes}/logs/gateway.log"
 ```
 
-:::note
+<Note>
+
+<div className="doc-callout-title">
+
+NOTE
+
+</div>
+
 `hermes webhook test <name>` only works for **dynamic subscriptions** created with `hermes webhook subscribe`. It does not read routes from `config.yaml`.
-:::
+
+</Note>
 
 ---
 
-## Filtering to specific actions
+## Filtering to specific actions {#filtering-to-specific-actions}
 
 GitHub sends `pull_request` events for many actions: `opened`, `synchronize`, `reopened`, `closed`, `labeled`, etc. The `events` list filters by the `X-GitHub-Event` header value, and route-level `filters` can narrow by payload fields such as `action`.
 
 The prompt in Step 1 already handles this by instructing the agent to stop early for `closed` and `labeled` events.
 
-:::warning The agent still runs and consumes tokens
+<Warning>
+
+<div className="doc-callout-title">
+
+The agent still runs and consumes tokens
+
+</div>
+
 The "stop here" instruction prevents a meaningful review, but the agent still runs to completion for every `pull_request` event regardless of action. Prefer filtering before the agent wakes:
 
 ```yaml
@@ -197,15 +251,16 @@ filters:
 ```
 
 For high-volume repositories, you can still filter upstream with a GitHub Actions workflow that calls your webhook URL conditionally.
-:::
+
+</Warning>
 
 > There is no Jinja2 or conditional template syntax. `{field}` and `{nested.field}` are the only substitutions supported. Anything else is passed verbatim to the agent.
 
 ---
 
-## Using a skill for consistent review style
+## Using a skill for consistent review style {#using-a-skill-for-consistent-review-style}
 
-Load a [Hermes skill](../user-guide/features/skills.md) to give the agent a consistent review persona. Add `skills` to your route inside `platforms.webhook.extra.routes` in `config.yaml`:
+Load a [{{app-name}} skill](../user-guide/features/skills.md) to give the agent a consistent review persona. Add `skills` to your route inside `platforms.webhook.extra.routes` in `config.yaml`:
 
 ```yaml
 platforms:
@@ -236,11 +291,11 @@ platforms:
             pr_number: "{number}"
 ```
 
-> **Note:** Only the first skill in the list that is found is loaded. Hermes does not stack multiple skills — subsequent entries are ignored.
+> **Note:** Only the first skill in the list that is found is loaded. {{app-name}} does not stack multiple skills — subsequent entries are ignored.
 
 ---
 
-## Sending responses to Slack or Discord instead
+## Sending responses to Slack or Discord instead {#sending-responses-to-slack-or-discord-instead}
 
 Replace the `deliver` and `deliver_extra` fields inside your route with your target platform:
 
@@ -264,7 +319,7 @@ Valid `deliver` values: `log` · `github_comment` · `telegram` · `discord` · 
 
 ---
 
-## GitLab support
+## GitLab support {#gitlab-support}
 
 The same adapter works with GitLab. GitLab authenticates with `X-Gitlab-Token` (plain string match, not HMAC) or, when a signing token is configured, a Standard Webhooks `webhook-signature`. Change the route's pin to `signature: gitlab`: a route left at `signature: github` rejects every GitLab delivery with `401`, even with the correct secret.
 
@@ -276,11 +331,11 @@ events:
   - Merge Request Hook
 ```
 
-GitLab payload fields differ from GitHub's — e.g. `{object_attributes.title}` for the MR title and `{object_attributes.iid}` for the MR number. The easiest way to discover the full payload structure is GitLab's **Test** button in your webhook settings, combined with the **Recent Deliveries** log. Alternatively, omit `prompt` from your route config — Hermes will then pass the full payload as formatted JSON directly to the agent, and the agent's response (visible in the gateway log with `deliver: log`) will describe its structure.
+GitLab payload fields differ from GitHub's — e.g. `{object_attributes.title}` for the MR title and `{object_attributes.iid}` for the MR number. The easiest way to discover the full payload structure is GitLab's **Test** button in your webhook settings, combined with the **Recent Deliveries** log. Alternatively, omit `prompt` from your route config — {{app-name}} will then pass the full payload as formatted JSON directly to the agent, and the agent's response (visible in the gateway log with `deliver: log`) will describe its structure.
 
 ---
 
-## Security notes
+## Security notes {#security-notes}
 
 - **Never use `INSECURE_NO_AUTH`** in production — it disables signature validation entirely. It is only for local development.
 - **Rotate your webhook secret** periodically and update it in both GitHub (webhook settings) and your `config.yaml`.
@@ -290,7 +345,7 @@ GitLab payload fields differ from GitHub's — e.g. `{object_attributes.title}` 
 
 ---
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Symptom | Check |
 |---|---|
@@ -307,7 +362,7 @@ GitLab payload fields differ from GitHub's — e.g. `{object_attributes.title}` 
 
 ---
 
-## Full config reference
+## Full config reference {#full-config-reference}
 
 ```yaml
 platforms:
@@ -331,7 +386,7 @@ platforms:
 
 ---
 
-## What's Next?
+## What's Next? {#whats-next}
 
 - **[Cron-Based PR Reviews](./github-pr-review-agent.md)** — poll for PRs on a schedule, no public endpoint needed
 - **[Webhook Reference](../user-guide/messaging/webhooks.md)** — full config reference for the webhook platform

@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Plus, X } from '@noone/ui/icons'
 import { Button } from '@nous-research/ui/ui/components/button'
 import { Input } from '@nous-research/ui/ui/components/input'
+import { useState } from 'react'
 
 interface Row {
   id: number

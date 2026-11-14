@@ -1,10 +1,10 @@
-#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-hermes-env" python3 "$0" "$@"'
+#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-agent-env" python3 "$0" "$@"'
 """Build the Hermes Skills Index — a centralized JSON catalog of all skills.
 
 This script crawls every skill source (skills.sh, GitHub taps, official,
 clawhub, lobehub) and writes a JSON index with resolved
 GitHub paths. The index is served as a static file on the docs site so that
-`hermes skills search/install` can use it without hitting the GitHub API.
+`noone skills search/install` can use it without hitting the GitHub API.
 
 Usage:
     # Local (uses gh CLI or GITHUB_TOKEN for auth)
@@ -13,7 +13,7 @@ Usage:
     # CI (set GITHUB_TOKEN as secret)
     GITHUB_TOKEN=ghp_... python scripts/build_skills_index.py
 
-Output: website/static/api/skills-index.json
+Output: website/docs/api/skills-index.json
 """
 
 import json
@@ -40,7 +40,7 @@ from tools.skills_hub_skillssh import SkillsShSource
 from tools.skills_hub_sources import BrowseShSource, LobeHubSource, WellKnownSkillSource
 import httpx
 
-OUTPUT_PATH = os.path.join(REPO_ROOT, "website", "static", "api", "skills-index.json")
+OUTPUT_PATH = os.path.join(REPO_ROOT, "website", "docs", "api", "skills-index.json")
 INDEX_VERSION = 1
 CLAWHUB_ENRICH_BUDGET_SECONDS = 480
 # Per-repo cap on contents/<candidate>/SKILL.md probes when the recursive tree is truncated.

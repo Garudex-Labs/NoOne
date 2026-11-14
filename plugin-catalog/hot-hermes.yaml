@@ -12,7 +12,7 @@ category: desktop
 requires_hermes: ">=0.23.0"
 version: "0.1.2"
 platforms: []
-image: https://raw.githubusercontent.com/firetussin/hermes-hot-hermes/e5bba328bd2ed247bc07f314de85d7acf92cad3d/docs/hot-hermes.png
+image: https://raw.githubusercontent.com/firetussin/hermes-hot-hermes/e5bba328bd2ed247bc07f314de85d7acf92cad3d/docs/hot-agent.png
 screenshots:
   - https://raw.githubusercontent.com/firetussin/hermes-hot-hermes/e5bba328bd2ed247bc07f314de85d7acf92cad3d/preview/shared-gateway.png
   - https://raw.githubusercontent.com/firetussin/hermes-hot-hermes/e5bba328bd2ed247bc07f314de85d7acf92cad3d/preview/light.png

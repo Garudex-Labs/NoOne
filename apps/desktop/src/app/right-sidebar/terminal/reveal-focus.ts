@@ -1,6 +1,7 @@
+import { Terminal } from '@noone/ui/icons'
+
 import { paletteToggle } from '@/app/command-palette/contrib'
 import { isPaneVisible, togglePaneVisible } from '@/components/pane-shell/tree/store'
-import { Terminal } from '@/lib/icons'
 import { isFocusWithin } from '@/lib/keybinds/combo'
 import { trackArea } from '@/store/desktop-metrics'
 

@@ -5,13 +5,13 @@ env through ``_build_child_env`` so the security rules (secret scrubbing,
 PYTHONPATH hygiene, UTF-8 forcing, TZ) cannot drift between them.
 """
 
+from agent_cli.application_identity import app_text
 import logging
 import os
 import platform
 import subprocess
 import sys
 from typing import Dict
-
 # Logger name kept as the origin module's so existing log expectations hold.
 logger = logging.getLogger("tools.code_execution_tool")
 
@@ -122,7 +122,7 @@ def _scrub_child_env(source_env, is_passthrough=None, is_windows=None, toolchain
 def _build_child_env(*, rpc_endpoint: str, rpc_token: str, tmpdir: str,
                      child_python: str) -> dict[str, str]:
     """Build the scrubbed child environment both execution paths share."""
-    from hermes_constants import apply_scratch_tmp_env, apply_subprocess_home_env, get_hermes_home_override
+    from agent_constants import apply_scratch_tmp_env, apply_subprocess_home_env, get_agent_home_override
     from agent.session_client_env import tool_env, toolchain_environ
     # A local session's client toolchain replaces the daemon's PATH / venv, then the whole scrub (secret
     # names, delegated-child restrictions) runs over the merged environment.
@@ -135,8 +135,8 @@ def _build_child_env(*, rpc_endpoint: str, rpc_token: str, tmpdir: str,
     child_env["PYTHONIOENCODING"] = "utf-8"
     child_env["PYTHONUTF8"] = "1"
     # Only TZ reaches the child; HERMES_TIMEZONE is an internal setting (and under the multiplexed
-    # gateway holds only the default profile's value — hermes_time resolves the routed profile's).
-    from hermes_time import get_timezone_name
+    # gateway holds only the default profile's value — agent_time resolves the routed profile's).
+    from agent_time import get_timezone_name
 
     _tz_name = get_timezone_name()
     # Windows CPython does not support IANA names in TZ.  Leaving TZ unset
@@ -150,7 +150,7 @@ def _build_child_env(*, rpc_endpoint: str, rpc_token: str, tmpdir: str,
     # The scrub above passed the stale default through; rewrite it so skill scripts see the
     # active profile's home — the same per-turn rewrite apply_subprocess_home_env does for HOME.
     # No override (dedicated per-profile process) → leave the inherited value untouched.
-    _home_override = get_hermes_home_override()
+    _home_override = get_agent_home_override()
     if _home_override:
         child_env["HERMES_HOME"] = _home_override
         apply_scratch_tmp_env(child_env)  # TMPDIR follows the routed home, like HOME does
@@ -185,10 +185,10 @@ def _build_child_env(*, rpc_endpoint: str, rpc_token: str, tmpdir: str,
     if _uses_hermes_python_environment(child_python):
         _pp_parts.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     elif child_python not in _external_env_logged:
-        # Surface once per interpreter so "import hermes_constants fails" is diagnosable.
+        # Surface once per interpreter so "import agent_constants fails" is diagnosable.
         _external_env_logged.add(child_python)
-        logger.info("execute_code: child interpreter %s is outside the Hermes "
-                    "environment; hermes root omitted from PYTHONPATH", child_python)
+        logger.info(app_text("execute_code: child interpreter %s is outside the {app_name} "
+                    "environment; hermes root omitted from PYTHONPATH", percent_format=True), child_python)
     if _existing_pp:
         _pp_parts.append(_existing_pp)
     child_env["PYTHONPATH"] = os.pathsep.join(_pp_parts)

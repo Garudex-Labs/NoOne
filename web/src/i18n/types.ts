@@ -1,20 +1,12 @@
 export type Locale =
   | "en"
   | "zh"
-  | "zh-hant"
+  | "hi"
   | "ja"
   | "de"
   | "es"
   | "fr"
-  | "tr"
-  | "uk"
-  | "af"
   | "ko"
-  | "it"
-  | "ga"
-  | "pt"
-  | "ru"
-  | "hu"
   | "ar";
 
 export interface Translations {

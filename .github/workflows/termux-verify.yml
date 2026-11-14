@@ -70,8 +70,8 @@ jobs:
             tests/pm/test_stage_only.py tests/pm/test_deb_safety.py tests/scripts/test_stage_apt_repo.py \
             tests/scripts/test_run_tests_shell.py
 
-  tui:
-    name: Prebuilt TUI checks
+  frontend:
+    name: Retained frontend checks
     runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 15
     steps:
@@ -89,12 +89,10 @@ jobs:
       # tests-js builds desktop fixtures with apps/desktop's own toolchain (vite,
       # node-pty): pnpm installs only the selected workspaces, so select it too.
       - name: Install the locked JS workspace
-        run: pnpm install --frozen-lockfile --filter "{./ui-tui}..." --filter "{./tests-js}..." --filter "{./apps/desktop}..."
-      - name: Check and bundle the TUI
+        run: pnpm install --frozen-lockfile --filter "{./tests-js}..." --filter "{./apps/desktop}..."
+      - name: Check retained JS packages
         run: |
           pnpm --dir tests-js run check
-          pnpm --dir ui-tui run check
-          pnpm --dir ui-tui run build
 
   # A job-level `if` cannot read `secrets`, so the gate is a job that exports
   # whether the release-signing environment is provisioned. Without R2 the

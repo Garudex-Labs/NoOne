@@ -2,11 +2,11 @@
 //
 // This is deliberately NOT the in-app terminal pane: the point of the verb is
 // to hand a session to the terminal the user already lives in, running
-// `hermes --tui --resume <id>` there. Two problems have to be solved for that
+// `noone --cli --resume <id>` there. Two problems have to be solved for that
 // to work anywhere:
 //
 //  1. WHAT to run. The desktop's Hermes runtime is often a venv Python invoked
-//     as `python -m hermes_cli.main`, not a `hermes` on PATH — so the command
+//     as `python -m agent_cli.main`, not a `hermes` on PATH — so the command
 //     and its PYTHONPATH have to be carried over verbatim. We write them into a
 //     small launcher script instead of trying to quote a nested command through
 //     a terminal emulator's `-e` argument, which every emulator parses
@@ -28,12 +28,12 @@
 import { backendProfileArg } from './profile-id-guard'
 
 /** Argv for resuming a session in the TUI, profile-pinned when we know it. */
-export function tuiResumeArgs(sessionId: string, profile?: string): string[] {
+export function cliResumeArgs(sessionId: string, profile?: string): string[] {
   // A non-slug profile value must never cross into spawn argv (#88842).
   const pinned = backendProfileArg(profile)
   const head = pinned ? ['--profile', pinned] : []
 
-  return [...head, '--tui', '--resume', sessionId]
+  return [...head, '--cli', '--resume', sessionId]
 }
 
 /** Single-quote a value for /bin/sh (the POSIX launcher script). */

@@ -1,39 +1,46 @@
 ---
-sidebar_position: 2
 title: "Adding Tools"
-description: "How to add a new tool to Hermes Agent — schemas, handlers, registration, and toolsets"
+description: "How to add a new tool to the agent — schemas, handlers, registration, and toolsets"
 ---
 
-# Adding Tools
+# Adding Tools {#adding-tools}
 
 Before writing a tool, ask yourself: **should this be a [skill](creating-skills.md) instead?**
 
-:::warning Built-in Core Tools Only
-This page is for adding a **built-in Hermes tool** to the repository itself.
+<Warning>
+
+<div className="doc-callout-title">
+
+Built-in Core Tools Only
+
+</div>
+
+This page is for adding a **built-in {{app-name}} tool** to the repository itself.
 If you want a personal, project-local, or otherwise custom tool without
-modifying Hermes core, use the plugin route instead:
+modifying {{app-name}} core, use the plugin route instead:
 
 - [Plugins](../user-guide/features/plugins.md)
-- [Build a Hermes Plugin](./plugins/index.md)
+- [Build a {{app-name}} Plugin](./plugins/index.md)
 
 Default to plugins for most custom tool creation. Only follow this page when
 you explicitly want to ship a new built-in tool in `tools/` and `toolsets.py`.
-:::
+
+</Warning>
 
 Make it a **Skill** when the capability can be expressed as instructions + shell commands + existing tools (arXiv search, git workflows, Docker management, PDF processing).
 
 Make it a **Tool** when it requires end-to-end integration with API keys, custom processing logic, binary data handling, or streaming (browser automation, TTS, vision analysis).
 
-## Overview
+## Overview {#overview}
 
 Adding a tool touches **2 files**:
 
 1. **`tools/your_tool.py`** — handler, schema, check function, `registry.register()` call
-2. **`toolsets.py`** — add tool name to `_HERMES_CORE_TOOLS` (or a specific toolset)
+2. **`toolsets.py`** — add tool name to `_CORE_AGENT_TOOLS` (or a specific toolset)
 
 Any `tools/*.py` file with a top-level `registry.register()` call is auto-discovered at startup — no manual import list required.
 
-## Step 1: Create the Built-in Tool File
+## Step 1: Create the Built-in Tool File {#step-1-create-the-built-in-tool-file}
 
 Every tool file follows the same structure:
 
@@ -109,22 +116,30 @@ registry.register(
 )
 ```
 
-### Key Rules
+### Key Rules {#key-rules}
 
-:::danger Important
+<Danger>
+
+<div className="doc-callout-title">
+
+Important
+
+</div>
+
 - Handlers **MUST** return a JSON string (via `json.dumps()`), never raw dicts
 - Errors **MUST** be returned as `{"error": "message"}`, never raised as exceptions
 - The `check_fn` is called when building tool definitions — if it returns `False`, the tool is silently excluded
 - The `handler` receives `(args: dict, **kwargs)` where `args` is the LLM's tool call arguments
-:::
 
-## Step 2: Add the Built-in Tool to a Toolset
+</Danger>
+
+## Step 2: Add the Built-in Tool to a Toolset {#step-2-add-the-built-in-tool-to-a-toolset}
 
 In `toolsets.py`, add the tool name:
 
 ```python
 # If it should be available on all platforms (CLI + messaging):
-_HERMES_CORE_TOOLS = [
+_CORE_AGENT_TOOLS = [
     ...
     "weather",  # <-- add here
 ]
@@ -137,11 +152,11 @@ _HERMES_CORE_TOOLS = [
 },
 ```
 
-## ~~Step 3: Add Discovery Import~~ (No longer needed)
+## ~~Step 3: Add Discovery Import~~ (No longer needed) {#step-3-add-discovery-import-no-longer-needed}
 
 Tool modules with a top-level `registry.register()` call are auto-discovered by `discover_builtin_tools()` in `tools/registry.py`. No manual import list to maintain — just create your file in `tools/` and it's picked up at startup.
 
-## Async Handlers
+## Async Handlers {#async-handlers}
 
 If your handler needs async code, mark it with `is_async=True`:
 
@@ -163,7 +178,7 @@ registry.register(
 
 The registry handles async bridging transparently — you never call `asyncio.run()` yourself.
 
-## Handlers That Need task_id
+## Handlers That Need task_id {#handlers-that-need-task_id}
 
 Tools that manage per-session state receive `task_id` via `**kwargs`:
 
@@ -179,13 +194,13 @@ registry.register(
 )
 ```
 
-## Agent-Loop Intercepted Tools
+## Agent-Loop Intercepted Tools {#agent-loop-intercepted-tools}
 
 Some tools (`todo_list`, `memory`, `session_search`, `delegate_task`) need access to per-session agent state. These are intercepted by the agent loop (`agent/tool_executor.py`, called from `agent/conversation_loop.py`) before reaching the registry. The registry still holds their schemas, but `dispatch()` returns a fallback error if the intercept is bypassed.
 
-## Optional: Setup Wizard Integration
+## Optional: Setup Wizard Integration {#optional-setup-wizard-integration}
 
-If your tool requires an API key, add it to `hermes_cli/config.py`:
+If your tool requires an API key, add it to `agent_cli/config.py`:
 
 ```python
 OPTIONAL_ENV_VARS = {
@@ -200,12 +215,12 @@ OPTIONAL_ENV_VARS = {
 }
 ```
 
-## Checklist
+## Checklist {#checklist}
 
 - [ ] Tool file created with handler, schema, check function, and registration
 - [ ] Added to appropriate toolset in `toolsets.py`
 - [ ] Confirmed this really should be a built-in/core tool and not a plugin
 - [ ] Handler returns JSON strings, errors returned as `{"error": "..."}`
-- [ ] Optional: API key added to `OPTIONAL_ENV_VARS` in `hermes_cli/config.py`
+- [ ] Optional: API key added to `OPTIONAL_ENV_VARS` in `agent_cli/config.py`
 - [ ] Optional: Added to `toolset_distributions.py` for batch processing
-- [ ] Tested with `hermes chat -q "Use the weather tool for London"`
+- [ ] Tested with `noone chat -q "Use the weather tool for London"`

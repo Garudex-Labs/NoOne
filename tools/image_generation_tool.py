@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Image generation via FAL.ai (model picked in ``hermes tools``, persisted to ``image_gen.model``).
+"""Image generation via FAL.ai (model picked in ``noone tools``, persisted to ``image_gen.model``).
 
 ``_build_fal_payload()`` / ``_build_fal_edit_payload()`` translate unified inputs into the
 ``FAL_MODELS`` payload filtered to its ``supports`` whitelist so models never receive rejected
@@ -29,64 +29,22 @@ def _load_fal_client() -> Any:
 
 
 from tools.debug_helpers import DebugSession
-from tools.fal_common import (
-    _ManagedFalSyncClient, _extract_http_status, _managed_fal_billing_error,
-    _normalize_fal_queue_url_format, submit_managed_fal_with_rate_limit_retry, wait_fal_queue_result,
-)
+from tools.fal_common import _extract_http_status, wait_fal_queue_result
 from tools.image_generation_catalog import (
     DEFAULT_ASPECT_RATIO, DEFAULT_MODEL, FAL_MODELS, UPSCALER_CREATIVITY, UPSCALER_DEFAULT_PROMPT,
     UPSCALER_FACTOR, UPSCALER_GUIDANCE_SCALE, UPSCALER_MODEL, UPSCALER_NEGATIVE_PROMPT,
     UPSCALER_NUM_INFERENCE_STEPS, UPSCALER_RESEMBLANCE, UPSCALER_SAFETY_CHECKER, VALID_ASPECT_RATIOS,
 )
-from tools.managed_tool_gateway import resolve_managed_tool_gateway
-from tools.tool_backend_helpers import (
-    NOUS_MANAGED_PROVIDER, fal_key_is_configured, managed_nous_tools_enabled,
-    nous_tool_gateway_unavailable_message, read_selection, selection_error)
+from tools.tool_backend_helpers import fal_key_is_configured, read_selection, selection_error
 
 logger = logging.getLogger(__name__)
 
 _debug = DebugSession("image_tools", env_var="IMAGE_TOOLS_DEBUG")
-_managed_fal_client = None
-_managed_fal_client_config = None
-_managed_fal_client_lock = threading.Lock()
 
 
 # --- Managed FAL gateway (Nous Subscription) ---
-def _resolve_managed_fal_gateway():
-    """Managed gateway config for the stored `hermes tools` selection, or ``None`` for direct FAL.
-
-    ``"nous"`` (or legacy ``use_gateway: true``) → managed ONLY (unreachable = selection-naming
-    error, never a silent FAL_KEY fallback). Other stored provider → direct ONLY (missing FAL_KEY
-    = error naming the selection). Never configured → autodetect: direct if FAL_KEY, else managed.
-    """
-    selected = read_selection("image_gen")
-    if selected == NOUS_MANAGED_PROVIDER:
-        gateway = resolve_managed_tool_gateway("fal-queue")
-        if gateway is None:
-            raise ValueError(selection_error(
-                "image_gen", NOUS_MANAGED_PROVIDER,
-                "the Nous Tool Gateway is not available (not entitled or unreachable)"))
-        return gateway
-    if selected is not None:
-        if fal_key_is_configured():
-            return None
-        raise ValueError(selection_error("image_gen", selected, "FAL_KEY is not set"))
-    # Never-configured category: legacy credential autodetect (do NOT persist).
-    return None if fal_key_is_configured() else resolve_managed_tool_gateway("fal-queue")
 
 
-def _get_managed_fal_client(managed_gateway):
-    """Reuse the managed FAL client so its internal httpx.Client is not leaked per call."""
-    global _managed_fal_client, _managed_fal_client_config
-    client_config = (managed_gateway.gateway_origin.rstrip("/"), managed_gateway.nous_user_token)
-    with _managed_fal_client_lock:
-        if _managed_fal_client is None or _managed_fal_client_config != client_config:
-            # Resolved on this module so monkeypatching ``image_generation_tool.fal_client`` still applies.
-            _managed_fal_client = _ManagedFalSyncClient(
-                _load_fal_client(), key=managed_gateway.nous_user_token,
-                queue_run_origin=managed_gateway.gateway_origin)
-            _managed_fal_client_config = client_config
-        return _managed_fal_client
 
 
 class ImageGenerationInterrupted(Exception):
@@ -120,44 +78,15 @@ def _wait_fal_result(handler, *, poll_seconds: float = 0.5):
 
 
 def _submit_fal_request(model: str, arguments: dict[str, Any]):
-    """Submit a FAL request using direct credentials or the managed queue gateway."""
     _load_fal_client()
-    request_headers = {"x-idempotency-key": str(uuid.uuid4())}
-    managed_gateway = _resolve_managed_fal_gateway()
-    if managed_gateway is None:
-        return fal_client.submit(model, arguments=arguments, headers=request_headers)
-    try:
-        return submit_managed_fal_with_rate_limit_retry(
-            lambda headers: _get_managed_fal_client(managed_gateway).submit(
-                model, arguments=arguments, headers=headers),
-            what="image model", name=model)
-    except Exception as exc:
-        # A managed-gateway 4xx usually means the portal doesn't proxy this model
-        # (allowlist miss, billing gate): give remediation instead of a raw httpx error.
-        status = _extract_http_status(exc)
-        if status is not None and 400 <= status < 500:
-            billing = _managed_fal_billing_error(exc, "model")
-            if billing is not None:
-                raise ValueError(
-                    f"Nous Subscription gateway rejected model '{model}' (HTTP {status}): {billing}") from exc
-            gateway_message = ""
-            if status in {401, 402, 403}:
-                gateway_message = "\n\n" + nous_tool_gateway_unavailable_message(
-                    "managed FAL image generation", force_fresh=True)
-            raise ValueError(
-                f"Nous Subscription gateway rejected model '{model}' (HTTP {status}). This model "
-                f"may not yet be enabled on the Nous Portal's FAL proxy. Either:\n"
-                f"  • Set FAL_KEY in your environment to use FAL.ai directly, or\n"
-                f"  • Pick a different model via `hermes tools` → Image Generation."
-                f"{gateway_message}") from exc
-        raise
+    return fal_client.submit(model, arguments=arguments, headers={"x-idempotency-key": str(uuid.uuid4())})
 
 
 # --- Config readers, model resolution + payload construction ---
 def _read_image_gen_key(key: str) -> Optional[str]:
     """Return the stripped ``image_gen.<key>`` string from config.yaml, or None."""
     try:
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         cfg = load_config()
         section = cfg.get("image_gen") if isinstance(cfg, dict) else None
         value = section.get(key) if isinstance(section, dict) else None
@@ -189,7 +118,7 @@ def _read_configured_image_provider():
 def _plugin_provider_name() -> Optional[str]:
     """Configured provider that must go through the plugin registry; None for unset/fal/nous."""
     configured = _read_configured_image_provider()
-    if not configured or configured in ("fal", NOUS_MANAGED_PROVIDER):
+    if not configured:
         return None
     return configured
 
@@ -430,11 +359,13 @@ def _shrink_data_url(url: str, budget: int) -> str:
 
 def _prepare_fal_request(model_id, meta, prompt, aspect_ratio, seed, overrides, source_images):
     """Validate inputs and return ``(endpoint, arguments)``; raises ValueError with the user-facing message."""
+    from tools.tool_backend_helpers import read_selection
+    read_selection("image_gen")
     if not isinstance(prompt, str) or not prompt.strip():
         raise ValueError("Prompt is required and must be a non-empty string")
     # A stored-but-broken selection raises the selection-naming error from
     # _resolve_managed_fal_gateway(); only never-configured reports "no backend at all".
-    if not (fal_key_is_configured() or _resolve_managed_fal_gateway()):
+    if not fal_key_is_configured():
         raise ValueError(_build_no_backend_setup_message())
     edit_endpoint, display = meta.get("edit_endpoint"), meta.get("display", model_id)
     # Fail clearly rather than silently dropping sources and producing an unrelated picture.
@@ -442,7 +373,7 @@ def _prepare_fal_request(model_id, meta, prompt, aspect_ratio, seed, overrides, 
         raise ValueError(
             f"Model '{display}' ({model_id}) is not capable of image-to-image / editing. "
             f"Provide a text-only prompt (omit image_url), or switch to an edit-capable model "
-            f"via `hermes tools` → Image Generation.")
+            f"via `noone tools` → Image Generation.")
     aspect_lc = (aspect_ratio or DEFAULT_ASPECT_RATIO).lower().strip()
     if aspect_lc not in VALID_ASPECT_RATIOS:
         logger.warning("Invalid aspect_ratio '%s', defaulting to '%s'", aspect_ratio, DEFAULT_ASPECT_RATIO)
@@ -537,43 +468,19 @@ def image_generate_tool(
 
 
 def check_fal_api_key() -> bool:
-    """True if the selected FAL backend (never configured: any FAL backend) is available.
-
-    A stored-but-broken selection reports False here (registry gating); the naming error
-    surfaces at call time from ``_resolve_managed_fal_gateway``.
-    """
-    try:
-        gateway = _resolve_managed_fal_gateway()
-    except ValueError:
-        return False
-    return bool(gateway) or fal_key_is_configured()
+    from tools.tool_backend_helpers import read_selection
+    read_selection("image_gen")
+    return fal_key_is_configured()
 
 
 def _build_no_backend_setup_message() -> str:
-    """Actionable no-backend error: FAL_KEY signup, managed-gateway status, plugin alternative."""
-    managed = managed_nous_tools_enabled()
-    lines = ["Image generation is unavailable in this environment.", "", "Missing requirements:"]
-    if managed:
-        lines.append("  - FAL_KEY is not set and the managed FAL gateway is unreachable")
-    else:
-        lines.append("  - FAL_KEY environment variable is not set")
-        if gateway_message := nous_tool_gateway_unavailable_message("managed FAL image generation"):
-            lines.append(f"  - {gateway_message}")
-    lines += ["", "To enable image generation, do one of:",
-              "  1. Get a free API key at https://fal.ai and set FAL_KEY=<your-key> "
-              "(then restart the session)"]
-    if managed:
-        lines.append("  2. Sign in to a Nous account that has the managed FAL gateway enabled "
-                     "(`hermes setup`)")
-    lines.append("  3. Configure a different image_gen provider via `hermes tools` → Image Generation "
-                 "(run `hermes plugins list` to see installed backends)")
-    return "\n".join(lines)
+    return "Configure your own image provider with `noone tools`, or set FAL_KEY to use FAL.ai directly."
 
 
 def _get_plugin_provider(name: str, *, force: bool = False):
     """Discover plugins (local import: importing this module must not trigger discovery) and return the named provider."""
     from agent.image_gen_registry import get_provider
-    from hermes_cli.plugins import _ensure_plugins_discovered
+    from agent_cli.plugins import _ensure_plugins_discovered
     if force:
         _ensure_plugins_discovered(force=True)
     else:
@@ -705,7 +612,7 @@ def _dispatch_to_plugin_provider(
     if provider is None:
         return _provider_error(
             f"image_gen.provider='{configured}' is set but no plugin registered that name. "
-            f"Run `hermes plugins list` to see available image gen backends.", "provider_not_registered")
+            f"Run `noone plugins list` to see available image gen backends.", "provider_not_registered")
     pname = getattr(provider, "name", "?")
     kwargs: dict[str, Any] = {"prompt": prompt, "aspect_ratio": aspect_ratio}
     try:
@@ -722,7 +629,7 @@ def _dispatch_to_plugin_provider(
             return _provider_error(
                 f"Provider '{pname}' does not support image-to-image / editing (its generate() "
                 f"signature is out of date with the image_generate schema). Omit image_url for "
-                f"text-to-image, or pick a backend that supports editing via `hermes tools` → "
+                f"text-to-image, or pick a backend that supports editing via `noone tools` → "
                 f"Image Generation.", "modality_unsupported")
         logger.warning("Image gen provider '%s' raised%s: %s", pname,
                        " TypeError" if is_type_error else "", exc)
@@ -738,54 +645,8 @@ def _normalize_krea_model(model_id: Optional[str]) -> Optional[str]:
     return candidate if candidate in KREA_MODEL_IDS else None
 
 
-def _managed_model_plugin() -> Optional[tuple]:
-    """``(plugin_name, model_id)`` when the stored selection routes to the Krea or Portal gateway
-    (rule: :func:`tools.image_generation_managed.managed_route`), else ``None`` for the FAL path."""
-    from tools.image_generation_managed import KREA, PORTAL, managed_route
-
-    model_id = _read_configured_image_model()
-    return {KREA: ("krea", model_id), PORTAL: ("nous", model_id)}.get(
-        managed_route(_read_configured_image_provider(), model_id))
 
 
-def _maybe_route_managed_model(
-    prompt: str, aspect_ratio: str, image_url: Optional[str] = None,
-    reference_image_urls: Optional[list] = None, upscale: Optional[bool] = None,
-    controls: Optional[dict[str, Any]] = None) -> Optional[str]:
-    """JSON result from the Krea or Portal gateway the stored model belongs to, or ``None`` to fall
-    through to FAL.
-
-    A Krea model with no reachable Krea gateway falls through (direct/BYO users keep their
-    pipeline); a Portal model never does — falling through would silently bill a FAL default.
-    """
-    target = _managed_model_plugin()
-    if target is None:
-        return None
-    plugin_name, model_id = target
-    try:
-        if plugin_name == "krea":
-            from plugins.image_gen.krea import _resolve_managed_krea_gateway
-            if _resolve_managed_krea_gateway() is None:
-                return None
-        provider = _get_plugin_provider(plugin_name)
-    except Exception as exc:
-        logger.debug("Managed %s routing unavailable: %s", plugin_name, exc)
-        provider = None
-    if provider is None:
-        if plugin_name == "krea":
-            return None
-        return _provider_error(
-            f"image_gen.model='{model_id}' is a Nous Portal model but the Portal image backend is not "
-            f"available. Pick another model via `hermes tools` → Image Generation.", "provider_not_registered")
-    kwargs: dict[str, Any] = {"prompt": prompt, "aspect_ratio": aspect_ratio, "model": model_id}
-    try:
-        _add_provider_kwargs(kwargs, image_url, reference_image_urls, upscale,
-                             controls=_declared_controls(provider, controls))
-        result = provider.generate(**kwargs)
-    except Exception as exc:
-        logger.warning("Managed %s routing failed: %s", plugin_name, exc)
-        return _provider_error(f"Managed {provider.display_name} generation error: {exc}", "provider_exception")
-    return _provider_result(result, f"{provider.display_name} provider returned a non-dict result")
 
 
 def _confine_source_images(image_url, reference_image_urls, task_id, *, permitted: tuple = ("image",)):
@@ -838,41 +699,10 @@ def _handle_image_generate(args, **kw):
     controls = {name: args[name] for name in _CREATIVE_CONTROL_PARAMS if name in args}
     raw = _dispatch_to_plugin_provider(prompt, aspect_ratio, controls=controls or None, **sources)
     if raw is None:
-        raw = _maybe_route_managed_model(prompt, aspect_ratio, controls=controls or None, **sources)
-        if raw is not None:
-            raw = _fall_back_to_fal(raw, prompt, aspect_ratio, sources)
-    if raw is None:
         raw = image_generate_tool(prompt, aspect_ratio, **sources)
     return _postprocess_image_generate_result(raw, task_id=task_id)
 
 
-def _fall_back_to_fal(raw: str, prompt: str, aspect_ratio: str, sources: dict[str, Any]) -> str:
-    """Rerun a managed Krea request on FAL's default model when Krea refused it before creating a job.
-
-    Only the Krea plugin marks a failure ``fallback_eligible``, and only when the submit provably never
-    created a job: a job that exists has already been authorized for billing and may still complete.
-    Source images never fall back; FAL would route them to an edit endpoint with different semantics."""
-    try:
-        result = json.loads(raw)
-    except ValueError:
-        return raw
-    if not isinstance(result, dict) or result.get("success") or not result.get("fallback_eligible"):
-        return raw
-    if sources.get("image_url") or sources.get("reference_image_urls"):
-        return raw
-    from plugins.image_gen.krea import fallback_to_fal_enabled
-    if not fallback_to_fal_enabled():
-        return raw
-    logger.warning("Managed Krea refused the request before starting a job; falling back to FAL: %s", result.get("error"))
-    fal_result = json.loads(image_generate_tool(prompt, aspect_ratio, upscale=sources.get("upscale"), fal_model=DEFAULT_MODEL))
-    note = (f"Krea was unavailable, so this image was generated on FAL ({DEFAULT_MODEL}) instead."
-            if fal_result.get("success") else
-            f"Krea was unavailable and the fallback to FAL ({DEFAULT_MODEL}) also failed.")
-    if fal_result.get("upscaled"):
-        note += f" The upscale ran on FAL's {UPSCALER_MODEL}, not Krea Enhance."
-    fal_result.update(
-        provider="fal", model=DEFAULT_MODEL, fallback_from="krea", fallback_reason=result.get("error"), note=note)
-    return json.dumps(fal_result)
 
 
 # --- Dynamic schema — reflect the active backend's image-to-image capability ---
@@ -890,13 +720,7 @@ def _active_image_capabilities() -> dict[str, Any]:
     """
     info: dict[str, Any] = dict(_NO_CAPABILITIES)
     configured_provider = _read_configured_image_provider()
-    managed = _managed_model_plugin()
-    if managed is not None:
-        plugin_name = managed[0]
-    elif configured_provider and configured_provider != "fal":
-        plugin_name = configured_provider
-    else:
-        plugin_name = None
+    plugin_name = configured_provider if configured_provider and configured_provider != "fal" else None
     if plugin_name:
         try:
             provider = _get_plugin_provider(plugin_name)

@@ -42,7 +42,7 @@ def _build_hermes_repo_root_aliases(
     <root>/<repo dirname> is the physical root (fail-closed)."""
     candidates = [resolved_root, lexical_root]
     # Profile re-home: with --profile the configured home is <root>/profiles/<name>
-    # and the repo lives beside the profiles dir (as get_default_hermes_root() does).
+    # and the repo lives beside the profiles dir (as get_default_agent_root() does).
     home_candidates = [configured_home]
     if configured_home.parent.name == "profiles":
         home_candidates.append(configured_home.parent.parent)

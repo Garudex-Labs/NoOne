@@ -8,14 +8,14 @@ import asyncio
 import time
 from pathlib import Path
 
-from hermes_state_runtime import RuntimeStoreError, list_session_admissions
+from agent_state_runtime import RuntimeStoreError, list_session_admissions
 
 
 def _queued_member_turn(hosted_owner, monkeypatch, task_id, prompt):
     from gateway import hosted_room_driver as tasks
     from gateway.hosted_rooms import create_room, local_authority_gateway_id
     from gateway.session_hosted_service import CanonicalHostedRoomService
-    from tui_gateway.hosted_room_driver import HostedRoomBinding, _member_id
+    from agent_backend.hosted_room_driver import HostedRoomBinding, _member_id
     authority, loop, _, _ = hosted_owner
     service = getattr(authority, 'hosted_room_service', None)
     if service is None:

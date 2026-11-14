@@ -1,3 +1,4 @@
+import { AppIcon } from '@noone/ui/app-icon'
 /**
  * Hover actions for directive chips in a composer.
  *
@@ -15,7 +16,6 @@ import { createPortal } from 'react-dom'
 
 import { DIRECTIVE_ACTIONS, type DirectiveAction } from '@/components/assistant-ui/directive-text'
 import { composerFloatingPill } from '@/components/chat/composer-dock'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 import { wantsNativeBrowser } from '@/lib/external-link'
 import { cn } from '@/lib/utils'
@@ -161,7 +161,7 @@ export function ComposerDirectiveActions({ editorRef }: { editorRef: RefObject<H
         onMouseDown={event => event.preventDefault()}
         type="button"
       >
-        <Codicon className="shrink-0 opacity-70" name={anchor.action.icon} size="0.75rem" />
+        <AppIcon className="shrink-0 opacity-70" name={anchor.action.icon} size="0.75rem" />
         {anchor.action.label(t)}
       </button>
     </div>,

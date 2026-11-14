@@ -1,60 +1,68 @@
 ---
 title: "Sketch — Throwaway HTML mockups: 2-3 design variants to compare"
-sidebar_label: "Sketch"
+sidebarTitle: "Sketch"
 description: "Throwaway HTML mockups: 2-3 design variants to compare"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Sketch
+# Sketch {#sketch}
 
 Throwaway HTML mockups: 2-3 design variants to compare.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/sketch` |
+| Source | Optional — install with `noone skills install official/creative/sketch` |
 | Path | `optional-skills/creative/sketch` |
 | Version | `1.0.1` |
-| Author | Hermes Agent (adapted from gsd-build/get-shit-done) |
+| Author | {{app-name}} (adapted from gsd-build/get-shit-done) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `sketch`, `mockup`, `design`, `ui`, `prototype`, `html`, `variants`, `exploration`, `wireframe`, `comparison` |
 | Related skills | [`spike`](../../bundled/software-development/software-development-spike.md), [`claude-design`](../../bundled/creative/creative-claude-design.md), [`popular-web-designs`](../../bundled/creative/creative-popular-web-designs.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Sketch
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Sketch {#sketch-1}
 
 Use this skill when the user wants to **see a design direction before committing** to one — exploring a UI/UX idea as disposable HTML mockups. The point is to generate 2-3 interactive variants so the user can compare visual directions side-by-side, not to produce shippable code.
 
 Load this when the user says things like "sketch this screen", "show me what X could look like", "compare layout A vs B", "give me 2-3 takes on this UI", "let me see some variants", "mockup this before I build".
 
-## When NOT to use this
+## When NOT to use this {#when-not-to-use-this}
 
 - User wants a production component — use `claude-design` or build it properly
 - User wants a polished one-off HTML artifact (landing page, deck) — `claude-design`
 - User wants a diagram — `excalidraw`, `architecture-diagram`
 - The design is already locked — just build it
 
-## If the user has the full GSD system installed
+## If the user has the full GSD system installed {#if-the-user-has-the-full-gsd-system-installed}
 
 If `gsd-sketch` shows up as a sibling skill (installed via `npx get-shit-done-cc --hermes`), you can use **`gsd-sketch`** for the fuller workflow: persistent `.planning/sketches/` with MANIFEST, frontier mode analysis, consistency audits across past sketches, and integration with the rest of GSD. This skill is the lightweight standalone version — one-off sketching without the state machinery.
 
 > **Note:** The upstream GSD project ([gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)) is **archived / no longer maintained** on GitHub. The npm package (`get-shit-done-cc`) still installs, but treat it as an archived community project — this standalone `sketch` skill is the maintained path and needs nothing extra.
 
-## Core method
+## Core method {#core-method}
 
 ```
 intake  →  variants  →  head-to-head  →  pick winner (or iterate)
 ```
 
-### 1. Intake (skip if the user already gave you enough)
+### 1. Intake (skip if the user already gave you enough) {#1-intake-skip-if-the-user-already-gave-you-enough}
 
 Before generating variants, get three things — one question at a time, not all at once:
 
@@ -64,7 +72,7 @@ Before generating variants, get three things — one question at a time, not all
 
 Reflect each answer briefly before the next question. If the user already gave you all three upfront, skip straight to variants.
 
-### 2. Variants (2-3, never 1, rarely 4+)
+### 2. Variants (2-3, never 1, rarely 4+) {#2-variants-2-3-never-1-rarely-4}
 
 Produce **2-3 variants** in one go. Each variant is a complete, standalone HTML file. Don't describe variants — build them. The point is comparison.
 
@@ -80,7 +88,7 @@ Pick one axis and pull apart from it. Two variants that differ only in accent co
 
 **Variant naming:** describe the stance, not the number.
 
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```
 sketches/
 ├── 001-calm-editorial/
@@ -93,9 +101,9 @@ sketches/
     ├── index.html
     └── README.md
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
-### 3. Make them real HTML
+### 3. Make them real HTML {#3-make-them-real-html}
 
 Each variant is a **single self-contained HTML file**:
 
@@ -107,7 +115,7 @@ Each variant is a **single self-contained HTML file**:
 
 Open it in a browser. If it looks broken, fix it before showing the user.
 
-**Verify variants visually — use Hermes' `browser_exec`.** Don't just write HTML and hope it renders; load each variant and look at it:
+**Verify variants visually — use {{app-name}}' `browser_exec`.** Don't just write HTML and hope it renders; load each variant and look at it:
 
 ```
 browser_exec(code='''
@@ -136,7 +144,7 @@ Look at the attached screenshot and ask: does this layout look clean and readabl
 </style>
 ```
 
-### 4. Variant README
+### 4. Variant README {#4-variant-readme}
 
 Each variant's `README.md` answers:
 
@@ -160,7 +168,7 @@ One sentence on the principle driving this variant.
 - The kind of user or use case this variant actually serves
 ```
 
-### 5. Head-to-head
+### 5. Head-to-head {#5-head-to-head}
 
 After all variants are built, present them as a comparison. Don't just list — **opinionate**:
 
@@ -179,7 +187,7 @@ After all variants are built, present them as a comparison. Don't just list — 
 
 Let the user pick a winner, or combine two into a hybrid, or ask for another round.
 
-## Theming (when the project has a visual identity)
+## Theming (when the project has a visual identity) {#theming-when-the-project-has-a-visual-identity}
 
 If the user has an existing theme (colors, fonts, tokens), put shared tokens in `sketches/themes/tokens.css` and `@import` them in each variant. Keep tokens minimal:
 
@@ -198,7 +206,7 @@ If the user has an existing theme (colors, fonts, tokens), put shared tokens in 
 
 Don't over-tokenize a throwaway sketch — three colors and one font is usually enough.
 
-## Interactivity bar
+## Interactivity bar {#interactivity-bar}
 
 A sketch is interactive enough when the user can:
 
@@ -208,7 +216,7 @@ A sketch is interactive enough when the user can:
 
 More than that is over-engineering a throwaway. Less than that is a screenshot.
 
-## Frontier mode (picking what to sketch next)
+## Frontier mode (picking what to sketch next) {#frontier-mode-picking-what-to-sketch-next}
 
 If sketches already exist and the user says "what should I sketch next?":
 
@@ -220,7 +228,7 @@ If sketches already exist and the user says "what should I sketch next?":
 
 Propose 2-4 named candidates. Let the user pick.
 
-## Output
+## Output {#output}
 
 - Create `sketches/` (or `.planning/sketches/` if the user is using GSD conventions) in the repo root
 - One subdir per variant: `NNN-stance-name/index.html` + `README.md`
@@ -239,6 +247,6 @@ browser_exec(code='new_tab("file:///abs/path/sketches/001-calm-editorial/index.h
 
 Repeat for each variant, then present the comparison table.
 
-## Attribution
+## Attribution {#attribution}
 
-Adapted from the GSD (Get Shit Done) project's `/gsd-sketch` workflow — MIT © 2025 Lex Christopherson ([gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)). The upstream GSD repo is now **archived/unmaintained** on GitHub; the `get-shit-done-cc` npm package still installs (`npx get-shit-done-cc --hermes --global`) and ships persistent sketch state, theme/variant pattern references, and consistency-audit workflows, but treat it as an archived community project.
+Adapted from the GSD (Get Shit Done) project's `/gsd-sketch` workflow — MIT © 2025 Lex Christopherson ([gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)). The upstream GSD repo is now **archived/unmaintained** on GitHub; the `get-shit-done-cc` npm package still installs (`npx get-shit-done-cc --noone --global`) and ships persistent sketch state, theme/variant pattern references, and consistency-audit workflows, but treat it as an archived community project.

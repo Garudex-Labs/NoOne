@@ -1,28 +1,35 @@
 ---
-sidebar_position: 9
 title: "Secret Source Plugins"
-description: "How to build a secret-manager backend plugin for Hermes Agent"
+description: "How to build a secret-manager backend plugin for the agent"
 ---
 
-# Building a Secret Source Plugin
+# Building a Secret Source Plugin {#building-a-secret-source-plugin}
 
-Secret sources resolve provider credentials from an external secret manager (a vault, a password manager, an OS keystore, a custom script) into environment variables at process startup — after `~/.hermes/.env` loads, before Hermes reads credentials. Bitwarden, 1Password, and a generic command-helper source ship in-tree; **every other backend is a plugin**. This guide covers building one.
+Secret sources resolve provider credentials from an external secret manager (a vault, a password manager, an OS keystore, a custom script) into environment variables at process startup — after `~/.hermes/.env` loads, before {{app-name}} reads credentials. Bitwarden, 1Password, and a generic command-helper source ship in-tree; **every other backend is a plugin**. This guide covers building one.
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 The bundled set is deliberately closed, same policy as [memory providers](./memory-provider-plugin.md): PRs adding new vault backends under `agent/secret_sources/` are closed with a pointer to this guide. Publish your backend as a standalone plugin repo and share it in the Nous Research Discord (`#plugins-skills-and-skins`).
-:::
 
-## First-process bootstrap timing
+</Tip>
 
-`load_hermes_dotenv()` often runs at import time **before** plugins register.
-Hermes then re-pulls secrets after plugin discovery when any **enabled**
+## First-process bootstrap timing {#first-process-bootstrap-timing}
+
+`load_agent_dotenv()` often runs at import time **before** plugins register.
+{{app-name}} then re-pulls secrets after plugin discovery when any **enabled**
 plugin secret source is configured. Enablement uses the source's
 `is_enabled(cfg)` contract; the standard form is
 `secrets.<name>.enabled: true`, while custom activation remains supported.
 That closes the "replace Bitwarden with my vault" first-process gap (#64177).
 
 - Re-pull is idempotent and fail-open (never blocks startup).
-- `hermes update` never resolves external sources — not in the updater process
+- `noone update` never resolves external sources — not in the updater process
   and not in the import-health probes it spawns. Nothing in the update path
   needs credentials, and a slow helper would otherwise be misreported as an
   import failure (#110823).
@@ -32,7 +39,7 @@ That closes the "replace Bitwarden with my vault" first-process gap (#64177).
 - Reading `os.environ` after load is possible for any in-process code — the
   trust boundary remains "enabled plugins run with agent privilege".
 
-## What the framework owns vs. what you own
+## What the framework owns vs. what you own {#what-the-framework-owns-vs-what-you-own}
 
 The orchestrator (`agent.secret_sources.registry.apply_all`) owns everything security- and precedence-sensitive, so a backend cannot get it wrong:
 
@@ -46,7 +53,7 @@ The orchestrator (`agent.secret_sources.registry.apply_all`) owns everything sec
 | Per-var provenance + `(from X)` labels | A human-readable `label` |
 | `os.environ` writes | Nothing — you never touch the environment |
 
-## Directory structure
+## Directory structure {#directory-structure}
 
 ```
 ~/.hermes/plugins/my-vault/
@@ -54,7 +61,7 @@ The orchestrator (`agent.secret_sources.registry.apply_all`) owns everything sec
 └── __init__.py      # SecretSource subclass + register(ctx)
 ```
 
-## The SecretSource ABC
+## The SecretSource ABC {#the-secretsource-abc}
 
 Implement `agent.secret_sources.base.SecretSource`. One method is required:
 
@@ -108,7 +115,7 @@ class MyVaultSource(SecretSource):
         return frozenset({"MYVAULT_TOKEN"})
 ```
 
-### Contract rules (enforced, not suggestions)
+### Contract rules (enforced, not suggestions) {#contract-rules-enforced-not-suggestions}
 
 - **`fetch()` never raises.** Errors go in `result.error` + `result.error_kind`. A raising fetch is contained by the orchestrator and reported as `INTERNAL` — a contract violation, not a feature.
 - **`fetch()` never prompts.** Startup runs in non-TTY contexts (gateway, cron, Docker). `run_secret_cli()` closes stdin so a prompting helper fails fast. Interactive auth belongs in your CLI setup flow, never on the startup path.
@@ -116,12 +123,12 @@ class MyVaultSource(SecretSource):
 - **You fetch; the orchestrator applies.** Return the mapping you *would* contribute. Never write `os.environ` yourself — you'd bypass precedence, conflict detection, and provenance.
 - **API versioning.** `SecretSource.api_version` defaults to the current `SECRET_SOURCE_API_VERSION`. The registry skips (with a warning) sources built against a different version instead of crashing startup.
 
-### Choosing your `shape`
+### Choosing your `shape` {#choosing-your-shape}
 
 - `mapped` — the user explicitly binds env-var names to references in config (like 1Password's `env:` map). Strongest intent: mapped claims beat bulk claims on contested vars.
 - `bulk` — you inject a whole project/folder of secrets implicitly (like Bitwarden BSM). Yields to mapped sources.
 
-### Optional hooks
+### Optional hooks {#optional-hooks}
 
 | Method | Default | Override when |
 |---|---|---|
@@ -132,11 +139,11 @@ class MyVaultSource(SecretSource):
 | `config_schema()` | `{}` | Declare config keys for setup surfaces |
 | `remediation(kind, cfg)` | generic per-`ErrorKind` hints | You want failure warnings to point at your own fix-it command (e.g. the bundled sources return `Run hermes secrets <name> token…` for `AUTH_FAILED`). Must be a pure kind→string mapping: no I/O, never raises. Return `""` to suppress the hint. |
 
-## Subprocess safety: use `run_secret_cli()`
+## Subprocess safety: use `run_secret_cli()` {#subprocess-safety-use-run_secret_cli}
 
-If your backend shells out to a CLI, use the shared helper instead of `subprocess.run` directly. It gives you the audited posture for free: argv-only (no `shell=True`), a **minimal allowlisted child environment** (by the time sources run, `os.environ` holds every credential Hermes knows — never hand that to a child process), `NO_COLOR` + ANSI-scrubbed stderr, stdin closed, timeout → clean `RuntimeError`. Pass user-supplied reference strings after a `--` terminator in your argv so they can never parse as flags.
+If your backend shells out to a CLI, use the shared helper instead of `subprocess.run` directly. It gives you the audited posture for free: argv-only (no `shell=True`), a **minimal allowlisted child environment** (by the time sources run, `os.environ` holds every credential {{app-name}} knows — never hand that to a child process), `NO_COLOR` + ANSI-scrubbed stderr, stdin closed, timeout → clean `RuntimeError`. Pass user-supplied reference strings after a `--` terminator in your argv so they can never parse as flags.
 
-## Registering
+## Registering {#registering}
 
 ```python
 # __init__.py
@@ -146,11 +153,19 @@ def register(ctx):
 
 Registration is rejected (with a log warning, never a crash) for: non-`SecretSource` instances, invalid/duplicate names, a `scheme` another source owns, wrong `api_version`, or a `shape` outside `mapped`/`bulk`.
 
-:::note Timing
-Plugin discovery runs later in startup than the first `load_hermes_dotenv()` call. Immediately after discovery, Hermes re-pulls enabled plugin secret sources (`reset_secret_source_cache()` + `load_hermes_dotenv()`), so the discovering process *does* pick them up — see [First-process bootstrap timing](#first-process-bootstrap-timing) above (#64177). The re-pull is fail-open and skipped when no plugin source is enabled. Any code that reads `os.environ` during the plugin module's import or `register(ctx)` still runs before the re-pull and cannot depend on credentials supplied by that same source; keep credentialed work inside `fetch()`. Gateway, cron, and subagent processes perform the same discovery/re-pull sequence. The re-pull (and the per-fire cron re-pull) resets only the resolving home's cache, so under a multiplex gateway sibling profiles keep their hydrated snapshots; and a re-pull whose keys already sit in the process environment (`skipped_existing`, e.g. the previous apply's own write-back) still records the home's effective values, so `override_existing` is never required just to survive a re-pull.
-:::
+<Note>
 
-## Users configure it like any other source
+<div className="doc-callout-title">
+
+Timing
+
+</div>
+
+Plugin discovery runs later in startup than the first `load_agent_dotenv()` call. Immediately after discovery, {{app-name}} re-pulls enabled plugin secret sources (`reset_secret_source_cache()` + `load_agent_dotenv()`), so the discovering process *does* pick them up — see [First-process bootstrap timing](#first-process-bootstrap-timing) above (#64177). The re-pull is fail-open and skipped when no plugin source is enabled. Any code that reads `os.environ` during the plugin module's import or `register(ctx)` still runs before the re-pull and cannot depend on credentials supplied by that same source; keep credentialed work inside `fetch()`. Gateway, cron, and subagent processes perform the same discovery/re-pull sequence. The re-pull (and the per-fire cron re-pull) resets only the resolving home's cache, so under a multiplex gateway sibling profiles keep their hydrated snapshots; and a re-pull whose keys already sit in the process environment (`skipped_existing`, e.g. the previous apply's own write-back) still records the home's effective values, so `override_existing` is never required just to survive a re-pull.
+
+</Note>
+
+## Users configure it like any other source {#users-configure-it-like-any-other-source}
 
 ```yaml
 secrets:
@@ -162,9 +177,9 @@ secrets:
 
 Multi-source precedence, conflict warnings, and `(from My Vault)` provenance labels all work automatically — see the [user-facing secrets docs](../user-guide/secrets/index.md) for the precedence ladder.
 
-## Validate with the conformance kit
+## Validate with the conformance kit {#validate-with-the-conformance-kit}
 
-Subclass the kit from the Hermes repo (`tests/secret_sources/conformance.py`) in your plugin's tests:
+Subclass the kit from the {{app-name}} repo (`tests/secret_sources/conformance.py`) in your plugin's tests:
 
 ```python
 import pytest
@@ -178,7 +193,7 @@ class TestMyVaultConformance(SecretSourceConformance):
 
 It checks the rules that break other people when violated: never-raises on malformed config, machine-readable error kinds, disabled-by-default, positive timeouts, valid protected-var names, and a full `apply_all()` round trip. Green conformance is the review bar for calling a backend contract-compliant.
 
-## ErrorKind reference
+## ErrorKind reference {#errorkind-reference}
 
 | Kind | Meaning |
 |---|---|

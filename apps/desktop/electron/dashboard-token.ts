@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 /**
  * Helpers for local dashboard session-token discovery.
  *
@@ -13,14 +14,14 @@ async function fetchPublicText(url, options: any = {}) {
   const { protocol } = new URL(url)
 
   if (protocol !== 'http:' && protocol !== 'https:') {
-    throw new Error(`Unsupported Hermes backend URL protocol: ${protocol}`)
+    throw new Error(appText(`Unsupported {app_name} backend URL protocol: ${protocol}`))
   }
 
   const timeoutMs = options.timeoutMs ?? DEFAULT_TOKEN_FETCH_TIMEOUT_MS
 
   const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) }).catch(error => {
     if (error.name === 'TimeoutError') {
-      throw new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`)
+      throw new Error(appText(`Timed out connecting to {app_name} backend after ${timeoutMs}ms`))
     }
 
     throw error

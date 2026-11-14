@@ -2,7 +2,7 @@
 import asyncio
 from pathlib import Path
 
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 
 async def discover_commands(authority, actor, params, *, completion=False):
@@ -22,12 +22,12 @@ async def discover_commands(authority, actor, params, *, completion=False):
         scope = _session_workspace(authority.runner, authority.sessions[ref.session_id].source)
 
     def discover():
-        from hermes_cli.profiles import profile_matches_home
+        from agent_cli.profiles import profile_matches_home
         home = Path(authority.profile_id)
         if params.get('profile') and not profile_matches_home(params['profile'], home):
             raise RuntimeStoreError('profile_mismatch')
         from gateway.run import _profile_runtime_scope
-        from tui_gateway.command_discovery import command_catalog, slash_completions
+        from agent_backend.command_discovery import command_catalog, slash_completions
         with _profile_runtime_scope(home):
             return (slash_completions(params.get('text', ''), scope=scope) if completion
                     else command_catalog(scope=scope))
@@ -46,8 +46,8 @@ async def list_plugins(authority, actor, params):
 
     def rows():
         from gateway.run import _profile_runtime_scope
-        from hermes_cli.plugins import discover_plugins, get_plugin_manager
-        from hermes_cli.plugins import get_plugin_toolsets
+        from agent_cli.plugins import discover_plugins, get_plugin_manager
+        from agent_cli.plugins import get_plugin_toolsets
         with _profile_runtime_scope(Path(authority.profile_id)):
             discover_plugins()  # idempotent: the profile's plugins are normally loaded already
             manager = get_plugin_manager()

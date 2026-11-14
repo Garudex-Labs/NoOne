@@ -1,8 +1,8 @@
 import { atom } from 'nanostores'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesConnection } from '@/global'
-import type { ProfileInfo } from '@/types/hermes'
+import type { AgentConnection } from '@/global'
+import type { ProfileInfo } from '@/types/agent-client'
 
 // Keep profile.ts's side-effecting imports inert: the gateway socket layer and
 // the REST query client must not run for real in a unit test.
@@ -27,7 +27,7 @@ vi.mock('@/store/gateway', () => ({
   openGatewayForProfile,
   openSecondaryCount
 }))
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   getProfiles: vi.fn(async () => ({ profiles: [] })),
   setApiRequestProfile: vi.fn()
 }))
@@ -53,7 +53,7 @@ const { $connectionsRegistry } = await import('@/store/connection-registry-state
 
 const { $connection } = await import('./session')
 const { invalidateProfileScopedQueries } = await import('@/lib/query-client')
-const { getProfiles } = await import('@/hermes')
+const { getProfiles } = await import('@/agent-client')
 
 const profile = (name: string, isDefault = false): ProfileInfo => ({
   has_env: false,
@@ -65,13 +65,13 @@ const profile = (name: string, isDefault = false): ProfileInfo => ({
   skill_count: 0
 })
 
-const remoteConn = (over: Partial<HermesConnection> = {}): HermesConnection =>
-  ({ baseUrl: 'https://hermes-roy.tail.ts.net', mode: 'remote', profile: 'vps-remote', ...over }) as HermesConnection
+const remoteConn = (over: Partial<AgentConnection> = {}): AgentConnection =>
+  ({ baseUrl: 'https://hermes-roy.tail.ts.net', mode: 'remote', profile: 'vps-remote', ...over }) as AgentConnection
 
-const localConn = (over: Partial<HermesConnection> = {}): HermesConnection =>
-  ({ baseUrl: '', mode: 'local', profile: 'default', ...over }) as HermesConnection
+const localConn = (over: Partial<AgentConnection> = {}): AgentConnection =>
+  ({ baseUrl: '', mode: 'local', profile: 'default', ...over }) as AgentConnection
 
-const getConnection = vi.fn<(profile?: string | null) => Promise<HermesConnection>>()
+const getConnection = vi.fn<(profile?: string | null) => Promise<AgentConnection>>()
 
 beforeEach(() => {
   getConnection.mockReset()

@@ -1,6 +1,6 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import type { CSSProperties, PointerEvent } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { cn } from '@/lib/utils'
 
 import { TITLEBAR_HEIGHT } from './titlebar'
@@ -53,7 +53,7 @@ export function WslgWindowControls({ isFullscreen, isMaximized }: WslgWindowCont
         onPointerDown={stopTitlebarDrag}
         type="button"
       >
-        <Codicon name="chrome-minimize" size={10} />
+        <AppIcon name="chrome-minimize" size={10} />
       </button>
       <button
         aria-label={isMaximized ? 'Restore window' : 'Maximize window'}
@@ -62,7 +62,7 @@ export function WslgWindowControls({ isFullscreen, isMaximized }: WslgWindowCont
         onPointerDown={stopTitlebarDrag}
         type="button"
       >
-        <Codicon name={isMaximized ? 'chrome-restore' : 'chrome-maximize'} size={10} />
+        <AppIcon name={isMaximized ? 'chrome-restore' : 'chrome-maximize'} size={10} />
       </button>
       <button
         aria-label="Close window"
@@ -74,7 +74,7 @@ export function WslgWindowControls({ isFullscreen, isMaximized }: WslgWindowCont
         onPointerDown={stopTitlebarDrag}
         type="button"
       >
-        <Codicon name="chrome-close" size={10} />
+        <AppIcon name="chrome-close" size={10} />
       </button>
     </div>
   )

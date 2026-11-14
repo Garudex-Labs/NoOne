@@ -1,5 +1,18 @@
-import { isGatewayReauthRequired } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { isGatewayReauthRequired } from '@noone/shared'
+import {
+  AlertCircle,
+  Check,
+  Cloud,
+  FileText,
+  Globe,
+  HelpCircle,
+  Loader2,
+  LogIn,
+  Monitor,
+  RefreshCw,
+  Terminal
+} from '@noone/ui/icons'
 import { useEffect, useRef, useState } from 'react'
 
 import { RemoteSetupFields } from '@/components/remote-setup/fields'
@@ -19,19 +32,6 @@ import { useI18n } from '@/i18n'
 import { reestablishCloudAgentSession } from '@/lib/cloud-agent-session'
 import { ExternalLink } from '@/lib/external-link'
 import { hostHas } from '@/lib/host-capabilities'
-import {
-  AlertCircle,
-  Check,
-  Cloud,
-  FileText,
-  Globe,
-  HelpCircle,
-  Loader2,
-  LogIn,
-  Monitor,
-  RefreshCw,
-  Terminal
-} from '@/lib/icons'
 import { coerceRemoteUrlScheme } from '@/lib/remote-url'
 import { selectableCardClass } from '@/lib/selectable-card'
 import { cn } from '@/lib/utils'
@@ -370,7 +370,7 @@ function GatewayConnectionSettings({ embedded, standalone }: { embedded: boolean
       })
 
     return () => void (cancelled = true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on mount; copy is stable
+     
   }, [])
 
   // Debounced probe of the entered remote URL. Only runs in remote mode with a
@@ -756,7 +756,7 @@ function GatewayConnectionSettings({ embedded, standalone }: { embedded: boolean
       })
 
     return () => void (cancelled = true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload on mode change only
+     
   }, [state.mode])
 
   const cloudSignIn = async () => {

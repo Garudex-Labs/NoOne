@@ -25,10 +25,10 @@ def hermes_env(tmp_path, monkeypatch):
 
     monkeypatch.setenv("HERMES_HOME", str(home))
 
-    # Reload modules that cache get_hermes_home() at import time.
+    # Reload modules that cache get_agent_home() at import time.
     import importlib
-    import hermes_constants
-    importlib.reload(hermes_constants)
+    import agent_constants
+    importlib.reload(agent_constants)
     import cron.jobs
     importlib.reload(cron.jobs)
     import cron.scheduler
@@ -115,7 +115,7 @@ def test_run_job_no_agent_reloads_dotenv_before_script(hermes_env, monkeypatch):
     vars in its environment, and the agent path's per-run dotenv reload never
     executes for no_agent jobs — delivery home channels stayed unresolved.
     run_job must load .env at the top of the no_agent branch."""
-    from hermes_cli import env_loader
+    from agent_cli import env_loader
     from cron.jobs import create_job
     from cron.scheduler import run_job
 
@@ -125,7 +125,7 @@ def test_run_job_no_agent_reloads_dotenv_before_script(hermes_env, monkeypatch):
         loaded_homes.append(hermes_home)
         return []
 
-    monkeypatch.setattr(env_loader, "load_hermes_dotenv", fake_load)
+    monkeypatch.setattr(env_loader, "load_agent_dotenv", fake_load)
 
     script_path = hermes_env / "scripts" / "probe.sh"
     script_path.write_text('#!/usr/bin/env bash\necho "ok"\n')
@@ -136,7 +136,7 @@ def test_run_job_no_agent_reloads_dotenv_before_script(hermes_env, monkeypatch):
     success, _doc, _final_response, error = run_job(job)
     assert success is True
     assert error is None
-    assert loaded_homes, "load_hermes_dotenv was not called on the no_agent path"
+    assert loaded_homes, "load_agent_dotenv was not called on the no_agent path"
     assert str(loaded_homes[0]) == str(hermes_env)
 
 
@@ -155,10 +155,10 @@ def test_no_agent_script_gets_owning_profiles_declared_secret_never_launch_resid
     from agent.secret_scope import (
         build_profile_secret_scope, reset_secret_scope, set_multiplex_active, set_secret_scope)
     from cron.scheduler_script import _run_job_script
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     (hermes_env / ".env").write_text("LAUNCH_ONLY_TOKEN=launch-secret\n", encoding="utf-8")
-    monkeypatch.setenv("LAUNCH_ONLY_TOKEN", "launch-secret")  # what load_hermes_dotenv() did at startup
+    monkeypatch.setenv("LAUNCH_ONLY_TOKEN", "launch-secret")  # what load_agent_dotenv() did at startup
     monkeypatch.delenv("JOB_SVC_TOKEN", raising=False)
     routed = tmp_path / "routed"
     (routed / "scripts").mkdir(parents=True)
@@ -167,13 +167,13 @@ def test_no_agent_script_gets_owning_profiles_declared_secret_never_launch_resid
     (routed / "scripts" / "probe.sh").write_text(_PRESENCE_PROBE, encoding="utf-8")
 
     set_multiplex_active(True)
-    home_token = set_hermes_home_override(str(routed))
+    home_token = set_agent_home_override(str(routed))
     scope_token = set_secret_scope(build_profile_secret_scope(routed))
     try:
         ok, output = _run_job_script("probe.sh")
     finally:
         reset_secret_scope(scope_token)
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
         set_multiplex_active(False)
 
     assert ok is True
@@ -350,10 +350,10 @@ def test_a_routed_profile_script_never_receives_a_launch_only_name(hermes_env, m
     from agent.secret_sources.base import FetchResult
     from agent.secret_sources.registry import ApplyReport, SourceReport
     from cron.scheduler_script import _run_job_script
-    from hermes_cli import env_loader
-    from hermes_constants import get_process_hermes_home, reset_hermes_home_override, set_hermes_home_override
+    from agent_cli import env_loader
+    from agent_constants import get_process_agent_home, reset_agent_home_override, set_agent_home_override
 
-    launch = get_process_hermes_home()
+    launch = get_process_agent_home()
     (launch / ".env").write_text("LAUNCH_ONLY_VALUE=launch-only\nCUSTOM_CRON_VALUE=launch\n", encoding="utf-8")
     (launch / "config.yaml").write_text("secrets:\n  test-source:\n    enabled: true\n", encoding="utf-8")
     for name, value in (("LAUNCH_ONLY_VALUE", "launch-only"), ("CUSTOM_CRON_VALUE", "launch"),
@@ -379,7 +379,7 @@ def test_a_routed_profile_script_never_receives_a_launch_only_name(hermes_env, m
         '|${LAUNCH_VAULT_ONLY:-<unset>}|${LAUNCH_SKIPPED_SECRET:-<unset>}"\n'
     )
 
-    home_token = set_hermes_home_override(str(routed))
+    home_token = set_agent_home_override(str(routed))
     context_token = secret_scope.set_multiplex_context(True)
     scope_token = secret_scope.set_secret_scope(
         {"CUSTOM_CRON_VALUE": "routed", "ROUTED_VAULT_ONLY": "routed-vault-value"})
@@ -388,7 +388,7 @@ def test_a_routed_profile_script_never_receives_a_launch_only_name(hermes_env, m
     finally:
         secret_scope.reset_secret_scope(scope_token)
         secret_scope.reset_multiplex_context(context_token)
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
 
     assert ok, output
     assert output.strip() == "routed|routed-vault-value|<unset>|<unset>|<unset>"
@@ -404,10 +404,10 @@ def test_a_routed_profile_script_keeps_administrator_managed_values_over_its_own
 
     from agent import secret_scope
     from cron.scheduler_script import _run_job_script
-    from hermes_cli import env_loader, managed_scope
-    from hermes_constants import get_process_hermes_home, reset_hermes_home_override, set_hermes_home_override
+    from agent_cli import env_loader, managed_scope
+    from agent_constants import get_process_agent_home, reset_agent_home_override, set_agent_home_override
 
-    launch = get_process_hermes_home()
+    launch = get_process_agent_home()
     managed = launch / "managed"
     managed.mkdir()
     (managed / ".env").write_text("ORG_POLICY_FLAG=managed-value\n", encoding="utf-8")
@@ -423,7 +423,7 @@ def test_a_routed_profile_script_keeps_administrator_managed_values_over_its_own
     script = routed / "scripts" / "probe_policy.sh"
     script.write_text('#!/usr/bin/env bash\necho "${ORG_POLICY_FLAG:-<unset>}"\n')
 
-    home_token = set_hermes_home_override(str(routed))
+    home_token = set_agent_home_override(str(routed))
     context_token = secret_scope.set_multiplex_context(True)
     # The routed user's own .env carries a competing value for the managed key.
     scope_token = secret_scope.set_secret_scope({"ORG_POLICY_FLAG": "user-value"})
@@ -432,7 +432,7 @@ def test_a_routed_profile_script_keeps_administrator_managed_values_over_its_own
     finally:
         secret_scope.reset_secret_scope(scope_token)
         secret_scope.reset_multiplex_context(context_token)
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
 
     assert ok, output
     assert output.strip() == "managed-value"

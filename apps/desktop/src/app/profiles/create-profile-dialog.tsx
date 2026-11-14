@@ -1,5 +1,7 @@
+import { AlertTriangle } from '@noone/ui/icons'
 import { useEffect, useState } from 'react'
 
+import { createProfile, updateProfileSoul } from '@/agent-client'
 import { ActionStatus } from '@/components/ui/action-status'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,12 +16,10 @@ import { Field, FieldHint } from '@/components/ui/field'
 import { SanitizedInput } from '@/components/ui/sanitized-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { createProfile, updateProfileSoul } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { dropBrowserProfilePrefs } from '@/lib/browser-profile-prefs'
-import { AlertTriangle } from '@/lib/icons'
 import { slug } from '@/lib/sanitize'
-import type { ProfileInfo } from '@/types/hermes'
+import type { ProfileInfo } from '@/types/agent-client'
 
 const PROFILE_NAME_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/
 

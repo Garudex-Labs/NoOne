@@ -22,6 +22,10 @@ class NoReleaseTag(ValueError):
 
 def dev_version(repo: Path) -> str:
     """``<release>+<distance>.g<short>`` from the highest reachable release tag."""
+    from agent_cli.version_info import project_version, release_history_start
+
+    if release_history_start(repo) is not None:
+        return project_version(repo)
     tags = [line for line in _git(repo, "tag", "--merged", "HEAD", "--list", "v[0-9]*").splitlines() if line]
     releases = [version for version in (version_from_tag(tag) for tag in tags) if version]
     if not releases:

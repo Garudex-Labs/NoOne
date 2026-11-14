@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract skill metadata into website/static/api/skills.json for the Skills Hub page.
+"""Extract skill metadata into website/docs/api/skills.json for the Skills Hub page.
 
 Two data sources:
 
@@ -7,7 +7,7 @@ Two data sources:
    (official optional). These give us full metadata — overview prose, version,
    license, env vars, commands — that the unified index doesn't carry.
 
-2. The unified Hermes Skills Index at ``website/static/api/skills-index.json``,
+2. The unified Skills Index at ``website/docs/api/skills-index.json``,
    built twice daily by ``scripts/build_skills_index.py`` (workflow
    ``.github/workflows/skills-index.yml``). Covers skills.sh, ClawHub, browse.sh,
    LobeHub, well-known endpoints, and the GitHub taps
@@ -26,23 +26,22 @@ from datetime import datetime, timezone, UTC
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, REPO_ROOT)
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 LOCAL_SKILL_DIRS = [
     ("skills", "built-in"),
     ("optional-skills", "optional"),
 ]
-UNIFIED_INDEX_PATH = os.path.join(REPO_ROOT, "website", "static", "api", "skills-index.json")
+UNIFIED_INDEX_PATH = os.path.join(REPO_ROOT, "website", "docs", "api", "skills-index.json")
 LEGACY_INDEX_CACHE_DIR = os.path.join(REPO_ROOT, "skills", "index-cache")
 # Output to static/api/ so the file is CDN-served at /api/skills.json
 # rather than bundled into the page's JS chunk. At 50k+ skills the
 # bundled payload was ~26 MB; lazy-fetch keeps the initial page load
 # fast and shrinks the JS chunk back to a few hundred KB.
-OUTPUT = os.path.join(REPO_ROOT, "website", "static", "api", "skills.json")
-# Curated artwork ships in website/static/img/catalog/, which the docs site serves
-# from its own host (docusaurus `url` + `baseUrl`); one place to change if it moves.
-CATALOG_ART_URL = "https://hermes-agent.nousresearch.com/docs/img/catalog/"
-META_OUTPUT = os.path.join(REPO_ROOT, "website", "static", "api", "skills-meta.json")
+OUTPUT = os.path.join(REPO_ROOT, "website", "docs", "api", "skills.json")
+# Curated artwork must resolve to image bytes, not GitHub's directory HTML.
+CATALOG_ART_URL = "https://raw.githubusercontent.com/Garudex-Labs/NoOne/main/website/docs/img/catalog/"
+META_OUTPUT = os.path.join(REPO_ROOT, "website", "docs", "api", "skills-meta.json")
 
 CATEGORY_LABELS = {
     "apple": "Apple",
@@ -112,7 +111,7 @@ GITHUB_TAP_LABELS = {
 }
 
 # Legacy filename -> label mapping for the deprecated skills/index-cache/
-# fallback. Used only when website/static/api/skills-index.json is absent.
+# fallback. Used only when website/docs/api/skills-index.json is absent.
 LEGACY_SOURCE_LABELS = {
     "anthropics_skills": "Anthropic",
     "openai_skills": "OpenAI",
@@ -172,32 +171,32 @@ def _docs_page_path(rel_dir: str, source_label: str) -> str:
 
 
 def _install_command(source: str, identifier: str, name: str) -> str:
-    """Build the ``hermes skills install …`` command for a unified-index entry.
+    """Build the ``noone skills install …`` command for a unified-index entry.
 
     These show up in the SkillCard panel so users can copy-paste them. We try
     to use the most idiomatic identifier per source.
     """
     if not identifier:
-        return f"hermes skills install {name}"
+        return f"noone skills install {name}"
     src = source.lower()
     if src in {"official", "built-in", "optional"}:
         # OptionalSkillSource emits identifiers like "official/security/1password"
-        return f"hermes skills install {identifier}"
+        return f"noone skills install {identifier}"
     if src in {"skills.sh", "skills-sh"}:
         # Already wrapped as "skills-sh/owner/repo/skill" by the source
-        return f"hermes skills install {identifier}"
+        return f"noone skills install {identifier}"
     if src == "clawhub":
-        return f"hermes skills install clawhub/{identifier}"
+        return f"noone skills install clawhub/{identifier}"
     if src == "browse-sh":
         # Identifier already includes the "browse-sh/" prefix from BrowseShSource
-        return f"hermes skills install {identifier}"
+        return f"noone skills install {identifier}"
     if src == "lobehub":
-        return f"hermes skills install {identifier}"
+        return f"noone skills install {identifier}"
     if src == "github":
-        return f"hermes skills install {identifier}"
+        return f"noone skills install {identifier}"
     if src == "well-known":
-        return f"hermes skills install {identifier}"
-    return f"hermes skills install {identifier}"
+        return f"noone skills install {identifier}"
+    return f"noone skills install {identifier}"
 
 
 def _source_url(source: str, identifier: str, extra: dict) -> str:
@@ -333,7 +332,7 @@ def extract_local_skills():
             rel_id = rel.replace(os.sep, "/")
             install_identifier = (
                 f"official/{rel_id}" if source_label == "optional"
-                else f"NousResearch/hermes-agent/skills/{rel_id}"
+                else f"Garudex-Labs/NoOne/skills/{rel_id}"
             )
             skills.append({
                 "name": fm.get("name", os.path.basename(root)),
@@ -354,7 +353,7 @@ def extract_local_skills():
                 # 1-based curated hero rank; the site and the app rotate through these.
                 **({"featured": featured.index(rel_id) + 1} if rel_id in featured else {}),
                 "installIdentifier": install_identifier,
-                "installCmd": f"hermes skills install {install_identifier}",
+                "installCmd": f"noone skills install {install_identifier}",
             })
 
     return skills
@@ -371,7 +370,7 @@ def _label_for_github_identifier(identifier: str) -> str:
 
 
 def extract_unified_index_skills():
-    """Read website/static/api/skills-index.json — the canonical multi-source index.
+    """Read website/docs/api/skills-index.json — the canonical multi-source index.
 
     Returns ``(skills, meta)`` where ``meta`` carries the index's
     ``generated_at`` timestamp and total count so the Skills Hub page can
@@ -465,7 +464,7 @@ def extract_unified_index_skills():
             "docsPath": "",
             "identifier": identifier,
             "installCmd": install_cmd,
-            "installIdentifier": install_cmd.removeprefix("hermes skills install "),
+            "installIdentifier": install_cmd.removeprefix("noone skills install "),
             "sourceUrl": source_url,
         })
 

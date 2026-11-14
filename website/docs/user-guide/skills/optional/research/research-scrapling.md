@@ -1,41 +1,49 @@
 ---
 title: "Scrapling — Scrape sites with stealth browsing and Cloudflare bypass"
-sidebar_label: "Scrapling"
+sidebarTitle: "Scrapling"
 description: "Scrape sites with stealth browsing and Cloudflare bypass"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Scrapling
+# Scrapling {#scrapling}
 
 Scrape sites with stealth browsing and Cloudflare bypass.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/scrapling` |
+| Source | Optional — install with `noone skills install official/research/scrapling` |
 | Path | `optional-skills/research/scrapling` |
 | Version | `1.0.0` |
-| Author | FEUAZUR |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Web Scraping`, `Browser`, `Cloudflare`, `Stealth`, `Crawling`, `Spider` |
 | Related skills | [`domain-intel`](../../optional/research/research-domain-intel.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Scrapling
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Scrapling {#scrapling-1}
 
 [Scrapling](https://github.com/D4Vinci/Scrapling) is a web scraping framework with anti-bot bypass, stealth browser automation, and a spider framework. It provides three fetching strategies (HTTP, dynamic JS, stealth/Cloudflare) and a full CLI.
 
 **This skill is for educational and research purposes only.** Users must comply with local/international data scraping laws and respect website Terms of Service.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - Scraping static HTML pages (faster than browser tools)
 - Scraping JS-rendered pages that need a real browser
@@ -43,7 +51,7 @@ The following is the complete skill definition that Hermes loads when this skill
 - Crawling multiple pages with a spider
 - When the built-in `web_extract` tool does not return the data you need
 
-## Installation
+## Installation {#installation}
 
 ```bash
 pip install "scrapling[all]"
@@ -61,7 +69,7 @@ pip install "scrapling[fetchers]"
 scrapling install
 ```
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Approach | Class | Use When |
 |----------|-------|----------|
@@ -70,9 +78,9 @@ scrapling install
 | Stealth | `StealthyFetcher` / `StealthySession` | Cloudflare, anti-bot protected sites |
 | Spider | `Spider` | Multi-page crawling with link following |
 
-## CLI Usage
+## CLI Usage {#cli-usage}
 
-### Extract Static Page
+### Extract Static Page {#extract-static-page}
 
 ```bash
 scrapling extract get 'https://example.com' output.md
@@ -86,7 +94,7 @@ scrapling extract get 'https://example.com' output.md \
   --impersonate 'chrome'
 ```
 
-### Extract JS-Rendered Page
+### Extract JS-Rendered Page {#extract-js-rendered-page}
 
 ```bash
 scrapling extract fetch 'https://example.com' output.md \
@@ -95,7 +103,7 @@ scrapling extract fetch 'https://example.com' output.md \
   --network-idle
 ```
 
-### Extract Cloudflare-Protected Page
+### Extract Cloudflare-Protected Page {#extract-cloudflare-protected-page}
 
 ```bash
 scrapling extract stealthy-fetch 'https://protected-site.com' output.html \
@@ -104,14 +112,14 @@ scrapling extract stealthy-fetch 'https://protected-site.com' output.html \
   --hide-canvas
 ```
 
-### POST Request
+### POST Request {#post-request}
 
 ```bash
 scrapling extract post 'https://example.com/api' output.json \
   --json '{"query": "search term"}'
 ```
 
-### Output Formats
+### Output Formats {#output-formats}
 
 The output format is determined by the file extension:
 - `.html` -- raw HTML
@@ -119,9 +127,9 @@ The output format is determined by the file extension:
 - `.txt` -- plain text
 - `.json` / `.jsonl` -- JSON
 
-## Python: HTTP Scraping
+## Python: HTTP Scraping {#python-http-scraping}
 
-### Single Request
+### Single Request {#single-request}
 
 ```python
 from scrapling.fetchers import Fetcher
@@ -132,7 +140,7 @@ for q in quotes:
     print(q)
 ```
 
-### Session (Persistent Cookies)
+### Session (Persistent Cookies) {#session-persistent-cookies}
 
 ```python
 from scrapling.fetchers import FetcherSession
@@ -145,7 +153,7 @@ with FetcherSession(impersonate='chrome') as session:
         print(sub.css('h1::text').get())
 ```
 
-### POST / PUT / DELETE
+### POST / PUT / DELETE {#post--put--delete}
 
 ```python
 page = Fetcher.post('https://api.example.com/data', json={"key": "value"})
@@ -153,13 +161,13 @@ page = Fetcher.put('https://api.example.com/item/1', data={"name": "updated"})
 page = Fetcher.delete('https://api.example.com/item/1')
 ```
 
-### With Proxy
+### With Proxy {#with-proxy}
 
 ```python
 page = Fetcher.get('https://example.com', proxy='http://user:pass@proxy:8080')
 ```
 
-## Python: Dynamic Pages (JS-Rendered)
+## Python: Dynamic Pages (JS-Rendered) {#python-dynamic-pages-js-rendered}
 
 For pages that require JavaScript execution (SPAs, lazy-loaded content):
 
@@ -170,7 +178,7 @@ page = DynamicFetcher.fetch('https://example.com', headless=True)
 data = page.css('.js-loaded-content::text').getall()
 ```
 
-### Wait for Specific Element
+### Wait for Specific Element {#wait-for-specific-element}
 
 ```python
 page = DynamicFetcher.fetch(
@@ -180,7 +188,7 @@ page = DynamicFetcher.fetch(
 )
 ```
 
-### Disable Resources for Speed
+### Disable Resources for Speed {#disable-resources-for-speed}
 
 Blocks fonts, images, media, stylesheets (~25% faster):
 
@@ -192,7 +200,7 @@ with DynamicSession(headless=True, disable_resources=True, network_idle=True) as
     items = page.css('.item::text').getall()
 ```
 
-### Custom Page Automation
+### Custom Page Automation {#custom-page-automation}
 
 ```python
 from playwright.sync_api import Page
@@ -208,7 +216,7 @@ page = DynamicFetcher.fetch('https://example.com', page_action=scroll_and_click)
 results = page.css('.extra-results .item::text').getall()
 ```
 
-## Python: Stealth Mode (Anti-Bot Bypass)
+## Python: Stealth Mode (Anti-Bot Bypass) {#python-stealth-mode-anti-bot-bypass}
 
 For Cloudflare-protected or heavily fingerprinted sites:
 
@@ -225,7 +233,7 @@ page = StealthyFetcher.fetch(
 content = page.css('.protected-content::text').getall()
 ```
 
-### Stealth Session
+### Stealth Session {#stealth-session}
 
 ```python
 from scrapling.fetchers import StealthySession
@@ -235,11 +243,11 @@ with StealthySession(headless=True, solve_cloudflare=True) as session:
     page2 = session.fetch('https://protected-site.com/page2')
 ```
 
-## Element Selection
+## Element Selection {#element-selection}
 
 All fetchers return a `Selector` object with these methods:
 
-### CSS Selectors
+### CSS Selectors {#css-selectors}
 
 ```python
 page.css('h1::text').get()              # First h1 text
@@ -247,14 +255,14 @@ page.css('a::attr(href)').getall()      # All link hrefs
 page.css('.quote .text::text').getall() # Nested selection
 ```
 
-### XPath
+### XPath {#xpath}
 
 ```python
 page.xpath('//div[@class="content"]/text()').getall()
 page.xpath('//a/@href').getall()
 ```
 
-### Find Methods
+### Find Methods {#find-methods}
 
 ```python
 page.find_all('div', class_='quote')       # By tag + attribute
@@ -262,7 +270,7 @@ page.find_by_text('Read more', tag='a')    # By text content
 page.find_by_regex(r'\$\d+\.\d{2}')       # By regex pattern
 ```
 
-### Similar Elements
+### Similar Elements {#similar-elements}
 
 Find elements with similar structure (useful for product listings, etc.):
 
@@ -271,7 +279,7 @@ first_product = page.css('.product')[0]
 all_similar = first_product.find_similar()
 ```
 
-### Navigation
+### Navigation {#navigation}
 
 ```python
 el = page.css('.target')[0]
@@ -281,7 +289,7 @@ el.next_sibling          # Next sibling
 el.prev_sibling          # Previous sibling
 ```
 
-## Python: Spider Framework
+## Python: Spider Framework {#python-spider-framework}
 
 For multi-page crawling with link following:
 
@@ -311,7 +319,7 @@ print(f"Scraped {len(result.items)} quotes")
 result.items.to_json("quotes.json")
 ```
 
-### Multi-Session Spider
+### Multi-Session Spider {#multi-session-spider}
 
 Route requests to different fetcher types:
 
@@ -334,14 +342,14 @@ class SmartSpider(Spider):
                 yield Request(link, sid="fast", callback=self.parse)
 ```
 
-### Pause/Resume Crawling
+### Pause/Resume Crawling {#pauseresume-crawling}
 
 ```python
 spider = QuotesSpider(crawldir="./crawl_checkpoint")
 spider.start()  # Ctrl+C to pause, re-run to resume from checkpoint
 ```
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Browser install required**: run `scrapling install` after pip install -- without it, `DynamicFetcher` and `StealthyFetcher` will fail
 - **Timeouts**: DynamicFetcher/StealthyFetcher timeout is in **milliseconds** (default 30000), Fetcher timeout is in **seconds**

@@ -1,4 +1,4 @@
-import { Codicon } from './codicon'
+import { AppIcon } from '@noone/ui/app-icon'
 
 interface ColorSwatchesProps {
   swatches: readonly string[]
@@ -42,7 +42,7 @@ export function ColorSwatches({
         onClick={() => onChange(null)}
         type="button"
       >
-        <Codicon name={clearIcon} size="0.75rem" />
+        <AppIcon name={clearIcon} size="0.75rem" />
         {clearLabel}
       </button>
     </div>

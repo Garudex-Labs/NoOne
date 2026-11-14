@@ -10,6 +10,7 @@
  */
 
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import {
   type ComponentProps,
   type CSSProperties,
@@ -25,7 +26,6 @@ import {
 import { ShellMenuItems } from '@/app/context-menu/shell-menu-items'
 import { TITLEBAR_DRAG_HANDLE_WIDTH } from '@/app/shell/titlebar'
 import { ActionsContextMenu, type MenuKit, renderActionItem } from '@/components/ui/actions-menu'
-import { Codicon } from '@/components/ui/codicon'
 import { DecodeText } from '@/components/ui/decode-text'
 import { DROP_SHEET_BLUR_CLASS, DROP_SHEET_CLASS } from '@/components/ui/drop-affordance'
 import {
@@ -311,7 +311,7 @@ function EditVeil({ label, onPointerDown, top, ...menu }: EditVeilProps) {
         }}
       >
         <span className="flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-md border border-(--ui-stroke-secondary) bg-popover px-2 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-(--ui-text-secondary)">
-          <Codicon className="shrink-0" name="gripper" size="0.8125rem" />
+          <AppIcon className="shrink-0" name="gripper" size="0.8125rem" />
           <span className="min-w-0 truncate">{label}</span>
         </span>
       </div>
@@ -784,7 +784,7 @@ export function TreeGroup({
                         onPointerDown={e => e.stopPropagation()}
                         type="button"
                       >
-                        <Codicon name={node.minimized ? 'chevron-up' : 'chevron-down'} size="0.75rem" />
+                        <AppIcon name={node.minimized ? 'chevron-up' : 'chevron-down'} size="0.75rem" />
                       </button>
                     )}
                     <StripDropCaret groupId={node.id} stripRef={stripRef} />
@@ -917,7 +917,7 @@ export function TreeGroup({
                     onPointerDownCapture={() => noteActiveTreeGroup(node.id)}
                   >
                     <PaneStripGlyph
-                      icon={<Codicon name="add" size="0.8125rem" />}
+                      icon={<AppIcon name="add" size="0.8125rem" />}
                       label={newTab.label}
                       onSelect={newTab.onSelect}
                     />

@@ -2,7 +2,7 @@
 
 Two scenarios for _agent_home's resolution order (#86313 post-merge findings):
 
-1. MULTIPLEX INVERSION (@kshitijk4poor): the messaging gateway hands every
+1. MULTIPLEX INVERSION : the messaging gateway hands every
    agent the shared launch-home state.db but binds the profile home per turn
    via the HERMES_HOME ContextVar (copy_context into the worker). A bound
    override must WIN over the db-derived launch home, else the shared-db
@@ -23,7 +23,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 
 class _DB:
@@ -65,7 +65,7 @@ def test_bound_override_wins_over_shared_db_home(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(root))
 
     agent = _agent_for(root)  # shared db lives at <root>/state.db
-    token = set_hermes_home_override(str(bot_home))
+    token = set_agent_home_override(str(bot_home))
     try:
         assert system_prompt._agent_home(agent) == bot_home
         assert (
@@ -73,7 +73,7 @@ def test_bound_override_wins_over_shared_db_home(tmp_path, monkeypatch):
             == "mybot"
         )
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def test_db_home_wins_on_bare_thread_without_override(tmp_path, monkeypatch):

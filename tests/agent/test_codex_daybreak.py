@@ -135,7 +135,7 @@ def _load(platform, chat_id="gui", check="_load_daybreak"):
 
 
 def test_gateway_reads_the_profile_switch_each_turn(tmp_path, monkeypatch):
-    """The owner's chat turns (Desktop, TUI, ``hermes chat``: ``Platform.LOCAL``) run in the gateway, which copies
+    """The owner's chat turns (Desktop, TUI, ``noone chat``: ``Platform.LOCAL``) run in the gateway, which copies
     the switch onto the turn's agent from the profile's config.yaml, so a flip reaches the next turn of a running chat."""
     from gateway.config import Platform
     home = tmp_path / ".hermes"
@@ -194,8 +194,8 @@ def test_delegation_sees_the_owners_gateway_chat_with_the_switch_off(tmp_path, m
 
 
 def test_model_menu_capability_marks_only_listed_subscription_models(catalog, monkeypatch):
-    from hermes_cli import auth_codex
-    from hermes_cli.inventory import _apply_capabilities
+    from agent_cli import auth_codex
+    from agent_cli.inventory import _apply_capabilities
 
     monkeypatch.setattr(auth_codex, "resolve_codex_runtime_credentials", lambda **kw: {"api_key": token("A")})
 

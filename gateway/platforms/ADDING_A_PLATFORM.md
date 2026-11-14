@@ -19,7 +19,7 @@ status display, gateway setup, and more.
 - `env_enablement_fn: () -> Optional[dict]` — seeds `PlatformConfig.extra`
   (and an optional `home_channel` dict) from env vars BEFORE the adapter is
   constructed.  Without this, env-only setups don't surface in
-  `hermes gateway status` or `get_connected_platforms()` until the SDK
+  `noone gateway status` or `get_connected_platforms()` until the SDK
   instantiates.  Build it from a `(ENV_VAR, extra_key, conv)` table with
   `gateway.platforms._shared.seed_extra_from_env(spec, home_env=...)`; every
   read goes through `_shared.get_scoped_secret` (multiplex-safe, never
@@ -46,7 +46,7 @@ status display, gateway setup, and more.
   `No live adapter for platform '<name>'`.  Pair with `cron_deliver_env_var`
   for end-to-end cron support.  See the docsite for the signature.
 - `plugin.yaml` `requires_env` / `optional_env` rich-dict entries —
-  auto-populate `OPTIONAL_ENV_VARS` in `hermes_cli/config.py` so the setup
+  auto-populate `OPTIONAL_ENV_VARS` in `agent_cli/config.py` so the setup
   wizard surfaces proper descriptions, prompts, password flags, and URLs.
 
 **Subclassing for platform-specific UX.** When a platform has a hard
@@ -76,7 +76,7 @@ come **first** in the bases list — `class WhatsAppAdapter(Mixin,
 BasePlatformAdapter)` — so the mixin's `format_message` overrides
 `BasePlatformAdapter`'s generic default.
 
-See `plugins/platforms/irc/`, `plugins/platforms/teams/`, and
+See `plugins/platforms/a2a/`, `plugins/platforms/teams/`, and
 `plugins/platforms/google_chat/` for complete working examples, and
 `website/docs/developer-guide/adding-platform-adapters.md` for the full
 plugin guide with code examples and hook documentation.
@@ -135,7 +135,7 @@ If your platform supports interactive button/menu messages, implement these for 
 | `_send_exec_approval_prompt(prompt: ExecApprovalPrompt)` | Render a dangerous-command approval as native buttons. `send_exec_approval` is a base template method: it builds the shared text (`_format_exec_approval`, tune via the `_EA_*` class attrs) and the choice set (`prompt.actions` = `(label, choice, style)` rows, choices `once`/`session`/`always`/`deny`) — you only map those rows to widgets. Inbound dispatch routes to `tools.approval.resolve_gateway_approval_card` with the card's request id (`prompt.request_id`), so a press answers the request that card showed. |
 | `send_slash_confirm(chat_id, title, message, session_key, confirm_id, ...)` | Render slash-command confirmations (e.g. `/reload-mcp`) as Once/Always/Cancel buttons. Inbound dispatch routes to `tools.slash_confirm.resolve`. |
 | `send_model_picker(...)` | Interactive `/model` picker. Used by Telegram, Discord, and Slack (Socket Mode). |
-| `send_choice_picker(...)` | Flat single-level picker for finite-choice commands (`/reasoning`, `/fast`). Implemented by Telegram (inline keyboard), Discord (select menu), Matrix (reactions), and Feishu (interactive card buttons). Platforms without it fall back to the text status card automatically. |
+| `send_choice_picker(...)` | Flat single-level picker for finite-choice commands (`/reasoning`, `/fast`). Implemented by Telegram (inline keyboard), Discord (select menu). Platforms without it fall back to the text status card automatically. |
 
 See `plugins/platforms/telegram/adapter.py`, `plugins/platforms/discord/adapter.py`, and `plugins/platforms/whatsapp_cloud/adapter.py` for reference implementations. The button-callback id convention (`cl:<id>:<idx>`, `appr:<id>:<choice>`, `sc:<choice>:<id>`) is shared across adapters — match it so the gateway-side resolvers work without modification.
 
@@ -261,7 +261,7 @@ and update `to_dict()`, `from_dict()`, and `build_source()` in base.py.
 
 Declare `platform_hint=` on `ctx.register_platform` (keep the text in a light sibling such as
 `adapter_hint.py`) so the agent knows what platform it's on. `agent/prompt_builder.py::PLATFORM_HINTS`
-holds only core surfaces (CLI, TUI, API server, ...):
+holds only core surfaces (CLI, API server, ...):
 
 ```python
 PLATFORM_HINT = (
@@ -282,7 +282,7 @@ Add a named toolset for your platform:
 ```python
 "hermes-your-platform": {
     "description": "Your Platform bot toolset",
-    "tools": _HERMES_CORE_TOOLS,
+    "tools": _CORE_AGENT_TOOLS,
     "includes": []
 },
 ```
@@ -356,7 +356,7 @@ for plat_name in ("telegram", "whatsapp", "signal", "your_platform"):
 
 ---
 
-## 12. Status Display (`hermes_cli/status.py`)
+## 12. Status Display (`agent_cli/status.py`)
 
 Add to the `platforms` dict in the Messaging Platforms section:
 
@@ -369,7 +369,7 @@ platforms = {
 
 ---
 
-## 13. Gateway Setup Wizard (`hermes_cli/gateway.py`)
+## 13. Gateway Setup Wizard (`agent_cli/gateway.py`)
 
 Add to the `_PLATFORMS` list:
 
@@ -442,7 +442,7 @@ After implementing everything, verify with:
 python -m pytest tests/ -q
 
 # Grep for your platform name to find any missed integration points
-grep -r "telegram\|discord\|whatsapp\|slack" gateway/ tools/ agent/ cron/ hermes_cli/ toolsets.py \
+grep -r "telegram\|discord\|whatsapp\|slack" gateway/ tools/ agent/ cron/ agent_cli/ toolsets.py \
   --include="*.py" -l | sort -u
 # Check each file in the output — if it mentions other platforms but not yours, you missed it
 ```

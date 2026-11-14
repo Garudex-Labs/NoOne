@@ -3,7 +3,7 @@
 Regression for issue #71296: bash 3.2 ``export -p`` prints a value containing
 a newline as a multi-line ``declare -x NAME="…`` block. The old line-based
 ``grep -vE`` filter removed only the opener; continuation lines (e.g.
-``curl … | bash #`` smuggled into a Matrix room/display name) persisted into
+``curl … | bash #`` smuggled into a messaging room/display name) persisted into
 the shared terminal snapshot and executed on the next ``source``, with stdout
 discarded by the wrapper.
 """

@@ -109,18 +109,20 @@ describe('BillingSettings', () => {
     expect(screen.getByText('余额')).toBeTruthy()
     const input = screen.getByRole('spinbutton', { name: '自定义充值金额' }) as HTMLInputElement
     fireEvent.change(input, { target: { value: '37' } })
-    await act(() => language.setLocale('zh-hant'))
-    expect(screen.getByText('支付與額度')).toBeTruthy()
-    expect(screen.getByText('餘額')).toBeTruthy()
-    expect((screen.getByRole('spinbutton', { name: '自訂儲值金額' }) as HTMLInputElement).value).toBe('37')
+    await act(() => language.setLocale('hi'))
+    expect(screen.getByText(language.t.settings.billing.sections.paymentAndCredits)).toBeTruthy()
+    expect(screen.getByText(language.t.settings.billing.summary.balance)).toBeTruthy()
+    expect((screen.getByRole('spinbutton', { name: language.t.settings.billing.buyCredits.customAmount }) as HTMLInputElement).value).toBe('37')
     expect(apiMocks.charge).not.toHaveBeenCalled()
     apiMocks.charge.mockResolvedValue({
       ok: false,
       refusal: { kind: 'stripe_unavailable', message: '', retryAfter: 120 },
       idempotencyKey: 'fixture-charge'
     })
-    fireEvent.click(screen.getByRole('button', { name: '購買' }))
-    await screen.findByText(/Stripe 遇到問題/)
+    fireEvent.click(screen.getByRole('button', { name: language.t.settings.billing.buyCredits.buyButton }))
+    await waitFor(() => {
+      expect(document.body.textContent).toContain(language.t.settings.billing.errors.stripeUnavailable.title)
+    })
     await act(() => language.setLocale('zh'))
     expect(screen.getByText(/Stripe 遇到问题/)).toBeTruthy()
     expect(apiMocks.charge).toHaveBeenCalledTimes(1)

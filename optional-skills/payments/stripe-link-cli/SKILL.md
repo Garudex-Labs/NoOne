@@ -2,7 +2,7 @@
 name: stripe-link-cli
 description: Agent payments via Stripe Link — cards, SPT, approvals.
 version: 0.1.0
-author: Teknium (teknium1), Hermes Agent
+author: RAWx18
 license: MIT
 platforms: [linux, macos]
 metadata:
@@ -26,7 +26,7 @@ Trigger phrases:
 - "log in to Link", "connect my Link wallet"
 - HTTP 402 response from a merchant API with `www-authenticate: ... method="stripe"`
 
-If the user wants a paid API call (HTTP 402, no checkout form), the `card` path is wrong — use SPT via this same skill, or install the `pay` plugin (`hermes plugins install pay`) for x402/MPP payments.
+If the user wants a paid API call (HTTP 402, no checkout form), the `card` path is wrong — use SPT via this same skill, or install the `pay` plugin (`noone plugins install pay`) for x402/MPP payments.
 
 ## Prerequisites
 

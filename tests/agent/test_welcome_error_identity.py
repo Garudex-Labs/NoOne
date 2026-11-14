@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 from agent.error_classifier import classify_api_error
-from tests.hermes_cli.anon_portal import make_jwt
+from tests.agent_cli.anon_portal import make_jwt
 from agent.error_surface import build_error_surface_from_result
 from agent.turn_recovery import max_retries_exhausted_result, nonretryable_client_error_result
 
@@ -122,7 +122,7 @@ def test_401_diagnostics_follow_request_identity_on_welcome_host(tier, capsys, m
     _print_nous_401_diagnostics(agent_for(make_jwt(account_tier=tier), WELCOME), Exception("unauthorized"))
     output = capsys.readouterr().out
     assert ("Hermes couldn't start a new one" in output) == (tier == "anonymous")
-    assert ("hermes auth add nous" in output) == (tier != "anonymous")
+    assert ("noone auth add nous" in output) == (tier != "anonymous")
 
 
 def test_anonymous_claim_does_not_classify_other_providers_as_nous():

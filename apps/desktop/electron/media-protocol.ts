@@ -1,3 +1,5 @@
+import { appText } from '@noone/shared/application-identity'
+
 import { fileUrlToNativePath } from '../../shared/src/file-url'
 
 import { httpStatusError, readStatusCode } from './api-transport'
@@ -139,7 +141,7 @@ export function remoteMediaEndpoint(baseUrl: string, filePath: string, profile?:
   const url = new URL(`${normalizedBase}/api/files/stream`)
 
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    throw new Error(`Unsupported Hermes backend URL protocol: ${url.protocol}`)
+    throw new Error(appText(`Unsupported {app_name} backend URL protocol: ${url.protocol}`))
   }
 
   if (/^file:/i.test(filePath)) {

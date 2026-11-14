@@ -1,46 +1,12 @@
 @import 'tailwindcss';
-/* `fonts.css` must come BEFORE `globals.css`: as of @nous-research/ui 0.14.x,
-   `globals.css` only declares the `--font-*` CSS variables (Collapse, Rules
-   Compressed/Expanded, Mondwest). The `@font-face` registrations live in
-   `fonts.css`, so without this import the DS variables resolve to font
-   families the browser never loads and components fall back to a system
-   stack (Tabs, Segmented, Typography, Buttons, etc. all look unstyled). */
-@import '@nous-research/ui/styles/fonts.css';
+@import '@noone/ui/fonts.css';
 @import '@nous-research/ui/styles/globals.css';
 
 /* Scan the published design-system bundle so its utility classes survive
    Tailwind's JIT purge. */
 @source '../node_modules/@nous-research/ui/dist';
 
-/* ------------------------------------------------------------------ */
-/* JetBrains Mono — bundled for the embedded TUI (/chat tab).          */
-/* Gives the terminal a proper monospace font even on systems where    */
-/* the user doesn't have one installed locally; xterm.js picks it up   */
-/* via ChatPage's `fontFamily` option.                                 */
-/* Apache-2.0.                                                         */
-/* ------------------------------------------------------------------ */
-
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts-terminal/JetBrainsMono-Regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts-terminal/JetBrainsMono-Bold.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts-terminal/JetBrainsMono-Italic.woff2') format('woff2');
-}
+/* Shared font faces and licenses are provided by @noone/ui/fonts.css. */
 
 /* ------------------------------------------------------------------ */
 /* Hermes Agent — Nous DS with the LENS_0 (Hermes teal) palette applied
@@ -63,11 +29,12 @@
 
   /* Typography tokens — rewritten by ThemeProvider. Defaults match the
      system stack so themes that don't override look native. */
-  --theme-font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --theme-font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo,
-    Consolas, monospace;
+  --theme-font-sans: var(--noone-font-sans);
+  --theme-font-mono: var(--noone-font-mono);
   --theme-font-display: var(--theme-font-sans);
+  --font-rules-compressed: var(--theme-font-sans);
+  --font-rules-expanded: var(--theme-font-sans);
+  --font-mondwest: var(--theme-font-sans);
   --theme-base-size: 15px;
   --theme-line-height: 1.55;
   --theme-letter-spacing: 0;
@@ -119,7 +86,11 @@ code, kbd, pre, samp, .font-mono, .font-mono-ui {
 @theme inline {
   --spacing: calc(0.25rem * var(--theme-spacing-mul, 1));
   --font-sans: var(--theme-font-sans);
+  --font-rules-compressed: var(--theme-font-sans);
+  --font-rules-expanded: var(--theme-font-sans);
+  --font-mondwest: var(--theme-font-sans);
   --font-mono: var(--theme-font-mono);
+  --font-serif: var(--theme-font-sans);
 }
 
 #root {
@@ -253,3 +224,10 @@ html[dir="rtl"] {
   direction: rtl;
 }
 
+
+h1 { font-size: var(--noone-text-page); font-weight: var(--noone-weight-semibold); line-height: var(--noone-leading-heading); }
+h2 { font-size: var(--noone-text-section); font-weight: var(--noone-weight-semibold); line-height: var(--noone-leading-heading); }
+
+/* Published DS display utilities otherwise inline their former font families. */
+.font-compressed, .font-expanded, .font-mondwest { font-family: var(--theme-font-sans); }
+.font-courier { font-family: var(--theme-font-mono); }

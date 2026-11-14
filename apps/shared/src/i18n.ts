@@ -1,3 +1,5 @@
+import { appText } from './application-identity'
+
 // Locale scaffolding shared by the desktop and web i18n layers. Generic over the
 // translation catalog type: each app supplies its own `Translations`/`en` and
 // wraps `mergeTranslations` in a one-line `defineLocale`.
@@ -44,7 +46,8 @@ export function mergeTranslations<T>(base: T, overrides: TranslationOverride<T> 
  *  pack author writes `"{0} of {1} tools on"` for `(on, total) => …`; an
  *  index the template names but the call didn't supply renders empty. */
 export function formatPositional(template: string, args: readonly unknown[]): string {
-  return template.replace(/\{(\d+)\}/g, (_match, index: string) => {
+  return template.replace(/\{(app_name|\d+)\}/g, (_match, index: string) => {
+    if (index === 'app_name') {return appText('{app_name}')}
     const value = args[Number(index)]
 
     return value === undefined || value === null ? '' : String(value)
@@ -165,26 +168,18 @@ export function flattenMessageKeys(tree: unknown, prefix = ''): string[] {
 
 // Endonyms (native names) for the language pickers so users recognize their
 // language regardless of the current UI language. No country flags: languages
-// are not countries (English ≠ GB, Portuguese ≠ PT, Chinese variants ≠ any
-// single jurisdiction). Desktop supports a subset of these ids; web all of them.
+// are not countries (English ≠ GB, Hindi ≠ IN, Chinese ≠ any
+// single jurisdiction). Desktop and web share these built-in ids.
 export const LOCALE_ENDONYMS = {
-  af: 'Afrikaans',
   ar: 'العربية',
   de: 'Deutsch',
   en: 'English',
   es: 'Español',
   fr: 'Français',
-  ga: 'Gaeilge',
-  hu: 'Magyar',
-  it: 'Italiano',
+  hi: 'हिन्दी',
   ja: '日本語',
   ko: '한국어',
-  pt: 'Português',
-  ru: 'Русский',
-  tr: 'Türkçe',
-  uk: 'Українська',
   zh: '简体中文',
-  'zh-hant': '繁體中文'
 } as const satisfies Record<string, string>
 
 export type EndonymLocale = keyof typeof LOCALE_ENDONYMS

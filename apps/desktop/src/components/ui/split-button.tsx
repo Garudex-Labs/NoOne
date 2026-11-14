@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import type { VariantProps } from 'class-variance-authority'
 import type { ReactNode } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { cn } from '@/lib/utils'
 
 import type { buttonVariants } from './button'
@@ -74,7 +74,7 @@ export function SplitButton({
             size={size}
             variant={variant}
           >
-            <Codicon name="chevron-down" size="0.8rem" />
+            <AppIcon name="chevron-down" size="0.8rem" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-44">
@@ -88,7 +88,7 @@ export function SplitButton({
             >
               {action.icon}
               <span className="flex-1 truncate">{action.label}</span>
-              {action.id === value && <Codicon className="text-(--ui-text-tertiary)" name="check" size="0.75rem" />}
+              {action.id === value && <AppIcon className="text-(--ui-text-tertiary)" name="check" size="0.75rem" />}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

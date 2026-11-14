@@ -113,7 +113,7 @@ def _fenced_kanban_root() -> str:
     """The board root this process's Kanban lineage lives under (``kanban_home()``); ``"1"`` when it
     cannot be resolved, which readers treat as "fence every board" (the pre-path marker)."""
     try:
-        from hermes_cli.kanban_db import kanban_home
+        from agent_cli.kanban_db import kanban_home
         return str(kanban_home())
     except Exception:
         return "1"
@@ -133,7 +133,7 @@ def scrub_kanban_env(env: Mapping[str, str] | MutableMapping[str, str]) -> dict[
     onto its scratch root and unfence the real one).
     """
     cleaned = {k: v for k, v in env.items() if k not in KANBAN_ENV_KEYS}
-    # Only the gateway mints ``kanban`` sessions: a descendant ``hermes chat`` sending it is refused.
+    # Only the gateway mints ``kanban`` sessions: a descendant ``noone chat`` sending it is refused.
     if cleaned.get("HERMES_SESSION_SOURCE") == "kanban":
         del cleaned["HERMES_SESSION_SOURCE"]
     inherited = str(env.get(DELEGATED_CHILD_ENV_MARKER) or "")

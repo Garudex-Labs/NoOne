@@ -2,7 +2,7 @@
 name: kanban-video-orchestrator
 description: Plan and run multi-agent video production pipelines.
 version: 1.0.0
-author: [SHL0MS, alt-glitch]
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
@@ -12,7 +12,7 @@ metadata:
     credits: |
       The single-project workspace layout, profile-config patching pattern,
       SOUL.md-per-profile model, TEAM.md task-graph convention, and
-      `--workspace dir:/abs/path` discipline are adapted from alt-glitch's
+      `--workspace dir:/abs/path` discipline are adapted from the
       original multi-agent video pipeline at
       https://github.com/NousResearch/kanban-video-pipeline.
 ---
@@ -99,11 +99,11 @@ Generate a setup script (`setup.sh`) and run it. The script:
 
 1. Creates the project workspace (`~/projects/video-pipeline/<slug>/`)
 2. Copies any provided assets into `taste/`, `audio/`, `assets/`
-3. Creates each Hermes profile via `hermes profile create --clone`
+3. Creates each Hermes profile via `noone profile create --clone`
 4. Writes per-profile `SOUL.md` (personality + role definition)
 5. Configures profile YAML (toolsets, always_load skills, cwd)
 6. Writes `brief.md`, `TEAM.md`, and `taste/` content
-7. Fires the initial `hermes kanban create` task assigned to the director
+7. Fires the initial `noone kanban create` task assigned to the director
 
 Use `scripts/bootstrap_pipeline.py` to generate setup.sh from a brief +
 team-design JSON. See **[references/kanban-setup.md](references/kanban-setup.md)**
@@ -115,9 +115,9 @@ for the setup script structure, profile config patterns, and the critical
 Run `setup.sh`. Then provide the user with monitoring commands:
 
 ```bash
-hermes kanban watch --tenant <project-tenant>     # live events
-hermes kanban list  --tenant <project-tenant>     # board snapshot
-hermes dashboard                                   # visual board UI
+noone kanban watch --tenant <project-tenant>     # live events
+noone kanban list  --tenant <project-tenant>     # board snapshot
+noone dashboard                                   # visual board UI
 ```
 
 The director profile takes over from here, decomposing the work and routing
@@ -174,7 +174,7 @@ task graphs. See **[references/examples.md](references/examples.md)**.
 6. **The director never executes.** Even with the full `kanban + terminal +
    file` toolset, the director's `SOUL.md` rules forbid it from executing
    work itself. It decomposes and routes only — every concrete task becomes
-   a `hermes kanban create` call to a specialist profile. The kanban
+   a `noone kanban create` call to a specialist profile. The kanban
    orchestration guidance auto-injected into every kanban worker's system
    prompt spells this out further.
 

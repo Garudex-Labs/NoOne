@@ -1,45 +1,53 @@
 ---
 title: "3 Statement Model — Build integrated IS/BS/CF financial workbooks in Excel"
-sidebar_label: "3 Statement Model"
+sidebarTitle: "3 Statement Model"
 description: "Build integrated IS/BS/CF financial workbooks in Excel"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# 3 Statement Model
+# 3 Statement Model {#3-statement-model}
 
 Build integrated IS/BS/CF financial workbooks in Excel.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/finance/3-statement-model` |
+| Source | Optional — install with `noone skills install official/finance/3-statement-model` |
 | Path | `optional-skills/finance/3-statement-model` |
 | Version | `1.0.0` |
-| Author | Anthropic (adapted by Nous Research) |
+| Author | Anthropic (adapted by Garudex Labs) |
 | License | Apache-2.0 |
 | Platforms | linux, macos, windows |
 | Tags | `finance`, `three-statement`, `income-statement`, `balance-sheet`, `cash-flow`, `excel`, `openpyxl`, `modeling` |
 | Related skills | [`excel-author`](../../optional/finance/finance-excel-author.md), [`pptx-author`](../../optional/finance/finance-pptx-author.md), [`dcf-model`](../../optional/finance/finance-dcf-model.md), [`lbo-model`](../../optional/finance/finance-lbo-model.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-## Environment
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+## Environment {#environment}
 
 This skill assumes **headless openpyxl** — you are producing an .xlsx file on disk.
 Follow the `excel-author` skill's conventions for cell coloring, formulas, named ranges, and sensitivity tables.
 Recalculate before delivery: `python /path/to/excel-author/scripts/recalc.py ./out/model.xlsx`.
 
-# 3-Statement Financial Model Template Completion
+# 3-Statement Financial Model Template Completion {#3-statement-financial-model-template-completion}
 
 Complete and populate integrated financial model templates with proper linkages between Income Statement, Balance Sheet, and Cash Flow Statement.
 
-## ⚠️ CRITICAL PRINCIPLES — Read Before Populating Any Template
+## ⚠️ CRITICAL PRINCIPLES — Read Before Populating Any Template {#️-critical-principles--read-before-populating-any-template}
 
 **Formulas over hardcodes (non-negotiable):**
 - Every projection cell, roll-forward, linkage, and subtotal MUST be an Excel formula — never a pre-computed value
@@ -56,7 +64,7 @@ Complete and populate integrated financial model templates with proper linkages 
 5. **After building CF** → show the user the cash tie-out (CF ending cash = BS cash), confirm before finalizing
 6. **Do NOT populate the entire model end-to-end and present it complete** — break at each statement, show the work, catch errors early
 
-## Formatting — Professional Blue/Grey Palette (Default unless template/user specifies otherwise)
+## Formatting — Professional Blue/Grey Palette (Default unless template/user specifies otherwise) {#formatting--professional-bluegrey-palette-default-unless-templateuser-specifies-otherwise}
 
 **Keep colors minimal.** Use only blues and greys for cell fills. Do NOT introduce greens, yellows, oranges, or multiple accent colors — a clean model uses restraint.
 
@@ -73,9 +81,9 @@ Complete and populate integrated financial model templates with proper linkages 
 
 Font color signals *what* a cell is (input/formula/link). Fill color signals *where* you are (header/data/check).
 
-## Model Structure
+## Model Structure {#model-structure}
 
-### Identifying Template Tab Organization
+### Identifying Template Tab Organization {#identifying-template-tab-organization}
 
 Templates vary in their tab naming conventions and organization. Before populating, review all tabs to understand the template's structure. Below are common tab names and their typical contents:
 
@@ -97,7 +105,7 @@ Templates vary in their tab naming conventions and organization. Before populati
 - Understand tab dependencies (e.g., which schedules feed into the main statements)
 - Locate input cells vs. formula cells on each tab
 
-### Understanding Template Structure
+### Understanding Template Structure {#understanding-template-structure}
 
 Before populating a template, familiarize yourself with its existing layout to ensure data is entered in the correct locations and formulas remain intact.
 
@@ -121,18 +129,18 @@ Templates often use named ranges for key inputs and outputs. Before entering dat
 - Common named ranges include: Revenue growth rates, cost percentages, key outputs (Net Income, EBITDA, Total Debt, Cash), scenario selector cell
 - Ensure inputs are entered in cells that feed into these named ranges
 
-### Projection Period
+### Projection Period {#projection-period}
 - Templates typically project 5 years forward from last historical year
 - Verify historical (A) vs. projected (E) columns are clearly separated
 - Confirm columns use fiscal year notation (e.g., FY2024A, FY2025E)
 
-## Margin Analysis
+## Margin Analysis {#margin-analysis}
 
 **Note: The following margin analysis should only be performed if prompted by the user or if the template explicitly requires it. If no prompt is given, skip this section.**
 
 Calculate and display profitability margins on the Income Statement (IS) tab to track operational efficiency and enable peer comparison.
 
-### Core Margins to Include
+### Core Margins to Include {#core-margins-to-include}
 
 | Margin | Formula | What It Measures |
 |--------|---------|------------------|
@@ -141,7 +149,7 @@ Calculate and display profitability margins on the Income Statement (IS) tab to 
 | EBIT Margin | EBIT / Revenue | Operating profitability after D&A |
 | Net Income Margin | Net Income / Revenue | Bottom-line profitability |
 
-### Income Statement Layout with Margins
+### Income Statement Layout with Margins {#income-statement-layout-with-margins}
 
 Display margin percentages directly below each profit line item:
 - Gross Margin % below Gross Profit
@@ -149,13 +157,13 @@ Display margin percentages directly below each profit line item:
 - EBITDA Margin % below EBITDA
 - Net Income Margin % below Net Income
 
-## Credit Metrics
+## Credit Metrics {#credit-metrics}
 
 **Note: The following Credit analysis should only be performed if prompted by the user or if the template explicitly requires it. If no prompt is given, skip this section.**
 
 Calculate and display credit/leverage metrics on the Balance Sheet (BS) tab to assess financial health, debt capacity, and covenant compliance.
 
-### Core Credit Metrics to Include
+### Core Credit Metrics to Include {#core-credit-metrics-to-include}
 
 | Metric | Formula | What It Measures |
 |--------|---------|------------------|
@@ -167,18 +175,18 @@ Calculate and display credit/leverage metrics on the Balance Sheet (BS) tab to a
 | Current Ratio | Current Assets / Current Liabilities | Short-term liquidity |
 | Quick Ratio | (Current Assets - Inventory) / Current Liabilities | Immediate liquidity |
 
-### Credit Metric Hierarchy Checks
+### Credit Metric Hierarchy Checks {#credit-metric-hierarchy-checks}
 
 Validate that Upside shows strongest credit profile:
 - Leverage: Upside &lt; Base &lt; Downside (lower is better)
 - Coverage: Upside > Base > Downside (higher is better)
 - Liquidity: Upside > Base > Downside (higher is better)
 
-### Covenant Compliance Tracking
+### Covenant Compliance Tracking {#covenant-compliance-tracking}
 
 If debt covenants are known, add explicit compliance checks comparing actual metrics to covenant thresholds.
 
-## Scenario Analysis (Base / Upside / Downside)
+## Scenario Analysis (Base / Upside / Downside) {#scenario-analysis-base--upside--downside}
 
 Use a scenario toggle (dropdown) in the Assumptions tab with CHOOSE or INDEX/MATCH formulas.
 
@@ -192,15 +200,15 @@ Use a scenario toggle (dropdown) in the Assumptions tab with CHOOSE or INDEX/MAT
 
 **Scenario Audit Checks**: Toggle switches all statements, BS balances in all scenarios, Cash ties out, Hierarchy holds (Upside > Base > Downside for NI, EBITDA, FCF, margins).
 
-## SEC Filings Data Extraction
+## SEC Filings Data Extraction {#sec-filings-data-extraction}
 
-If the template specifically requires pulling data from SEC filings (10-K, 10-Q), see [references/sec-filings.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/finance/3-statement-model/references/sec-filings.md) for detailed extraction guidance. This reference is only needed when populating templates with public company data from regulatory filings.
+If the template specifically requires pulling data from SEC filings (10-K, 10-Q), see [references/sec-filings.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/finance/3-statement-model/references/sec-filings.md) for detailed extraction guidance. This reference is only needed when populating templates with public company data from regulatory filings.
 
-## Completing Model Templates
+## Completing Model Templates {#completing-model-templates}
 
 This section provides general guidance for completing any 3-statement financial model template while preserving existing formulas and ensuring data integrity.
 
-### Step 1: Analyze the Template Structure
+### Step 1: Analyze the Template Structure {#step-1-analyze-the-template-structure}
 
 Before entering any data, thoroughly review the template to understand its architecture:
 
@@ -215,7 +223,7 @@ Before entering any data, thoroughly review the template to understand its archi
 - Note any supporting schedules and their linkages to main statements
 - Document the template's specific line items and structure before populating
 
-### Step 2: Filling in Data Without Breaking Formulas
+### Step 2: Filling in Data Without Breaking Formulas {#step-2-filling-in-data-without-breaking-formulas}
 
 **Golden Rules for Data Entry**
 
@@ -239,7 +247,7 @@ Before entering any data, thoroughly review the template to understand its archi
 - When formulas produce unexpected results, trace precedents to identify missing or incorrect inputs
 - Never delete rows/columns without checking for formula dependencies across all tabs
 
-### Step 3: Validating Formulas
+### Step 3: Validating Formulas {#step-3-validating-formulas}
 
 **Formula Integrity Checks**
 
@@ -266,7 +274,7 @@ Before relying on template outputs, validate that formulas are functioning corre
 - Verify schedule totals tie to corresponding line items on main statements
 - Check that period labels align across all tabs
 
-### Step 4: Quality Checks by Sheet
+### Step 4: Quality Checks by Sheet {#step-4-quality-checks-by-sheet}
 
 Perform these validation checks on each sheet after populating the template:
 
@@ -301,7 +309,7 @@ Perform these validation checks on each sheet after populating the template:
 - Schedule totals tie to main statement line items
 - Assumptions used in calculations match Assumptions tab
 
-### Step 5: Cross-Statement Integrity Checks
+### Step 5: Cross-Statement Integrity Checks {#step-5-cross-statement-integrity-checks}
 
 After validating individual sheets, confirm the three statements are properly integrated:
 
@@ -312,7 +320,7 @@ After validating individual sheets, confirm the three statements are properly in
 | Net Income Link | IS Net Income - CF Starting Net Income | = 0 |
 | Retained Earnings | Prior RE + NI - Dividends - BS Ending RE | = 0 (adjust for SBC/other items as needed) |
 
-### Step 6: Final Review
+### Step 6: Final Review {#step-6-final-review}
 
 Before considering the model complete:
 - Toggle through all scenarios (if applicable) to verify checks pass in each case
@@ -321,13 +329,13 @@ Before considering the model complete:
 - Verify units are consistent across all tabs
 - Save a clean version before making any additional modifications
 
-## Model Validation and Audit
+## Model Validation and Audit {#model-validation-and-audit}
 
 This section consolidates all validation checks and audit procedures for completed templates.
 
-### Core Linkages (Must Always Hold)
+### Core Linkages (Must Always Hold) {#core-linkages-must-always-hold}
 
-See [references/formulas.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/finance/3-statement-model/references/formulas.md) for all formula details.
+See [references/formulas.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/finance/3-statement-model/references/formulas.md) for all formula details.
 
 | Check | Formula | Expected Result |
 |-------|---------|-----------------|
@@ -339,7 +347,7 @@ See [references/formulas.md](https://github.com/NousResearch/hermes-agent/blob/m
 | Equity Financing | ΔCommon Stock/APIC (BS) - Equity Issuance (CFF) | = 0 |
 | Year 0 Equity | Equity Raised (Year 0) - Beginning Equity Capital (Year 1) | = 0 |
 
-### Sign Convention Reference
+### Sign Convention Reference {#sign-convention-reference}
 
 | Statement | Item | Sign Convention |
 |-----------|------|-----------------|
@@ -351,13 +359,13 @@ See [references/formulas.md](https://github.com/NousResearch/hermes-agent/blob/m
 | CFF | Debt repayments | Negative |
 | CFF | Dividends | Negative |
 
-### Circular Reference Handling
+### Circular Reference Handling {#circular-reference-handling}
 
 Interest expense creates circularity: Interest → Net Income → Cash → Debt Balance → Interest
 
 Enable iterative calculation in Excel: File → Options → Formulas → Enable iterative calculation. Set maximum iterations to 100, maximum change to 0.001. Add a circuit breaker toggle in Assumptions tab.
 
-### Check Categories
+### Check Categories {#check-categories}
 
 **Section 1: Currency Consistency**
 - Currency identified and documented in Assumptions
@@ -418,13 +426,13 @@ Enable iterative calculation in Excel: File → Options → Formulas → Enable 
 - Flag metrics as Green/Yellow/Red based on covenant thresholds
 - Summary of any red flags
 
-### Master Check Formula
+### Master Check Formula {#master-check-formula}
 
 Aggregate all section statuses into a single master check:
 - If all sections pass → "✓ ALL CHECKS PASS"
 - If any section fails → "✗ ERRORS DETECTED - REVIEW BELOW"
 
-### Quick Debug Workflow
+### Quick Debug Workflow {#quick-debug-workflow}
 
 When Master Status shows errors:
 1. Scroll to find red-highlighted sections
@@ -434,11 +442,11 @@ When Master Status shows errors:
 5. Return to Checks tab to verify resolution
 
 
-## Data sources — MCP first, web fallback
+## Data sources — MCP first, web fallback {#data-sources--mcp-first-web-fallback}
 
-Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Those are commercial financial-data MCPs from the original Cowork plugin context. In Hermes:
+Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Those are commercial financial-data MCPs from the original Cowork plugin context. In {{app-name}}:
 
-- **If you have any structured financial-data MCP configured** (Hermes supports MCP — see `native-mcp` skill), prefer it for point-in-time comps, precedent transactions, and filings.
+- **If you have any structured financial-data MCP configured** ({{app-name}} supports MCP — see `native-mcp` skill), prefer it for point-in-time comps, precedent transactions, and filings.
 - **Otherwise**, fall back to:
   - `web_search` / `web_extract` against SEC EDGAR (`https://www.sec.gov/cgi-bin/browse-edgar`) for US filings
   - Company IR pages for press releases, earnings decks
@@ -446,6 +454,6 @@ Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Th
   - User-provided data (explicitly ask when the context doesn't have it)
 - **Never fabricate**. If a multiple, precedent, or filing number can't be sourced, flag the cell as `[UNSOURCED]` and surface it to the user.
 
-## Attribution
+## Attribution {#attribution}
 
 This skill is adapted from Anthropic's Claude for Financial Services plugin suite (Apache-2.0). The Office-JS / Cowork live-Excel paths have been removed; this version targets headless openpyxl via the `excel-author` skill's conventions. Original: https://github.com/anthropics/financial-services

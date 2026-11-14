@@ -1,6 +1,7 @@
+import { ExternalLink } from '@noone/ui/icons'
+
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
-import { ExternalLink } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { LIST_ROW_COLUMNS } from '../primitives'

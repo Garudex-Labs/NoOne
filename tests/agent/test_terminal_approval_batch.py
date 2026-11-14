@@ -54,7 +54,7 @@ def test_desktop_publishes_final_commands_before_wait_and_runs_in_order(tmp_path
     agent = _agent()
     published = queue.Queue()
     approval.register_gateway_notify(key, published.put)
-    from tui_gateway import server
+    from agent_backend import server
     monkeypatch.setattr(server, "_sessions", {key: {
         "session_key": key, "source": "desktop", "agent": agent, "cwd": str(tmp_path),
     }})
@@ -89,7 +89,7 @@ def test_desktop_publishes_final_commands_before_wait_and_runs_in_order(tmp_path
             thread.start()
             thread.join(20)
             return results[0]
-        monkeypatch.setattr("hermes_cli.middleware.run_tool_execution_middleware", middleware)
+        monkeypatch.setattr("agent_cli.middleware.run_tool_execution_middleware", middleware)
 
     def pre_hook(name, args, **kwargs):
         if name != "terminal":
@@ -112,7 +112,7 @@ def test_desktop_publishes_final_commands_before_wait_and_runs_in_order(tmp_path
             errors.append(exc)
 
     with ExitStack() as scope, patch(
-        "hermes_cli.plugins._dispatch_pre_tool_call_hooks", side_effect=pre_hook
+        "agent_cli.plugins._dispatch_pre_tool_call_hooks", side_effect=pre_hook
     ):
         scope.callback(reset_terminal_scope, set_terminal_scope({"TERMINAL_ENV": "local", "TERMINAL_CWD": str(tmp_path)}))
         worker = threading.Thread(target=propagate_context_to_thread(run), daemon=True)
@@ -176,7 +176,7 @@ def test_cancelled_preparation_drains_requests_without_reusing_once(tmp_path, mo
             errors.append(exc)
 
     approval.register_gateway_notify(key, notify)
-    from tui_gateway import server
+    from agent_backend import server
     monkeypatch.setattr(server, "_sessions", {key: {
         "session_key": key, "source": "desktop", "agent": agent, "cwd": str(tmp_path),
     }})
@@ -254,7 +254,7 @@ def test_failed_command_re_gates_later_prepared_approvals(tmp_path, monkeypatch)
     agent = _agent()
     published = queue.Queue()
     approval.register_gateway_notify(key, published.put)
-    from tui_gateway import server
+    from agent_backend import server
     monkeypatch.setattr(server, "_sessions", {key: {
         "session_key": key, "source": "desktop", "agent": agent, "cwd": str(tmp_path),
     }})
@@ -335,7 +335,7 @@ def test_switching_yolo_off_mid_batch_re_gates_later_commands(tmp_path, monkeypa
     agent._flush_messages_to_session_db = lambda *a, **kw: True
     published = queue.Queue()
     approval.register_gateway_notify(key, published.put)
-    from tui_gateway import server
+    from agent_backend import server
     monkeypatch.setattr(server, "_sessions", {key: {
         "session_key": key, "source": "desktop", "agent": agent, "cwd": str(tmp_path)}})
     tokens = server._set_session_context(key)

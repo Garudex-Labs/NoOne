@@ -1,7 +1,7 @@
 """The classic CLI's real startup and command dispatch, in a fresh process, recording every plugin
 discovery / execution entry point it reaches (#134889 PLG-7).
 
-``argv[1]`` is the launch: ``oneshot`` (``_prepare_agent_startup``, as ``hermes chat -q`` runs it) or
+``argv[1]`` is the launch: ``oneshot`` (``_prepare_agent_startup``, as ``noone chat -q`` runs it) or
 ``interactive`` (main's fast path: discovery deferred to the first turn). The rest of argv are the
 chat flags (``-t terminal``, ``-s <skill>``). The gateway for ``HERMES_HOME`` must already run, with the probe plugin
 (a ``pre_command`` hook, a command, a skill and a toolset) loaded. Prints one JSON line.
@@ -16,7 +16,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from agent import skill_commands
-from hermes_cli import plugins
+from agent_cli import plugins
 
 calls = []
 
@@ -65,7 +65,7 @@ COMPLETE = ('/probe', '/tools enable ', '/tools disable ')
 
 def main():
     mode, flags = sys.argv[1], sys.argv[2:]
-    from hermes_cli import main as hermes_main
+    from agent_cli import main as hermes_main
     args = hermes_main._light_chat_parser().parse_args(['chat', *flags])
     if mode == 'interactive':
         os.environ['HERMES_DEFER_AGENT_STARTUP'] = '1'
@@ -91,7 +91,7 @@ def main():
                 errors.append(f'{command}: {traceback.format_exc()}')
             outputs[command if command not in outputs else f'{command} #2'] = out.getvalue()[start:]
         try:
-            from hermes_cli.commands_completion import cli_slash_completer
+            from agent_cli.commands_completion import cli_slash_completer
             completer = cli_slash_completer(c)  # the prompt's own completer
             for text in COMPLETE:
                 completions[text] = sorted({x.text for x in completer.get_completions(Document(text), None)})

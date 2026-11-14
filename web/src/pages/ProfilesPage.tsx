@@ -1,4 +1,32 @@
 import {
+  AlignLeft,
+  Check,
+  ChevronDown,
+  Cpu,
+  MoreVertical,
+  Package,
+  Pencil,
+  Sparkles,
+  Terminal,
+  Trash2,
+  Users,
+  X,
+} from "@noone/ui/icons";
+import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
+import { Badge } from "@nous-research/ui/ui/components/badge";
+import { Button } from "@nous-research/ui/ui/components/button";
+import { Card, CardContent } from "@nous-research/ui/ui/components/card";
+import { Checkbox } from "@nous-research/ui/ui/components/checkbox";
+import { Input } from "@nous-research/ui/ui/components/input";
+import { Label } from "@nous-research/ui/ui/components/label";
+import {
+  Select,
+  SelectOption,
+} from "@nous-research/ui/ui/components/select";
+import { Toast } from "@nous-research/ui/ui/components/toast";
+import { H2 } from "@nous-research/ui/ui/components/typography/h2";
+import {
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -7,47 +35,20 @@ import {
   useState,
 } from "react";
 import { useNavigate } from "react-router";
-import { useProfileScope } from "@/contexts/useProfileScope";
-import {
-  AlignLeft,
-  Check,
-  ChevronDown,
-  Cpu,
-  MoreVertical,
-  Pencil,
-  Package,
-  Sparkles,
-  Terminal,
-  Trash2,
-  Users,
-  X,
-} from "lucide-react";
 import spinners from "unicode-animations";
-import { H2 } from "@nous-research/ui/ui/components/typography/h2";
+
+import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+import { usePageHeader } from "@/contexts/usePageHeader";
+import { useProfileScope } from "@/contexts/useProfileScope";
+import { useModalBehavior } from "@/hooks/useModalBehavior";
+import { useI18n } from "@/i18n";
 import { api } from "@/lib/api";
 import type { ActiveProfileInfo, ProfileInfo } from "@/lib/api";
-import { copyTextToClipboard } from "@/lib/clipboard";
-import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
-import { useModalBehavior } from "@/hooks/useModalBehavior";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { Card, CardContent } from "@nous-research/ui/ui/components/card";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Label } from "@nous-research/ui/ui/components/label";
-import {
-  Select,
-  SelectOption,
-} from "@nous-research/ui/ui/components/select";
-import { Checkbox } from "@nous-research/ui/ui/components/checkbox";
-import { useI18n } from "@/i18n";
-import { usePageHeader } from "@/contexts/usePageHeader";
-import { cn, themedBody } from "@/lib/utils";
 import { errorMessage } from "@/lib/api-error";
+import { copyTextToClipboard } from "@/lib/clipboard";
+import { cn, themedBody } from "@/lib/utils";
 
-// Mirrors hermes_cli/profiles.py::_PROFILE_ID_RE so we can reject obviously
+// Mirrors agent_cli/profiles.py::_PROFILE_ID_RE so we can reject obviously
 // invalid names (uppercase, spaces, …) before round-tripping a doomed POST.
 const PROFILE_NAME_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 

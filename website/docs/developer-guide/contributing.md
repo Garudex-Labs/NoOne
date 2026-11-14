@@ -1,14 +1,13 @@
 ---
-sidebar_position: 4
 title: "Contributing"
-description: "How to contribute to Hermes Agent — dev setup, code style, PR process"
+description: "How to contribute to the agent — dev setup, code style, PR process"
 ---
 
-# Contributing
+# Contributing {#contributing}
 
-Thank you for contributing to Hermes Agent! This guide covers setting up your dev environment, understanding the codebase, and getting your PR merged.
+Thank you for contributing to {{app-name}}! This guide covers setting up your dev environment, understanding the codebase, and getting your PR merged.
 
-## Contribution Priorities
+## Contribution Priorities {#contribution-priorities}
 
 We value contributions in this order:
 
@@ -20,21 +19,21 @@ We value contributions in this order:
 6. **New tools** — rarely needed; most capabilities should be skills
 7. **Documentation** — fixes, clarifications, new examples
 
-## Contribution rubric
+## Contribution rubric {#contribution-rubric}
 
 The project's intent layer, summarised in the root `AGENTS.md`; this is the long form with the
-examples. Hermes ships a lot: most merges are bug fixes and the product surface (platforms,
-providers, models, desktop/TUI features) expands on purpose. The restraint targets the core agent
+examples. {{app-name}} ships a lot: most merges are bug fixes and the product surface (platforms,
+providers, models, desktop features) expands on purpose. The restraint targets the core agent
 and the model tool schema, where every addition is paid for on every API call: expansive at the
 edges, conservative at the waist.
 
-### What we want
+### What we want {#what-we-want}
 
 - **Fix real bugs, well.** Reproduce the symptom on current `main`, point to the exact line
   where it manifests, and fix the whole bug class — sibling call paths included.
-- **Expand reach at the edges.** New adapters, channels, providers, models, desktop/TUI/
+- **Expand reach at the edges.** New adapters, channels, providers, models, desktop/
   dashboard features land routinely, including large ones — as long as they integrate with
-  the existing setup/config UX (`hermes tools`, `hermes setup`, auto-install) rather than
+  the existing setup/config UX (`noone tools`, `noone setup`, auto-install) rather than
   bolting on a raw env var.
 - **Refactor god-files into clean modules.** Huge mechanical `+N/-N` extraction PRs are
   wanted work. "Every line traces to the request" applies to *feature* PRs; a declared
@@ -58,7 +57,7 @@ edges, conservative at the waist.
 - **Contributor credit preserved.** Salvage external work by cherry-picking (rebase-merge) so
   authorship survives; build on top rather than reimplementing.
 
-### What we don't want (rejected even when well-built)
+### What we don't want (rejected even when well-built) {#what-we-dont-want-rejected-even-when-well-built}
 
 - **Speculative infrastructure.** Hooks/callbacks/extension points with no concrete consumer.
   Adding a hook is easy; removing one after plugins depend on it is hard. A hook with a real,
@@ -76,7 +75,7 @@ edges, conservative at the waist.
   (`git log -p -S`) before restricting behavior; find a fix that preserves the feature.
 - **Outbound telemetry / usage attribution without opt-in gating.** No analytics,
   third-party identifier tagging, or attribution tags until a generic user-facing opt-in
-  (config gate + setup prompt + `hermes tools` toggle) exists. Park behind a label.
+  (config gate + setup prompt + `noone tools` toggle) exists. Park behind a label.
 - **Change-detector tests, cache-breaking mid-conversation, dead code wired in without E2E
   proof, plugins that touch core files.** Plugins work within the ABCs/hooks we provide; if
   one needs more, widen the generic plugin surface, never special-case it in core.
@@ -87,7 +86,7 @@ edges, conservative at the waist.
   entry point), promoted in the Nous Research Discord `#plugins-skills-and-skins`. This is a
   coupling decision, not a quality bar; such PRs are closed with a pointer to publish.
 
-### Before you call it a bug — verify the premise (and when NOT to close)
+### Before you call it a bug — verify the premise (and when NOT to close) {#before-you-call-it-a-bug--verify-the-premise-and-when-not-to-close}
 
 The most common reason a well-written PR is closed is a **wrong premise** or treating an
 **intentional design as a gap**. These patterns tell a reviewer what to scrutinize and tell
@@ -116,14 +115,14 @@ a fix.** A reproduction on current `main` plus a line-level account beats a plau
 rationale. When unsure about intent, asking is cheaper than shipping a fix that fights the
 design.
 
-### The Footprint Ladder (new capability decision)
+### The Footprint Ladder (new capability decision) {#the-footprint-ladder-new-capability-decision}
 
 Choose the highest (least-footprint) rung that correctly solves the problem:
 
 1. **Extend existing code** — a variation of something that exists. Zero new surface.
 2. **CLI command + skill** — config/state/infra expressible as shell commands; the agent runs
    `hermes <subcommand>` guided by a skill. Default for subscriptions, scheduled tasks,
-   service setup (`hermes webhook`, `hermes cron`, `hermes tools`).
+   service setup (`hermes webhook`, `noone cron`, `noone tools`).
 3. **Service-gated tool (`check_fn`)** — needs structured params/returns AND only appears when
    a prerequisite is configured (Home Assistant tools, memory-provider tools). This rung gates
    reachability/opt-in process-wide; a capability that varies per SESSION (who is watching) is
@@ -137,16 +136,16 @@ Choose the highest (least-footprint) rung that correctly solves the problem:
    unreachable via terminal + file or an MCP server (terminal, read_file, web_search,
    browser_exec).
 
-## Common contribution paths
+## Common contribution paths {#common-contribution-paths}
 
-- Building a custom/local tool without modifying Hermes core? Start with [Build a Hermes Plugin](../developer-guide/plugins/index.md)
-- Building a new built-in core tool for Hermes itself? Start with [Adding Tools](./adding-tools.md)
+- Building a custom/local tool without modifying {{app-name}} core? Start with [Build a {{app-name}} Plugin](../developer-guide/plugins/index.md)
+- Building a new built-in core tool for {{app-name}} itself? Start with [Adding Tools](./adding-tools.md)
 - Building a new skill? Start with [Creating Skills](./creating-skills.md)
 - Building a new inference provider? Start with [Adding Providers](./adding-providers.md)
 
-## Development Setup
+## Development Setup {#development-setup}
 
-### Prerequisites
+### Prerequisites {#prerequisites}
 
 | Requirement          | Notes                                                                                         |
 | -------------------- | --------------------------------------------------------------------------------------------- |
@@ -155,7 +154,7 @@ Choose the highest (least-footprint) rung that correctly solves the problem:
 | **Node.js** | Use the PM pin or a version accepted by root `package.json` engines |
 | **pnpm** | Exactly the `pm/lock.json` pin; `source ./activate` provides it |
 
-### PM developer environment
+### PM developer environment {#pm-developer-environment}
 
 Use the [PM developer workflow](../reference/package-management.md#developer-workflow) for preparation, activation, everyday commands,
 dependency changes, and test environments. Select your development
@@ -168,14 +167,14 @@ Bash:
 
 ```bash
 source ./activate
-hermes --version
+noone --version
 ```
 
 PowerShell:
 
 ```powershell
 . .\activate.ps1
-hermes --version
+noone --version
 ```
 
 Run `hermes` for this checkout. Activation defines it as a function for this
@@ -191,12 +190,12 @@ script or tool in this repository, so the commands below also work without
 
 | Recipe | Runs |
 |---|---|
-| `just setup` | `setup-hermes.sh --runtime-only --test-environment` (PowerShell: `setup-hermes.ps1 -RuntimeOnly`) |
+| `just setup` | `setup-agent.sh --runtime-only --test-environment` (PowerShell: `setup-agent.ps1 -RuntimeOnly`) |
 | `just check` | `scripts/check`, every blocking lint check; `just check --only health` selects checks |
 | `just fix` | the pinned ruff with `--fix`, then `pnpm -r fix` |
 | `just test <paths>` | `scripts/run_tests.sh <paths>`; refuses to start without a path, even with flags |
 | `just test-all` | the full Python suite |
-| `just js-install`, `just check-js`, `just test-js` | `pnpm install --frozen-lockfile`, `pnpm -r check`, `pnpm -r test` (after building `@hermes/ink`) |
+| `just js-install`, `just check-js`, `just test-js` | `pnpm install --frozen-lockfile`, `pnpm -r check`, `pnpm -r test` (after building `@noone/ink`) |
 | `just desktop`, `just tui` | the desktop and TUI dev servers |
 | `just docs-install`, `just docs-build` | the website's `npm ci` and `build:fast` |
 | `just docs-generate`, `just docs-check` | regenerate the skill docs pages; then every docs check CI runs (committed pages match, links, diagrams) |
@@ -205,7 +204,7 @@ script or tool in this repository, so the commands below also work without
 | `just check-icons`, `just lint-docker`, `just check-plugin-catalog`, `just check-nix` | the committed-icons check, hadolint and shellcheck on the container inputs, the catalog validator, `nix flake check` |
 | `just test-catalog`, `just test-whatsapp-bridge`, `just test-rust` | the plugin-catalog tests, the WhatsApp bridge's node tests (after `just js-install-whatsapp-bridge`), the bootstrap installer's `cargo test --lib` |
 
-Recipes that run Python go through `scripts/run-in-hermes-env`, so they work in
+Recipes that run Python go through `scripts/run-in-agent-env`, so they work in
 a shell that was never activated. A new developer command is a script under
 `scripts/` plus a recipe that calls it; the recipe holds no logic.
 
@@ -245,10 +244,10 @@ This test environment does not replace PM's application selection or tool
 store. Do not point a bundled app at it or install into an MSIX payload.
 
 For an isolated development instance, select a disposable `HERMES_HOME` before
-starting the source command. Use `hermes setup` to configure it rather
+starting the source command. Use `noone setup` to configure it rather
 than copying production credentials into the checkout.
 
-### JavaScript workspaces and website
+### JavaScript workspaces and website {#javascript-workspaces-and-website}
 
 From the repository root, run `pnpm install --frozen-lockfile` (`just js-install`) for the desktop,
 TUI, dashboard, and shared JS workspaces. `pm/lock.json` pins pnpm
@@ -287,10 +286,10 @@ Native desktop dependencies can also require the platform build toolchain.
 
 Logos and icons are generated from `assets/nous-girl-*.svg` and
 `assets/backgrounds/`. `node scripts/generate-icons.mjs` (`just icons`) renders them with the
-Hermes runtime Python (`HERMES_PYTHON`, else `python` on PATH): Pillow and
+{{app-name}} runtime Python (`HERMES_PYTHON`, else `python` on PATH): Pillow and
 resvg-py are core dependencies. Do not commit generated PNG/ICO/ICNS outputs.
 
-### Run tests
+### Run tests {#run-tests}
 
 Use the canonical runner on every host:
 
@@ -316,15 +315,15 @@ Run the relevant JS workspace checks for JS changes. Native install/update
 E2E runs on disposable CI hosts, never against the developer's live app.
 See [Package management](../reference/package-management.md) for PM commands and runtime ownership.
 
-## Code Style
+## Code Style {#code-style}
 
 - **PEP 8** with practical exceptions (no strict line length enforcement)
 - **Comments**: Only when explaining non-obvious intent, trade-offs, or API quirks
 - **Error handling**: Catch specific exceptions. Use `logger.warning()`/`logger.error()` with `exc_info=True` for unexpected errors
 - **Cross-platform**: Never assume Unix (see below)
-- **Profile-safe paths**: Never hardcode `~/.hermes` — use `get_hermes_home()` from `hermes_constants` for code paths and `display_hermes_home()` for user-facing messages. See [AGENTS.md](https://github.com/NousResearch/hermes-agent/blob/main/AGENTS.md#profiles-multi-instance-support) for full rules.
+- **Profile-safe paths**: Never hardcode `~/.hermes` — use `get_agent_home()` from `agent_constants` for code paths and `display_agent_home()` for user-facing messages. See [AGENTS.md](https://github.com/Garudex-Labs/NoOne/blob/main/AGENTS.md#profiles-multi-instance-support) for full rules.
 
-## Cross-Platform Compatibility
+## Cross-Platform Compatibility {#cross-platform-compatibility}
 
 See **[Platform Support](../getting-started/platform-support.md)**. Native Windows uses Git Bash (from [Git for Windows](https://git-scm.com/download/win)) for shell commands. The dashboard uses POSIX PTYs on Unix and the `pywinpty`/ConPTY bridge on Windows. Availability depends on that host's native dependency support. If you're doing Windows-heavy dev, run the Windows-footgun lint (`scripts/check-windows-footguns.py`) before pushing.
 
@@ -338,7 +337,7 @@ When contributing code, keep these rules in mind:
 
 Key patterns:
 
-### 1. File encoding
+### 1. File encoding {#1-file-encoding}
 
 Some environments may save `.env` files in non-UTF-8 encodings:
 
@@ -349,7 +348,7 @@ except UnicodeDecodeError:
     load_dotenv(env_path, encoding="latin-1")
 ```
 
-### 2. Process management
+### 2. Process management {#2-process-management}
 
 `os.setsid()`, `os.killpg()`, and signal handling differ across platforms:
 
@@ -359,15 +358,15 @@ if platform.system() != "Windows":
     kwargs["preexec_fn"] = os.setsid
 ```
 
-### 3. Path separators
+### 3. Path separators {#3-path-separators}
 
 Use `pathlib.Path` instead of string concatenation with `/`.
 
-## Security Considerations
+## Security Considerations {#security-considerations}
 
-Hermes has terminal access. Security matters.
+{{app-name}} has terminal access. Security matters.
 
-### Existing Protections
+### Existing Protections {#existing-protections}
 
 | Layer                           | Implementation                                                              |
 | ------------------------------- | --------------------------------------------------------------------------- |
@@ -379,7 +378,7 @@ Hermes has terminal access. Security matters.
 | **Code execution sandbox**      | Child process runs with API keys stripped                                   |
 | **Container hardening**         | Docker: all capabilities dropped, no privilege escalation, PID limits       |
 
-### Contributing Security-Sensitive Code
+### Contributing Security-Sensitive Code {#contributing-security-sensitive-code}
 
 - Always use `shlex.quote()` when interpolating user input into shell commands
 - Resolve symlinks with `os.path.realpath()` before access control checks
@@ -387,9 +386,9 @@ Hermes has terminal access. Security matters.
 - Catch broad exceptions around tool execution
 - Test on all platforms if your change touches file paths or processes
 
-## Pull Request Process
+## Pull Request Process {#pull-request-process}
 
-### Branch Naming
+### Branch Naming {#branch-naming}
 
 ```
 fix/description        # Bug fixes
@@ -399,16 +398,16 @@ test/description       # Tests
 refactor/description   # Code restructuring
 ```
 
-### Before Submitting
+### Before Submitting {#before-submitting}
 
 1. **Run tests**: `scripts/run_tests.sh` for CI-parity. Use direct `python -m pytest ...` only when the wrapper is unavailable or you are intentionally debugging outside the wrapper.
 2. **Test manually**: Run `hermes` and exercise the code path you changed
 3. **Check cross-platform impact**: Consider macOS, Linux, WSL2, and native Windows. If you touch file I/O, process management, terminal handling, subprocesses, or signals, run `scripts/check-windows-footguns.py`.
 4. **Keep PRs focused**: One logical change per PR
-5. **Prompt or tool-schema changes**: if `tests/ci/test_prompt_surface.py` fails, your change alters the system prompt or a tool schema that every session sends. Regenerate with `scripts/run-in-hermes-env python scripts/ci/prompt_surface.py render` and commit the snapshot. Changes there need a maintainer approval (see [Prompt Assembly](./prompt-assembly.md#reviewing-changes-to-the-prompt-surface)).
+5. **Prompt or tool-schema changes**: if `tests/ci/test_prompt_surface.py` fails, your change alters the system prompt or a tool schema that every session sends. Regenerate with `scripts/run-in-agent-env python scripts/ci/prompt_surface.py render` and commit the snapshot. Changes there need a maintainer approval (see [Prompt Assembly](./prompt-assembly.md#reviewing-changes-to-the-prompt-surface)).
 6. **New config keys or slash commands**: if `tests/ci/test_docs_drift.py` fails, a `DEFAULT_CONFIG` key or slash command you added has no docs. Mention the dotted key (`agent.max_turns`) or show it in a YAML example under `website/docs/` (usually `user-guide/configuration.md`), and add slash commands to `reference/slash-commands.md`. If a key really should stay undocumented, `python scripts/ci/check_docs_drift.py --update` adds it to `scripts/ci/docs_drift_baseline.json` where reviewers see it. Keys that were undocumented when the check landed are already baselined; documenting one never fails.
 
-### PR Description
+### PR Description {#pr-description}
 
 Include:
 
@@ -417,7 +416,7 @@ Include:
 - **What platforms** you tested on
 - Reference any related issues
 
-### Commit Messages
+### Commit Messages {#commit-messages}
 
 We use [Conventional Commits](https://www.conventionalcommits.org/):
 
@@ -444,9 +443,9 @@ feat(gateway): add WhatsApp multi-user session isolation
 fix(security): prevent shell injection in sudo password piping
 ```
 
-### Repo-local review checklists: `.agents/checks/*.md`
+### Repo-local review checklists: `.agents/checks/*.md` {#repo-local-review-checklists-agentschecksmd}
 
-Projects built on (or reviewed by) Hermes can keep reviewer checklists inside the repository under `.agents/checks/`. Each file is a focused, plain-markdown checklist that an agent loads before reviewing a change touching the matching area:
+Projects built on (or reviewed by) {{app-name}} can keep reviewer checklists inside the repository under `.agents/checks/`. Each file is a focused, plain-markdown checklist that an agent loads before reviewing a change touching the matching area:
 
 ```
 .agents/
@@ -463,22 +462,45 @@ Conventions that make these work well:
 - **State the trigger at the top** — which paths or change types the checklist applies to — so an agent (or human) can skip irrelevant ones cheaply.
 - Keep them in version control next to the code they guard: they evolve with the codebase, and a PR that changes the rules changes the checklist in the same diff.
 
-When you ask Hermes to review a PR in a repository that has `.agents/checks/`, tell it (or teach it via a skill) to read the relevant checklists first and report against them. This gives review agents the project-specific bar that generic review prompts miss.
+When you ask {{app-name}} to review a PR in a repository that has `.agents/checks/`, tell it (or teach it via a skill) to read the relevant checklists first and report against them. This gives review agents the project-specific bar that generic review prompts miss.
 
-## Reporting Issues
+## Reporting Issues {#reporting-issues}
 
-- Use [GitHub Issues](https://github.com/NousResearch/hermes-agent/issues)
-- Include: OS, Python version, Hermes version (`hermes --version`), full error traceback
+- Use [GitHub Issues](https://github.com/Garudex-Labs/NoOne/issues)
+- Include: OS, Python version, {{app-name}} version (`noone --version`), full error traceback
 - Include steps to reproduce
 - Check existing issues before creating duplicates
 - For security vulnerabilities, please report privately
 
-## Community
+## Community {#community}
 
-- **Discord**: [discord.gg/NousResearch](https://discord.gg/NousResearch)
+- **Questions and feedback**: [project issues](https://github.com/Garudex-Labs/NoOne/issues)
 - **GitHub Discussions**: For design proposals and architecture discussions
 - **Skills Hub**: Upload specialized skills and share with the community
 
-## License
+## License {#license}
 
-By contributing, you agree that your contributions will be licensed under the [MIT License](https://github.com/NousResearch/hermes-agent/blob/main/LICENSE).
+By contributing, you agree that your contributions will be licensed under the [MIT License](https://github.com/Garudex-Labs/NoOne/blob/main/LICENSE).
+
+## Documentation source release and hosting prerequisites {#documentation-source-release-and-hosting-prerequisites}
+
+`npm --prefix website run release:source -- /absolute/empty/output` prepares a complete content directory after the existing documentation generators. It resolves the canonical application-name variable while preserving literal examples, both languages, pinned catalog pages, snippets, assets, and API/OAuth feeds. The output directory must not already exist and cannot be inside the source tree. A sibling `-report.json` records every file's size and SHA-256. This command does not deploy or certify a host.
+
+The current full static archive is approximately 6.73 GiB uncompressed and cannot meet the existing 1 GiB Pages gate. Keep that gate and all retained content. A prepared-source deployment is an alternative to repeating the large static export, not permission to provision a service.
+
+Before publishing, the maintainer must approve a real hosting project and its repository/content-directory integration, the retained `/docs` route/base path and locale navigation, and publication of `/docs/api/*`, `/docs/oauth/*`, images, and LLM feeds. Validate custom page rendering/hydration, search, redirects and shared-client catalog/OAuth consumers against that host. Account access, domain/proxy changes, resource limits, credentials and deployment remain separate prerequisites. No dedicated NoOne hosting endpoint is declared by this repository.
+
+### Source-release workflow and resource-only Pages {#source-release-workflow-and-resource-only-pages}
+
+`.github/workflows/deploy-site.yml` validates the complete native documentation source, releases the `prepared-docs-source` artifact (including both locales, all retained pages and generated catalogs), and publishes only the existing shared API/OAuth/image/LLM resources on GitHub Pages. The source artifact includes its SHA-256 inventory; it is a workflow artifact, not a claim that HTML documentation is deployed.
+
+Local commands:
+
+```sh
+just docs-release-source /absolute/empty/source-output
+just docs-stage-resources /absolute/empty/source-output /absolute/empty/resource-output
+# Optional full native static export, only for a separately approved capable host:
+just docs-export
+```
+
+The Pages job keeps the original 1 GiB published/900 MiB compressed artifact gates. Its landing page and `docs/publication.json` explicitly state that it serves shared resources, not the full documentation site. It does not create a Mintlify account, set DNS, add API secrets, or invoke the former Vercel deployment hook. The real full-documentation host, source/build integration, `/docs` path, resource serving, renderer/hydration, search, access and publishing approval remain external prerequisites.

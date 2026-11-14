@@ -1,10 +1,10 @@
 import { useStore } from '@nanostores/react'
+import { AlertTriangle, FileText, Loader2, Power, RefreshCw } from '@noone/ui/icons'
 import { useEffect, useId, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import type { UpdateHoldWire } from '@/global'
 import { useI18n } from '@/i18n'
-import { AlertTriangle, FileText, Loader2, Power, RefreshCw } from '@/lib/icons'
 import { $desktopBoot } from '@/store/boot'
 
 type Busy = 'quit' | 'recheck' | 'start' | null

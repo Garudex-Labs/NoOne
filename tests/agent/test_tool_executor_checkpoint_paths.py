@@ -102,8 +102,8 @@ async def test_container_session_refuses_host_rollback_on_every_surface(tmp_path
     from gateway.config import Platform
     from gateway.platforms.event import MessageEvent
     from gateway.session import SessionSource
-    from hermes_cli.cli_commands_mixin import CLICommandsMixin
-    from tui_gateway import server
+    from agent_cli.cli_commands_mixin import CLICommandsMixin
+    from agent_backend import server
 
     host_dir = tmp_path / "workspace" / "project"
     host_dir.mkdir(parents=True)

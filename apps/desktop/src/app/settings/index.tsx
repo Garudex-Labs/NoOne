@@ -1,13 +1,5 @@
 import { useStore } from '@nanostores/react'
-import { type ComponentType, useCallback, useEffect, useMemo, useRef } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router'
-
-import { codiconIcon } from '@/components/ui/codicon'
-import { KbdCombo } from '@/components/ui/kbd'
-import { Tip } from '@/components/ui/tooltip'
-import { getHermesConfigDefaults, getHermesConfigRecord, saveHermesConfig } from '@/hermes'
-import { useI18n } from '@/i18n'
-import { triggerHaptic } from '@/lib/haptics'
+import { getAppIcon } from '@noone/ui/app-icon'
 import {
   Archive,
   BarChart3,
@@ -26,7 +18,15 @@ import {
   Upload,
   Wrench,
   Zap
-} from '@/lib/icons'
+} from '@noone/ui/icons'
+import { type ComponentType, useCallback, useEffect, useMemo, useRef } from 'react'
+import { Navigate, useLocation, useNavigate } from 'react-router'
+
+import { getHermesConfigDefaults, getHermesConfigRecord, saveHermesConfig } from '@/agent-client'
+import { KbdCombo } from '@/components/ui/kbd'
+import { Tip } from '@/components/ui/tooltip'
+import { useI18n } from '@/i18n'
+import { triggerHaptic } from '@/lib/haptics'
 import { isEditableTarget } from '@/lib/keybinds/combo'
 import { typeToFocusChar } from '@/lib/keybinds/composer-focus-keys'
 import { cn } from '@/lib/utils'
@@ -324,7 +324,7 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
             children: [
               {
                 active: activeView === 'providers' && providerView === 'accounts',
-                icon: codiconIcon('account'),
+                icon: getAppIcon('account'),
                 id: 'pview:accounts',
                 label: t.settings.nav.providerAccounts,
                 onSelect: () => openProviderView('accounts')

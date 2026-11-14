@@ -12,7 +12,7 @@ import gateway.run as run_mod
 from gateway.active_lease_io import release_soon
 from gateway.config import Platform
 from gateway.session import SessionSource
-from hermes_cli import active_sessions
+from agent_cli import active_sessions
 
 
 class _ReleaseStuckOnTheRegistry:
@@ -77,7 +77,7 @@ def test_the_next_sessions_claim_at_the_cap_sees_the_ended_turns_slot_free(tmp_p
 
 def test_a_desktop_claim_of_the_session_a_gateway_turn_just_ended_is_not_already_owned(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    from tui_gateway import server
+    from agent_backend import server
 
     runner = _runner({})
     src = SessionSource(platform=Platform.TELEGRAM, chat_id="c1", user_id="u1")

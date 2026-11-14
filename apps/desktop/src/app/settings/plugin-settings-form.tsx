@@ -1,3 +1,4 @@
+import { Loader2, Save, SlidersHorizontal } from '@noone/ui/icons'
 import { type ReactNode, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -6,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { useI18n } from '@/i18n'
-import { Loader2, Save, SlidersHorizontal } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import type { PluginSettingField, PluginSettingFieldType } from '@/store/agent-plugins'
 

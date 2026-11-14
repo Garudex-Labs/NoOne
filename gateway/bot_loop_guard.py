@@ -63,7 +63,7 @@ def _as_positive_int(raw, default: int) -> int:
 
 def settings_from_config(cfg) -> BotLoopGuardSettings:
     """Read ``gateway.bot_loop_guard`` from a loaded config dict. Unusable values keep the default."""
-    from hermes_cli.config import cfg_get
+    from agent_cli.config import cfg_get
 
     block = cfg_get(cfg, "gateway", "bot_loop_guard", default=None)
     if not isinstance(block, dict):
@@ -81,8 +81,8 @@ def settings_from_config(cfg) -> BotLoopGuardSettings:
 
 def configured_bot_user(platform_config, user_id) -> bool:
     """Whether ``user_id`` is in the adapter's ``bot_users`` list (config.yaml platform ``extra``): the
-    opt-in that marks a peer bot on a platform whose events carry no bot flag (Mattermost, Matrix,
-    Signal, IRC, ...), so this guard and the bot-peer delivery rules engage for it (#137027)."""
+    opt-in that marks a peer bot on a platform whose events carry no bot flag (Mattermost,
+    Signal, ...), so this guard and the bot-peer delivery rules engage for it (#137027)."""
     if user_id is None or user_id == "":
         return False
     configured = (getattr(platform_config, "extra", None) or {}).get("bot_users")
@@ -94,7 +94,7 @@ def configured_bot_user(platform_config, user_id) -> bool:
 def load_settings() -> BotLoopGuardSettings:
     """Settings from the live config.yaml. Defaults when the config cannot be read."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
 
         return settings_from_config(load_config_readonly())
     except Exception:

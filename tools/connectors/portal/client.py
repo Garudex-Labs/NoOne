@@ -8,7 +8,6 @@ from urllib.parse import quote
 import requests
 from pydantic import ValidationError
 
-from hermes_cli.nous_account import resolve_nous_portal_base_url
 from tools.connectors.gateway.errors import (
     GatewayAuthError,
     GatewayUnavailable,
@@ -23,7 +22,6 @@ from tools.connectors.portal.wire import (
     ConnectorPolicyWriteResponse,
     ConnectorToolsListing,
 )
-from tools.managed_gateway_auth import read_nous_access_token
 from tools.managed_gateway_identity import connector_headers, log_connector_outcome, response_request_id
 
 

@@ -1,4 +1,4 @@
-"""A messaging conversation its chat moved past stays usable from the apps (Teknium's ruling).
+"""A messaging conversation its chat moved past stays usable from the apps.
 
 When a messaging chat names another conversation (``/new``, ``/resume``, ``/branch``, a handoff,
 its next inbound naming another one), a Desktop / Webapp / mobile view still open on the previous
@@ -133,12 +133,12 @@ def session_env_source(runner, source):
 def _route_authority(runner, store, route):
     """The authority owning *route*: its key names the profile, whatever scope the writer runs in."""
     from gateway.session_authorities import authority_for_home
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     registry = getattr(runner, 'session_authorities', None)
     if store._named_profile_for_key(route) is None:  # the launch profile's own key
         if registry is None:
             return getattr(runner, 'session_authority', None)
-        return next((a for a in registry.serving() if hermes_home_key(a.profile_id) == registry.launch_key), None)
+        return next((a for a in registry.serving() if agent_home_key(a.profile_id) == registry.launch_key), None)
     home = store._profile_home_for_key(route)
     return authority_for_home(runner, home) if home is not None else None
 
@@ -182,7 +182,7 @@ def recover_detached_sessions(authority, pending):
     from gateway.session_contract import SessionRef
     from gateway.session_route_recovery import restore_routed_session
     scheduled = []
-    from hermes_state_runtime import list_session_admissions
+    from agent_state_runtime import list_session_admissions
     for session_id in sorted(pending):
         if session_id in authority.sessions or not any(  # a lost (unknown) turn waits for /discard
                 row['status'] == 'queued' for row in list_session_admissions(authority.db, session_id=session_id)):
@@ -261,7 +261,7 @@ def _mounted(authority, session_id):
     if session_id not in authority.sessions:
         from gateway.session_authorities import owner_scope
         from gateway.session_route_recovery import restore_routed_session
-        from hermes_state_runtime import RuntimeStoreError
+        from agent_state_runtime import RuntimeStoreError
         try:
             with owner_scope(authority):
                 restore_routed_session(authority, session_id)

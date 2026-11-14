@@ -237,33 +237,11 @@ class TaskAttempt:
     cancel_generation: int
 
 
-def _create_task_table(conn: sqlite3.Connection, table: str = "hosted_room_driver_tasks") -> None:
-    conn.execute(
-        f"""CREATE TABLE IF NOT EXISTS {table} (
-            room_id TEXT NOT NULL, task_id TEXT NOT NULL, thread_id TEXT NOT NULL, turn_id TEXT NOT NULL,
-            source_event_seq INTEGER NOT NULL CHECK (source_event_seq >= 1),
-            payload_json TEXT NOT NULL, payload_digest TEXT NOT NULL,
-            status TEXT NOT NULL CHECK (status IN (
-                'queued', 'running', 'settled', 'failed', 'cancelled', 'indeterminate', 'deferred', 'stopping')),
-            execution_generation INTEGER NOT NULL DEFAULT 0 CHECK (execution_generation >= 0),
-            cancel_generation INTEGER NOT NULL DEFAULT 0 CHECK (cancel_generation >= 0),
-            run_gateway_id TEXT, run_process_generation TEXT, run_lease_generation INTEGER, cancel_id TEXT,
-            settlement_id TEXT, settlement_status TEXT, result_json TEXT, created_at REAL NOT NULL,
-            updated_at REAL NOT NULL, started_at REAL, terminal_at REAL, indeterminate_at REAL,
-            PRIMARY KEY (room_id, task_id), UNIQUE (room_id, thread_id, turn_id),
-            FOREIGN KEY (room_id) REFERENCES hosted_rooms(room_id))""")
 
 
 def _initialize_schema(conn: sqlite3.Connection) -> None:
-    conn.execute("""CREATE TABLE IF NOT EXISTS hosted_room_driver_leases (
-            room_id TEXT PRIMARY KEY, gateway_id TEXT NOT NULL,
-            authority_epoch INTEGER NOT NULL CHECK (authority_epoch >= 1), process_generation TEXT NOT NULL,
-            lease_generation INTEGER NOT NULL CHECK (lease_generation >= 1),
-            expires_at REAL NOT NULL, acquired_at REAL NOT NULL, updated_at REAL NOT NULL, released_at REAL,
-            FOREIGN KEY (room_id) REFERENCES hosted_rooms(room_id))""")
-    _create_task_table(conn)
-    _validate_schema(conn)
-    conn.execute(_TASK_INDEX_SQL.format(if_not_exists="IF NOT EXISTS "))
+    from agent_cli.database_migrations import initialize_database
+    initialize_database(conn, "hosted_room_tasks")
 
 
 def _validate_schema(conn: sqlite3.Connection) -> None:
@@ -289,40 +267,17 @@ def _schema_objects_exist(conn: sqlite3.Connection) -> bool:
     return index is not None
 
 
-def _migrate_task_status_constraint(conn: sqlite3.Connection) -> None:
-    """Expand the unpublished task-state CHECK without losing durable work."""
-    conn.execute("DROP INDEX IF EXISTS idx_hosted_room_driver_tasks_status")
-    _create_task_table(conn, "hosted_room_driver_tasks_next")
-    columns = ", ".join(_TASK_COLUMN_ORDER)
-    conn.execute(
-        f"INSERT INTO hosted_room_driver_tasks_next ({columns}) SELECT {columns} FROM hosted_room_driver_tasks")
-    conn.execute("DROP TABLE hosted_room_driver_tasks")
-    conn.execute("ALTER TABLE hosted_room_driver_tasks_next RENAME TO hosted_room_driver_tasks")
-    conn.execute(_TASK_INDEX_SQL.format(if_not_exists=""))
 
 
 def _connect(db_path: DbPath) -> sqlite3.Connection:
     """Open the store; existing tables are validated (after the status-constraint migration when needed).
     The driver schema never shipped, so an incompatible draft fails closed in ``_validate_schema``."""
-    existing: list[bool] = []
-    def ready(conn: sqlite3.Connection) -> bool:
-        existing.append(_schema_objects_exist(conn))
-        if not existing[0]:
-            return False
-        row = conn.execute(
-            "SELECT sql FROM sqlite_master WHERE type='table' AND name='hosted_room_driver_tasks'").fetchone()
-        sql = str(row[0] or "").lower() if row else ""
-        return "'stopping'" in sql and "'deferred'" in sql  # task-status CHECK already covers the current states
-    conn = connect(
-        db_path, db_label="state.db (hosted_room_driver)", ready=ready,
-        initialize=lambda conn: (_migrate_task_status_constraint if existing[0] else _initialize_schema)(conn))
-    if existing[0]:
-        try:
-            _validate_schema(conn)
-        except Exception:
-            conn.close()
-            raise
-    return conn
+    from agent_cli.database_migrations import database_is_current
+    return connect(
+        db_path, db_label="state.db (hosted_room_driver)",
+        ready=lambda conn: database_is_current(conn, "hosted_room_tasks"),
+        initialize=_initialize_schema,
+    )
 
 
 def _transaction(db_path: DbPath):

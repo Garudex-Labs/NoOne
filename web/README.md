@@ -1,6 +1,6 @@
-# Hermes Agent — Web UI
+# the agent — Web UI
 
-Browser-based dashboard for managing Hermes Agent configuration, API keys, and monitoring active sessions.
+Browser-based dashboard for managing the agent configuration, API keys, and monitoring active sessions.
 
 ## Stack
 
@@ -13,7 +13,7 @@ Browser-based dashboard for managing Hermes Agent configuration, API keys, and m
 ```bash
 # Start the backend API server
 cd ../
-python -m hermes_cli.main web --no-open
+python -m agent_cli.main web --no-open
 
 # In another terminal, start the Vite dev server (with HMR + API proxy)
 cd web/
@@ -23,7 +23,7 @@ pnpm run dev
 
 Open the **Vite URL** printed in the terminal (usually `http://localhost:5173`). That is the live-reload UI.
 
-`hermes dashboard` on port 9119 serves the **built** bundle from `hermes_cli/web_dist/`, not the Vite dev server — changes in `web/src/` will not appear there until you run `pnpm run build` and restart the dashboard (or use `web --no-open` + Vite as above).
+`noone dashboard` on port 9119 serves the **built** bundle from `agent_cli/web_dist/`, not the Vite dev server — changes in `web/src/` will not appear there until you run `pnpm run build` and restart the dashboard (or use `web --no-open` + Vite as above).
 
 The Vite dev server proxies `/api` requests to `http://127.0.0.1:9119` (the FastAPI backend).
 
@@ -33,7 +33,7 @@ The Vite dev server proxies `/api` requests to `http://127.0.0.1:9119` (the Fast
 pnpm run build
 ```
 
-This outputs to `../hermes_cli/web_dist/`, which the FastAPI server serves as a static SPA. The built assets are included in the Python package via `pyproject.toml` package-data.
+This outputs to `../agent_cli/web_dist/`, which the FastAPI server serves as a static SPA. The built assets are included in the Python package via `pyproject.toml` package-data.
 
 ## Structure
 
@@ -88,7 +88,7 @@ Typography is **opt-in per surface**, not global on layout shells — the app sh
 | Brand chrome | `font-mondwest text-display` (or `themedChrome`) | Sidebar nav, card section headers (`CardTitle`), Segmented filter buttons, filter panel headings |
 | Themed body | `font-mondwest normal-case` (or `themedBody`) | Card content (`Card`, `CardDescription`), session/platform rows, analytics tables — **scoped to the component** |
 | Page chrome | `font-expanded` | Page header h1 (`PageHeaderProvider`) — sentence case, not `text-display` |
-| Wordmark | `Typography` + size/tracking only | Sidebar/mobile “Hermes Agent” — mixed case, no Mondwest, no `text-display` |
+| Wordmark | `Typography` + size/tracking only | Sidebar/mobile “the agent” — mixed case, no Mondwest, no `text-display` |
 | Technical | `font-mono-ui` / `font-mono` / `font-courier` | Model slugs, env keys, schedules, YAML, repo URLs |
 
 - Do **not** put `themedBody` or `themedFont` on `<main>`, `App`, or other layout wrappers — it overrides component-scoped styles.

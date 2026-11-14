@@ -1,18 +1,24 @@
 ---
-sidebar_position: 15
 title: "Automation Blueprints"
 description: "Ready-to-use automation blueprints — scheduled tasks, GitHub event triggers, API webhooks, and multi-skill workflows"
 ---
 
-# Automation Blueprints
+# Automation Blueprints {#automation-blueprints}
 
-Copy-paste blueprints for common automation patterns. Each blueprint uses Hermes's built-in [cron scheduler](../user-guide/features/cron.md) for time-based triggers and [webhook platform](../user-guide/messaging/webhooks.md) for event-driven triggers.
+Copy-paste blueprints for common automation patterns. Each blueprint uses {{app-name}}'s built-in [cron scheduler](../user-guide/features/cron.md) for time-based triggers and [webhook platform](../user-guide/messaging/webhooks.md) for event-driven triggers.
 
 Every blueprint works with **any model** — not locked to a single provider.
 
 For parameterized blueprints with forms instead of cron syntax, see the [Automation Blueprints Catalog](../reference/automation-blueprints-catalog.mdx).
 
-:::tip Three Trigger Types
+<Tip>
+
+<div className="doc-callout-title">
+
+Three Trigger Types
+
+</div>
+
 | Trigger | How | Tool |
 |---------|-----|------|
 | **Schedule** | Runs on a cadence (hourly, nightly, weekly) | `cronjob_manage` tool or `/cron` slash command |
@@ -20,23 +26,24 @@ For parameterized blueprints with forms instead of cron syntax, see the [Automat
 | **API Call** | External service POSTs JSON to your endpoint | Webhook platform (config.yaml routes or `hermes webhook subscribe`) |
 
 All three support delivery to Telegram, Discord, Slack, SMS, email, GitHub comments, or local files.
-:::
+
+</Tip>
 
 ---
 
-## Development Workflow
+## Development Workflow {#development-workflow}
 
-### Nightly Backlog Triage
+### Nightly Backlog Triage {#nightly-backlog-triage}
 
 Label, prioritize, and summarize new issues every night. Delivers a digest to your team channel.
 
 **Trigger:** Schedule (nightly)
 
 ```bash
-hermes cron create "0 2 * * *" \
-  "You are a project manager triaging the NousResearch/hermes-agent GitHub repo.
+noone cron create "0 2 * * *" \
+  "You are a project manager triaging the Garudex-Labs/NoOne GitHub repo.
 
-1. Run: gh issue list --repo NousResearch/hermes-agent --state open --json number,title,labels,author,createdAt --limit 30
+1. Run: gh issue list --repo Garudex-Labs/NoOne --state open --json number,title,labels,author,createdAt --limit 30
 2. Identify issues opened in the last 24 hours
 3. For each new issue:
    - Suggest a priority label (P0-critical, P1-high, P2-medium, P3-low)
@@ -49,7 +56,7 @@ Format as a clean digest. If no new issues, respond with [SILENT]." \
   --deliver telegram
 ```
 
-### Automatic PR Code Review
+### Automatic PR Code Review {#automatic-pr-code-review}
 
 Review every pull request automatically when it's opened. Posts a review comment directly on the PR.
 
@@ -109,22 +116,22 @@ platforms:
 
 Then in GitHub: **Settings → Webhooks → Add webhook** → Payload URL: `http://your-server:8644/webhooks/github-pr-review`, Content type: `application/json`, Secret: `github-webhook-secret`, Events: **Pull requests**.
 
-### Docs Drift Detection
+### Docs Drift Detection {#docs-drift-detection}
 
 Weekly scan of merged PRs to find API changes that need documentation updates.
 
 **Trigger:** Schedule (weekly)
 
 ```bash
-hermes cron create "0 9 * * 1" \
-  "Scan the NousResearch/hermes-agent repo for documentation drift.
+noone cron create "0 9 * * 1" \
+  "Scan the Garudex-Labs/NoOne repo for documentation drift.
 
-1. Run: gh pr list --repo NousResearch/hermes-agent --state merged --json number,title,files,mergedAt --limit 30
+1. Run: gh pr list --repo Garudex-Labs/NoOne --state merged --json number,title,files,mergedAt --limit 30
 2. Filter to PRs merged in the last 7 days
 3. For each merged PR, check if it modified:
    - Tool schemas (tools/*.py) — may need docs/reference/tools-reference.md update
-   - CLI commands (hermes_cli/commands.py, hermes_cli/main.py) — may need docs/reference/cli-commands.md update
-   - Config options (hermes_cli/config.py) — may need docs/user-guide/configuration.md update
+   - CLI commands (agent_cli/commands.py, agent_cli/main.py) — may need docs/reference/cli-commands.md update
+   - Config options (agent_cli/config.py) — may need docs/user-guide/configuration.md update
    - Environment variables — may need docs/reference/environment-variables.md update
 4. Cross-reference: for each code change, check if the corresponding docs page was also updated in the same PR
 
@@ -133,14 +140,14 @@ Report any gaps where code changed but docs didn't. If everything is in sync, re
   --deliver telegram
 ```
 
-### Dependency Security Audit
+### Dependency Security Audit {#dependency-security-audit}
 
 Daily scan for known vulnerabilities in project dependencies.
 
 **Trigger:** Schedule (daily)
 
 ```bash
-hermes cron create "0 6 * * *" \
+noone cron create "0 6 * * *" \
   "Run a dependency security audit on the hermes-agent project.
 
 1. Locate the hermes-agent checkout and its pyproject.toml and uv.lock. Do not activate or mutate Hermes's dependency environment.
@@ -160,9 +167,9 @@ If no vulnerabilities, respond with [SILENT]." \
 
 ---
 
-## DevOps & Monitoring
+## DevOps & Monitoring {#devops--monitoring}
 
-### Deploy Verification
+### Deploy Verification {#deploy-verification}
 
 Trigger smoke tests after every deployment. Your CI/CD pipeline POSTs to the webhook when a deploy completes.
 
@@ -200,7 +207,7 @@ curl -X POST http://your-server:8644/webhooks/deploy-verify \
   -d "$BODY"
 ```
 
-### Alert Triage
+### Alert Triage {#alert-triage}
 
 Correlate monitoring alerts with recent changes to draft a response. Works with Datadog, PagerDuty, Grafana, or any alerting system that can POST JSON.
 
@@ -227,7 +234,7 @@ Be concise. This goes to the on-call channel." \
   --deliver slack
 ```
 
-### Uptime Monitor
+### Uptime Monitor {#uptime-monitor}
 
 Check endpoints every 30 minutes. Only notify when something is down.
 
@@ -264,7 +271,7 @@ else:
 ```
 
 ```bash
-hermes cron create "every 30m" \
+noone cron create "every 30m" \
   "If the script reports OUTAGE DETECTED, summarize which services are down and suggest likely causes. If NO_ISSUES, respond with [SILENT]." \
   --script ~/.hermes/scripts/check-uptime.py \
   --name "Uptime monitor" \
@@ -273,16 +280,16 @@ hermes cron create "every 30m" \
 
 ---
 
-## Research & Intelligence
+## Research & Intelligence {#research--intelligence}
 
-### Competitive Repository Scout
+### Competitive Repository Scout {#competitive-repository-scout}
 
 Monitor competitor repos for interesting PRs, features, and architectural decisions.
 
 **Trigger:** Schedule (daily)
 
 ```bash
-hermes cron create "0 8 * * *" \
+noone cron create "0 8 * * *" \
   "Scout these AI agent repositories for notable activity in the last 24 hours:
 
 Repos to check:
@@ -308,14 +315,14 @@ If there are findings, organize by repo with brief analysis of each item." \
   --deliver telegram
 ```
 
-### AI News Digest
+### AI News Digest {#ai-news-digest}
 
 Weekly roundup of AI/ML developments.
 
 **Trigger:** Schedule (weekly)
 
 ```bash
-hermes cron create "0 9 * * 1" \
+noone cron create "0 9 * * 1" \
   "Generate a weekly AI news digest covering the past 7 days:
 
 1. Search the web for major AI announcements, model releases, and research breakthroughs
@@ -333,15 +340,15 @@ Keep each item to 1-2 sentences. Include links. Total under 600 words." \
   --deliver telegram
 ```
 
-### Paper Digest with Notes
+### Paper Digest with Notes {#paper-digest-with-notes}
 
 Daily arXiv scan that saves summaries to your note-taking system.
 
 **Trigger:** Schedule (daily)
 
 ```bash
-hermes cron create "0 8 * * *" \
-  "Search arXiv for the 3 most interesting papers on 'language model reasoning' OR 'tool-use agents' from the past day. For each paper, create an Obsidian note with the title, authors, abstract summary, key contribution, and potential relevance to Hermes Agent development." \
+noone cron create "0 8 * * *" \
+  "Search arXiv for the 3 most interesting papers on 'language model reasoning' OR 'tool-use agents' from the past day. For each paper, create an Obsidian note with the title, authors, abstract summary, key contribution, and potential relevance to NoOne development." \
   --skill arxiv --skill obsidian \
   --name "Paper digest" \
   --deliver local
@@ -349,9 +356,9 @@ hermes cron create "0 8 * * *" \
 
 ---
 
-## GitHub Event Automations
+## GitHub Event Automations {#github-event-automations}
 
-### Issue Auto-Labeling
+### Issue Auto-Labeling {#issue-auto-labeling}
 
 Automatically label and respond to new issues.
 
@@ -379,7 +386,7 @@ If this is a label or assignment change, respond with [SILENT]." \
   --deliver github_comment
 ```
 
-### CI Failure Analysis
+### CI Failure Analysis {#ci-failure-analysis}
 
 Analyze CI failures and post diagnostics on the PR.
 
@@ -414,7 +421,7 @@ platforms:
             pr_number: "{check_run.pull_requests.0.number}"
 ```
 
-### Auto-Port Changes Across Repos
+### Auto-Port Changes Across Repos {#auto-port-changes-across-repos}
 
 When a PR merges in one repo, automatically port the equivalent change to another.
 
@@ -445,9 +452,9 @@ If action is not 'closed' or not merged, respond with [SILENT]." \
 
 ---
 
-## Business Operations
+## Business Operations {#business-operations}
 
-### Stripe Payment Monitoring
+### Stripe Payment Monitoring {#stripe-payment-monitoring}
 
 Track payment events and get summaries of failures.
 
@@ -477,14 +484,14 @@ Keep responses concise for the ops channel." \
   --deliver slack
 ```
 
-### Daily Revenue Summary
+### Daily Revenue Summary {#daily-revenue-summary}
 
 Compile key business metrics every morning.
 
 **Trigger:** Schedule (daily)
 
 ```bash
-hermes cron create "0 8 * * *" \
+noone cron create "0 8 * * *" \
   "Generate a morning business metrics summary.
 
 Search the web for:
@@ -500,16 +507,16 @@ Deliver as a clean, scannable message." \
 
 ---
 
-## Multi-Skill Workflows
+## Multi-Skill Workflows {#multi-skill-workflows}
 
-### Security Audit Pipeline
+### Security Audit Pipeline {#security-audit-pipeline}
 
 Combine multiple skills for a comprehensive weekly security review.
 
 **Trigger:** Schedule (weekly)
 
 ```bash
-hermes cron create "0 3 * * 0" \
+noone cron create "0 3 * * 0" \
   "Run a comprehensive security audit of the hermes-agent codebase.
 
 1. Check for dependency vulnerabilities (pip audit, npm audit)
@@ -528,14 +535,14 @@ If nothing found, report a clean bill of health." \
   --deliver telegram
 ```
 
-### Content Pipeline
+### Content Pipeline {#content-pipeline}
 
 Research, draft, and prepare content on a schedule.
 
 **Trigger:** Schedule (weekly)
 
 ```bash
-hermes cron create "0 10 * * 3" \
+noone cron create "0 10 * * 3" \
   "Research and draft a technical blog post outline about a trending topic in AI agents.
 
 1. Search the web for the most discussed AI agent topics this week
@@ -554,9 +561,9 @@ Keep the outline to ~300 words. This is a starting point, not a finished post." 
 
 ---
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
-### Cron Schedule Syntax
+### Cron Schedule Syntax {#cron-schedule-syntax}
 
 | Expression | Meaning |
 |-----------|---------|
@@ -568,7 +575,7 @@ Keep the outline to ~300 words. This is a starting point, not a finished post." 
 | `0 3 * * 0` | Every Sunday at 3:00 AM |
 | `0 */6 * * *` | Every 6 hours |
 
-### Delivery Targets
+### Delivery Targets {#delivery-targets}
 
 | Target | Flag | Notes |
 |--------|------|-------|
@@ -580,7 +587,7 @@ Keep the outline to ~300 words. This is a starting point, not a finished post." 
 | SMS | `--deliver sms:+15551234567` | Direct to phone number |
 | Specific thread | `--deliver telegram:-100123:456` | Telegram forum topic |
 
-### Webhook Template Variables
+### Webhook Template Variables {#webhook-template-variables}
 
 | Variable | Description |
 |----------|-------------|
@@ -591,7 +598,7 @@ Keep the outline to ~300 words. This is a starting point, not a finished post." 
 | `{__raw__}` | Full JSON payload (truncated at 4000 chars) |
 | `{sender.login}` | GitHub user who triggered the event |
 
-### The [SILENT] Pattern
+### The [SILENT] Pattern {#the-silent-pattern}
 
 When a cron job's response contains `[SILENT]`, delivery is suppressed. Use this to avoid notification spam on quiet runs:
 

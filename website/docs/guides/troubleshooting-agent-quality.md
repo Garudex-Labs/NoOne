@@ -1,14 +1,13 @@
 ---
-sidebar_position: 27
 title: "Troubleshooting: \"My Agent Feels Dumber\""
-description: "A diagnostic checklist for when Hermes seems less capable than before or forgets things mid-session — model switches, context pressure, wrong context detection, and the frozen memory snapshot"
+description: "A diagnostic checklist for when the agent seems less capable than before or forgets things mid-session — model switches, context pressure, wrong context detection, and the frozen memory snapshot"
 ---
 
-# Troubleshooting: "My Agent Feels Dumber"
+# Troubleshooting: "My Agent Feels Dumber" {#troubleshooting-my-agent-feels-dumber}
 
-Sometimes Hermes seems less sharp than it was yesterday, or forgets something you told it twenty minutes ago. This is almost never mysterious — there's usually one specific, checkable cause. Work through this checklist in order: the steps are sorted by how often each one turns out to be the answer.
+Sometimes {{app-name}} seems less sharp than it was yesterday, or forgets something you told it twenty minutes ago. This is almost never mysterious — there's usually one specific, checkable cause. Work through this checklist in order: the steps are sorted by how often each one turns out to be the answer.
 
-## 1. Check which model the session is actually using
+## 1. Check which model the session is actually using {#1-check-which-model-the-session-is-actually-using}
 
 **Symptom:** Answers are shallower, code quality dropped, reasoning feels off — across the board.
 
@@ -22,7 +21,7 @@ Sometimes Hermes seems less sharp than it was yesterday, or forgets something yo
 
 If the model is wrong, `/model <name>` fixes it for this session; add `--global` to persist the change to `config.yaml`. Note that a mid-session switch resets the prompt cache, so the next turn re-reads the conversation at full input price — on a long session it can be cheaper to start fresh on the right model.
 
-## 2. Check context usage
+## 2. Check context usage {#2-check-context-usage}
 
 **Symptom:** The session started strong but responses are slowing down, getting truncated, or losing track of earlier details.
 
@@ -40,17 +39,25 @@ If the model is wrong, `/model <name>` fixes it for this session; add `--global`
 
 `/compress` summarizes the conversation history, dramatically reducing token count while preserving key context. `/compress here [N]` keeps the most recent N exchanges verbatim and summarizes the rest, and a focus topic (`/compress focus <topic>`) narrows what a full summary preserves.
 
-:::tip
-Use `/compress` regularly during long sessions rather than waiting for problems, and `/usage` periodically to see where you stand.
-:::
+<Tip>
 
-## 3. Verify the detected context length
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+Use `/compress` regularly during long sessions rather than waiting for problems, and `/usage` periodically to see where you stand.
+
+</Tip>
+
+## 3. Verify the detected context length {#3-verify-the-detected-context-length}
 
 **Symptom:** Context problems appear surprisingly early — the first long conversation already hits limits, or compression fires far sooner than the model's advertised window should allow.
 
 **Check:** Look at the CLI startup line — it shows the detected context length (e.g., `📊 Context limit: 128000 tokens`). You can also check with `/usage` during a session.
 
-**What it means:** Hermes may have auto-detected the wrong context length for your model. Set it explicitly:
+**What it means:** {{app-name}} may have auto-detected the wrong context length for your model. Set it explicitly:
 
 ```yaml
 # In ~/.hermes/config.yaml
@@ -70,27 +77,35 @@ providers:
         context_length: 64000
 ```
 
-Ollama users: if you set a custom `num_ctx`, set the matching context length in Hermes — Ollama's `/api/show` reports the model's *maximum* context, not the effective `num_ctx` you configured. On a running gateway, edits to `model.context_length` or any `compression.*` key take effect on the next message — no restart needed.
+Ollama users: if you set a custom `num_ctx`, set the matching context length in {{app-name}} — Ollama's `/api/show` reports the model's *maximum* context, not the effective `num_ctx` you configured. On a running gateway, edits to `model.context_length` or any `compression.*` key take effect on the next message — no restart needed.
 
 See [Context Length Detection](../integrations/providers.md#context-length-detection) for how auto-detection works and all override options.
 
-## 4. "I told it something and it forgot" — the frozen memory snapshot
+## 4. "I told it something and it forgot" — the frozen memory snapshot {#4-i-told-it-something-and-it-forgot--the-frozen-memory-snapshot}
 
-**Symptom:** You asked Hermes to remember something during this session, it confirmed the save, but later in the *same* session it doesn't seem to know it.
+**Symptom:** You asked {{app-name}} to remember something during this session, it confirmed the save, but later in the *same* session it doesn't seem to know it.
 
 **Check:** Nothing is broken — check the timing. Memory saved mid-session is written to disk immediately, but the system prompt won't reflect it until the next session.
 
 **What it means:** This is documented, intentional behavior. Memory is injected into the system prompt as a **frozen snapshot at session start**, and that injection never changes mid-session — it preserves the LLM's prefix cache for performance. When the agent adds or removes memory entries during a session, the changes persist to disk right away but appear in the system prompt only when the next session starts. Tool responses always show the live state, so the save itself is confirmed and real.
 
-:::info
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
 Frozen snapshot in practice: "remember X" during a session means X is guaranteed available **next** session. Within the current session, the fact still exists in the conversation history itself — the agent forgets it only if that part of the conversation has since been compressed away (see step 7).
-:::
+
+</Info>
 
 See [Persistent Memory](../user-guide/features/memory.md#how-memory-appears-in-the-system-prompt) for the full mechanics.
 
-## 5. Memory is bounded and curated — not a transcript
+## 5. Memory is bounded and curated — not a transcript {#5-memory-is-bounded-and-curated--not-a-transcript}
 
-**Symptom:** Hermes doesn't recall a detail from a session last week, even though you discussed it at length.
+**Symptom:** {{app-name}} doesn't recall a detail from a session last week, even though you discussed it at length.
 
 **Check:** Memory capacity and contents. The system prompt memory header shows usage (e.g., `[67% — 1,474/2,200 chars]`), and `hermes journey list` shows every saved memory entry and skill.
 
@@ -100,9 +115,9 @@ For "did we discuss X last week?" recall, the agent has a separate mechanism: `s
 
 You can also help directly: say "remember this for next time" after a productive session, or "clean up your memory" when it's near capacity so the agent consolidates entries. See [Memory & Skills tips](./tips.md#memory--skills) and [Capacity Management](../user-guide/features/memory.md#capacity-management).
 
-## 6. Check that skills and tools are loaded
+## 6. Check that skills and tools are loaded {#6-check-that-skills-and-tools-are-loaded}
 
-**Symptom:** Hermes used to handle a specific workflow expertly and now approaches it naively, or says it can't do something it did before.
+**Symptom:** {{app-name}} used to handle a specific workflow expertly and now approaches it naively, or says it can't do something it did before.
 
 **Check:**
 
@@ -111,11 +126,11 @@ You can also help directly: say "remember this for next time" after a productive
 - `/tools list` — see available tools; a tool disabled earlier with `/tools disable` stays out of the agent's toolset for the session.
 - `/context all` — per-skill and per-toolset cost listing, which doubles as an inventory of what's actually loaded.
 
-**What it means:** Skills are the agent's procedural knowledge — multi-step workflows and tool-specific instructions. If a skill is missing or a toolset was trimmed (e.g., a session started with `hermes chat -t "terminal"` to reduce prompt weight), the agent genuinely has less to work with in that session. Re-enable tools with `/tools enable`, or invoke the skill explicitly by name (`/github-pr-workflow`) to confirm it loads.
+**What it means:** Skills are the agent's procedural knowledge — multi-step workflows and tool-specific instructions. If a skill is missing or a toolset was trimmed (e.g., a session started with `noone chat -t "terminal"` to reduce prompt weight), the agent genuinely has less to work with in that session. Re-enable tools with `/tools enable`, or invoke the skill explicitly by name (`/github-pr-workflow`) to confirm it loads.
 
-## 7. Compression side-effects
+## 7. Compression side-effects {#7-compression-side-effects}
 
-**Symptom:** After a long session (or right after running `/compress`), Hermes remembers the broad strokes but has lost fine detail from earlier in the conversation.
+**Symptom:** After a long session (or right after running `/compress`), {{app-name}} remembers the broad strokes but has lost fine detail from earlier in the conversation.
 
 **Check:** Whether compression has fired — `/usage` and `/context` show compression stats and context state on messaging platforms, and manual `/compress` always reports its result.
 
@@ -123,7 +138,7 @@ You can also help directly: say "remember this for next time" after a productive
 
 - Recent messages are protected: by default the last 20 messages stay uncompressed (`protect_last_n`) and the opening exchange is pinned (`protect_first_n: 3`) so the original goal stays visible.
 - Compaction is non-destructive: with the default `compression.in_place: true`, the session keeps one durable id and pre-compaction turns are soft-archived — still searchable via `session_search` and recoverable, not deleted.
-- With `in_place: false` (legacy behavior), each compaction rotates to a **new session linked to the old one** — a titled session becomes `"my project" → "my project #2" → "my project #3"`. If you resume by title, `hermes -c "my project"` automatically picks the most recent variant.
+- With `in_place: false` (legacy behavior), each compaction rotates to a **new session linked to the old one** — a titled session becomes `"my project" → "my project #2" → "my project #3"`. If you resume by title, `noone -c "my project"` automatically picks the most recent variant.
 - A focus topic narrows what a full summary preserves: `/compress focus auth-refactor` keeps that thread's detail at the expense of the rest.
 
 If a compressed-away detail matters, ask the agent to search for it (`session_search` reaches the archived turns), or re-paste the key facts into the conversation.
@@ -132,7 +147,7 @@ See [Context Compression](../user-guide/configuration.md#context-compression) fo
 
 ---
 
-## Quick reference
+## Quick reference {#quick-reference}
 
 | Symptom | First command | Likely cause |
 |---------|--------------|--------------|

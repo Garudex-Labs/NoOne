@@ -1,20 +1,20 @@
 ---
 title: "Lambda Labs — On-demand GPU cloud instances for ML training"
-sidebar_label: "Lambda Labs"
+sidebarTitle: "Lambda Labs"
 description: "On-demand GPU cloud instances for ML training"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Lambda Labs
+# Lambda Labs {#lambda-labs}
 
 On-demand GPU cloud instances for ML training.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/lambda-labs` |
+| Source | Optional — install with `noone skills install official/mlops/lambda-labs` |
 | Path | `optional-skills/mlops/lambda-labs` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ On-demand GPU cloud instances for ML training.
 | Platforms | linux, macos, windows |
 | Tags | `Infrastructure`, `GPU Cloud`, `Training`, `Inference`, `Lambda Labs` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Lambda Labs GPU Cloud
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Lambda Labs GPU Cloud {#lambda-labs-gpu-cloud}
 
 Guide to running ML workloads on Lambda Labs GPU cloud with on-demand instances and 1-Click Clusters.
 
-## When to use Lambda Labs
+## When to use Lambda Labs {#when-to-use-lambda-labs}
 
 **Use Lambda Labs when:**
 - Need dedicated GPU instances with full SSH access
@@ -57,16 +65,16 @@ Guide to running ML workloads on Lambda Labs GPU cloud with on-demand instances 
 - **RunPod**: For cheaper spot instances and serverless endpoints
 - **Vast.ai**: For GPU marketplace with lowest prices
 
-## Quick start
+## Quick start {#quick-start}
 
-### Account setup
+### Account setup {#account-setup}
 
 1. Create account at https://lambda.ai
 2. Add payment method
 3. Generate API key from dashboard
 4. Add SSH key (required before launching instances)
 
-### Launch via console
+### Launch via console {#launch-via-console}
 
 1. Go to https://cloud.lambda.ai/instances
 2. Click "Launch instance"
@@ -75,7 +83,7 @@ Guide to running ML workloads on Lambda Labs GPU cloud with on-demand instances 
 5. Optionally attach filesystem
 6. Launch and wait 3-15 minutes
 
-### Connect via SSH
+### Connect via SSH {#connect-via-ssh}
 
 ```bash
 # Get instance IP from console
@@ -85,9 +93,9 @@ ssh ubuntu@<INSTANCE-IP>
 ssh -i ~/.ssh/lambda_key ubuntu@<INSTANCE-IP>
 ```
 
-## GPU instances
+## GPU instances {#gpu-instances}
 
-### Available GPUs
+### Available GPUs {#available-gpus}
 
 | GPU | VRAM | Price/GPU/hr | Best For |
 |-----|------|--------------|----------|
@@ -101,7 +109,7 @@ ssh -i ~/.ssh/lambda_key ubuntu@<INSTANCE-IP>
 | A6000 | 48 GB | $0.80 | Good VRAM/price ratio |
 | V100 | 16 GB | $0.55 | Budget training |
 
-### Instance configurations
+### Instance configurations {#instance-configurations}
 
 ```
 8x GPU: Best for distributed training (DDP, FSDP)
@@ -110,12 +118,12 @@ ssh -i ~/.ssh/lambda_key ubuntu@<INSTANCE-IP>
 1x GPU: Fine-tuning, inference, development
 ```
 
-### Launch times
+### Launch times {#launch-times}
 
 - Single-GPU: 3-5 minutes
 - Multi-GPU: 10-15 minutes
 
-## Lambda Stack
+## Lambda Stack {#lambda-stack}
 
 All instances come with Lambda Stack pre-installed:
 
@@ -132,7 +140,7 @@ All instances come with Lambda Stack pre-installed:
 - JupyterLab
 ```
 
-### Verify installation
+### Verify installation {#verify-installation}
 
 ```bash
 # Check GPU
@@ -145,15 +153,15 @@ python -c "import torch; print(torch.cuda.is_available())"
 nvcc --version
 ```
 
-## Python API
+## Python API {#python-api}
 
-### Installation
+### Installation {#installation}
 
 ```bash
 pip install lambda-cloud-client
 ```
 
-### Authentication
+### Authentication {#authentication}
 
 ```python
 import os
@@ -166,7 +174,7 @@ configuration = lambda_cloud_client.Configuration(
 )
 ```
 
-### List available instances
+### List available instances {#list-available-instances}
 
 ```python
 with lambda_cloud_client.ApiClient(configuration) as api_client:
@@ -178,7 +186,7 @@ with lambda_cloud_client.ApiClient(configuration) as api_client:
         print(f"{name}: {info.instance_type.description}")
 ```
 
-### Launch instance
+### Launch instance {#launch-instance}
 
 ```python
 from lambda_cloud_client.models import LaunchInstanceRequest
@@ -196,7 +204,7 @@ instance_id = response.data.instance_ids[0]
 print(f"Launched: {instance_id}")
 ```
 
-### List running instances
+### List running instances {#list-running-instances}
 
 ```python
 instances = api.list_instances()
@@ -204,7 +212,7 @@ for instance in instances.data:
     print(f"{instance.name}: {instance.ip} ({instance.status})")
 ```
 
-### Terminate instance
+### Terminate instance {#terminate-instance}
 
 ```python
 from lambda_cloud_client.models import TerminateInstanceRequest
@@ -215,7 +223,7 @@ request = TerminateInstanceRequest(
 api.terminate_instance(request)
 ```
 
-### SSH key management
+### SSH key management {#ssh-key-management}
 
 ```python
 from lambda_cloud_client.models import AddSshKeyRequest
@@ -234,16 +242,16 @@ keys = api.list_ssh_keys()
 api.delete_ssh_key(key_id)
 ```
 
-## CLI with curl
+## CLI with curl {#cli-with-curl}
 
-### List instance types
+### List instance types {#list-instance-types}
 
 ```bash
 curl -u $LAMBDA_API_KEY: \
   https://cloud.lambdalabs.com/api/v1/instance-types | jq
 ```
 
-### Launch instance
+### Launch instance {#launch-instance-1}
 
 ```bash
 curl -u $LAMBDA_API_KEY: \
@@ -256,7 +264,7 @@ curl -u $LAMBDA_API_KEY: \
   }' | jq
 ```
 
-### Terminate instance
+### Terminate instance {#terminate-instance-1}
 
 ```bash
 curl -u $LAMBDA_API_KEY: \
@@ -265,9 +273,9 @@ curl -u $LAMBDA_API_KEY: \
   -d '{"instance_ids": ["<INSTANCE-ID>"]}' | jq
 ```
 
-## Persistent storage
+## Persistent storage {#persistent-storage}
 
-### Filesystems
+### Filesystems {#filesystems}
 
 Filesystems persist data across instance restarts:
 
@@ -279,22 +287,22 @@ Filesystems persist data across instance restarts:
 python train.py --checkpoint-dir /lambda/nfs/my-storage/checkpoints
 ```
 
-### Create filesystem
+### Create filesystem {#create-filesystem}
 
 1. Go to Storage in Lambda console
 2. Click "Create filesystem"
 3. Select region (must match instance region)
 4. Name and create
 
-### Attach to instance
+### Attach to instance {#attach-to-instance}
 
 Filesystems must be attached at instance launch time:
 - Via console: Select filesystem when launching
 - Via API: Include `file_system_names` in launch request
 
-### Best practices
+### Best practices {#best-practices}
 
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```bash
 # Store on filesystem (persists)
 /lambda/nfs/storage/
@@ -307,11 +315,11 @@ Filesystems must be attached at instance launch time:
 ~/ (instance home)
   └── working/  # Temporary files
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
-## SSH configuration
+## SSH configuration {#ssh-configuration}
 
-### Add SSH key
+### Add SSH key {#add-ssh-key}
 
 ```bash
 # Generate key locally
@@ -321,21 +329,21 @@ ssh-keygen -t ed25519 -f ~/.ssh/lambda_key
 # Or via API
 ```
 
-### Multiple keys
+### Multiple keys {#multiple-keys}
 
 ```bash
 # On instance, add more keys
 echo 'ssh-rsa AAAA...' >> ~/.ssh/authorized_keys
 ```
 
-### Import from GitHub
+### Import from GitHub {#import-from-github}
 
 ```bash
 # On instance
 ssh-import-id gh:username
 ```
 
-### SSH tunneling
+### SSH tunneling {#ssh-tunneling}
 
 ```bash
 # Forward Jupyter
@@ -348,15 +356,15 @@ ssh -L 6006:localhost:6006 ubuntu@<IP>
 ssh -L 8888:localhost:8888 -L 6006:localhost:6006 ubuntu@<IP>
 ```
 
-## JupyterLab
+## JupyterLab {#jupyterlab}
 
-### Launch from console
+### Launch from console {#launch-from-console}
 
 1. Go to Instances page
 2. Click "Launch" in Cloud IDE column
 3. JupyterLab opens in browser
 
-### Manual access
+### Manual access {#manual-access}
 
 ```bash
 # On instance
@@ -367,9 +375,9 @@ ssh -L 8888:localhost:8888 ubuntu@<IP>
 # Open http://localhost:8888
 ```
 
-## Training workflows
+## Training workflows {#training-workflows}
 
-### Single-GPU training
+### Single-GPU training {#single-gpu-training}
 
 ```bash
 # SSH to instance
@@ -386,7 +394,7 @@ pip install -r requirements.txt
 python train.py --epochs 100 --checkpoint-dir /lambda/nfs/storage/checkpoints
 ```
 
-### Multi-GPU training (single node)
+### Multi-GPU training (single node) {#multi-gpu-training-single-node}
 
 ```python
 # train_ddp.py
@@ -413,7 +421,7 @@ if __name__ == "__main__":
 torchrun --nproc_per_node=8 train_ddp.py
 ```
 
-### Checkpoint to filesystem
+### Checkpoint to filesystem {#checkpoint-to-filesystem}
 
 ```python
 import os
@@ -430,9 +438,9 @@ torch.save({
 }, f"{checkpoint_dir}/checkpoint_{epoch}.pt")
 ```
 
-## 1-Click Clusters
+## 1-Click Clusters {#1-click-clusters}
 
-### Overview
+### Overview {#overview}
 
 High-performance Slurm clusters with:
 - 16-512 NVIDIA H100 or B200 GPUs
@@ -440,7 +448,7 @@ High-performance Slurm clusters with:
 - GPUDirect RDMA at 3200 Gb/s
 - Pre-installed distributed ML stack
 
-### Included software
+### Included software {#included-software}
 
 - Ubuntu 22.04 LTS + Lambda Stack
 - NCCL, Open MPI
@@ -448,12 +456,12 @@ High-performance Slurm clusters with:
 - TensorFlow
 - OFED drivers
 
-### Storage
+### Storage {#storage}
 
 - 24 TB NVMe per compute node (ephemeral)
 - Lambda filesystems for persistent data
 
-### Multi-node training
+### Multi-node training {#multi-node-training}
 
 ```bash
 # On Slurm cluster
@@ -463,29 +471,29 @@ srun --nodes=4 --ntasks-per-node=8 --gpus-per-node=8 \
   train.py
 ```
 
-## Networking
+## Networking {#networking}
 
-### Bandwidth
+### Bandwidth {#bandwidth}
 
 - Inter-instance (same region): up to 200 Gbps
 - Internet outbound: 20 Gbps max
 
-### Firewall
+### Firewall {#firewall}
 
 - Default: Only port 22 (SSH) open
 - Configure additional ports in Lambda console
 - ICMP traffic allowed by default
 
-### Private IPs
+### Private IPs {#private-ips}
 
 ```bash
 # Find private IP
 ip addr show | grep 'inet '
 ```
 
-## Common workflows
+## Common workflows {#common-workflows}
 
-### Workflow 1: Fine-tuning LLM
+### Workflow 1: Fine-tuning LLM {#workflow-1-fine-tuning-llm}
 
 ```bash
 # 1. Launch 8x H100 instance with filesystem
@@ -508,7 +516,7 @@ accelerate launch --num_processes 8 train.py \
   --checkpoint_dir /lambda/nfs/storage/checkpoints
 ```
 
-### Workflow 2: Batch inference
+### Workflow 2: Batch inference {#workflow-2-batch-inference}
 
 ```bash
 # 1. Launch A10 instance (cost-effective for inference)
@@ -520,9 +528,9 @@ python inference.py \
   --output /lambda/nfs/storage/data/outputs.jsonl
 ```
 
-## Cost optimization
+## Cost optimization {#cost-optimization}
 
-### Choose right GPU
+### Choose right GPU {#choose-right-gpu}
 
 | Task | Recommended GPU |
 |------|-----------------|
@@ -532,19 +540,19 @@ python inference.py \
 | Development | V100, A10 |
 | Maximum performance | B200 |
 
-### Reduce costs
+### Reduce costs {#reduce-costs}
 
 1. **Use filesystems**: Avoid re-downloading data
 2. **Checkpoint frequently**: Resume interrupted training
 3. **Right-size**: Don't over-provision GPUs
 4. **Terminate idle**: No auto-stop, manually terminate
 
-### Monitor usage
+### Monitor usage {#monitor-usage}
 
 - Dashboard shows real-time GPU utilization
 - API for programmatic monitoring
 
-## Common issues
+## Common issues {#common-issues}
 
 | Issue | Solution |
 |-------|----------|
@@ -554,12 +562,12 @@ python inference.py \
 | Slow data transfer | Use filesystem in same region |
 | GPU not detected | Reboot instance, check drivers |
 
-## References
+## References {#references}
 
-- **[Advanced Usage](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/lambda-labs/references/advanced-usage.md)** - Multi-node training, API automation
-- **[Troubleshooting](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/lambda-labs/references/troubleshooting.md)** - Common issues and solutions
+- **[Advanced Usage](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/lambda-labs/references/advanced-usage.md)** - Multi-node training, API automation
+- **[Troubleshooting](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/lambda-labs/references/troubleshooting.md)** - Common issues and solutions
 
-## Resources
+## Resources {#resources}
 
 - **Documentation**: https://docs.lambda.ai
 - **Console**: https://cloud.lambda.ai

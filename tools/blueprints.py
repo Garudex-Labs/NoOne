@@ -55,7 +55,7 @@ def _split_frontmatter(text: str) -> Optional[dict[str, Any]]:
     if not stripped.startswith("---") or (end := stripped.find("\n---", 3)) == -1:
         return None
     try:
-        import hermes_yaml as yaml
+        import agent_yaml as yaml
 
         data = yaml.safe_load(stripped[3:end])
     except Exception as e:  # pragma: no cover - malformed YAML
@@ -167,9 +167,9 @@ def register_blueprint_suggestion(spec: BlueprintSpec) -> Optional[dict[str, Any
 
 def export_blueprint(job: dict[str, Any], body: str, *, blueprint_name: Optional[str] = None) -> str:
     """Inverse of ``create_blueprint_job``: render a cron job as a SKILL.md (with a
-    ``metadata.hermes.blueprint`` block) ready for ``hermes skills publish``.
+    ``metadata.hermes.blueprint`` block) ready for ``noone skills publish``.
     ``body`` becomes the SKILL.md body; its first line is the description."""
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
 
     # Sanitize to a valid skill identifier.
     name = str(blueprint_name or job.get("name") or "shared-blueprint").lower()

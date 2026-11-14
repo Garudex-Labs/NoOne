@@ -1,4 +1,4 @@
-"""Tests for approval boundary handling in WeCom native streaming."""
+"""Tests for approval boundary handling in native streaming."""
 import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock
@@ -7,7 +7,7 @@ from gateway.stream_consumer import GatewayStreamConsumer, StreamConsumerConfig
 
 @pytest.fixture
 def mock_adapter():
-    """Create a mock WeCom adapter with native streaming support."""
+    """Create a mock adapter with native streaming support."""
     from gateway.platforms.base import BasePlatformAdapter
     MockAdapter = type("MockAdapter", (BasePlatformAdapter,), {
         "MAX_MESSAGE_LENGTH": 4096,

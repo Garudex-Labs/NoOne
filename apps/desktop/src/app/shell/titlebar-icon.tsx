@@ -1,4 +1,5 @@
-import { Codicon } from '@/components/ui/codicon'
+import { AppIcon } from '@noone/ui/app-icon'
+
 import { cn } from '@/lib/utils'
 
 import { titlebarIconSizeCss } from './titlebar'
@@ -15,5 +16,5 @@ export function TitlebarIcon({
   size?: number | string
   spinning?: boolean
 }) {
-  return <Codicon className={cn('leading-none', className)} name={name} size={size} spinning={spinning} />
+  return <AppIcon className={cn('leading-none', className)} name={name} size={size} spinning={spinning} />
 }

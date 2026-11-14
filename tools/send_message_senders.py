@@ -82,7 +82,7 @@ def _live_adapter(platform, *, lookup_failed_warning=None):
     ``runner.adapters`` hit — that map holds the default profile's bots, so a secondary profile's turn
     would post/react with the default bot's identity. A profile with no adapter for the platform
     yields ``None`` (fail closed → the caller's scoped standalone sender or an error), never the
-    default bot. Same resolver shape as ``hermes_cli/platform_actions.py::_resolve_adapter``."""
+    default bot. Same resolver shape as ``agent_cli/platform_actions.py::_resolve_adapter``."""
     try:
         from gateway.run import _gateway_runner_ref
         runner = _gateway_runner_ref()
@@ -94,7 +94,7 @@ def _live_adapter(platform, *, lookup_failed_warning=None):
         resolve = getattr(runner, "_authorization_adapter", None)
         if not callable(resolve):  # bare runner stubs without the authz mixin
             return runner, runner.adapters.get(platform)
-        from hermes_cli.profiles import get_active_profile_name
+        from agent_cli.profiles import get_active_profile_name
         return runner, resolve(platform, get_active_profile_name())
     except Exception:
         if lookup_failed_warning:
@@ -107,7 +107,7 @@ def _plugin_standalone_sender(platform_name, *, label=None, discover=True):
     ``discover`` runs the idempotent plugin scan first."""
     from gateway.platform_registry import platform_registry
     if discover:
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
         discover_plugins()
     entry = platform_registry.get(platform_name)
     if entry is None or entry.standalone_sender_fn is None:
@@ -188,57 +188,3 @@ async def _resolve_slack_user_target(token, chat_id):
     except Exception as e:
         # aiohttp echoes a malformed proxy URL (password included) as the InvalidURL text.
         return None, _error(f"Slack DM resolution failed: {describe_proxy_error(e, proxy) or e}")
-
-
-# "ephemeral connect (may re-init E2EE per send, see #46310)",
-async def _send_matrix_via_adapter(pconfig, chat_id, message, media_files=None, thread_id=None):
-    """Matrix adapter send (native media preserved). Prefer the live gateway adapter's persistent
-    olm/megolm session: ephemeral per-send connects re-init E2EE and claim one-time keys, which
-    under bursts exhausts recipient OTKs and silently drops messages — ephemeral is cron-only.
-
-    When a live gateway adapter is available (i.e. the tool runs inside a running gateway), the persistent
-    connection is reused — one olm/megolm session for all sends. This avoids per-message E2EE re-init storms
-    that exhaust recipient OTKs and silently drop messages (issue #46310).
-    """
-    media_files = media_files or []
-    metadata = {"thread_id": thread_id} if thread_id else None
-    from gateway.config import Platform
-    _, live_adapter = _live_adapter(Platform.MATRIX, lookup_failed_warning=(
-        "Matrix: live gateway adapter lookup failed; falling back to an "
-        "ephemeral connect (may re-init E2EE per send)"))
-    if live_adapter is not None:
-        # Owned by the gateway — must NOT be disconnected (return before the ephemeral ``finally``).
-        return await _matrix_send_core(live_adapter, chat_id, message, media_files, metadata)
-    try:
-        from plugins.platforms.matrix.adapter import MatrixAdapter
-    except ImportError:
-        return {"error": "Matrix dependencies not installed. Run: "
-                f"{install_hint('matrix')}"}
-    adapter = MatrixAdapter(pconfig)
-    try:
-        if not await adapter.connect():
-            return _error("Matrix connect failed")
-        return await _matrix_send_core(adapter, chat_id, message, media_files, metadata)
-    except Exception as e:
-        return _error(f"Matrix send failed: {e}")
-    finally:
-        with contextlib.suppress(Exception):
-            await adapter.disconnect()
-
-
-async def _matrix_send_core(adapter, chat_id, message, media_files, metadata):
-    """Core send logic shared by live and ephemeral Matrix adapters."""
-    last_result = None
-    if message.strip():
-        last_result = await adapter.send(chat_id, message, metadata=metadata)
-        if not last_result.success:
-            return _error(f"Matrix send failed: {last_result.error}")
-    for media_path, is_voice in media_files:
-        if not os.path.exists(media_path):
-            return _error(f"Media file not found: {media_path}")
-        ext = os.path.splitext(media_path)[1].lower()
-        method, _ = _adapter_media_method(ext, (ext in _VOICE_EXTS and is_voice) or ext in _AUDIO_EXTS)
-        last_result = await getattr(adapter, method)(chat_id, media_path, metadata=metadata)
-        if not last_result.success:
-            return _error(f"Matrix media send failed: {last_result.error}")
-    return {"error": _NO_DELIVERABLE} if last_result is None else _success("matrix", chat_id, message_id=last_result.message_id)

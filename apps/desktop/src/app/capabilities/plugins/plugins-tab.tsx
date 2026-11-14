@@ -1,10 +1,12 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { CheckCircle2, FolderOpen, Loader2, Monitor, Package, RefreshCw } from '@noone/ui/icons'
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 
+import type { ProfileScope } from '@/agent-client'
 import { getToolsets, setToolsetEnabled } from '@/api/toolsets'
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Switch } from '@/components/ui/switch'
 import { Tip } from '@/components/ui/tooltip'
 import { revokeGrantsIfUninstalled } from '@/contrib/plugin-files'
@@ -12,11 +14,9 @@ import { $pluginRecords, enablePackageDesktopHalf, type PluginRecord, setPluginE
 import { useContributions } from '@/contrib/react/use-contributions'
 import { discoverRuntimePlugins, uninstallDiskPlugin } from '@/contrib/runtime-loader'
 import { pluginSettingsRouteHref, SETTINGS_PLUGINS_AREA } from '@/contrib/settings-pages'
-import type { ProfileScope } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { DESKTOP_PLUGIN_TOOLSETS } from '@/lib/desktop-toolsets'
 import { triggerHaptic } from '@/lib/haptics'
-import { CheckCircle2, FolderOpen, Loader2, Monitor, Package, RefreshCw } from '@/lib/icons'
 import { isBrowserHostedDesktop } from '@/lib/platform'
 import { queryClient } from '@/lib/query-client'
 import { cn } from '@/lib/utils'
@@ -424,7 +424,7 @@ function PackageRow({
             {desktop?.file && (
               <Tip label={d.reveal}>
                 <Button onClick={() => reveal(desktop.file!)} size="icon" variant="ghost">
-                  <Codicon name="folder-opened" size="0.85rem" />
+                  <AppIcon name="folder-opened" size="0.85rem" />
                 </Button>
               </Tip>
             )}
@@ -435,7 +435,7 @@ function PackageRow({
             {hasSettings && (
               <Tip label={p.settingsToggle(pkg.name)}>
                 <Button aria-label={p.settingsToggle(pkg.name)} onClick={openSettings} size="icon" variant="ghost">
-                  <Codicon name="settings-gear" size="0.85rem" />
+                  <AppIcon name="settings-gear" size="0.85rem" />
                 </Button>
               </Tip>
             )}

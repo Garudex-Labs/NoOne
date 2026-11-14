@@ -2,8 +2,8 @@ import type { Unstable_TriggerItem } from '@assistant-ui/core'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import type { AgentGateway } from '@/agent-client'
 import { renderCommandsCatalog } from '@/app/session/hooks/use-prompt-actions/utils'
-import type { HermesGateway } from '@/hermes'
 import { I18nProvider, useI18n } from '@/i18n'
 import { TRANSLATIONS } from '@/i18n/catalog'
 import { setRuntimeI18nLocale } from '@/i18n/runtime'
@@ -102,7 +102,7 @@ describe('desktop slash description localization', () => {
 
     function Probe() {
       api.setLocale = useI18n().setLocale
-      api.search = useSlashCompletions({ gateway: { request } as unknown as HermesGateway }).adapter?.search
+      api.search = useSlashCompletions({ gateway: { request } as unknown as AgentGateway }).adapter?.search
 
       return null
     }
@@ -114,7 +114,7 @@ describe('desktop slash description localization', () => {
     )
 
     for (const query of ['', 'ne']) {
-      for (const locale of ['en', 'zh', 'ja', 'zh-hant', 'ar', 'ru', 'fr', 'de', 'es', 'en'] as const) {
+      for (const locale of ['en', 'zh', 'ja', 'ar', 'fr', 'de', 'es', 'en'] as const) {
         await act(async () => {
           await api.setLocale!(locale)
         })

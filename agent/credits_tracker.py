@@ -5,7 +5,7 @@ Header contract: see ``_HEADER_FIELDS``. Money is micros ints only; ``*_usd``
 strings are preserved verbatim (never re-parsed to float)."""
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import logging
 import os
 import re
@@ -391,22 +391,13 @@ def _sticky_notice(text: str, level: str, key: str) -> AgentNotice:
     return AgentNotice(text=text, level=level, kind=CREDITS_NOTICE_KIND, key=key, id=key)
 
 
-def _is_nous_welcome_route(base_url: str) -> bool:
-    """True when *base_url* is the Nous welcome host, which serves only the free tier. Local data only;
-    False wherever the free tier is not built in. The host is the evidence, not the model name: the paid
-    inference host can serve ``nous/welcome`` to a named account, and that account's depletion is real."""
-    try:
-        from hermes_cli.anon_auth import route_is_welcome_host
-    except ImportError:
-        return False
-    return route_is_welcome_host(base_url)
 
 
 def is_free_tier_model(model: str, base_url: str = "") -> bool:
     """True when *model* is a Nous free-tier model, using ONLY local data: (1) ``:free`` suffix — canonical
     Nous free SKU marker; (2) ``stealth/`` prefix — stealth-preview SKUs are free without the suffix
     (naming-convention trust: a PAID ``stealth/`` model would wrongly suppress the banner); (3) a PEEK into
-    ``hermes_cli.models``' pricing cache (filled by the model picker; a miss never fetches). Fail-open to
+    ``agent_cli.models``' pricing cache (filled by the model picker; a miss never fetches). Fail-open to
     False (depleted notice still shows): a wrong warning is recoverable noise; hiding it masks a real block."""
     if not model:
         return False
@@ -420,8 +411,8 @@ def is_free_tier_model(model: str, base_url: str = "") -> bool:
     if _is_nous_welcome_route(base_url):
         return True
     try:
-        from hermes_cli.models import _is_model_free
-        from hermes_cli.models_pricing import peek_cached_pricing
+        from agent_cli.models import _is_model_free
+        from agent_cli.models_pricing import peek_cached_pricing
 
         pricing = peek_cached_pricing(base_url)  # owns the /v1-suffix and auth-state key details
         return bool(pricing) and _is_model_free(model, pricing)
@@ -599,7 +590,7 @@ def parse_credits_headers(headers: Mapping[str, str], provider: str = "") -> Opt
         if version_val != 1:
             if version_val > 1 and not _version_warning_emitted:
                 _version_warning_emitted = True
-                logger.warning("credits header version %d unsupported, ignoring — update Hermes", version_val)
+                logger.warning(app_text("credits header version %d unsupported, ignoring — update {app_name}", percent_format=True), version_val)
             return None
         denominator_kind = lowered.get("x-nous-credits-denominator-kind", "none")
         window_note = denominator_kind == "usage_window"
@@ -804,7 +795,6 @@ def apply_keep_going_change(agent, enabled: bool) -> None:
         agent._credits_state = replace(state, keep_going_on_credits=enabled)
         _rerun_notice_policy(agent)
         from agent.memory_provider import spawn_context_thread
-        from hermes_cli.nous_account import get_nous_portal_account_info
         spawn_context_thread(lambda: get_nous_portal_account_info(force_fresh=True), name="keep-going-refresh").start()
     except Exception:
         logger.debug("keep going ▸ local refresh failed", exc_info=True)
@@ -854,17 +844,6 @@ def _rerun_notice_policy(agent) -> None:
         emit()
 
 
-def _warm_nous_pricing_cache() -> None:
-    """Fill the in-process Nous pricing catalog so :func:`is_free_tier_model`'s peek can answer.
-    The peek never fetches and nothing else warms it during session start, so a cold process reads
-    an EMPTY catalog and a subscription-billed model — which spends no credits — still draws the
-    depleted banner. Fail-open: a miss leaves the peek exactly as it was."""
-    try:
-        from hermes_cli.models_pricing import get_pricing_for_provider
-
-        get_pricing_for_provider("nous")
-    except Exception:
-        logger.debug("credits ▸ nous pricing warm failed", exc_info=True)
 
 
 def rewarm_pricing_before_depleted_notice(agent) -> bool:
@@ -879,7 +858,7 @@ def rewarm_pricing_before_depleted_notice(agent) -> bool:
     base_url = getattr(agent, "base_url", "") or ""
     if getattr(agent, "provider", "") != "nous" or not base_url:
         return False
-    from hermes_cli.models_pricing import peek_cached_pricing, pricing_fetch_suppressed
+    from agent_cli.models_pricing import peek_cached_pricing, pricing_fetch_suppressed
 
     if peek_cached_pricing(base_url) or pricing_fetch_suppressed(base_url):
         return False
@@ -915,7 +894,6 @@ def seed_credits_at_session_start(agent) -> bool:
 
         def _bg_seed() -> None:  # FIRE-AND-FORGET: a slow portal must never delay "ready"
             try:
-                from hermes_cli.nous_account import get_nous_portal_account_info
                 # BEFORE the policy runs (either branch below): the free-model gate only PEEKS the
                 # pricing cache, and this thread is the first thing a chat session runs that can
                 # afford to fill it.

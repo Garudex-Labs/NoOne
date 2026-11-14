@@ -1,63 +1,71 @@
 ---
 title: "Property Listings — Present property and rental listings as desktop cards"
-sidebar_label: "Property Listings"
+sidebarTitle: "Property Listings"
 description: "Present property and rental listings as desktop cards"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Property Listings
+# Property Listings {#property-listings}
 
 Present property and rental listings as desktop cards.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/productivity/property-listings` |
+| Source | Optional — install with `noone skills install official/productivity/property-listings` |
 | Path | `optional-skills/productivity/property-listings` |
 | Version | `0.1.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `property`, `rental`, `real-estate`, `listings`, `desktop`, `cards` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Property Listings Skill
+<div className="doc-callout-title">
 
-Present researched properties as browsable cards in the Hermes desktop transcript.
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Property Listings Skill {#property-listings-skill}
+
+Present researched properties as browsable cards in the {{app-name}} desktop transcript.
 This is a presentation recipe, not a listing search service or an investment valuation.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - Presenting property or rental search results, comparing a shortlist, or re-ranking properties.
 - Following up on a property already shown: keep using cards so the shortlist stays comparable.
 - Outside the desktop app, use ordinary Markdown with source links instead; other clients need not render listing fences.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
-- A Hermes desktop conversation for native cards; the backend may be local or remote.
+- A {{app-name}} desktop conversation for native cards; the backend may be local or remote.
 - Property details supplied by the user or verified through `web_search`, `web_extract`, or the browser tools available in this session.
 - No additional API keys or dependencies are required for card formatting.
 
-## How to Run
+## How to Run {#how-to-run}
 
 Install this optional skill through the Skills catalog, or use `terminal`:
 
 ```text
-hermes skills install official/productivity/property-listings
+noone skills install official/productivity/property-listings
 ```
 
 Load it with `skill_view(name="property-listings")` when presenting listings.
 Installing does not retrofit the running conversation's skill index; start a new
 conversation for automatic discovery, or explicitly load the installed skill now.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 Emit a fenced code block whose language is `listing` and whose body is valid JSON.
 Use one object, an array of objects, or `{ "listings": [...] }` for a comparison.
@@ -74,7 +82,7 @@ Use one object, an array of objects, or `{ "listings": [...] }` for a comparison
 | `images` | Direct HTTPS photo URLs in listing order; the first is the hero. |
 | `links` | Array of `{ "label": "Source", "url": "https://..." }` detail-page links, not search-result URLs. |
 
-## Procedure
+## Procedure {#procedure}
 
 1. Gather the address, price, specs, photos and canonical detail URL. Distinguish
    verified facts from unknowns; do not invent prices, amenities, or photo URLs.
@@ -100,7 +108,7 @@ Use one object, an array of objects, or `{ "listings": [...] }` for a comparison
 }
 ```
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Cards are authored from gathered data, not fetched from a listing URL or embedded portal page.
 - A sparse card needs only an address. Omit unknown fields rather than filling them with guesses.
@@ -111,7 +119,7 @@ Use one object, an array of objects, or `{ "listings": [...] }` for a comparison
 - Malformed JSON or a card without identity falls back to a plain code block.
   A valid card is not proof that the underlying listing is current or accurate.
 
-## Verification
+## Verification {#verification}
 
 - Every presented property has an address and a verified source link; unknowns are explicit.
 - Desktop displays the address, price, specs, facts, catches and links as a native card.

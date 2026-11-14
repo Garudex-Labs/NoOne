@@ -1,21 +1,28 @@
 ---
 title: Provider Routing
 description: Configure OpenRouter provider preferences to optimize for cost, speed, or quality.
-sidebar_label: Provider Routing
-sidebar_position: 7
+sidebarTitle: Provider Routing
 ---
 
-# Provider Routing
+# Provider Routing {#provider-routing}
 
-When using [OpenRouter](https://openrouter.ai) as your LLM provider, Hermes Agent supports **provider routing** — fine-grained control over which underlying AI providers handle your requests and how they're prioritized.
+When using [OpenRouter](https://openrouter.ai) as your LLM provider, {{app-name}} supports **provider routing** — fine-grained control over which underlying AI providers handle your requests and how they're prioritized.
 
 OpenRouter routes requests to many providers (e.g., Anthropic, Google, AWS Bedrock, Together AI). Provider routing lets you optimize for cost, speed, quality, or enforce specific provider requirements. Comparing the two gateways? [Nous Portal vs OpenRouter](https://portal.nousresearch.com/compare/openrouter) covers pricing, free models and plans.
 
-:::note
-[Nous Portal](../../integrations/nous-portal.md) decides routing centrally per model and does not accept caller-supplied provider preferences; Hermes never sends the `provider` object to Portal, so `provider_routing` is simply ignored there.
-:::
+<Note>
 
-## Configuration
+<div className="doc-callout-title">
+
+NOTE
+
+</div>
+
+[Nous Portal](../../integrations/nous-portal.md) decides routing centrally per model and does not accept caller-supplied provider preferences; {{app-name}} never sends the `provider` object to Portal, so `provider_routing` is simply ignored there.
+
+</Note>
+
+## Configuration {#configuration}
 
 Add a `provider_routing` section to your `~/.hermes/config.yaml`:
 
@@ -29,13 +36,21 @@ provider_routing:
   data_collection: null   # Control data collection ("allow" or "deny")
 ```
 
-:::info
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
 Provider routing only applies when using OpenRouter. It has no effect on Nous Portal or direct provider connections (e.g., connecting directly to the Anthropic API).
-:::
 
-## Options
+</Info>
 
-### `sort`
+## Options {#options}
+
+### `sort` {#sort}
 
 Controls how OpenRouter ranks available providers for your request.
 
@@ -50,7 +65,7 @@ provider_routing:
   sort: "price"
 ```
 
-### `only`
+### `only` {#only}
 
 Whitelist of provider slugs. When set, **only** these providers will be used. All others are excluded. Use the lowercase slug shown by OpenRouter for each provider.
 
@@ -61,7 +76,7 @@ provider_routing:
     - "google"
 ```
 
-### `ignore`
+### `ignore` {#ignore}
 
 Blacklist of provider names. These providers will **never** be used, even if they offer the cheapest or fastest option.
 
@@ -72,7 +87,7 @@ provider_routing:
     - "deepinfra"
 ```
 
-### `order`
+### `order` {#order}
 
 Explicit priority order. Providers listed first are preferred. Unlisted providers are used as fallbacks.
 
@@ -84,7 +99,7 @@ provider_routing:
     - "amazon-bedrock"
 ```
 
-### `require_parameters`
+### `require_parameters` {#require_parameters}
 
 When `true`, OpenRouter will only route to providers that support **all** parameters in your request (like `temperature`, `top_p`, `tools`, etc.). This avoids silent parameter drops.
 
@@ -93,7 +108,7 @@ provider_routing:
   require_parameters: true
 ```
 
-### `data_collection`
+### `data_collection` {#data_collection}
 
 Controls whether providers can use your prompts for training. Options are `"allow"` or `"deny"`.
 
@@ -102,7 +117,7 @@ provider_routing:
   data_collection: "deny"
 ```
 
-### Per-model overrides (`models`)
+### Per-model overrides (`models`) {#per-model-overrides-models}
 
 Pin a different provider set per model. Keys under `models` are model ids; each entry takes the same
 `sort` / `only` / `ignore` / `order` / `require_parameters` / `data_collection` keys and overrides the
@@ -124,12 +139,12 @@ provider_routing:
 Matching is spelling-tolerant like `agent.reasoning_overrides` (`claude-fable-5.1` / `claude-fable-5-1`,
 with or without the `openrouter/` prefix). The override follows the model the agent is *currently* on, so
 `/model` switches, fallback activation, cron jobs, and delegated subagents on another model each get their
-own pins. Edit `config.yaml` directly for these keys: model ids contain dots, which `hermes config set`
+own pins. Edit `config.yaml` directly for these keys: model ids contain dots, which `noone config set`
 reads as path separators.
 
-## Practical Examples
+## Practical Examples {#practical-examples}
 
-### Optimize for Cost
+### Optimize for Cost {#optimize-for-cost}
 
 Route to the cheapest available provider. Good for high-volume usage and development:
 
@@ -138,7 +153,7 @@ provider_routing:
   sort: "price"
 ```
 
-### Optimize for Speed
+### Optimize for Speed {#optimize-for-speed}
 
 Prioritize low-latency providers for interactive use:
 
@@ -147,7 +162,7 @@ provider_routing:
   sort: "latency"
 ```
 
-### Optimize for Throughput
+### Optimize for Throughput {#optimize-for-throughput}
 
 Best for long-form generation where tokens-per-second matters:
 
@@ -156,7 +171,7 @@ provider_routing:
   sort: "throughput"
 ```
 
-### Lock to Specific Providers
+### Lock to Specific Providers {#lock-to-specific-providers}
 
 Ensure all requests go through a specific provider for consistency:
 
@@ -166,7 +181,7 @@ provider_routing:
     - "anthropic"
 ```
 
-### Avoid Specific Providers
+### Avoid Specific Providers {#avoid-specific-providers}
 
 Exclude providers you don't want to use (e.g., for data privacy):
 
@@ -178,7 +193,7 @@ provider_routing:
   data_collection: "deny"
 ```
 
-### Preferred Order with Fallbacks
+### Preferred Order with Fallbacks {#preferred-order-with-fallbacks}
 
 Try your preferred providers first, fall back to others if unavailable:
 
@@ -190,12 +205,12 @@ provider_routing:
   require_parameters: true
 ```
 
-## How It Works
+## How It Works {#how-it-works}
 
 Provider routing preferences are passed to OpenRouter on agent chat requests and iteration-limit summaries via the `extra_body.provider` field. (`extra_body` is the OpenAI Python SDK argument; it becomes the top-level `provider` object in the JSON request.) Auxiliary tasks such as compression and title generation are configured independently under `auxiliary.<task>.extra_body`.
 
 - **CLI mode** — configured in `~/.hermes/config.yaml`, loaded at startup
-- **Gateway mode** — same config file. Messaging-platform turns use the copy loaded when the gateway starts. A local `hermes chat` / TUI session reads it from its own profile when the gateway creates the session: an edit applies to the next new session without a gateway restart, and open sessions keep the values they were created with
+- **Gateway mode** — same config file. Messaging-platform turns use the copy loaded when the gateway starts. A local `noone chat` / TUI session reads it from its own profile when the gateway creates the session: an edit applies to the next new session without a gateway restart, and open sessions keep the values they were created with
 
 The routing config is read from `config.yaml` and passed as parameters when creating the `AIAgent`:
 
@@ -208,7 +223,14 @@ provider_require_parameters ← from provider_routing.require_parameters
 provider_data_collection    ← from provider_routing.data_collection
 ```
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 You can combine multiple options. For example, sort by price but exclude certain providers and require parameter support:
 
 ```yaml
@@ -218,12 +240,21 @@ provider_routing:
   require_parameters: true
   data_collection: "deny"
 ```
-:::
 
-## Default Behavior
+</Tip>
+
+## Default Behavior {#default-behavior}
 
 When no `provider_routing` section is configured (the default), the aggregator uses its own default routing logic, which generally balances cost and availability automatically.
 
-:::tip Provider Routing vs. Fallback Models
+<Tip>
+
+<div className="doc-callout-title">
+
+Provider Routing vs. Fallback Models
+
+</div>
+
 Provider routing controls which **sub-providers behind OpenRouter** handle your requests. For automatic failover to an entirely different provider when your primary model fails, see [Fallback Providers](./fallback-providers.md).
-:::
+
+</Tip>

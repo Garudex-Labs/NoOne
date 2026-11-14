@@ -1,5 +1,6 @@
-import type { Translations } from './types'
+import { appText } from '@noone/shared/application-identity'
 
+import type { Translations } from './types'
 export const enConnectorCard: Translations['connectors'] = {
   title: 'Connect your apps',
   connect: 'Connect',
@@ -24,14 +25,14 @@ export const enConnectorCard: Translations['connectors'] = {
   ownerMissing: 'Reopen this conversation to manage its connections.',
   search: 'Find an app',
   empty: 'No matching apps',
-  disclaimer: 'Connecting is optional. Only authorize the apps you want Hermes to use.',
+  disclaimer: 'Connecting is optional. Only authorize the apps you want {app_name} to use.',
   execution: 'Connector tools',
   setup: server => `Set up ${server}`,
   openInBrowser: 'Open in browser',
   setupCancel: 'Cancel',
   authorizedToolsUnavailable: 'Authorized. Tools unavailable.',
   required: 'Required',
-  namedAccount: (app: string, alias: string) => `Hermes named this ${app} account ${alias}.`,
+  namedAccount: (app: string, alias: string) => `${appText('{app_name}')} named this ${app} account ${alias}.`,
   renameAccount: 'Rename',
   directory: {
     suggested: 'Suggested',

@@ -3,7 +3,7 @@
 The #86581 incident delivered 60,698 chars as 31 messages. A reply that needs more than
 ``MAX_SPLIT_MESSAGES`` now goes out as one file (``test_reply_file_handoff.py``); when that upload
 fails the gateway falls back to ``send()``, which must then deliver every chunk, in order, with no
-truncation notice (Teknium's ruling on PR #153476: Discord matches Telegram). discord.py's
+truncation notice (The design rule on PR #153476: Discord matches Telegram). discord.py's
 rate-limit buckets pace the sends.
 """
 

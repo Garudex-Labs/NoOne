@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { Fragment, type ReactNode, useId, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,7 +49,7 @@ function PickerRow({ hasActions, onActions, tab }: PickerRowProps) {
           className="min-h-11 min-w-11 shrink-0 justify-center"
           onSelect={onActions}
         >
-          <Codicon name="ellipsis" />
+          <AppIcon name="ellipsis" />
         </DropdownMenuItem>
       )}
     </div>
@@ -88,7 +88,7 @@ export function CompactTabPicker({ activeId, tabs, onSelect, onClose, newTab, ta
           >
             <span className="truncate" id={labelId}>{active?.label ?? active?.title}</span>
             <span className="shrink-0 text-xs text-muted-foreground" id={countId}>{count}</span>
-            <Codicon name="chevron-down" />
+            <AppIcon name="chevron-down" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -153,7 +153,7 @@ export function CompactTabPicker({ activeId, tabs, onSelect, onClose, newTab, ta
       )}
       {newTab && (
         <Button aria-label={newTab.label} onClick={newTab.onSelect} size="touch" variant="ghost">
-          <Codicon name="add" />
+          <AppIcon name="add" />
         </Button>
       )}
     </div>

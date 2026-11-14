@@ -1,64 +1,75 @@
-# Website
+# Documentation
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+The site uses the pinned Mintlify CLI in `package.json`. The renderer is pinned independently in `scripts/docs-cli.mjs`, with telemetry disabled. Its project root is
+`website/docs/`; `docs.json` defines both languages, navigation, appearance and redirects.
+Product wording, examples and branding are not changed by the platform migration.
 
-> **Reading the docs on GitHub?** The Markdown under `docs/` is authored for the rendered site at
-> <https://hermes-agent.nousresearch.com/docs/>. Cross-page links are relative Markdown paths, so they
-> follow through on GitHub's file viewer too. Every page on the site has an **Edit this page** link
-> that opens the source file here.
+## Install and preview
 
-## Authoring links in `docs/`
-
-- Link to another page with a relative Markdown path, anchors included:
-  `[Profiles](../user-guide/profiles.md)`, `[Bundles](../user-guide/features/skills.md#skill-bundles)`.
-  Docusaurus turns the file path into the page route; GitHub follows the same path. Site routes
-  (`/user-guide/profiles`, `/docs/user-guide/profiles`) only work on the rendered site — GitHub
-  resolves them as repository paths and 404s, and the `/docs/` form also emits
-  `/docs/zh-Hans/docs/...` 404s in the zh-Hans build because `baseUrl` is already `/docs/`.
-- `python3 website/scripts/check_doc_links.py` fails on any route-style link in hand-authored pages
-  (EN and the zh-Hans mirror); `--fix` rewrites them. It runs in the `Docs Site Checks` workflow.
-  Generated pages (`user-guide/skills/{bundled,optional}`, `reference/*skills-catalog.md`) are
-  produced by `scripts/generate-skill-docs.py`, which emits the same relative form.
-- Pin `{#anchor}` on cross-linked headings so the zh-Hans mirror keeps the same id.
-
-## Installation
+From the repository root, activate the project toolchain with `source ./activate`, then:
 
 ```bash
-yarn
+just docs-install
+npm start --prefix website
 ```
 
-## Local Development
+The preview runs locally. It prepares catalog data and supported page components, but
+does not regenerate author-written documentation, per-skill source pages, or existing data snapshots.
+Hosted search needs account authentication; exported sites have a local search index.
+
+## Authoring
+
+Keep relative Markdown links, including anchors, so references still resolve on GitHub:
+`[Profiles](../user-guide/profiles.md)` and
+`[Bundles](../user-guide/features/skills.md#skill-bundles)`.
+Use the supported `Note`, `Tip`, `Info`, `Warning` and `Danger` components for callouts.
+Keep `{#anchor}` on cross-linked headings, including translated headings.
+
+English pages retain their existing paths. Chinese pages live in `docs/zh-Hans/`;
+untranslated pages have English fallback copies at their existing localized routes.
+Interactive components are authored under `src/` and bundled into named JSX snippets
+by `scripts/build-components.mjs`; edit the sources, not the generated snippets.
+
+## Generate and validate
 
 ```bash
-yarn start
+just docs-generate          # explicitly refresh the per-skill pages and navigation
+just docs-generate-data     # refresh local blueprint and agent-index data
+npm test --prefix website
+just docs-check-links
+npm run typecheck --prefix website
+npm run build --prefix website
+npm run check:links --prefix website
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+Preview, validation and export use resolved temporary copies to work around the pinned CLI’s variable-parser limitation; source files retain their supported variable syntax. The preview mirrors source edits and publishes the shared JSON feeds locally.
 
-## Build
+Do not use automatic content fixes: removing duplicate headings or rewriting examples
+is outside the migration's content-preservation scope.
+
+`scripts/migration-ledger.json` records source-to-target locations and category metadata.
+The original inventory contains 700 pages. Separately approved integration removal
+(plan 022) and TUI removal (plan 025) delete their dedicated pages; do not recreate
+them during migration or count them as accidentally lost content. Identity changes
+are owned by plans 017/024, not this migration. Final content parity against the
+remaining source is not yet certified. The immutable source snapshots, comparison
+results and known unavailable pinned READMEs are recorded with execution plan 020.
+
+## Static deployment
 
 ```bash
-yarn build
+npm run export --prefix website
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+The pinned native renderer creates `website/build/docs.zip` for the `/docs` subpath;
+the ZIP writer streams files to avoid loading the entire site into memory. It retains
+client-facing catalog feeds, OAuth metadata, legacy redirects, both locales, and the
+root-level `llms.txt` and `llms-full.txt` aliases.
 
-## Deployment
+The complete export currently exceeds the existing Pages hosting size limit. Publishing
+requires a hosting decision; do not remove pages or relax deployment checks to make it fit.
+Managed publishing uses `website/docs/` as the documentation project root.
+No documentation account, production publication or domain changes are performed locally.
 
-Using SSH:
-
-```bash
-USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
-
-## Diagram Linting
-
-CI runs `ascii-guard` to lint docs for ASCII box diagrams. Use Mermaid (````mermaid`) or plain lists/tables instead of ASCII boxes to avoid CI failures.
+CI runs the same validation commands. Diagram checks still use `ascii-guard` through
+`just docs-lint-diagrams`.

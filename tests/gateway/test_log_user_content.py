@@ -1,4 +1,4 @@
-"""Gateway logs at INFO+ carry no verbatim user content (#46006): `hermes debug share` uploads them."""
+"""Gateway logs at INFO+ carry no verbatim user content (#46006): `noone debug share` uploads them."""
 
 import hashlib
 import hmac

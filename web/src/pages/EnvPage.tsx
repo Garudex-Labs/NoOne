@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
   Eye,
   EyeOff,
-  ExternalLink,
   KeyRound,
   MessageSquare,
   Pencil,
@@ -12,20 +13,11 @@ import {
   Trash2,
   X,
   Zap,
-  ChevronDown,
-  ChevronRight,
-} from "lucide-react";
-import { api } from "@/lib/api";
-import type { EnvVarInfo } from "@/lib/api";
-import { removeDeletedEnvVarFromState } from "@/lib/env-state";
-import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
-import { Toast } from "@nous-research/ui/ui/components/toast";
+} from "@noone/ui/icons";
 import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
 import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { OAuthProvidersCard } from "@/components/OAuthProvidersCard";
+import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
-import { ListItem } from "@nous-research/ui/ui/components/list-item";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import {
   Card,
   CardContent,
@@ -33,13 +25,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@nous-research/ui/ui/components/card";
-import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Input } from "@nous-research/ui/ui/components/input";
 import { Label } from "@nous-research/ui/ui/components/label";
-import { useI18n } from "@/i18n";
+import { ListItem } from "@nous-research/ui/ui/components/list-item";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Toast } from "@nous-research/ui/ui/components/toast";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+
+import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+import { OAuthProvidersCard } from "@/components/OAuthProvidersCard";
 import { usePageHeader } from "@/contexts/usePageHeader";
-import { PluginSlot } from "@/plugins";
+import { useI18n } from "@/i18n";
+import { pluralSuffix } from '@/i18n/plural';
+import { api } from "@/lib/api";
+import type { EnvVarInfo } from "@/lib/api";
 import { errorMessage } from "@/lib/api-error";
+import { removeDeletedEnvVarFromState } from "@/lib/env-state";
+import { PluginSlot } from "@/plugins";
 
 /* ------------------------------------------------------------------ */
 /*  Provider grouping                                                  */
@@ -361,7 +363,7 @@ function ProviderGroupCard({
   clearDialogOpen?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   // Separate API keys from base URLs and other settings
   const apiKeys = group.entries.filter(
@@ -420,7 +422,7 @@ function ProviderGroupCard({
           <span className="text-xs text-text-tertiary">
             {t.env.keysCount
               .replace("{count}", String(group.entries.length))
-              .replace("{s}", group.entries.length !== 1 ? "s" : "")}
+              .replace("{s}", pluralSuffix(locale, group.entries.length))}
           </span>
         </div>
       </ListItem>
@@ -490,7 +492,7 @@ function ProviderGroupCard({
 /*  CustomKeysCard — user-added arbitrary env vars + add-key form      */
 /* ------------------------------------------------------------------ */
 
-// Mirror of the backend env-name guard (hermes_cli/config.py _ENV_VAR_NAME_RE).
+// Mirror of the backend env-name guard (agent_cli/config.py _ENV_VAR_NAME_RE).
 const ENV_VAR_NAME_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 function CustomKeysCard({
@@ -518,7 +520,7 @@ function CustomKeysCard({
   onAddKey: (key: string) => void;
   clearDialogOpen?: boolean;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [newKey, setNewKey] = useState("");
   const trimmed = newKey.trim().toUpperCase();
   const alreadyEditing = edits[trimmed] !== undefined;
@@ -553,7 +555,7 @@ function CustomKeysCard({
         <CardDescription>
           {t.env.customConfigured
             .replace("{count}", String(entries.length))
-            .replace("{s}", entries.length !== 1 ? "s" : "")}
+            .replace("{s}", pluralSuffix(locale, entries.length))}
         </CardDescription>
         <CardDescription className="text-text-tertiary">
           {t.env.customHint}

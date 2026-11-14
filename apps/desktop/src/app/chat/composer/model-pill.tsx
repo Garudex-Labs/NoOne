@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { ChevronDown } from '@noone/ui/icons'
 import { atom } from 'nanostores'
 import { useEffect, useRef, useState } from 'react'
 
@@ -12,7 +13,6 @@ import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { releaseTypingFocus } from '@/components/ui/keyboard-first'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { ChevronDown } from '@/lib/icons'
 import { formatModelPillLabel, providerDisplayName } from '@/lib/model-status-label'
 import { cn } from '@/lib/utils'
 import { $currentModelSource, setModelPickerOpen } from '@/store/session'

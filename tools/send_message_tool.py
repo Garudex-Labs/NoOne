@@ -18,7 +18,7 @@ from tools.send_message_senders import (
     _AUDIO_EXTS, _DEFAULT_CAPTION_LIMIT, _IMAGE_EXTS, _NO_DELIVERABLE, _VIDEO_EXTS, _VOICE_EXTS,
     _adapter_media_method, _error, _live_adapter, _media_caption_split, _optional_sender_kwargs,
     _plugin_standalone_sender, _registry_standalone_send, _resolve_slack_user_target, _sanitize_error_text,
-    _send_matrix_via_adapter)
+)
 from tools.registry import tool_error
 
 # A bare Slack user id (session metadata / home-channel config) is opened as a DM; same shape the
@@ -27,12 +27,12 @@ _SLACK_USER_ID_RE = re.compile(r"^\s*(U[A-Z0-9]{8,})\s*$")
 
 # NOTE: ``send_message`` is intentionally NOT registered as an agent-callable model tool
 # (the agent must not fire cross-platform messages on its own); cron delivery, the
-# ``hermes send`` CLI, the kanban notifier and the opt-in MCP server import the helpers.
+# ``noone send`` CLI, the kanban notifier and the opt-in MCP server import the helpers.
 
 
 def prepare_send_message_platforms() -> None:
     """Load enabled standalone plugins before tool schemas/cache keys are built."""
-    from hermes_cli.plugins import discover_plugins
+    from agent_cli.plugins import discover_plugins
     discover_plugins()
 
 
@@ -207,9 +207,9 @@ def _handle_send(args):
     if not target or not message:
         return tool_error("Both 'target' and 'message' are required when action='send'")
     # Lone surrogates reach the outbound body via surrogateescape-decoded argv
-    # (`hermes send` MESSAGE) and crash the UTF-8 marshal inside platform SDK
-    # request bodies (feishu/lark, #113799). Every send_message caller (model tool
-    # call, `hermes send`, dashboard console) enters here, so scrub once before the
+    # (`noone send` MESSAGE) and crash the UTF-8 marshal inside platform SDK
+    # request bodies. Every send_message caller (model tool
+    # call, `noone send`, dashboard console) enters here, so scrub once before the
     # media extraction, the session mirror and the platform sender see the text.
     # Model output delivered by the gateway/cron is already scrubbed upstream
     # (``agent/turn_finalizer.py::finalize_turn``, ``gateway/run.py``).
@@ -333,9 +333,9 @@ def _not_configured_error(platform_name, platform, entry):
     from agent.secret_scope import load_env_file
     from gateway.config import _getenv
     from gateway.config_env import _ENV_ENABLE_CREDENTIALS
-    from hermes_constants import get_hermes_home
-    from hermes_cli.config_backend import config_exists
-    home = get_hermes_home()
+    from agent_constants import get_agent_home
+    from agent_cli.config_backend import config_exists
+    home = get_agent_home()
     env_names = list(_ENV_ENABLE_CREDENTIALS.get(platform) or (entry.required_env if entry else ()))
     names = "/".join(env_names) or "credentials"
     env_path, config_path = home / ".env", home / "config.yaml"
@@ -343,7 +343,7 @@ def _not_configured_error(platform_name, platform, entry):
     dotenv_state = (f"{names} present" if any(n in dotenv_keys for n in env_names) else f"no {names}") \
         if env_path.exists() else "missing"
     try:
-        from hermes_cli.config_effective import load_user_config_effective
+        from agent_cli.config_effective import load_user_config_effective
         user_config = load_user_config_effective(config_path) or {}
         block = user_config.get("platforms", {}).get(platform_name)
     except Exception:
@@ -365,10 +365,10 @@ def _not_configured_error(platform_name, platform, entry):
     # never reads this profile's .env at all.
     try:
         from gateway.status import read_runtime_status, runtime_status_pid_is_live
-        from hermes_constants import get_default_hermes_root, hermes_home_key
-        root = get_default_hermes_root()
+        from agent_constants import get_default_agent_root, agent_home_key
+        root = get_default_agent_root()
         gateways = [(home, read_runtime_status())]
-        if hermes_home_key(root) != hermes_home_key(home):
+        if agent_home_key(root) != agent_home_key(home):
             gateways.append((root, read_runtime_status(root / "gateway_state.json")))
         for gw_home, record in gateways:
             state = ((record or {}).get("platforms") or {}).get(platform_name, {}).get("state")
@@ -410,7 +410,7 @@ def _home_chat_id(config, platform, platform_name):
     home_env = _HOME_CHANNEL_ENV_OVERRIDES.get(platform_name, f"{platform_name.upper()}_HOME_CHANNEL")
     return None, None, (f"No home channel set for {platform_name} to determine where to send the message. "
                   f"Either specify a channel directly with '{platform_name}:CHANNEL_NAME', "
-                  f"or set a home channel via: hermes config set {home_env} <channel_id>")
+                  f"or set a home channel via: noone config set {home_env} <channel_id>")
 
 
 def _slack_dm_chat_id(pconfig, chat_id):
@@ -561,8 +561,7 @@ async def _send_via_adapter(platform, pconfig, chat_id, chunk, *, thread_id=None
     runner, adapter = _live_adapter(platform)
     if adapter is not None:
         try:
-            metadata = {**({"thread_id": thread_id} if thread_id else {}),
-                        **({"publish_topic": chat_id} if platform_name == "ntfy" and chat_id else {})} or None
+            metadata = {"thread_id": thread_id} if thread_id else None
             if media_files:  # always a dict result, returned as-is below
                 make_coro = lambda: _send_live_adapter_media(
                     adapter, chat_id, chunk, media_files, thread_id=thread_id, metadata=metadata,
@@ -611,7 +610,6 @@ async def _send_chunks(chunks, send_one):
     from gateway.platforms._shared import DeliveryOutcome
     outcome = DeliveryOutcome()
     result = None
-    # --- Matrix: route ALL sends through the native adapter so text is encrypted in E2EE rooms too (issue:
     # text-only sends arrived with a red padlock because they took the raw-HTTP standalone path). The
     # adapter reuses the live gateway's E2EE session when available (#46310) and falls back to an
     # encryption-aware ephemeral adapter for standalone/cron. ---
@@ -643,7 +641,7 @@ def _standalone_send_policy(platform_name):
     (idempotent manifest scan; only this platform's adapter is materialized)."""
     from gateway.platform_registry import platform_registry
     if not platform_registry.is_registered(platform_name):
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
         discover_plugins()
     entry = platform_registry.get(platform_name)
     return entry.standalone_send if entry is not None else None
@@ -712,23 +710,20 @@ def _via_adapter_route(p, pc, cid, chunk, media, tid, fd):
 
 # Native-media chunked routes for built-in platforms; media rides on the final chunk, non-final
 # chunks get the sentinel. platform -> (media required, sentinel, sender(platform, pconfig,
-# chat_id, chunk, media, thread_id, force_document)). Matrix: ALL sends use the native adapter
-# (E2EE text). WeCom: media needs the running gateway. Slack text: live adapter (multi-workspace, ignored_channels gates) else the
+# chat_id, chunk, media, thread_id, force_document )). Slack text: live adapter (multi-workspace, ignored_channels gates) else the
 # plugin's standalone sender. Names resolve at call time so tests can monkeypatch the senders.
 _CHUNKED_ROUTES = {
-    "matrix": (False, [], lambda p, pc, cid, chunk, media, tid, fd: _send_matrix_via_adapter(
-        pc, cid, chunk, media_files=media, thread_id=tid)),
     "slack": (False, [], _via_adapter_route),
-    "wecom": (True, None, _via_adapter_route)}
+    }
 
-_MEDIA_PLATFORMS_NOTE = "telegram, discord, matrix, weixin, signal, feishu, whatsapp, slack and qqbot"
+_MEDIA_PLATFORMS_NOTE = "telegram, discord, weixin, signal, whatsapp and slack"
 
 
 async def _send_to_platform(platform, pconfig, chat_id, message, thread_id=None, media_files=None,
                             force_document=False, mentions=None, args=None, notify=None):
     """Route to the platform sender, chunking long text with the adapters' splitter. Order matters:
     Weixin first (its native helper must not be blocked by unrelated optional imports such as
-    lark-oapi), Telegram (chunks itself), plugin standalone media, native chunked, generic text."""
+    platform SDKs), Telegram (chunks itself), plugin standalone media, native chunked, generic text."""
     from gateway.config import Platform
     platform_name = platform.value if hasattr(platform, "value") else str(platform)
     media_files = media_files or []
@@ -754,9 +749,9 @@ async def _send_to_platform(platform, pconfig, chat_id, message, thread_id=None,
         return await _send_chunks(chunks, lambda chunk, is_last: sender(
             platform, pconfig, chat_id, chunk, media_files if is_last else empty_media, thread_id, force_document))
 
-    # Generic path: text only. Buzz delivers media natively via _send_via_adapter, so no warning.
+    # Generic path: text only.
     warning = None
-    if media_files and platform_name != "buzz":
+    if media_files:
         if not message.strip():
             return {"error": (f"send_message MEDIA delivery is currently only supported for {_MEDIA_PLATFORMS_NOTE}; "
                               f"target {platform_name} had only media attachments")}

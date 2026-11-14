@@ -98,7 +98,7 @@ def test_loaded_wake_defaults_resolve_supported_provider(tmp_path, monkeypatch, 
 
 def test_load_wake_word_config_guards_non_dict(monkeypatch):
     monkeypatch.setattr(
-        "hermes_cli.config.load_config", lambda: {"wake_word": "oops"}
+        "agent_cli.config.load_config", lambda: {"wake_word": "oops"}
     )
     assert ww.load_wake_word_config() == {}
 
@@ -373,7 +373,7 @@ def test_requirements_lazy_disabled_returns_remedy_not_nameerror(monkeypatch):
     r = ww.check_wake_word_requirements({"provider": "openwakeword"})
     assert r["available"] is False
     assert r["deps_available"] is False
-    assert "hermes pm install --extra wake-openwakeword" in r["hint"]
+    assert "noone pm install --extra wake-openwakeword" in r["hint"]
 
 
 def test_requirements_deps_present_but_no_audio_hint(monkeypatch):

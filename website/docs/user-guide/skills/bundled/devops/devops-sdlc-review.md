@@ -1,38 +1,46 @@
 ---
 title: "Sdlc Review — Review Kanban handoffs and route verified outcomes"
-sidebar_label: "Sdlc Review"
+sidebarTitle: "Sdlc Review"
 description: "Review Kanban handoffs and route verified outcomes"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Sdlc Review
+# Sdlc Review {#sdlc-review}
 
 Review Kanban handoffs and route verified outcomes.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/devops/sdlc-review` |
 | Version | `1.1.0` |
-| Author | Jakub Wolniewicz (@frizikk) + Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `kanban`, `review`, `quality`, `verification` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# SDLC Review Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# SDLC Review Skill {#sdlc-review-skill}
 
 Independently verify work handed from a Kanban implementation run to the review lane, then approve it, request changes, or escalate. This skill reviews the deliverable and its evidence; it does not take over the implementer's work.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use this skill when all of the following are true:
 
@@ -42,14 +50,14 @@ Use this skill when all of the following are true:
 
 Do not use it for a separate downstream review card. A downstream card is ordinary implementation work with a review-oriented specification and completes through its own lifecycle.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - A Kanban worker context with the current task and run identifiers.
 - Native Kanban tools: `kanban_show`, `kanban_comment`, `kanban_complete`, `kanban_request_changes`, and `kanban_block`.
 - Workspace access through `read_file`, `search_files`, and `terminal` when the deliverable is code.
 - The task's original specification, acceptance criteria, handoff summary, and prior run history must be available through `kanban_show`.
 
-## How to Run
+## How to Run {#how-to-run}
 
 This skill is loaded automatically by the review dispatcher. Start with `kanban_show` before inspecting files or choosing a verdict.
 
@@ -58,7 +66,7 @@ This skill is loaded automatically by the review dispatcher. Start with `kanban_
 3. Choose exactly one verdict: approve, request changes, or escalate.
 4. Record concrete evidence in the terminal Kanban transition.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Verdict | When | Final action |
 |---|---|---|
@@ -68,7 +76,7 @@ This skill is loaded automatically by the review dispatcher. Start with `kanban_
 
 A requested-changes transition returns the task to its original implementer. When that implementer requests review again without naming a reviewer, the persisted reviewer provenance routes the re-review back to the same reviewer profile.
 
-## Review Lenses
+## Review Lenses {#review-lenses}
 
 Vary how you look at the work on each round instead of repeating the same inspection. Decorrelated lenses catch different defect classes: a cold read of the artifact surfaces design and correctness problems that the implementer's narrative would have framed away, execution surfaces claims that do not reproduce, and a strict contract audit surfaces quiet scope drift. Repeating the round-1 lens on round 3 mostly re-finds what round 1 already found.
 
@@ -82,13 +90,13 @@ Determine the current round from the history the task record already gives you: 
 
 The baseline duties in the Procedure section still apply on every round; the lens sets which inspection you lead with and weight most heavily.
 
-### Lens variation for ad-hoc review fan-outs
+### Lens variation for ad-hoc review fan-outs {#lens-variation-for-ad-hoc-review-fan-outs}
 
 The same principle applies outside the Kanban review lane. When spawning multiple parallel reviewers via `delegate_task`, give each reviewer a different lens — one diff-only brief, one full-context brief, one checkout-and-run brief — rather than identical briefs. Identical briefs produce correlated verdicts and duplicate findings; varied briefs cover more defect classes for the same review spend.
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. Orient from the durable task record
+### 1. Orient from the durable task record {#1-orient-from-the-durable-task-record}
 
 Call `kanban_show` and identify:
 
@@ -100,7 +108,7 @@ Call `kanban_show` and identify:
 
 Treat the handoff as a claim to verify, not as proof that the work is correct.
 
-### 2. Compare requested behavior with delivered behavior
+### 2. Compare requested behavior with delivered behavior {#2-compare-requested-behavior-with-delivered-behavior}
 
 Map every acceptance criterion to concrete implementation or output evidence. Note omissions, changed semantics, and unrelated scope before deciding whether to run deeper checks.
 
@@ -118,9 +126,9 @@ For non-code work:
 2. Check correctness, completeness, formatting, and provenance.
 3. Validate referenced URLs or external facts with the appropriate native tools when they affect the verdict.
 
-### 3. Choose one verdict
+### 3. Choose one verdict {#3-choose-one-verdict}
 
-#### Approve
+#### Approve {#approve}
 
 Approve only when the acceptance criteria are satisfied and the evidence is sufficient. Call:
 
@@ -133,7 +141,7 @@ kanban_complete(
 
 Include the exact checks that passed and any bounded caveat that does not block acceptance.
 
-#### Request changes
+#### Request changes {#request-changes}
 
 Use this for specific, correctable defects. First record actionable findings:
 
@@ -154,7 +162,7 @@ kanban_request_changes(
 
 State where the defect is, how it reproduces, why it violates the task, and what minimum outcome would resolve it. The transition does not use blocker recurrence accounting.
 
-#### Escalate
+#### Escalate {#escalate}
 
 Use escalation only when the reviewer and implementer cannot resolve the problem without a human decision or external prerequisite:
 
@@ -166,11 +174,11 @@ kanban_block(
 
 Explain the blocked decision and the smallest information needed to continue.
 
-### 4. Preserve role separation
+### 4. Preserve role separation {#4-preserve-role-separation}
 
 Do not edit the implementation while acting as reviewer. Request changes and let the implementer produce the next candidate; then independently verify that candidate in the next review run.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Rubber-stamping:** A passing handoff summary is not independent evidence.
 - **Reviewer implementation:** Editing the deliverable hides ownership and weakens the re-review boundary.
@@ -180,7 +188,7 @@ Do not edit the implementation while acting as reviewer. Request changes and let
 - **Using blockers for ordinary rework:** Correctable defects belong in `kanban_request_changes`; reserve `kanban_block` for genuine external blockers or human decisions.
 - **Completing without evidence:** Every approval summary must name the checks or artifacts actually inspected.
 
-## Verification
+## Verification {#verification}
 
 Before submitting the verdict, confirm:
 

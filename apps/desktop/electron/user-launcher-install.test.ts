@@ -13,10 +13,10 @@ afterEach((): void => {
 })
 
 function sourceTree(root: string): void {
-  fs.mkdirSync(path.join(root, 'hermes_cli'), { recursive: true })
+  fs.mkdirSync(path.join(root, 'agent_cli'), { recursive: true })
   fs.mkdirSync(path.join(root, 'pm'))
-  fs.writeFileSync(path.join(root, 'hermes_cli', 'main.py'), '')
-  fs.writeFileSync(path.join(root, 'hermes_cli', '_launchers.py'), '')
+  fs.writeFileSync(path.join(root, 'agent_cli', 'main.py'), '')
+  fs.writeFileSync(path.join(root, 'agent_cli', '_launchers.py'), '')
 }
 
 function publishLauncher(dir: string, reported: string): string {
@@ -33,7 +33,7 @@ function publishLauncher(dir: string, reported: string): string {
   return launcher
 }
 
-// The reported machine: setup-hermes.sh published ~/.local/bin/hermes for a
+// The reported machine: setup-agent.sh published ~/.local/bin/hermes for a
 // clone outside ~/.hermes/hermes-agent, and a Finder/Dock launch inherited
 // launchd's PATH, which has no ~/.local/bin. Desktop must still find it.
 test.skipIf(process.platform === 'win32')(

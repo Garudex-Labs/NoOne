@@ -1,45 +1,54 @@
 ---
 title: "P5Js — p5.js sketches: gen art, shaders, interactive, 3D"
-sidebar_label: "P5Js"
+sidebarTitle: "P5Js"
 description: "p5.js sketches: gen art, shaders, interactive, 3D"
 ---
 
+
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# P5Js
+# P5Js {#p5js}
 
 p5.js sketches: gen art, shaders, interactive, 3D.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/creative/p5js` |
 | Version | `1.0.0` |
-| Author | SHL0MS, Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `creative-coding`, `generative-art`, `p5js`, `canvas`, `interactive`, `visualization`, `webgl`, `shaders`, `animation` |
 | Related skills | [`ascii-video`](../../bundled/creative/creative-ascii-video.md), [`manim-video`](../../bundled/creative/creative-manim-video.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# p5.js Production Pipeline
+<div className="doc-callout-title">
 
-## When to use
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# p5.js Production Pipeline {#p5js-production-pipeline}
+
+## When to use {#when-to-use}
 
 Use when users request: p5.js sketches, creative coding, generative art, interactive visualizations, canvas animations, browser-based visual art, data viz, shader effects, or any p5.js project.
 
-## What's inside
+## What's inside {#whats-inside}
 
 Production pipeline for interactive and generative visual art using p5.js. Creates browser-based sketches, generative art, data visualizations, interactive experiences, 3D scenes, audio-reactive visuals, and motion graphics — exported as HTML, PNG, GIF, MP4, or SVG. Covers: 2D/3D rendering, noise and particle systems, flow fields, shaders (GLSL), pixel manipulation, kinetic typography, WebGL scenes, audio analysis, mouse/keyboard interaction, and headless high-res export.
 
-## Creative Standard
+## Creative Standard {#creative-standard}
 
 This is visual art rendered in the browser. The canvas is the medium; the algorithm is the brush.
 
@@ -55,7 +64,7 @@ This is visual art rendered in the browser. The canvas is the medium; the algori
 
 **Cohesive aesthetic over feature count.** All elements must serve a unified visual language — shared color temperature, consistent stroke weight vocabulary, harmonious motion speeds. A sketch with ten unrelated effects is worse than one with three that belong together.
 
-## Modes
+## Modes {#modes}
 
 | Mode | Input | Output | Reference |
 |------|-------|--------|-----------|
@@ -67,7 +76,7 @@ This is visual art rendered in the browser. The canvas is the medium; the algori
 | **Image processing** | Image file(s) | Pixel manipulation, filters, mosaic, pointillism | `references/visual-effects.md` § Pixel Manipulation |
 | **Audio-reactive** | Audio file / mic | Sound-driven generative visuals | `references/interaction.md` § Audio Input |
 
-## Stack
+## Stack {#stack}
 
 Single self-contained HTML file per project. No build step required.
 
@@ -84,13 +93,13 @@ Single self-contained HTML file per project. No build step required.
 | Texture | p5.grain (optional) | Film grain, texture overlays |
 | Fonts | Google Fonts / `loadFont()` | Custom typography via OTF/TTF/WOFF2 |
 
-### Version Note
+### Version Note {#version-note}
 
 **p5.js 1.x** (1.11.3) is the default — stable, well-documented, broadest library compatibility. Use this unless a project requires 2.x features.
 
 **p5.js 2.x** (2.2+) adds: `async setup()` replacing `preload()`, OKLCH/OKLAB color modes, `splineVertex()`, shader `.modify()` API, variable fonts, `textToContours()`, pointer events. Required for p5.brush. See `references/core-api.md` § p5.js 2.0.
 
-## Pipeline
+## Pipeline {#pipeline}
 
 Every project follows the same 6-stage path:
 
@@ -105,9 +114,9 @@ CONCEPT → DESIGN → CODE → PREVIEW → EXPORT → VERIFY
 5. **EXPORT** — Capture output: `saveCanvas()` for PNG, `saveGif()` for GIF, `saveFrames()` + ffmpeg for MP4, Puppeteer for headless batch
 6. **VERIFY** — Does the output match the concept? Is it visually striking at the intended display size? Would you frame it?
 
-## Creative Direction
+## Creative Direction {#creative-direction}
 
-### Aesthetic Dimensions
+### Aesthetic Dimensions {#aesthetic-dimensions}
 
 | Dimension | Options | Reference |
 |-----------|---------|-----------|
@@ -124,7 +133,7 @@ CONCEPT → DESIGN → CODE → PREVIEW → EXPORT → VERIFY
 | **Layering** | `createGraphics()` offscreen buffers, alpha compositing, masking | `references/core-api.md` § Offscreen Buffers |
 | **Texture** | Perlin surface, stippling, hatching, halftone, pixel sorting | `references/visual-effects.md` § Texture Generation |
 
-### Per-Project Variation Rules
+### Per-Project Variation Rules {#per-project-variation-rules}
 
 Never use default configurations. For every project:
 - **Custom color palette** — never raw `fill(255, 0, 0)`. Always a designed palette with 3-7 colors
@@ -133,7 +142,7 @@ Never use default configurations. For every project:
 - **Motion variety** — different speeds for different elements. Primary at 1x, secondary at 0.3x, ambient at 0.1x
 - **At least one invented element** — a custom particle behavior, a novel noise application, a unique interaction response
 
-### Project-Specific Invention
+### Project-Specific Invention {#project-specific-invention}
 
 For every project, invent at least one of:
 - A custom color palette matching the mood (not a preset)
@@ -142,7 +151,7 @@ For every project, invent at least one of:
 - An interaction mechanic the user didn't request but that elevates the piece
 - A compositional technique that creates visual hierarchy
 
-### Parameter Design Philosophy
+### Parameter Design Philosophy {#parameter-design-philosophy}
 
 Parameters should emerge from the algorithm, not from a generic menu. Ask: "What properties of *this* system should be tunable?"
 
@@ -160,9 +169,9 @@ Parameters should emerge from the algorithm, not from a generic menu. Ask: "What
 
 Every parameter should change how the algorithm *thinks*, not just how it *looks*. A "turbulence" parameter that changes noise octaves is good. A "particle size" slider that only changes `ellipse()` radius is shallow.
 
-## Workflow
+## Workflow {#workflow}
 
-### Step 1: Creative Vision
+### Step 1: Creative Vision {#step-1-creative-vision}
 
 Before any code, articulate:
 
@@ -175,7 +184,7 @@ Before any code, articulate:
 
 Map the user's prompt to aesthetic choices. "Relaxing generative background" demands different everything from "glitch data visualization."
 
-### Step 2: Technical Design
+### Step 2: Technical Design {#step-2-technical-design}
 
 - **Mode** — which of the 7 modes from the table above
 - **Canvas size** — landscape 1920x1080, portrait 1080x1920, square 1080x1080, or responsive `windowWidth/windowHeight`
@@ -185,7 +194,7 @@ Map the user's prompt to aesthetic choices. "Relaxing generative background" dem
 - **Interaction model** — passive (no input), mouse-driven, keyboard-driven, audio-reactive, scroll-driven
 - **Viewer UI** — for interactive generative art, start from `templates/viewer.html` which provides seed navigation, parameter sliders, and download. For simple sketches or video export, use bare HTML
 
-### Step 3: Code the Sketch
+### Step 3: Code the Sketch {#step-3-code-the-sketch}
 
 For **interactive generative art** (seed exploration, parameter tuning): start from `templates/viewer.html`. Read the template first, keep the fixed sections (seed nav, actions), replace the algorithm and parameter controls. This gives the user seed prev/next/random/jump, parameter sliders with live update, and PNG download — all wired up.
 
@@ -271,7 +280,7 @@ Key implementation patterns:
 - **Class-based entities**: Particles, agents, shapes as classes with `update()` + `display()` methods
 - **Offscreen buffers**: `createGraphics()` for layered composition, trails, masks
 
-### Step 4: Preview & Iterate
+### Step 4: Preview & Iterate {#step-4-preview--iterate}
 
 - Open HTML file directly in browser — no server needed for basic sketches
 - For `loadImage()`/`loadFont()` from local files: use `scripts/serve.sh` or `python -m http.server`
@@ -279,7 +288,7 @@ Key implementation patterns:
 - Test at target export resolution, not just the window size
 - Adjust parameters until the visual matches the concept from Step 1
 
-### Step 5: Export
+### Step 5: Export {#step-5-export}
 
 | Format | Method | Command |
 |--------|--------|---------|
@@ -290,7 +299,7 @@ Key implementation patterns:
 | **MP4** | Puppeteer frame capture + ffmpeg | `bash scripts/render.sh sketch.html output.mp4 --duration 30 --fps 30` |
 | **SVG** | `createCanvas(w, h, SVG)` with p5.js-svg | `save('output.svg')` |
 
-### Step 6: Quality Verification
+### Step 6: Quality Verification {#step-6-quality-verification}
 
 - **Does it match the vision?** Compare output to the creative concept. If it looks generic, go back to Step 1
 - **Resolution check**: Is it sharp at the target display size? No aliasing artifacts?
@@ -298,9 +307,9 @@ Key implementation patterns:
 - **Color check**: Do the colors work together? Test on both light and dark monitors
 - **Edge cases**: What happens at canvas edges? On resize? After running for 10 minutes?
 
-## Critical Implementation Notes
+## Critical Implementation Notes {#critical-implementation-notes}
 
-### Performance — Disable FES First
+### Performance — Disable FES First {#performance--disable-fes-first}
 
 The Friendly Error System (FES) adds up to 10x overhead. Disable it in every production sketch:
 
@@ -325,7 +334,7 @@ let m = Math.min(a, b);       // not min(a, b)
 
 Never `console.log()` inside `draw()`. Never manipulate DOM in `draw()`. See `references/troubleshooting.md` § Performance.
 
-### Seeded Randomness — Always
+### Seeded Randomness — Always {#seeded-randomness--always}
 
 Every generative sketch must be reproducible. Same seed, same output.
 
@@ -339,7 +348,7 @@ function setup() {
 
 Never use `Math.random()` for generative content — only for performance-critical non-visual code. Always `random()` for visual elements. If you need a random seed: `CONFIG.seed = floor(random(99999))`.
 
-### Generative Art Platform Support (fxhash / Art Blocks)
+### Generative Art Platform Support (fxhash / Art Blocks) {#generative-art-platform-support-fxhash--art-blocks}
 
 For generative art platforms, replace p5's PRNG with the platform's deterministic random:
 
@@ -359,7 +368,7 @@ let x = rng() * width;  // instead of random(width)
 
 See `references/export-pipeline.md` § Platform Export.
 
-### Color Mode — Use HSB
+### Color Mode — Use HSB {#color-mode--use-hsb}
 
 HSB (Hue, Saturation, Brightness) is dramatically easier to work with than RGB for generative art:
 
@@ -373,7 +382,7 @@ colorMode(HSB, 360, 100, 100, 100);
 
 Never hardcode raw RGB values. Define a palette object, derive variations procedurally. See `references/color-systems.md`.
 
-### Noise — Multi-Octave, Not Raw
+### Noise — Multi-Octave, Not Raw {#noise--multi-octave-not-raw}
 
 Raw `noise(x, y)` looks like smooth blobs. Layer octaves for natural texture:
 
@@ -392,7 +401,7 @@ function fbm(x, y, octaves = 4) {
 
 For flowing organic forms, use **domain warping**: feed noise output back as noise input coordinates. See `references/visual-effects.md`.
 
-### createGraphics() for Layers — Not Optional
+### createGraphics() for Layers — Not Optional {#creategraphics-for-layers--not-optional}
 
 Flat single-pass rendering looks flat. Use offscreen buffers for composition:
 
@@ -414,7 +423,7 @@ function draw() {
 }
 ```
 
-### Performance — Vectorize Where Possible
+### Performance — Vectorize Where Possible {#performance--vectorize-where-possible}
 
 p5.js draw calls are expensive. For thousands of particles:
 
@@ -442,7 +451,7 @@ updatePixels();
 
 See `references/troubleshooting.md` § Performance.
 
-### Instance Mode for Multiple Sketches
+### Instance Mode for Multiple Sketches {#instance-mode-for-multiple-sketches}
 
 Global mode pollutes `window`. For production, use instance mode:
 
@@ -461,7 +470,7 @@ new p5(sketch, 'canvas-container');
 
 Required when embedding multiple sketches on one page or integrating with frameworks.
 
-### WebGL Mode Gotchas
+### WebGL Mode Gotchas {#webgl-mode-gotchas}
 
 - `createCanvas(w, h, WEBGL)` — origin is center, not top-left
 - Y-axis is inverted (positive Y goes up in WEBGL, down in P2D)
@@ -470,7 +479,7 @@ Required when embedding multiple sketches on one page or integrating with framew
 - `texture()` before `rect()`/`plane()` — not after
 - Custom shaders: `createShader(vert, frag)` — test on multiple browsers
 
-### Export — Key Bindings Convention
+### Export — Key Bindings Convention {#export--key-bindings-convention}
 
 Every sketch should include these in `keyPressed()`:
 
@@ -483,7 +492,7 @@ function keyPressed() {
 }
 ```
 
-### Headless Video Export — Use noLoop()
+### Headless Video Export — Use noLoop() {#headless-video-export--use-noloop}
 
 For headless rendering via Puppeteer, the sketch **must** use `noLoop()` in setup. Without it, p5's draw loop runs freely while screenshots are slow — the sketch races ahead and you get skipped/duplicate frames.
 
@@ -500,7 +509,7 @@ The bundled `scripts/export-frames.js` detects `_p5Ready` and calls `redraw()` o
 
 For multi-scene videos, use the per-clip architecture: one HTML per scene, render independently, stitch with `ffmpeg -f concat`. See `references/export-pipeline.md` § Per-Clip Architecture.
 
-### Agent Workflow
+### Agent Workflow {#agent-workflow}
 
 When building p5.js sketches:
 
@@ -513,7 +522,7 @@ When building p5.js sketches:
 7. **Iterative refinement** — edit the HTML file, user refreshes browser to see changes
 8. **Load references on demand** — use `skill_view(name="p5js", file_path="references/...")` to load specific reference files as needed during implementation
 
-## Performance Targets
+## Performance Targets {#performance-targets}
 
 | Metric | Target |
 |--------|--------|
@@ -525,7 +534,7 @@ When building p5.js sketches:
 | File size (HTML) | &lt; 100KB (excluding CDN libraries) |
 | Load time | &lt; 2s to first frame |
 
-## References
+## References {#references}
 
 | File | Contents |
 |------|----------|
@@ -543,7 +552,7 @@ When building p5.js sketches:
 
 ---
 
-## Creative Divergence (use only when user requests experimental/creative/unique output)
+## Creative Divergence (use only when user requests experimental/creative/unique output) {#creative-divergence-use-only-when-user-requests-experimentalcreativeunique-output}
 
 If the user asks for creative, experimental, surprising, or unconventional output, select the strategy that best fits and reason through its steps BEFORE generating code.
 
@@ -551,13 +560,13 @@ If the user asks for creative, experimental, surprising, or unconventional outpu
 - **SCAMPER** — when the user wants a twist on a known generative art pattern
 - **Distance Association** — when the user gives a single concept and wants exploration ("make something about time")
 
-### Conceptual Blending
+### Conceptual Blending {#conceptual-blending}
 1. Name two distinct visual systems (e.g., particle physics + handwriting)
 2. Map correspondences (particles = ink drops, forces = pen pressure, fields = letterforms)
 3. Blend selectively — keep mappings that produce interesting emergent visuals
 4. Code the blend as a unified system, not two systems side-by-side
 
-### SCAMPER Transformation
+### SCAMPER Transformation {#scamper-transformation}
 Take a known generative pattern (flow field, particle system, L-system, cellular automata) and systematically transform it:
 - **Substitute**: replace circles with text characters, lines with gradients
 - **Combine**: merge two patterns (flow field + voronoi)
@@ -567,7 +576,7 @@ Take a known generative pattern (flow field, particle system, L-system, cellular
 - **Eliminate**: remove the grid, remove color, remove symmetry
 - **Reverse**: run the simulation backward, invert the parameter space
 
-### Distance Association
+### Distance Association {#distance-association}
 1. Anchor on the user's concept (e.g., "loneliness")
 2. Generate associations at three distances:
    - Close (obvious): empty room, single figure, silence

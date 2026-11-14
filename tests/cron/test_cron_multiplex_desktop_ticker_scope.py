@@ -25,7 +25,7 @@ def test_standalone_fallback_pool_keeps_profile_scope(tmp_path, monkeypatch):
         set_multiplex_active,
         set_secret_scope,
     )
-    from hermes_constants import get_hermes_home, set_hermes_home_override
+    from agent_constants import get_agent_home, set_agent_home_override
     import cron.scheduler as sched
     import tools.send_message_tool as smt
 
@@ -41,7 +41,7 @@ def test_standalone_fallback_pool_keeps_profile_scope(tmp_path, monkeypatch):
     seen = {}
 
     async def fake_send(platform, pconfig, chat_id, message, **kwargs):
-        seen["home"] = str(get_hermes_home())
+        seen["home"] = str(get_agent_home())
         seen["token"] = get_secret("TELEGRAM_BOT_TOKEN", None)
         return {"success": True, "message_id": "1"}
 
@@ -49,7 +49,7 @@ def test_standalone_fallback_pool_keeps_profile_scope(tmp_path, monkeypatch):
 
     async def _inside_running_loop():
         # Emulate the multiplex ticker's per-profile scope on the caller.
-        set_hermes_home_override(str(sec_home))
+        set_agent_home_override(str(sec_home))
         set_secret_scope({"TELEGRAM_BOT_TOKEN": "OPS-TOKEN"})
         return sched._deliver_result(job, "hello", adapters={}, loop=None)
 
@@ -66,7 +66,7 @@ def test_standalone_fallback_pool_keeps_profile_scope(tmp_path, monkeypatch):
 
 def test_multiplex_ticker_profile_gate_skips_rejected_profile(tmp_path):
     from cron.scheduler_provider import InProcessCronScheduler
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
     own_gateway = tmp_path / "own-gateway"
     orphan = tmp_path / "orphan"
@@ -77,7 +77,7 @@ def test_multiplex_ticker_profile_gate_skips_rejected_profile(tmp_path):
     ticked: list[str] = []
 
     def _tick(*args, **kwargs):
-        ticked.append(str(get_hermes_home()))
+        ticked.append(str(get_agent_home()))
         if len(ticked) >= 3:
             stop.set()
         return 0
@@ -110,17 +110,17 @@ def test_multiplex_ticker_profile_gate_skips_rejected_profile(tmp_path):
 @pytest.mark.parametrize("profile_count", [1, 2])
 def test_desktop_ticker_gates_on_profile_gateway_running(tmp_path, monkeypatch, profile_count):
     """Desktop yields to each live gateway, including a single-profile install."""
-    from hermes_cli import web_server
+    from agent_cli import web_server
 
     homes = [("default", tmp_path / "default"), ("ops", tmp_path / "ops")][:profile_count]
     running = {homes[-1][1]}
     monkeypatch.setattr(
-        "hermes_cli.profiles.profiles_to_serve", lambda multiplex=False: list(homes)
+        "agent_cli.profiles.profiles_to_serve", lambda multiplex=False: list(homes)
     )
     monkeypatch.setattr(
-        "hermes_cli.profiles._check_gateway_running", lambda home: home in running
+        "agent_cli.profiles._check_gateway_running", lambda home: home in running
     )
-    monkeypatch.setattr("hermes_cli.profiles._served_by_running_multiplexer", lambda name: False)
+    monkeypatch.setattr("agent_cli.profiles._served_by_running_multiplexer", lambda name: False)
     captured = {}
 
     class _Provider:
@@ -134,7 +134,7 @@ def test_desktop_ticker_gates_on_profile_gateway_running(tmp_path, monkeypatch, 
     monkeypatch.setattr(web_server, "resolve_cron_scheduler", lambda: _Provider(), raising=False)
     monkeypatch.setattr(sp, "resolve_cron_scheduler", lambda: _Provider())
     monkeypatch.setattr(sp, "InProcessCronScheduler", _Provider)
-    monkeypatch.setattr("hermes_logging.enable_profile_log_routing", lambda homes: None)
+    monkeypatch.setattr("agent_logging.enable_profile_log_routing", lambda homes: None)
 
     web_server._start_desktop_cron_ticker(threading.Event(), interval=0)
 
@@ -167,7 +167,7 @@ def test_a_routed_profile_fire_runs_under_multiplex_semantics_for_exactly_its_sc
     from cron import scheduler
     from agent import secret_scope
     from cron.scheduler_provider import _profile_cron_scope, routed_profile_fire
-    from hermes_cli.env_loader import load_hermes_dotenv
+    from agent_cli.env_loader import load_agent_dotenv
 
     launch, routed = tmp_path / "launch", tmp_path / "launch" / "profiles" / "ops"
     for home in (launch, routed):
@@ -191,7 +191,7 @@ def test_a_routed_profile_fire_runs_under_multiplex_semantics_for_exactly_its_sc
         try:
             assert secret_scope.is_multiplex_active() is True
             # The job's per-run dotenv reload, exactly as cron/scheduler does it: hydrate-only.
-            assert load_hermes_dotenv(hermes_home=routed, load_external_secrets=False) == []
+            assert load_agent_dotenv(hermes_home=routed, load_external_secrets=False) == []
             assert secret_scope.get_secret("XAI_API_KEY") == "routed-key"
             assert secret_scope.get_secret("DISCORD_BOT_TOKEN") is None  # never the launch bot
         finally:
@@ -218,7 +218,7 @@ def test_routed_fire_scope_carries_managed_env_authority(tmp_path, monkeypatch, 
     from cron import scheduler
     from agent import secret_scope
     from cron.scheduler_provider import _profile_cron_scope
-    from hermes_cli import managed_scope
+    from agent_cli import managed_scope
 
     launch, routed = tmp_path / "launch", tmp_path / "launch" / "profiles" / "ops"
     managed = tmp_path / "managed"
@@ -250,12 +250,12 @@ def test_dashboard_run_now_isolates_a_sibling_profile_fire_like_the_ticker(tmp_p
     import os
 
     from cron import scheduler
-    from hermes_cli import web_server_cron
+    from agent_cli import web_server_cron
     from agent import secret_scope
     from cron.jobs import create_job
     from cron.scheduler_provider import InProcessCronScheduler
-    from hermes_cli import profiles
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_cli import profiles
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     launch = tmp_path / ".hermes"
     routed = launch / "profiles" / "ops"
@@ -270,7 +270,7 @@ def test_dashboard_run_now_isolates_a_sibling_profile_fire_like_the_ticker(tmp_p
     monkeypatch.setenv("HERMES_HOME", str(launch))
     monkeypatch.setenv("LAUNCH_ONLY_SECRET", "launch-secret")
     monkeypatch.delenv("ROUTED_ONLY_SECRET", raising=False)
-    monkeypatch.setattr(profiles, "_get_default_hermes_home", lambda: launch)
+    monkeypatch.setattr(profiles, "_get_default_agent_home", lambda: launch)
     monkeypatch.setattr(profiles, "_get_profiles_root", lambda: launch / "profiles")
     monkeypatch.setattr(scheduler, "_hermes_home", None)
     monkeypatch.setattr("cron.scheduler_provider.resolve_cron_scheduler", lambda: InProcessCronScheduler())
@@ -281,12 +281,12 @@ def test_dashboard_run_now_isolates_a_sibling_profile_fire_like_the_ticker(tmp_p
             "#!/usr/bin/env bash\n"
             f'echo "${{ROUTED_ONLY_SECRET:-<unset>}}|${{LAUNCH_ONLY_SECRET:-<unset>}}" > "{probe / name}"\n',
             encoding="utf-8")
-        token = set_hermes_home_override(str(home))
+        token = set_agent_home_override(str(home))
         try:
             return create_job(prompt=None, schedule="every 1h", script=f"{name}.sh",
                               no_agent=True, deliver="local")["id"]
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
 
     routed_job, launch_job = _job_for(routed, "routed"), _job_for(launch, "launch")
     environ_before = dict(os.environ)

@@ -1,20 +1,20 @@
 ---
 title: "Blogwatcher — Monitor blogs and RSS/Atom feeds via blogwatcher-cli tool"
-sidebar_label: "Blogwatcher"
+sidebarTitle: "Blogwatcher"
 description: "Monitor blogs and RSS/Atom feeds via blogwatcher-cli tool"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Blogwatcher
+# Blogwatcher {#blogwatcher}
 
 Monitor blogs and RSS/Atom feeds via blogwatcher-cli tool.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/blogwatcher` |
+| Source | Optional — install with `noone skills install official/research/blogwatcher` |
 | Path | `optional-skills/research/blogwatcher` |
 | Version | `2.0.0` |
 | Author | JulienTant (fork of Hyaxia/blogwatcher) |
@@ -22,19 +22,27 @@ Monitor blogs and RSS/Atom feeds via blogwatcher-cli tool.
 | Platforms | linux, macos, windows |
 | Tags | `RSS`, `Blogs`, `Feed-Reader`, `Monitoring` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Blogwatcher
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Blogwatcher {#blogwatcher-1}
 
 Track blog and RSS/Atom feed updates with the `blogwatcher-cli` tool. Supports automatic feed discovery, HTML scraping fallback, OPML import, and read/unread article management.
 
-## Working with Hermes tools (read this first)
+## Working with {{app-name}} tools (read this first) {#working-with-hermes-tools-read-this-first}
 
-`blogwatcher-cli` is the feed database; Hermes tools do the automation around it:
+`blogwatcher-cli` is the feed database; {{app-name}} tools do the automation around it:
 
 - **Recurring watch — use the cronjob tool's `monitor` field, not a bare schedule.** `monitor` runs a script each tick and only wakes the agent when output changes: set it to a script that runs `blogwatcher-cli scan >/dev/null 2>&1 && blogwatcher-cli articles` (deterministic output; new articles = changed output = agent wakes with the diff injected). Unchanged ticks cost zero LLM calls. Set `deliver` to route digests to a chat/channel; add `continuity: true` so consecutive digests can dedupe.
 - **Reading an article the user asks about**: `web_extract([url])` on the article URL from `blogwatcher-cli articles` — do not re-scrape by hand.
@@ -42,7 +50,7 @@ Track blog and RSS/Atom feed updates with the `blogwatcher-cli` tool. Supports a
 - **One-off read of a feed or a site's latest posts, nothing to install**: the bundled `rss-feeds` skill (`scripts/feed.py read URL`); blogwatcher earns its install when you track many feeds with read/unread state.
 - **Company/competitor tracking with analysis and citations**: prefer the `competitor-news-monitor` skill; blogwatcher is the lighter raw-feed layer it can sit on.
 
-## Installation
+## Installation {#installation}
 
 Pick one method:
 
@@ -55,7 +63,7 @@ Pick one method:
 
 All releases: https://github.com/JulienTant/blogwatcher-cli/releases
 
-### Docker with persistent storage
+### Docker with persistent storage {#docker-with-persistent-storage}
 
 By default the database lives at `~/.blogwatcher-cli/blogwatcher-cli.db`. In Docker this is lost on container restart. Use `BLOGWATCHER_DB` or a volume mount to persist it:
 
@@ -67,7 +75,7 @@ docker run --rm -v blogwatcher-cli:/data -e BLOGWATCHER_DB=/data/blogwatcher-cli
 docker run --rm -v /path/on/host:/data -e BLOGWATCHER_DB=/data/blogwatcher-cli.db ghcr.io/julientant/blogwatcher-cli scan
 ```
 
-### Migrating from the original blogwatcher
+### Migrating from the original blogwatcher {#migrating-from-the-original-blogwatcher}
 
 If upgrading from `Hyaxia/blogwatcher`, move your database:
 
@@ -77,9 +85,9 @@ mv ~/.blogwatcher/blogwatcher.db ~/.blogwatcher-cli/blogwatcher-cli.db
 
 The binary name changed from `blogwatcher` to `blogwatcher-cli`.
 
-## Common Commands
+## Common Commands {#common-commands}
 
-### Managing blogs
+### Managing blogs {#managing-blogs}
 
 - Add a blog: `blogwatcher-cli add "My Blog" https://example.com`
 - Add with explicit feed: `blogwatcher-cli add "My Blog" https://example.com --feed-url https://example.com/feed.xml`
@@ -88,7 +96,7 @@ The binary name changed from `blogwatcher` to `blogwatcher-cli`.
 - Remove a blog: `blogwatcher-cli remove "My Blog" --yes`
 - Import from OPML: `blogwatcher-cli import subscriptions.opml`
 
-### Scanning and reading
+### Scanning and reading {#scanning-and-reading}
 
 - Scan all blogs: `blogwatcher-cli scan`
 - Scan one blog: `blogwatcher-cli scan "My Blog"`
@@ -101,7 +109,7 @@ The binary name changed from `blogwatcher` to `blogwatcher-cli`.
 - Mark all read: `blogwatcher-cli read-all`
 - Mark all read for a blog: `blogwatcher-cli read-all --blog "My Blog" --yes`
 
-## Environment Variables
+## Environment Variables {#environment-variables}
 
 All flags can be set via environment variables with the `BLOGWATCHER_` prefix:
 
@@ -113,7 +121,7 @@ All flags can be set via environment variables with the `BLOGWATCHER_` prefix:
 | `BLOGWATCHER_YES` | Skip confirmation prompts |
 | `BLOGWATCHER_CATEGORY` | Default filter for articles by category |
 
-## Example Output
+## Example Output {#example-output}
 
 ```
 $ blogwatcher-cli blogs
@@ -152,7 +160,7 @@ Unread articles (2):
        Categories: Comics
 ```
 
-## Notes
+## Notes {#notes}
 
 - Auto-discovers RSS/Atom feeds from blog homepages when no `--feed-url` is provided.
 - Falls back to HTML scraping if RSS fails and `--scrape-selector` is configured.

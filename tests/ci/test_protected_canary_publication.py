@@ -15,10 +15,10 @@ import subprocess
 import sys
 import zipfile
 
-import hermes_yaml
+import agent_yaml
 import pytest
 
-from hermes_cli.release_channels import ChannelReader
+from agent_cli.release_channels import ChannelReader
 from scripts.releases import channel_releases, desktop_targets, handoff
 from tests.ci.desktop_release_roles import canary_publisher, native_builds, stage_step
 from tests.ci.test_desktop_release_tag_admission import _git, _seed_repo
@@ -29,7 +29,7 @@ pytestmark = pytest.mark.platforms("posix")
 
 
 def workflow_jobs():
-    return hermes_yaml.safe_load((ROOT / ".github/workflows/desktop-bundled-release.yml").read_text())["jobs"]
+    return agent_yaml.safe_load((ROOT / ".github/workflows/desktop-bundled-release.yml").read_text())["jobs"]
 
 
 def canary_job():
@@ -100,8 +100,8 @@ def canary(tmp_path, r2_server, monkeypatch):
     base = f"http://127.0.0.1:{r2_server.server_port}/hermes-releases"
     env = {**os.environ, "PATH": str(tools) + os.pathsep + os.environ["PATH"],
            "FIXTURE_RELEASE": str(release_state), "FIXTURE_WINDOWS_VERSION": windows_version, "GITHUB_ACTIONS": "true",
-           "GITHUB_EVENT_NAME": "workflow_dispatch", "GITHUB_REPOSITORY": "NousResearch/hermes-agent",
-           "GITHUB_WORKFLOW_REF": "NousResearch/hermes-agent/.github/workflows/desktop-bundled-release.yml@refs/heads/main",
+           "GITHUB_EVENT_NAME": "workflow_dispatch", "GITHUB_REPOSITORY": "Garudex-Labs/NoOne",
+           "GITHUB_WORKFLOW_REF": "Garudex-Labs/NoOne/.github/workflows/desktop-bundled-release.yml@refs/heads/main",
            "RELEASE_TAG": tag, "TAG": tag, "HERMES_PAYLOAD_TAG": tag,
            "RELEASE_TAG_OBJECT": tag_object,
            "RELEASE_COMMIT": commit, "RELEASE_PHASE": "", "HERMES_DESKTOP_VARIANT": "bundled",
@@ -252,7 +252,7 @@ def test_published_canary_workflow_advances_only_after_every_gate(canary, r2_ser
     # rather than asking canary for a stable-only candidate manifest.
     from scripts.bundles.release_artifacts import write_appinstaller
     from scripts.releases import stable
-    from hermes_cli.release_channels import canonical_json
+    from agent_cli.release_channels import canonical_json
     mac = resolved.manifest["packages"][0]
     mac_feed = json.loads(r2_server.store[mac["feed"]["key"]][0])
     for entry in mac_feed["files"]:

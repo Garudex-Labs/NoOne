@@ -2,9 +2,9 @@ import {
   buildHermesWebSocketUrl,
   type ModelOptionProvider,
   type ModelOptionsResult,
-} from "@hermes/shared";
+} from "@noone/shared";
 import { createDashboardSessionMutations } from "./session-mutations";
-
+import { identityProfileChanged, readConfigIdentity, writeConfigIdentity } from "./api-identity-sync";
 const mutateSessionHttp = createDashboardSessionMutations(fetchJSON);
 
 import type { AuxiliaryModelsResponse, ModelAssignmentResponse } from "./api-aux";
@@ -106,7 +106,7 @@ function setSessionHeader(headers: Headers, token: string): void {
 let _managementProfile = "";
 
 export function setManagementProfile(name: string): void {
-  _managementProfile = (name || "").trim();
+  _managementProfile = identityProfileChanged(name);
 }
 
 /**
@@ -210,7 +210,7 @@ export async function fetchJSON<T>(
       return new Promise<T>(() => {});
     }
     // Loopback mode: ``_SESSION_TOKEN`` rotates on every server restart
-    // (``hermes update``, ``hermes gateway restart``, etc.). A tab kept
+    // (``noone update``, ``noone gateway restart``, etc.). A tab kept
     // open across the restart holds the OLD token in
     // ``window.__HERMES_SESSION_TOKEN__`` from the previous HTML render,
     // so every fetch returns 401. The HTML is served ``Cache-Control:
@@ -247,7 +247,7 @@ function pluginPath(name: string): string {
 /**
  * Fetch a single-use ticket for a WebSocket upgrade in gated mode.
  *
- * The dashboard's gated-mode WS auth (``hermes_cli.web_server._ws_auth_ok``)
+ * The dashboard's gated-mode WS auth (``agent_cli.web_server._ws_auth_ok``)
  * rejects the legacy ``?token=<_SESSION_TOKEN>`` path and only accepts
  * ``?ticket=<minted>`` consumed against the in-memory ticket store. Browsers
  * can't set ``Authorization`` on a WS upgrade, so this round-trip via the
@@ -573,7 +573,7 @@ export const api = {
       appendProfileParam(`/api/analytics/models?days=${days}`, profile),
     ),
   getConfig: (profile = getManagementProfile()) =>
-    fetchJSON<Record<string, unknown>>(appendProfileParam("/api/config", profile)),
+    readConfigIdentity(profile || getManagementProfile(), getManagementProfile, fetchJSON<Record<string, unknown>>(appendProfileParam("/api/config", profile))),
   getDefaults: () => fetchJSON<Record<string, unknown>>("/api/config/defaults"),
   getSchema: () => fetchJSON<{ fields: Record<string, unknown>; category_order: string[] }>("/api/config/schema"),
   getModelInfo: (profile = getManagementProfile()) =>
@@ -630,11 +630,11 @@ export const api = {
       body: JSON.stringify(answer),
     }),
   saveConfig: (config: Record<string, unknown>, profile = getManagementProfile()) =>
-    fetchJSON<{ ok: boolean }>(appendProfileParam("/api/config", profile), {
+    writeConfigIdentity(profile || getManagementProfile(), getManagementProfile, config, fetchJSON<{ ok: boolean }>(appendProfileParam("/api/config", profile), {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ config }),
-    }),
+    })),
   getConfigRaw: (profile = getManagementProfile()) =>
     fetchJSON<{ yaml: string; path?: string }>(
       appendProfileParam("/api/config/raw", profile),
@@ -1466,7 +1466,7 @@ export interface AuthMeResponse {
   expires_at: number;
 }
 
-/** Preflight for `hermes gateway migrate --multiplex` (mirrors the CLI plan JSON). */
+/** Preflight for `noone gateway migrate --multiplex` (mirrors the CLI plan JSON). */
 export interface GatewayMigratePlan {
   already_multiplexed: boolean;
   blockers: string[];
@@ -1977,7 +1977,7 @@ export interface StatusResponse {
    * desktop falls back to the embedded-webview flow. */
   auth_flows?: string[];
   /** False when the dashboard is running in a hosted/managed layout where
-   * updates are handled by the outer launcher instead of ``hermes update``. */
+   * updates are handled by the outer launcher instead of ``noone update``. */
   can_update_hermes?: boolean;
   config_path: string;
   config_version: number;
@@ -1985,7 +1985,7 @@ export interface StatusResponse {
   gateway_exit_reason: string | null;
   /** Why a multi-profile host's gateway came up STANDALONE on a boot guard (unset
    * ``gateway.multiplex_profiles`` refused): the other profiles' bots are silent until
-   * ``hermes gateway migrate --multiplex`` runs. null/absent when it multiplexes or only one
+   * ``noone gateway migrate --multiplex`` runs. null/absent when it multiplexes or only one
    * profile exists. */
   multiplex_standalone_reason?: string | null;
   /** Every profile installed on this host (multiplex or not). */

@@ -1,22 +1,21 @@
 ---
-sidebar_position: 23
 title: "Microsoft Graph Webhook Listener"
-description: "Receive Microsoft Graph change notifications (meetings, calendar, chat, etc.) in Hermes"
+description: "Receive Microsoft Graph change notifications (meetings, calendar, chat, etc.) in the agent"
 ---
 
-# Microsoft Graph Webhook Listener
+# Microsoft Graph Webhook Listener {#microsoft-graph-webhook-listener}
 
-The `msgraph_webhook` gateway platform is an inbound event listener. It's how Hermes receives **change notifications** from Microsoft Graph — "a Teams meeting ended," "a new message landed in this chat," "this calendar event was updated." Different from the `teams` platform (which is a chat bot users type to) — this one is M365 telling Hermes something happened, not a person.
+The `msgraph_webhook` gateway platform is an inbound event listener. It's how {{app-name}} receives **change notifications** from Microsoft Graph — "a Teams meeting ended," "a new message landed in this chat," "this calendar event was updated." Different from the `teams` platform (which is a chat bot users type to) — this one is M365 telling {{app-name}} something happened, not a person.
 
-Right now the primary consumer is the Teams meeting summary pipeline: Graph notifies when a meeting produces a transcript, the pipeline fetches it, and Hermes posts a summary back into Teams. Other Graph resources (`/chats/.../messages`, `/users/.../events`) use the same listener — the pipeline consumers land with their own PRs.
+Right now the primary consumer is the Teams meeting summary pipeline: Graph notifies when a meeting produces a transcript, the pipeline fetches it, and {{app-name}} posts a summary back into Teams. Other Graph resources (`/chats/.../messages`, `/users/.../events`) use the same listener — the pipeline consumers land with their own PRs.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Microsoft Graph application credentials — [Register a Microsoft Graph Application](../../guides/microsoft-graph-app-registration.md)
 - A **public HTTPS URL** that Microsoft Graph can reach (Graph does not call private endpoints). A dev tunnel works for testing; production needs a real domain with a valid certificate.
 - A strong shared secret to use as the `clientState` value. Generate with `openssl rand -hex 32` and put it in `~/.hermes/.env` as `MSGRAPH_WEBHOOK_CLIENT_STATE`.
 
-## Quick Start
+## Quick Start {#quick-start}
 
 Minimum `~/.hermes/config.yaml`:
 
@@ -43,7 +42,7 @@ MSGRAPH_WEBHOOK_ACCEPTED_RESOURCES=communications/onlineMeetings
 
 Note: the bind host is read from `extra.host` in `config.yaml` (see the example above); there is no `MSGRAPH_WEBHOOK_HOST` env-var override.
 
-Start the gateway: `hermes gateway run`. The listener exposes:
+Start the gateway: `noone gateway run`. The listener exposes:
 
 - `POST /msgraph/webhook` — change notifications from Graph
 - `GET /msgraph/webhook?validationToken=...` — Graph subscription validation handshake
@@ -55,7 +54,7 @@ Expose the listener publicly (reverse proxy, dev tunnel, ingress). Your notifica
 https://ops.example.com/msgraph/webhook
 ```
 
-## Configuration
+## Configuration {#configuration}
 
 All settings go under `platforms.msgraph_webhook.extra`:
 
@@ -72,15 +71,15 @@ All settings go under `platforms.msgraph_webhook.extra`:
 
 Most settings also have an equivalent env var (`MSGRAPH_WEBHOOK_*`) that merges into the config at gateway startup (the exception is `host`, which is config-only — see the note above) — see the [environment variables reference](../../reference/environment-variables.md#microsoft-graph-teams-meetings).
 
-## Security Hardening
+## Security Hardening {#security-hardening}
 
-### clientState is the primary auth check
+### clientState is the primary auth check {#clientstate-is-the-primary-auth-check}
 
 Every Graph notification includes the `clientState` string your subscription registered with. The listener rejects any notification whose `clientState` doesn't match, using timing-safe comparison. This is Microsoft's documented mechanism — treat the value as a strong shared secret.
 
 If `client_state` is unset, the listener refuses to start.
 
-### Source-IP allowlisting (production deployments)
+### Source-IP allowlisting (production deployments) {#source-ip-allowlisting-production-deployments}
 
 For production, restrict the listener to Microsoft's published Graph webhook source IP ranges. Microsoft documents the egress ranges under the [Office 365 IP Address and URL Web service](https://learn.microsoft.com/en-us/microsoft-365/enterprise/urls-and-ip-address-ranges). Configure them as:
 
@@ -103,13 +102,13 @@ Or as an env var:
 MSGRAPH_WEBHOOK_ALLOWED_SOURCE_CIDRS="52.96.0.0/14,52.104.0.0/14"
 ```
 
-Binding a non-loopback host such as `0.0.0.0`, `::`, or a LAN IP without `allowed_source_cidrs` is refused at startup. If you're using a dev tunnel or reverse proxy on the same machine, bind Hermes to `127.0.0.1` or `::1` and leave the allowlist empty there. Invalid CIDR strings log a warning and are ignored. **Review the Microsoft IP list quarterly** — it changes.
+Binding a non-loopback host such as `0.0.0.0`, `::`, or a LAN IP without `allowed_source_cidrs` is refused at startup. If you're using a dev tunnel or reverse proxy on the same machine, bind {{app-name}} to `127.0.0.1` or `::1` and leave the allowlist empty there. Invalid CIDR strings log a warning and are ignored. **Review the Microsoft IP list quarterly** — it changes.
 
-### HTTPS termination
+### HTTPS termination {#https-termination}
 
 The listener speaks plain HTTP. Terminate TLS at your reverse proxy (Caddy, Nginx, Cloudflare Tunnel, AWS ALB) and proxy to the listener over the local network. Graph refuses to deliver to non-HTTPS endpoints, so there's no path for unencrypted traffic to reach you from Graph itself.
 
-### Response hygiene
+### Response hygiene {#response-hygiene}
 
 On success the listener returns `202 Accepted` with an empty body — internal counters stay out of the wire response. Operators can observe counts via `/health`, which is guarded by the same source-IP rules as the webhook path.
 
@@ -124,19 +123,19 @@ Status code table:
 | Source IP not in allowlist | 403 |
 | Bare GET without `validationToken` | 400 |
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Problem | What to check |
 |---------|---------------|
 | Graph subscription validation fails | Public URL is reachable, `/msgraph/webhook` path matches, GET with `validationToken` echoes the token verbatim as `text/plain` within 10 seconds. |
 | Notifications POST but nothing ingests | `client_state` matches what you registered the subscription with. Re-run `openssl rand -hex 32` and create a new subscription if the value drifted. Check `accepted_resources` includes the resource path Graph is sending. |
 | Every notification 403s | `clientState` mismatch (forged, or subscription registered with a different value). Re-create the subscription with `hermes teams-pipeline subscribe --client-state "$MSGRAPH_WEBHOOK_CLIENT_STATE" ...` (ships with the pipeline runtime PR). |
-| Listener refuses to start on `0.0.0.0` | Set `allowed_source_cidrs` to Microsoft's current webhook egress ranges, or bind Hermes to `127.0.0.1` / `::1` behind your tunnel or reverse proxy. |
+| Listener refuses to start on `0.0.0.0` | Set `allowed_source_cidrs` to Microsoft's current webhook egress ranges, or bind {{app-name}} to `127.0.0.1` / `::1` behind your tunnel or reverse proxy. |
 | Listener starts but `curl http://localhost:8646/health` hangs | Port binding collision. Check `ss -tlnp \| grep 8646` and change `port:` if needed. |
-| Real Graph requests from Microsoft get 403'd | Source IP allowlist is too narrow. Widen the list to include the current Microsoft egress ranges. If you're still validating the tunnel path, bind Hermes to loopback and let the tunnel handle public exposure. |
+| Real Graph requests from Microsoft get 403'd | Source IP allowlist is too narrow. Widen the list to include the current Microsoft egress ranges. If you're still validating the tunnel path, bind {{app-name}} to loopback and let the tunnel handle public exposure. |
 
-## Related Docs
+## Related Docs {#related-docs}
 
 - [Register a Microsoft Graph Application](../../guides/microsoft-graph-app-registration.md) — Azure app registration prereq
 - [Environment Variables → Microsoft Graph](../../reference/environment-variables.md#microsoft-graph-teams-meetings) — full env var list
-- [Microsoft Teams bot setup](./teams.md) — the different platform that lets users chat with Hermes in Teams
+- [Microsoft Teams bot setup](./teams.md) — the different platform that lets users chat with {{app-name}} in Teams

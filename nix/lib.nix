@@ -6,12 +6,12 @@
 #
 # Source filters (pythonSrc, per-package npm srcs) reduce rebuild scope so
 # that e.g. a .tsx change doesn't trigger a Python venv rebuild, and a .py
-# change doesn't trigger a TUI/Web/Desktop rebuild.  Each derivation gets a
+# change doesn't trigger a Web/Webapp/Desktop rebuild.  Each derivation gets a
 # filtered src that only includes files it actually needs, while keeping
 # the repo-root directory layout intact for pnpmConfigHook workspace
 # resolution.
 #
-# buildPnpmPackage returns packageJsonPath (e.g. "ui-tui/package.json")
+# buildPnpmPackage returns packageJsonPath (e.g. "web/package.json")
 # instead of a per-package devShellHook.  The root devshell hook
 # (mkPnpmDevShellHook) stamps all package.json paths and pnpm-workspace.yaml,
 # and if any changed, runs a single `pnpm install --lockfile-only` from
@@ -96,7 +96,7 @@ let
   # Expand a workspace glob (e.g. "apps/*") into concrete member dirs
   # relative to the repo root.  Only trailing "*" globs are supported —
   # that's all pnpm-workspace.yaml uses here.  Literal patterns (e.g.
-  # "ui-tui") pass through unchanged.
+  # "web") pass through unchanged.
   expandWorkspace =
     pattern:
     let
@@ -121,19 +121,19 @@ let
 
   # Top-level directory of each workspace member, deduplicated.  Used to
   # exclude JS/TS workspace trees from the Python source filter.  E.g.
-  # apps/desktop + apps/shared + ui-tui + web → [ "apps" "ui-tui" "web" ].
+  # apps/desktop + apps/shared + web → [ "apps" "web" ].
   jsWorkspaceTopDirs = lib.unique (
     map (d: builtins.head (lib.splitString "/" d)) workspaceMemberDirs
   );
 
   # ── Source filters for reducing rebuild scope ──────────────────────
   # Changing a .tsx/.mjs file should NOT trigger a Python venv rebuild,
-  # and changing a .py file should NOT trigger a TUI/Web/Desktop rebuild.
+  # and changing a .py file should NOT trigger a Web/Webapp/Desktop rebuild.
 
   # Python source: everything except JS/TS/docs/infra directories.
   pythonSrc = lib.cleanSourceWith {
     src = repoRoot;
-    name = "hermes-python-source";
+    name = "agent-python-source";
     filter =
       path: type:
       let
@@ -163,7 +163,7 @@ let
             # Nix build definitions (Python build doesn't need these)
             "nix"
             # Skills are shipped via HERMES_BUNDLED_SKILLS /
-            # HERMES_OPTIONAL_SKILLS (see hermes-agent.nix), not via the
+            # HERMES_OPTIONAL_SKILLS (see agent.nix), not via the
             # wheel's data_files — setup.py's _data_file_tree returns []
             # for a missing dir, so the wheel builds fine without them.
             # This keeps SKILL.md edits from rebuilding the Python venv.
@@ -197,7 +197,7 @@ let
           "SECURITY.md"
           "README.zh-CN.md"
           ".gitignore"
-          "setup-hermes.sh"
+          "setup-agent.sh"
         ];
       in
       if relPath == "" then
@@ -241,7 +241,7 @@ let
   # nix/pnpm-deps-hash: after a pnpm-lock.yaml change, run
   # `nix run .#update-pnpm-lockfile` (CI prints the expected hash too).
   pnpmDeps = fetchPnpmDeps {
-    pname = "hermes-agent";
+    pname = "noone";
     src = pnpmDepsSrc;
     inherit pnpm;
     # pnpm >= 11 keeps the store index in SQLite, which only fetcher
@@ -370,7 +370,7 @@ in
     fi
     echo "$hash" > nix/pnpm-deps-hash
 
-    nix build .#tui .#web .#webapp .#desktop
+    nix build .#web .#webapp .#desktop
     echo "Lockfile and pnpmDeps hash updated and all pnpm packages built."
   '';
 

@@ -3,9 +3,9 @@
  * seats a bot from a NAMED profile on a second computer's gateway.
  *
  * "This device" (owner A) is the Electron-managed local backend with `default` + `scribe`.
- * "Homelab" (lender B) is a REAL `hermes gateway run` on its own HOME lending its named
- * profile `coder` (catalog at `<room_link_url>/p/coder`), plus the `hermes serve` viewer
- * Desktop connects to. A plain `hermes serve` Homelab (no lender) must make the dialog say
+ * "Homelab" (lender B) is a REAL `noone gateway run` on its own HOME lending its named
+ * profile `coder` (catalog at `<room_link_url>/p/coder`), plus the `noone serve` viewer
+ * Desktop connects to. A plain `noone serve` Homelab (no lender) must make the dialog say
  * what is missing instead of creating anything.
  *
  * Model turns are REAL when NOUS_API_KEY is in the runner's environment (each probe home gets
@@ -78,7 +78,7 @@ async function startRemoteGateway(root: string, mockUrl: string, config = MULTIP
   const url = `http://127.0.0.1:${port}`
   const python = process.env.CROSS_GATEWAY_PYTHON || path.join(REPO_ROOT, '.venv', 'bin', 'python')
 
-  const child: ChildProcess = spawn(python, ['-m', 'hermes_cli.main', 'serve', '--host', '127.0.0.1', '--port', String(port), '--skip-build'], {
+  const child: ChildProcess = spawn(python, ['-m', 'agent_cli.main', 'serve', '--host', '127.0.0.1', '--port', String(port), '--skip-build'], {
     cwd: REPO_ROOT,
     detached: true,
     env: { ...process.env, HOME: fakeHome, HERMES_HOME: home, PYTHONPATH: REPO_ROOT, HERMES_DASHBOARD_SESSION_TOKEN: REMOTE_TOKEN },
@@ -91,7 +91,7 @@ async function startRemoteGateway(root: string, mockUrl: string, config = MULTIP
   const deadline = Date.now() + 90_000
 
   while (Date.now() < deadline) {
-    if (child.exitCode !== null) {throw new Error(`remote hermes serve exited early (${child.exitCode}):\n${log}`)}
+    if (child.exitCode !== null) {throw new Error(`remote noone serve exited early (${child.exitCode}):\n${log}`)}
 
     try {
       if ((await fetch(`${url}/api/status`, { headers: { 'X-Hermes-Session-Token': REMOTE_TOKEN } })).ok) {break}
@@ -270,7 +270,7 @@ test.describe('cross-gateway group chat without a lender', () => {
     sandbox = createSandbox('xgw')
     writeMockProviderConfig(sandbox.hermesHome, mock.url, undefined, MULTIPLEX)
     writeEnvFile(sandbox.hermesHome, undefined, mock.url)
-    // Homelab is a plain `hermes serve`: no gateway is lending its bots.
+    // Homelab is a plain `noone serve`: no gateway is lending its bots.
     remote = await startRemoteGateway(sandbox.root, mock.url)
     writeConnectionsRegistry(sandbox, remote.url)
     ;({ app, page } = await launchDesktop(buildAppEnv(sandbox)))
@@ -630,7 +630,7 @@ async function startPeerGateway(root: string, mockUrl: string, lent = '') {
 
   const python = process.env.CROSS_GATEWAY_PYTHON || path.join(REPO_ROOT, '.venv', 'bin', 'python')
 
-  const child = spawn(python, ['-m', 'hermes_cli.main', 'gateway', 'run'], {
+  const child = spawn(python, ['-m', 'agent_cli.main', 'gateway', 'run'], {
     cwd: REPO_ROOT,
     env: { ...process.env, HOME: fakeHome, HERMES_HOME: home, PYTHONPATH: REPO_ROOT,
       API_SERVER_KEY: REMOTE_TOKEN, API_SERVER_ENABLED: 'true', API_SERVER_PORT: String(apiPort) },

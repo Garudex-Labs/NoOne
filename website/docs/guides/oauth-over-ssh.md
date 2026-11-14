@@ -1,20 +1,19 @@
 ---
-sidebar_position: 17
 title: "OAuth over SSH / Remote Hosts"
-description: "How to complete browser-based OAuth (Spotify, MCP servers) when Hermes runs on a remote machine, container, or behind a jump box"
+description: "How to complete browser-based OAuth (Spotify, MCP servers) when the agent runs on a remote machine, container, or behind a jump box"
 ---
 
-# OAuth over SSH / Remote Hosts
+# OAuth over SSH / Remote Hosts {#oauth-over-ssh--remote-hosts}
 
-Some Hermes providers — **Spotify** (the `spotify` catalog plugin) and **remote MCP servers** (Linear, Sentry, Atlassian, Asana, Figma, …) — use a *loopback redirect* OAuth flow. The auth server redirects your browser to `http://127.0.0.1:<port>/callback` so a tiny HTTP listener started by Hermes can grab the authorization code.
+Some {{app-name}} providers — **Spotify** (the `spotify` catalog plugin) and **remote MCP servers** (Linear, Sentry, Atlassian, Asana, Figma, …) — use a *loopback redirect* OAuth flow. The auth server redirects your browser to `http://127.0.0.1:<port>/callback` so a tiny HTTP listener started by {{app-name}} can grab the authorization code.
 
-This works perfectly when Hermes and your browser are on the same machine. It breaks the moment they aren't: your laptop's browser tries to reach `127.0.0.1` on **your laptop**, but the listener is bound to `127.0.0.1` on **the remote server**.
+This works perfectly when {{app-name}} and your browser are on the same machine. It breaks the moment they aren't: your laptop's browser tries to reach `127.0.0.1` on **your laptop**, but the listener is bound to `127.0.0.1` on **the remote server**.
 
 The fix is a one-line SSH local-forward. For MCP servers on an interactive terminal, you can often paste the redirect URL back instead (no tunnel).
 
-**xAI Grok OAuth (`xai-oauth`) uses OAuth device code**, not a loopback callback — open the printed verification URL in any browser and Hermes polls until approval. No SSH tunnel is required. See [xAI Grok OAuth](./xai-grok-oauth.md).
+**xAI Grok OAuth (`xai-oauth`) uses OAuth device code**, not a loopback callback — open the printed verification URL in any browser and {{app-name}} polls until approval. No SSH tunnel is required. See [xAI Grok OAuth](./xai-grok-oauth.md).
 
-## TL;DR
+## TL;DR {#tldr}
 
 ```bash
 # On your local machine (laptop), in a separate terminal:
@@ -27,23 +26,23 @@ hermes spotify login --no-browser
 #   the request to the remote listener, login completes.
 ```
 
-Hermes prints the exact port it bound to on the `Waiting for callback on ...` line — copy it from there. Spotify defaults to port `43827`.
+{{app-name}} prints the exact port it bound to on the `Waiting for callback on ...` line — copy it from there. Spotify defaults to port `43827`.
 
-## Which Providers Need This
+## Which Providers Need This {#which-providers-need-this}
 
 | Provider | Loopback port | Tunnel needed? |
 |----------|---------------|----------------|
-| Spotify | `43827` (default) | Yes, when Hermes is remote |
-| MCP servers (`auth: oauth`) | auto-picked per server | Yes, when Hermes is remote (or paste redirect URL) |
+| Spotify | `43827` (default) | Yes, when {{app-name}} is remote |
+| MCP servers (`auth: oauth`) | auto-picked per server | Yes, when {{app-name}} is remote (or paste redirect URL) |
 | `xai-oauth` (Grok SuperGrok) | n/a | No — device code flow |
 | `anthropic` (Claude Pro/Max) | n/a | No — paste-the-code flow |
-| `openai-codex` (ChatGPT Plus/Pro) | n/a (default device code); `1455` with `--browser` / `auth.codex_login_flow: browser` | Only for the opt-in browser PKCE flow, when Hermes is remote |
+| `openai-codex` (ChatGPT Plus/Pro) | n/a (default device code); `1455` with `--browser` / `auth.codex_login_flow: browser` | Only for the opt-in browser PKCE flow, when {{app-name}} is remote |
 | `minimax`, `nous-portal` | n/a | No — device code flow |
-| `openrouter` (`hermes auth add openrouter --type oauth`) | OS-assigned, local only | No — over SSH Hermes switches to OpenRouter's headless flow and asks you to paste the code shown in the browser |
+| `openrouter` (`noone auth add openrouter --type oauth`) | OS-assigned, local only | No — over SSH {{app-name}} switches to OpenRouter's headless flow and asks you to paste the code shown in the browser |
 
 If your provider isn't in the table, you don't need a tunnel.
 
-## MCP Servers
+## MCP Servers {#mcp-servers}
 
 **Desktop Skills → MCP:** the native app receives the callback on your computer
 and relays it to the selected connection and profile, so this flow does not need
@@ -53,11 +52,11 @@ sign-in. If Desktop asks you to update the backend, update it before retrying;
 it does not fall back to a remote HTTP callback. The terminal workflows below
 are unchanged.
 
-Remote MCP servers (Linear, Sentry, Atlassian, Asana, Figma, etc.) use the same loopback redirect flow. Hermes auto-picks a free port per server and prints the authorize URL when the OAuth flow kicks off — either at startup (when a new server appears in `mcp_servers:`) or when you run `hermes mcp login <server>`.
+Remote MCP servers (Linear, Sentry, Atlassian, Asana, Figma, etc.) use the same loopback redirect flow. {{app-name}} auto-picks a free port per server and prints the authorize URL when the OAuth flow kicks off — either at startup (when a new server appears in `mcp_servers:`) or when you run `noone mcp login <server>`.
 
 You have two ways to complete it from a remote host:
 
-**Option 1 — paste the redirect URL back (no setup, works anywhere).** On an interactive terminal, Hermes prompts you to paste the redirect URL alongside running the local listener. After approving in your browser, the redirect to `http://127.0.0.1:<port>/callback` will show a connection error — that's expected. Copy the **full URL from the browser's address bar** and paste it at the Hermes prompt:
+**Option 1 — paste the redirect URL back (no setup, works anywhere).** On an interactive terminal, {{app-name}} prompts you to paste the redirect URL alongside running the local listener. After approving in your browser, the redirect to `http://127.0.0.1:<port>/callback` will show a connection error — that's expected. Copy the **full URL from the browser's address bar** and paste it at the {{app-name}} prompt:
 
 ```
   MCP OAuth: authorization required.
@@ -72,7 +71,7 @@ You have two ways to complete it from a remote host:
 
 A bare `?code=...&state=...` query string is accepted too. This works for any MCP server with `auth: oauth` and requires no SSH config changes.
 
-**Option 2 — SSH port forward (same as Spotify).** Hermes prints the exact port it bound to in the SSH-session hint. Open a separate terminal on your laptop:
+**Option 2 — SSH port forward (same as Spotify).** {{app-name}} prints the exact port it bound to in the SSH-session hint. Open a separate terminal on your laptop:
 
 ```bash
 ssh -N -L <port>:127.0.0.1:<port> user@remote-host
@@ -80,15 +79,15 @@ ssh -N -L <port>:127.0.0.1:<port> user@remote-host
 
 Then open the authorize URL in your browser as normal; the redirect tunnels through and the listener picks it up. Use this when you need the flow to complete unattended (e.g. scripted re-auth where you can't paste interactively).
 
-**Pitfall — the 30s config-reload race.** If you edit `~/.hermes/config.yaml` to add an OAuth MCP server from inside a running Hermes session, the CLI auto-reloads MCP connections with a 30s timeout. That's not enough time to complete an interactive OAuth flow, and the reload will give up. Use `hermes mcp login <server>` from a fresh terminal instead — it has no such cap and waits the full 5 min for you to paste back.
+**Pitfall — the 30s config-reload race.** If you edit `~/.hermes/config.yaml` to add an OAuth MCP server from inside a running {{app-name}} session, the CLI auto-reloads MCP connections with a 30s timeout. That's not enough time to complete an interactive OAuth flow, and the reload will give up. Use `noone mcp login <server>` from a fresh terminal instead — it has no such cap and waits the full 5 min for you to paste back.
 
-## Why the listener can't just bind 0.0.0.0
+## Why the listener can't just bind 0.0.0.0 {#why-the-listener-cant-just-bind-0000}
 
 Spotify and most MCP OAuth servers validate the `redirect_uri` parameter against an allowlist. Both require the loopback form (`http://127.0.0.1:<exact-port>/callback`). Binding the listener to `0.0.0.0` or a different port would cause the auth server to reject the request as a redirect_uri mismatch. The SSH tunnel keeps the loopback URI intact end-to-end.
 
-## Step-by-step: single SSH hop
+## Step-by-step: single SSH hop {#step-by-step-single-ssh-hop}
 
-### 1. Start the tunnel from your local machine
+### 1. Start the tunnel from your local machine {#1-start-the-tunnel-from-your-local-machine}
 
 ```bash
 # Spotify (port 43827)
@@ -97,24 +96,24 @@ ssh -N -L 43827:127.0.0.1:43827 user@remote-host
 
 `-N` means "don't open a remote shell, just hold the tunnel open." Keep this terminal running for the duration of the login.
 
-### 2. In a separate SSH session, run the auth command
+### 2. In a separate SSH session, run the auth command {#2-in-a-separate-ssh-session-run-the-auth-command}
 
 ```bash
 ssh user@remote-host
 hermes spotify login --no-browser
 ```
 
-Hermes detects the SSH session, skips the browser auto-open, and prints an authorize URL plus a `Waiting for callback on http://127.0.0.1:<port>/callback` line.
+{{app-name}} detects the SSH session, skips the browser auto-open, and prints an authorize URL plus a `Waiting for callback on http://127.0.0.1:<port>/callback` line.
 
-### 3. Open the URL in your local browser
+### 3. Open the URL in your local browser {#3-open-the-url-in-your-local-browser}
 
-Copy the authorize URL from the remote terminal and paste it into the browser on your laptop. Approve the consent screen. The auth server redirects to `http://127.0.0.1:<port>/callback`. Your browser hits the tunnel, the request is forwarded to the remote listener, and Hermes prints `Login successful!`.
+Copy the authorize URL from the remote terminal and paste it into the browser on your laptop. Approve the consent screen. The auth server redirects to `http://127.0.0.1:<port>/callback`. Your browser hits the tunnel, the request is forwarded to the remote listener, and {{app-name}} prints `Login successful!`.
 
 You can tear down the tunnel (Ctrl+C in the first terminal) once you see the success line.
 
-## Step-by-step: through a jump box
+## Step-by-step: through a jump box {#step-by-step-through-a-jump-box}
 
-If you reach Hermes through a bastion / jump host, use SSH's built-in `-J` (ProxyJump):
+If you reach {{app-name}} through a bastion / jump host, use SSH's built-in `-J` (ProxyJump):
 
 ```bash
 ssh -N -L 43827:127.0.0.1:43827 -J jump-user@jump-host user@final-host
@@ -131,9 +130,9 @@ ssh -N \
     user@final-host
 ```
 
-## Mosh, tmux, ssh ControlMaster
+## Mosh, tmux, ssh ControlMaster {#mosh-tmux-ssh-controlmaster}
 
-The tunnel is a property of the underlying SSH connection. If you're running Hermes inside `tmux` over a mosh session, the mosh roaming doesn't carry the `-L` forwarding. Open a *separate* plain SSH session **only** for the `-L` tunnel — that's the connection that has to stay alive during the auth flow. Your interactive mosh/tmux session can keep running Hermes normally.
+The tunnel is a property of the underlying SSH connection. If you're running {{app-name}} inside `tmux` over a mosh session, the mosh roaming doesn't carry the `-L` forwarding. Open a *separate* plain SSH session **only** for the `-L` tunnel — that's the connection that has to stay alive during the auth flow. Your interactive mosh/tmux session can keep running {{app-name}} normally.
 
 If you use `ssh -o ControlMaster=auto`, port forwards on a multiplexed connection share the master's lifetime. Restart the master if the tunnel doesn't come up:
 
@@ -142,11 +141,11 @@ ssh -O exit user@remote-host
 ssh -N -L 43827:127.0.0.1:43827 user@remote-host
 ```
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
-### `bind [127.0.0.1]:43827: Address already in use`
+### `bind [127.0.0.1]:43827: Address already in use` {#bind-12700143827-address-already-in-use}
 
-Something on your laptop is already using that port. Either the previous tunnel didn't shut down cleanly, or a local Hermes is also listening on it. Find and kill the offender:
+Something on your laptop is already using that port. Either the previous tunnel didn't shut down cleanly, or a local {{app-name}} is also listening on it. Find and kill the offender:
 
 ```bash
 # macOS / Linux
@@ -156,15 +155,15 @@ kill <PID>
 
 Then retry the `ssh -L` command.
 
-### Authorization timed out waiting for the local callback
+### Authorization timed out waiting for the local callback {#authorization-timed-out-waiting-for-the-local-callback}
 
-The redirect never made it back to the remote listener. Check the tunnel is still alive (`ssh -N` doesn't show output, so look at the terminal you started it from), confirm you used the port from the latest `Waiting for callback on ...` line (Hermes may auto-bump if the preferred port is busy), restart the tunnel if needed, and re-run the auth command.
+The redirect never made it back to the remote listener. Check the tunnel is still alive (`ssh -N` doesn't show output, so look at the terminal you started it from), confirm you used the port from the latest `Waiting for callback on ...` line ({{app-name}} may auto-bump if the preferred port is busy), restart the tunnel if needed, and re-run the auth command.
 
-### Tokens land in the wrong `~/.hermes`
+### Tokens land in the wrong `~/.hermes` {#tokens-land-in-the-wrong-hermes}
 
-The tokens are written under the Linux user that ran `hermes auth add ...`. If your gateway / systemd service runs as a different user (e.g. `root` or a dedicated `hermes` user), authenticate as **that** user so the tokens land in their `~/.hermes/auth.json`. `sudo -u hermes -i` or equivalent.
+The tokens are written under the Linux user that ran `noone auth add ...`. If your gateway / systemd service runs as a different user (e.g. `root` or a dedicated `hermes` user), authenticate as **that** user so the tokens land in their `~/.hermes/auth.json`. `sudo -u hermes -i` or equivalent.
 
-## See Also
+## See Also {#see-also}
 
 - [xAI Grok OAuth](./xai-grok-oauth.md) — device code; no SSH tunnel
 - [Spotify (`Running over SSH`)](../user-guide/features/spotify.md#running-over-ssh--in-a-headless-environment)

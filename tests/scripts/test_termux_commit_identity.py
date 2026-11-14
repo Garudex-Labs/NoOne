@@ -57,4 +57,4 @@ def test_deb_identity_refusal_leaves_payload_and_output_untouched(tmp_path):
     # Python package metadata is an inert placeholder; commit admission comes
     # from the selected checkout and flows to install-stamp.json later.
     (payload / 'app/pyproject.toml').write_text('[project]\nversion="9.9.9"\n', encoding='utf-8')
-    assert '--tui-product is required' in invoke(['--commit', commit])
+    assert 'payload missing python/' in invoke(['--commit', commit])

@@ -1,37 +1,45 @@
 ---
 title: "Node Inspect Debugger — Debug Node.js via --inspect + Chrome DevTools Protocol CLI"
-sidebar_label: "Node Inspect Debugger"
+sidebarTitle: "Node Inspect Debugger"
 description: "Debug Node.js via --inspect + Chrome DevTools Protocol CLI"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Node Inspect Debugger
+# Node Inspect Debugger {#node-inspect-debugger}
 
 Debug Node.js via --inspect + Chrome DevTools Protocol CLI.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/software-development/node-inspect-debugger` |
+| Source | Optional — install with `noone skills install official/software-development/node-inspect-debugger` |
 | Path | `optional-skills/software-development/node-inspect-debugger` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `debugging`, `nodejs`, `node-inspect`, `cdp`, `breakpoints`, `ui-tui` |
 | Related skills | [`systematic-debugging`](../../bundled/software-development/software-development-systematic-debugging.md), [`python-debugpy`](../../optional/software-development/software-development-python-debugpy.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Node.js Inspect Debugger
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Node.js Inspect Debugger {#nodejs-inspect-debugger}
+
+## Overview {#overview}
 
 When `console.log` isn't enough, drive Node's built-in V8 inspector programmatically from the terminal. You get real breakpoints, step in/over/out, call-stack walking, local/closure scope dumps, and arbitrary expression evaluation in the paused frame.
 
@@ -42,17 +50,17 @@ Two tools, pick one:
 
 **Prefer `node inspect` first.** It's always available and the REPL is fast.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - A Node test fails and you need to see intermediate state
 - ui-tui crashes or behaves wrong and you want to inspect React/Ink state pre-render
-- tui_gateway child processes (`_SlashWorker`, PTY bridge workers) misbehave
+- agent_backend child processes (`_SlashWorker`, PTY bridge workers) misbehave
 - You need to inspect a value in a closure that `console.log` can't reach without patching
 - Perf: attach to a running process to capture a CPU profile or heap snapshot
 
 **Don't use for:** things `console.log` solves in under a minute. Breakpoint-driven debugging is heavier; use it when the payoff is real.
 
-## Quick Reference: `node inspect` REPL
+## Quick Reference: `node inspect` REPL {#quick-reference-node-inspect-repl}
 
 Launch paused on first line:
 
@@ -88,7 +96,7 @@ The `debug>` prompt accepts:
 
 **In the `repl` sub-mode:** type any JS expression, including access to locals/closure variables. `Ctrl+C` exits back to `debug>`.
 
-## Attaching to a Running Process
+## Attaching to a Running Process {#attaching-to-a-running-process}
 
 When the process is already running (e.g. a long-lived dev server or the TUI gateway):
 
@@ -119,7 +127,7 @@ node --inspect-brk --import tsx script.ts
 node --inspect-brk -r tsx/cjs script.ts
 ```
 
-## Programmatic CDP (scripting from terminal)
+## Programmatic CDP (scripting from terminal) {#programmatic-cdp-scripting-from-terminal}
 
 When you want to automate — set many breakpoints, capture scope state, script a repro — use `chrome-remote-interface`:
 
@@ -192,11 +200,11 @@ mkdir -p ~/.hermes/cache/scratch/cdp-tools && cd ~/.hermes/cache/scratch/cdp-too
 NODE_PATH=~/.hermes/cache/scratch/cdp-tools/node_modules node ~/.hermes/cache/scratch/cdp-debug.js
 ```
 
-## Debugging Hermes ui-tui
+## Debugging {{app-name}} ui-tui {#debugging-hermes-ui-tui}
 
 The TUI is built Ink + tsx. Two common scenarios:
 
-### Debugging a single Ink component under dev
+### Debugging a single Ink component under dev {#debugging-a-single-ink-component-under-dev}
 
 `ui-tui/package.json` has `pnpm run dev` (tsx --watch). Add `--inspect-brk` by running tsx directly:
 
@@ -217,13 +225,13 @@ cont
 
 When it pauses, `repl` → inspect `props`, state refs, `useInput` handler values, etc.
 
-### Debugging a running `hermes --tui`
+### Debugging a running `noone --cli` {#debugging-a-running-hermes---tui}
 
 The TUI spawns Node from the Python CLI. Easiest path:
 
 ```bash
 # 1. Launch TUI
-hermes --tui &
+noone --cli &
 TUI_PID=$(pgrep -f 'ui-tui/dist/entry' | head -1)
 
 # 2. Enable inspector on that Node PID
@@ -238,11 +246,11 @@ node inspect ws://127.0.0.1:9229/<uuid>
 
 Interacting with the TUI (typing in its window) continues to advance execution; your debugger can pause it on a breakpoint at any `sb(...)`.
 
-### Debugging `_SlashWorker` / PTY child processes
+### Debugging `_SlashWorker` / PTY child processes {#debugging-_slashworker--pty-child-processes}
 
-Those are Python, not Node — use the `python-debugpy` skill for them. Only Node portions (Ink UI, tui_gateway client, tsx-run tests under `ui-tui/`) use this skill.
+Those are Python, not Node — use the `python-debugpy` skill for them. Only Node portions (Ink UI, agent_backend client, tsx-run tests under `ui-tui/`) use this skill.
 
-## Running Vitest Tests Under the Debugger
+## Running Vitest Tests Under the Debugger {#running-vitest-tests-under-the-debugger}
 
 ```bash
 cd <hermes-agent-repo>/ui-tui
@@ -254,7 +262,7 @@ In another terminal: `node inspect -p <pid>`, then `sb('src/app/foo.tsx', 42)`, 
 
 Use `--no-file-parallelism` (vitest) or `--runInBand` (jest) so only one worker exists — debugging a pool is painful.
 
-## Heap Snapshots & CPU Profiles (Non-interactive)
+## Heap Snapshots & CPU Profiles (Non-interactive) {#heap-snapshots--cpu-profiles-non-interactive}
 
 From the CDP driver above, swap Debugger for `HeapProfiler` / `Profiler`:
 
@@ -277,7 +285,7 @@ await client.HeapProfiler.takeHeapSnapshot({ reportProgress: false });
 require('fs').writeFileSync('~/.hermes/cache/scratch/heap.heapsnapshot', chunks.join(''));
 ```
 
-## Common Pitfalls
+## Common Pitfalls {#common-pitfalls}
 
 1. **Wrong line numbers in TS source.** Breakpoints hit the emitted JS, not the `.ts`. Either (a) break in the built `dist/*.js`, or (b) enable sourcemaps (`node --enable-source-maps`) and use `sb('src/app.tsx', N)` — but only with CDP clients that follow sourcemaps. `node inspect` CLI does not.
 
@@ -292,11 +300,11 @@ require('fs').writeFileSync('~/.hermes/cache/scratch/heap.heapsnapshot', chunks.
 
 5. **Background kills.** If you `Ctrl+C` out of `node inspect` while the target is paused, the target stays paused. Either `cont` first, or `kill` the target explicitly.
 
-6. **Running `node inspect` through an agent terminal.** It's a PTY-friendly REPL. In Hermes, launch it with `terminal(pty=true)` or `background=true` + `process(action='submit', data='...')`. Non-PTY foreground mode will work for one-shot commands but not for interactive stepping.
+6. **Running `node inspect` through an agent terminal.** It's a PTY-friendly REPL. In {{app-name}}, launch it with `terminal(pty=true)` or `background=true` + `process(action='submit', data='...')`. Non-PTY foreground mode will work for one-shot commands but not for interactive stepping.
 
 7. **Security.** `--inspect=0.0.0.0:9229` exposes arbitrary code execution. Always bind to `127.0.0.1` (the default) unless you have an isolated network.
 
-## Verification Checklist
+## Verification Checklist {#verification-checklist}
 
 After setting up a debug session, verify:
 
@@ -305,7 +313,7 @@ After setting up a debug session, verify:
 - [ ] Source listing at pause shows the right file (mismatch = sourcemap issue, see pitfall 1)
 - [ ] `exec process.pid` in `repl` returns the PID you meant to attach to
 
-## One-Shot Recipes
+## One-Shot Recipes {#one-shot-recipes}
 
 **"Why is this variable undefined at line X?"**
 ```bash

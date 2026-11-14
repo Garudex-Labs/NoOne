@@ -86,7 +86,7 @@ def list_context_file_sources(
         sources.append(_entry(label, path, content, status))
 
     if not skip_soul:
-        home = Path(home_override) if home_override is not None else _pb.get_hermes_home()
+        home = Path(home_override) if home_override is not None else _pb.get_agent_home()
         soul_path = home / "SOUL.md"
         if _pb._exists_or_denied(soul_path):
             content = _pb._read_context_file(soul_path)

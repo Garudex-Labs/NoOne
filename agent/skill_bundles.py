@@ -14,9 +14,9 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from utils import atomic_write_text
 from agent.skill_commands import command_snapshot, diff_command_snapshots, resolve_slash_key, slugify_skill_name as _slugify
 
@@ -29,7 +29,7 @@ _bundles_cache_mtime: Optional[tuple] = None  # _bundles_sig() (content digests)
 def _bundles_dir() -> Path:
     """Bundles directory: ``HERMES_BUNDLES_DIR`` override (tests) or ``<HERMES_HOME>/skill-bundles``."""
     override = os.environ.get("HERMES_BUNDLES_DIR")
-    return Path(override).expanduser() if override else get_hermes_home() / "skill-bundles"
+    return Path(override).expanduser() if override else get_agent_home() / "skill-bundles"
 
 
 def _iter_bundle_files() -> list[Path]:

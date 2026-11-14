@@ -10,9 +10,9 @@ import { clearWebappSession, seedWebappSession } from '@/test/webapp-session'
 // Every socket the store builds besides the tab's own (the primary each test installs).
 const sockets: Array<{ connect: ReturnType<typeof vi.fn> }> = []
 
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  HermesGateway: class {
+  AgentGateway: class {
     connectionState = 'closed'
     connect = vi.fn(async () => {
       this.connectionState = 'open'

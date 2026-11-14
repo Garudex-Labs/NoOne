@@ -20,8 +20,8 @@ _cache_lock = threading.Lock()
 
 
 def _cache_path() -> Path:
-    from hermes_constants import get_hermes_home
-    return get_hermes_home() / "cache" / _CACHE_FILENAME
+    from agent_constants import get_agent_home
+    return get_agent_home() / "cache" / _CACHE_FILENAME
 
 
 def config_fingerprint(config: dict) -> str:

@@ -1,18 +1,17 @@
 ---
-sidebar_position: 13
 title: "Delegation & Parallel Work"
 description: "When and how to use subagent delegation — patterns for parallel research, code review, and multi-file work"
 ---
 
-# Delegation & Parallel Work
+# Delegation & Parallel Work {#delegation--parallel-work}
 
-Hermes can spawn isolated child agents to work on tasks in parallel. Each subagent gets its own conversation, terminal session, and toolset. Only the final summary comes back — intermediate tool calls never enter your context window.
+{{app-name}} can spawn isolated child agents to work on tasks in parallel. Each subagent gets its own conversation, terminal session, and toolset. Only the final summary comes back — intermediate tool calls never enter your context window.
 
 For the full feature reference, see [Subagent Delegation](../user-guide/features/delegation.md).
 
 ---
 
-## When to Delegate
+## When to Delegate {#when-to-delegate}
 
 **Good candidates for delegation:**
 - Reasoning-heavy subtasks (debugging, code review, research synthesis)
@@ -29,7 +28,7 @@ For the full feature reference, see [Subagent Delegation](../user-guide/features
 
 ---
 
-## Pattern: Parallel Research
+## Pattern: Parallel Research {#pattern-parallel-research}
 
 Research three topics simultaneously and get structured summaries back:
 
@@ -42,7 +41,7 @@ Research these three topics in parallel:
 Focus on recent developments and key players.
 ```
 
-Behind the scenes, Hermes uses:
+Behind the scenes, {{app-name}} uses:
 
 ```python
 delegate_task(tasks=[
@@ -65,7 +64,7 @@ All three run concurrently. Each subagent searches the web independently and ret
 
 ---
 
-## Pattern: Code Review
+## Pattern: Code Review {#pattern-code-review}
 
 Delegate a security review to a fresh-context subagent that approaches the code without preconceptions:
 
@@ -88,13 +87,21 @@ delegate_task(
 )
 ```
 
-:::warning The Context Problem
+<Warning>
+
+<div className="doc-callout-title">
+
+The Context Problem
+
+</div>
+
 Subagents know **absolutely nothing** about your conversation. They start completely fresh. If you delegate "fix the bug we were discussing," the subagent has no idea what bug you mean. Always pass file paths, error messages, project structure, and constraints explicitly.
-:::
+
+</Warning>
 
 ---
 
-## Pattern: Compare Alternatives
+## Pattern: Compare Alternatives {#pattern-compare-alternatives}
 
 Evaluate multiple approaches to the same problem in parallel, then pick the best:
 
@@ -113,7 +120,7 @@ Each subagent researches one option independently. Because they're isolated, the
 
 ---
 
-## Pattern: Multi-File Refactoring
+## Pattern: Multi-File Refactoring {#pattern-multi-file-refactoring}
 
 Split a large refactoring task across parallel subagents, each handling a different part of the codebase:
 
@@ -146,13 +153,21 @@ delegate_task(tasks=[
 ])
 ```
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 Each subagent gets its own terminal session. They can work on the same project directory without stepping on each other — as long as they're editing different files. If two subagents might touch the same file, handle that file yourself after the parallel work completes.
-:::
+
+</Tip>
 
 ---
 
-## Pattern: Gather Then Analyze
+## Pattern: Gather Then Analyze {#pattern-gather-then-analyze}
 
 Use `execute_code` for mechanical data gathering, then delegate the reasoning-heavy analysis:
 
@@ -192,18 +207,18 @@ This is often the most efficient pattern: `execute_code` handles the 10+ sequent
 
 ---
 
-## Inherited Tool Access
+## Inherited Tool Access {#inherited-tool-access}
 
-Subagents inherit the parent's enabled toolsets. `delegate_task` does not accept a model-facing `toolsets` parameter, so delegated work cannot grant itself capabilities that the parent does not have. Configure the parent's tools before starting the conversation when a delegated task needs web, terminal, file, or other access. Hermes still strips child-blocked tools such as `clarify`, `memory`, and `send_message`; children keep `execute_code` for programmatic tool calling.
+Subagents inherit the parent's enabled toolsets. `delegate_task` does not accept a model-facing `toolsets` parameter, so delegated work cannot grant itself capabilities that the parent does not have. Configure the parent's tools before starting the conversation when a delegated task needs web, terminal, file, or other access. {{app-name}} still strips child-blocked tools such as `clarify`, `memory`, and `send_message`; children keep `execute_code` for programmatic tool calling.
 
 ---
 
-## Constraints
+## Constraints {#constraints}
 
 - **Default 10 parallel tasks**: batches default to 10 concurrent subagents (configurable via `delegation.max_concurrent_children` in config.yaml, no hard ceiling, only a floor of 1)
 - **Nested delegation is opt-in**: leaf subagents (default) cannot call `delegate_task`, `clarify`, `memory`, or `execute_code`. Orchestrator subagents (`role="orchestrator"`) retain `delegate_task` for further delegation, but only when `delegation.max_spawn_depth` is raised above the default of 1 (floor 1, no ceiling); the other three remain blocked. Disable globally via `delegation.orchestrator_enabled: false`.
 
-### Tuning Concurrency and Depth
+### Tuning Concurrency and Depth {#tuning-concurrency-and-depth}
 
 | Config | Default | Range | Effect |
 |--------|---------|-------|--------|
@@ -221,11 +236,11 @@ delegation:
 - **Separate terminals** — each subagent gets its own terminal session with separate working directory and state
 - **No conversation history** — subagents see only the `goal` and `context` the parent agent passes when calling `delegate_task`
 - **Default 250 iterations** — set `delegation.max_iterations` lower in `config.yaml` for fleets of simple tasks to save cost
-- **Not durable** — top-level delegation runs in the background and posts its result back later, but it remains tied to the owning session and Hermes process. Session closure, `/stop`, `/new`, or a process restart can cancel or strand in-progress work. Use `cronjob_manage` or `terminal(background=True, notify_on_complete=True)` for work that must survive those boundaries.
+- **Not durable** — top-level delegation runs in the background and posts its result back later, but it remains tied to the owning session and {{app-name}} process. Session closure, `/stop`, `/new`, or a process restart can cancel or strand in-progress work. Use `cronjob_manage` or `terminal(background=True, notify_on_complete=True)` for work that must survive those boundaries.
 
 ---
 
-## Tips
+## Tips {#tips}
 
 **Be specific in goals.** "Fix the bug" is too vague. "Fix the TypeError in api/handlers.py line 47 where process_request() receives None from parse_body()" gives the subagent enough to work with.
 

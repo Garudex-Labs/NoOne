@@ -1,50 +1,58 @@
 ---
 title: "Mono Color — Generate one- or two-ink editorial print poster images"
-sidebar_label: "Mono Color"
+sidebarTitle: "Mono Color"
 description: "Generate one- or two-ink editorial print poster images"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Mono Color
+# Mono Color {#mono-color}
 
 Generate one- or two-ink editorial print poster images.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/mono-color` |
+| Source | Optional — install with `noone skills install official/creative/mono-color` |
 | Path | `optional-skills/creative/mono-color` |
 | Version | `1.0.0` |
-| Author | Yan Liu (adapted by Nous Research) |
+| Author | Yan Liu (adapted by Garudex Labs) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `design`, `poster`, `print`, `duotone`, `risograph`, `editorial`, `image-generation` |
 | Related skills | [`baoyu-infographic`](../../bundled/creative/creative-baoyu-infographic.md), [`meme-generation`](../../optional/creative/creative-meme-generation.md), [`pixel-art`](../../optional/creative/creative-pixel-art.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Mono-Color Editorial Print Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Mono-Color Editorial Print Skill {#mono-color-editorial-print-skill}
 
 Turn any user theme, sentence, or reference photo into an original printed editorial artifact with one stable visual language: adaptive neutral substrate + one or two inks + mechanically reproduced image + typographic tension + concise human voice.
 
 This skill designs and generates the image; it does not imitate any one reference, copy a source composition, wording, logo, or artwork, and it never uses more than two printing inks.
 
-## When to Use
+## When to Use {#when-to-use}
 
 The user asks for a monochrome editorial poster, duotone print, risograph/zine poster, halftone photo treatment, one-ink or two-ink cover, or names the mono-color style. Chinese trigger vocabulary includes 单色海报、双色印刷、单色调视觉、蓝色/绿色孔版印刷、网点照片、复古或当代编辑排版. Do not trigger merely because a request mentions a color.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
-- The Hermes `image_generate` tool (search/describe it via the deferred-tool catalog if not loaded). If image generation is unavailable, deliver prompt-only and say so.
+- The {{app-name}} `image_generate` tool (search/describe it via the deferred-tool catalog if not loaded). If image generation is unavailable, deliver prompt-only and say so.
 - The `design-system/` catalogs bundled with this skill (see Quick Reference).
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 Print modes:
 
@@ -72,7 +80,7 @@ References:
 - `references/composition.md` — layout decision flow, layout families, composition grammar, rhythm
 - `references/quality-gate.md` — originality firewall, hard avoids, inspection checklist
 
-## Procedure
+## Procedure {#procedure}
 
 1. **Read the input.** Extract five things:
    - **Subject:** the one person, object, scene, or idea that must remain recognizable.
@@ -135,7 +143,7 @@ References:
 
    Stop at prompt-only only when the user explicitly asks or image generation is unavailable.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Never more than two printing inks.** The substrate is not an ink; overprint mixing and density variation are not extra inks. Gradients, rainbow accents, and full-color photography are always out.
 - **Catalog wins over prose.** When a hex, ID, range, or geometry in `design-system/` differs from any prose description, use the catalog value.
@@ -144,7 +152,7 @@ References:
 - **Contemporary by default.** Do not add yellowed paper, sepia, distressed borders, or retro props merely because the work uses halftone or limited inks — only when the user asks for vintage/archival mood.
 - **One focal event, one release zone.** Never center everything, never distribute elements evenly like a template, never fill the quiet zone with decoration.
 
-## Verification
+## Verification {#verification}
 
 - Manifest fully resolved, all IDs present in the `design-system/` catalogs.
 - Result uses one intentional white/gray/pale-beige substrate and ≤2 inks with clear plate roles.
@@ -153,6 +161,6 @@ References:
 - Supplied subject and text preserved exactly; ≥4 structural features differ from every supplied reference.
 - An image was generated (unless prompt-only was requested) and saved under the output directory, and the recipe note was delivered.
 
-## Notice
+## Notice {#notice}
 
 Upstream example artwork is not included: `examples/` in the source repo is all-rights-reserved (see upstream ASSET-LICENSE.md); only MIT-licensed text and design-system catalogs are vendored here. Code and text are MIT (see `LICENSE.txt`).

@@ -1,10 +1,10 @@
+import type { IconComponent } from '@noone/ui/icons'
 import { Fragment, memo, type ReactNode, useEffect, useId, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { TabDropdown } from '@/components/ui/tab-dropdown'
 import { useI18n } from '@/i18n'
-import type { IconComponent } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { PAGE_MAX_W } from '../layout-constants'

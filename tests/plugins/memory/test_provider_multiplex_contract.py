@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 from agent.memory_manager import MemoryManager
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 from tests.waiting import wait_until
 
 
@@ -34,10 +34,10 @@ class _Scope:
         self.home = home
 
     def __enter__(self):
-        self.token = set_hermes_home_override(str(self.home))
+        self.token = set_agent_home_override(str(self.home))
 
     def __exit__(self, *exc):
-        reset_hermes_home_override(self.token)
+        reset_agent_home_override(self.token)
 
 
 # -- ByteRover ---------------------------------------------------------------------------------------

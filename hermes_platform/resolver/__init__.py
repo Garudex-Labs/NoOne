@@ -1,17 +1,13 @@
-"""Resource resolution: where a tool or application is, and what state it is in."""
+"""Legacy import boundary for shipped updaters and published plugin imports.
 
-from hermes_platform.resolver.base import Effort, Inspection, Probe, Probeable, Resolver
-from hermes_platform.resolver.core import (
-    ABSENT,
-    Candidate,
-    CheckState,
-    LookupContext,
-    Observation,
-    Resolution,
-    locate_command,
-)
+Primary implementation: agent_platform.resolver. Do not add behavior here.
+"""
+from importlib import import_module
 
-__all__ = [
-    "ABSENT", "Candidate", "CheckState", "Effort", "Inspection", "LookupContext",
-    "Observation", "Probe", "Probeable", "Resolution", "Resolver", "locate_command",
-]
+from agent_platform.resolver import locate_command
+
+_current = import_module('agent_platform.resolver')
+
+
+def __getattr__(name):
+    return getattr(_current, name)

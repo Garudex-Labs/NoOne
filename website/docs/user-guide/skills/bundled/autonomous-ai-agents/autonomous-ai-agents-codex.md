@@ -1,41 +1,47 @@
 ---
 title: "Codex — Delegate coding to OpenAI Codex CLI (features, PRs)"
-sidebar_label: "Codex"
+sidebarTitle: "Codex"
 description: "Delegate coding to OpenAI Codex CLI (features, PRs)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Codex
+# Codex {#codex}
 
 Delegate coding to OpenAI Codex CLI (features, PRs).
 
-Want the full side-by-side? Read [Hermes Agent vs Codex](https://hermes-agent.nousresearch.com/compare/codex).
-
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/autonomous-ai-agents/codex` |
 | Version | `1.0.1` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Coding-Agent`, `Codex`, `OpenAI`, `Code-Review`, `Refactoring` |
 | Related skills | [`claude-code`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code.md), [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Codex CLI
+<div className="doc-callout-title">
 
-Delegate coding tasks to [Codex](https://github.com/openai/codex) via the Hermes terminal. Codex is OpenAI's autonomous coding agent CLI.
+INFO
 
-## When to use
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Codex CLI {#codex-cli}
+
+Delegate coding tasks to [Codex](https://github.com/openai/codex) via the {{app-name}} terminal. Codex is OpenAI's autonomous coding agent CLI.
+
+## When to use {#when-to-use}
 
 - Building features
 - Refactoring
@@ -44,7 +50,7 @@ Delegate coding tasks to [Codex](https://github.com/openai/codex) via the Hermes
 
 Requires the codex CLI and a git repository.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Codex installed: `npm install -g @openai/codex`
 - OpenAI auth configured: either `OPENAI_API_KEY` or Codex OAuth credentials
@@ -52,13 +58,13 @@ Requires the codex CLI and a git repository.
 - **Must run inside a git repository** — Codex refuses to run outside one
 - Use `pty=true` in terminal calls — Codex is an interactive terminal app
 
-For Hermes itself, `model.provider: openai-codex` uses Hermes-managed Codex
-OAuth from `~/.hermes/auth.json` after `hermes auth add openai-codex`. For the
+For {{app-name}} itself, `model.provider: openai-codex` uses Hermes-managed Codex
+OAuth from `~/.hermes/auth.json` after `noone auth add openai-codex`. For the
 standalone Codex CLI, a valid CLI OAuth session may live under
 `~/.codex/auth.json`; do not treat a missing `OPENAI_API_KEY` alone as proof
 that Codex auth is missing.
 
-## One-Shot Tasks
+## One-Shot Tasks {#one-shot-tasks}
 
 ```
 terminal(command="codex exec 'Add dark mode toggle to settings'", workdir="~/project", pty=true)
@@ -69,7 +75,7 @@ For scratch work (Codex needs a git repo):
 terminal(command="cd $(mktemp -d) && git init && codex exec 'Build a snake game in Python'", pty=true)
 ```
 
-## Background Mode (Long Tasks)
+## Background Mode (Long Tasks) {#background-mode-long-tasks}
 
 ```
 # Start in background with PTY
@@ -87,7 +93,7 @@ process(action="submit", session_id="<id>", data="yes")
 process(action="kill", session_id="<id>")
 ```
 
-## Key Flags
+## Key Flags {#key-flags}
 
 | Flag | Effect |
 |------|--------|
@@ -98,9 +104,9 @@ process(action="kill", session_id="<id>")
 
 > **Deprecated:** `--full-auto` still works but the live CLI warns to use `--sandbox workspace-write` instead.
 
-## Hermes Gateway Caveat
+## {{app-name}} Gateway Caveat {#hermes-gateway-caveat}
 
-When invoking the Codex CLI from a Hermes gateway/service context (for example,
+When invoking the Codex CLI from a {{app-name}} gateway/service context (for example,
 Telegram-driven agent sessions), Codex `workspace-write` sandboxing may fail even
 when the same command works in the user's interactive shell. A typical symptom is
 bubblewrap/user-namespace errors such as `setting up uid map: Permission denied`
@@ -116,7 +122,7 @@ Use process boundaries as the safety layer instead: explicit `workdir`, clean gi
 status before launch, narrow task prompts, `git diff` review, targeted tests, and
 human/agent confirmation before committing broad changes.
 
-## PR Reviews
+## PR Reviews {#pr-reviews}
 
 Clone to a temp directory for safe review:
 
@@ -124,7 +130,7 @@ Clone to a temp directory for safe review:
 terminal(command="REVIEW=$(mktemp -d) && git clone https://github.com/user/repo.git $REVIEW && cd $REVIEW && gh pr checkout 42 && codex review --base origin/main", pty=true)
 ```
 
-## Parallel Issue Fixing with Worktrees
+## Parallel Issue Fixing with Worktrees {#parallel-issue-fixing-with-worktrees}
 
 ```
 # Create worktrees
@@ -146,7 +152,7 @@ terminal(command="gh pr create --repo user/repo --head fix/issue-78 --title 'fix
 terminal(command="git worktree remove ~/.hermes/cache/scratch/issue-78", workdir="~/project")
 ```
 
-## Batch PR Reviews
+## Batch PR Reviews {#batch-pr-reviews}
 
 ```
 # Fetch all PR refs
@@ -160,7 +166,7 @@ terminal(command="codex exec 'Review PR #87. git diff origin/main...origin/pr/87
 terminal(command="gh pr comment 86 --body '<review>'", workdir="~/project")
 ```
 
-## Rules
+## Rules {#rules}
 
 1. **Always use `pty=true`** — Codex is an interactive terminal app and hangs without a PTY
 2. **Git repo required** — Codex won't run outside a git directory. Use `mktemp -d && git init` for scratch

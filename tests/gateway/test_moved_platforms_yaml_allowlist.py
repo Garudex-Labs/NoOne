@@ -13,7 +13,7 @@ import pytest
 from gateway.config import GatewayConfig, Platform, PlatformConfig
 from gateway.session import SessionSource
 
-_MOVED = ("signal", "weixin", "bluebubbles", "qqbot", "whatsapp_cloud")
+_MOVED = ("signal", "weixin",   "whatsapp_cloud")
 
 
 @pytest.mark.parametrize("platform", _MOVED)
@@ -21,7 +21,7 @@ def test_yaml_allowed_users_admits_listed_dm_sender_only(monkeypatch, platform):
     import os
 
     from gateway.run import GatewayRunner
-    from hermes_cli.plugins import discover_plugins
+    from agent_cli.plugins import discover_plugins
 
     for key in list(os.environ):
         if key.endswith(("_ALLOWED_USERS", "_ALLOW_ALL_USERS", "_ALLOWED_CHATS")):

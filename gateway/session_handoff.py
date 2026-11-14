@@ -1,5 +1,5 @@
 """``handoff.request`` / ``handoff.state`` / ``handoff.fail`` on the shared owner (Desktop and CLI
-``/handoff``), as the per-TUI sidecar serves them (``tui_gateway/methods_session.py``).
+``/handoff``), as the per-TUI sidecar serves them (``agent_backend/methods_session.py``).
 
 The owner only writes the session row's ``pending`` handoff; the gateway's handoff watcher claims it,
 repoints the platform's home route at the session and runs the synthetic turn there. ``dispatch``
@@ -10,7 +10,7 @@ import asyncio
 from functools import partial
 
 from gateway.session_busy_controls import authorize
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 
 def handlers(connection):
@@ -63,8 +63,8 @@ def require_settled(db, session_id, conn):
     turn has no resident drain task, yet moving its route would hand the lane a turn whose outcome
     nobody resolved. Runs on the caller's write transaction: inside ``request_handoff``'s, and again
     when the watcher repoints (``check_settled``), so a turn admitted after the request still wins."""
-    from hermes_state_mutation_guards import MUTATION_GUARD_REFUSALS, require_idle
-    from hermes_state_runtime_workers import runtime_lineage
+    from agent_state_mutation_guards import MUTATION_GUARD_REFUSALS, require_idle
+    from agent_state_runtime_workers import runtime_lineage
     try:
         require_idle(db, conn, sorted(runtime_lineage(conn, session_id)))
     except MUTATION_GUARD_REFUSALS:

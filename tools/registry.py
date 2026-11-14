@@ -20,7 +20,7 @@ from contextvars import ContextVar, copy_context
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Set
 
-from hermes_constants import hermes_home_key, normalize_scope
+from agent_constants import agent_home_key, normalize_scope
 
 logger = logging.getLogger(__name__)
 
@@ -179,8 +179,8 @@ def _discovery_cache_path() -> Optional[Path]:
     """Path of the tool-discovery verdict cache, or None if unresolvable."""
     try:
         # Deferred import keeps tools/registry.py a no-deps leaf at import time.
-        from hermes_constants import get_hermes_home
-        return Path(get_hermes_home()) / "cache" / "tool_discovery_cache.json"
+        from agent_constants import get_agent_home
+        return Path(get_agent_home()) / "cache" / "tool_discovery_cache.json"
     except Exception:
         return None
 
@@ -205,8 +205,8 @@ def _save_discovery_cache(cache: dict[str, list]) -> None:
         return
     try:
         from utils import atomic_json_write  # stdlib+yaml only; no cycle
-        from hermes_constants import mkdir_under_hermes_home
-        mkdir_under_hermes_home(path.parent)
+        from agent_constants import mkdir_under_agent_home
+        mkdir_under_agent_home(path.parent)
         atomic_json_write(path, cache, indent=0)
     except Exception as e:
         logger.debug("Could not write tool discovery cache %s: %s", path, e)
@@ -255,7 +255,7 @@ _OVERRIDE_DENIED_MSG = (
 
 # ---- check_fn TTL cache ----------------------------------------------------
 # check_fns probe external state (Docker, Modal SDK, playwright) that changes on human
-# timescales, so results are cached ~30 s: env-var flips via ``hermes tools`` still land
+# timescales, so results are cached ~30 s: env-var flips via ``noone tools`` still land
 # within a turn or two. Transient-failure suppression: a flapping probe (``docker version``
 # timing out under load) would silently strip a whole toolset from the agent being built —
 # most visibly a subagent reporting "Tool read_file does not exist" — so a failure within a
@@ -339,10 +339,10 @@ def check_fn_cache_scope() -> Optional[str]:
     per profile turn, so the canonical profile key is the boundary."""
     try:
         from agent.secret_scope import serves_routed_profile
-        from hermes_constants import get_hermes_home_override
+        from agent_constants import get_agent_home_override
         if not serves_routed_profile():
             return None
-        override = get_hermes_home_override()
+        override = get_agent_home_override()
         return str(Path(override).expanduser().resolve()) if override else CHECK_FN_CACHE_BYPASS
     except Exception:
         # Fail closed: bypass both cache layers rather than aliasing requests
@@ -389,7 +389,7 @@ def _call_check_fn(fn: Callable, *, shared: bool = True) -> bool:
     contract) join a single worker, reserved under the lock before it starts; an unshared probe
     (``no_cache_check_fn`` or an unresolved cache scope) answers for its own caller's context only,
     and is recorded only once it times out. Raises what the probe raised, or ``CheckFnTimeout``."""
-    key = (fn, hermes_home_key())
+    key = (fn, agent_home_key())
     with _check_fn_inflight_lock:
         current = _check_fn_inflight.get(key)
         if current is not None and current.timed_out:
@@ -549,10 +549,10 @@ def _check_fn_cached(fn: Callable) -> bool:
 
 
 def _core_tools_gated_by(fn: Callable) -> set[str]:
-    """Names of ``_HERMES_CORE_TOOLS`` members whose registered ``check_fn`` is *fn*."""
+    """Names of ``_CORE_AGENT_TOOLS`` members whose registered ``check_fn`` is *fn*."""
     try:
-        from toolsets import _HERMES_CORE_TOOLS
-        core = frozenset(_HERMES_CORE_TOOLS)
+        from toolsets import _CORE_AGENT_TOOLS
+        core = frozenset(_CORE_AGENT_TOOLS)
     except Exception:
         return set()
     return {e.name for e in registry._snapshot_entries() if e.check_fn is fn and e.name in core}
@@ -566,7 +566,7 @@ def _memo_check(fn: Callable, memo: dict[Callable, bool]) -> bool:
 
 
 def invalidate_check_fn_cache() -> None:
-    """Drop all cached ``check_fn`` results (after config changes like ``hermes tools enable``)."""
+    """Drop all cached ``check_fn`` results (after config changes like ``noone tools enable``)."""
     global _check_fn_epoch
     with _check_fn_cache_lock:
         _check_fn_epoch += 1
@@ -610,7 +610,7 @@ class ToolRegistry:
 
     @staticmethod
     def current_scope_key() -> str:
-        return hermes_home_key()
+        return agent_home_key()
 
     @staticmethod
     def _grouped(entries: list[ToolEntry]) -> dict[str, list[ToolEntry]]:
@@ -635,7 +635,7 @@ class ToolRegistry:
 
     def _merged_tools(self, scope: Optional[str] = None) -> dict[str, ToolEntry]:
         """Return global tools overlaid with one profile's plugin tools."""
-        entries = {**self._tools, **self._scoped_tools.get(hermes_home_key(scope), {})}
+        entries = {**self._tools, **self._scoped_tools.get(agent_home_key(scope), {})}
         if scope is None:
             entries.update(self._scoped_tools.get(_session_slot_key(), {}))
         return entries
@@ -1033,7 +1033,7 @@ class ToolRegistry:
 
     def get_definitions(self, tool_names: set[str], quiet: bool = False) -> list[dict]:
         """OpenAI-format schemas for the requested tools whose ``check_fn`` passes (or is
-        absent). Probes use the ~30 s TTL cache so ``hermes tools enable`` lands quickly."""
+        absent). Probes use the ~30 s TTL cache so ``noone tools enable`` lands quickly."""
         result = []
         check_results: dict[Callable, bool] = {}
         entries_by_name = {entry.name: entry for entry in self._snapshot_entries()}

@@ -1,9 +1,9 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useReducedMotion } from 'motion/react'
 import { useMemo, useRef } from 'react'
 
 import { useTranscriptWindow } from '@/components/assistant-ui/thread/transcript-window'
-import { Codicon } from '@/components/ui/codicon'
 import { AnimatedInt } from '@/components/ui/diff-count'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
@@ -127,7 +127,7 @@ export function ScrollToBottomButton({ sessionId }: { sessionId: string | null }
       tabIndex={visible ? 0 : -1}
       type="button"
     >
-      <Codicon name="arrow-down" size="0.875rem" />
+      <AppIcon name="arrow-down" size="0.875rem" />
       {visibleApproval || count <= 0 ? (
         <span>{label}</span>
       ) : (

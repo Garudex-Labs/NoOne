@@ -1,18 +1,17 @@
 ---
-sidebar_position: 17
 title: "LINE"
-description: "Set up Hermes Agent as a LINE Messaging API bot"
+description: "Set up the agent as a LINE Messaging API bot"
 ---
 
-# LINE Setup
+# LINE Setup {#line-setup}
 
-Run Hermes Agent as a [LINE](https://line.me/) bot via the official LINE Messaging API. The adapter lives as a bundled platform plugin under `plugins/platforms/line/` — no core edits, just enable it like any other platform.
+Run {{app-name}} as a [LINE](https://line.me/) bot via the official LINE Messaging API. The adapter lives as a bundled platform plugin under `plugins/platforms/line/` — no core edits, just enable it like any other platform.
 
 LINE is the dominant messaging app in Japan, Taiwan, and Thailand. If your users live there, this is how they reach you.
 
-> Run `hermes gateway setup` and pick **LINE** for a guided walk-through.
+> Run `noone gateway setup` and pick **LINE** for a guided walk-through.
 
-## How the bot responds
+## How the bot responds {#how-the-bot-responds}
 
 | Context | Behavior |
 |---------|----------|
@@ -24,7 +23,7 @@ Inbound text, images, audio, video, files, stickers, and locations are all handl
 
 ---
 
-## Step 1: Create a LINE Messaging API channel
+## Step 1: Create a LINE Messaging API channel {#step-1-create-a-line-messaging-api-channel}
 
 1. Go to the [LINE Developers Console](https://developers.line.biz/console/).
 2. Create a Provider, then under it a **Messaging API** channel.
@@ -34,7 +33,7 @@ Inbound text, images, audio, video, files, stickers, and locations are all handl
 
 ---
 
-## Step 2: Expose the webhook port
+## Step 2: Expose the webhook port {#step-2-expose-the-webhook-port}
 
 LINE delivers webhooks over public HTTPS. The default port is `8646` — override with `LINE_PORT` if needed.
 
@@ -55,7 +54,7 @@ Copy the `https://...` URL — you'll set it as the webhook URL below. **Leave t
 
 ---
 
-## Step 3: Configure Hermes
+## Step 3: Configure {{app-name}} {#step-3-configure-hermes}
 
 Add to `~/.hermes/.env`:
 
@@ -86,7 +85,7 @@ That's enough — the bundled-plugin scan in `gateway/config.py` automatically p
 
 ---
 
-## Step 4: Set the webhook URL
+## Step 4: Set the webhook URL {#step-4-set-the-webhook-url}
 
 Back in the LINE console:
 
@@ -97,10 +96,10 @@ Back in the LINE console:
 
 ---
 
-## Step 5: Run the gateway
+## Step 5: Run the gateway {#step-5-run-the-gateway}
 
 ```bash
-hermes gateway
+noone gateway
 ```
 
 The agent log shows:
@@ -113,7 +112,7 @@ Add the bot as a friend from the LINE app (scan the QR in the channel's **Messag
 
 ---
 
-## Slow LLM responses
+## Slow LLM responses {#slow-llm-responses}
 
 LINE's reply token is single-use and expires roughly 60 seconds after the inbound event. Slow LLMs can't reply in time, which would normally force a paid Push API call.
 
@@ -146,7 +145,7 @@ display:
 
 ---
 
-## Cron / notification delivery
+## Cron / notification delivery {#cron--notification-delivery}
 
 ```env
 LINE_HOME_CHANNEL=Uxxxxxxxxxxxxxxxxxxxx     # default delivery target
@@ -156,7 +155,7 @@ Cron jobs with `deliver: line` route to `LINE_HOME_CHANNEL`. The adapter ships a
 
 ---
 
-## Environment variable reference
+## Environment variable reference {#environment-variable-reference}
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
@@ -179,7 +178,7 @@ Cron jobs with `deliver: line` route to `LINE_HOME_CHANNEL`. The adapter ships a
 
 ---
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 **"invalid signature" on webhook verify.** The `Channel secret` was copied wrong, or your tunnel rewrote the request body. Verify with `curl -i https://<tunnel>/line/webhook/health` first — that should return `{"status":"ok","platform":"line"}`.
 
@@ -189,11 +188,11 @@ Cron jobs with `deliver: line` route to `LINE_HOME_CHANNEL`. The adapter ships a
 
 **Postback button never appears.** Either the LLM responded faster than `LINE_SLOW_RESPONSE_THRESHOLD`, or another bubble (tool-progress, streaming) consumed the reply token first. See the suppression block under "Slow LLM responses".
 
-**"already in use by another profile".** The same channel access token is bound to another running Hermes profile. Stop the other gateway or use a separate channel.
+**"already in use by another profile".** The same channel access token is bound to another running {{app-name}} profile. Stop the other gateway or use a separate channel.
 
 ---
 
-## Limitations
+## Limitations {#limitations}
 
 * **Bubble and length caps.** Each LINE text bubble is capped at 5000 characters. Longer responses are smart-chunked at ~4500 characters across up to 5 bubbles per Reply/Push call, splitting on natural boundaries where possible.
 * **No native message editing.** LINE has no edit-message API — streaming responses always send fresh bubbles, never edit prior ones.

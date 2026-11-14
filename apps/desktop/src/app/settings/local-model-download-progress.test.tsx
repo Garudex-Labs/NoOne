@@ -3,9 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { I18nProvider } from '@/i18n'
 import type * as Notifications from '@/store/notifications'
-import type { LocalRuntimeJob } from '@/types/hermes'
+import type { LocalRuntimeJob } from '@/types/agent-client'
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   pauseLocalDownload: vi.fn(),
   resumeLocalDownload: vi.fn()
 }))
@@ -19,7 +19,7 @@ vi.mock('@/store/local-runtime-jobs', (): object => ({
   watchLocalRuntimeJobs: vi.fn()
 }))
 
-import { pauseLocalDownload, resumeLocalDownload } from '@/hermes'
+import { pauseLocalDownload, resumeLocalDownload } from '@/agent-client'
 
 import {
   downloadStatusText,

@@ -1,4 +1,4 @@
-"""A fresh Windows machine for the PR-time install.ps1 -> ``hermes update`` suite.
+"""A fresh Windows machine for the PR-time install.ps1 -> ``noone update`` suite.
 
 Every file here drives the REAL user entry points on a real Windows runner:
 
@@ -6,7 +6,7 @@ Every file here drives the REAL user entry points on a real Windows runner:
   directory that is not a project, like a user who downloaded it);
 * the ``hermes.exe`` it publishes in ``%LOCALAPPDATA%\\hermes\\bin`` for every later
   command (``--version``, one-shot turns, ``gateway run/status/stop``, ``update``);
-* ``hermes update --yes`` from HEAD to NEXT, a synthetic child of HEAD.
+* ``noone update --yes`` from HEAD to NEXT, a synthetic child of HEAD.
 
 Only external edges are replaced (tests/install/README.md, "The isolation trick"):
 
@@ -72,9 +72,9 @@ UPDATE_TIMEOUT = 1200.0
 CMD_TIMEOUT = 300.0
 GATEWAY_READY_TIMEOUT = 240.0
 CANONICAL_URLS = (
-    "https://github.com/NousResearch/hermes-agent.git",
-    "https://github.com/NousResearch/hermes-agent",
-    "git@github.com:NousResearch/hermes-agent.git",
+    "https://github.com/Garudex-Labs/NoOne.git",
+    "https://github.com/Garudex-Labs/NoOne",
+    "git@github.com:Garudex-Labs/NoOne.git",
 )
 NEXT_MARKER = ".hermes-e2e-next"
 # Captured before any machine strips PATH: harness plumbing (serve.git, rev-parse) only.
@@ -481,7 +481,7 @@ class Machine:
             return {}
 
     def spawn_gateway(self, env_extra: dict[str, str] | None = None, *, as_user: bool = False) -> subprocess.Popen:
-        """``hermes gateway run`` through the published launcher, windowless and detached from
+        """``noone gateway run`` through the published launcher, windowless and detached from
         this console: the shape the Desktop / login item uses to host a gateway.
 
         ``as_user``: under a standard-user token, as a non-elevated login item / Desktop starts it."""
@@ -696,7 +696,7 @@ class Turn:
 
 
 def one_shot_turn(machine: Machine, srv: Any, label: str, *, as_user: bool = False) -> Turn:
-    """``hermes chat -q ... -Q`` through the published launcher against the loopback provider."""
+    """``noone chat -q ... -Q`` through the published launcher against the loopback provider."""
     from tests.e2e.core.windows._helpers import last_user
     from tests.fakes.fake_llm_provider import Text
 
@@ -712,7 +712,7 @@ def one_shot_turn(machine: Machine, srv: Any, label: str, *, as_user: bool = Fal
 
 
 # Printed only when a launch detours through source-update completion instead of running
-# the requested command (hermes_cli/venv_sync.py, hermes_cli/source_build.py, update_cmd).
+# the requested command (agent_cli/venv_sync.py, agent_cli/source_build.py, update_cmd).
 SOURCE_COMPLETION_MARKERS = ("completing source-update", "Preparing Node dependencies", "Update complete")
 
 

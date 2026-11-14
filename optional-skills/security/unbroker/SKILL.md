@@ -2,7 +2,7 @@
 name: unbroker
 description: Remove your info from data-broker sites, by name or phone.
 version: 1.0.0
-author: SHL0MS (github.com/SHL0MS)
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 prerequisites:
@@ -12,7 +12,7 @@ metadata:
     tags: [privacy, data-broker, opt-out, ccpa, gdpr, security, doxxing]
     category: security
     related_skills: [google-workspace, agentmail, himalaya, scrapling, osint-investigation]
-    homepage: https://github.com/NousResearch/hermes-agent
+    homepage: https://github.com/Garudex-Labs/NoOne
 ---
 
 # unbroker

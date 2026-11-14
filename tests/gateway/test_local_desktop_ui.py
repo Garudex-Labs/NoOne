@@ -61,8 +61,8 @@ def window(monkeypatch):
     stream = SimpleNamespace(
         fanout=_Fanout(requests, silent),
         publish=lambda session_id, payload, *, event_type: streamed.append((session_id, event_type, payload)))
-    from hermes_constants import get_hermes_home
-    authority = SimpleNamespace(sessions={"canon": SimpleNamespace(event_stream=stream)}, profile_id=str(get_hermes_home()))
+    from agent_constants import get_agent_home
+    authority = SimpleNamespace(sessions={"canon": SimpleNamespace(event_stream=stream)}, profile_id=str(get_agent_home()))
     turn = SimpleNamespace(
         _ctx=SimpleNamespace(session_id="phys", session_key="agent:main:local:dm:1"),
         _approval_owner=(authority, "canon", 1),

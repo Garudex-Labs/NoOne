@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { Egg, ImageIcon } from '@noone/ui/icons'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -11,7 +12,6 @@ import { GenerateButton } from '@/components/ui/generate-button'
 import { Input } from '@/components/ui/input'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { Egg, ImageIcon } from '@/lib/icons'
 import { isSubmitEnter } from '@/lib/ime'
 import { cn } from '@/lib/utils'
 import {

@@ -14,7 +14,7 @@ and a seeded two-login pool in ``auth.json``. Two vendor boundaries are faked:
   shipped.
 
 The pool is the #120741 layout: login A is the singleton plus its seeded ``device_code`` row
-(fresh), login B is an independently authorized ``manual:device_code`` row (``hermes auth
+(fresh), login B is an independently authorized ``manual:device_code`` row (``noone auth
 add``) whose access token is about to expire, so every selection defers a refresh of B.
 """
 
@@ -271,7 +271,7 @@ def test_dead_shared_grant_retires_every_row_of_it(tmp_path) -> None:
     assert posted and set(posted) == {"rt-S"}, posted
     for run, store, rows in zip(runs, stores, pools):
         assert run.proc.returncode != 0 and "NEVER" not in run.stdout, run.describe()
-        assert "hermes auth add openai-codex" in run.stdout, run.describe()
+        assert "noone auth add openai-codex" in run.stdout, run.describe()
         singleton = store["providers"]["openai-codex"]
         assert not singleton.get("tokens", {}).get("refresh_token"), singleton
         assert (singleton.get("last_auth_error") or {}).get("relogin_required") is True, singleton

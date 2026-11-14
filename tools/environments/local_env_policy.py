@@ -1,6 +1,6 @@
 """Secret-scrub policy for Hermes child processes: pure data + predicates for which env
 names are Hermes-managed credentials. The env *builders* applying it (``_make_run_env``,
-``_sanitize_subprocess_env``, ``hermes_subprocess_env``) live in ``tools.environments.local``."""
+``_sanitize_subprocess_env``, ``agent_subprocess_env``) live in ``tools.environments.local``."""
 
 import functools
 import os
@@ -39,6 +39,7 @@ _STATIC_PROVIDER_ENV_BLOCKLIST = frozenset({
     # The dashboard PTY child's WS URLs carry that token (or the gated internal
     # credential) in their query string; the TUI reads them at start-up, no child does.
     "HERMES_TUI_SIDECAR_URL", "HERMES_TUI_GATEWAY_URL",
+    "HERMES_TUI_ACTIVE_SESSION_FILE",
     "GATEWAY_ALLOWED_USERS", "GH_TOKEN", "GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY_PATH",
     "GITHUB_APP_INSTALLATION_ID", "MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET",
     "DAYTONA_API_KEY", "GATEWAY_RELAY_ID", "GATEWAY_RELAY_SECRET",
@@ -66,9 +67,9 @@ def _secret_source_bootstrap_env() -> frozenset[str]:
 
 
 def _left_core_env(*, secrets_only: bool) -> frozenset:
-    """Env of features that left core for a catalog plugin (``hermes_cli.left_core_migration``):
+    """Env of features that left core for a catalog plugin (``agent_cli.left_core_migration``):
     stripped exactly as when core shipped them, plugin installed or not."""
-    from hermes_cli.left_core_migration import LEFT_CORE
+    from agent_cli.left_core_migration import LEFT_CORE
     return frozenset(name for feature in LEFT_CORE
                      for name in feature.secret_env + (() if secrets_only else feature.private_env))
 
@@ -78,7 +79,7 @@ def _build_provider_env_blocklist() -> frozenset:
     blocked: set[str] = (set(_STATIC_PROVIDER_ENV_BLOCKLIST) | _left_core_env(secrets_only=False)
                          | _secret_source_bootstrap_env())
     try:
-        from hermes_cli.auth import PROVIDER_REGISTRY
+        from agent_cli.auth import PROVIDER_REGISTRY
         for pconfig in PROVIDER_REGISTRY.values():
             blocked.update(pconfig.api_key_env_vars)
             if pconfig.auth_type == "aws_sdk":
@@ -88,7 +89,7 @@ def _build_provider_env_blocklist() -> frozenset:
     except ImportError:
         pass
     try:
-        from hermes_cli.config import OPTIONAL_ENV_VARS
+        from agent_cli.config import OPTIONAL_ENV_VARS
         for name, metadata in OPTIONAL_ENV_VARS.items():
             category = metadata.get("category")
             if category in {"tool", "messaging"} or (
@@ -96,40 +97,31 @@ def _build_provider_env_blocklist() -> frozenset:
                 blocked.add(name)
     except ImportError:
         pass
-    # CLAUDE_CODE_OAUTH_TOKEN (via the anthropic registry entry) belongs to the user's
-    # Claude Code install, not Hermes: stripping it made agent-spawned ``claude`` CLIs
-    # fall through to the shared Keychain / ~/.claude store and, on auth failure, wipe
-    # it — logging the user out. BUZZ_* is deliberately NOT discarded: this list feeds
-    # every scrub surface, so an import-time discard would leak BUZZ_PRIVATE_KEY into
-    # non-terminal children; the Buzz carve-out is terminal-only and context-gated
-    # (``_is_terminal_first_party_env``).
     # It is set and owned by the user's Claude Code install (subscription OAuth), not a Hermes-managed
     # inference credential — Claude subscription auth is not a working Hermes provider path. It arrives via
     # the registry loop above (anthropic api_key_env_vars), so remove it explicitly. See #55878.
     blocked.discard("CLAUDE_CODE_OAUTH_TOKEN")
-    # BUZZ_* is deliberately NOT discarded here, even for Buzz-managed agents (BUZZ_MANAGED_AGENT set by the
-    # buzz-acp harness). See #76243, #78026, #78065, #78511.
     return frozenset(blocked)
 
 
 def _build_adapter_secret_env() -> frozenset:
     """Secrets the messaging adapters declare, process-wide: core ``password`` messaging entries
     of OPTIONAL_ENV_VARS, the bundled platform plugin manifests' secret entries, and the
-    secret-named keys the gateway env-override table reads (WEIXIN_TOKEN, FEISHU_ENCRYPT_KEY, ...).
+    secret-named keys the gateway env-override table reads (WEIXIN_TOKEN, ...).
     Declared names only: a user's own ``SLACK_USER_TOKEN`` or ``LOCAL_LLM_API_KEY`` is not Hermes's.
     A profile's user-installed platform plugins are per home: :func:`_home_adapter_secret_env`.
     Nothing here fails soft: an unreadable bundled manifest or env table fails the import rather
     than dropping its secrets from the policy."""
-    from hermes_cli.config import (
+    from agent_cli.config import (
         CORE_DECLARED_ENV_NAMES, OPTIONAL_ENV_VARS, PLATFORM_SECRET_ENV_SUFFIXES, platform_manifest_secret_envs)
-    from hermes_cli.profile_channels import config_env_table_keys
+    from agent_cli.profile_channels import config_env_table_keys
     # Read in code only, declared nowhere else: the Microsoft Graph app secret and webhook
-    # clientState, the QQ bot's speech-to-text key, and secrets only a plugin's ``env_overrides``
-    # reads (Feishu webhook keys; Yuanbao's legacy app key, kept while the plugin is absent). Those rows live on the adapter's
+    # clientState, and secrets only a plugin's ``env_overrides``
+    # reads (Yuanbao's legacy app key, kept while the plugin is absent). Those rows live on the adapter's
     # PlatformEntry, which this import-time policy cannot load without importing every adapter;
     # tests/gateway/test_platform_env_overrides.py pins that every such secret is listed here.
-    names: set[str] = {"MSGRAPH_CLIENT_SECRET", "MSGRAPH_WEBHOOK_CLIENT_STATE", "QQ_STT_API_KEY",
-                       "FEISHU_ENCRYPT_KEY", "FEISHU_VERIFICATION_TOKEN", "YUANBAO_APP_KEY"}
+    names: set[str] = {"MSGRAPH_CLIENT_SECRET", "MSGRAPH_WEBHOOK_CLIENT_STATE",
+                         "YUANBAO_APP_KEY"}
     names.update(name.upper() for name, meta in OPTIONAL_ENV_VARS.items()
                  if name in CORE_DECLARED_ENV_NAMES
                  and meta.get("category") == "messaging" and meta.get("password"))
@@ -138,7 +130,7 @@ def _build_adapter_secret_env() -> frozenset:
     return frozenset(names)
 
 
-# Provider blocklist first: it imports hermes_cli.auth before hermes_cli.config, whose import
+# Provider blocklist first: it imports agent_cli.auth before agent_cli.config, whose import
 # discovers provider plugins that expect a fully initialized auth registry.
 _PROVIDER_ENV_BLOCKLIST = _build_provider_env_blocklist()
 _ADAPTER_SECRET_ENV = _build_adapter_secret_env()
@@ -155,10 +147,10 @@ def _home_adapter_secret_env() -> frozenset:
     manifest under ``plugins/platforms/`` that cannot be read raises. A partial scan (a plugin dir
     or flat manifest unreadable or unparsable) keeps the names this home already had and is not
     cached, so a failed discovery never releases a known denial and recovery is seen at once."""
-    from hermes_cli.config import platform_manifest_secret_scan, platform_manifest_stamp
-    from hermes_constants import get_hermes_home, hermes_home_key
-    home = get_hermes_home()
-    key, stamp = hermes_home_key(home), platform_manifest_stamp(home)
+    from agent_cli.config import platform_manifest_secret_scan, platform_manifest_stamp
+    from agent_constants import get_agent_home, agent_home_key
+    home = get_agent_home()
+    key, stamp = agent_home_key(home), platform_manifest_stamp(home)
     cached = _HOME_ADAPTER_SECRET_CACHE.get(key)
     if cached is None or cached[0] is None or cached[0] != stamp:
         names, complete = platform_manifest_secret_scan(home)
@@ -176,7 +168,7 @@ def _registry_adapter_secret_env() -> frozenset:
     must not strip it from credentialed children. No blanket fallback: a registry error surfaces
     instead of an empty (fail-open) set."""
     from gateway.platform_registry import platform_registry
-    from hermes_cli.config import PLATFORM_SECRET_ENV_SUFFIXES
+    from agent_cli.config import PLATFORM_SECRET_ENV_SUFFIXES
     return frozenset(n.upper() for n in platform_registry.required_env_names()
                      if n.upper().endswith(PLATFORM_SECRET_ENV_SUFFIXES))
 
@@ -198,78 +190,6 @@ def _is_provider_env_blocklisted(name: str, _registered: frozenset | None = None
     if name in _HERMES_PROVIDER_ENV_BLOCKLIST or upper in _HERMES_PROVIDER_ENV_BLOCKLIST:
         return True
     return upper in (_registered_adapter_secret_env() if _registered is None else _registered)
-
-
-# First-party platform credentials (``BUZZ_*``, driving the platform-mandated ``buzz``
-# CLI) carved out of the TERMINAL scrub only (``_make_run_env``,
-# ``_sanitize_subprocess_env``); execute_code, hermes_subprocess_env, docker and
-# env_passthrough registration stay sealed (GHSA-rhgp-j443-p4rf). CONTEXT-GATED via
-# ``_buzz_terminal_context_active``: a Telegram/CLI/cron session on a host that also
-# runs a Buzz gateway must not get the signing key. Values are used directly, never
-# scope-resolved (UnscopedSecretError under multiplex); the snapshot treats them as
-# profile-scoped. Prefix-based so future BUZZ_* names need no code change.
-# First-party platform credentials the agent's own platform adapters need in terminal children (e.g. the
-# ``BUZZ_*`` vars for the Buzz messaging platform, which drive the platform-mandated ``buzz`` CLI:
-# BUZZ_PRIVATE_KEY, BUZZ_AUTH_TAG, BUZZ_RELAY_URL, and the other BUZZ_* names). These are the agent's OWN
-# credentials — a Buzz community agent is expected to operate the ``buzz`` CLI — so they are carved out of
-# the terminal scrub. CONTEXT-GATED: the carve-out applies ONLY when this process/session is actually
-# operating as a Buzz agent — either the process is a Buzz-ACP managed agent (``BUZZ_MANAGED_AGENT`` is set,
-# only by Buzz Desktop's buzz-acp harness; see #76243 / #78511) or the current session's platform is
-# ``buzz`` (the gateway's ``HERMES_SESSION_PLATFORM`` ContextVar; concurrency safe under a multi-session
-# host). A Telegram/CLI/cron session on a host that also runs a Buzz gateway does NOT get BUZZ_PRIVATE_KEY
-# in its terminal children — blanket passthrough of a signing key to every terminal child on the host would
-# be wrong (maintainer triage note on #76243: don't expose the key to unrelated shell commands).
-# ``_sanitize_subprocess_env`` is also consumed by search workers (e.g. the ddgs web-search subprocess), the
-# computer-use driver binary, and user-script runners (bang ``!`` commands, quick commands, cron scripts,
-# webhook-filter scripts), so those children receive the vars too — matching the approved background/PTY
-# scope. Every other surface stays sealed — execute_code scrubbing, :func:`hermes_subprocess_env` (browser /
-# TUI host / ACP agent spawns), docker children, and ``env_passthrough`` registration (skills/config
-# still cannot register these names). The GHSA-rhgp-j443-p4rf seal is preserved because no registration path
-# is opened; this is a scrub-path exemption, not an allowlist addition. First-party matches use the merged
-# env value directly — they are the process's own env values and are never scope-resolved (a profile secret
-# scope under multiplex would otherwise raise UnscopedSecretError at passthrough-resolution call sites);
-# only skill/config passthrough names resolve through the profile secret scope. The snapshot mechanism
-# treats these names like profile-scoped passthrough names (see
-# ``LocalEnvironment._additional_profile_scoped_passthrough_names``) so they never persist in the shared
-# terminal snapshot across profiles. Contrast with CLAUDE_CODE_OAUTH_TOKEN above, which is discarded from
-# the blocklist entirely because it is NOT a Hermes credential; these ARE Hermes-managed first-party
-# platform credentials, so they stay IN the blocklist for every non-terminal surface. See issue #78026 (Buzz
-# agents could not use ``buzz`` from the terminal tool) and #76243 (Buzz Desktop managed agent wakes but
-# cannot reply).
-_TERMINAL_FIRST_PARTY_ENV_PREFIXES = ("BUZZ_",)
-
-
-def _matches_terminal_first_party_prefix(name: str) -> bool:
-    """Pure name check (``BUZZ_*``), regardless of session context — the snapshot
-    exclusion must stay conservative even when the carve-out is inactive.
-    Case-folded: on Windows the env block is case-insensitive, so a
-    lowercase-stored ``buzz_private_key`` IS the credential; it needs the
-    carve-out (and the snapshot exclusion) just like the canonical name."""
-    return name.upper().startswith(_TERMINAL_FIRST_PARTY_ENV_PREFIXES)
-
-
-def _buzz_terminal_context_active() -> bool:
-    """True when this process/session operates as a Buzz agent: ``BUZZ_MANAGED_AGENT`` in
-    the process env (set only by Buzz Desktop's buzz-acp harness), or the live session's
-    platform is ``buzz`` via the gateway ContextVar — authoritative under a concurrent
-    multi-session host, so a sibling Telegram session resolves its OWN platform.
-
-    Gateway / CLI / cron / kanban processes never carry it. See #76243.
-    """
-    if os.environ.get("BUZZ_MANAGED_AGENT"):
-        return True
-    try:
-        from gateway.session_context import get_session_env
-
-        return get_session_env("HERMES_SESSION_PLATFORM", "").strip().lower() == "buzz"
-    except Exception:
-        return False
-
-
-def _is_terminal_first_party_env(name: str) -> bool:
-    """``name`` is a first-party platform credential (``BUZZ_*``) AND the current
-    process/session context entitles it to reach terminal children."""
-    return _matches_terminal_first_party_prefix(name) and _buzz_terminal_context_active()
 
 
 # Active-venv markers that must NOT leak: VIRTUAL_ENV/CONDA_PREFIX make uv/poetry sync
@@ -297,14 +217,14 @@ _ACTIVE_VENV_MARKER_VARS = ("VIRTUAL_ENV", "CONDA_PREFIX", "PYTHONHOME")
 # terminal answers ``launchd``/supervised and takes the exit-75 restart route no supervisor answers.
 # NOTIFY_SOCKET/WATCHDOG_* name the systemd unit's main process (sd_notify's unset_environment).
 # Kept on purpose: XPC_SERVICE_NAME (launchd's own per-process stamp, "0" below the wrapper, which
-# ``hermes update`` compares to tell it runs inside a job), INVOCATION_ID/JOURNAL_STREAM (systemd
+# ``noone update`` compares to tell it runs inside a job), INVOCATION_ID/JOURNAL_STREAM (systemd
 # sets them for every process of the unit, and the gateway-child dispatch reads them there), and the
 # launch markers HERMES_SUPERVISED_CHILD / HERMES_S6_SUPERVISED_CHILD (profile pinning, s6 redirect).
 _SUPERVISED_PROCESS_IDENTITY_VARS = (
     "HERMES_LAUNCHD_LABEL", "HERMES_GATEWAY_EXTERNAL_SUPERVISOR", "NOTIFY_SOCKET", "WATCHDOG_USEC", "WATCHDOG_PID",
 )
 # The supervisor markers are also profile pins: a CLI under them skips the sticky active_profile
-# (``hermes_cli.main._under_gateway_supervisor``, #74872), and HERMES_GATEWAY_EXTERNAL_SUPERVISOR is an
+# (``agent_cli.main._under_gateway_supervisor``, #74872), and HERMES_GATEWAY_EXTERNAL_SUPERVISOR is an
 # --external-supervisor gateway's ONLY one. A child that loses a marker keeps the pin under a name the
 # restart-route and launch-identity probes never read, so it stays on the gateway's profile without
 # claiming the supervisor.
@@ -365,7 +285,7 @@ def _config_declared_key_envs(node: Any) -> set:
     return names.union(*(_config_declared_key_envs(value) for value in node.values()))
 
 
-# A field holding a credential value: ``key``, ``*_key`` (``api_key``, Feishu's ``encrypt_key``,
+# A field holding a credential value: ``key``, ``*_key`` (``api_key``, ``encrypt_key``,
 # api_server's ``extra.key``), ``token``, ``*_token``, ``secret``, ``*_secret``, ``password``,
 # ``*_password``. A non-credential ``*_key`` holding a ``${VAR}`` is withheld too: safe side, and a
 # server that needs the name declares it in its own ``env:``.
@@ -378,7 +298,7 @@ def _config_credential_env_refs(node: Any) -> set:
     (``api_key: "prefix-${VAR}"``), parsed exactly as the config loader expands them.
     Must be the unexpanded config: the merged one already holds the value, not the name. The
     top-level ``mcp_servers`` block is skipped: its ``env:`` refs are what a server is meant to get."""
-    from hermes_cli.config import _ENV_REF_RE, _env_ref_var_name
+    from agent_cli.config import _ENV_REF_RE, _env_ref_var_name
 
     def ref_name(value: str) -> set:
         return {name for ref in _ENV_REF_RE.finditer(value) if (name := _env_ref_var_name(ref.group(1)))}
@@ -412,8 +332,8 @@ def _raw_config_behind_effective() -> Any:
     fails to parse, the loader keeps serving its last-known-good, whose credentials stay in use;
     that is the file as of the last successful load, which the loader backs up as the newest
     ``good`` copy (``config_backups.backup_config``), so its refs come from there, not from ``{}``."""
-    from hermes_cli.config import FailedConfigRead, get_config_path, read_raw_config_readonly
-    from hermes_cli.config_backups import load_newest_good_backup
+    from agent_cli.config import FailedConfigRead, get_config_path, read_raw_config_readonly
+    from agent_cli.config_backups import load_newest_good_backup
 
     raw = read_raw_config_readonly()
     if not isinstance(raw, FailedConfigRead):
@@ -438,11 +358,11 @@ def hermes_consumed_credentials(names: Iterable[str]) -> frozenset:
     (``secret_sources.registry._profile_alias_target``). Resolved per call: pool rows, config,
     plugin adapters and the profile differ per served profile."""
     from agent.secret_sources.registry import _active_profile_name, _profile_alias_target
-    from hermes_cli.auth import read_credential_pool
-    from hermes_cli.config import load_config_readonly
-    from hermes_cli.managed_scope import load_managed_config
-    from hermes_cli.profile_channels import credential_env_keys
-    from hermes_constants import get_hermes_home
+    from agent_cli.auth import read_credential_pool
+    from agent_cli.config import load_config_readonly
+    from agent_cli.managed_scope import load_managed_config
+    from agent_cli.profile_channels import credential_env_keys
+    from agent_constants import get_agent_home
 
     adapter_keys = credential_env_keys()
     registered = _registered_adapter_secret_env()
@@ -456,7 +376,7 @@ def hermes_consumed_credentials(names: Iterable[str]) -> frozenset:
     declared = (pool_rows | _config_declared_key_envs(effective)
                 | _config_credential_env_refs(_raw_config_behind_effective())
                 | _config_credential_env_refs(load_managed_config()))
-    profile = _active_profile_name(get_hermes_home())
+    profile = _active_profile_name(get_agent_home())
 
     def consumed(name: str) -> bool:
         upper = name.upper()
@@ -485,8 +405,8 @@ _PROFILE_GATE_ENV_MARKERS = (
     "_NO_THREAD_CHANNELS", "_FREE_RESPONSE_CHANNELS", "_BACKFILL_CHANNELS", "_GROUP_ALLOWED",
 )
 # Gate owners that are not a ``Platform`` value: the cross-platform pairing gate and adapters whose
-# env prefix differs from their platform name (``qqbot`` reads ``QQ_*``).
-_EXTRA_GATE_ENV_PREFIXES = frozenset({"GATEWAY", "QQ"})
+# env prefix differs from their platform name (``sms`` reads ``TWILIO_*``).
+_EXTRA_GATE_ENV_PREFIXES = frozenset({"GATEWAY"})
 
 
 @functools.lru_cache(maxsize=1)
@@ -567,6 +487,7 @@ _ALWAYS_STRIP_KEYS: frozenset[str] = frozenset({
     # enumerated here to stay stripped on the inherit_credentials=True path.
     "GATEWAY_RELAY_ID", "GATEWAY_RELAY_SECRET", "GATEWAY_RELAY_DELIVERY_KEY",
     "EMAIL_PASSWORD", "HERMES_DASHBOARD_SESSION_TOKEN", "HERMES_TUI_SIDECAR_URL", "HERMES_TUI_GATEWAY_URL",
+    "HERMES_TUI_ACTIVE_SESSION_FILE",
     # Dashboard auth: the basic-auth password and session-signing secret, the OIDC client
     # secret and the drain bearer. They let a holder mint or forge dashboard sessions, and no
     # child (credentialed CLIs included) consumes them.

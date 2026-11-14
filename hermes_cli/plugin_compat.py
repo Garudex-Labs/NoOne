@@ -1,22 +1,15 @@
-"""Frozen exports for ``hermes update`` processes that predate the plugin compat layer's removal.
+"""Legacy import boundary; implementation lives in agent_cli.plugin_compat.
 
-The Sep 2026 decomposition kept old import paths alive for external plugins until 2026-09-14; that
-layer, and the scanner that reported plugins still using it, is gone. An updater already running from
-an older checkout still lazy-imports these three names for its post-update notice after the swap
-(``tests/compat/old_updater_surface.json``), so they stay as inert stubs with nothing left to report.
+Retained for shipped updater/plugin compatibility, sharing the canonical module.
 """
-from __future__ import annotations
+from importlib import import_module
+import sys
 
-from typing import Any, Dict, List
+from agent_cli.plugin_compat import (
+    compat_report,
+    removal_in_effect,
+    summary_lines,
+)
 
-
-def compat_report(manifests: Any = None, *, force: bool = False) -> dict[str, list[Any]]:
-    return {}
-
-
-def removal_in_effect(today: Any = None) -> bool:
-    return True
-
-
-def summary_lines(report: Any, *, today: Any = None) -> list[str]:
-    return []
+_current = import_module('agent_cli.plugin_compat')
+sys.modules[__name__] = _current

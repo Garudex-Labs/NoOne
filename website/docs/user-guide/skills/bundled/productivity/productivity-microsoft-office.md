@@ -1,35 +1,43 @@
 ---
 title: "Microsoft Office — Create, read, and edit Word, PowerPoint, and Excel files"
-sidebar_label: "Microsoft Office"
+sidebarTitle: "Microsoft Office"
 description: "Create, read, and edit Word, PowerPoint, and Excel files"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Microsoft Office
+# Microsoft Office {#microsoft-office}
 
 Create, read, and edit Word, PowerPoint, and Excel files.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/productivity/microsoft-office` |
 | Version | `2.0.0` |
-| Author | Nous Research |
+| Author | Garudex Labs |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `office`, `word`, `docx`, `powerpoint`, `pptx`, `excel`, `xlsx`, `csv`, `documents`, `slides`, `spreadsheets` |
 | Related skills | [`pdf`](../../bundled/productivity/productivity-pdf.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Microsoft Office Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Microsoft Office Skill {#microsoft-office-skill}
 
 Create, read, edit, and template Word (`.docx`), PowerPoint (`.pptx`), and
 Excel (`.xlsx`, `.csv`) files offline with small Python CLIs built on
@@ -37,7 +45,7 @@ python-docx, python-pptx, and openpyxl. Office itself is never needed. It does
 not open legacy binary formats (`.doc`, `.ppt`, `.xls`) and does not render
 pages without LibreOffice.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Pick the format, then read its reference with `skill_view` before working:
 
@@ -54,22 +62,22 @@ Deeper notes: `references/revisions-and-comments.md` (Word review markup) and
   `soffice --headless --convert-to docx|pptx|xlsx old-file` when LibreOffice is installed.
 - Not for `.odt`/`.odp`/`.ods`, or WYSIWYG layout work.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Python 3.10+ with `python-docx`, `python-pptx`, and `openpyxl` (import names
   `docx`, `pptx`, `openpyxl`).
 - Pick the interpreter with `terminal`. Use `python` when it already imports
-  the libraries (the Hermes Docker image ships them). Otherwise, when `hermes`
-  is on PATH, let Hermes build its shared, pinned documents environment under
-  the Hermes home: it survives container restarts, never touches the Hermes
+  the libraries (the {{app-name}} Docker image ships them). Otherwise, when `hermes`
+  is on PATH, let {{app-name}} build its shared, pinned documents environment under
+  the {{app-name}} home: it survives container restarts, never touches the {{app-name}}
   install itself, and is safe to run from several agents at once. When it is
-  not (the terminal runs in a Docker sandbox, which has no Hermes), the block
+  not (the terminal runs in a Docker sandbox, which has no {{app-name}}), the block
   builds a venv in the sandbox home with the same pinned versions. Use this
   exact block in every document skill so they all share one environment:
 
   ```bash
   python -c "import docx, pptx, openpyxl" 2>/dev/null && PY=python || if command -v hermes >/dev/null 2>&1; then
-    PY="$(hermes pm environment documents --extra documents --extra documents-pdf)"
+    PY="$(noone pm environment documents --extra documents --extra documents-pdf)"
   else
     PY="$HOME/.cache/hermes-docs-venv/bin/python"
     "$PY" -c "import docx, openpyxl, pptx, reportlab, pypdf, pdfplumber, pypdfium2" 2>/dev/null || (
@@ -93,16 +101,16 @@ Deeper notes: `references/revisions-and-comments.md` (Word review markup) and
   "$PY" scripts/docx_create.py --help
   ```
 
-  Run every helper with `"$PY"`. In PowerShell (Hermes runs on that host, so
+  Run every helper with `"$PY"`. In PowerShell ({{app-name}} runs on that host, so
   it is on PATH):
-  `$env:PY = hermes pm environment documents --extra documents --extra documents-pdf`.
-  Never `pip install` into the interpreter that runs Hermes or into the
-  `hermes pm environment` one; Hermes owns both.
+  `$env:PY = noone pm environment documents --extra documents --extra documents-pdf`.
+  Never `pip install` into the interpreter that runs {{app-name}} or into the
+  `noone pm environment` one; {{app-name}} owns both.
 - Optional: LibreOffice (`soffice`) for PDF export, Excel recalculation, and
   slide rendering, plus poppler (`pdftoppm` or `pdftocairo`) for slide PNGs.
   The helpers that need them report what is missing and exit 0.
 
-## How to Run
+## How to Run {#how-to-run}
 
 Every helper lives in `scripts/`, is an argparse CLI with `--help`, prints
 JSON to stdout, and exits non-zero on failure. Run them with `terminal` from
@@ -115,7 +123,7 @@ the skill directory. Author JSON specs with `write_file`; read results with
 "$PY" scripts/xlsx_create.py spec.json report.xlsx
 ```
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Task | Word | PowerPoint | Excel |
 | --- | --- | --- | --- |
@@ -127,7 +135,7 @@ the skill directory. Author JSON specs with `write_file`; read results with
 
 The per-format reference has the full flag table.
 
-## Procedure
+## Procedure {#procedure}
 
 1. Identify the format from the file extension or the ask, and load its
    reference (`skill_view` with `file_path=references/<format>.md`).
@@ -137,7 +145,7 @@ The per-format reference has the full flag table.
 4. Verify the result as the reference's Verification section says, then give
    the user the exact output path.
 
-## Converting to PDF
+## Converting to PDF {#converting-to-pdf}
 
 When LibreOffice is installed, convert headlessly:
 
@@ -152,7 +160,7 @@ pure-Python path to PDF for any of these formats: if `soffice` is missing, say
 so rather than approximating. For other sheets use
 `xlsx_to_csv.py --sheet NAME`.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Never unzip-and-edit the XML.** These files are zip packages; raw text
   substitution corrupts them. Edit through the helpers (or the libraries) and
@@ -165,7 +173,7 @@ so rather than approximating. For other sheets use
 - **Encoding.** Write specs as UTF-8; the helpers read UTF-8 explicitly.
 - Format-specific traps are in each reference.
 
-## Verification
+## Verification {#verification}
 
 - Re-read every output with the format's read helper and check the expected
   content is there and the old content is gone.

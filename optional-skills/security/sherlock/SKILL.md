@@ -2,7 +2,7 @@
 name: sherlock
 description: Find accounts for a username across 400+ platforms.
 version: 1.0.0
-author: unmodeled-tyler
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

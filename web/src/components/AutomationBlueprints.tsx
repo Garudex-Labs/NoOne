@@ -1,18 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
-import { Clock, Wand2 } from "lucide-react";
+import { Clock, Wand2 } from "@noone/ui/icons";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
+import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
-import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent } from "@nous-research/ui/ui/components/card";
 import { Input } from "@nous-research/ui/ui/components/input";
 import { Label } from "@nous-research/ui/ui/components/label";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
+import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Toast } from "@nous-research/ui/ui/components/toast";
+import { useCallback, useEffect, useState } from "react";
+
 import { api } from "@/lib/api";
+import { errorMessage } from "@/lib/api-error";
 import type { AutomationBlueprint, AutomationBlueprintField } from "@/lib/automation-blueprints";
 import { cn, themedBody } from "@/lib/utils";
-import { errorMessage } from "@/lib/api-error";
 
 interface AutomationBlueprintsProps {
   profile: string;

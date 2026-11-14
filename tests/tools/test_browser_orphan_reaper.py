@@ -26,8 +26,8 @@ _LIVE_OTHER_OWNER = 88888
 @pytest.fixture
 def records(monkeypatch):
     """The test profile's launch records dir; nothing is ever signalled (``_terminate`` only records)."""
-    from hermes_constants import get_hermes_home
-    home = Path(get_hermes_home())
+    from agent_constants import get_agent_home
+    home = Path(get_agent_home())
     path = home / "cache" / "browser" / "chromium-records"
     path.mkdir(mode=0o700, parents=True)
     monkeypatch.setattr(launcher, "_records_dir", lambda *_home: path)  # this profile's dir, from any caller
@@ -231,9 +231,9 @@ def test_browser_attached_after_its_owner_crashed_is_never_reaped_while_in_use(r
     monkeypatch.setattr(launcher, "_start_time", lambda pid: 777)
     monkeypatch.setattr(launcher, "_cmdline_names_dir", lambda pid, udd: True)
     monkeypatch.setattr(launcher, "running_instance", lambda d: (41234, "/devtools/browser/abc", 4242) if d == udd else None)
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     crashed = launcher.LaunchedBrowser(key=f"profile:{udd}", pid=4242, start_time=777, cdp_url="", http_url="",
-                                       user_data_dir=udd, owned=True, ephemeral=False, home_key=hermes_home_key())
+                                       user_data_dir=udd, owned=True, ephemeral=False, home_key=agent_home_key())
     record = launcher._record_path(crashed)  # where the crashed owner left it
     record.write_text(json.dumps({"owner_pid": _DEAD_OWNER, "owner_start_time": None, "pid": 4242, "start_time": 777,
                                   "user_data_dir": udd, "home_key": crashed.home_key, "ephemeral": False,
@@ -304,8 +304,8 @@ class TestPrivatePerProfileRecords:
 def test_records_of_every_served_profile_are_reaped(tmp_path, monkeypatch):
     """One process serves many profiles; the janitor/atexit reap runs outside any profile scope. Each served
     home's records are read by path: the launch profile's and a live session's owning profile's."""
-    from hermes_constants import get_hermes_home
-    home_a, home_b = Path(get_hermes_home()), tmp_path / "profile-b"
+    from agent_constants import get_agent_home
+    home_a, home_b = Path(get_agent_home()), tmp_path / "profile-b"
     monkeypatch.setattr(launcher, "_browsers", {})
     monkeypatch.setattr(launcher, "_served_homes", set(), raising=False)
     terminated = []

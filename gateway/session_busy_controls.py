@@ -3,7 +3,7 @@ import asyncio
 from functools import partial
 from pathlib import Path
 
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 
 def handlers(connection):
@@ -19,7 +19,7 @@ def authorize(connection, ref, params, capability):
     connection.authority.authorize(connection.actor, ref, capability)
     # The contract's ``profile`` is nullable; null means this owner, as an omitted key does.
     if params.get('profile') is not None:
-        from hermes_cli.profiles import profile_matches_home
+        from agent_cli.profiles import profile_matches_home
         profile = params['profile']
         if not isinstance(profile, str):
             raise RuntimeStoreError('invalid_params')
@@ -203,7 +203,7 @@ async def correct(connection, ref, params, *, verb):
         # A claim can outlive the agent that carried it (a reaped turn the client still believes is
         # running), and a redirect in the build window has no agent to queue behind. Nothing live can
         # take the text, so answer 'rejected' — the wire contract's "not corrected, queue it as the
-        # next prompt" (desktop SessionRedirectResponse, tui_gateway's idle-steer reply). Raising here
+        # next prompt" (desktop SessionRedirectResponse, agent_backend's idle-steer reply). Raising here
         # made clients discard the message (#141644). ``delivered: False`` is the confirmation a
         # client may re-admit on: the live-agent 'rejected' below can follow delivery.
         if agent is None:

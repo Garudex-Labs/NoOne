@@ -11,7 +11,7 @@ import threading
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
-from hermes_constants import (
+from agent_constants import (
     get_config_path,
     get_skills_dir,
     get_subprocess_home,
@@ -63,7 +63,7 @@ def yaml_load(content: str):
     """Parse YAML with the shared safe loader, imported lazily."""
     global _yaml_load_fn
     if _yaml_load_fn is None:
-        from hermes_yaml import safe_load
+        from agent_yaml import safe_load
         _yaml_load_fn = safe_load
     return _yaml_load_fn(content)
 
@@ -139,7 +139,7 @@ def _detect_kanban() -> bool:
 
 def _detect_docker() -> bool:
     try:
-        from hermes_constants import is_container
+        from agent_constants import is_container
         return is_container()
     except Exception:
         return False
@@ -177,15 +177,15 @@ def skill_matches_environment(frontmatter: dict[str, Any]) -> bool:
 def skill_matches_apps(frontmatter: dict[str, Any]) -> bool:
     """True when every app named in ``requires_apps:`` has a registered declaration this host satisfies.
 
-    Names resolve through ``hermes_platform.declaration`` (registered by whoever owns the server,
+    Names resolve through ``agent_platform.declaration`` (registered by whoever owns the server,
     e.g. the plugin loader); the check is the same ``availability()`` the MCP check_fn uses. An
     unknown name hides the skill (fail closed). Offer-time filter, like ``environments:``.
     """
     names = frontmatter.get("requires_apps")
     if not names:
         return True
-    from hermes_platform import declaration
-    from hermes_platform.resolver.availability import availability
+    from agent_platform import declaration
+    from agent_platform.resolver.availability import availability
 
     for name in names if isinstance(names, list) else [names]:
         decl = declaration.lookup(str(name).strip())
@@ -214,15 +214,15 @@ def _raw_config_cache_clear() -> None:
 
 def _config_cache_key(config_path: Path) -> Optional[tuple[Any, ...]]:
     """``(path, *backend cache version)`` identity of config.yaml, or None when unreadable/absent."""
-    from hermes_cli.config_backend import config_cache_version_or_none
+    from agent_cli.config_backend import config_cache_version_or_none
     version = config_cache_version_or_none(config_path)
     return None if version is None else (str(config_path), *version)
 
 
 def _load_raw_config() -> dict[str, Any]:
-    """Read config.yaml with a version-keyed cache (no hermes_cli.config import)."""
+    """Read config.yaml with a version-keyed cache (no agent_cli.config import)."""
     from agent.safe_worker_policy import worker_config_snapshot
-    from hermes_cli.config_backend import config_exists, read_config_doc
+    from agent_cli.config_backend import config_exists, read_config_doc
 
     snapshot = worker_config_snapshot()
     if snapshot is not None:
@@ -269,8 +269,8 @@ def _expand_path(entry: str) -> Path:
 
 def _home_relative(p: Path) -> Path:
     """Anchor a relative config path at HERMES_HOME; absolute paths pass through."""
-    from hermes_constants import get_hermes_home
-    return p if p.is_absolute() else get_hermes_home() / p
+    from agent_constants import get_agent_home
+    return p if p.is_absolute() else get_agent_home() / p
 
 
 # Never disableable: `hermes-agent` is the agent's own operating manual and the
@@ -295,7 +295,7 @@ def get_disabled_skill_names(platform: str | None = None) -> set[str]:
 
 def parse_config_string_list(value) -> list[str]:
     """Normalize a config value that may hold a JSON-array string into a list.
-    ``hermes config set`` stores lists as quoted JSON/Python-literal strings;
+    ``noone config set`` stores lists as quoted JSON/Python-literal strings;
     treating one as a single name would silently filter nothing. A scalar
     string still means one name.
 
@@ -340,7 +340,7 @@ def _config_str_list(raw) -> list[str]:
 def get_external_skills_dirs() -> list[Path]:
     """Validated, deduplicated ``skills.external_dirs`` (existing dirs only). Entries
     are ``~``/``${VAR}`` expanded, relative to HERMES_HOME; the local skills dir is skipped."""
-    from hermes_cli.config_backend import config_exists
+    from agent_cli.config_backend import config_exists
     config_path = get_config_path()
     if not config_exists(config_path):
         return []
@@ -390,10 +390,10 @@ def get_skill_create_dir() -> Optional[Path]:
 def display_skill_create_dir() -> str:
     """User-facing path where new skills are created (``~/`` shorthand when
     possible); tool schema descriptions and prompts follow ``skills.create_dir``."""
-    from hermes_constants import display_hermes_home
+    from agent_constants import display_agent_home
     create_dir = get_skill_create_dir()
     if create_dir is None:
-        return f"{display_hermes_home()}/skills/"
+        return f"{display_agent_home()}/skills/"
     if create_dir.is_relative_to(Path.home()):
         return "~/" + create_dir.relative_to(Path.home()).as_posix() + "/"
     return create_dir.as_posix() + "/"
@@ -618,7 +618,7 @@ def get_untrusted_project_skills_root() -> Optional[tuple[Path, int]]:
 # cached under HERMES_HOME, never inside the repo); "dangerous" excludes the
 # skill from index, list, view and slash commands ("caution" loads, as on the hub).
 
-# ── Project skill quarantine (scan-time injection defense) ──────────────── Trust (`hermes skills trust`)
+# ── Project skill quarantine (scan-time injection defense) ──────────────── Trust (`noone skills trust`)
 # is a REPO-level decision made once; the repo's skill content keeps changing underneath it with every pull.
 # The hub install path runs skills_guard on install, but project skills are read straight from a checkout —
 # without this gate a `git pull` could inject a malicious skill into an already-trusted repo with no scan
@@ -645,8 +645,8 @@ def is_quarantined_project_skill(skill_md) -> bool:
         return _PROJECT_QUARANTINE_CACHE[key]
     try:
         from tools.skills_guard import scan_skill_cached
-        from hermes_constants import get_hermes_home
-        cache_dir = get_hermes_home() / "cache" / "project_skill_scans"
+        from agent_constants import get_agent_home
+        cache_dir = get_agent_home() / "cache" / "project_skill_scans"
         result, _prov = scan_skill_cached(skill_dir, source=_PROJECT_SCAN_SOURCE, cache_dir=cache_dir)
         quarantined = result.verdict == "dangerous"
         if quarantined:

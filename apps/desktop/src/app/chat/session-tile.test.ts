@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesConnection } from '@/global'
-import { getSession } from '@/hermes'
+import { getSession } from '@/agent-client'
+import type { AgentConnection } from '@/global'
 import { clearSessionDraft, stashSessionDraft } from '@/store/composer'
 import { $gatewaySwitching } from '@/store/gateway-switch'
 import { $activeGatewayProfile, $profiles } from '@/store/profile'
@@ -17,12 +17,12 @@ import {
   WRONG_BACKEND_TILE_ERROR
 } from './session-tile'
 
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   getSession: vi.fn()
 }))
 
-function localConnection(): HermesConnection {
+function localConnection(): AgentConnection {
   return {
     baseUrl: 'http://127.0.0.1:9119',
     isFullscreen: false,

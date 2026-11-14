@@ -2,7 +2,7 @@
 name: youtube-content
 description: "YouTube transcripts to summaries, threads, blogs."
 version: 1.0.0
-author: Teknium (teknium1), Hermes Agent
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
@@ -26,7 +26,7 @@ Use `terminal` with the Python from a PM-prepared Hermes source checkout. The
 Hermes with raw pip or project-discovering `uv run`.
 
 From that checkout, first follow the isolated development-home setup in
-[Package Management](https://hermes-agent.nousresearch.com/docs/reference/package-management#developer-workflow),
+[Package Management](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/package-management.md#developer-workflow),
 then prepare the extra and reactivate before running the helper:
 
 ```bash

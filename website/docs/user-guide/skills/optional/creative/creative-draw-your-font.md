@@ -1,41 +1,49 @@
 ---
 title: "Draw Your Font — Turn a handwriting photo into an installable TTF font"
-sidebar_label: "Draw Your Font"
+sidebarTitle: "Draw Your Font"
 description: "Turn a handwriting photo into an installable TTF font"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Draw Your Font
+# Draw Your Font {#draw-your-font}
 
 Turn a handwriting photo into an installable TTF font.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/draw-your-font` |
+| Source | Optional — install with `noone skills install official/creative/draw-your-font` |
 | Path | `optional-skills/creative/draw-your-font` |
 | Version | `0.1.0` |
-| Author | Danilo Znamerovszkij (https://github.com/danilo-znamerovszkij/draw-your-font), ported by Hermes Agent |
+| Author | Danilo Znamerovszkij (https://github.com/danilo-znamerovszkij/draw-your-font), ported by {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `font`, `handwriting`, `typography`, `ttf`, `woff`, `vision`, `creative` |
 | Related skills | [`pixel-art`](../../optional/creative/creative-pixel-art.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# draw-your-font
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# draw-your-font {#draw-your-font-1}
 
 Photo of handwritten letters in → installable font out. You do the seeing
 (find and label letters, judge quality); the CLI does all geometry (trace,
 metrics, font assembly). Never edit SVG paths or coordinates yourself.
 
-## Setup in Hermes (once per session)
+## Setup in {{app-name}} (once per session) {#setup-in-hermes-once-per-session}
 
 The CLI is the pinned npm package `draw-your-font@0.1.0` — run it via npx (Node ≥ 18 required, no global install needed):
 
@@ -45,11 +53,11 @@ npx -y draw-your-font@0.1.0 --help
 
 Wherever the examples below show `$DYF`, use `npx -y draw-your-font@0.1.0`. Shell variables do not persist between tool calls, so paste the full command each time. Everything runs locally; the user's handwriting never leaves the machine.
 
-Photos arrive in Hermes either as a file path in the message or via the gateway image cache — use the actual file path with the CLI. When a photo lands in the conversation with no path, ask the user for the file (the CLI needs a real file, not your memory of the image).
+Photos arrive in {{app-name}} either as a file path in the message or via the gateway image cache — use the actual file path with the CLI. When a photo lands in the conversation with no path, ask the user for the file (the CLI needs a real file, not your memory of the image).
 
 Do the visual steps (contact sheets, previews, glyph sheets) by loading the PNGs with `vision_analyze`.
 
-## Decide the flow
+## Decide the flow {#decide-the-flow}
 
 - **User has no photo yet** → offer the template: print, write, photograph.
 - **User shares photo(s) of handwriting** → main flow below.
@@ -58,7 +66,7 @@ Do the visual steps (contact sheets, previews, glyph sheets) by loading the PNGs
   inserts its path) or give the path directly. Do not proceed from memory.
 - **User wants changes to a font built this session** → Refine section.
 
-## Template flow (best quality)
+## Template flow (best quality) {#template-flow-best-quality}
 
 ```bash
 $DYF template -o template.pdf --charset minimal   # or: spanish
@@ -69,7 +77,7 @@ Tell the user: print it, write one character per box with a dark pen
 page from above in good light and share the file paths. The grid prints in
 light grey and vanishes during processing - only their ink survives.
 
-## Main flow: photo(s) → font
+## Main flow: photo(s) → font {#main-flow-photos--font}
 
 **1. Segment.** Works for template pages and freeform photos alike:
 
@@ -135,7 +143,7 @@ without pushing:
   work2` - then relabel from the new contact sheets (blob ids renumber; the
   old labels.json does not carry over) and build from the new workdir.
 
-## Refine (conversational iteration)
+## Refine (conversational iteration) {#refine-conversational-iteration}
 
 | User says | Do |
 |---|---|
@@ -150,7 +158,7 @@ without pushing:
 All refine commands rebuild from the stored crops - no re-photographing
 needed unless the ink itself is the problem.
 
-## Legibility report (offer after delivering)
+## Legibility report (offer after delivering) {#legibility-report-offer-after-delivering}
 
 ```bash
 $DYF preview -d work --text "minimum mill rn m cl d I l 1 O 0 quick brown fox" -o work/legibility.png
@@ -162,7 +170,7 @@ or two concrete fixes (rewrite those letters larger, more spacing). Note that
 display use (headings, notes) is more forgiving than paragraphs. Never gate
 delivery on this - it's advice, not a blocker.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 Segmentation found far too many / too few blobs, grey guide lines surviving,
 shadow blobs, faint ballpoint strokes → see

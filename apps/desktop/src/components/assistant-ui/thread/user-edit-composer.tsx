@@ -1,6 +1,8 @@
 import type { Unstable_TriggerAdapter, Unstable_TriggerItem } from '@assistant-ui/core'
 import { ComposerPrimitive, useAui, useAuiState } from '@assistant-ui/react'
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { Loader2Icon } from '@noone/ui/icons'
 import {
   type ClipboardEvent,
   type FC,
@@ -15,6 +17,7 @@ import {
   useState
 } from 'react'
 
+import type { AgentGateway } from '@/agent-client'
 import { ComposerDirectiveActions } from '@/app/chat/composer/directive-actions'
 import { COMPOSER_DROP_ACTIVE_CLASS, COMPOSER_DROP_FADE_CLASS } from '@/app/chat/composer/drop-affordance'
 import {
@@ -71,14 +74,11 @@ import {
   USER_ACTION_ICON_SIZE,
   USER_BUBBLE_BASE_CLASS
 } from '@/components/assistant-ui/thread/user-message'
-import { Codicon } from '@/components/ui/codicon'
-import type { HermesGateway } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { attachmentDisplayText, attachmentId, pathLabel } from '@/lib/chat-runtime'
 import { sanitizeComposerInput } from '@/lib/composer-input-sanitize'
 import { DATA_IMAGE_URL_RE } from '@/lib/embedded-images'
 import { triggerHaptic } from '@/lib/haptics'
-import { Loader2Icon } from '@/lib/icons'
 import { $touchPointer } from '@/lib/touch-interaction'
 import { cn } from '@/lib/utils'
 import type { ComposerAttachment } from '@/store/composer'
@@ -91,7 +91,7 @@ import { notifyThreadEditClose } from '@/store/thread-scroll'
 
 interface UserEditComposerProps {
   cwd: string | null
-  gateway: HermesGateway | null
+  gateway: AgentGateway | null
   sessionId: string | null
 }
 
@@ -987,7 +987,7 @@ export const UserEditComposer: FC<UserEditComposerProps> = ({ cwd, gateway, sess
               onPointerDown={event => event.preventDefault()}
               type="button"
             >
-              {submitting ? StopGlyph : <Codicon name="arrow-up" size={USER_ACTION_ICON_SIZE} />}
+              {submitting ? StopGlyph : <AppIcon name="arrow-up" size={USER_ACTION_ICON_SIZE} />}
             </button>
           </div>
         </div>

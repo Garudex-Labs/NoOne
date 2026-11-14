@@ -1,51 +1,20 @@
-"""Shims to stop the old updater doing work until relaunch.
+"""Legacy import boundary; implementation lives in agent_cli.managed_uv.
 
-An updater already in memory imports these names after replacing its checkout.
-They must not install anything, delegate to PM, or return a falsy value that
-would send that old process down its pip fallback. New code must not use them.
+Retained for shipped updater/plugin compatibility, sharing the canonical module.
 """
+from importlib import import_module
+import sys
 
-from pathlib import Path
-from typing import NoReturn
+from agent_cli.managed_uv import (
+    _reload_agent_constants as _reload_hermes_constants,
+    ensure_uv,
+    managed_python_env,
+    rebuild_venv,
+    resolve_uv,
+    update_managed_uv,
+)
 
-from hermes_cli._old_updater import stop_for_relaunch
+_current = import_module('agent_cli.managed_uv')
+sys.modules[__name__] = _current
 
-
-def _reload_hermes_constants() -> NoReturn:
-    # Shim to suppress old updater work until relaunch. Callers dereference the
-    # result, so None crashes. Stop without re-executing live globals.
-    stop_for_relaunch()
-
-
-def ensure_uv(*args, **kwargs) -> NoReturn:
-    # Shim to stop the old updater doing work until relaunch. Older releases
-    # expect a tuple, newer ones a path. Exit before either can consume it.
-    stop_for_relaunch()
-
-
-def update_managed_uv(*args, **kwargs) -> NoReturn:
-    # Shim to stop the old updater doing work until relaunch.
-    stop_for_relaunch()
-
-
-def resolve_uv(*args, **kwargs) -> NoReturn:
-    # Shim to stop the old updater doing work until relaunch, not enable pip.
-    stop_for_relaunch()
-
-
-def managed_python_env(
-    project_root: Path | None = None,
-    *,
-    install_dir: Path | None = None,
-    base_env: dict[str, str] | None = None,
-    **kwargs,
-) -> NoReturn:
-    # Shim to stop the old updater doing work until relaunch, not prepare a child.
-    stop_for_relaunch()
-
-
-def rebuild_venv(
-    uv_bin: str, venv_dir: Path, python_version: str = "3.11", **kwargs
-) -> NoReturn:
-    # Shim to stop the old updater doing work until relaunch, not claim a rebuild.
-    stop_for_relaunch()
+_current._reload_hermes_constants = _reload_hermes_constants

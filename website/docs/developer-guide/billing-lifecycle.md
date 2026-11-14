@@ -3,7 +3,7 @@ title: "Billing Lifecycle (TUI)"
 description: "Map from every billing/subscription state and typed refusal to the exact TUI copy and recovery action"
 ---
 
-# Billing lifecycle: client-side state, errors, and recovery
+# Billing lifecycle: client-side state, errors, and recovery {#billing-lifecycle-client-side-state-errors-and-recovery}
 
 This is the map from every `billing.*`/`subscription.*` state shape the gateway
 serves (from NAS) to what the terminal actually renders, and from every typed
@@ -16,7 +16,7 @@ degrades gracefully: it hits the `default` branch (a generic-but-real message
 pulled from the server payload, never a blank toast) rather than crashing or
 silently dropping the refusal.
 
-## 1. `billing.state` shapes → render
+## 1. `billing.state` shapes → render {#1-billingstate-shapes--render}
 
 Source: `ui-tui/src/components/billingOverlay.tsx` (`OverviewScreen`,
 `BuyScreen`, `AutoReloadScreen`), `ui-tui/src/app/slash/commands/topup.ts` (`/topup` run).
@@ -35,14 +35,14 @@ Source: `ui-tui/src/components/billingOverlay.tsx` (`OverviewScreen`,
 | `monthly_cap` present, `limit_usd != null` | `{spent_display} of {limit_display} used this month` (+ ` (default ceiling)` iff `is_default_ceiling`). |
 | `monthly_cap` absent or `limit_usd == null` | `No monthly cap visible (managed on the portal).` |
 | Role without billing capability (`!is_admin`, menu collapses) | Note: `Billing actions need someone with billing permissions (owner, admin, or finance admin).` Menu collapses to `Manage on portal` / `Cancel`. |
-| Org kill-switch off (`is_admin` but `!cli_billing_enabled`) | Note: `Remote spending is off for this org — a billing admin can turn it on from the portal's Hermes Agent page.` Same collapsed menu. |
+| Org kill-switch off (`is_admin` but `!cli_billing_enabled`) | Note: `Remote spending is off for this org — a billing admin can turn it on from the portal's NoOne page.` Same collapsed menu. |
 
 Note: `full = s.is_admin && s.cli_billing_enabled` gates the **org-level**
 switch, not the per-terminal `billing:manage` scope — that's discovered
 reactively (a charge 403s `insufficient_scope`) and routes to the resumable
 step-up screen instead of a preflight check.
 
-## 2. Refusal codes (`renderBillingError`, in code order)
+## 2. Refusal codes (`renderBillingError`, in code order) {#2-refusal-codes-renderbillingerror-in-code-order}
 
 Source: `renderBillingError` in `ui-tui/src/app/slash/commands/topup.ts:37-149`.
 "Portal" row = `sys('Portal: {portal_url}')` is appended whenever `portal_url` is present, for every code (including default).
@@ -52,7 +52,7 @@ Source: `renderBillingError` in `ui-tui/src/app/slash/commands/topup.ts:37-149`.
 | `insufficient_scope` | `This needs Remote Spending allowed. Start a top-up to allow it, then retry.` | if present | — |
 | `remote_spending_revoked` (CF-4) | `{An admin stopped remote spending for this terminal. \| You stopped remote spending for this terminal.}` (by `actor`) `Reconnect to restore — run /portal to re-authorize this terminal.` Also clears `billing` overlay state immediately (doesn't wait for token refresh). | if present | — |
 | `session_revoked` | `Your session was logged out. Run /portal to log in again.` Also clears `billing` overlay state. | if present | — |
-| `cli_billing_disabled` / `remote_spending_disabled` (dual-emitted) | `Remote spending is off for this account — a billing admin can turn it on from the portal's Hermes Agent page.` | if present | — |
+| `cli_billing_disabled` / `remote_spending_disabled` (dual-emitted) | `Remote spending is off for this account — a billing admin can turn it on from the portal's NoOne page.` | if present | — |
 | `role_required` | `Adding funds needs someone with billing permissions (owner, admin, or finance admin), or manage this on the portal.` | if present | — |
 | `consent_required` | `This action needs a one-time card confirmation and consent step on the portal before it can proceed.` | if present | — |
 | `org_access_denied` | `This token isn't bound to an org you can manage. Sign in with the right org, or manage this on the portal.` | if present | — |
@@ -65,7 +65,7 @@ Source: `renderBillingError` in `ui-tui/src/app/slash/commands/topup.ts:37-149`.
 | `stripe_unavailable` | `🟡 Stripe is having trouble right now — try again shortly{ (try again in ~N min)}.` | if present | **yes** (same formula) |
 | *default (unknown/other)* | `🔴 {message \|\| error \|\| 'Billing request failed.'}` — still surfaces whatever the server said, never a blank toast. | if present | — |
 
-## 3. Charge settlement outcomes (`pollCharge` / `renderChargeFailed`)
+## 3. Charge settlement outcomes (`pollCharge` / `renderChargeFailed`) {#3-charge-settlement-outcomes-pollcharge--renderchargefailed}
 
 Source: `pollCharge` (`ui-tui/src/app/slash/commands/topup.ts:170-258`) and
 `renderChargeFailed` (`:260-290`). Poll cadence: 2s interval, 5-minute cap
@@ -87,7 +87,7 @@ keep the poll alive forever.
 | Other `!ok` status-check error | `🔴 Could not check the charge: {message \|\| error \|\| 'error'}` | |
 | Transport loss (poll RPC throws/rejects) | `🟡 Your last charge's outcome is unconfirmed — check your balance/history before retrying.` (`UNCONFIRMED_CHARGE_MESSAGE`) | Same "unconfirmed, check balance" framing as revocation mid-poll — a dropped connection can never be read as "failed". |
 
-## 4. Subscription preview / pending-change / upgrade outcomes
+## 4. Subscription preview / pending-change / upgrade outcomes {#4-subscription-preview--pending-change--upgrade-outcomes}
 
 Source: `previewAndRoute`, `applyPendingAndRoute`, `upgradeResult`,
 `stepUpDenialResult` in `ui-tui/src/components/subscriptionOverlay.tsx`.
@@ -151,7 +151,7 @@ step-up screen (it's already mounted there — re-patching would freeze it);
 isn’t active for this terminal — the authorization didn’t take. Retry, or make
 this change on the portal.`
 
-## Text-mode (CLI) parity
+## Text-mode (CLI) parity {#text-mode-cli-parity}
 
 `cli.py`'s `_show_billing` / `_billing_overview` and `_show_subscription` /
 `_subscription_overview` render the same state shapes (balance title, two-bar
@@ -172,7 +172,7 @@ never prompting.
 | **Downgrades** in the CLI | Stay **native / in-app** for normal changes (chargeless scheduling via `put_subscription_pending_change`). A blocked downgrade may still print the generic manage URL, but it never carries `plan=<tier_id>` — selected-tier deep-links are reserved for new subscriptions and upgrades. |
 | `/topup` overview action copy | Splits one-time top-up from automatic refill, the distinction stated up front in each first sentence: `Add funds now — a single charge, added to your balance today.` vs `Refill when low — charges $X automatically when your balance falls below $Y.` ("credits" stays out of the dollars-only `/topup` surface — "Add funds now" carries the one-time meaning without it). When auto-reload is off, the automatic line omits concrete amounts. |
 
-## Forward compatibility
+## Forward compatibility {#forward-compatibility}
 
 Any `error`/`status`/`reason` code not in the tables above lands on the
 `default` branch in `renderBillingError` (§2) or `errorResult`/`upgradeResult`'s

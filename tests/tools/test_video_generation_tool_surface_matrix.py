@@ -1,6 +1,6 @@
 """Tool-surface routing matrix: every (provider, model, modality) combo.
 
-This is the integration test for the question Teknium asked: regardless
+This is the integration test for the question: regardless
 of which provider+model the user picks and whether they pass an
 image_url or not, does the tool surface route correctly to the right
 endpoint with the right payload shape?
@@ -19,7 +19,7 @@ import types
 from typing import Any, Dict, List
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 
 @pytest.fixture(autouse=True)
@@ -111,7 +111,7 @@ def matrix_env(tmp_path, monkeypatch):
     fal_plugin._fal_client = None
 
     # Force discovery
-    from hermes_cli.plugins import _ensure_plugins_discovered
+    from agent_cli.plugins import _ensure_plugins_discovered
     _ensure_plugins_discovered(force=True)
 
     return tmp_path, fal_calls, xai_calls
@@ -120,7 +120,7 @@ def matrix_env(tmp_path, monkeypatch):
 def _invoke_tool(home, cfg: dict, args: dict, tool_name: str = "video_generate") -> dict:
     """Write config, invoke the registered tool handler, return parsed JSON."""
     (home / "config.yaml").write_text(yaml.safe_dump(cfg), encoding="utf-8")
-    import hermes_cli.config as cfg_mod
+    import agent_cli.config as cfg_mod
     if hasattr(cfg_mod, "_invalidate_load_config_cache"):
         cfg_mod._invalidate_load_config_cache()
 

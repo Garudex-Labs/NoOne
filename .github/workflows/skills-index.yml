@@ -18,7 +18,7 @@ permissions:
 jobs:
   build-index:
     # Only run on the upstream repository, not on forks
-    if: github.repository == 'NousResearch/hermes-agent'
+    if: github.repository == 'Garudex-Labs/NoOne'
     runs-on: blacksmith-4vcpu-ubuntu-2404
     # Critical path (Sep 2026): clawhub walk ∥ github taps ~8 min, then skills.sh
     # resolve ~6 min, then a bounded 8 min owner enrichment. 15 min cancelled every
@@ -75,8 +75,8 @@ jobs:
         with:
           name: skills-index
           path: |
-            website/static/api/skills-index.json
-            website/static/api/plugin-stars.json
+            website/docs/api/skills-index.json
+            website/docs/api/plugin-stars.json
           retention-days: 7
 
   # Re-trigger the docs deploy so the refreshed index lands on the live site.

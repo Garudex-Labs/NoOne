@@ -48,7 +48,7 @@ def hermes_root(tmp_path, monkeypatch):
     )
     (lokaj / ".env").write_text(f"API_SERVER_KEY={LOKAJ_KEY}\n", encoding="utf-8")
     monkeypatch.setenv("HERMES_HOME", str(root))
-    # get_default_hermes_root memoizes per (native_home, env_home) pair, so
+    # get_default_agent_root memoizes per (native_home, env_home) pair, so
     # the env change alone re-keys it; no cache reset needed.
     return root
 

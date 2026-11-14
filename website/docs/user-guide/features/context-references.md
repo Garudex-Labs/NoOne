@@ -1,15 +1,14 @@
 ---
-sidebar_position: 9
-sidebar_label: "Context References"
+sidebarTitle: "Context References"
 title: "Context References"
 description: "Inline @-syntax for attaching files, folders, git diffs, and URLs directly into your messages"
 ---
 
-# Context References
+# Context References {#context-references}
 
-Type `@` followed by a reference to inject content directly into your message. Hermes expands the reference inline and appends the content under an `--- Attached Context ---` section.
+Type `@` followed by a reference to inject content directly into your message. {{app-name}} expands the reference inline and appends the content under an `--- Attached Context ---` section.
 
-## Supported References
+## Supported References {#supported-references}
 
 | Syntax | Description |
 |--------|-------------|
@@ -21,7 +20,7 @@ Type `@` followed by a reference to inject content directly into your message. H
 | `@git:5` | Inject last N commits with patches (max 10) |
 | `@url:https://example.com` | Fetch and inject web page content |
 
-## Usage Examples
+## Usage Examples {#usage-examples}
 
 ```text
 Review @file:src/main.py and suggest improvements
@@ -43,7 +42,7 @@ Check @file:main.py, and also @file:test.py.
 
 Trailing punctuation (`,`, `.`, `;`, `!`, `?`) is automatically stripped from reference values.
 
-## CLI Tab Completion
+## CLI Tab Completion {#cli-tab-completion}
 
 In the interactive CLI, typing `@` triggers autocomplete:
 
@@ -51,7 +50,7 @@ In the interactive CLI, typing `@` triggers autocomplete:
 - `@file:` and `@folder:` trigger filesystem path completion with file size metadata
 - Bare `@` followed by partial text shows matching files and folders from the current directory
 
-## Line Ranges
+## Line Ranges {#line-ranges}
 
 The `@file:` reference supports line ranges for precise content injection:
 
@@ -62,7 +61,7 @@ The `@file:` reference supports line ranges for precise content injection:
 
 Lines are 1-indexed. Invalid ranges are silently ignored (full file is returned).
 
-## Size Limits
+## Size Limits {#size-limits}
 
 Context references are bounded to prevent overwhelming the model's context window:
 
@@ -73,35 +72,35 @@ Context references are bounded to prevent overwhelming the model's context windo
 | Folder entries | 200 files max | Excess entries replaced with `- ...` |
 | Git commits | 10 max | `@git:N` clamped to range [1, 10] |
 
-## Security
+## Security {#security}
 
-### Sensitive Path Blocking
+### Sensitive Path Blocking {#sensitive-path-blocking}
 
 These paths are always blocked from `@file:` references to prevent credential exposure:
 
 - SSH keys and config: `~/.ssh/id_rsa`, `~/.ssh/id_ed25519`, `~/.ssh/authorized_keys`, `~/.ssh/config`
 - Shell profiles: `~/.bashrc`, `~/.zshrc`, `~/.profile`, `~/.bash_profile`, `~/.zprofile`
 - Credential files: `~/.netrc`, `~/.pgpass`, `~/.npmrc`, `~/.pypirc`
-- Hermes env: `$HERMES_HOME/.env`
+- {{app-name}} env: `$HERMES_HOME/.env`
 
 These directories are fully blocked (any file inside):
 - `~/.ssh/`, `~/.aws/`, `~/.gnupg/`, `~/.kube/`, `$HERMES_HOME/skills/.hub/`
 
-### Path Traversal Protection
+### Path Traversal Protection {#path-traversal-protection}
 
 All paths are resolved relative to the working directory. References that resolve outside the allowed workspace root are rejected.
 
-### Binary File Detection
+### Binary File Detection {#binary-file-detection}
 
 Binary files are detected via MIME type and null-byte scanning. Known text extensions (`.py`, `.md`, `.json`, `.yaml`, `.toml`, `.js`, `.ts`, etc.) bypass MIME-based detection. Binary files are rejected with a warning.
 
-## Platform Availability
+## Platform Availability {#platform-availability}
 
 Context references are primarily a **CLI feature**. They work in the interactive CLI where `@` triggers tab completion and references are expanded before the message is sent to the agent.
 
 In **messaging platforms** (Telegram, Discord, etc.), the `@` syntax is not expanded by the gateway — messages are passed through as-is. The agent itself can still reference files via the `read_file`, `search_files`, and `web_extract` tools.
 
-## Interaction with Context Compression
+## Interaction with Context Compression {#interaction-with-context-compression}
 
 When conversation context is compressed, the expanded reference content is included in the compression summary. This means:
 
@@ -109,7 +108,7 @@ When conversation context is compressed, the expanded reference content is inclu
 - If the conversation is later compressed, the file content is summarized (not preserved verbatim)
 - For very large files, consider using line ranges (`@file:main.py:100-200`) to inject only relevant sections
 
-## Common Patterns
+## Common Patterns {#common-patterns}
 
 ```text
 # Code review workflow
@@ -127,7 +126,7 @@ Compare the approaches in @url:https://arxiv.org/abs/2301.00001
 and @url:https://arxiv.org/abs/2301.00002
 ```
 
-## Error Handling
+## Error Handling {#error-handling}
 
 Invalid references produce inline warnings rather than failures:
 

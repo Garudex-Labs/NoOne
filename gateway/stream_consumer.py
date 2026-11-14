@@ -43,8 +43,8 @@ from gateway.platforms.helpers import reply_file_off
 logger = logging.getLogger("gateway.stream_consumer")
 
 # Queue sentinels (see _drain_queue()).  Bare: _DONE, _NEW_SEGMENT (finalize, start a
-# fresh message), _REOPEN_SEED (EAGER native re-seed after a clarify answer — WeCom
-# typing is driven by the seed frame; lazy re-seed measured 48s of dead air).  Tuples:
+# fresh message), _REOPEN_SEED (EAGER native re-seed after a clarify answer;
+# typing is driven by the seed frame).  Tuples:
 # (_COMMENTARY, text); (_TOOL_PROGRESS, line) native-bubble overlay; (_FINAL_TEXT, text)
 # authoritative final_response incl. post-stream augmentation, queued just before _DONE;
 # (_FLUSH, threading.Event) barrier; (_APPROVAL_BOUNDARY, future, cancelled_flag).
@@ -142,7 +142,7 @@ class GatewayStreamConsumer(StreamTransportMixin, StreamFallbackMixin, StreamThi
         # ``_run_agent_mark_streamed_delivery`` must not fire for it (#105341). Default True: every
         # other construction site (incl. the proxy path) creates consumers only when streaming is on.
         self.stream_deltas_enabled = True
-        # Only platforms needing an explicit finalize call (DingTalk AI Cards) force a
+        # Only platforms needing an explicit finalize call (native progress cards) force a
         # redundant final edit; ``is True`` keeps MagicMock adapters out.
         self._adapter_requires_finalize = getattr(adapter, "REQUIRES_EDIT_FINALIZE", False) is True
         # Telegram bounds edit retries at 5s; a fallback must not wait longer.
@@ -173,7 +173,7 @@ class GatewayStreamConsumer(StreamTransportMixin, StreamFallbackMixin, StreamThi
 
         # Transports, resolved in run().  Draft: animated frames via adapter.send_draft;
         # the final still uses first-send; a terminal failure disables drafts.  Native
-        # (WeCom msgtype "stream"): the ONLY channel — any failure falls back to edit/send.
+        # (native streams): the ONLY channel — any failure falls back to edit/send.
         self._use_draft_streaming = False
         self._draft_id: Optional[int] = None
         self._draft_failures = 0
@@ -184,7 +184,7 @@ class GatewayStreamConsumer(StreamTransportMixin, StreamFallbackMixin, StreamThi
         self._egress_declined = False
         self._use_native_streaming = False
         self._native_stream_opened = False  # seed sent: bubble open, zero content
-        self._native_last_pushed_len = 0    # throttle under WeCom's 30 frames/min
+        self._native_last_pushed_len = 0    # throttle under the adapter's frame budget
         # Boundary state from close_for_approval_prompt() (boundaries are processed
         # serially).  reopen=True (clarify) keeps native enabled so post-prompt output
         # re-opens a fresh stream; approval degrades to send().
@@ -499,7 +499,7 @@ class GatewayStreamConsumer(StreamTransportMixin, StreamFallbackMixin, StreamThi
 
     async def _handle_approval_boundary(self, boundary_future, cancelled_flag=None) -> None:
         """Serially process an interaction boundary dequeued by run().  The stream is never
-        kept open across a prompt: the WeCom finalize ack only confirms server receipt, and
+        kept open across a prompt: the finalize ack only confirms server receipt, and
         after a long idle gap the client may stop tracking the stream."""
         _reason = self._boundary_reason or "Approval"
         try:
@@ -791,8 +791,7 @@ class GatewayStreamConsumer(StreamTransportMixin, StreamFallbackMixin, StreamThi
 
     async def _eager_reopen_seed(self) -> None:
         """Eager re-seed after a clarify answer (gate re-checked: state may have advanced).
-        Trade-off: WeCom's ~6-minute stream limit (errcode 846608, from the FIRST frame)
-        now starts at the reply instant; on expiry we degrade to send()."""
+        The stream lifetime starts at the reply instant; on expiry we degrade to send()."""
         if not self._reopen_seed_pending():
             return
         if await self._try_seed_frame("Eager reopen seed raised, disabling native: %s"):
@@ -948,8 +947,7 @@ class GatewayStreamConsumer(StreamTransportMixin, StreamFallbackMixin, StreamThi
         # unlike an EDIT, which REQUIRES_EDIT_FINALIZE adapters still need a pass for.
         tick.draft_final_fresh_send = (tick.got_done and self._use_draft_streaming
                                        and self._message_id is None)
-        # Segment break finalizes so platforms needing explicit closure (DingTalk AI
-        # Cards) don't leave the segment stuck loading; it closes a preamble, not the
+        # Segment break finalizes so platforms needing explicit closure don't leave the segment stuck loading; it closes a preamble, not the
         # answer.
         tick.update_visible = await self._send_or_edit(
             display_text, finalize=tick.got_done or tick.got_segment_break,
@@ -1022,7 +1020,7 @@ class GatewayStreamConsumer(StreamTransportMixin, StreamFallbackMixin, StreamThi
         return self._final_response_sent
 
     def _cumulative_transport(self) -> bool:
-        """Stream-is-the-message drafts and WeCom native: one append-only stream per turn."""
+        """Stream-is-the-message drafts and native streaming: one append-only stream per turn."""
         stream_draft = self._stream_is_message() and self._use_draft_streaming
         return stream_draft or self._use_native_streaming
 

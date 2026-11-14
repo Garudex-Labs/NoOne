@@ -1,20 +1,20 @@
 ---
 title: "Baoyu Comic — Knowledge comics (知识漫画): educational, biography, tutorial"
-sidebar_label: "Baoyu Comic"
+sidebarTitle: "Baoyu Comic"
 description: "Knowledge comics (知识漫画): educational, biography, tutorial"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Baoyu Comic
+# Baoyu Comic {#baoyu-comic}
 
 Knowledge comics (知识漫画): educational, biography, tutorial.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/baoyu-comic` |
+| Source | Optional — install with `noone skills install official/creative/baoyu-comic` |
 | Path | `optional-skills/creative/baoyu-comic` |
 | Version | `1.56.1` |
 | Author | 宝玉 (JimLiu) |
@@ -22,25 +22,33 @@ Knowledge comics (知识漫画): educational, biography, tutorial.
 | Platforms | linux, macos, windows |
 | Tags | `comic`, `knowledge-comic`, `creative`, `image-generation` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Knowledge Comic Creator
+<div className="doc-callout-title">
 
-Adapted from [baoyu-comic](https://github.com/JimLiu/baoyu-skills) for Hermes Agent's tool ecosystem.
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Knowledge Comic Creator {#knowledge-comic-creator}
+
+Adapted from [baoyu-comic](https://github.com/JimLiu/baoyu-skills) for {{app-name}}'s tool ecosystem.
 
 Create original knowledge comics with flexible art style × tone combinations.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Trigger this skill when the user asks to create a knowledge/educational comic, biography comic, tutorial comic, or uses terms like "知识漫画", "教育漫画", or "Logicomix-style". The user provides content (text, file path, URL, or topic) and optionally specifies art style, tone, layout, aspect ratio, or language.
 
-## Reference Images
+## Reference Images {#reference-images}
 
-Hermes' `image_generate` tool is **prompt-only** — it accepts a text prompt and an aspect ratio, and returns an image URL. It does **NOT** accept reference images. When the user supplies a reference image, use it to **extract traits in text** that get embedded in every page prompt:
+{{app-name}}' `image_generate` tool is **prompt-only** — it accepts a text prompt and an aspect ratio, and returns an image URL. It does **NOT** accept reference images. When the user supplies a reference image, use it to **extract traits in text** that get embedded in every page prompt:
 
 **Intake**: Accept file paths when the user provides them (or pastes images in conversation).
 - File path(s) → copy to `refs/NN-ref-{slug}.{ext}` alongside the comic output for provenance
@@ -67,9 +75,9 @@ references:
 
 Character consistency is driven by **text descriptions** in `characters/characters.md` (written in Step 3) that get embedded inline in every page prompt (Step 5). The optional PNG character sheet generated in Step 7.1 is a human-facing review artifact, not an input to `image_generate`.
 
-## Options
+## Options {#options}
 
-### Visual Dimensions
+### Visual Dimensions {#visual-dimensions}
 
 | Option | Values | Description |
 |--------|--------|-------------|
@@ -80,7 +88,7 @@ Character consistency is driven by **text descriptions** in `characters/characte
 | Language | auto (default), zh, en, ja, etc. | Output language |
 | Refs | File paths | Reference images used for style / palette trait extraction (not passed to the image model). See [Reference Images](#reference-images) above. |
 
-### Partial Workflow Options
+### Partial Workflow Options {#partial-workflow-options}
 
 | Option | Description |
 |--------|-------------|
@@ -89,9 +97,9 @@ Character consistency is driven by **text descriptions** in `characters/characte
 | Images only | Generate images from existing prompts directory |
 | Regenerate N | Regenerate specific page(s) only (e.g., `3` or `2,5,8`) |
 
-Details: [references/partial-workflows.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/partial-workflows.md)
+Details: [references/partial-workflows.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/partial-workflows.md)
 
-### Art, Tone & Preset Catalogue
+### Art, Tone & Preset Catalogue {#art-tone--preset-catalogue}
 
 - **Art styles** (6): `ligne-claire`, `manga`, `realistic`, `ink-brush`, `chalk`, `minimalist`. Full definitions at `references/art-styles/<style>.md`.
 - **Tones** (7): `neutral`, `warm`, `dramatic`, `romantic`, `energetic`, `vintage`, `action`. Full definitions at `references/tones/<tone>.md`.
@@ -107,9 +115,9 @@ Details: [references/partial-workflows.md](https://github.com/NousResearch/herme
 
   Full rules at `references/presets/<preset>.md` — load the file when a preset is picked.
 
-- **Compatibility matrix** and **content-signal → preset** table live in [references/auto-selection.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/auto-selection.md). Read it before recommending combinations in Step 2.
+- **Compatibility matrix** and **content-signal → preset** table live in [references/auto-selection.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/auto-selection.md). Read it before recommending combinations in Step 2.
 
-## File Structure
+## File Structure {#file-structure}
 
 Output directory: `comic/{topic-slug}/`
 - Slug: 2-4 words kebab-case from topic (e.g., `alan-turing-bio`)
@@ -127,7 +135,7 @@ Output directory: `comic/{topic-slug}/`
 | `NN-{cover\|page}-[slug].png` | Generated images (downloaded from `image_generate`) |
 | `refs/NN-ref-{slug}.{ext}` | User-supplied reference images (optional, for provenance) |
 
-## Language Handling
+## Language Handling {#language-handling}
 
 **Detection Priority**:
 1. User-specified language (explicit option)
@@ -142,9 +150,9 @@ Output directory: `comic/{topic-slug}/`
 
 Technical terms remain in English.
 
-## Workflow
+## Workflow {#workflow}
 
-### Progress Checklist
+### Progress Checklist {#progress-checklist}
 
 ```
 Comic Progress:
@@ -162,13 +170,13 @@ Comic Progress:
 - [ ] Step 8: Completion report
 ```
 
-### Flow
+### Flow {#flow}
 
 ```
 Input → Analyze → [Check Existing?] → [Confirm: Style + Reviews] → Storyboard → [Review?] → Prompts → [Review?] → Images → Complete
 ```
 
-### Step Summary
+### Step Summary {#step-summary}
 
 | Step | Action | Key Output |
 |------|--------|------------|
@@ -183,9 +191,9 @@ Input → Analyze → [Check Existing?] → [Confirm: Style + Reviews] → Story
 | 7.2 | Generate pages | `*.png` files |
 | 8 | Completion report | Summary |
 
-### User Questions
+### User Questions {#user-questions}
 
-Use the `clarify` tool to confirm options. Put independent questions in one `questions` array (up to 5); ask separately any question whose options depend on an earlier answer. See [references/workflow.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/workflow.md) for the full Step 2 question set.
+Use the `clarify` tool to confirm options. Put independent questions in one `questions` array (up to 5); ask separately any question whose options depend on an earlier answer. See [references/workflow.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/workflow.md) for the full Step 2 question set.
 
 **Timeout handling (CRITICAL)**: `clarify` can return `"outcome": "timed_out"` with responses marked `"status": "unanswered"` — this is NOT user consent to default everything.
 
@@ -193,9 +201,9 @@ Use the `clarify` tool to confirm options. Put independent questions in one `que
 - **Surface the default to the user visibly** in your next message so they have a chance to correct it: e.g. `"Style: defaulted to ohmsha preset (clarify timed out). Say the word to switch."` — an unreported default is indistinguishable from never having asked.
 - Do NOT collapse Step 2 into a single "use all defaults" pass after one timeout. If the user is genuinely absent, they will be equally absent for all five questions — but they can correct visible defaults when they return, and cannot correct invisible ones.
 
-### Step 7: Image Generation
+### Step 7: Image Generation {#step-7-image-generation}
 
-Use Hermes' built-in `image_generate` tool for all image rendering. Its schema accepts only `prompt` and `aspect_ratio` (`landscape` | `portrait` | `square`); it **returns a URL**, not a local file. Every generated page or character sheet must therefore be downloaded to the output directory.
+Use {{app-name}}' built-in `image_generate` tool for all image rendering. Its schema accepts only `prompt` and `aspect_ratio` (`landscape` | `portrait` | `square`); it **returns a URL**, not a local file. Every generated page or character sheet must therefore be downloaded to the output directory.
 
 **Prompt file requirement (hard)**: write each image's full, final prompt to a standalone file under `prompts/` (naming: `NN-{type}-[slug].md`) BEFORE calling `image_generate`. The prompt file is the reproducibility record.
 
@@ -221,15 +229,15 @@ Use Hermes' built-in `image_generate` tool for all image rendering. Its schema a
 
 **Backup rule**: existing `prompts/…md` and `…png` files → rename with `-backup-YYYYMMDD-HHMMSS` suffix before regenerating.
 
-Full step-by-step workflow (analysis, storyboard, review gates, regeneration variants): [references/workflow.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/workflow.md).
+Full step-by-step workflow (analysis, storyboard, review gates, regeneration variants): [references/workflow.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/workflow.md).
 
-## References
+## References {#references}
 
 **Core Templates**:
-- [analysis-framework.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/analysis-framework.md) - Deep content analysis
-- [character-template.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/character-template.md) - Character definition format
-- [storyboard-template.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/storyboard-template.md) - Storyboard structure
-- [ohmsha-guide.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/ohmsha-guide.md) - Ohmsha manga specifics
+- [analysis-framework.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/analysis-framework.md) - Deep content analysis
+- [character-template.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/character-template.md) - Character definition format
+- [storyboard-template.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/storyboard-template.md) - Storyboard structure
+- [ohmsha-guide.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/ohmsha-guide.md) - Ohmsha manga specifics
 
 **Style Definitions**:
 - `references/art-styles/` - Art styles (ligne-claire, manga, realistic, ink-brush, chalk, minimalist)
@@ -238,11 +246,11 @@ Full step-by-step workflow (analysis, storyboard, review gates, regeneration var
 - `references/layouts/` - Layouts (standard, cinematic, dense, splash, mixed, webtoon, four-panel)
 
 **Workflow**:
-- [workflow.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/workflow.md) - Full workflow details
-- [auto-selection.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/auto-selection.md) - Content signal analysis
-- [partial-workflows.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-comic/references/partial-workflows.md) - Partial workflow options
+- [workflow.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/workflow.md) - Full workflow details
+- [auto-selection.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/auto-selection.md) - Content signal analysis
+- [partial-workflows.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-comic/references/partial-workflows.md) - Partial workflow options
 
-## Page Modification
+## Page Modification {#page-modification}
 
 | Action | Steps |
 |--------|-------|
@@ -252,7 +260,7 @@ Full step-by-step workflow (analysis, storyboard, review gates, regeneration var
 
 **IMPORTANT**: When updating pages, ALWAYS update the prompt file (`prompts/NN-{cover|page}-[slug].md`) FIRST before regenerating. This ensures changes are documented and reproducible.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Image generation: 10-30 seconds per page; auto-retry once on failure
 - **Always download** the URL returned by `image_generate` to a local PNG — downstream tooling (and the user's review) expects files in the output directory, not ephemeral URLs

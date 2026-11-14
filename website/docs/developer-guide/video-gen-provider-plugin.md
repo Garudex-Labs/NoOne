@@ -1,18 +1,25 @@
 ---
-sidebar_position: 12
 title: "Video Generation Provider Plugins"
-description: "How to build a video-generation backend plugin for Hermes Agent"
+description: "How to build a video-generation backend plugin for the agent"
 ---
 
-# Building a Video Generation Provider Plugin
+# Building a Video Generation Provider Plugin {#building-a-video-generation-provider-plugin}
 
 Video-gen provider plugins register a backend that services every `video_generate` tool call. Built-in providers (xAI, FAL, OpenRouter, DeepInfra) ship as plugins. Add a new one, or override a bundled one, by dropping a directory into `plugins/video_gen/<name>/`.
 
-:::tip
-Video-gen mirrors [Image Generation Provider Plugins](./image-gen-provider-plugin.md) almost line-for-line — if you've built an image-gen backend, you already know the shape. The main differences: a `capabilities()` method advertising modalities/aspect-ratios/durations, and a routing convention (pass `image_url` to use image-to-video, omit it to use text-to-video — the provider picks the right endpoint internally).
-:::
+<Tip>
 
-## The unified surface (one tool, two modalities)
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+Video-gen mirrors [Image Generation Provider Plugins](./image-gen-provider-plugin.md) almost line-for-line — if you've built an image-gen backend, you already know the shape. The main differences: a `capabilities()` method advertising modalities/aspect-ratios/durations, and a routing convention (pass `image_url` to use image-to-video, omit it to use text-to-video — the provider picks the right endpoint internally).
+
+</Tip>
+
+## The unified surface (one tool, two modalities) {#the-unified-surface-one-tool-two-modalities}
 
 The `video_generate` tool exposes two modalities through one parameter:
 
@@ -21,17 +28,17 @@ The `video_generate` tool exposes two modalities through one parameter:
 
 Edit and extend are intentionally out of scope. Most backends don't support them and the inconsistency would force per-backend prose into the agent's tool description.
 
-## How discovery works
+## How discovery works {#how-discovery-works}
 
-Hermes scans for video-gen backends in three places:
+{{app-name}} scans for video-gen backends in three places:
 
 1. **Bundled** — `<repo>/plugins/video_gen/<name>/` (auto-loaded with `kind: backend`)
 2. **User** — `~/.hermes/plugins/video_gen/<name>/` (opt-in via `plugins.enabled`)
 3. **Pip** — packages declaring a `hermes_agent.plugins` entry point
 
-Each plugin's `register(ctx)` function calls `ctx.register_video_gen_provider(...)`. The active provider is picked by `video_gen.provider` in `config.yaml`; `hermes tools` → Video Generation walks users through selection. Unlike `image_generate`, there is no in-tree legacy backend — every provider is a plugin.
+Each plugin's `register(ctx)` function calls `ctx.register_video_gen_provider(...)`. The active provider is picked by `video_gen.provider` in `config.yaml`; `noone tools` → Video Generation walks users through selection. Unlike `image_generate`, there is no in-tree legacy backend — every provider is a plugin.
 
-## Directory structure
+## Directory structure {#directory-structure}
 
 ```
 plugins/video_gen/my-backend/
@@ -39,7 +46,7 @@ plugins/video_gen/my-backend/
 └── plugin.yaml      # Manifest with kind: backend
 ```
 
-## The VideoGenProvider ABC
+## The VideoGenProvider ABC {#the-videogenprovider-abc}
 
 Subclass `agent.video_gen_provider.VideoGenProvider`. Required: `name` property and `generate()` method.
 
@@ -101,7 +108,7 @@ class MyVideoGenProvider(VideoGenProvider):
         return {
             "name": "My Backend",
             "badge": "paid",
-            "tag": "Short description shown in `hermes tools`",
+            "tag": "Short description shown in `noone tools`",
             "env_vars": [
                 {
                     "key": "MY_API_KEY",
@@ -151,7 +158,7 @@ def register(ctx) -> None:
     ctx.register_video_gen_provider(MyVideoGenProvider())
 ```
 
-## The plugin manifest
+## The plugin manifest {#the-plugin-manifest}
 
 ```yaml
 # plugins/video_gen/my-backend/plugin.yaml
@@ -164,7 +171,7 @@ requires_env:
   - MY_API_KEY
 ```
 
-## The `video_generate` schema
+## The `video_generate` schema {#the-video_generate-schema}
 
 The tool exposes one schema across every backend. Providers ignore parameters they don't support.
 
@@ -182,9 +189,9 @@ The tool exposes one schema across every backend. Providers ignore parameters th
 
 There is deliberately no `model` parameter: the backend and model are user configuration (`video_gen.provider` / `video_gen.model`), never an agent choice. Your `generate()` still receives `model=` — it is the configured model, resolved by the tool layer.
 
-The provider's `capabilities()` advertises which of these are honored. The agent sees the active backend's capabilities in the tool description, dynamically rebuilt when the user changes backend via `hermes tools`.
+The provider's `capabilities()` advertises which of these are honored. The agent sees the active backend's capabilities in the tool description, dynamically rebuilt when the user changes backend via `noone tools`.
 
-## Model families and endpoint routing (the FAL pattern)
+## Model families and endpoint routing (the FAL pattern) {#model-families-and-endpoint-routing-the-fal-pattern}
 
 When your backend has multiple endpoints per "model" — like FAL, where every family (Veo 3.1, Pixverse v6, Kling O3) has both a `/text-to-video` and an `/image-to-video` URL — represent each **family** as one catalog entry. Your `generate()` picks the right endpoint based on whether `image_url` was passed:
 
@@ -203,9 +210,9 @@ def generate(self, prompt, *, image_url=None, model=None, **kwargs):
     # ... build payload from family's declared capability flags, call endpoint ...
 ```
 
-The user picks `veo3.1` once in `hermes tools`. The agent never thinks about endpoints — it just passes (or doesn't pass) `image_url`.
+The user picks `veo3.1` once in `noone tools`. The agent never thinks about endpoints — it just passes (or doesn't pass) `image_url`.
 
-## Selection precedence
+## Selection precedence {#selection-precedence}
 
 For per-instance model knobs (see `plugins/video_gen/fal/__init__.py`):
 
@@ -216,7 +223,7 @@ For per-instance model knobs (see `plugins/video_gen/fal/__init__.py`):
 
 The `model=` keyword your `generate()` receives is the outcome of this resolution — a `model` in the agent's tool call is ignored, so the LLM cannot switch backends or billing tiers on its own.
 
-## Response shape
+## Response shape {#response-shape}
 
 `success_response()` and `error_response()` produce the dict shape every backend returns. Use them — don't hand-roll the dict.
 
@@ -224,10 +231,10 @@ Success keys: `success`, `video` (URL or absolute path), `model`, `prompt`, `mod
 
 Error keys: `success`, `video` (None), `error`, `error_type`, `model`, `prompt`, `aspect_ratio`, `provider`.
 
-## Where to save artifacts
+## Where to save artifacts {#where-to-save-artifacts}
 
 If your backend returns base64, use `save_b64_video()` to write under `$HERMES_HOME/cache/videos/`. For raw bytes from a follow-up HTTP fetch, use `save_bytes_video()`. Otherwise return the upstream URL directly — the gateway resolves remote URLs on delivery.
 
-## Testing
+## Testing {#testing}
 
 Drop a smoke test under `tests/plugins/video_gen/test_<name>_plugin.py`. The xAI and FAL tests show the pattern — register, verify catalog, exercise routing both with and without `image_url`, assert clean error responses on missing auth.

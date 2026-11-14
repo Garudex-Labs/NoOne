@@ -17,11 +17,11 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from utils import atomic_write_text, is_truthy_value
-from hermes_cli.config import cfg_get
+from agent_cli.config import cfg_get
 from agent.skill_utils import (
     extract_skill_description,
     is_skill_description_truncated_for_prompt,
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 def _guard_agent_created_enabled() -> bool:
     """skills.guard_agent_created (default False): opt-in — terminal() runs the same code ungated."""
     try:
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         return is_truthy_value(cfg_get(load_config(), "skills", "guard_agent_created"), default=False)
     except Exception:
         return False
@@ -66,7 +66,7 @@ def _security_scan_skill(skill_dir: Path) -> Optional[str]:
 
 
 # All skills live in ~/.hermes/skills/ (single source of truth)
-HERMES_HOME = get_hermes_home()
+HERMES_HOME = get_agent_home()
 SKILLS_DIR = HERMES_HOME / "skills"
 _SKILLS_DIR_AT_IMPORT = SKILLS_DIR
 
@@ -79,7 +79,7 @@ def _skills_dir() -> Path:
     module once under the launch HERMES_HOME and later bind a different profile per session (#40677).
     """
     configured = Path(SKILLS_DIR)
-    return configured if configured != _SKILLS_DIR_AT_IMPORT else get_hermes_home() / "skills"
+    return configured if configured != _SKILLS_DIR_AT_IMPORT else get_agent_home() / "skills"
 
 
 def _skill_lock_path(name: str) -> Path:
@@ -311,8 +311,8 @@ def _find_skill_in_other_profiles(name: str) -> list[tuple[str, Path]]:
     error can explain a wrong-profile mistake). Fail-quiet."""
     matches: list[tuple[str, Path]] = []
     try:
-        from hermes_constants import get_default_hermes_root
-        root = get_default_hermes_root()
+        from agent_constants import get_default_agent_root
+        root = get_default_agent_root()
     except Exception:
         return matches
     _active = _skills_dir()
@@ -417,8 +417,8 @@ def _guarded_write(name: str, skill_dir: Path, target: Path, action: str, label:
         original = target.read_text(encoding="utf-8-sig")
     if target == skill_dir / "SKILL.md" and (err := _description_budget_error(content, before=original)):
         return _err(err)
-    from hermes_constants import mkdir_under_hermes_home
-    mkdir_under_hermes_home(target.parent)
+    from agent_constants import mkdir_under_agent_home
+    mkdir_under_agent_home(target.parent)
     atomic_write_text(target, content, preserve_mode=True, create_mode=0o644)
     scan_error = _security_scan_skill(skill_dir)
     if not scan_error:
@@ -473,8 +473,8 @@ def _create_skill(name: str, content: str, category: str | None = None) -> dict[
     if existing := _find_skill(name):
         return _err(f"A skill named '{name}' already exists at {existing['path']}.")
     skill_dir = _resolve_skill_dir(name, category)
-    from hermes_constants import mkdir_under_hermes_home
-    mkdir_under_hermes_home(skill_dir.parent)
+    from agent_constants import mkdir_under_agent_home
+    mkdir_under_agent_home(skill_dir.parent)
     try:
         skill_dir.mkdir(exist_ok=False)
     except FileExistsError:

@@ -36,9 +36,9 @@ async def test_resume_carries_the_newest_todo_snapshot(tmp_path, monkeypatch):
 
 
 def test_the_home_module_reads_the_snapshot_when_imported_directly():
-    """``tool_progress`` bodies are also rebound onto ``tui_gateway.server``; the module's own copy (what the
+    """``tool_progress`` bodies are also rebound onto ``agent_backend.server``; the module's own copy (what the
     gateway imports) must not lean on the server's globals for ``json``/``logger``."""
-    from tui_gateway.tool_progress import _todo_state_from_history
+    from agent_backend.tool_progress import _todo_state_from_history
     call = {'id': 'call-1', 'type': 'function', 'function': {'name': 'todo_list', 'arguments': '{}'}}
     history = [{'role': 'assistant', 'content': '', 'tool_calls': [call]},
                {'role': 'tool', 'tool_call_id': 'call-1', 'content': json.dumps({'todos': TODOS, 'revision': 2})}]
@@ -47,25 +47,25 @@ def test_the_home_module_reads_the_snapshot_when_imported_directly():
 
 @pytest.mark.asyncio
 async def test_resume_leaves_the_gateway_processs_stdout_alone(tmp_path, monkeypatch):
-    """Importing ``tui_gateway.server`` (the stdio JSON-RPC sidecar) points ``sys.stdout`` at stderr, so the
+    """Importing ``agent_backend.server`` (the stdio JSON-RPC sidecar) points ``sys.stdout`` at stderr, so the
     resume path must not import it: a CLI sharing the process would print to stderr from then on."""
-    import tui_gateway
+    import agent_backend
     authority, actor, ref, physical = await _local_session(tmp_path, monkeypatch)
     _todo_turn(authority.db, physical, 'call-1', TODOS, 2)
-    monkeypatch.delitem(sys.modules, 'tui_gateway.server', raising=False)
-    monkeypatch.delattr(tui_gateway, 'server', raising=False)
+    monkeypatch.delitem(sys.modules, 'agent_backend.server', raising=False)
+    monkeypatch.delattr(agent_backend, 'server', raising=False)
     monkeypatch.setattr(sys, 'stdout', sys.stdout)  # restored even if the import below swaps it
     stdout = sys.stdout
     assert (await _resume(authority, actor, ref))['todo_state'] == {'todos': TODOS, 'revision': 2}
     assert sys.stdout is stdout
-    assert 'tui_gateway.server' not in sys.modules
+    assert 'agent_backend.server' not in sys.modules
 
 
 def test_a_later_null_resume_clears_the_clients_todo_seed():
     """The client keeps the reply's snapshot until the next one: a later resume of a session with no plan
     (``todo_state: null``) clears it, so a fresh ``TodoStore`` is not seeded with a plan that is gone. A
     reply without the field (an older gateway) keeps it."""
-    from hermes_cli.gateway_connection import SessionState
+    from agent_cli.gateway_connection import SessionState
     state = SessionState("local-abc")
     state.adopt_snapshot({"todo_state": {"todos": TODOS, "revision": 2}})
     assert state.todo_state == {"todos": TODOS, "revision": 2}

@@ -1,12 +1,12 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertTriangle, CheckCircle2, ExternalLink, Loader2, RefreshCw } from '@noone/ui/icons'
 import { type ReactElement, type ReactNode, useState } from 'react'
 
 import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import type { DesktopUpdateStatus, DesktopVersionInfo } from '@/global'
 import { type Translations, useI18n } from '@/i18n'
-import { AlertTriangle, CheckCircle2, ExternalLink, Loader2, RefreshCw } from '@/lib/icons'
 import { rollbackRelease } from '@/lib/update-copy'
 import { cn } from '@/lib/utils'
 import { shortVersion } from '@/lib/version-label'
@@ -25,8 +25,8 @@ import {
   type UpdateTarget
 } from '@/store/updates'
 
-const RELEASE_NOTES_URL = 'https://github.com/NousResearch/hermes-agent/releases'
-const INSTALLER_URL = 'https://hermes-agent.nousresearch.com/'
+const RELEASE_NOTES_URL = 'https://github.com/Garudex-Labs/NoOne/releases'
+const INSTALLER_URL = 'https://github.com/Garudex-Labs/NoOne/tree/main/website/docs'
 
 export type UpdateStatusTone = 'idle' | 'available' | 'error' | 'unsupported'
 
@@ -386,7 +386,7 @@ function UpdateStatusCardBody({
     >
       <div className="flex items-start gap-2">
         {view.tone === 'available' ? (
-          <Codicon className="mt-0.5 size-4 shrink-0 text-primary" name="cloud-download" size="1rem" />
+          <AppIcon className="mt-0.5 size-4 shrink-0 text-primary" name="cloud-download" size="1rem" />
         ) : view.tone === 'error' || view.tone === 'unsupported' ? null : (
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
         )}

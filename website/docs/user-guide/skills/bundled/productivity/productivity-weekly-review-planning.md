@@ -1,39 +1,47 @@
 ---
 title: "Weekly Review Planning — Weekly reset: commitments, stalled work, next-week plan"
-sidebar_label: "Weekly Review Planning"
+sidebarTitle: "Weekly Review Planning"
 description: "Weekly reset: commitments, stalled work, next-week plan"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Weekly Review Planning
+# Weekly Review Planning {#weekly-review-planning}
 
 Weekly reset: commitments, stalled work, next-week plan.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/productivity/weekly-review-planning` |
 | Version | `0.1.0` |
-| Author | Ben Barclay (benbarclay), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Weekly-Review`, `Planning`, `Tasks`, `Calendar`, `Productivity` |
 | Related skills | [`obsidian`](../../bundled/note-taking/note-taking-obsidian.md), [`google-workspace`](../../bundled/productivity/productivity-google-workspace.md), [`email-inbox-triage`](../../bundled/email/email-email-inbox-triage.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Weekly Review and Planning
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Weekly Review and Planning {#weekly-review-and-planning}
 
 Run a bounded weekly reset across the user's chosen systems. This is a concrete recurring task, not a generic productivity methodology — the `weekly-review` Automation Blueprint schedules it as a cron job.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - "Run my weekly review."
 - "What did I commit to and what is slipping?"
@@ -43,37 +51,37 @@ Run a bounded weekly reset across the user's chosen systems. This is a concrete 
 
 Don't use for: daily briefs (see the `google-workspace` daily-brief reference) or single-inbox triage (`email-inbox-triage`).
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. Set systems and window
+### 1. Set systems and window {#1-set-systems-and-window}
 
 Confirm timezone, review period, planning horizon, authoritative task/project store, calendars, inboxes, and allowed writes. Default to recommendations/drafts, not mutations. Done when source-of-truth conflicts have a declared winner.
 
-### 2. Review calendar evidence
+### 2. Review calendar evidence {#2-review-calendar-evidence}
 
 Load `google-workspace` or the relevant calendar connector. Inspect the completed week for meetings and commitments, then the next 1-2 weeks for deadlines, travel, preparation, and capacity. Capture follow-ups implied by past events and conflicts ahead. Done when both retrospective and horizon are covered.
 
-### 3. Clear capture inboxes
+### 3. Clear capture inboxes {#3-clear-capture-inboxes}
 
 Review the task inbox, notes (`obsidian`, Notion), flagged email (`email-inbox-triage` owns thread-level triage), and other declared capture points. Convert each item to next action, project, waiting, scheduled, someday, reference, archive, or delete proposal. Do not mutate until scope is approved. Done when remaining unprocessed items are counted and stated.
 
-### 4. Reconcile active projects
+### 4. Reconcile active projects {#4-reconcile-active-projects}
 
 For each project identify desired outcome, next action, owner, deadline, blocker, last meaningful activity, and source link. Flag projects with no next action, missed dates, duplicate records, or contradictory status. Done when every active project is actionable or explicitly paused.
 
-### 5. Review waiting and commitments
+### 5. Review waiting and commitments {#5-review-waiting-and-commitments}
 
 Find promises made by the user and items owed by others. Propose follow-ups with dates and channels. Do not infer that silence means completion. Done when each waiting item has an owner and next review/follow-up date.
 
-### 6. Build a capacity-aware plan
+### 6. Build a capacity-aware plan {#6-build-a-capacity-aware-plan}
 
 Estimate fixed calendar load and select a small set of weekly outcomes plus near-term next actions. Rank by consequence, deadline, dependency, and effort; do not fill every free hour. Done when the plan fits actual capacity and names deferred work.
 
-### 7. Apply approved updates
+### 7. Apply approved updates {#7-apply-approved-updates}
 
 Update tasks/projects, create calendar holds, archive processed items, and draft follow-ups only as approved. Read every changed record back from the provider. Done when verified writes match the review summary.
 
-## Output Shape
+## Output Shape {#output-shape}
 
 1. Wins and completed commitments
 2. Overdue or at risk
@@ -83,7 +91,7 @@ Update tasks/projects, create calendar holds, archive processed items, and draft
 6. Proposed updates awaiting approval
 7. Coverage gaps
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Planning from tasks without calendar capacity.
 - Carrying every unfinished item forward as high priority.
@@ -91,7 +99,7 @@ Update tasks/projects, create calendar holds, archive processed items, and draft
 - Silently deleting or rescheduling personal commitments.
 - Treating silence from others as completion.
 
-## Verification
+## Verification {#verification}
 
 - [ ] Both the completed week and the planning horizon were covered, or gaps are stated.
 - [ ] Every stalled/waiting flag traces to a specific record, event, or thread.

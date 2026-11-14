@@ -16,10 +16,10 @@ ASSETS = ROOT / "tests/install/e2e-assets"
 def _stamp_probe(tmp_path, shell):
     repo = tmp_path / "installed source"
     for relative in (
-        "scripts/write_install_stamp.py", "hermes_cli/__init__.py",
-        "hermes_cli/update_channel.py", "hermes_cli/release_channels.py",
+        "scripts/write_install_stamp.py", "agent_cli/__init__.py",
+        "agent_cli/update_channel.py", "agent_cli/release_channels.py",
         "pm/paths.py", "pm/environments.py",
-        "hermes_cli/steward.py", "hermes_constants.py",
+        "agent_cli/steward.py", "agent_constants.py",
     ):
         dest = repo / relative
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -31,7 +31,7 @@ def _stamp_probe(tmp_path, shell):
     env = dict(os.environ, HOME=str(tmp_path), HERMES_HOME=str(tmp_path / "home"),
                GIT_CONFIG_GLOBAL=str(tmp_path / "gitconfig"), GIT_CONFIG_NOSYSTEM="1")
     (tmp_path / "gitconfig").write_text('[url "file:///staged/serve.git"]\n'
-                                      '\tinsteadOf = https://github.com/NousResearch/hermes-agent.git\n',
+                                      '\tinsteadOf = https://github.com/Garudex-Labs/NoOne.git\n',
                                       encoding="utf-8")
 
     def git(*args):
@@ -153,7 +153,7 @@ if ($LASTEXITCODE) { exit $LASTEXITCODE }
         assert not overrides.keys() & child.keys()
         assert child["GIT_CONFIG_GLOBAL"] == env["GIT_CONFIG_GLOBAL"]
         redirect = subprocess.run(["git", "ls-remote", "--get-url",
-                                   "https://github.com/NousResearch/hermes-agent.git"], env=child,
+                                   "https://github.com/Garudex-Labs/NoOne.git"], env=child,
                                   cwd=tmp_path, check=True, capture_output=True, text=True, timeout=30)
         assert redirect.stdout.strip() == "file:///staged/serve.git"
         assert child["HERMES_HOME"] == env["HERMES_HOME"]

@@ -1,9 +1,9 @@
-import type { ModelOptionsResult } from '@hermes/shared'
+import type { ModelOptionsResult } from '@noone/shared'
 import { useQuery } from '@tanstack/react-query'
 import type * as React from 'react'
 import { useMemo } from 'react'
 
-import type { HermesGateway } from '@/hermes'
+import type { AgentGateway } from '@/agent-client'
 import { quickModelOptions } from '@/lib/chat-runtime'
 import { currentModelCapabilities, modelOptionsQueryKey, requestModelOptions } from '@/lib/model-options'
 
@@ -15,7 +15,7 @@ interface ChatBarStateOptions {
   contextSuggestions: ChatBarState['tools']['suggestions']
   currentModel: string
   currentProvider: string
-  gateway: HermesGateway | null
+  gateway: AgentGateway | null
   gatewayOpen: boolean
   modelMenuContent?: React.ReactNode
   modelOptionsOwnerConnectionId?: string

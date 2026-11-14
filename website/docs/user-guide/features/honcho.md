@@ -1,18 +1,25 @@
 ---
-sidebar_position: 99
 title: "Honcho Memory"
 description: "AI-native persistent memory via Honcho — dialectic reasoning, multi-agent user modeling, and deep personalization"
 ---
 
-# Honcho Memory
+# Honcho Memory {#honcho-memory}
 
-[Honcho](https://github.com/plastic-labs/honcho) is an AI-native memory backend that adds dialectic reasoning and deep user modeling on top of Hermes's built-in memory system. Instead of simple key-value storage, Honcho maintains a running model of who the user is — their preferences, communication style, goals, and patterns — by reasoning about conversations after they happen.
+[Honcho](https://github.com/plastic-labs/honcho) is an AI-native memory backend that adds dialectic reasoning and deep user modeling on top of {{app-name}}'s built-in memory system. Instead of simple key-value storage, Honcho maintains a running model of who the user is — their preferences, communication style, goals, and patterns — by reasoning about conversations after they happen.
 
-:::info Honcho is a catalog Memory Provider Plugin
-Honcho is maintained by Plastic Labs and installed from the [plugin catalog](./plugins.md) (`hermes plugins install honcho`); source lives in [plastic-labs/honcho](https://github.com/plastic-labs/honcho/tree/main/hermes-plugin-honcho). It plugs into the [Memory Providers](./memory-providers.md) system, so all features below are available through the unified memory provider interface. Homes upgraded from a release that bundled Honcho get the plugin installed automatically — config and memory carry over untouched.
-:::
+<Info>
 
-## What Honcho Adds
+<div className="doc-callout-title">
+
+Honcho is a catalog Memory Provider Plugin
+
+</div>
+
+Honcho is maintained by Plastic Labs and installed from the [plugin catalog](./plugins.md) (`noone plugins install honcho`); source lives in [plastic-labs/honcho](https://github.com/plastic-labs/honcho/tree/main/hermes-plugin-honcho). It plugs into the [Memory Providers](./memory-providers.md) system, so all features below are available through the unified memory provider interface. Homes upgraded from a release that bundled Honcho get the plugin installed automatically — config and memory carry over untouched.
+
+</Info>
+
+## What Honcho Adds {#what-honcho-adds}
 
 | Capability | Built-in Memory | Honcho |
 |-----------|----------------|--------|
@@ -28,12 +35,12 @@ Honcho is maintained by Plastic Labs and installed from the [plugin catalog](./p
 
 **Session-scoped context**: Base context now includes the session summary alongside the user representation and peer card. This gives the agent awareness of what has already been discussed in the current session, reducing repetition and enabling continuity.
 
-**Multi-agent profiles**: When multiple Hermes instances talk to the same user (e.g., a coding assistant and a personal assistant), Honcho maintains separate "peer" profiles. Each peer sees only its own observations and conclusions, preventing cross-contamination of context.
+**Multi-agent profiles**: When multiple {{app-name}} instances talk to the same user (e.g., a coding assistant and a personal assistant), Honcho maintains separate "peer" profiles. Each peer sees only its own observations and conclusions, preventing cross-contamination of context.
 
-## Setup
+## Setup {#setup}
 
 ```bash
-hermes plugins install honcho   # from the plugin catalog
+noone plugins install honcho   # from the plugin catalog
 hermes memory setup             # select "honcho" from the provider list
 ```
 
@@ -51,9 +58,9 @@ echo 'HONCHO_API_KEY=***' >> ~/.hermes/.env
 
 Get an API key at [honcho.dev](https://honcho.dev).
 
-## Architecture
+## Architecture {#architecture}
 
-### Two-Layer Context Injection
+### Two-Layer Context Injection {#two-layer-context-injection}
 
 Every turn (in `hybrid` or `context` mode), Honcho assembles two layers of context injected into the system prompt:
 
@@ -62,7 +69,7 @@ Every turn (in `hybrid` or `context` mode), Honcho assembles two layers of conte
 
 Both layers are concatenated and truncated to the `contextTokens` budget (if set).
 
-### Cold/Warm Prompt Selection
+### Cold/Warm Prompt Selection {#coldwarm-prompt-selection}
 
 The dialectic automatically selects between two prompt strategies:
 
@@ -71,7 +78,7 @@ The dialectic automatically selects between two prompt strategies:
 
 This happens automatically based on whether base context has been populated.
 
-### Three Orthogonal Config Knobs
+### Three Orthogonal Config Knobs {#three-orthogonal-config-knobs}
 
 Cost and depth are controlled by three independent knobs:
 
@@ -83,7 +90,7 @@ Cost and depth are controlled by three independent knobs:
 
 These are orthogonal — you can have frequent context refreshes with infrequent dialectic, or deep multi-pass dialectic at low frequency. Example: `contextCadence: 1, dialecticCadence: 5, dialecticDepth: 2` refreshes base context every turn, runs dialectic every 5 turns, and each dialectic run makes 2 passes.
 
-### Dialectic Depth (Multi-Pass)
+### Dialectic Depth (Multi-Pass) {#dialectic-depth-multi-pass}
 
 When `dialecticDepth` > 1, each dialectic invocation runs multiple `.chat()` passes:
 
@@ -95,23 +102,23 @@ Each pass uses a proportional reasoning level (lighter early passes, base level 
 
 Passes bail out early if the prior pass returned strong signal (long, structured output), so depth 3 doesn't always mean 3 LLM calls.
 
-### Session-Start Prewarm
+### Session-Start Prewarm {#session-start-prewarm}
 
 On session init, Honcho fires a dialectic call in the background at the full configured `dialecticDepth` and hands the result directly to turn 1's context assembly. A single-pass prewarm on a cold peer often returns thin output — multi-pass depth runs the audit/reconcile cycle before the user ever speaks. If prewarm hasn't landed by turn 1, turn 1 falls back to a synchronous call with a bounded timeout.
 
-### Query-Adaptive Reasoning Level
+### Query-Adaptive Reasoning Level {#query-adaptive-reasoning-level}
 
 The auto-injected dialectic scales `dialecticReasoningLevel` by query length: +1 level at ≥120 chars, +2 at ≥400, clamped at `reasoningLevelCap` (default `"high"`). Disable with `reasoningHeuristic: false` to pin every auto call to `dialecticReasoningLevel`. Available levels: `minimal`, `low`, `medium`, `high`, `max`.
 
-## Configuration Options
+## Configuration Options {#configuration-options}
 
 Honcho is configured in `~/.honcho/config.json` (global) or `$HERMES_HOME/honcho.json` (profile-local). The setup wizard handles this for you.
 
-### Self-Hosted Honcho with Authentication
+### Self-Hosted Honcho with Authentication {#self-hosted-honcho-with-authentication}
 
-When pointing Hermes at a self-hosted Honcho server, `hermes honcho setup` (and `hermes memory setup`) ask for a **local JWT / bearer token** after the base URL. Paste a JWT signed with the server's `AUTH_JWT_SECRET` (the Honcho compose env var) to enable authenticated access; leave it blank for servers running with `AUTH_USE_AUTH=false`. The local token is stored under the host block (`hosts.<host>.apiKey` in `honcho.json`), separate from any cloud `apiKey`, so you can flip the `Cloud or local?` prompt back to `cloud` later without losing either credential.
+When pointing {{app-name}} at a self-hosted Honcho server, `hermes honcho setup` (and `hermes memory setup`) ask for a **local JWT / bearer token** after the base URL. Paste a JWT signed with the server's `AUTH_JWT_SECRET` (the Honcho compose env var) to enable authenticated access; leave it blank for servers running with `AUTH_USE_AUTH=false`. The local token is stored under the host block (`hosts.<host>.apiKey` in `honcho.json`), separate from any cloud `apiKey`, so you can flip the `Cloud or local?` prompt back to `cloud` later without losing either credential.
 
-### Full Config Reference
+### Full Config Reference {#full-config-reference}
 
 | Key | Default | Description |
 |-----|---------|-------------|
@@ -143,11 +150,11 @@ When pointing Hermes at a self-hosted Honcho server, `hermes honcho setup` (and 
 - `per-repo` — one session per git repository.
 - `global` — single session across all directories.
 
-Directory-based strategies and manual `sessions` mappings use the logical session working directory, not the backend's launch directory. Desktop/TUI project workspaces and ACP session directories are passed during agent construction, including deferred builds. When no directory is supplied, Honcho uses the runtime cwd resolver: session context, then the scoped `terminal.cwd` setting, then the process launch directory.
+Directory-based strategies and manual `sessions` mappings use the logical session working directory, not the backend's launch directory. Desktop project workspaces and ACP session directories are passed during agent construction, including deferred builds. When no directory is supplied, Honcho uses the runtime cwd resolver: session context, then the scoped `terminal.cwd` setting, then the process launch directory.
 
 Messaging gateways keep their stable per-chat session key regardless of strategy or title. For other sessions, `per-session` identity takes priority, followed by a manual directory mapping, an explicit title, and the configured strategy.
 
-Automatically generated Hermes titles (`derived` or `llm`), including lineage titles for Desktop branches, are display metadata and do not override `sessionStrategy`. An explicit user title remains an intentional session-name override for non-gateway, non-`per-session` sessions without a manual mapping.
+Automatically generated {{app-name}} titles (`derived` or `llm`), including lineage titles for Desktop branches, are display metadata and do not override `sessionStrategy`. An explicit user title remains an intentional session-name override for non-gateway, non-`per-session` sessions without a manual mapping.
 
 Sessions created before title provenance was recorded retain legacy behavior: because an old automatic title cannot be distinguished from an old user title, a title with no source is treated as an explicit override.
 
@@ -171,9 +178,9 @@ In `tools` mode, the model is fully in control — it calls `honcho_reasoning` w
 
 **Startup behaviour and `initOnSessionStart`.** In `hybrid` and `context` mode the session is created in a background thread and startup fails open if Honcho is slow or down. `tools` mode is different by design: with `initOnSessionStart: false` (the default) nothing touches Honcho until the first `honcho_*` tool call, and with `initOnSessionStart: true` the session is created **synchronously during agent construction** so a tool call on turn 1 never races a half-initialized session. That guarantee means startup waits for Honcho: if the server is unreachable, every SDK call in that eager path runs to its connection/`timeout` limit before the agent is ready, which on Desktop shows up as `request timed out: session.resume` / `prompt.submit` (the renderer gives up after 30 s). Keep `initOnSessionStart` at `false` on Desktop and whenever your Honcho is a local service that may not be running, and set `timeout` (seconds) in `honcho.json` to bound each call if you do enable it.
 
-## Gateway Identity Mapping
+## Gateway Identity Mapping {#gateway-identity-mapping}
 
-These settings only matter when you run the [Hermes gateway](../../developer-guide/gateway-internals.md) — the one entrypoint where users arrive with platform-native runtime IDs (Telegram UID, Discord snowflake, Slack user). CLI, TUI, and desktop sessions have no runtime ID and always resolve to `peerName`, so off-gateway these keys do nothing.
+These settings only matter when you run the [{{app-name}} gateway](../../developer-guide/gateway-internals.md) — the one entrypoint where users arrive with platform-native runtime IDs (Telegram UID, Discord snowflake, Slack user). CLI, and desktop sessions have no runtime ID and always resolve to `peerName`, so off-gateway these keys do nothing.
 
 The setup wizard detects whether a gateway platform is connected and skips this step entirely if not. When it runs, it asks one question — *who talks to this gateway?* — and derives the keys:
 
@@ -189,15 +196,31 @@ The resolver tries the keys top-down, first match wins: `pinUserPeer` → `userP
 
 Each turn is written under the peer of whoever wrote it, so in a shared chat the first person to message no longer collects everyone else's facts. A turn from another bot (a Bot Mode DM tagged `bot:<profile>`, or a platform account the adapter flags as a bot) always gets its own peer: `pinUserPeer` unifies one person's accounts, never a bot. Its turn lands in a per-sender `a2a` session (see `a2aSessions`), and `honcho_conclude` / `honcho_profile` refuse writes while such a turn runs, since conclusions and cards describe the human.
 
-:::warning Un-pinning orphans pooled memory
+<Warning>
+
+<div className="doc-callout-title">
+
+Un-pinning orphans pooled memory
+
+</div>
+
 Flipping `pinUserPeer` from `true` to `false` does not migrate data — memory accumulated under `peerName` stays there, and platform users resolve to fresh, empty peers. To keep your own continuity, choose the **pooled** path so your runtime IDs alias back to `peerName`. The wizard offers this steer automatically when it detects the transition.
-:::
 
-:::note Deprecated key
+</Warning>
+
+<Note>
+
+<div className="doc-callout-title">
+
+Deprecated key
+
+</div>
+
 `pinPeerName` is a legacy alias for `pinUserPeer` — still read for back-compat (`pinUserPeer` wins where both are set), never written. Re-running setup migrates it onto the canonical key.
-:::
 
-## Observation (Directional vs. Unified)
+</Note>
+
+## Observation (Directional vs. Unified) {#observation-directional-vs-unified}
 
 Honcho models a conversation as peers exchanging messages. Each peer has two observation toggles that map 1:1 to Honcho's `SessionPeerConfig`:
 
@@ -230,9 +253,9 @@ Common patterns:
 | AI shouldn't re-model the user from its own replies | `"ai": {"observeMe": true, "observeOthers": false}` |
 | Strong persona the AI peer shouldn't update from self-observation | `"ai": {"observeMe": false, "observeOthers": true}` |
 
-Server-side toggles set via the [Honcho dashboard](https://app.honcho.dev) win over local defaults — Hermes syncs them back at session init.
+Server-side toggles set via the [Honcho dashboard](https://app.honcho.dev) win over local defaults — {{app-name}} syncs them back at session init.
 
-## Tools
+## Tools {#tools}
 
 When Honcho is active as the memory provider, five tools become available:
 
@@ -244,7 +267,7 @@ When Honcho is active as the memory provider, five tools become available:
 | `honcho_reasoning` | Synthesized answer from Honcho's LLM — pass `reasoning_level` (minimal/low/medium/high/max) to control depth |
 | `honcho_conclude` | Create or delete conclusions — pass `conclusion` to create, `delete_id` to remove (PII only) |
 
-## CLI Commands
+## CLI Commands {#cli-commands}
 
 The `hermes honcho` subcommand is **only registered when Honcho is the active memory provider** (`memory.provider: honcho` in `config.yaml`). On a fresh install, configure Honcho directly with `hermes memory setup honcho` (or run `hermes memory setup` and pick it from the list); the `hermes honcho` subcommand then appears on the next invocation.
 
@@ -266,7 +289,7 @@ hermes honcho disable         # Disable Honcho for the active profile
 hermes honcho migrate         # Step-by-step migration guide from openclaw-honcho
 ```
 
-## Migrating from `hermes honcho`
+## Migrating from `hermes honcho` {#migrating-from-hermes-honcho}
 
 If you previously used the standalone `hermes honcho setup`:
 
@@ -276,6 +299,6 @@ If you previously used the standalone `hermes honcho setup`:
 
 No re-login or re-setup needed. Run `hermes memory setup` and select "honcho" — the wizard detects your existing config.
 
-## Full Documentation
+## Full Documentation {#full-documentation}
 
 See [Memory Providers — Honcho](./memory-providers.md#honcho) for the complete reference.

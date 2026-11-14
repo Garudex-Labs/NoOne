@@ -144,13 +144,13 @@ def _write_config(home, plugins, vault):
 def vault_home(tmp_path, monkeypatch):
     """Temp HERMES_HOME with one real local-vault login; yields a loader for plugins written into it."""
     from agent.vault_store import get_vault_store
-    from hermes_cli.plugins import PluginManager
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_cli.plugins import PluginManager
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("HERMES_HOME", str(home))
-    token = set_hermes_home_override(home)
+    token = set_agent_home_override(home)
     managers = []
     local = get_vault_store().add_item("login", "Local", {"identifier_type": "email", "identifier": "me@example.com",
                                                         "password": "local-dummy-pw-27"}, origin=ORIGIN)
@@ -167,7 +167,7 @@ def vault_home(tmp_path, monkeypatch):
     finally:
         for manager in managers:
             manager.unload()
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 @pytest.fixture
@@ -307,8 +307,8 @@ def test_builtin_namespaces_are_reserved_and_backend_names_cannot_be_taken_over(
 
 
 def test_plugin_backend_is_off_until_enabled_refused_in_host_and_origin_checked(vault_home, page):
-    from hermes_cli.plugin_host_child import RemotePluginContext
-    from hermes_cli.plugin_host_wire import PluginHostUnsupported
+    from agent_cli.plugin_host_child import RemotePluginContext
+    from agent_cli.plugin_host_wire import PluginHostUnsupported
 
     home, local, load = vault_home
     _write_plugin(home, "alpha_vault", _RECORDING_BACKEND.format(

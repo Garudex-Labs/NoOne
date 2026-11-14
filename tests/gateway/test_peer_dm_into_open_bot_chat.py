@@ -1,6 +1,6 @@
 """A peer DM into a Bot Chat is answered by that chat, never by a second writer.
 
-``hermes peer dm`` posts to ``/api/sessions/{id}/chat`` on the peer. Under session authority the
+``noone peer dm`` posts to ``/api/sessions/{id}/chat`` on the peer. Under session authority the
 Bot Chat's single writer is the authority FIFO and the turn enters through the ``bot_relay.deliver``
 door (``tests/gateway/test_peer_dm_bot_chat_authority.py``). This file keeps the no-authority lane:
 a Desktop lease is a viewer, not an executor (the lease-advertised mailbox consumer was retired), so
@@ -21,8 +21,8 @@ from aiohttp.test_utils import TestClient, TestServer
 
 from gateway.config import PlatformConfig
 from gateway.platforms.api_server import APIServerAdapter
-from hermes_cli.subcommands import peer as peer_mod
-from hermes_state import SessionDB
+from agent_cli.subcommands import peer as peer_mod
+from agent_state import SessionDB
 
 AUTHOR = {"id": "bot:cto", "name": "cto", "is_bot": True}
 
@@ -51,7 +51,7 @@ async def test_a_peer_turn_into_a_bot_chat_without_an_authority_runs_here(tmp_pa
     db.create_session("scratch", "api_server")
     lease = None
     if open_in_desktop:
-        from hermes_cli.active_sessions import try_acquire_active_session
+        from agent_cli.active_sessions import try_acquire_active_session
         lease, refusal = try_acquire_active_session(
             session_id="bot-chat", surface="desktop", config={}, registry_home=home, track_liveness=True,
             metadata={"live_session_id": "live-1", "bot_live_delivery_consumer": True})
@@ -112,7 +112,7 @@ async def test_a_peer_run_into_a_bot_chat_without_an_authority_runs_here(tmp_pat
     db.create_session("bot-chat", "desktop")
     db.set_session_title("bot-chat", "Bot Chat")
     db.create_session("scratch", "api_server")
-    from hermes_cli.active_sessions import try_acquire_active_session
+    from agent_cli.active_sessions import try_acquire_active_session
     lease, refusal = try_acquire_active_session(
         session_id="bot-chat", surface="desktop", config={}, registry_home=home, track_liveness=True,
         metadata={"live_session_id": "live-1", "bot_live_delivery_consumer": True})

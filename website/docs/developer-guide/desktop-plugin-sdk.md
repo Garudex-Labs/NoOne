@@ -1,38 +1,50 @@
 ---
-sidebar_label: "Desktop Plugin SDK"
-title: "Desktop Plugin SDK (@hermes/plugin-sdk)"
-description: "Extend the native Hermes Desktop app — panes, pages, sidebar nav, status bar, palette commands, keybinds, themes, and a scoped backend namespace, with one import and no build step."
+sidebarTitle: "Desktop Plugin SDK"
+title: "Desktop Plugin SDK (@noone/plugin-sdk)"
+description: "Extend the native the agent Desktop app — panes, pages, sidebar nav, status bar, palette commands, keybinds, themes, and a scoped backend namespace, with one import and no build step."
 ---
 
-# Desktop Plugin SDK
+# Desktop Plugin SDK {#desktop-plugin-sdk}
 
-The native [Hermes Desktop](../user-guide/desktop.md) app is contribution-driven: every
+The native [{{app-name}} Desktop](../user-guide/desktop.md) app is contribution-driven: every
 surface in the window — panes, routes, sidebar nav, status-bar items, palette
 entries, keybinds, themes — registers into one central registry. Core registers
 its surfaces exactly the way a plugin does, so the plugin story is the real one,
 not a bolted-on afterthought.
 
 A **desktop plugin** is a single ESM file that default-exports a `HermesPlugin`.
-It imports one module — `@hermes/plugin-sdk` — and gets everything: the app's
+It imports one module — `@noone/plugin-sdk` — and gets everything: the app's
 live state, the gateway JSON-RPC door, a scoped REST/socket backend namespace,
 React Query, and the app's own UI kit so plugin UI looks native by default. No
 repo clone, no `pnpm run build`, no patching app source. Drop the file in
 `$HERMES_HOME/desktop-plugins/<id>/plugin.js` and the app loads it within seconds
 and hot-reloads every save.
 
-:::warning This is not the web-dashboard plugin SDK
-"Plugin" means several unrelated things across Hermes. This page is the **native
-desktop app** (`hermes desktop`) SDK — the `@hermes/plugin-sdk` module and
-`$HERMES_HOME/desktop-plugins/`. The **web dashboard** (`hermes dashboard`) has
+<Warning>
+
+<div className="doc-callout-title">
+
+This is not the web-dashboard plugin SDK
+
+</div>
+
+"Plugin" means several unrelated things across {{app-name}}. This page is the **native
+desktop app** (`noone desktop`) SDK — the `@noone/plugin-sdk` module and
+`$HERMES_HOME/desktop-plugins/`. The **web dashboard** (`noone dashboard`) has
 its own, unrelated plugin system on `window.__HERMES_PLUGIN_SDK__` with a
 `manifest.json` — documented at
 [Extending the Dashboard](../user-guide/features/extending-the-dashboard.md). Python
-CLI/gateway plugins are documented at [Build a Hermes Plugin](./plugins/index.md).
+CLI/gateway plugins are documented at [Build a {{app-name}} Plugin](./plugins/index.md).
 The three do not share code, APIs, or delivery. Only the backend `plugin_api.py`
 namespace (`/api/plugins/<id>`) is shared between the desktop and dashboard SDKs.
-:::
 
-## Mental model
+</Warning>
+
+## Mental model {#mental-model}
+
+Use `appText` from `@noone/plugin-sdk` to format `{app_name}` in plugin text.
+It reads the current configured application name; an optional second argument
+formats a specific name without changing that configuration.
 
 The SDK follows the VS Code module model. A plugin author imports exactly one
 module and never touches app internals (they are lint-fenced out of a bundled
@@ -65,7 +77,7 @@ plugin, and fail to resolve in a disk plugin). Capability comes in tiers:
 - **`ui.*`** — the design language: the app's real components, theme variables,
   icons, and formatters, so your UI matches the app pixel-for-pixel.
 
-## Two delivery modes
+## Two delivery modes {#two-delivery-modes}
 
 | Mode | Where | Who | Build step |
 |------|-------|-----|------------|
@@ -86,7 +98,7 @@ toggle and contributes nothing while disabled. Reference demos live in the compa
 [`hermes-example-plugins`](https://github.com/NousResearch/hermes-example-plugins)
 repo.
 
-## Quick start — your first plugin
+## Quick start — your first plugin {#quick-start--your-first-plugin}
 
 Create `$HERMES_HOME/desktop-plugins/hello/plugin.js` (that's `~/.hermes/...`
 by default). Desktop plugins are app-level — one root for every profile, gateway,
@@ -94,7 +106,7 @@ or remote machine the window connects to. The folder name must equal the plugin 
 
 ```javascript
 // ~/.hermes/desktop-plugins/hello/plugin.js
-import { host, haptic, useValue } from '@hermes/plugin-sdk'
+import { host, haptic, useValue } from '@noone/plugin-sdk'
 import { jsx, jsxs } from 'react/jsx-runtime'
 
 function HelloPane() {
@@ -147,14 +159,22 @@ and hot-reloads every later save in place. If it doesn't appear, run ⌘K →
 **Reload desktop plugins**. If loading fails, a toast names the error — fix and
 save again.
 
-:::note No JSX, no build
+<Note>
+
+<div className="doc-callout-title">
+
+No JSX, no build
+
+</div>
+
 The disk file is loaded **uncompiled**, so JSX syntax will not parse. Write UI
 with `jsx()` / `jsxs()` calls from `react/jsx-runtime` (or `React.createElement`).
-The only importable specifiers are `@hermes/plugin-sdk`, `react`, and
+The only importable specifiers are `@noone/plugin-sdk`, `react`, and
 `react/jsx-runtime` — everything else fails to resolve, on purpose.
-:::
 
-## The plugin contract
+</Note>
+
+## The plugin contract {#the-plugin-contract}
 
 A plugin default-exports a `HermesPlugin`:
 
@@ -232,7 +252,7 @@ interface Contribution {
 
 You provide `render`, `data`, or both, depending on the area.
 
-## Contribution areas — the cookbook
+## Contribution areas — the cookbook {#contribution-areas--the-cookbook}
 
 Import the area constants from the SDK; each area has its own `data` payload.
 
@@ -254,7 +274,7 @@ Import the area constants from the SDK; each area has its own `data` payload.
 | Tool media | `TOOL_MEDIA_RENDERER_AREA` (`'transcript.toolMedia'`) | `data: { tools, render }` — draw the `MEDIA:` files your package's own tools produced ([Tool media renderers](#tool-media-renderers)) |
 | Plugin settings page | `SETTINGS_PLUGINS_AREA` (`'settings.plugins'`) | Use `ctx.registerSettingsPage({ id, title, render, icon?, order?, children? })` — your own entry (with sub-pages) under Settings → Plugins |
 
-### Panes
+### Panes {#panes}
 
 A pane is a tile in the layout tree. `placement` is the semantic role — the pane
 stacks (as tabs) with existing panes of that role; the user can drag it anywhere
@@ -294,13 +314,13 @@ panes, closing one dismisses only that pane and leaves the plugin's other panes,
 commands, and middleware active. **Reset layout** restores dismissed contributed
 panes.
 
-### Pages and sidebar nav
+### Pages and sidebar nav {#pages-and-sidebar-nav}
 
 A route mounts a full page in the workspace pane, like any built-in view. Pair it
 with a sidebar nav row (and/or a palette command) to make it reachable.
 
 ```javascript
-import { ROUTES_AREA, SIDEBAR_NAV_AREA } from '@hermes/plugin-sdk'
+import { ROUTES_AREA, SIDEBAR_NAV_AREA } from '@noone/plugin-sdk'
 
 ctx.registerMany([
   {
@@ -320,14 +340,14 @@ ctx.registerMany([
 `codicon` is a [VS Code codicon](https://microsoft.github.io/vscode-codicons/dist/codicon.html)
 id. Navigate to a route from anywhere with `host.navigate('/my-page')`.
 
-### Status bar and title bar
+### Status bar and title bar {#status-bar-and-title-bar}
 
 Status-bar items render into the left or right cluster of the bottom bar.
 Simplest is a `render` function; for a plain button use `data` as a
 `StatusbarItem` (`{ id, label?, icon?, detail?, variant?, menuItems?, … }`).
 
 ```javascript
-import { STATUSBAR_AREAS, TITLEBAR_AREAS } from '@hermes/plugin-sdk'
+import { STATUSBAR_AREAS, TITLEBAR_AREAS } from '@noone/plugin-sdk'
 
 ctx.register({
   id: 'count',
@@ -356,10 +376,10 @@ opened in a split route tile, which has no page header, it renders inline where
 you placed it. A raw `<Contribute area={WORKSPACE_PAGE_HEADER_AREA}>` only
 shows up in the workspace pane.
 
-### Palette commands and keybinds
+### Palette commands and keybinds {#palette-commands-and-keybinds}
 
 ```javascript
-import { PALETTE_AREA, KEYBINDS_AREA } from '@hermes/plugin-sdk'
+import { PALETTE_AREA, KEYBINDS_AREA } from '@noone/plugin-sdk'
 
 ctx.registerMany([
   {
@@ -393,13 +413,13 @@ Settings, focus the composer), never dispatch a synthetic `KeyboardEvent` for it
 shortcut — the user may have rebound it. Call
 [`ctx.runAction(id)`](#run-app-actions) instead.
 
-### Themes
+### Themes {#themes}
 
 A theme contribution ships a full `DesktopTheme` as its `data` (name, label,
 colors, …). It appears in the theme picker like a built-in.
 
 ```javascript
-import { THEMES_AREA } from '@hermes/plugin-sdk'
+import { THEMES_AREA } from '@noone/plugin-sdk'
 
 ctx.register({ id: 'noir', area: THEMES_AREA, data: myDesktopTheme })
 ```
@@ -409,7 +429,7 @@ painted appearance (`theme`, `themeName`, `availableThemes`, `resolvedMode`) and
 changes it (`setTheme`, `setMode`, `previewTheme`) from a component:
 
 ```javascript
-import { Button, useTheme } from '@hermes/plugin-sdk'
+import { Button, useTheme } from '@noone/plugin-sdk'
 
 function ThemePicker() {
   const { availableThemes, setTheme, themeName } = useTheme()
@@ -429,7 +449,7 @@ coerced to the default skin, so the return value doubles as the availability
 check and a wrong name can never silently reset someone's appearance:
 
 ```javascript
-import { host, requestTheme } from '@hermes/plugin-sdk'
+import { host, requestTheme } from '@noone/plugin-sdk'
 
 host.onEvent('gateway.ready', () => {
   if (!requestTheme('noir')) {
@@ -444,7 +464,7 @@ manual pick. To tint the *active* theme rather than replace it, use
 [Accent Picker](https://github.com/NousResearch/hermes-official-plugins/tree/main/accent-picker)
 plugin is the worked example (it is also a complete, installable disk plugin).
 
-#### Styling the chat switch — `data-session-switching`
+#### Styling the chat switch — `data-session-switching` {#styling-the-chat-switch--data-session-switching}
 
 Opening a chat places its transcript in steps: the session loads, the rows
 land, then the restored scroll position settles a few frames later. A theme
@@ -483,7 +503,7 @@ listener plus a `requestAnimationFrame` loop that polled the transcript's rows
 and scroll position, then toggled its own root attribute): the CSS above is the
 whole migration.
 
-### Composer extensions
+### Composer extensions {#composer-extensions}
 
 `COMPOSER_AREAS` (`top`, `bottom`, `underside`, `leading`, `actions`,
 `attachments`, `middleware`, `contextMenu`) let a plugin add controls around the message
@@ -505,7 +525,7 @@ style and keyboard-navigate like the built-in ones; a plugin never touches the
 menu's DOM.
 
 ```javascript
-import { COMPOSER_AREAS, host } from '@hermes/plugin-sdk'
+import { COMPOSER_AREAS, host } from '@noone/plugin-sdk'
 
 ctx.register({
   id: 'spelling',
@@ -564,7 +584,7 @@ standing; a throwing `onSelect` is logged, not raised. Rows registered through
 `ctx.register` disappear when the plugin unloads or is disabled — including
 from a menu that is open at the time.
 
-#### Spell-check dictionary — `host.spellcheck`
+#### Spell-check dictionary — `host.spellcheck` {#spell-check-dictionary--hostspellcheck}
 
 ```ts
 host.spellcheck.addWord(word: string): Promise<boolean>
@@ -578,7 +598,7 @@ at least one letter, at most 64 characters. Anything else resolves `false`
 without touching the dictionary; so does an older desktop shell. There is no
 way to list or read the dictionary.
 
-### Composer draft API — read and write the live input
+### Composer draft API — read and write the live input {#composer-draft-api--read-and-write-the-live-input}
 
 For everything the composer areas can't do — put text INTO the input, replace
 what's there, read the current draft, or send it — use `host.composer`. This
@@ -590,7 +610,7 @@ composer, in the primary pane or a tile; `'new'` = the fresh draft that has no
 session id yet.
 
 ```javascript
-import { host } from '@hermes/plugin-sdk'
+import { host } from '@noone/plugin-sdk'
 
 // Append to the active composer (modes: 'block' | 'inline' | 'prefix';
 // 'prefix' seats a slash command at the start). Acknowledged like setDraft:
@@ -661,7 +681,7 @@ and its siblings; the pet-wallet row uses the [pet bubble](#pet-bubble) door):
 `sessionId` in the table is the id the plugin's UI is bound to; for a composer
 slot render it is `host.state.focusedSessionId.get()`.
 
-### Session rows — decorations + the session list API
+### Session rows — decorations + the session list API {#session-rows--decorations--the-session-list-api}
 
 `SESSION_ROW_AREAS` (`leading`, `trailing`) let a plugin decorate sidebar
 session rows. Register a `data` contribution whose `render({ sessionId })`
@@ -669,7 +689,7 @@ returns a small element (a badge, a swatch, a tag) or `null` for rows you don't
 own — registering costs nothing on every other row:
 
 ```ts
-import { SESSION_ROW_AREAS, type SessionRowSlotContribution } from '@hermes/plugin-sdk'
+import { SESSION_ROW_AREAS, type SessionRowSlotContribution } from '@noone/plugin-sdk'
 
 ctx.register({
   area: SESSION_ROW_AREAS.trailing,
@@ -738,10 +758,10 @@ let the next provider (then the core label) win. The pill keeps its chrome, pin
 dot, and menu; only the label changes — the sanctioned replacement for the
 MutationObserver text-rewriting plugins do today.
 
-#### Model pill label providers
+#### Model pill label providers {#model-pill-label-providers}
 
 ```ts
-import { COMPOSER_AREAS, type ComposerModelPillContext, type ComposerModelPillProvider } from '@hermes/plugin-sdk'
+import { COMPOSER_AREAS, type ComposerModelPillContext, type ComposerModelPillProvider } from '@noone/plugin-sdk'
 
 interface ComposerModelPillContext {
   model: string            // the model slug the pill would show
@@ -800,7 +820,7 @@ register(ctx) {
 The reasoning-pill visibility CSS the plugin also injected has no hook; it is
 only needed if the app ever hides that label at narrow widths.
 
-#### Model menu row decorations
+#### Model menu row decorations {#model-menu-row-decorations}
 
 `MODEL_MENU_ROW_AREA` puts a per-model mark inside the native model menu — the
 one the composer's pill opens, and every other surface that renders
@@ -810,7 +830,7 @@ and a **trailing badge** after core's own chips. The row's markup, name,
 star, submenu and click stay core's.
 
 ```ts
-import { MODEL_MENU_ROW_AREA, type ModelMenuRowContribution } from '@hermes/plugin-sdk'
+import { MODEL_MENU_ROW_AREA, type ModelMenuRowContribution } from '@noone/plugin-sdk'
 
 interface ModelMenuRowContext {
   provider: string  // provider slug: 'anthropic', 'openrouter', …
@@ -867,7 +887,7 @@ import {
   KANBAN_CARD_AREAS,
   KANBAN_CARD_BADGE_HUES,
   type KanbanCardBadgeContribution
-} from '@hermes/plugin-sdk'
+} from '@noone/plugin-sdk'
 
 interface KanbanCard {            // frozen; identity and routing fields only
   id: string                      // task id (t_…): key your own per-card data by it
@@ -944,7 +964,7 @@ reads of the Kanban plugin's query cache. The whole decoration becomes the
 `KANBAN_CARD_BADGE_HUES` (its twelve hues are the same `hsl(n×30 68% 58%)`
 set, in the same order).
 
-### Appearance settings
+### Appearance settings {#appearance-settings}
 
 `APPEARANCE_AREAS.extra` renders contributions at the end of **Settings →
 Appearance**, after the built-in sections. It is the seam for a plugin that
@@ -1035,7 +1055,7 @@ ctx.registerSettingsPage?.({
 `src/plugins/hello-runtime/plugin.runtime.js` is a complete runtime example: one
 page and two sub-pages, backed by `ctx.storage`.
 
-### Embedding external content
+### Embedding external content {#embedding-external-content}
 
 Use the SDK's `<SandboxedFrame src title />` for any external web content
 (reader views, dashboards, docs). It renders a sandboxed iframe with the app's
@@ -1097,14 +1117,14 @@ Migration for **rss-reader** (#115972): replace the stubbed `/preview` → 501 �
 chain with `<SandboxedFrame src={article.url} title={article.title} />` inside
 the workspace page; drop the leftover `.rss-browser-frame-host webview` CSS.
 
-### Transcript directives — inline components the model addresses
+### Transcript directives — inline components the model addresses {#transcript-directives--inline-components-the-model-addresses}
 
 `TRANSCRIPT_DIRECTIVE_AREA` makes the transcript itself a contribution area.
 Register a named directive and the agent can render your component inline in
 an assistant message by emitting a paragraph of the form `::name{key="value"}`:
 
 ```javascript
-import { TRANSCRIPT_DIRECTIVE_AREA } from '@hermes/plugin-sdk'
+import { TRANSCRIPT_DIRECTIVE_AREA } from '@noone/plugin-sdk'
 
 ctx.register({
   id: 'task-card',
@@ -1187,7 +1207,7 @@ the path, earlier in the transcript. If the plugin that owns that tool registere
 the tool's name, your component replaces the built-in player:
 
 ```javascript
-import * as sdk from '@hermes/plugin-sdk'
+import * as sdk from '@noone/plugin-sdk'
 import { useEffect, useState } from 'react'
 import { jsx, jsxs } from 'react/jsx-runtime'
 
@@ -1273,14 +1293,14 @@ non-Desktop users with a raw directive line. With a renderer, the tool returns
 the ordinary `MEDIA:` tag every surface understands and Desktop alone upgrades
 it.
 
-### Mount-scoped chrome (`Contribute`)
+### Mount-scoped chrome (`Contribute`) {#mount-scoped-chrome-contribute}
 
 `ctx.register` is for **permanent** contributions. When chrome should live and
 die with a component that's already on screen (a page's own header control
 leaves when the page unmounts), render `<Contribute>` inside it instead:
 
 ```javascript
-import { Contribute, WORKSPACE_PAGE_HEADER_AREA } from '@hermes/plugin-sdk'
+import { Contribute, WORKSPACE_PAGE_HEADER_AREA } from '@noone/plugin-sdk'
 
 jsx(Contribute, {
   area: WORKSPACE_PAGE_HEADER_AREA,
@@ -1298,7 +1318,7 @@ tile) it renders its children in place. Put it where the control should sit
 when inline:
 
 ```javascript
-import { WorkspacePageHeaderControl } from '@hermes/plugin-sdk'
+import { WorkspacePageHeaderControl } from '@noone/plugin-sdk'
 
 jsx(WorkspacePageHeaderControl, {
   id: 'my-page:switcher', // namespace with your slug
@@ -1309,10 +1329,10 @@ jsx(WorkspacePageHeaderControl, {
 `WorkspacePageHeaderControl` is new in this release. Older desktop builds don't
 export it, and a named import of a missing SDK export stops the plugin module
 from loading. A plugin that must also run on older builds either feature-detects
-through a namespace import (`import * as sdk from '@hermes/plugin-sdk'`, then
+through a namespace import (`import * as sdk from '@noone/plugin-sdk'`, then
 `sdk.WorkspacePageHeaderControl ?? …`) or keeps the raw `Contribute` form above.
 
-### Sidebar nav visibility and order (`SIDEBAR_NAV_PREFS_AREA`)
+### Sidebar nav visibility and order (`SIDEBAR_NAV_PREFS_AREA`) {#sidebar-nav-visibility-and-order-sidebar_nav_prefs_area}
 
 A plugin hides or re-orders the sidebar's top nav rows by **contributing a
 preference**, not by writing a setting. Core merges every `sidebarNav.prefs`
@@ -1320,7 +1340,7 @@ contribution at render and applies the result to the rows it would otherwise
 show; the default list itself never changes.
 
 ```ts
-import { SIDEBAR_NAV_PREFS_AREA, type SidebarNavPrefsContribution } from '@hermes/plugin-sdk'
+import { SIDEBAR_NAV_PREFS_AREA, type SidebarNavPrefsContribution } from '@noone/plugin-sdk'
 
 // Payload (`data`) of a sidebarNav.prefs contribution
 interface SidebarNavPrefsContribution {
@@ -1376,7 +1396,7 @@ ctx.storage.set('navPrefs', next); apply(next)
 
 Session sections (Pinned, Recents, Cron jobs) are not covered — nav rows only.
 
-## Host API
+## Host API {#host-api}
 
 Everything on `host` is reachable from anywhere in a plugin. State atoms are
 readonly — read with `.get()` in handlers, subscribe with `useValue(atom)` in
@@ -1398,7 +1418,7 @@ host.state.profile          // ReadableAtom<string>
 host.state.viewport         // ReadableAtom<{ width, height, narrow }>
 ```
 
-`gatewayActivationEpoch` is a named SDK export: `import { gatewayActivationEpoch } from '@hermes/plugin-sdk'`.
+`gatewayActivationEpoch` is a named SDK export: `import { gatewayActivationEpoch } from '@noone/plugin-sdk'`.
 It reads the canonical activation counter, which changes on every active route
 selection, including same-profile source swaps. Capture `const epoch = gatewayActivationEpoch()`
 alongside the route before asynchronous work, then check both the captured route
@@ -1508,7 +1528,7 @@ is the registry routing identity;
 pair it with `profile` for keys and persistence. Endpoint, token, SSH host/key, and
 other raw connection fields never cross the plugin IPC boundary. `profile` is the
 source-local route used
-for requests; `targetProfile` is the backend Hermes profile served by that route.
+for requests; `targetProfile` is the backend {{app-name}} profile served by that route.
 They differ when a route explicitly maps to another backend profile (for example an
 SSH `remoteProfile` override or a legacy per-profile URL alias). This distinction
 preserves backend identity without exposing connection secrets.
@@ -1546,7 +1566,7 @@ rejection your `.catch()` sees, never an error-boundary crash.
 #### Live tool progress — `tool.progress` {#tool-progress-event}
 
 While a tool call runs, an MCP server that sends `notifications/progress` (the
-MCP spec's progress channel; Hermes opts in by sending `_meta.progressToken` on
+MCP spec's progress channel; {{app-name}} opts in by sending `_meta.progressToken` on
 every `tools/call`) reaches the renderer as a `tool.progress` event. The native
 tool row shows it as `42% · <message>` next to its timer; a plugin can render
 its own view:
@@ -1575,7 +1595,7 @@ transcript, so a reopened session shows only the finished row.
 `ctx.os` is the curated OS door — every way a plugin reaches outside the app
 window, in one namespace attributed to your plugin. `ctx.os.notify` posts a
 **native OS notification** — the same Electron pipeline the app's own
-approval/turn alerts use. It fires only while the user is away from Hermes
+approval/turn alerts use. It fires only while the user is away from {{app-name}}
 (backgrounded / unfocused); use `host.notify` for the in-app toast when
 they're looking at the app. Users can silence it per device under Settings ▸
 Notifications ▸ "Plugin notifications", and repeats from the same plugin are
@@ -1627,9 +1647,9 @@ computer running Desktop. A plugin reaches exactly two kinds of folder:
 Every call names a folder handle and a path **relative to that folder**. The
 app's main process checks each call: `..`, absolute paths, drive letters and
 symlinks that resolve outside the folder are refused, never normalized, and
-nothing inside Hermes' own data (the Hermes home with `config.yaml`, `.env`,
+nothing inside {{app-name}}' own data (the {{app-name}} home with `config.yaml`, `.env`,
 auth and profiles; the app data folder with every plugin's data and the grants
-record) is reachable. A folder that holds or sits inside Hermes data (however
+record) is reachable. A folder that holds or sits inside {{app-name}} data (however
 it is spelled: a bind mount, a macOS firmlink, a WSL share or a
 `\\localhost\C$` share counts), a key folder such as `~/.ssh`, or a kernel
 filesystem such as `/proc` (wherever it is mounted) cannot be granted at all;
@@ -1749,7 +1769,7 @@ runs, so the user rebinding (or unbinding) that shortcut in Settings ▸ Keyboar
 Shortcuts changes nothing for you:
 
 ```ts
-import { TITLEBAR_AREAS } from '@hermes/plugin-sdk'
+import { TITLEBAR_AREAS } from '@noone/plugin-sdk'
 import { jsx } from 'react/jsx-runtime'
 
 register(ctx) {
@@ -1861,7 +1881,7 @@ Reach the page only through this door. Querying or creating a `<webview>`
 consent, and fails the catalog's `desktop surface` lint (`preview guest
 reach`). A popped-out Browser window is not bridged.
 
-### Desktop appearance settings — `host.settings`
+### Desktop appearance settings — `host.settings` {#desktop-appearance-settings--hostsettings}
 
 `host.settings` is the supported door for the small set of Desktop-local
 appearance preferences plugins may share with the native Settings page. Every
@@ -1954,7 +1974,7 @@ page's intro-splash switch becomes `host.settings.subscribe('intro-splash.v1', f
 is the keybind-map row above: contribute the default through `KEYBINDS_AREA` and
 keep the user's override in `ctx.storage`, not in the app's map.
 
-### Typed capabilities bridge — `host.skills`, `host.toolsets`, `host.profiles`, `host.pluginDecisions`
+### Typed capabilities bridge — `host.skills`, `host.toolsets`, `host.profiles`, `host.pluginDecisions` {#typed-capabilities-bridge--hostskills-hosttoolsets-hostprofiles-hostplugindecisions}
 
 ```ts
 type ProfileScope = undefined | null | string | { connectionId?: null | string; profile?: null | string }
@@ -2011,7 +2031,7 @@ localStorage.setItem('hermes.desktop.pluginDecisions.v2')  // declined — host.
 row.querySelector('[data-slot="switch"]').click()          // same: the app's Plugins tab owns the toggle
 ```
 
-### Language packs — `host.i18n.registerAppLocale` / `ctx.i18n.registerAppLocale`
+### Language packs — `host.i18n.registerAppLocale` / `ctx.i18n.registerAppLocale` {#language-packs--hosti18nregisterapplocale--ctxi18nregisterapplocale}
 
 `ctx.i18n.register` localizes YOUR plugin's strings. A **language pack** does the
 opposite: it adds (or extends) a language for the WHOLE app — every core label,
@@ -2051,7 +2071,7 @@ Where English has a **function** entry (``results: n => `${n} results` ``), a pa
 gives a plain string with POSITIONAL placeholders — `{0}`, `{1}` in argument
 order — and the merge wraps it into the same call shape. The full key set is
 published in `locales/_keys.desktop.json` (regenerate with `pnpm run i18n:keys`
-in `apps/desktop` and commit it; CI pins the file to `en.ts`), which is what `hermes plugins
+in `apps/desktop` and commit it; CI pins the file to `en.ts`), which is what `noone plugins
 validate` checks a pack's `<lang>.desktop.yaml` against.
 
 `host.i18n.registerAppLocale` is the same call for code with no `ctx` in reach;
@@ -2064,13 +2084,13 @@ desktop file over `i18n.catalog {lang, surface: 'desktop'}`; the app pulls it
 into the same registry (source `backend`) when `display.language` names it and
 re-pulls on a profile switch.
 
-## Data layer — React Query + nanostores
+## Data layer — React Query + nanostores {#data-layer--react-query--nanostores}
 
 Plugins share the app's single `QueryClient`, so plugin queries cache, dedupe,
 poll, and invalidate exactly like core screens — never hand-roll a fetch loop.
 
 ```javascript
-import { useQuery, useMutation, useQueryClient, atom, computed, useValue } from '@hermes/plugin-sdk'
+import { useQuery, useMutation, useQueryClient, atom, computed, useValue } from '@noone/plugin-sdk'
 
 function MyPanel() {
   const { data, isLoading } = useQuery({
@@ -2087,14 +2107,14 @@ renders the value with `useValue`. To invalidate a query from **outside** React
 (e.g. a `ctx.socket` frame arriving), import the shared `queryClient`:
 
 ```javascript
-import { queryClient } from '@hermes/plugin-sdk'
+import { queryClient } from '@noone/plugin-sdk'
 
 ctx.socket('/events', () => {
   queryClient.invalidateQueries({ queryKey: ['my-plugin', 'items'] })
 })
 ```
 
-## The UI kit and theming
+## The UI kit and theming {#the-ui-kit-and-theming}
 
 Import the app's real components directly so your UI is native by default:
 
@@ -2121,7 +2141,7 @@ For canvas drawing, resolve them once with
 `getComputedStyle(canvas).getPropertyValue('--ui-accent')`. This is what makes a
 plugin reskin automatically with every theme.
 
-## A backend for your plugin
+## A backend for your plugin {#a-backend-for-your-plugin}
 
 If your plugin needs server-side work, ship a Python `plugin_api.py` and reach it
 through `ctx.rest` / `ctx.socket` — a namespace scoped to your plugin **by
@@ -2156,7 +2176,7 @@ package folder is copied as the desktop half (without `.git` and
 `__pycache__`). It must hold no symlinks and stay under 64 MB, or nothing is
 copied.
 Installing, sharing, or removing the feature is one folder: the app-root copy
-is refreshed when the source `plugin.js` changes (`hermes plugins update`, or
+is refreshed when the source `plugin.js` changes (`noone plugins update`, or
 **Rescan**) and removed when the package folder disappears. The copy is what
 makes the desktop half **app-level**: it exists once, however many profiles
 carry the package, and it never appears or disappears when the user switches
@@ -2171,7 +2191,7 @@ such damage and replaced on the next **Rescan**, while a marker-less folder
 that *does* hold a `plugin.js` is a standalone plugin you installed by hand and
 is never overwritten.
 
-#### Developing a unified package
+#### Developing a unified package {#developing-a-unified-package}
 
 The app loads the **copy** in `desktop-plugins/<id>/`, not your package. An
 installed package (catalog, Git URL, `file://` path) is refreshed only when its
@@ -2189,7 +2209,7 @@ checkout's `desktop/plugin.js`; every save re-syncs the copy (by content, not
 mtime, so `git stash pop` counts) and hot-reloads the plugin. Catalog and Git
 installs keep the mtime rule.
 
-`hermes plugins doctor <path-or-id>` warns when the copy differs from your
+`noone plugins doctor <path-or-id>` warns when the copy differs from your
 source and names the copy it found:
 
 ```text
@@ -2205,7 +2225,14 @@ a package into `~/.hermes/plugins` is inert on every surface until the user
 says otherwise. The desktop half degrades gracefully when the backend half is
 off — `ctx.rest` returns errors, not crashes.
 
-:::note
+<Note>
+
+<div className="doc-callout-title">
+
+NOTE
+
+</div>
+
 The copy is local to the machine the desktop app runs on. Against a remote
 backend, the remote box's `~/.hermes/plugins` is not reachable as a filesystem —
 only locally installed packages contribute a desktop half this way. For a
@@ -2214,7 +2241,8 @@ remote backend the install dialog clones the desktop half separately into
 was installed on the remote host without that clone shows its Desktop half as
 **unavailable (remote backend)** on the Plugins page — not as a pending copy —
 and the tooltip points at **Install from Git** with the Desktop target checked.
-:::
+
+</Note>
 
 ### Distributing with an install link {#install-link}
 
@@ -2231,10 +2259,10 @@ never auto-install. `force=1` replaces an existing install; dev builds use
 `hermes-dev://`. Full link reference:
 [One-click install links](../user-guide/features/plugins.md#one-click-install-links-desktop).
 
-### The Python side
+### The Python side {#the-python-side}
 
 Desktop plugins reuse the dashboard plugin backend mount. Put the backend in a
-`dashboard/` subfolder of a regular Hermes plugin and declare it in a
+`dashboard/` subfolder of a regular {{app-name}} plugin and declare it in a
 `manifest.json`:
 
 ```
@@ -2261,27 +2289,35 @@ async def action(body: dict):
 
 Routes mount under `/api/plugins/<id>/` (`GET /api/plugins/<id>/board`, …).
 Backend code runs inside the gateway process, so it can import from the
-hermes-agent codebase directly (`hermes_state`, `hermes_cli.config`, …). See
+hermes-agent codebase directly (`agent_state`, `agent_cli.config`, …). See
 [Extending the Dashboard → Backend API routes](../user-guide/features/extending-the-dashboard.md#backend-api-routes)
 for the full backend reference — the mount is identical.
 
-:::caution The Python backend is gated separately
+<Warning>
+
+<div className="doc-callout-title">
+
+The Python backend is gated separately
+
+</div>
+
 Enabling a plugin in the desktop **Capabilities → Plugins** panel is a renderer-side
 choice; it does **not** import Python. A user plugin's `plugin_api.py` is
 imported only when the plugin is in the `plugins.enabled` allow-list in
 `config.yaml` (and not in `plugins.disabled`). Project plugins (`./.hermes/`)
 never auto-import Python. This is a security boundary, not an oversight
 (GHSA-mcfc-hp25-cjv7).
-:::
 
-#### Pushing events to your desktop half
+</Warning>
+
+#### Pushing events to your desktop half {#pushing-events-to-your-desktop-half}
 
 Your backend runs inside the gateway process, so it can push an update to your
 own desktop half over the app's global event stream — the same stream
 `host.onEvent` subscribes to:
 
 ```python
-from hermes_cli.plugin_events import broadcast_plugin_event
+from agent_cli.plugin_events import broadcast_plugin_event
 
 broadcast_plugin_event("rss-reader", "feed.updated", {"count": 3})
 # → event "plugin.rss-reader.feed.updated" reaches every connected desktop client
@@ -2305,12 +2341,12 @@ your handler). Where it lands depends on the process the call runs in:
 
 | Caller runs in | Reaches |
 |---|---|
-| the process Desktop is connected to — the host gateway a local Desktop attaches to, or a remote `hermes serve`: `plugin_api.py` routers, plugin slash commands, tools and hooks in the agent turn | every Desktop window connected to that process |
+| the process Desktop is connected to — the host gateway a local Desktop attaches to, or a remote `noone serve`: `plugin_api.py` routers, plugin slash commands, tools and hooks in the agent turn | every Desktop window connected to that process |
 | the `dashboard.turn_isolation` compute-host child (tools/hooks of an isolated turn) | relayed over the host pipe to its parent process, then every connected window |
 | the stdio TUI (`hermes` in a terminal) | that terminal's client |
-| `hermes chat`, cron, `hermes plugins validate`, or a gateway with no Desktop window connected | nobody — no Desktop client is attached to that process; the call is a logged no-op |
+| `noone chat`, cron, `noone plugins validate`, or a gateway with no Desktop window connected | nobody — no Desktop client is attached to that process; the call is a logged no-op |
 
-Use this instead of importing `tui_gateway.server` internals; for plugin-scoped frames
+Use this instead of importing `agent_backend.server` internals; for plugin-scoped frames
 with a payload tailored per connection, `ctx.socket('/events')` remains the
 richer door.
 
@@ -2320,7 +2356,7 @@ calls `broadcast_plugin_event('rss-reader', 'feed.updated', payload)` where it
 used to enqueue, and the desktop side replaces the timer with
 `host.onEvent('plugin.rss-reader.feed.updated', fn)` inside `register(ctx)`.
 
-### Calling it from the plugin
+### Calling it from the plugin {#calling-it-from-the-plugin}
 
 ```javascript
 register(ctx) {
@@ -2373,7 +2409,7 @@ When the socket gives up (your polling fallback is then the only feed):
 For gateway-wide data (not your own namespace), use `host.request` (JSON-RPC) and
 `host.onEvent` (the gateway event stream) instead.
 
-## Settings, enable state, and storage
+## Settings, enable state, and storage {#settings-enable-state-and-storage}
 
 Every plugin — enabled or not — inventories in **Capabilities → Plugins**, where the
 user toggles it live (no app restart), reveals its folder, or rescans. A plugin's
@@ -2399,7 +2435,7 @@ ctx.storage.remove('lastTab')
 For files (a vault, a notes folder, exports) use [`ctx.files`](#plugin-files):
 your own data folder plus folders the user grants you.
 
-## Bundled plugins
+## Bundled plugins {#bundled-plugins}
 
 A plugin can ship in-tree at `apps/desktop/src/plugins/<id>/plugin.tsx` (default
 export a `HermesPlugin`). It's discovered by `discoverBundledPlugins()` at boot —
@@ -2407,8 +2443,8 @@ no import, no registry edit — and shares the exact inventory + live
 enable/disable contract as a disk plugin. The two differences:
 
 1. It goes through the app's Vite build, so you can write **real JSX** and import
-   the SDK by its `@hermes/plugin-sdk` alias.
-2. It's still lint-fenced to `@hermes/plugin-sdk` + `react` only — no `@/…` app
+   the SDK by its `@noone/plugin-sdk` alias.
+2. It's still lint-fenced to `@noone/plugin-sdk` + `react` only — no `@/…` app
    internals.
 
 No desktop plugins ship in the core tree today; the shipped app stays uncluttered
@@ -2416,7 +2452,7 @@ and demos live in the
 [`hermes-example-plugins`](https://github.com/NousResearch/hermes-example-plugins)
 companion repo.
 
-## Security model
+## Security model {#security-model}
 
 A loaded plugin is evaluated as ESM in the renderer realm with **full app
 authority** — the React singleton, the whole SDK (`host.request` gateway RPC,
@@ -2432,7 +2468,7 @@ your machine — which is why the disk door only loads local files you (or your
 agent) wrote. For [catalog](../user-guide/features/plugin-catalog.md#trust-model)
 installs the trust comes from admission — a human reviewed the exact pinned
 commit — backed by two tripwires: the `desktop surface` lint at admission and
-the loader's import allowlist (`@hermes/plugin-sdk` and `react*` only; a static
+the loader's import allowlist (`@noone/plugin-sdk` and `react*` only; a static
 or dynamic `import` of anything else, including `https:` URLs, fails the load).
 Neither is a sandbox. Doors that touch user data outside the app are gated
 on top of that: `ctx.preview.executeJavaScript` needs a declared capability
@@ -2446,12 +2482,12 @@ bridge has no such limit, which is why catalog review asks for `ctx.files`. A fu
 (iframe/worker + CSP + capability gating) before it can land; do not treat this
 pipeline as a trust boundary.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **JSX won't parse in a disk plugin.** The file loads uncompiled — use `jsx()` /
   `jsxs()` (or `React.createElement`), not JSX syntax. (Bundled plugins are built,
   so JSX is fine there.)
-- **Only three specifiers resolve:** `@hermes/plugin-sdk`, `react`,
+- **Only three specifiers resolve:** `@noone/plugin-sdk`, `react`,
   `react/jsx-runtime`. Any other import surfaces an up-front load error.
 - **Never hardcode colors** (`#000`, `black`, `rgb(...)`). Leave the background
   alone; use theme variables (`var(--ui-*)`) for everything.
@@ -2478,9 +2514,9 @@ pipeline as a trust boundary.
   one shows `duplicate id` on its own row in Capabilities ▸ Plugins.
 - **`ctx.socket` is a no-op on OAuth remotes.** Always have a polling fallback.
 
-## Reference
+## Reference {#reference}
 
-### SDK exports at a glance
+### SDK exports at a glance {#sdk-exports-at-a-glance}
 
 | Category | Exports |
 |----------|---------|
@@ -2495,22 +2531,22 @@ pipeline as a trust boundary.
 
 The canonical, always-current export list is `apps/desktop/src/sdk/index.ts`.
 
-### Agents: the `hermes-desktop-plugins` skill
+### Agents: the `hermes-desktop-plugins` skill {#agents-the-hermes-desktop-plugins-skill}
 
 When an agent writes a desktop plugin, it should load the bundled
 **`hermes-desktop-plugins`** skill — it carries the same contract as this page in
 agent-facing form, with a ready-to-copy `templates/plugin.js`. This page is the
 human/developer reference; the skill is the working checklist.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 **My plugin doesn't appear.** Confirm the file is at
 `$HERMES_HOME/desktop-plugins/<id>/plugin.js` and the folder name matches the
 export `id`. Run ⌘K → **Reload desktop plugins**. Check the app for an error
-toast naming the failure, and tail `hermes logs gui -f`.
+toast naming the failure, and tail `noone logs gui -f`.
 
 **"unsupported import" on load.** A disk plugin may only import
-`@hermes/plugin-sdk`, `react`, and `react/jsx-runtime`. Remove any other import.
+`@noone/plugin-sdk`, `react`, and `react/jsx-runtime`. Remove any other import.
 
 **A `jsx` element renders nothing / throws `ReferenceError`.** An identifier used
 in a `jsx()` call isn't imported. Add it to the import line.

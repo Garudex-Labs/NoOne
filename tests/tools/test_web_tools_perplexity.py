@@ -19,9 +19,9 @@ def _ok(payload):
 def _assert_hermes_identity_headers(headers):
     """Both Perplexity endpoints carry the Hermes identity headers (same set as Kimi/OpenCode)
     plus Perplexity's integration header."""
-    from hermes_cli.version_info import get_version_info
+    from agent_cli.version_info import get_version_info
 
-    assert headers["HTTP-Referer"] == "https://hermes-agent.nousresearch.com"
+    assert headers["HTTP-Referer"] == "https://github.com/Garudex-Labs/NoOne/tree/main/website/docs"
     assert headers["X-Title"] == "Hermes Agent"
     assert headers["User-Agent"] == f"HermesAgent/{get_version_info().base_version}"
     assert headers["X-Pplx-Integration"] == "hermes-agent"

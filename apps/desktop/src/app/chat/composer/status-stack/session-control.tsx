@@ -1,8 +1,8 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo, useCallback, useState } from 'react'
 
 import type { SubmitTextOptions } from '@/app/session/hooks/use-prompt-actions/utils'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 import type { SessionControlEntry } from '@/store/session-control'
 
@@ -60,7 +60,7 @@ export const SessionControlSections = memo(function SessionControlSections({
           role="alert"
         >
           <div className="flex items-center gap-1.5 truncate">
-            <Codicon className="shrink-0" name="error" size="0.85rem" />
+            <AppIcon className="shrink-0" name="error" size="0.85rem" />
             <span className="truncate">{displayError}</span>
           </div>
           <Button
@@ -71,7 +71,7 @@ export const SessionControlSections = memo(function SessionControlSections({
             type="button"
             variant="ghost"
           >
-            <Codicon name="close" size="0.75rem" />
+            <AppIcon name="close" size="0.75rem" />
           </Button>
         </div>
       )}

@@ -1,12 +1,12 @@
 ---
 title: Gateway local sessions
-description: Local CLI/TUI sessions as canonical gateway admissions
+description: Local CLI sessions as canonical gateway admissions
 ---
 
-# Gateway-owned fresh local sessions
+# Gateway-owned fresh local sessions {#gateway-owned-fresh-local-sessions}
 
-The composed gateway listener can create fresh local **CLI, TUI, or GUI-policy** sessions without
-starting `tui_gateway`'s separate agent runtime. The existing `GatewayRunner` / `TurnRunner`
+The composed gateway listener can create fresh local **CLI, or GUI-policy** sessions without
+starting `agent_backend`'s separate agent runtime. The existing `GatewayRunner` / `TurnRunner`
 own execution, approval waiters, tool calls, session storage, and canonical event delivery.
 
 A server-authenticated identity with `session:create` can call:
@@ -26,7 +26,7 @@ Repeating the request ID for the same principal and profile reuses that identity
 policy, including after daemon death. Omit the ID for a new session; clients that need
 lost-ACK retry protection must retain it. A failed transaction publishes no live session.
 
-### Naming the client
+### Naming the client {#naming-the-client}
 
 A client may say who it is with an optional `client` object on `session.create`, for example
 `"client": {"name": "my-client", "version": "1.2.0"}`. `name` is 1-64 characters of `a-z`, `0-9`,
@@ -37,10 +37,10 @@ only to an owner whose `runtime.describe` lists `client` in `session_create.para
 
 The name is stored with the frozen creation request, so it is part of the exact-retry identity
 and survives a restart. `session.info` returns it as `client` (absent when none was sent), and
-plugins read it through `hermes_cli.plugin_session.session_client()` and the `client` /
+plugins read it through `agent_cli.plugin_session.session_client()` and the `client` /
 `client_version` keys of prompt-section session info. It is attribution only: `source` still
 picks the session policy (send `source: "tui"` for terminal-client behaviour), and no toolset,
-approval, permission, prompt text or telemetry reads `client`. Hermes does not verify the name,
+approval, permission, prompt text or telemetry reads `client`. {{app-name}} does not verify the name,
 so any client can claim any name: never grant anything based on it.
 
 Attach another authenticated viewer with `session.resume({session_id})`, and submit
@@ -49,12 +49,12 @@ admission, not inference completion. Closing every viewer leaves the execution a
 pending approval alive. A new viewer can resume the same identity and answer through
 `approval.respond({session_id, execution_generation, prompt_id, choice})`.
 
-## Deliberate behavior change: shared operator access
+## Deliberate behavior change: shared operator access {#deliberate-behavior-change-shared-operator-access}
 
 Verified operators of the same gateway profile may attach to canonical local sessions
 created through another operator authentication path. This replaces the creator-subject-only
 access fence for those operators: the existing dashboard gate already grants operator access,
-so changing from native CLI/TUI to an authenticated dashboard must not create a second runtime
+so changing from native CLI to an authenticated dashboard must not create a second runtime
 or prevent attachment solely because the raw identities differ. This is shared access, not
 shared identity: creation receipts keep the original owner, and admissions and retries keep
 the submitting principal.
@@ -67,7 +67,7 @@ The server issues `session:operator` only at these existing trusted boundaries:
   legacy session token when that authentication path is enabled. With `webapp.enabled`, that
   session token is the browser-hosted Desktop's credential: the gateway keeps it in its home so
   Webapp tabs survive a restart, hands it out only through a one-use link minted for a same-user
-  control-socket peer, and replaces it on `hermes webapp --sign-out` and whenever the Webapp's
+  control-socket peer, and replaces it on `noone webapp --sign-out` and whenever the Webapp's
   listener fails to start, since its port then belongs to someone else. Behind the sign-in gate a
   Webapp login is bound to that token by the `hermes_webapp_signin_<gateway>` cookie (HMAC-SHA256 of
   `webapp-sign-in` keyed with the token), so replacing it ends those logins too; sign-out closes
@@ -100,7 +100,7 @@ one-use launch links are then off. `dashboard.public_url` never applies to the W
 gateway's private listener for native clients reads it as main does, so hosted sign-in on that
 listener keeps working.
 
-## Deliberately limited compatibility
+## Deliberately limited compatibility {#deliberately-limited-compatibility}
 
 - `source` accepts `cli` (default), `tui`, `gui`, `acp`, `tool` and `oneshot`
   (`gateway.session_policy.SURFACES`). They select the agent platforms `cli`, `tui`,
@@ -119,7 +119,7 @@ listener keeps working.
   `model` (nonempty model identifier on the daemon's configured provider), and `toolsets`
   (explicit array of established toolset names, including an empty array). Unknown or
   policy-filtered toolsets reject instead of silently disappearing. Explicit toolsets
-  override the default surface additions; CLI/TUI cannot explicitly request `desktop_ui`.
+  override the default surface additions; CLI cannot explicitly request `desktop_ui`.
   `cwd`, model selection, source and effective toolsets are captured at creation; attach
   cannot change them. A conflicting repeat `request_id` returns `invalid_params`.
 - Further frozen launch fields (`CREATE_FIELDS`): `provider`, `base_url` (http(s), no
@@ -139,11 +139,11 @@ listener keeps working.
   to `session:create`.
 - `session.list({limit})` returns authorized **live** authority sessions (`scope: "live"`).
   The native TUI picker also requests `session.list({limit, scope: "stored"})` for pre-authority
-  CLI/TUI/GUI history. This read-only feed uses the native legacy-resume ownership checks,
+  CLI/GUI history. This read-only feed uses the native legacy-resume ownership checks,
   excludes hidden/archived/internal and foreign-owned rows, and never adopts a session merely
   by listing it. Explicit resume performs adoption; the default live feed is unchanged.
   Both scopes take `workspace`: only conversations whose first row is in that folder, by
-  `hermes -c`'s rule (`hermes_state_sessions.workspace_key`): the row's git repo root equals it, or
+  `noone -c`'s rule (`agent_state_sessions.workspace_key`): the row's git repo root equals it, or
   (no root recorded) its cwd is the folder or under it. Pass the caller's repo root (else its cwd).
   With `picker: true` each row also carries what a picker shows (`gateway/session_picker_fields.py`):
   `cwd` and `workspace` from the same first row the filter reads, and from the conversation's current
@@ -156,7 +156,7 @@ listener keeps working.
   `session.resume`'s read (`SessionAuthority.authorize`, `session:read`: profile, owner or operator).
   Like `session.info` that check publishes the conversation's route entry in `authority.sessions`
   when it is not there; it builds no agent, subscribes nobody, and an ended local conversation stays
-  out of the live list. An old CLI/TUI/GUI row (no receipt or route) is judged at its compression tip
+  out of the live list. An old CLI/GUI row (no receipt or route) is judged at its compression tip
   by the stored feed's own rule, whichever lineage id is asked, and never adopted. It runs on the
   socket's concurrent read lane, so a prompt or interrupt never queues behind it. Runtimes that serve
   it advertise `session-transcript-v1` (and `session-list-picker-v1` for the `session.list` options
@@ -242,7 +242,7 @@ listener keeps working.
   either transition, and shared controls/stream callbacks keep the same execution owner.
   Clients continue resuming the creation ID, not an internal physical continuation ID.
 
-## Verification
+## Verification {#verification}
 
 `tests/gateway/test_operator_cross_surface.py` exercises native-created/dashboard-attached
 and dashboard-created/native-attached sessions through real bootstrap and dashboard
@@ -271,7 +271,7 @@ model request. No native messaging allow-all credential authorizes the execution
 separate negative control enables messaging allow-all only while proving reconstructed
 local source/profile objects still fail closed.
 
-`tests/gateway/test_session_policy.py` adds three simultaneous CLI/TUI/GUI turns against
+`tests/gateway/test_session_policy.py` adds three simultaneous CLI/GUI turns against
 an owned loopback model. A barrier holds their first requests concurrently; real terminal
 calls write separate files in three owned working directories. The next requests expose
 the correct cwd results, distinct requested models and surface-specific tool schemas.

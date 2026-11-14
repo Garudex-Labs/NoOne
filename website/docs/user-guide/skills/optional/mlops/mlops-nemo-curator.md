@@ -1,20 +1,20 @@
 ---
 title: "Nemo Curator — Curate LLM training data: dedupe, filter, PII redaction"
-sidebar_label: "Nemo Curator"
+sidebarTitle: "Nemo Curator"
 description: "Curate LLM training data: dedupe, filter, PII redaction"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Nemo Curator
+# Nemo Curator {#nemo-curator}
 
 Curate LLM training data: dedupe, filter, PII redaction.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/nemo-curator` |
+| Source | Optional — install with `noone skills install official/mlops/nemo-curator` |
 | Path | `optional-skills/mlops/nemo-curator` |
 | Version | `1.0.1` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ Curate LLM training data: dedupe, filter, PII redaction.
 | Platforms | linux, macos |
 | Tags | `Data Processing`, `NeMo Curator`, `Data Curation`, `GPU Acceleration`, `Deduplication`, `Quality Filtering`, `NVIDIA`, `RAPIDS`, `PII Redaction`, `Multimodal`, `LLM Training Data` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# NeMo Curator - GPU-Accelerated Data Curation
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# NeMo Curator - GPU-Accelerated Data Curation {#nemo-curator---gpu-accelerated-data-curation}
 
 NVIDIA's toolkit for preparing high-quality training data for LLMs.
 
-## When to use NeMo Curator
+## When to use NeMo Curator {#when-to-use-nemo-curator}
 
 **Use NeMo Curator when:**
 - Preparing LLM training data from web scrapes (Common Crawl)
@@ -52,9 +60,9 @@ NVIDIA's toolkit for preparing high-quality training data for LLMs.
 - **dolma**: Allen AI's data toolkit
 - **Ray Data**: General ML data processing (no curation focus)
 
-## Quick start
+## Quick start {#quick-start}
 
-### Installation
+### Installation {#installation}
 
 ```bash
 # NeMo Curator 1.x installs with uv. Extras use hyphens (PyPI-normalized):
@@ -70,7 +78,7 @@ uv pip install "nemo-curator[all]"
 uv pip install "nemo-curator[text-cpu]"
 ```
 
-### Basic text curation pipeline
+### Basic text curation pipeline {#basic-text-curation-pipeline}
 
 > **Major version rewrite (1.x):** NeMo Curator was rewritten around a **Ray-based
 > pipeline/stage architecture**. The old `DocumentDataset` + `nemo_curator.modules.*` /
@@ -106,9 +114,9 @@ The 0.x-style snippets in the sections that follow illustrate the *concepts* (qu
 filtering, exact/fuzzy/semantic dedup, PII redaction, classifier filtering). For runnable
 1.x code, map each concept onto the corresponding stage from the modality guide.
 
-## Data curation pipeline
+## Data curation pipeline {#data-curation-pipeline}
 
-### Stage 1: Quality filtering
+### Stage 1: Quality filtering {#stage-1-quality-filtering}
 
 ```python
 from nemo_curator.filters import (
@@ -131,7 +139,7 @@ dataset = dataset.filter(RepeatedLinesFilter(max_repeated_line_fraction=0.3))
 dataset = dataset.filter(UrlRatioFilter(max_url_ratio=0.2))
 ```
 
-### Stage 2: Deduplication
+### Stage 2: Deduplication {#stage-2-deduplication}
 
 **Exact deduplication**:
 ```python
@@ -172,7 +180,7 @@ semantic_dedup = SemanticDuplicates(
 deduped = semantic_dedup(dataset)
 ```
 
-### Stage 3: PII redaction
+### Stage 3: PII redaction {#stage-3-pii-redaction}
 
 ```python
 from nemo_curator.modules import Modify
@@ -187,7 +195,7 @@ pii_redactor = PIIRedactor(
 redacted = Modify(pii_redactor)(dataset)
 ```
 
-### Stage 4: Classifier filtering
+### Stage 4: Classifier filtering {#stage-4-classifier-filtering}
 
 ```python
 from nemo_curator.classifiers import QualityClassifier
@@ -203,9 +211,9 @@ quality_clf = QualityClassifier(
 high_quality = dataset.filter(lambda doc: quality_clf(doc["text"]) > 0.5)
 ```
 
-## GPU acceleration
+## GPU acceleration {#gpu-acceleration}
 
-### GPU vs CPU performance
+### GPU vs CPU performance {#gpu-vs-cpu-performance}
 
 | Operation | CPU (16 cores) | GPU (A100) | Speedup |
 |-----------|----------------|------------|---------|
@@ -213,7 +221,7 @@ high_quality = dataset.filter(lambda doc: quality_clf(doc["text"]) > 0.5)
 | Exact dedup (1TB) | 8 hours | 0.5 hours | 16× |
 | Quality filtering | 2 hours | 0.2 hours | 10× |
 
-### Multi-GPU scaling
+### Multi-GPU scaling {#multi-gpu-scaling}
 
 ```python
 from nemo_curator import get_client
@@ -226,9 +234,9 @@ client = get_client(cluster_type="gpu", n_workers=8)
 deduped = FuzzyDuplicates(...)(dataset)
 ```
 
-## Multi-modal curation
+## Multi-modal curation {#multi-modal-curation}
 
-### Image curation
+### Image curation {#image-curation}
 
 ```python
 from nemo_curator.image import (
@@ -250,7 +258,7 @@ clip_embedder = CLIPEmbedder(model="openai/clip-vit-base-patch32")
 image_embeddings = clip_embedder(safe_images)
 ```
 
-### Video curation
+### Video curation {#video-curation}
 
 ```python
 from nemo_curator.video import (
@@ -272,7 +280,7 @@ video_embedder = InternVideo2Embedder()
 video_embeddings = video_embedder(clips)
 ```
 
-### Audio curation
+### Audio curation {#audio-curation}
 
 ```python
 from nemo_curator.audio import (
@@ -294,9 +302,9 @@ duration_filter = DurationFilter(min_duration=1.0, max_duration=30.0)
 filtered_audio = duration_filter(high_quality_audio)
 ```
 
-## Common patterns
+## Common patterns {#common-patterns}
 
-### Web scrape curation (Common Crawl)
+### Web scrape curation (Common Crawl) {#web-scrape-curation-common-crawl}
 
 ```python
 from nemo_curator import ScoreFilter, Modify
@@ -337,7 +345,7 @@ for stage in pipeline:
 dataset.to_parquet("curated_common_crawl/")
 ```
 
-### Distributed processing
+### Distributed processing {#distributed-processing}
 
 ```python
 from nemo_curator import get_client
@@ -356,27 +364,27 @@ client.close()
 cluster.close()
 ```
 
-## Performance benchmarks
+## Performance benchmarks {#performance-benchmarks}
 
-### Fuzzy deduplication (8TB RedPajama v2)
+### Fuzzy deduplication (8TB RedPajama v2) {#fuzzy-deduplication-8tb-redpajama-v2}
 
 - **CPU (256 cores)**: 120 hours
 - **GPU (8× A100)**: 7.5 hours
 - **Speedup**: 16×
 
-### Exact deduplication (1TB)
+### Exact deduplication (1TB) {#exact-deduplication-1tb}
 
 - **CPU (64 cores)**: 8 hours
 - **GPU (4× A100)**: 0.5 hours
 - **Speedup**: 16×
 
-### Quality filtering (100GB)
+### Quality filtering (100GB) {#quality-filtering-100gb}
 
 - **CPU (32 cores)**: 2 hours
 - **GPU (2× A100)**: 0.2 hours
 - **Speedup**: 10×
 
-## Cost comparison
+## Cost comparison {#cost-comparison}
 
 **CPU-based curation** (AWS c5.18xlarge × 10):
 - Cost: $3.60/hour × 10 = $36/hour
@@ -390,24 +398,24 @@ cluster.close()
 
 **Savings**: 89% reduction ($3,828 saved)
 
-## Supported data formats
+## Supported data formats {#supported-data-formats}
 
 - **Input**: Parquet, JSONL, CSV
 - **Output**: Parquet (recommended), JSONL
 - **WebDataset**: TAR archives for multi-modal
 
-## Use cases
+## Use cases {#use-cases}
 
 **Production deployments**:
 - NVIDIA used NeMo Curator to prepare Nemotron-4 training data
 - Open-source datasets curated: RedPajama v2, The Pile
 
-## References
+## References {#references}
 
-- **[Filtering Guide](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/nemo-curator/references/filtering.md)** - 30+ quality filters, heuristics
-- **[Deduplication Guide](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/nemo-curator/references/deduplication.md)** - Exact, fuzzy, semantic methods
+- **[Filtering Guide](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/nemo-curator/references/filtering.md)** - 30+ quality filters, heuristics
+- **[Deduplication Guide](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/nemo-curator/references/deduplication.md)** - Exact, fuzzy, semantic methods
 
-## Resources
+## Resources {#resources}
 
 - **GitHub**: https://github.com/NVIDIA-NeMo/Curator
 - **Docs**: https://docs.nvidia.com/nemo/curator/latest/

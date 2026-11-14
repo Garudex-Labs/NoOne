@@ -3,8 +3,8 @@
 import pytest
 
 from gateway.session_context import clear_session_vars, set_session_vars
-from hermes_cli import plugins_session_env
-from hermes_cli.plugins import PluginManager
+from agent_cli import plugins_session_env
+from agent_cli.plugins import PluginManager
 
 _PLUGIN = """
 PANES = {}
@@ -88,7 +88,7 @@ def test_a_plugin_cannot_set_core_or_credential_names(plugin, monkeypatch):
 @pytest.mark.platforms("windows")
 def test_a_lowercase_name_replaces_or_unsets_the_inherited_windows_variable(monkeypatch):
     """Windows names are case-insensitive: ``pane`` acts on the inherited ``PANE``, with no second alias."""
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     from tools.environments.local import build_subprocess_env
 
     monkeypatch.setattr(plugins_session_env, "_REGISTRATIONS", {})
@@ -96,7 +96,7 @@ def test_a_lowercase_name_replaces_or_unsets_the_inherited_windows_variable(monk
     monkeypatch.setenv("PANE", "gateway")
     monkeypatch.setenv("WINDOW", "gateway-win")
     values = {"a": {"pane": "pane-a", "window": None}}
-    plugins_session_env.register_session_env(hermes_home_key(), ["pane", "window"], values.get)
+    plugins_session_env.register_session_env(agent_home_key(), ["pane", "window"], values.get)
     child = _as_session("a", build_subprocess_env)
     assert [k for k in child if k.upper() in {"PANE", "WINDOW"}] == ["PANE"] and child["PANE"] == "pane-a"
 
@@ -104,11 +104,11 @@ def test_a_lowercase_name_replaces_or_unsets_the_inherited_windows_variable(monk
 def test_an_unloaded_plugins_names_stay_out_of_the_shell_snapshot(monkeypatch):
     """A snapshot taken while a value was injected may hold it: after the plugin unloads, its names
     stay excluded, so no later command restores another session's value."""
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
 
     monkeypatch.setattr(plugins_session_env, "_REGISTRATIONS", {})
     monkeypatch.setattr(plugins_session_env, "_DECLARED", {})
-    release = plugins_session_env.register_session_env(hermes_home_key(), ["PANE"], lambda sid: {"PANE": sid})
+    release = plugins_session_env.register_session_env(agent_home_key(), ["PANE"], lambda sid: {"PANE": sid})
     release()
     assert "PANE" in plugins_session_env.session_env_names()
 
@@ -138,7 +138,7 @@ def _home(root, plugins, isolation="in_process"):
 def test_a_second_plugin_cannot_take_a_declared_name(tmp_path, monkeypatch, isolation):
     """One value per name: the later plugin is refused, naming the holder, instead of a silent last-wins.
     The holder reloads, and its unload frees the name."""
-    from hermes_cli import plugins as plugins_mod
+    from agent_cli import plugins as plugins_mod
 
     monkeypatch.setattr(plugins_session_env, "_REGISTRATIONS", {})
     monkeypatch.setattr(plugins_session_env, "_DECLARED", {})
@@ -178,7 +178,7 @@ def register(ctx):
 def test_one_plugin_declaring_a_name_twice_keeps_the_later_value(tmp_path, monkeypatch, isolation, disposed):
     """Only another plugin is refused: one plugin's overlapping registrations load, the later one's value
     wins, and disposing either one leaves the other's value."""
-    from hermes_cli import plugins as plugins_mod
+    from agent_cli import plugins as plugins_mod
 
     monkeypatch.setattr(plugins_session_env, "_REGISTRATIONS", {})
     monkeypatch.setattr(plugins_session_env, "_DECLARED", {})
@@ -203,7 +203,7 @@ def test_one_plugin_declaring_a_name_twice_keeps_the_later_value(tmp_path, monke
 def test_a_profiles_names_never_reach_another_profiles_shells(tmp_path, monkeypatch):
     """A multiplexed gateway serves two homes: A's plugin declaring PANE leaves B's own PANE export alone
     (it still carries to B's next command), and B may declare the same name for its own sessions."""
-    from hermes_constants import hermes_home_key, reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import agent_home_key, reset_agent_home_override, set_agent_home_override
     from tools.environments.local import LocalEnvironment
 
     monkeypatch.setattr(plugins_session_env, "_REGISTRATIONS", {})
@@ -212,14 +212,14 @@ def test_a_profiles_names_never_reach_another_profiles_shells(tmp_path, monkeypa
     home_a, home_b = tmp_path / "a", tmp_path / "b"
     home_a.mkdir()
     home_b.mkdir()
-    plugins_session_env.register_session_env(hermes_home_key(home_a), ["PANE"], lambda sid: {"PANE": "a-" + sid})
+    plugins_session_env.register_session_env(agent_home_key(home_a), ["PANE"], lambda sid: {"PANE": "a-" + sid})
 
     def as_profile(home, fn):
-        token = set_hermes_home_override(home)
+        token = set_agent_home_override(home)
         try:
             return fn()
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
 
     assert as_profile(home_a, plugins_session_env.session_env_names) == {"PANE"}
     assert as_profile(home_b, plugins_session_env.session_env_names) == frozenset()
@@ -232,7 +232,7 @@ def test_a_profiles_names_never_reach_another_profiles_shells(tmp_path, monkeypa
         shell.cleanup()
 
     # A different plugin from A's: only the scope check lets B declare PANE too.
-    plugins_session_env.register_session_env(hermes_home_key(home_b), ["PANE"], lambda sid: {"PANE": "b-" + sid},
+    plugins_session_env.register_session_env(agent_home_key(home_b), ["PANE"], lambda sid: {"PANE": "b-" + sid},
                                              owner="b_plugin")
     assert as_profile(home_a, lambda: plugins_session_env.resolve_session_env("s")) == {"PANE": "a-s"}
     assert as_profile(home_b, lambda: plugins_session_env.resolve_session_env("s")) == {"PANE": "b-s"}

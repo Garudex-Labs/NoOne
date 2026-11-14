@@ -23,7 +23,7 @@ from agent.transports.codex_app_server import (
     CodexAppServerClient, CodexAppServerError, CodexAppServerTransportError,
 )
 from agent.transports.codex_event_projector import CodexEventProjector, ProjectionResult
-from agent.transports.hermes_tools_mcp_server import HERMES_TOOLS_MCP_SERVER_NAME
+from agent.transports.agent_tools_mcp_server import HERMES_TOOLS_MCP_SERVER_NAME
 
 logger = logging.getLogger(__name__)
 

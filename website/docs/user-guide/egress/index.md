@@ -1,9 +1,8 @@
 ---
 title: Egress proxy
-sidebar_position: 1
 ---
 
-# Egress proxy
+# Egress proxy {#egress-proxy}
 
 Optional outbound credential-injection firewall for remote terminal sandboxes. The sandbox only ever holds opaque proxy tokens; real API keys never leave the host.
 

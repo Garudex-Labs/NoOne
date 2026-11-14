@@ -43,7 +43,7 @@ def test_explicit_reset_timestamp_overrides_default_429_ttl(tmp_path, monkeypatc
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     # Prevent auto-seeding from Codex CLI tokens on the host
     monkeypatch.setattr(
-        "hermes_cli.auth._import_codex_cli_tokens",
+        "agent_cli.auth._import_codex_cli_tokens",
         lambda: None,
     )
     _write_auth_store(
@@ -506,7 +506,7 @@ def test_dead_manual_entry_pruned_after_24h(tmp_path, monkeypatch):
     Manual entries (``manual:*``) are independent credentials with no
     singleton to re-seed from, so we can clean them up after a quiet
     window without losing recoverability — the user can always re-add
-    via ``hermes auth add``.
+    via ``noone auth add``.
     """
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     # DEAD entry from > 24h ago
@@ -677,7 +677,7 @@ def test_load_pool_persists_bitwarden_origin_metadata_without_secret(tmp_path, m
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     monkeypatch.setenv("OPENROUTER_API_KEY", sentinel)
     monkeypatch.setattr(
-        "hermes_cli.env_loader.get_secret_source",
+        "agent_cli.env_loader.get_secret_source",
         lambda env_var: "bitwarden" if env_var == "OPENROUTER_API_KEY" else None,
     )
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
@@ -837,7 +837,7 @@ def test_write_credential_pool_sanitizes_borrowed_payload_at_disk_boundary(tmp_p
     manual_secret = "MANUAL_SECRET_STAYS_PERSISTABLE"
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
 
-    from hermes_cli.auth import write_credential_pool
+    from agent_cli.auth import write_credential_pool
 
     write_credential_pool("openrouter", [
         {
@@ -880,7 +880,7 @@ def test_write_credential_pool_treats_unowned_oauth_source_as_borrowed(tmp_path,
     sentinel = "S3NTINEL_DO_NOT_PERSIST_UNOWNED_OAUTH"
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
 
-    from hermes_cli.auth import write_credential_pool
+    from agent_cli.auth import write_credential_pool
 
     write_credential_pool("openrouter", [
         {
@@ -908,7 +908,7 @@ def test_write_credential_pool_preserves_known_provider_owned_oauth_state(tmp_pa
     sentinel = "PROVIDER_OWNED_DEVICE_CODE_STAYS_PERSISTABLE"
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
 
-    from hermes_cli.auth import write_credential_pool
+    from agent_cli.auth import write_credential_pool
 
     write_credential_pool("nous", [
         {
@@ -1077,7 +1077,7 @@ def test_nous_runtime_api_key_rejects_opaque_agent_key():
 def test_load_pool_api_key_path_skips_oauth_autodiscovery(tmp_path, monkeypatch):
     """API-key auth path: autodiscovered OAuth creds must NOT be seeded.
 
-    When the user picks "Anthropic API key" at `hermes setup`,
+    When the user picks "Anthropic API key" at `noone setup`,
     `save_anthropic_api_key()` writes ANTHROPIC_API_KEY and zeros
     ANTHROPIC_TOKEN.  That env-var pattern is the explicit signal that the
     user opted into the API-key path and explicitly OUT of the OAuth
@@ -1092,7 +1092,7 @@ def test_load_pool_api_key_path_skips_oauth_autodiscovery(tmp_path, monkeypatch)
     monkeypatch.delenv("ANTHROPIC_TOKEN", raising=False)
     monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
-    monkeypatch.setattr("hermes_cli.auth.is_provider_explicitly_configured", lambda pid: True)
+    monkeypatch.setattr("agent_cli.auth.is_provider_explicitly_configured", lambda pid: True)
 
     pkce_called = {"n": 0}
     cc_called = {"n": 0}
@@ -1133,7 +1133,7 @@ def test_load_pool_api_key_path_prunes_stale_oauth_entries(tmp_path, monkeypatch
 
     Without this, a user who logs into OAuth (seeding `claude_code` or
     `hermes_pkce` into auth.json) and later switches to the API key at
-    `hermes setup` would still have those OAuth entries dormant on disk.
+    `noone setup` would still have those OAuth entries dormant on disk.
     Pool rotation on a transient 401 could revive them and flip the
     session onto the OAuth masquerade.
     """
@@ -1166,7 +1166,7 @@ def test_load_pool_api_key_path_prunes_stale_oauth_entries(tmp_path, monkeypatch
             },
         },
     )
-    monkeypatch.setattr("hermes_cli.auth.is_provider_explicitly_configured", lambda pid: True)
+    monkeypatch.setattr("agent_cli.auth.is_provider_explicitly_configured", lambda pid: True)
     monkeypatch.setattr("agent.anthropic_credentials.read_hermes_oauth_credentials", lambda: None)
     monkeypatch.setattr("agent.anthropic_credentials.read_claude_code_credentials", lambda: None)
 
@@ -1184,7 +1184,7 @@ def test_load_pool_oauth_path_still_autodiscovers(tmp_path, monkeypatch):
     """OAuth path: ANTHROPIC_TOKEN set, autodiscovery still fires.
 
     Regression guard: the API-key gate must not affect users who chose the
-    OAuth path at `hermes setup`.  When ANTHROPIC_TOKEN is set (and
+    OAuth path at `noone setup`.  When ANTHROPIC_TOKEN is set (and
     ANTHROPIC_API_KEY is empty), autodiscovered Claude Code creds should
     still be seeded into the pool as before.
     """
@@ -1193,7 +1193,7 @@ def test_load_pool_oauth_path_still_autodiscovers(tmp_path, monkeypatch):
     monkeypatch.setenv("ANTHROPIC_TOKEN", "sk-ant-oat01-explicit-oauth-token")
     monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
-    monkeypatch.setattr("hermes_cli.auth.is_provider_explicitly_configured", lambda pid: True)
+    monkeypatch.setattr("agent_cli.auth.is_provider_explicitly_configured", lambda pid: True)
 
     monkeypatch.setattr(
         "agent.anthropic_credentials.read_hermes_oauth_credentials",
@@ -1291,7 +1291,7 @@ def test_custom_endpoint_pool_seeds_from_config(tmp_path, monkeypatch):
 
     # Write config.yaml with a custom_providers entry
     config_path = tmp_path / "hermes" / "config.yaml"
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
     config_path.write_text(yaml.safe_dump({
         "custom_providers": [
             {
@@ -1317,7 +1317,7 @@ def test_custom_endpoint_pool_seeds_from_model_config(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     _write_auth_store(tmp_path, {"version": 1})
 
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
     config_path = tmp_path / "hermes" / "config.yaml"
     config_path.write_text(yaml.safe_dump({
         "custom_providers": [
@@ -1375,7 +1375,7 @@ def test_load_pool_does_not_seed_claude_code_when_anthropic_not_configured(tmp_p
     )
     # User configured kimi-coding, NOT anthropic
     monkeypatch.setattr(
-        "hermes_cli.auth.is_provider_explicitly_configured",
+        "agent_cli.auth.is_provider_explicitly_configured",
         lambda pid: pid == "kimi-coding",
     )
 
@@ -1392,7 +1392,7 @@ def test_load_pool_seeds_qwen_oauth_via_cli_tokens(tmp_path, monkeypatch):
     _write_auth_store(tmp_path, {"version": 1, "credential_pool": {}})
 
     monkeypatch.setattr(
-        "hermes_cli.auth.resolve_qwen_runtime_credentials",
+        "agent_cli.auth.resolve_qwen_runtime_credentials",
         lambda **kw: {
             "provider": "qwen-oauth",
             "base_url": "https://portal.qwen.ai/v1",
@@ -1418,10 +1418,10 @@ def test_load_pool_does_not_seed_qwen_oauth_when_no_token(tmp_path, monkeypatch)
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     _write_auth_store(tmp_path, {"version": 1, "credential_pool": {}})
 
-    from hermes_cli.auth import AuthError
+    from agent_cli.auth import AuthError
 
     monkeypatch.setattr(
-        "hermes_cli.auth.resolve_qwen_runtime_credentials",
+        "agent_cli.auth.resolve_qwen_runtime_credentials",
         lambda **kw: (_ for _ in ()).throw(
             AuthError("Qwen CLI credentials not found.", provider="qwen-oauth", code="qwen_auth_missing")
         ),
@@ -1585,7 +1585,7 @@ def test_persist_preserves_concurrent_disk_only_entry(tmp_path, monkeypatch):
     )
 
     from agent.credential_pool import load_pool
-    from hermes_cli.auth import read_credential_pool, write_credential_pool
+    from agent_cli.auth import read_credential_pool, write_credential_pool
 
     pool = load_pool("anthropic")
     assert {entry.id for entry in pool.entries()} == {"cred-A", "cred-B"}
@@ -1629,7 +1629,7 @@ def _make_anthropic_claude_code_pool(tmp_path, monkeypatch, *, access_token, ref
     monkeypatch.delenv("ANTHROPIC_TOKEN", raising=False)
     monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
     _write_auth_store(tmp_path, {"version": 1, "credential_pool": {}})
-    monkeypatch.setattr("hermes_cli.auth.is_provider_explicitly_configured", lambda pid: pid == "anthropic")
+    monkeypatch.setattr("agent_cli.auth.is_provider_explicitly_configured", lambda pid: pid == "anthropic")
     monkeypatch.setattr(
         "agent.anthropic_credentials.read_hermes_oauth_credentials",
         lambda: None,
@@ -1805,7 +1805,7 @@ def test_reset_statuses_clears_a_cooldown_that_is_still_binding(tmp_path, monkey
     snapshot so one process cannot resurrect a key another has just benched.
     ``reset_statuses`` clears ``last_status_at`` to None, which that merge reads
     as epoch 0 — older than any real timestamp — so the reset always lost and
-    the cooldown was copied straight back. ``hermes auth reset`` printed "Reset
+    the cooldown was copied straight back. ``noone auth reset`` printed "Reset
     status on 1 credentials" and changed nothing on disk.
 
     The cooldown here is deliberately RECENT. Once a cooldown has expired the
@@ -1838,7 +1838,7 @@ def test_reset_statuses_clears_the_classified_failure_reason(tmp_path, monkeypat
 
     It lives in ``extra`` rather than as a dataclass field, so ``replace()``
     could not reach it and it outlived every reset — leaving an entry with no
-    status and no error code but still classified ``billing``. ``hermes auth
+    status and no error code but still classified ``billing``. ``noone auth
     list`` renders that leftover as though it were a current finding.
     """
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
@@ -1867,7 +1867,7 @@ def test_a_persist_without_declared_intent_still_cannot_erase_a_cooldown(
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     _exhausted_billing_store(tmp_path, age_seconds=5)
 
-    from hermes_cli.auth import write_credential_pool
+    from agent_cli.auth import write_credential_pool
 
     # A stale snapshot: same id, status cleared, intent NOT declared.
     write_credential_pool(
@@ -1893,7 +1893,7 @@ def test_a_persist_without_declared_intent_still_cannot_erase_a_cooldown(
 
 
 def test_live_pool_flush_does_not_resurrect_a_cooldown_reset_by_another_process(tmp_path, monkeypatch):
-    """A running session's next ordinary flush must not undo ``hermes auth reset`` (#89415).
+    """A running session's next ordinary flush must not undo ``noone auth reset`` (#89415).
 
     The live pool still holds the entry as exhausted in memory; the CLI in another
     process clears it on disk. Before the fix the cleared disk row had no status,
@@ -1910,7 +1910,7 @@ def test_live_pool_flush_does_not_resurrect_a_cooldown_reset_by_another_process(
 
     live = load_pool("deepseek")                      # process A: session already running
     assert live.has_available() is False
-    assert load_pool("deepseek").reset_statuses() == 1  # process B: `hermes auth reset deepseek`
+    assert load_pool("deepseek").reset_statuses() == 1  # process B: `noone auth reset deepseek`
 
     live._persist()                                   # A's next ordinary flush
     assert _disk_entry(tmp_path)["last_status"] is None

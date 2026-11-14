@@ -1,6 +1,6 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { type ReactNode, useId, useRef, useState } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { Command, CommandItem, CommandItemCheck, CommandList } from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
@@ -127,7 +127,7 @@ export function ComboboxInput({
             tabIndex={-1}
             type="button"
           >
-            <Codicon name={expanded ? 'chevron-up' : 'chevron-down'} size="1rem" />
+            <AppIcon name={expanded ? 'chevron-up' : 'chevron-down'} size="1rem" />
           </button>
         </div>
       </PopoverAnchor>

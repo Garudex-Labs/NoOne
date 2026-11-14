@@ -1,45 +1,53 @@
 ---
 title: "Kanban Video Orchestrator — Plan and run multi-agent video production pipelines"
-sidebar_label: "Kanban Video Orchestrator"
+sidebarTitle: "Kanban Video Orchestrator"
 description: "Plan and run multi-agent video production pipelines"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Kanban Video Orchestrator
+# Kanban Video Orchestrator {#kanban-video-orchestrator}
 
 Plan and run multi-agent video production pipelines.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/kanban-video-orchestrator` |
+| Source | Optional — install with `noone skills install official/creative/kanban-video-orchestrator` |
 | Path | `optional-skills/creative/kanban-video-orchestrator` |
 | Version | `1.0.0` |
-| Author | ['SHL0MS', 'alt-glitch'] |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `video`, `kanban`, `multi-agent`, `orchestration`, `production-pipeline` |
 | Related skills | [`ascii-video`](../../bundled/creative/creative-ascii-video.md), [`manim-video`](../../bundled/creative/creative-manim-video.md), [`p5js`](../../bundled/creative/creative-p5js.md), [`comfyui`](../../optional/creative/creative-comfyui.md), [`pixel-art`](../../optional/creative/creative-pixel-art.md), [`ascii-art`](../../optional/creative/creative-ascii-art.md), [`songwriting-and-ai-music`](../../bundled/creative/creative-songwriting-and-ai-music.md), [`heartmula`](../../optional/creative/creative-heartmula.md), [`songsee`](../../optional/media/media-songsee.md), [`youtube-content`](../../bundled/media/media-youtube-content.md), [`claude-design`](../../bundled/creative/creative-claude-design.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md), [`architecture-diagram`](../../bundled/creative/creative-architecture-diagram.md), [`concept-diagrams`](../../optional/creative/creative-concept-diagrams.md), [`baoyu-comic`](../../optional/creative/creative-baoyu-comic.md), [`baoyu-infographic`](../../bundled/creative/creative-baoyu-infographic.md), [`humanizer`](../../bundled/creative/creative-humanizer.md), [`gif-search`](../../optional/media/media-gif-search.md), [`meme-generation`](../../optional/creative/creative-meme-generation.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Kanban Video Orchestrator
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Kanban Video Orchestrator {#kanban-video-orchestrator-1}
 
 Wrap any video request — from a 15-second product teaser to a 5-minute narrative
-short to a music video to an ASCII loop — in a Hermes Kanban pipeline that
+short to a music video to an ASCII loop — in a {{app-name}} Kanban pipeline that
 decomposes the work to specialized agent profiles.
 
 This skill does **not** render anything itself. It is a meta-pipeline that:
 
 1. **Scopes** the request through targeted discovery
 2. **Designs** an appropriate team (which roles, which tools per role) based on the style
-3. **Generates** a setup script that creates Hermes profiles, project workspace, and the initial kanban task
+3. **Generates** a setup script that creates {{app-name}} profiles, project workspace, and the initial kanban task
 4. **Hands off** to the director profile, which decomposes via the kanban
 5. **Monitors** execution, helps intervene when tasks stall or fail
 
@@ -48,20 +56,20 @@ existing skills + tools fit the scenes — `ascii-video`, `manim-video`, `p5js`,
 `comfyui`, `touchdesigner-mcp`, `songwriting-and-ai-music`,
 `heartmula`, external APIs, or plain Python with PIL + ffmpeg.
 
-## When NOT to use this skill
+## When NOT to use this skill {#when-not-to-use-this-skill}
 
 - The video is one continuous procedural project that needs no specialists. Just write the code directly.
 - The user wants a quick one-shot conversion (e.g. "convert this mp4 to a GIF") — use ffmpeg directly.
 - The output is a static image, GIF, or audio-only artifact — use the matching specific skill (`ascii-art`, `gifs`, `meme-generation`, `songwriting-and-ai-music`).
 - The work fits a single existing skill cleanly (e.g. a pure ASCII video — just use `ascii-video`).
 
-## Workflow
+## Workflow {#workflow}
 
 ```
 DISCOVER  →  BRIEF  →  TEAM DESIGN  →  SETUP  →  EXECUTE  →  MONITOR
 ```
 
-### Step 1 — Discover (ask the right questions)
+### Step 1 — Discover (ask the right questions) {#step-1--discover-ask-the-right-questions}
 
 The discovery process is **adaptive**: ask only what is actually needed. Always
 start with three questions to identify the broad shape:
@@ -76,9 +84,9 @@ time, listen, then proceed. Make reasonable assumptions whenever the user
 implies an answer.
 
 For complete intake patterns and per-style question banks, see
-**[references/intake.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/intake.md)**.
+**[references/intake.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/kanban-video-orchestrator/references/intake.md)**.
 
-### Step 2 — Brief
+### Step 2 — Brief {#step-2--brief}
 
 Once enough is known, produce a structured `brief.md` using the template in
 `assets/brief.md.tmpl`. Stages:
@@ -93,49 +101,49 @@ Once enough is known, produce a structured `brief.md` using the template in
 Show the brief to the user for confirmation before designing the team. **The
 brief is the contract** — every downstream task references it.
 
-### Step 3 — Team design
+### Step 3 — Team design {#step-3--team-design}
 
 Pick role archetypes from the library that fit this video. **Compose, don't
 clone.** Most videos need 4-7 profiles. The director is always present; the
 rest are picked by what the brief actually requires.
 
 For the role library and per-style team compositions, see
-**[references/role-archetypes.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/role-archetypes.md)**.
+**[references/role-archetypes.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/kanban-video-orchestrator/references/role-archetypes.md)**.
 
-For mapping role → which Hermes skills + toolsets it loads, see
-**[references/tool-matrix.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/tool-matrix.md)**.
+For mapping role → which {{app-name}} skills + toolsets it loads, see
+**[references/tool-matrix.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/kanban-video-orchestrator/references/tool-matrix.md)**.
 
-### Step 4 — Setup
+### Step 4 — Setup {#step-4--setup}
 
 Generate a setup script (`setup.sh`) and run it. The script:
 
 1. Creates the project workspace (`~/projects/video-pipeline/<slug>/`)
 2. Copies any provided assets into `taste/`, `audio/`, `assets/`
-3. Creates each Hermes profile via `hermes profile create --clone`
+3. Creates each {{app-name}} profile via `noone profile create --clone`
 4. Writes per-profile `SOUL.md` (personality + role definition)
 5. Configures profile YAML (toolsets, always_load skills, cwd)
 6. Writes `brief.md`, `TEAM.md`, and `taste/` content
-7. Fires the initial `hermes kanban create` task assigned to the director
+7. Fires the initial `noone kanban create` task assigned to the director
 
 Use `scripts/bootstrap_pipeline.py` to generate setup.sh from a brief +
-team-design JSON. See **[references/kanban-setup.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/kanban-setup.md)**
+team-design JSON. See **[references/kanban-setup.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/kanban-video-orchestrator/references/kanban-setup.md)**
 for the setup script structure, profile config patterns, and the critical
 "shared workspace" rule.
 
-### Step 5 — Execute
+### Step 5 — Execute {#step-5--execute}
 
 Run `setup.sh`. Then provide the user with monitoring commands:
 
 ```bash
-hermes kanban watch --tenant <project-tenant>     # live events
-hermes kanban list  --tenant <project-tenant>     # board snapshot
-hermes dashboard                                   # visual board UI
+noone kanban watch --tenant <project-tenant>     # live events
+noone kanban list  --tenant <project-tenant>     # board snapshot
+noone dashboard                                   # visual board UI
 ```
 
 The director profile takes over from here, decomposing the work and routing
 tasks to specialist profiles via the kanban toolset.
 
-### Step 6 — Monitor and intervene
+### Step 6 — Monitor and intervene {#step-6--monitor-and-intervene}
 
 Stay engaged — the kanban runs autonomously but a stuck task or bad output
 needs human (or AI) judgment.
@@ -149,16 +157,16 @@ heartbeats. When a worker's output fails review, the standard interventions are:
 3. Adjust the brief's scope and let the director re-decompose
 
 For diagnostic patterns, intervention recipes, and the "task is stuck"
-playbook, see **[references/monitoring.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/monitoring.md)**.
+playbook, see **[references/monitoring.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/kanban-video-orchestrator/references/monitoring.md)**.
 
-## Reference: worked examples
+## Reference: worked examples {#reference-worked-examples}
 
 Six concrete pipelines covering very different video styles — narrative film,
 product/marketing, music video, math/algorithm explainer, ASCII video, real-time
 installation — showing how the same workflow yields very different teams and
-task graphs. See **[references/examples.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/kanban-video-orchestrator/references/examples.md)**.
+task graphs. See **[references/examples.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/kanban-video-orchestrator/references/examples.md)**.
 
-## Critical rules
+## Critical rules {#critical-rules}
 
 1. **Discovery before action.** Never start generating a brief or team without
    asking at least the three baseline questions. A bad brief cascades through
@@ -186,7 +194,7 @@ task graphs. See **[references/examples.md](https://github.com/NousResearch/herm
 6. **The director never executes.** Even with the full `kanban + terminal +
    file` toolset, the director's `SOUL.md` rules forbid it from executing
    work itself. It decomposes and routes only — every concrete task becomes
-   a `hermes kanban create` call to a specialist profile. The kanban
+   a `noone kanban create` call to a specialist profile. The kanban
    orchestration guidance auto-injected into every kanban worker's system
    prompt spells this out further.
 
@@ -199,7 +207,7 @@ task graphs. See **[references/examples.md](https://github.com/NousResearch/herm
    A worker that hits a missing-key error wastes a task slot. The setup
    script's `check_key` helper aborts cleanly if a required key is missing.
 
-## File map
+## File map {#file-map}
 
 ```
 SKILL.md                            ← this file (workflow + rules)

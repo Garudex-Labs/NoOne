@@ -1,9 +1,9 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { type Dispatch, type ReactNode, type SetStateAction, useState } from 'react'
 
 import { ListRow } from '@/app/settings/primitives'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Input } from '@/components/ui/input'
 import { useI18n } from '@/i18n'
 import type { Translations } from '@/i18n/types'
@@ -218,7 +218,7 @@ function RetiredFold({
   return (
     <details className="group py-1.5" data-slot="connector-accounts-retired">
       <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[0.72rem] text-(--ui-text-tertiary)">
-        <Codicon
+        <AppIcon
           className="shrink-0 transition-transform duration-100 group-open:rotate-90"
           name="chevron-right"
           size="0.75rem"

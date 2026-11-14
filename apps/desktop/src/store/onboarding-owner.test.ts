@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
 import { setApiRequestConnection, setApiRequestProfile } from '@/api/client'
 import { setEnvVar } from '@/api/config'
-import type { HermesApiRequest } from '@/global'
+import type { AgentApiRequest } from '@/global'
 import { makeOAuthProvider } from '@/test/oauth-provider'
 
 import {
@@ -26,7 +26,7 @@ vi.mock('@/store/gateway', async importOriginal => ({
 }))
 
 const owner = { connectionId: 'athena', profile: 'leverage-ai' }
-const requests: HermesApiRequest[] = []
+const requests: AgentApiRequest[] = []
 let authFlow: 'device_code' | 'pkce'
 // The sign-in long-poll asks at once, so a test that cancels a waiting flow keeps it pending.
 let pollStatus: 'approved' | 'pending'
@@ -44,7 +44,7 @@ beforeEach(() => {
     configurable: true,
     value: {
       openExternal: vi.fn(async () => undefined),
-      api: vi.fn(async (request: HermesApiRequest) => {
+      api: vi.fn(async (request: AgentApiRequest) => {
         requests.push(request)
         const { path } = request
 

@@ -180,7 +180,7 @@ export function freePort(): Promise<number> {
 
 /** `hermes <args>` in the sandbox, as an operator runs it. */
 export function hermesCli(sandbox: CoreSandbox, args: string[]): { code: number | null; output: string } {
-  const result = spawnSync(process.env.HERMES_E2E_PYTHON || 'python3', ['-m', 'hermes_cli.main', ...args], {
+  const result = spawnSync(process.env.HERMES_E2E_PYTHON || 'python3', ['-m', 'agent_cli.main', ...args], {
     cwd: REPO_ROOT,
     env: coreAppEnv(sandbox),
     encoding: 'utf8',
@@ -196,8 +196,8 @@ export function webappLaunchLink(sandbox: CoreSandbox, profile?: string): string
   const profileArgs = profile ? ['-p', profile] : []
   const { code, output } = hermesCli(sandbox, [...profileArgs, 'webapp', '--no-open', '--skip-build'])
   const link = /^\s+(http:\/\/127\.0\.0\.1:\d+\/webapp\/launch#\S+)$/m.exec(output)?.[1]
-  expect(code, `hermes webapp --no-open\n${output.replace(/ticket=\S+/g, 'ticket=<redacted>')}`).toBe(0)
-  expect(link, 'hermes webapp printed a one-use launch link').toBeTruthy()
+  expect(code, `noone webapp --no-open\n${output.replace(/ticket=\S+/g, 'ticket=<redacted>')}`).toBe(0)
+  expect(link, 'noone webapp printed a one-use launch link').toBeTruthy()
 
   return link!
 }
@@ -247,7 +247,7 @@ export function sandboxProcesses(sandbox: CoreSandbox): ProcInfo[] {
 }
 
 /**
- * The `hermes serve` backend(s) spawned for this sandbox.
+ * The `noone serve` backend(s) spawned for this sandbox.
  *
  * A child of the backend still shows the backend's argv and environ between
  * fork and exec, and the backend forks ~40 probes per boot (git, ps,
@@ -258,8 +258,8 @@ export function sandboxProcesses(sandbox: CoreSandbox): ProcInfo[] {
  * dead backend is reparented away and still counted.
  */
 export function backendProcesses(sandbox: CoreSandbox): ProcInfo[] {
-  // The local backend is the gateway `hermes gateway ensure` attached to or started
-  // (`hermes_cli.main [--profile X] gateway run --quiet`); `serve` covers a pool backend.
+  // The local backend is the gateway `noone gateway ensure` attached to or started
+  // (`agent_cli.main [--profile X] gateway run --quiet`); `serve` covers a pool backend.
   const serve = sandboxProcesses(sandbox).filter(
     proc => (/ serve( |$)/.test(proc.cmdline) || / gateway run( |$)/.test(proc.cmdline))
       && !/electron/i.test(proc.cmdline.split(' ')[0])
@@ -272,7 +272,7 @@ export function backendProcesses(sandbox: CoreSandbox): ProcInfo[] {
 
 
 /**
- * `hermes gateway stop` for the sandbox profile, run with the backend's own
+ * `noone gateway stop` for the sandbox profile, run with the backend's own
  * interpreter (argv[0] of the live `gateway run`). Attach-mode Desktop never
  * owns the gateway, so this is how a test proves teardown works when asked.
  * `interrupt` passes `--yes`: stop refuses while a turn is live unless told to
@@ -286,7 +286,7 @@ export function stopSandboxGateway(
   // argv[0], unquoted (a Windows command line quotes a path with spaces).
   const python = /^"([^"]+)"|^(\S+)/.exec(backend?.cmdline ?? '')?.slice(1).find(Boolean) || 'python3'
 
-  const args = ['-m', 'hermes_cli.main', 'gateway', 'stop', ...(interrupt ? ['--yes'] : [])]
+  const args = ['-m', 'agent_cli.main', 'gateway', 'stop', ...(interrupt ? ['--yes'] : [])]
 
   const result = spawnSync(python, args, {
     cwd: REPO_ROOT,

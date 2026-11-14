@@ -1,8 +1,8 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { PLUGIN_FOLDER_GRANTS_KEY } from '@/contrib/plugin-files'
 import type { PluginRecord } from '@/contrib/plugins-store'
 import { useI18n } from '@/i18n'
@@ -89,7 +89,7 @@ export function PluginFolderAccess({ plugin, name }: PluginFolderAccessProps) {
       </div>
       {grants.map(grant => (
         <div className="flex min-w-0 items-center gap-2" key={grant.id}>
-          <Codicon name="folder" size="0.85rem" />
+          <AppIcon name="folder" size="0.85rem" />
           <span className="flex min-w-0 flex-1 flex-col" title={grant.path}>
             <span className="truncate text-xs text-(--ui-text-secondary)">{grant.name}</span>
             <span className="truncate font-mono text-[length:var(--conversation-caption-font-size)] text-(--ui-text-tertiary)">

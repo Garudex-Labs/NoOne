@@ -30,7 +30,7 @@ async def _owner(tmp_path, monkeypatch):
 
     monkeypatch.setenv('HERMES_HOME', str(tmp_path))
     monkeypatch.setattr(run, '_load_gateway_config', lambda: {'platform_toolsets': {'cli': []}})
-    monkeypatch.setattr('hermes_cli.lifecycle.invoke_hook', lambda name, **kwargs: None)
+    monkeypatch.setattr('agent_cli.lifecycle.invoke_hook', lambda name, **kwargs: None)
     store = SessionStore(tmp_path / 'sessions', GatewayConfig())
 
     async def finalize(**kwargs):
@@ -198,7 +198,7 @@ async def _local(tmp_path, monkeypatch):
     from gateway.session_authority import SessionAuthority, initialize_session_authority
     from gateway.session_contract import SessionActor
     from gateway.session_local import create_local_session
-    from hermes_state import AsyncSessionDB, SessionDB
+    from agent_state import AsyncSessionDB, SessionDB
 
     monkeypatch.setenv('HERMES_HOME', str(tmp_path))
     monkeypatch.setattr(SessionAuthority, '_schedule', lambda self, ref: None)  # admitted rows stay queued
@@ -232,7 +232,7 @@ async def _deliver(runner, authority, ref, producer):
 
 
 def _admissions(authority, ref):
-    from hermes_state_runtime import list_session_admissions
+    from agent_state_runtime import list_session_admissions
     return [r for r in list_session_admissions(authority.db, session_id=ref.session_id, pending_only=False)
             if r['principal_id'].startswith('automation:')]
 
@@ -308,8 +308,8 @@ async def test_messaging_completion_still_starts_its_turn(tmp_path, monkeypatch)
     from gateway.run import GatewayRunner
     from gateway.session_authority import SessionAuthority, initialize_session_authority
     from gateway.session_ingress_context import native_callback
-    from hermes_constants import get_hermes_home
-    from hermes_state_runtime import list_session_admissions
+    from agent_constants import get_agent_home
+    from agent_state_runtime import list_session_admissions
     from plugins.platforms.discord.adapter import DiscordAdapter
     from tests.gateway.test_completion_admission import pending
 
@@ -322,7 +322,7 @@ async def test_messaging_completion_still_starts_its_turn(tmp_path, monkeypatch)
     runner._wire_adapter_handlers(adapter)
     source = adapter.build_source(chat_id='42', chat_type='dm', user_id='42')
     human = MessageEvent(text='human', source=source, message_id='human')
-    with native_callback(runner, human, get_hermes_home()):
+    with native_callback(runner, human, get_agent_home()):
         await authority.admit_native(human)
     key = runner.session_store._generate_session_key(source)
     sid = runner.session_store.peek_session_id(key)

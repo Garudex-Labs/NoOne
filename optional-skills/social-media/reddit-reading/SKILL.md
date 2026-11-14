@@ -2,7 +2,7 @@
 name: reddit-reading
 description: "Read Reddit: subreddits, search, threads, users. No browser."
 version: 1.0.0
-author: Teknium (teknium1), Hermes Agent
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

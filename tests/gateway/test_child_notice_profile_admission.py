@@ -21,9 +21,9 @@ def _build_rig(monkeypatch, tmp_path, request, surface_a, mode):
 
     from gateway.platforms.base import BasePlatformAdapter
     from gateway.run import _async_profile_runtime_scope
-    from hermes_cli.profiles import get_profile_dir
-    from hermes_constants import get_hermes_home
-    import hermes_state
+    from agent_cli.profiles import get_profile_dir
+    from agent_constants import get_agent_home
+    import agent_state
     from tools import process_registry as pr_module
     from tools.process_registry import ProcessRegistry
 
@@ -31,7 +31,7 @@ def _build_rig(monkeypatch, tmp_path, request, surface_a, mode):
     monkeypatch.setenv("HERMES_BASE_HOME", str(tmp_path))
     # The global fixture pins the default DB; restore call-time profile resolution
     # within these explicitly private homes instead of sharing its root handle.
-    monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", hermes_state._IMPORT_DEFAULT_DB_PATH)
+    monkeypatch.setattr(agent_state, "DEFAULT_DB_PATH", agent_state._IMPORT_DEFAULT_DB_PATH)
     import gateway.run as gw
     monkeypatch.setattr(gw, "_hermes_home", tmp_path)
     registry = ProcessRegistry()
@@ -64,7 +64,7 @@ def _build_rig(monkeypatch, tmp_path, request, surface_a, mode):
             if pinned:
                 entry = await runner._resolve_async_delegation_session(entry, pinned)
             assert entry is not None
-            admitted.append((event, entry.session_id, get_hermes_home()))
+            admitted.append((event, entry.session_id, get_agent_home()))
         event._gateway_accepted = True
 
     adapter = SimpleNamespace(send=AsyncMock(), handle_message=accept)
@@ -86,7 +86,7 @@ async def _for_each_leg(rig, owner, surface_a, path, consume):
     """Run ``consume`` on legs A, B, A; afterwards no route, row or pin may have moved."""
     from gateway.run import _async_profile_runtime_scope, _profile_runtime_scope
     from gateway.session import SessionSource
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     from tools.process_registry import ProcessSession
 
     runner, registry, homes = rig.runner, rig.registry, rig.homes
@@ -116,7 +116,7 @@ async def _for_each_leg(rig, owner, surface_a, path, consume):
             "notify_on_complete": path == "agent",
         }
         async with runner._completion_event_scope(watcher):
-            assert get_hermes_home() == homes[name], runner._primary_profile_name
+            assert get_agent_home() == homes[name], runner._primary_profile_name
             assert await runner._session_db.get_session(child) is not None
         leg = SimpleNamespace(
             name=name, index=leg_index, entry=entry, db=db, child=child, proc=proc, watcher=watcher,

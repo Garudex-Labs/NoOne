@@ -1,8 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 
 import { sessionDotClassName } from '@/app/chat/session-status-dot'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -82,7 +82,7 @@ function OptionGlyph({ option }: { option: Option }) {
     return <span aria-hidden="true" className={cn('shrink-0', option.dot)} />
   }
 
-  return option.icon ? <Codicon className="text-(--ui-text-tertiary)" name={option.icon} size="0.8125rem" /> : null
+  return option.icon ? <AppIcon className="text-(--ui-text-tertiary)" name={option.icon} size="0.8125rem" /> : null
 }
 
 /** Every option row — single or multi select — leaves the menu open, so a whole
@@ -248,7 +248,7 @@ export function SidebarFilterMenu({ className }: { className?: string }) {
           type="button"
           variant="ghost"
         >
-          <Codicon name="list-filter" size="0.75rem" />
+          <AppIcon name="list-filter" size="0.75rem" />
         </Button>
       </DropdownMenuTrigger>
 
@@ -259,7 +259,7 @@ export function SidebarFilterMenu({ className }: { className?: string }) {
               {f.grouping}
               <span className="ml-auto flex items-center gap-1 pl-4 text-(--ui-text-tertiary)">
                 {groupingLabel}
-                <Codicon name="chevron-right" size="1rem" />
+                <AppIcon name="chevron-right" size="1rem" />
               </span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>

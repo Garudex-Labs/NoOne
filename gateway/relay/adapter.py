@@ -2085,7 +2085,7 @@ class RelayAdapter(RelayDiscordInteractionMixin, BasePlatformAdapter):
     # debug), it failed silently on every single Telegram turn.
     #
     # 👍/👎 are both in Telegram's set and carry the same success/failure sense.
-    # Platforms with free-form reaction vocabularies (Slack, Discord, Matrix,
+    # Platforms with free-form reaction vocabularies (Slack, Discord,
     # Signal) keep ✅/❌, which read better and are what their users already see.
     # Per-platform divergence here follows `_descriptor_for_chat`'s precedent:
     # platform capabilities genuinely differ, so one hardcoded set cannot serve

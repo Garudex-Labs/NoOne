@@ -7,7 +7,7 @@ description: >-
   contrast, vignette, fit, anchor, zoom and mirroring; videos get speed, pause-when-hidden and
   reduced-motion controls, and a small library with an optional slideshow keeps several
   backgrounds. Quick controls in the status bar, a full settings page and command-palette commands.
-  Disclosure — desktop-only (desktop/plugin.js, imports only @hermes/plugin-sdk and react): no
+  Disclosure — desktop-only (desktop/plugin.js, imports only @noone/plugin-sdk and react): no
   backend, agent tools, hooks, env vars, network calls or telemetry. Picked files are copied into
   the plugin's own IndexedDB in the Desktop app's local profile and never leave that computer;
   settings use ctx.storage. While a wallpaper shows, the plugin adds its own fixed z-index -1 layer

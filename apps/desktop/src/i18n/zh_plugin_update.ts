@@ -1,5 +1,6 @@
-import type { TranslationOverrides } from './define-locale'
+import { appText } from '@noone/shared/application-identity'
 
+import type { TranslationOverrides } from './define-locale'
 /** Chinese copy for the Plugins tab: updating an installed plugin and the folders it may use. */
 export const zhPluginUpdate = {
   updateToPin: (sha: string) => `更新到 ${sha}`,
@@ -15,7 +16,7 @@ export const zhPluginUpdate = {
     pickerTitle: (name: string) => `为 ${name} 选择文件夹`,
     pickerButton: '允许访问',
     refusedProtected: (name: string) =>
-      `${name} 不能使用该文件夹：其中包含 Hermes 的设置、密钥或插件数据。请选择不包含它们的文件夹。`,
+      `${name} 不能使用该文件夹：其中包含 ${appText('{app_name}')} 的设置、密钥或插件数据。请选择不包含它们的文件夹。`,
     loadFailed: (name: string) => `无法加载与 ${name} 共享的文件夹。`
   }
 } satisfies NonNullable<NonNullable<TranslationOverrides['skills']>['plugins']>

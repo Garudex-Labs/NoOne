@@ -26,8 +26,8 @@ from gateway.restart import (
 )
 from gateway.session import SessionSource
 from gateway.session_state import SERVICE_TIER_UNSET as _SERVICE_TIER_UNSET
-from hermes_cli.config import cfg_get, resolve_ephemeral_system_prompt_from_config
-from hermes_cli.fallback_config import get_fallback_chain
+from agent_cli.config import cfg_get, resolve_ephemeral_system_prompt_from_config
+from agent_cli.fallback_config import get_fallback_chain
 from utils import is_truthy_value
 
 if TYPE_CHECKING:  # string annotations only; never imported at runtime (cycle)
@@ -191,12 +191,12 @@ class GatewayConfigLoadersMixin:
     ) -> str:
         """Resolve model for this channel: channel_overrides else global default.
 
-        Precedence lives in :func:`hermes_cli.model_switch.resolve_effective_model` (shared with the
+        Precedence lives in :func:`agent_cli.model_switch.resolve_effective_model` (shared with the
         API server so the surfaces cannot diverge). No session tier here: session /model overrides
         are applied later by ``_apply_session_model_override``.
         """
         from gateway.run import _resolve_gateway_model
-        from hermes_cli.model_switch import resolve_effective_model
+        from agent_cli.model_switch import resolve_effective_model
         return resolve_effective_model(
             None,  # session tier applied downstream (_apply_session_model_override)
             self._channel_override(platform, chat_id, thread_id, parent_id, source),
@@ -226,7 +226,7 @@ class GatewayConfigLoadersMixin:
 
     @staticmethod
     def _load_reasoning_config(model: str = "") -> dict | None:
-        """Reasoning effort from config.yaml via :func:`hermes_constants.resolve_reasoning_config`.
+        """Reasoning effort from config.yaml via :func:`agent_constants.resolve_reasoning_config`.
 
         Per-model override > global ``agent.reasoning_effort``; YAML False = disabled. Empty
         ``model`` uses ``model.default``.
@@ -234,7 +234,7 @@ class GatewayConfigLoadersMixin:
         Closes #21256.
         """
         from gateway.run import _load_gateway_config
-        from hermes_constants import resolve_reasoning_config
+        from agent_constants import resolve_reasoning_config
         return resolve_reasoning_config(_load_gateway_config(), model)
 
     @staticmethod
@@ -309,8 +309,8 @@ class GatewayConfigLoadersMixin:
 
     @classmethod
     def _load_service_tier(cls) -> str | None:
-        """``agent.service_tier`` parsed like the CLI (``hermes_cli.cli_config_load``); None when unset/unknown."""
-        from hermes_cli.cli_config_load import _parse_service_tier_config
+        """``agent.service_tier`` parsed like the CLI (``agent_cli.cli_config_load``); None when unset/unknown."""
+        from agent_cli.cli_config_load import _parse_service_tier_config
 
         return _parse_service_tier_config(cls._cfg_str("agent", "service_tier"))
 
@@ -622,7 +622,7 @@ class GatewayConfigLoadersMixin:
         chain; only a successful read that genuinely lacks the key clears it.
 
         Cron already does this per job via ``get_fallback_chain``; the gateway previously froze
-        ``self._fallback_model`` at process start, so a chain configured (or changed) after ``hermes
+        ``self._fallback_model`` at process start, so a chain configured (or changed) after ``noone
         gateway`` was running never reached messaging sessions even though the same process's cron jobs fell
         back correctly. Fixes #60955.
 
@@ -630,16 +630,16 @@ class GatewayConfigLoadersMixin:
         and keeps one last-known-good chain per home: a single runner-wide slot filled from the launch
         home handed every secondary profile the default profile's fallback chain.
         """
-        from hermes_cli.config_backend import config_exists
+        from agent_cli.config_backend import config_exists
         from gateway.run import _gateway_config_home
-        from hermes_constants import hermes_home_key
+        from agent_constants import agent_home_key
         home = _gateway_config_home()
         by_home = getattr(self, "_fallback_model_by_home", None)
         if by_home is None:
             by_home = self._fallback_model_by_home = {}
-        home_key = hermes_home_key(home)
+        home_key = agent_home_key(home)
         try:
-            from hermes_cli.config_effective import load_user_config_effective
+            from agent_cli.config_effective import load_user_config_effective
             cfg_path = home / "config.yaml"
             if not config_exists(cfg_path):
                 by_home[home_key] = self._fallback_model = None

@@ -37,7 +37,7 @@ from agent.turn_failure_copy import (
 from agent.route_verdicts import route_visit
 from agent.turn_retry_state import TurnRetryState
 from agent.turn_recovery_codex import _codex_soft_failure_error, _is_codex_token_expired, _recover_stale_codex_reasoning
-from hermes_constants import display_hermes_home
+from agent_constants import display_agent_home
 from utils import base_url_host_matches
 
 logger = logging.getLogger("agent.conversation_loop")
@@ -103,16 +103,6 @@ def _image_error_max_dimension(error: Exception) -> Optional[int]:
     return max_dimension if 512 <= max_dimension <= 8000 else None
 
 
-def _try_refresh_nous_paid_entitlement_credentials(agent) -> bool:
-    """Refresh Nous runtime credentials after a fresh paid-entitlement check."""
-    try:
-        from hermes_cli.nous_account import get_nous_portal_account_info
-
-        if get_nous_portal_account_info(force_fresh=True).paid_service_access is not True:
-            return False
-        return agent._try_refresh_nous_client_credentials(force=True)
-    except Exception:
-        return False
 
 
 def _repair_transport_credentials(agent: Any) -> bool:
@@ -329,48 +319,13 @@ def recover_before_classification(
     return False, active_system_prompt
 
 
-def _print_nous_401_diagnostics(agent: Any, api_error: Exception) -> None:
-    """Nous 401 that survived a credential refresh: likely Portal OAuth expired/revoked,
-    no credits, or agent key blocked."""
-    from agent.conversation_loop import _print_nous_entitlement_guidance
-    from hermes_constants import display_hermes_home
-    _body_text = ""
-    try:
-        _body = getattr(api_error, "body", None) or getattr(api_error, "response", None)
-        if _body is not None:
-            _body_text = str(_body)[:200]
-    except Exception:
-        pass
-    _plines(agent, "🔐 Nous 401 — Portal authentication failed.")
-    if _body_text:
-        _plines(agent, f"   Response: {_body_text}")
-    try:
-        from hermes_cli.anon_auth import is_anonymous_agent
-        if is_anonymous_agent(agent):
-            # The free tier has no credits, no agent key and no auth.json to inspect: its session
-            # ended and could not be replaced. The two doors are a sign-in or another provider.
-            _plines(agent, "   Your session ended and Hermes couldn't start a new one.",
-                    "   Sign in with a Nous account (it's free), or switch providers with /model.")
-            return
-    except Exception:
-        pass
-    if not _print_nous_entitlement_guidance(agent, "Nous model access"):
-        _plines(agent, "   Most likely: Portal OAuth expired, account out of credits, or agent key revoked.")
-    _plines(
-        agent,
-        "   Troubleshooting:",
-        "     • Re-authenticate: hermes auth add nous",
-        "     • Check credits / billing: https://portal.nousresearch.com",
-        f"     • Verify stored credentials: {display_hermes_home()}/auth.json",
-        "     • Switch providers temporarily: /model <model> --provider openrouter",
-    )
 
 
 def _print_anthropic_401_diagnostics(agent: Any, key: Any) -> None:
     """Anthropic 401 that survived a credential refresh: show auth method + fixes."""
     from agent.anthropic_credentials import _is_oauth_token
     from agent.azure_identity_adapter import is_token_provider
-    from hermes_constants import display_hermes_home
+    from agent_constants import display_agent_home
     _plines(agent, "🔐 Anthropic 401 — authentication failed.")
     if is_token_provider(key):
         # Azure Foundry Entra ID: JWT minted per-request by an httpx hook; 401 = Azure
@@ -378,7 +333,7 @@ def _print_anthropic_401_diagnostics(agent: Any, key: Any) -> None:
         _plines(
             agent,
             "   Auth method: Microsoft Entra ID (httpx event hook)",
-            "   Run `hermes doctor` for credential-chain diagnostics, or",
+            "   Run `noone doctor` for credential-chain diagnostics, or",
             "   `az login` if your developer session expired.",
         )
     else:
@@ -388,17 +343,17 @@ def _print_anthropic_401_diagnostics(agent: Any, key: Any) -> None:
             f"   Auth method: {auth_method}",
             f"   Token prefix: {key[:12]}..." if isinstance(key, str) and len(key) > 12 else "   Token: (empty or short)",
         )
-    _dhh = display_hermes_home()
+    _dhh = display_agent_home()
     _plines(
         agent,
         "   Troubleshooting:",
         f"     • Check ANTHROPIC_TOKEN in {_dhh}/.env for Hermes-managed OAuth/setup tokens",
         f"     • Check ANTHROPIC_API_KEY in {_dhh}/.env for API keys or legacy token values",
         "     • For API keys: verify at https://platform.claude.com/settings/keys",
-        "     • Hermes login (OAuth): run 'hermes auth add anthropic' to sign in again, then retry",
-        "     • Inspect what Hermes holds: hermes auth list anthropic",
-        "     • Legacy cleanup: hermes config set ANTHROPIC_TOKEN \"\"",
-        "     • Clear stale keys: hermes config set ANTHROPIC_API_KEY \"\"",
+        "     • Hermes login (OAuth): run 'noone auth add anthropic' to sign in again, then retry",
+        "     • Inspect what Hermes holds: noone auth list anthropic",
+        "     • Legacy cleanup: noone config set ANTHROPIC_TOKEN \"\"",
+        "     • Clear stale keys: noone config set ANTHROPIC_API_KEY \"\"",
     )
 
 
@@ -427,19 +382,6 @@ def _refresh_credentials_after_401(
         if agent._try_refresh_vertex_client_credentials():
             agent._buffer_vprint("🔐 Vertex AI token refreshed after 401. Retrying request...")
             return True
-    if (
-        agent.api_mode in ("chat_completions", "anthropic_messages")
-        and agent.provider == "nous"
-        and not _retry.nous_auth_retry_attempted
-    ):
-        _retry.nous_auth_retry_attempted = True
-        from agent.credential_auth_recovery import nous_pool_refreshed_this_turn
-        # The pool already spent this episode's one forced refresh (and its backoff retries):
-        # a second force here would redeem the rotating grant again for a server-side 401.
-        if not nous_pool_refreshed_this_turn(agent) and agent._try_refresh_nous_client_credentials(force=True):
-            agent._buffer_vprint("🔐 Nous agent key refreshed after 401. Retrying request...")
-            return True
-        _print_nous_401_diagnostics(agent, api_error)
     if not _retry.provider_auth_refresh_attempted and (profile := _credential_refresh_profile(agent)) is not None:
         _retry.provider_auth_refresh_attempted = True
         if agent._try_refresh_provider_runtime_credentials(reason="unauthorized"):
@@ -663,7 +605,6 @@ def recover_after_classification(
     strip → Anthropic OAuth 1M-beta disable → per-provider 401 credential refresh →
     format-recovery strips.
     Returns ``(retry_now, recovered_with_pool)``; the latter feeds the Nous rate-limit guard."""
-    from agent.conversation_loop import _is_nous_inference_route
 
     # The credit-limited 402 clamp runs before pool rotation, which would bench a credential
     # that still has credit. A ``reasoning.context`` 400 is classified reasoning_mandatory, whose rung
@@ -682,19 +623,6 @@ def recover_after_classification(
     ):
         return True, False
 
-    if (
-        classified.reason == FailoverReason.billing
-        # A usage-window 402 is the plan's own limit: refreshing credentials cannot lift it.
-        and not (getattr(classified, "error_context", None) or {}).get("usage_window")
-        and _is_nous_inference_route(
-            getattr(agent, "provider", "") or "", getattr(agent, "base_url", "") or ""
-        )
-        and not _retry.nous_paid_entitlement_refresh_attempted
-    ):
-        _retry.nous_paid_entitlement_refresh_attempted = True
-        if _try_refresh_nous_paid_entitlement_credentials(agent):
-            _vlines(agent, "🔐 Nous paid access verified — refreshed runtime credentials and retrying request...")
-            return True, False
 
     recovered_with_pool, _retry.has_retried_429 = agent._recover_with_credential_pool(
         status_code=status_code, has_retried_429=_retry.has_retried_429,
@@ -761,7 +689,7 @@ def recover_after_classification(
         from agent.error_classifier import is_reasoning_required_rejection
         agent._reasoning_floor_required = is_reasoning_required_rejection(str(api_error))
         try:
-            from hermes_cli.models_reasoning_caps import refresh_reasoning_caps_async
+            from agent_cli.models_reasoning_caps import refresh_reasoning_caps_async
             refresh_reasoning_caps_async(agent.provider)
         except Exception:
             pass
@@ -887,16 +815,14 @@ def _print_nonretryable_auth_guidance(
     """Actionable guidance for a terminal auth / billing error."""
     if (getattr(classified, "error_context", None) or {}).get("usage_window"):
         return  # a plan limit's refusal line and limit panel are its guidance: no second copy, no portal fetch
-    from agent.conversation_loop import _print_billing_or_entitlement_guidance, _print_nous_entitlement_guidance
+    from agent.conversation_loop import _print_billing_or_entitlement_guidance
 
     if classified.reason == FailoverReason.billing and _print_billing_or_entitlement_guidance(
         agent, capability="model access", provider=provider, base_url=str(base_url),
         model=model, unverified=classified.billing_unverified,
     ):
         return
-    if provider == "nous" and _print_nous_entitlement_guidance(agent, "Nous model access"):
-        return
-    if provider in {"openai-codex", "xai-oauth", "nous"} and status_code == 401:
+    if provider in {"openai-codex", "xai-oauth"} and status_code == 401:
         if provider == "openai-codex":
             from agent.turn_failure_copy import oauth_relogin_command
 
@@ -910,14 +836,14 @@ def _print_nonretryable_auth_guidance(
             _vlines(
                 agent,
                 "   💡 xAI OAuth token was rejected (HTTP 401). To fix:",
-                "      re-authenticate with xAI Grok OAuth (SuperGrok / Premium+) from `hermes model`.",
+                "      re-authenticate with xAI Grok OAuth (SuperGrok / Premium+) from `noone model`.",
             )
         else:  # nous
             _vlines(
                 agent,
                 "   💡 Nous Portal OAuth token was rejected (HTTP 401). Your token may be",
                 "      expired, revoked, or your account may be out of credits. To fix:",
-                "      1. Re-authenticate: hermes portal",
+                "      1. Re-authenticate: noone portal",
                 "      2. Check your portal account: https://portal.nousresearch.com",
             )
             # ``:free`` is OpenRouter slug syntax; Nous Portal will reject the model
@@ -930,7 +856,7 @@ def _print_nonretryable_auth_guidance(
                     f"         Nous catalog model, or run `/model openrouter:{model}` to use OpenRouter.",
                 )
         return
-    from hermes_cli.auth_plugin_providers import plugin_refresh_hook
+    from agent_cli.auth_plugin_providers import plugin_refresh_hook
     if status_code == 401 and plugin_refresh_hook(str(provider or "")) is not None:
         # A plugin OAuth grant the pool could not refresh: the fix is a fresh sign-in, not a key.
         from agent.turn_failure_copy import oauth_relogin_command
@@ -939,7 +865,7 @@ def _print_nonretryable_auth_guidance(
     _vlines(
         agent,
         "   💡 Your API key was rejected by the provider. Check:",
-        "      • Is the key valid? Run: hermes setup",
+        "      • Is the key valid? Run: noone setup",
         f"      • Does your account have access to {model}?",
     )
     if base_url_host_matches(str(base_url), "openrouter.ai"):
@@ -953,7 +879,7 @@ def _welcome_tier_guidance(classified: Any, *, model: Any, in_chat: bool, door: 
     refusal, route = ctx.get("welcome_refusal"), ctx.get("welcome_route")
     if not refusal and not route:
         return ""
-    from hermes_cli.anon_auth import welcome_refusal_copy, welcome_route_refusal_copy
+    from agent_cli.anon_auth import welcome_refusal_copy, welcome_route_refusal_copy
     if refusal:
         return welcome_refusal_copy(refusal, model=str(model or ""), in_chat=in_chat, door=door)
     return welcome_route_refusal_copy(str(route), in_chat=in_chat, door=door)
@@ -993,17 +919,6 @@ def _stamp_free_tier(result: dict[str, Any], kind: str, message: str) -> dict[st
     return result
 
 
-def _welcome_outage_copy(agent: Any, base_url: Any, classified: Any) -> str:
-    """On the Nous free tier, a transport / server failure that outlived every retry reads as one
-    plain sentence (the free model is having trouble) rather than the technical summary. Empty
-    for every other route and for rate limits / billing, which have their own copy."""
-    from hermes_cli.anon_auth import FREE_TIER_OUTAGE_COPY, on_free_model
-    # Not ``unknown``: that is the classifier's catch-all for status-less local failures, which
-    # are not the free model's trouble.
-    if on_free_model(agent, base_url) and classified.reason in (
-            FailoverReason.timeout, FailoverReason.overloaded, FailoverReason.server_error):
-        return FREE_TIER_OUTAGE_COPY
-    return ""
 
 
 # Terminal status label per non-retryable reason (default names the HTTP status).
@@ -1021,7 +936,7 @@ def _missing_vendor_prefix_suggestion(api_error: Exception, provider: Any, model
     if getattr(api_error, "status_code", None) != 404:
         return None
     try:
-        from hermes_cli.model_normalize import suggest_prefixed_model_id
+        from agent_cli.model_normalize import suggest_prefixed_model_id
 
         return suggest_prefixed_model_id(str(provider or ""), str(model or ""))
     except Exception:
@@ -1062,7 +977,7 @@ def nonretryable_client_error_result(
         )
     _welcome_hint = _welcome_tier_guidance(classified, model=model, in_chat=False)
     _prefix_suggestion = _missing_vendor_prefix_suggestion(api_error, provider, model)
-    from hermes_cli.left_core_migration import host_install_hint
+    from agent_cli.left_core_migration import host_install_hint
     if _moved_hint := host_install_hint(base_url):  # a host whose plugin left core: install it first
         _vlines(agent, f"   💡 {_moved_hint}")
     if _welcome_hint:
@@ -1078,7 +993,7 @@ def nonretryable_client_error_result(
         if _prefix_suggestion:
             _vlines(agent, f"      Did you mean '{_prefix_suggestion}'? It looks like the vendor prefix is missing.")
     elif classified.reason not in _NONRETRYABLE_LABELS:
-        _vlines(agent, f"   💡 Fix: pick another model (/model), or check `{display_hermes_home()}/logs/agent.log`.")
+        _vlines(agent, f"   💡 Fix: pick another model (/model), or check `{display_agent_home()}/logs/agent.log`.")
     # A WAF/CDN block (#53099, #70566): the key never reached the provider; the usual cause
     # is the SDK User-Agent, which the per-provider extra_headers override.
     if classified.reason == FailoverReason.upstream_blocked:
@@ -1283,8 +1198,6 @@ def max_retries_exhausted_result(
         if _welcome_hint:
             _final_response = _welcome_tier_guidance(classified, model=model, in_chat=True)
             _free_tier_kind = _welcome_surface_kind(classified)
-        elif _outage := _welcome_outage_copy(agent, base_url, classified):
-            _final_response, _free_tier_kind = _outage, "outage"
     if _is_thinking_timeout:
         # Thinking-timeout guidance overrides stream-drop guidance, which would wrongly
         # suggest splitting large file writes.
@@ -1437,7 +1350,6 @@ def interruptible_backoff_sleep(
             agent._touch_activity(f"{activity_label}, {int(sleep_end - time.time())}s remaining")
     # A long wait can outlive a short-lived credential (the free tier's JWT lives 15 minutes), and
     # the per-iteration pre-expiry adoption does not run between retries.
-    agent._adopt_nous_key_before_expiry()
     return None
 
 
@@ -1477,7 +1389,6 @@ def compute_error_backoff(
         LIVE_RETRY_WAIT_CAP_S, RETRY_AFTER_CAP_S, adaptive_rate_limit_backoff, jittered_backoff,
         provider_retry_after_seconds,
     )
-    from hermes_cli.anon_auth import on_free_model
 
     # Respect Retry-After on every retryable provider error, not just 429s. Retryable
     # 5xx responses (e.g. Cloudflare 520/524) also carry the header or a structured
@@ -1494,7 +1405,7 @@ def compute_error_backoff(
             retry_count, base_url=str(base_url), model=model, error=api_error, default_wait=wait_time,
         )
     _reset = reset_hint(api_error) if _adaptive else ""
-    _free_busy = is_rate_limited and on_free_model(agent, base_url)
+    _free_busy = False
     _wait_reason = ("The free model is busy" if _free_busy
                     else "Provider overloaded" if is_zai_coding_overload and not is_rate_limited else "Rate limited")
     if _adaptive:
@@ -1529,20 +1440,6 @@ def compute_error_backoff(
     return wait_time
 
 
-def free_tier_cooldown_ends_turn(agent: Any, api_error: Exception, base_url: Any) -> bool:
-    """True when an attended session on the free model meets a cooldown longer than a person
-    sits through. The free tier's pause is service-wide: a 600 s retry met a second 429 while its
-    1069 s window ran, so the caller ends the attempt cycle now (fallback, or the reset time and
-    the sign-in / model doors). Every other provider, and every unattended run (cron, messaging,
-    ``hermes chat -q``), waits out its ``Retry-After``: a paid bucket reopens on time, and
-    ``fallback.min_switch_reset_seconds`` relies on that wait."""
-    from agent.retry_utils import LIVE_RETRY_WAIT_CAP_S, provider_retry_after_seconds
-    from agent.session_source import is_attended
-    from hermes_cli.anon_auth import on_free_model
-    if not (on_free_model(agent, base_url) and is_attended(agent)):
-        return False
-    cooldown = provider_retry_after_seconds(api_error)
-    return cooldown is not None and cooldown > LIVE_RETRY_WAIT_CAP_S
 
 
 def validate_response_shape(agent: Any, response: Any) -> tuple[bool, list[str]]:
@@ -1756,41 +1653,6 @@ def activate_codex_app_server_fallback(agent: Any, result: dict[str, Any]) -> bo
     return True
 
 
-def _is_genuine_nous_rate_limit(agent: Any, api_error: Exception, error_context: Any, classified: Any = None) -> bool:
-    """Record a genuine account-level Nous 429 to the cross-session breaker; upstream
-    capacity 429s (no exhausted bucket in headers or last-known state) are left alone.
-
-    *error_context* is the turn's (``extract_api_error_context``); *classified* brings the
-    classifier's own context, where a welcome-tier ``rate_limited`` refusal and its ``reset_at``
-    live. A long welcome reset is an exhausted allowance whatever the headers say, and the one
-    place the user is told that signing in lifts it."""
-    _genuine = False
-    try:
-        from agent.nous_rate_guard import (
-            is_genuine_nous_rate_limit, is_long_welcome_rate_limit, record_nous_rate_limit)
-        _err_resp = getattr(api_error, "response", None)
-        _err_hdrs = getattr(_err_resp, "headers", None) if _err_resp else None
-        from hermes_cli.anon_auth import is_anonymous_agent
-        anonymous = is_anonymous_agent(agent)
-        _classified_ctx = getattr(classified, "error_context", None) or {}
-        # Only an anonymous request's fairshare body is an allowance verdict; named
-        # requests keep the exhausted-bucket rule, whatever their host or body says.
-        _genuine = (
-            (anonymous and is_long_welcome_rate_limit(_classified_ctx))
-            or is_genuine_nous_rate_limit(headers=_err_hdrs, last_known_state=agent._rate_limit_state))
-        if _genuine:
-            _merged = {**(error_context if isinstance(error_context, dict) else {}), **_classified_ctx}
-            record_nous_rate_limit(headers=_err_hdrs, error_context=_merged, anonymous=anonymous)
-        else:
-            logger.info(
-                "Nous 429 looks like upstream capacity "
-                "(no exhausted bucket in headers or "
-                "last-known state) -- not tripping "
-                "cross-session breaker."
-            )
-    except Exception:
-        pass
-    return _genuine
 
 
 def route_classified_error(
@@ -1954,16 +1816,5 @@ def route_classified_error(
 
     # Nous Portal: a genuine account-level 429 is recorded to a shared file so ALL
     # sessions back off; is_genuine_nous_rate_limit excludes upstream 429s.
-    if (
-        is_rate_limited
-        and agent.provider == "nous"
-        and classified.reason == FailoverReason.rate_limit
-        and not recovered_with_pool
-        and _is_genuine_nous_rate_limit(agent, api_error, error_context, classified)
-    ):
-        # Re-enter the loop exactly once so the top-of-loop Nous guard runs
-        # (retry_count = max_retries would skip it entirely).
-        retry_count = max(0, max_retries - 1)
-        return _verdict("continue")
     # Upstream capacity 429: normal retry logic will typically succeed.
     return _verdict("fallthrough")

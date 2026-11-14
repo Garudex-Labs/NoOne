@@ -11,14 +11,14 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 from plugins.google_meet._jsonfile import read_json
 from utils import atomic_json_write
 
 
 def _default_path() -> Path:
-    return Path(get_hermes_home()) / "workspace" / "meetings" / "nodes.json"
+    return Path(get_agent_home()) / "workspace" / "meetings" / "nodes.json"
 
 
 class NodeRegistry:

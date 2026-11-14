@@ -5,8 +5,8 @@ identity, each accepting only its own randomly minted key. ``check_routing`` is 
 invariant every scenario shares: a request on a host the scenario did not select, or a
 selected host receiving any bearer other than its own, is a credential leak.
 
-Hermes itself runs for real in child processes (``hermes chat -q`` / ``hermes -z`` /
-``python -m tui_gateway.entry``) with HOME and HERMES_HOME inside the test's tmp dir,
+Hermes itself runs for real in child processes (``noone chat -q`` / ``hermes -z`` /
+``python -m agent_backend.entry``) with HOME and HERMES_HOME inside the test's tmp dir,
 every credential/endpoint env var stripped, and only these fake hosts configured.
 """
 
@@ -27,7 +27,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from tests.fakes.fake_llm_provider import Error, FakeLLMServer, Text
 
@@ -246,8 +246,8 @@ def inference_hosts() -> frozenset[str]:
     """
     from urllib.parse import urlparse
 
-    from hermes_cli.auth import PROVIDER_REGISTRY
-    from hermes_constants import OPENROUTER_BASE_URL
+    from agent_cli.auth import PROVIDER_REGISTRY
+    from agent_constants import OPENROUTER_BASE_URL
 
     urls = [getattr(p, "inference_base_url", "") or "" for p in PROVIDER_REGISTRY.values()] + [OPENROUTER_BASE_URL]
     return frozenset(h for h in (urlparse(u).hostname for u in urls) if h and h not in {"127.0.0.1", "localhost"})
@@ -291,7 +291,7 @@ def run_hermes(argv: list[str], home: Path, *, hermes_home: Path | None = None, 
     """Run the real ``hermes`` entry point in its own process group; kill only that group."""
     start = time.monotonic()
     proc = subprocess.Popen(
-        [sys.executable, "-m", "hermes_cli.main", *argv],
+        [sys.executable, "-m", "agent_cli.main", *argv],
         cwd=str(home), env=hermetic_env(home, hermes_home, proxy), stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True,
     )
@@ -313,13 +313,13 @@ def _kill_group(proc: subprocess.Popen) -> None:
 
 
 class TuiGateway:
-    """The real stdio JSON-RPC backend (``python -m tui_gateway.entry``) the TUI/Desktop drive."""
+    """The real stdio JSON-RPC backend (``python -m agent_backend.entry``) the TUI/Desktop drive."""
 
     def __init__(self, home: Path, proxy: str | None = None) -> None:
         self.home = home
-        self._stderr = open(home / "tui_gateway.stderr.log", "w", encoding="utf-8")
+        self._stderr = open(home / "agent_backend.stderr.log", "w", encoding="utf-8")
         self.proc = subprocess.Popen(
-            [sys.executable, "-m", "tui_gateway.entry"], cwd=str(home), env=hermetic_env(home, proxy=proxy),
+            [sys.executable, "-m", "agent_backend.entry"], cwd=str(home), env=hermetic_env(home, proxy=proxy),
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self._stderr, text=True, bufsize=1,
             start_new_session=True,
         )
@@ -349,7 +349,7 @@ class TuiGateway:
             if pred(msg):
                 return msg
         tail = [(m.get("method"), (m.get("params") or {}).get("type"), m.get("id")) for m in self.seen[-25:]]
-        raise AssertionError(f"tui_gateway: condition not met within {timeout}s (rc={self.proc.poll()}); "
+        raise AssertionError(f"agent_backend: condition not met within {timeout}s (rc={self.proc.poll()}); "
                              f"last frames {tail}")
 
     def seen_or_wait(self, pred: Callable[[dict[str, Any]], bool], timeout: float = 120.0) -> dict[str, Any]:

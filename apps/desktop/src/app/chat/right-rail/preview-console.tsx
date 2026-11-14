@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { PanelBottom, Send, Trash2 } from '@noone/ui/icons'
 import type { CSSProperties, MutableRefObject, PointerEvent as ReactPointerEvent, RefObject } from 'react'
 import { useEffect, useMemo, useRef } from 'react'
 
@@ -6,7 +7,6 @@ import { requestComposerInsert } from '@/app/chat/composer/focus'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { PanelBottom, Send, Trash2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { notify } from '@/store/notifications'
 

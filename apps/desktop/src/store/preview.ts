@@ -1,4 +1,4 @@
-import { randomUuid } from '@hermes/shared'
+import { randomUuid } from '@noone/shared'
 import { atom, computed } from 'nanostores'
 
 import { dismissTreePane, isPaneVisible } from '@/components/pane-shell/tree/store'

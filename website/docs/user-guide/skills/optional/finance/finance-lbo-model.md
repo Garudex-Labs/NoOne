@@ -1,35 +1,43 @@
 ---
 title: "Lbo Model — Build leveraged buyout workbooks with IRR/MOIC in Excel"
-sidebar_label: "Lbo Model"
+sidebarTitle: "Lbo Model"
 description: "Build leveraged buyout workbooks with IRR/MOIC in Excel"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Lbo Model
+# Lbo Model {#lbo-model}
 
 Build leveraged buyout workbooks with IRR/MOIC in Excel.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/finance/lbo-model` |
+| Source | Optional — install with `noone skills install official/finance/lbo-model` |
 | Path | `optional-skills/finance/lbo-model` |
 | Version | `1.0.0` |
-| Author | Anthropic (adapted by Nous Research) |
+| Author | Anthropic (adapted by Garudex Labs) |
 | License | Apache-2.0 |
 | Platforms | linux, macos, windows |
 | Tags | `finance`, `valuation`, `lbo`, `private-equity`, `excel`, `openpyxl`, `modeling` |
 | Related skills | [`excel-author`](../../optional/finance/finance-excel-author.md), [`pptx-author`](../../optional/finance/finance-pptx-author.md), [`dcf-model`](../../optional/finance/finance-dcf-model.md), [`3-statement-model`](../../optional/finance/finance-3-statement-model.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-## Environment
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+## Environment {#environment}
 
 This skill assumes **headless openpyxl** — you are producing an .xlsx file on disk.
 Follow the `excel-author` skill's conventions for cell coloring, formulas, named ranges, and sensitivity tables.
@@ -37,7 +45,7 @@ Recalculate before delivery: `python /path/to/excel-author/scripts/recalc.py ./o
 
 ---
 
-## TEMPLATE REQUIREMENT
+## TEMPLATE REQUIREMENT {#template-requirement}
 
 **This skill uses templates for LBO models. Always check for an attached template file first.**
 
@@ -50,24 +58,24 @@ Before starting any LBO model:
 
 ---
 
-## CRITICAL INSTRUCTIONS — READ FIRST
+## CRITICAL INSTRUCTIONS — READ FIRST {#critical-instructions--read-first}
 
 Use Python/openpyxl. Write formula strings (`ws["D20"] = "=B5*B6"`), then run the `excel-author` skill's `recalc.py` helper before delivery.
 
-### Core Principles
+### Core Principles {#core-principles}
 * **Every calculation must be an Excel formula** - NEVER compute values in Python and hardcode results into cells. When using openpyxl, write `cell.value = "=B5*B6"` (formula string), NOT `cell.value = 1250` (computed result). The model must be dynamic and update when inputs change.
 * **Use the template structure** - Follow the organization in `examples/LBO_Model.xlsx` or the user's provided template. Do not invent your own layout.
 * **Use proper cell references** - All formulas should reference the appropriate cells. Never type numbers that should come from other cells.
 * **Maintain sign convention consistency** - Follow whatever sign convention the template uses (some use negative for outflows, some use positive). Be consistent throughout.
 * **Work section by section, verify with user at each step** - Complete one section fully, show the user what was built, run the section's verification checks, and get confirmation BEFORE moving to the next section. Do NOT build the entire model end-to-end and then present it — later sections depend on earlier ones, so catching a mistake in Sources & Uses after the returns are already built means rework everywhere.
 
-### Formula Color Conventions
+### Formula Color Conventions {#formula-color-conventions}
 * **Blue (0000FF)**: Hardcoded inputs - typed numbers that don't reference other cells
 * **Black (000000)**: Formulas with calculations - any formula using operators or functions (`=B4*B5`, `=SUM()`, `=-MAX(0,B4)`)
 * **Purple (800080)**: Links to cells on the **same tab** - direct references with no calculation (`=B9`, `=B45`)
 * **Green (008000)**: Links to cells on **different tabs** - cross-sheet references (`=Assumptions!B5`, `='Operating Model'!C10`)
 
-### Fill Color Palette — Professional Blues & Greys (Default unless user/template specifies otherwise)
+### Fill Color Palette — Professional Blues & Greys (Default unless user/template specifies otherwise) {#fill-color-palette--professional-blues--greys-default-unless-usertemplate-specifies-otherwise}
 * **Keep it minimal** — only use blues and greys for cell fills. Do NOT introduce greens, yellows, reds, or multiple accents. A professional LBO model uses restraint.
 * **Default fill palette:**
   * **Section headers** (Sources & Uses, Operating Model, etc.): Dark blue `#1F4E79` with white bold text
@@ -78,7 +86,7 @@ Use Python/openpyxl. Write formula strings (`ws["D20"] = "=B5*B6"`), then run th
 * **That's the whole palette.** 3 blues + 1 grey + white. If the template uses its own colors, follow the template instead.
 * Note: The blue/black/purple/green **font** colors above are for distinguishing inputs vs formulas vs links. Those are separate from the **fill** palette here — both work together.
 
-### Number Formatting Standards
+### Number Formatting Standards {#number-formatting-standards}
 * **Currency**: `$#,##0;($#,##0);"-"` or `$#,##0.0` depending on template
 * **Percentages**: `0.0%` (one decimal)
 * **Multiples**: `0.0"x"` (one decimal)
@@ -87,7 +95,7 @@ Use Python/openpyxl. Write formula strings (`ws["D20"] = "=B5*B6"`), then run th
 
 ---
 
-### Clarify Requirements First
+### Clarify Requirements First {#clarify-requirements-first}
 
 Before filling any formulas:
 
@@ -98,7 +106,7 @@ Before filling any formulas:
 
 ---
 
-## TEMPLATE ANALYSIS PHASE - DO THIS FIRST
+## TEMPLATE ANALYSIS PHASE - DO THIS FIRST {#template-analysis-phase---do-this-first}
 
 Before filling any formulas, examine the template thoroughly:
 
@@ -116,58 +124,58 @@ Before filling any formulas, examine the template thoroughly:
 
 ---
 
-## FILLING FORMULAS - GENERAL APPROACH
+## FILLING FORMULAS - GENERAL APPROACH {#filling-formulas---general-approach}
 
 For each cell that needs a formula, follow this hierarchy:
 
-### Step 1: Check the Template
+### Step 1: Check the Template {#step-1-check-the-template}
 * Does the cell already have a formula? If yes, verify it's correct and move on.
 * Is there a comment or note indicating the expected calculation?
 * Does the row/column label make the calculation obvious?
 * Do neighboring cells show a pattern you should follow?
 
-### Step 2: Check the User's Instructions
+### Step 2: Check the User's Instructions {#step-2-check-the-users-instructions}
 * Did the user specify a particular calculation method?
 * Are there stated assumptions that affect this formula?
 * Any special requirements mentioned?
 
-### Step 3: Apply Standard Practice
+### Step 3: Apply Standard Practice {#step-3-apply-standard-practice}
 * If neither template nor user specifies, use standard LBO modeling conventions
 * Document any assumptions you make
 * If genuinely uncertain, ask the user
 
 ---
 
-## COMMON PROBLEM AREAS
+## COMMON PROBLEM AREAS {#common-problem-areas}
 
 The following calculation patterns frequently cause issues across LBO models. Pay special attention when you encounter these:
 
-### Balancing Sections
+### Balancing Sections {#balancing-sections}
 * When two sections must equal (e.g., Sources = Uses), one item is typically the "plug" (balancing figure)
 * Identify which item is the plug and calculate it as the difference
 
-### Tax Calculations
+### Tax Calculations {#tax-calculations}
 * Tax formulas should only reference the relevant income line and tax rate
 * Should NOT reference unrelated sections (e.g., debt schedules)
 * Consider whether losses create tax shields or are simply ignored
 
-### Interest and Circular References
+### Interest and Circular References {#interest-and-circular-references}
 * Interest calculations can create circularity if they reference balances affected by cash flows
 * Use **Beginning Balance** (not average or ending) to break circular references
 * Pattern: Interest → Cash Flow → Paydown → Ending Balance (if interest uses ending balance, this circles back)
 
-### Debt Paydown / Cash Sweeps
+### Debt Paydown / Cash Sweeps {#debt-paydown--cash-sweeps}
 * When multiple debt tranches exist, there's usually a priority order
 * Cash sweep should respect the priority waterfall
 * Balances cannot go negative - use MAX or MIN functions appropriately
 
-### Returns Calculations (IRR/MOIC)
+### Returns Calculations (IRR/MOIC) {#returns-calculations-irrmoic}
 * Cash flows must have correct signs: Investment = negative, Proceeds = positive
 * If using XIRR, need corresponding dates
 * If using IRR, cash flows should be in consecutive periods
 * MOIC = Total Proceeds / Total Investment
 
-### Sensitivity Tables
+### Sensitivity Tables {#sensitivity-tables}
 * **Use ODD dimensions** (5×5 or 7×7) — never 4×4 or 6×6. Odd dimensions guarantee a true center cell.
 * **Center cell = base case.** Build the row and column axis values symmetrically around the model's actual assumptions (e.g., if base entry multiple = 10.0x, axis = `[8.0x, 9.0x, 10.0x, 11.0x, 12.0x]`). The center cell's IRR/MOIC MUST then equal the model's actual IRR/MOIC output — this is the proof the table is wired correctly.
 * **Highlight the center cell** — medium-blue fill (`#BDD7EE`) + bold font so the base case is visually anchored.
@@ -177,60 +185,60 @@ The following calculation patterns frequently cause issues across LBO models. Pa
 
 ---
 
-## VERIFICATION CHECKLIST - RUN AFTER COMPLETION
+## VERIFICATION CHECKLIST - RUN AFTER COMPLETION {#verification-checklist---run-after-completion}
 
-### Run Formula Validation
+### Run Formula Validation {#run-formula-validation}
 ```bash
 python /path/to/excel-author/scripts/recalc.py model.xlsx
 ```
 Must return success with zero errors.
 
-### Section Balancing
+### Section Balancing {#section-balancing}
 - [ ] Any sections that must balance (Sources/Uses, Assets/Liabilities) balance exactly
 - [ ] Plug items are calculated correctly as the balancing figure
 - [ ] Amounts that should match across sections are consistent
 
-### Income/Operating Projections
+### Income/Operating Projections {#incomeoperating-projections}
 - [ ] Revenue/top-line builds correctly from drivers or growth rates
 - [ ] All cost and expense items calculated appropriately
 - [ ] Subtotals and totals sum correctly
 - [ ] Margins and ratios are reasonable
 - [ ] Links to assumptions are correct
 
-### Balance Sheet (if applicable)
+### Balance Sheet (if applicable) {#balance-sheet-if-applicable}
 - [ ] Assets = Liabilities + Equity (must balance)
 - [ ] All items link to appropriate schedules or roll-forwards
 - [ ] Beginning balances = prior period ending balances
 - [ ] Check row included and shows zero
 
-### Cash Flow (if applicable)
+### Cash Flow (if applicable) {#cash-flow-if-applicable}
 - [ ] Starts with correct income figure
 - [ ] Non-cash items added/subtracted appropriately
 - [ ] Working capital changes have correct signs
 - [ ] Ending Cash = Beginning Cash + Net Cash Flow
 - [ ] Cash balances are consistent across statements
 
-### Supporting Schedules
+### Supporting Schedules {#supporting-schedules}
 - [ ] Roll-forward schedules balance (Beginning + Changes = Ending)
 - [ ] Schedules link correctly to main statements
 - [ ] Calculated items use appropriate drivers
 - [ ] All periods are calculated consistently
 
-### Debt/Financing Schedules (if applicable)
+### Debt/Financing Schedules (if applicable) {#debtfinancing-schedules-if-applicable}
 - [ ] Beginning balances tie to sources or prior period
 - [ ] Interest calculated on appropriate balance (typically beginning)
 - [ ] Paydowns respect cash availability and priority
 - [ ] Ending balances cannot be negative
 - [ ] Totals sum tranches correctly
 
-### Returns/Output Analysis
+### Returns/Output Analysis {#returnsoutput-analysis}
 - [ ] Exit/terminal values calculated correctly
 - [ ] All relevant adjustments included
 - [ ] Cash flow signs are correct (negative for investment, positive for proceeds)
 - [ ] IRR/MOIC formulas reference complete ranges
 - [ ] Results are reasonable for the scenario
 
-### Sensitivity Tables (if applicable)
+### Sensitivity Tables (if applicable) {#sensitivity-tables-if-applicable}
 - [ ] Grid dimensions are ODD (5×5 or 7×7) — there is a true center cell
 - [ ] Row and column axis values are symmetric around the base case (`[base-2Δ, base-Δ, base, base+Δ, base+2Δ]`)
 - [ ] Center cell output equals the model's actual IRR/MOIC — confirms the table is wired correctly
@@ -240,7 +248,7 @@ Must return success with zero errors.
 - [ ] Each data cell shows a DIFFERENT value
 - [ ] Values move in expected directions (higher exit multiple → higher IRR, etc.)
 
-### Formatting
+### Formatting {#formatting}
 - [ ] Hardcoded inputs are blue (0000FF)
 - [ ] Calculated formulas are black (000000)
 - [ ] Same-tab links are purple (800080)
@@ -249,7 +257,7 @@ Must return success with zero errors.
 - [ ] Appropriate number formats applied throughout
 - [ ] No cells show error values (#REF!, #DIV/0!, #VALUE!, #NAME?)
 
-### Logical Sanity Checks
+### Logical Sanity Checks {#logical-sanity-checks}
 - [ ] Numbers are reasonable order of magnitude
 - [ ] Trends make sense (growth, decline, stabilization as expected)
 - [ ] No obviously wrong values (negative where should be positive, impossible percentages, etc.)
@@ -257,7 +265,7 @@ Must return success with zero errors.
 
 ---
 
-## COMMON ERRORS TO AVOID
+## COMMON ERRORS TO AVOID {#common-errors-to-avoid}
 
 | Error | What Goes Wrong | How to Fix |
 |-------|-----------------|------------|
@@ -273,7 +281,7 @@ Must return success with zero errors.
 
 ---
 
-## WORKING WITH THE USER — SECTION-BY-SECTION CHECKPOINTS
+## WORKING WITH THE USER — SECTION-BY-SECTION CHECKPOINTS {#working-with-the-user--section-by-section-checkpoints}
 
 * **If the template structure is unclear**, ask before proceeding
 * **If the user's requirements conflict with the template**, confirm their preference
@@ -292,11 +300,11 @@ Must return success with zero errors.
 **This skill produces investment banking-quality LBO models by filling templates with correct formulas, proper formatting, and validated calculations. The skill adapts to any template structure while ensuring financial accuracy and professional presentation standards.**
 
 
-## Data sources — MCP first, web fallback
+## Data sources — MCP first, web fallback {#data-sources--mcp-first-web-fallback}
 
-Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Those are commercial financial-data MCPs from the original Cowork plugin context. In Hermes:
+Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Those are commercial financial-data MCPs from the original Cowork plugin context. In {{app-name}}:
 
-- **If you have any structured financial-data MCP configured** (Hermes supports MCP — see `native-mcp` skill), prefer it for point-in-time comps, precedent transactions, and filings.
+- **If you have any structured financial-data MCP configured** ({{app-name}} supports MCP — see `native-mcp` skill), prefer it for point-in-time comps, precedent transactions, and filings.
 - **Otherwise**, fall back to:
   - `web_search` / `web_extract` against SEC EDGAR (`https://www.sec.gov/cgi-bin/browse-edgar`) for US filings
   - Company IR pages for press releases, earnings decks
@@ -304,6 +312,6 @@ Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Th
   - User-provided data (explicitly ask when the context doesn't have it)
 - **Never fabricate**. If a multiple, precedent, or filing number can't be sourced, flag the cell as `[UNSOURCED]` and surface it to the user.
 
-## Attribution
+## Attribution {#attribution}
 
 This skill is adapted from Anthropic's Claude for Financial Services plugin suite (Apache-2.0). The Office-JS / Cowork live-Excel paths have been removed; this version targets headless openpyxl via the `excel-author` skill's conventions. Original: https://github.com/anthropics/financial-services

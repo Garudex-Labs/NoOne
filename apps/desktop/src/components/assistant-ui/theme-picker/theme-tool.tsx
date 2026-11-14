@@ -2,12 +2,12 @@
 
 import type { ToolCallMessagePart, ToolCallMessagePartProps } from '@assistant-ui/react'
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useState } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'
 import { WIDGET_SHELL_CLASS } from '@/components/chat/widget-shell'
 import { LAYOUTS_AREA } from '@/components/pane-shell/tree/presets'
-import { Codicon } from '@/components/ui/codicon'
 import { useContributions } from '@/contrib/react/use-contributions'
 import { useI18n } from '@/i18n'
 import { connectorText, recordOf } from '@/lib/connector-tools'
@@ -154,7 +154,7 @@ export function ThemeTool(props: ToolCallMessagePartProps) {
           onClick={() => cancelThemePick(sessionId)}
           type="button"
         >
-          <Codicon name="close" size="0.8rem" />
+          <AppIcon name="close" size="0.8rem" />
         </button>
       </div>
       {picker === 'accent' ? (

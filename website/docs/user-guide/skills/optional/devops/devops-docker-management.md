@@ -1,38 +1,46 @@
 ---
 title: "Docker Management — Manage Docker containers, images, volumes, and Compose"
-sidebar_label: "Docker Management"
+sidebarTitle: "Docker Management"
 description: "Manage Docker containers, images, volumes, and Compose"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Docker Management
+# Docker Management {#docker-management}
 
 Manage Docker containers, images, volumes, and Compose.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/devops/docker-management` |
+| Source | Optional — install with `noone skills install official/devops/docker-management` |
 | Path | `optional-skills/devops/docker-management` |
 | Version | `1.0.0` |
-| Author | sprmn24 |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `docker`, `containers`, `devops`, `infrastructure`, `compose`, `images`, `volumes`, `networks`, `debugging` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Docker Management
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Docker Management {#docker-management-1}
 
 Manage Docker containers, images, volumes, networks, and Compose stacks using standard Docker CLI commands. No additional dependencies beyond Docker itself.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - Run, stop, restart, remove, or inspect containers
 - Build, pull, push, tag, or clean up Docker images
@@ -42,7 +50,7 @@ Manage Docker containers, images, volumes, networks, and Compose stacks using st
 - Check Docker disk usage or free up space
 - Review or optimize a Dockerfile
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Docker Engine installed and running
 - User added to the `docker` group (or use `sudo`)
@@ -54,7 +62,7 @@ Quick check:
 docker --version && docker compose version
 ```
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Task | Command |
 |------|---------|
@@ -69,9 +77,9 @@ docker --version && docker compose version
 | Disk usage | `docker system df` |
 | Cleanup dangling | `docker image prune && docker container prune` |
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. Identify the domain
+### 1. Identify the domain {#1-identify-the-domain}
 
 Figure out which area the request falls into:
 
@@ -82,7 +90,7 @@ Figure out which area the request falls into:
 - **Volumes & networks** → create, inspect, rm, prune, connect
 - **Troubleshooting** → log analysis, exit codes, resource issues
 
-### 2. Container operations
+### 2. Container operations {#2-container-operations}
 
 **Run a new container:**
 
@@ -136,7 +144,7 @@ docker stats --no-stream               # resource usage snapshot
 docker top NAME                        # running processes
 ```
 
-### 3. Image management
+### 3. Image management {#3-image-management}
 
 ```bash
 # Build
@@ -162,7 +170,7 @@ docker image prune -a                  # remove ALL unused images (careful!)
 docker image prune -a --filter "until=168h"   # unused images older than 7 days
 ```
 
-### 4. Docker Compose
+### 4. Docker Compose {#4-docker-compose}
 
 ```bash
 # Start/stop
@@ -218,7 +226,7 @@ volumes:
   pgdata:
 ```
 
-### 5. Volumes and networks
+### 5. Volumes and networks {#5-volumes-and-networks}
 
 ```bash
 # Volumes
@@ -238,7 +246,7 @@ docker network rm mynet                # remove network
 docker network prune                   # remove unused networks
 ```
 
-### 6. Disk usage and cleanup
+### 6. Disk usage and cleanup {#6-disk-usage-and-cleanup}
 
 Always start with a diagnostic before cleaning:
 
@@ -261,7 +269,7 @@ docker system prune -a --volumes       # EVERYTHING — named volumes too
 
 **Warning:** Never run `docker system prune -a --volumes` without confirming with the user. This removes named volumes with potentially important data.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
@@ -274,7 +282,7 @@ docker system prune -a --volumes       # EVERYTHING — named volumes too
 | Build cache not working | Layer order wrong in Dockerfile | Put rarely-changing layers first (deps before source code) |
 | Image too large | No multi-stage build, no .dockerignore | Use multi-stage builds, add `.dockerignore` |
 
-## Verification
+## Verification {#verification}
 
 After any Docker operation, verify the result:
 
@@ -285,7 +293,7 @@ After any Docker operation, verify the result:
 - **Compose stack healthy?** → `docker compose ps` (all services "running" or "healthy")
 - **Disk freed?** → `docker system df` (compare before/after)
 
-## Dockerfile Optimization Tips
+## Dockerfile Optimization Tips {#dockerfile-optimization-tips}
 
 When reviewing or creating a Dockerfile, suggest these improvements:
 

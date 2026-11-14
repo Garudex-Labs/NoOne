@@ -1,43 +1,51 @@
 ---
 title: "Parallel Cli — Agent-native web search, deep research, and enrichment"
-sidebar_label: "Parallel Cli"
+sidebarTitle: "Parallel Cli"
 description: "Agent-native web search, deep research, and enrichment"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Parallel Cli
+# Parallel Cli {#parallel-cli}
 
 Agent-native web search, deep research, and enrichment.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/parallel-cli` |
+| Source | Optional — install with `noone skills install official/research/parallel-cli` |
 | Path | `optional-skills/research/parallel-cli` |
 | Version | `1.1.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Research`, `Web`, `Search`, `Deep-Research`, `Enrichment`, `CLI` |
 | Related skills | [`mcporter`](../../optional/mcp/mcp-mcporter.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Parallel CLI
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Parallel CLI {#parallel-cli-1}
 
 Use `parallel-cli` when the user explicitly wants Parallel, or when a terminal-native workflow would benefit from Parallel's vendor-specific stack for web search, extraction, deep research, enrichment, entity discovery, or monitoring.
 
-This is an optional third-party workflow, not a Hermes core capability.
+This is an optional third-party workflow, not a {{app-name}} core capability.
 
 Important expectations:
 - Parallel is a paid service with a free tier, not a fully free local tool.
-- It overlaps with Hermes native `web_search` / `web_extract`, so do not prefer it by default for ordinary lookups.
+- It overlaps with {{app-name}} native `web_search` / `web_extract`, so do not prefer it by default for ordinary lookups.
 - Prefer this skill when the user mentions Parallel specifically or needs capabilities like Parallel's enrichment, FindAll, or monitor workflows.
 
 `parallel-cli` is designed for agents:
@@ -47,7 +55,7 @@ Important expectations:
 - Context chaining with `--previous-interaction-id`
 - Search, extract, research, enrichment, entity discovery, and monitoring in one CLI
 
-## When to use it
+## When to use it {#when-to-use-it}
 
 Prefer this skill when:
 - The user explicitly mentions Parallel or `parallel-cli`
@@ -55,31 +63,31 @@ Prefer this skill when:
 - You need async deep research jobs that can be launched and polled later
 - You need structured enrichment, FindAll entity discovery, or monitoring
 
-Prefer Hermes native `web_search` / `web_extract` for quick one-off lookups when Parallel is not specifically requested.
+Prefer {{app-name}} native `web_search` / `web_extract` for quick one-off lookups when Parallel is not specifically requested.
 
-## Installation
+## Installation {#installation}
 
 Try the least invasive install path available for the environment.
 
-### Homebrew
+### Homebrew {#homebrew}
 
 ```bash
 brew install parallel-web/tap/parallel-cli
 ```
 
-### npm
+### npm {#npm}
 
 ```bash
 npm install -g parallel-web-cli
 ```
 
-### Python package
+### Python package {#python-package}
 
 ```bash
 pip install "parallel-web-tools[cli]"
 ```
 
-### Standalone installer
+### Standalone installer {#standalone-installer}
 
 ```bash
 curl -fsSL https://parallel.ai/install.sh | bash
@@ -92,7 +100,7 @@ pipx install "parallel-web-tools[cli]"
 pipx ensurepath
 ```
 
-## Authentication
+## Authentication {#authentication}
 
 Interactive login:
 
@@ -120,7 +128,7 @@ parallel-cli auth
 
 If auth requires browser interaction, run with `pty=true`.
 
-## Core rule set
+## Core rule set {#core-rule-set}
 
 1. Always prefer `--json` when you need machine-readable output.
 2. Prefer explicit arguments and non-interactive flows.
@@ -128,11 +136,11 @@ If auth requires browser interaction, run with `pty=true`.
 4. Cite only URLs returned by the CLI output.
 5. Save large JSON outputs to a temp file when follow-up questions are likely.
 6. Use background processes only for genuinely long-running workflows; otherwise run in foreground.
-7. Prefer Hermes native tools unless the user wants Parallel specifically or needs Parallel-only workflows.
+7. Prefer {{app-name}} native tools unless the user wants Parallel specifically or needs Parallel-only workflows.
 
-## Quick reference
+## Quick reference {#quick-reference}
 
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```text
 parallel-cli
 ├── auth
@@ -145,9 +153,9 @@ parallel-cli
 ├── findall run|ingest|status|poll|result|enrich|extend|schema|cancel
 └── monitor create|list|get|update|delete|events|event-group|simulate
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
-## Common flags and patterns
+## Common flags and patterns {#common-flags-and-patterns}
 
 Commonly useful flags:
 - `--json` for structured output
@@ -166,7 +174,7 @@ echo "What is the latest funding for Anthropic?" | parallel-cli search - --json
 echo "Research question" | parallel-cli research run - --json
 ```
 
-## Search
+## Search {#search}
 
 Use for current web lookups with structured results.
 
@@ -196,7 +204,7 @@ When summarizing results:
 - cite only returned sources
 - avoid inventing URLs or source titles
 
-## Extraction
+## Extraction {#extraction}
 
 Use to pull clean content or markdown from a URL.
 
@@ -209,7 +217,7 @@ parallel-cli fetch https://example.com --json
 
 Use `--objective` when the page is broad and you only need one slice of information.
 
-## Deep research
+## Deep research {#deep-research}
 
 Use for deeper multi-step research tasks that may take time.
 
@@ -218,7 +226,7 @@ Common processor tiers:
 - `core` / `pro` for more thorough synthesis
 - `ultra` for the heaviest research jobs
 
-### Synchronous
+### Synchronous {#synchronous}
 
 ```bash
 parallel-cli research run \
@@ -227,7 +235,7 @@ parallel-cli research run \
   --json
 ```
 
-### Async launch + poll
+### Async launch + poll {#async-launch--poll}
 
 ```bash
 parallel-cli research run \
@@ -241,7 +249,7 @@ parallel-cli research poll trun_xxx --json
 parallel-cli research processors --json
 ```
 
-### Context chaining / follow-up
+### Context chaining / follow-up {#context-chaining--follow-up}
 
 ```bash
 parallel-cli research run "What are the top AI coding agents?" --json
@@ -251,30 +259,30 @@ parallel-cli research run \
   --json
 ```
 
-Recommended Hermes workflow:
+Recommended {{app-name}} workflow:
 1. launch with `--no-wait --json`
 2. capture the returned run/task ID
 3. if the user wants to continue other work, keep moving
 4. later call `status` or `poll`
 5. summarize the final report with citations from the returned sources
 
-## Enrichment
+## Enrichment {#enrichment}
 
 Use when the user has CSV/JSON/tabular inputs and wants additional columns inferred from web research.
 
-### Suggest columns
+### Suggest columns {#suggest-columns}
 
 ```bash
 parallel-cli enrich suggest "Find the CEO and annual revenue" --json
 ```
 
-### Plan a config
+### Plan a config {#plan-a-config}
 
 ```bash
 parallel-cli enrich plan -o config.yaml
 ```
 
-### Inline data
+### Inline data {#inline-data}
 
 ```bash
 parallel-cli enrich run \
@@ -283,7 +291,7 @@ parallel-cli enrich run \
   --json
 ```
 
-### Non-interactive file run
+### Non-interactive file run {#non-interactive-file-run}
 
 ```bash
 parallel-cli enrich run \
@@ -294,13 +302,13 @@ parallel-cli enrich run \
   --intent "Find the CEO and annual revenue"
 ```
 
-### YAML config run
+### YAML config run {#yaml-config-run}
 
 ```bash
 parallel-cli enrich run config.yaml
 ```
 
-### Status / polling
+### Status / polling {#status--polling}
 
 ```bash
 parallel-cli enrich status <task_group_id> --json
@@ -310,7 +318,7 @@ parallel-cli enrich poll <task_group_id> --json
 Use explicit JSON arrays for column definitions when operating non-interactively.
 Validate the output file before reporting success.
 
-## FindAll
+## FindAll {#findall}
 
 Use for web-scale entity discovery when the user wants a discovered dataset rather than a short answer.
 
@@ -325,7 +333,7 @@ parallel-cli findall schema <run_id> --json
 
 This is a better fit than ordinary search when the user wants a discovered set of entities that can be reviewed, filtered, or enriched later.
 
-## Monitor
+## Monitor {#monitor}
 
 Use for ongoing change detection over time.
 
@@ -344,32 +352,32 @@ parallel-cli monitor create --help
 
 Use this when the user wants recurring tracking of a page or source rather than a one-time fetch.
 
-## Recommended Hermes usage patterns
+## Recommended {{app-name}} usage patterns {#recommended-hermes-usage-patterns}
 
-### Fast answer with citations
+### Fast answer with citations {#fast-answer-with-citations}
 1. Run `parallel-cli search ... --json`
 2. Parse titles, URLs, dates, excerpts
 3. Summarize with inline citations from the returned URLs only
 
-### URL investigation
+### URL investigation {#url-investigation}
 1. Run `parallel-cli extract URL --json`
 2. If needed, rerun with `--objective` or `--full-content`
 3. Quote or summarize the extracted markdown
 
-### Long research workflow
+### Long research workflow {#long-research-workflow}
 1. Run `parallel-cli research run ... --no-wait --json`
 2. Store the returned ID
 3. Continue other work or periodically poll
 4. Summarize the final report with citations
 
-### Structured enrichment workflow
+### Structured enrichment workflow {#structured-enrichment-workflow}
 1. Inspect the input file and columns
 2. Use `enrich suggest` or provide explicit enriched columns
 3. Run `enrich run`
 4. Poll for completion if needed
 5. Validate the output file before reporting success
 
-## Error handling and exit codes
+## Error handling and exit codes {#error-handling-and-exit-codes}
 
 The CLI documents these exit codes:
 - `0` success
@@ -383,7 +391,7 @@ If you hit auth errors:
 2. confirm `PARALLEL_API_KEY` or run `parallel-cli login` / `parallel-cli login --device`
 3. verify `parallel-cli` is on `PATH`
 
-## Maintenance
+## Maintenance {#maintenance}
 
 Check current auth / install state:
 
@@ -400,12 +408,12 @@ pip install --upgrade parallel-web-tools
 parallel-cli config auto-update-check off
 ```
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Do not omit `--json` unless the user explicitly wants human-formatted output.
 - Do not cite sources not present in the CLI output.
 - `login` may require PTY/browser interaction.
 - Prefer foreground execution for short tasks; do not overuse background processes.
-- For large result sets, save JSON to `~/.hermes/cache/scratch/*.json` (the Hermes scratch dir) instead of stuffing everything into context.
-- Do not silently choose Parallel when Hermes native tools are already sufficient.
+- For large result sets, save JSON to `~/.hermes/cache/scratch/*.json` (the {{app-name}} scratch dir) instead of stuffing everything into context.
+- Do not silently choose Parallel when {{app-name}} native tools are already sufficient.
 - Remember this is a vendor workflow that usually requires account auth and paid usage beyond the free tier.

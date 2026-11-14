@@ -1,15 +1,12 @@
-import { useEffect, useState, useCallback, useRef } from "react";
 import {
-  ShieldCheck,
-  ShieldOff,
   ExternalLink,
   RefreshCw,
+  ShieldCheck,
+  ShieldOff,
   Terminal,
-} from "lucide-react";
-import { api, type OAuthProvider } from "@/lib/api";
+} from "@noone/ui/icons";
+import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
-import { CopyButton } from "@nous-research/ui/ui/components/command-block";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import {
   Card,
   CardContent,
@@ -17,10 +14,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@nous-research/ui/ui/components/card";
-import { Badge } from "@nous-research/ui/ui/components/badge";
+import { CopyButton } from "@nous-research/ui/ui/components/command-block";
 import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { OAuthLoginModal } from "@/components/OAuthLoginModal";
 import { useI18n } from "@/i18n";
+import { api, type OAuthProvider } from "@/lib/api";
 import { errorMessage } from "@/lib/api-error";
 
 interface Props {

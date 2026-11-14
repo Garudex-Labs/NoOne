@@ -1,9 +1,9 @@
 'use client'
 
+import { Play } from '@noone/ui/icons'
 import { type CSSProperties, useState } from 'react'
 
 import { SplitButton } from '@/components/ui/split-button'
-import { Play } from '@/lib/icons'
 import { allowProvider } from '@/store/embed-consent'
 
 import { EMBED_DEFAULT_H } from './embed-size'

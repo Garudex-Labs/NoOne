@@ -8,20 +8,20 @@
  *   the Desktop app on this machine still updates itself.
  */
 
-import { isHermesCloudUrl } from '@hermes/shared'
+import { isHermesCloudUrl } from '@noone/shared'
 import { computed } from 'nanostores'
 
-import type { HermesConnection } from '@/global'
-import { servedByHermesCloud } from '@/lib/hermes-cloud-host'
+import type { AgentConnection } from '@/global'
+import { servedByHermesCloud } from '@/lib/cloud-host'
 import type { UpdateTarget } from '@/lib/update-copy'
 import { $connection } from '@/store/session'
 
-function connectedToHermesCloud(connection: HermesConnection | null): boolean {
+function connectedToHermesCloud(connection: AgentConnection | null): boolean {
   return connection?.mode === 'remote' && (connection.remoteKind === 'cloud' || isHermesCloudUrl(connection.baseUrl))
 }
 
 /** Whether Hermes Cloud owns updates for `target` under `connection`. */
-export function cloudOwnsUpdates(target: UpdateTarget, connection: HermesConnection | null = $connection.get()): boolean {
+export function cloudOwnsUpdates(target: UpdateTarget, connection: AgentConnection | null = $connection.get()): boolean {
   return servedByHermesCloud() || (target === 'backend' && connectedToHermesCloud(connection))
 }
 
@@ -29,7 +29,7 @@ export function cloudOwnsUpdates(target: UpdateTarget, connection: HermesConnect
  * The target a generic "Update Hermes" command acts on: the connected backend
  * in remote mode, unless Hermes Cloud owns it — then this machine's own app.
  */
-export function updateTargetFor(connection: HermesConnection | null): UpdateTarget {
+export function updateTargetFor(connection: AgentConnection | null): UpdateTarget {
   return connection?.mode === 'remote' && !cloudOwnsUpdates('backend', connection) ? 'backend' : 'client'
 }
 

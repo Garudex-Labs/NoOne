@@ -64,8 +64,8 @@ async def probe(peer):
     from gateway.session_authority import initialize_session_authority
     from gateway.run_api import start_gateway_api, stop_gateway_api
     from gateway.session_contract import SessionRef
-    from hermes_cli import web_server
-    from hermes_cli.dashboard_auth.ws_tickets import mint_ticket
+    from agent_cli import web_server
+    from agent_cli.dashboard_auth.ws_tickets import mint_ticket
     runner = GatewayRunner()
     authority = await initialize_session_authority(runner, profile_id='fixture', instance_id='policy')
     api = await start_gateway_api(runner)
@@ -92,7 +92,7 @@ async def probe(peer):
             params = dict(request_id=source, source=source, cwd=str(cwd), model='policy-' + source)
             if source == 'cli':
                 params['toolsets'] = ['terminal']
-            if source == 'tui':  # `hermes --tui -s policy-skill --pass-session-id`
+            if source == 'tui':  # `noone --tui -s policy-skill --pass-session-id`
                 params.update(skills=['policy-skill'], pass_session_id=True)
             created = await rpc(ws, 'session.create', **params)
             assert 'result' in created, created
@@ -100,7 +100,7 @@ async def probe(peer):
             sessions.append(sid)
             created_ids[sid] = created['result']['stored_session_id']
             from gateway.session_policy import policy_for_source
-            from hermes_state_runtime import RuntimeStoreError
+            from agent_state_runtime import RuntimeStoreError
             live_source = authority.sessions[sid].source
             adapter = runner._adapter_for_source(live_source)
             saved_policy = adapter.policies.pop(live_source.chat_id)

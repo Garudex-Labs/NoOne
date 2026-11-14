@@ -1,12 +1,12 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { Ear, EarOff, iconSize, Layers3, Loader2, Square } from '@noone/ui/icons'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip, TipKeybindLabel } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import { hostHas } from '@/lib/host-capabilities'
-import { Ear, EarOff, iconSize, Layers3, Loader2, Square } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { recordAction } from '@/store/desktop-metrics'
 import { $hudMode, closeHud, resetHudLayout } from '@/store/hud'
@@ -195,7 +195,7 @@ export function ComposerControls({
             {showStop ? (
               <span className="block size-2.5 rounded-[0.1875rem] bg-current" />
             ) : (
-              <Codicon name="arrow-up" size="0.875rem" />
+              <AppIcon name="arrow-up" size="0.875rem" />
             )}
           </Button>
         </Tip>
@@ -249,7 +249,7 @@ function renderSteerButton(
         type="button"
         variant="ghost"
       >
-        <Codicon name="debug-step-over" size="0.875rem" />
+        <AppIcon name="debug-step-over" size="0.875rem" />
       </Button>
     </Tip>
   ) : null
@@ -269,7 +269,7 @@ function HudWindowButtons() {
           type="button"
           variant="ghost"
         >
-          <Codicon name="discard" size="0.875rem" />
+          <AppIcon name="discard" size="0.875rem" />
         </Button>
       </Tip>
       <Tip label={t.titlebar.exitHud} placement="toolbar">
@@ -281,7 +281,7 @@ function HudWindowButtons() {
           type="button"
           variant="ghost"
         >
-          <Codicon name="screen-normal" size="0.875rem" />
+          <AppIcon name="screen-normal" size="0.875rem" />
         </Button>
       </Tip>
     </>
@@ -332,7 +332,7 @@ function ConversationPill({
           type="button"
           variant="ghost"
         >
-          <Codicon name={muted ? 'mic-off' : 'mic'} size="1rem" />
+          <AppIcon name={muted ? 'mic-off' : 'mic'} size="1rem" />
         </Button>
       </Tip>
       {listening && (

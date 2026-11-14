@@ -5,10 +5,11 @@ import {
   JsonRpcGatewayClient,
   type ServerRequest,
   type ServerRequestHandler
-} from '@hermes/shared'
+} from '@noone/shared'
+import { appText } from '@noone/shared/application-identity'
 import { map, type MapStore } from 'nanostores'
 
-import type { HermesApiRequest } from '@/global'
+import type { AgentApiRequest } from '@/global'
 
 import { CanonicalDesktopProtocol, canonicalProfile, canonicalPromptParams, canonicalSessionKey, openGatewaySocket, recordCanonicalOwner, splitRewindSubmit } from './canonical-protocol'
 import { DialReadiness, GATEWAY_NOT_CONNECTED_MESSAGE, remainingRequestBudget } from './dial-readiness'
@@ -63,7 +64,7 @@ const ATTACH_REQUIRED = new Set([
 // (`session_key`) is the same CAS mutation on a sidebar row.
 const PARENT_ATTACH_REQUIRED = new Set(['session.branch_stored', 'session.branch_whole', 'session.workspace.move'])
 
-// Canonical-only identity keys. The legacy `hermes serve` contract refuses an unknown key as
+// Canonical-only identity keys. The legacy `noone serve` contract refuses an unknown key as
 // version skew (4000), so they are stripped on a non-canonical dial. `prompt.submit` keeps its
 // `submission_id` on purpose: the submit path retries identityless on that exact refusal and
 // records the send as legacy-attempted, which a silent strip here would hide. A message-level
@@ -92,7 +93,7 @@ function requestDeadline(timeoutMs: number | undefined): number {
 
 export type GatewaySessionWire = 'canonical' | 'legacy'
 
-export class HermesGateway extends JsonRpcGatewayClient {
+export class AgentGateway extends JsonRpcGatewayClient {
   private canonical = false
   private nativeDial = false
   private readonly readiness = new DialReadiness(() => super.connectionState === 'open')
@@ -524,7 +525,7 @@ export class HermesGateway extends JsonRpcGatewayClient {
   }
 
   private requireConnectionGeneration(generation: number): void {
-    if (generation !== this.connectionGeneration) { throw new Error('Hermes gateway connection changed; reopen the session') }
+    if (generation !== this.connectionGeneration) { throw new Error(appText('{app_name} gateway connection changed; reopen the session')) }
   }
 
   // Resume the session (and, for branch-like methods, its parent) on THIS socket before a
@@ -583,7 +584,7 @@ export class HermesGateway extends JsonRpcGatewayClient {
         console.error(`[gateway] error frame with no request id (code ${error.code ?? 'none'}): ${error.message}`),
       // The channel already answered -32601; note the missing registry in devtools.
       onUnhandledRequest: request =>
-        console.warn(`[gateway] Hermes Desktop has no server-request registry for ${request.method} (${request.id})`),
+        console.warn(appText(`[gateway] {app_name} Desktop has no server-request registry for ${request.method} (${request.id})`)),
       requestTimeoutMs: DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS,
       socketFactory: openGatewaySocket
     })
@@ -683,7 +684,7 @@ export function resolveOwnerNow(owner?: OwnerScope): ResolvedOwner {
  *  ambient connection spread underneath. An untagged half stays untagged. A
  *  named profile is always explicit here, so it carries the foreground
  *  priority `profileScoped` gives explicit profiles (voice is user-driven). */
-export function hermesApiAs<T>(owner: ResolvedOwner, request: HermesApiRequest): Promise<T> {
+export function hermesApiAs<T>(owner: ResolvedOwner, request: AgentApiRequest): Promise<T> {
   return window.hermesDesktop.api<T>({
     ...(owner.connectionId ? { connectionId: owner.connectionId } : {}),
     ...(owner.profile ? { priority: 'foreground' as const, profile: owner.profile } : {}),
@@ -750,7 +751,7 @@ export function ambientOwnerConnectionId(): string | undefined {
  *  pin — `'local'` included — so a pin always overrides the ambient tag spread
  *  underneath it. (It used to omit the key for 'local', which made the pin
  *  unable to beat the ambient tag; helpers then had to bypass this wrapper.) */
-export function hermesApi<T>(request: HermesApiRequest): Promise<T> {
+export function hermesApi<T>(request: AgentApiRequest): Promise<T> {
   return window.hermesDesktop.api<T>({ ...connectionScoped(), ...request })
 }
 

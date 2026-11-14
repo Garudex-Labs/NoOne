@@ -1,0 +1,3145 @@
+{
+  "sourcePages": [
+    {
+      "source": "website/docs/developer-guide/acp-internals.md",
+      "target": "website/docs/developer-guide/acp-internals.md"
+    },
+    {
+      "source": "website/docs/developer-guide/adding-platform-adapters.md",
+      "target": "website/docs/developer-guide/adding-platform-adapters.md"
+    },
+    {
+      "source": "website/docs/developer-guide/adding-providers.md",
+      "target": "website/docs/developer-guide/adding-providers.md"
+    },
+    {
+      "source": "website/docs/developer-guide/adding-tools.md",
+      "target": "website/docs/developer-guide/adding-tools.md"
+    },
+    {
+      "source": "website/docs/developer-guide/agent-loop.md",
+      "target": "website/docs/developer-guide/agent-loop.md"
+    },
+    {
+      "source": "website/docs/developer-guide/architecture.md",
+      "target": "website/docs/developer-guide/architecture.md"
+    },
+    {
+      "source": "website/docs/developer-guide/billing-lifecycle.md",
+      "target": "website/docs/developer-guide/billing-lifecycle.md"
+    },
+    {
+      "source": "website/docs/developer-guide/browser-provider-plugin.md",
+      "target": "website/docs/developer-guide/browser-provider-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/browser-supervisor.md",
+      "target": "website/docs/developer-guide/browser-supervisor.md"
+    },
+    {
+      "source": "website/docs/developer-guide/browser-vault-plugin.md",
+      "target": "website/docs/developer-guide/browser-vault-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/chronos-managed-cron-contract.md",
+      "target": "website/docs/developer-guide/chronos-managed-cron-contract.md"
+    },
+    {
+      "source": "website/docs/developer-guide/cli-internals.md",
+      "target": "website/docs/developer-guide/cli-internals.md"
+    },
+    {
+      "source": "website/docs/developer-guide/codebase-ownership.md",
+      "target": "website/docs/developer-guide/codebase-ownership.md"
+    },
+    {
+      "source": "website/docs/developer-guide/completion-backlog-delivery.md",
+      "target": "website/docs/developer-guide/completion-backlog-delivery.md"
+    },
+    {
+      "source": "website/docs/developer-guide/config-backend.md",
+      "target": "website/docs/developer-guide/config-backend.md"
+    },
+    {
+      "source": "website/docs/developer-guide/context-compression-and-caching.md",
+      "target": "website/docs/developer-guide/context-compression-and-caching.md"
+    },
+    {
+      "source": "website/docs/developer-guide/context-engine-plugin.md",
+      "target": "website/docs/developer-guide/context-engine-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/contributing.md",
+      "target": "website/docs/developer-guide/contribution-guide.md"
+    },
+    {
+      "source": "website/docs/developer-guide/creating-skills.md",
+      "target": "website/docs/developer-guide/creating-skills.md"
+    },
+    {
+      "source": "website/docs/developer-guide/cron-internals.md",
+      "target": "website/docs/developer-guide/cron-internals.md"
+    },
+    {
+      "source": "website/docs/developer-guide/delegation-provider-plugin.md",
+      "target": "website/docs/developer-guide/delegation-provider-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/desktop-plugin-sdk.md",
+      "target": "website/docs/developer-guide/desktop-plugin-sdk.md"
+    },
+    {
+      "source": "website/docs/developer-guide/egress-internals.md",
+      "target": "website/docs/developer-guide/egress-internals.md"
+    },
+    {
+      "source": "website/docs/developer-guide/extending-the-cli.md",
+      "target": "website/docs/developer-guide/extending-the-cli.md"
+    },
+    {
+      "source": "website/docs/developer-guide/gateway-classic-cli.md",
+      "target": "website/docs/developer-guide/gateway-classic-cli.md"
+    },
+    {
+      "source": "website/docs/developer-guide/gateway-command-parity.md",
+      "target": "website/docs/developer-guide/gateway-command-parity.md"
+    },
+    {
+      "source": "website/docs/developer-guide/gateway-internals.md",
+      "target": "website/docs/developer-guide/gateway-internals.md"
+    },
+    {
+      "source": "website/docs/developer-guide/gateway-local-sessions.md",
+      "target": "website/docs/developer-guide/gateway-local-sessions.md"
+    },
+    {
+      "source": "website/docs/developer-guide/gateway-monitoring.md",
+      "target": "website/docs/developer-guide/gateway-monitoring.md"
+    },
+    {
+      "source": "website/docs/developer-guide/gateway-session-lifecycle.md",
+      "target": "website/docs/developer-guide/gateway-session-lifecycle.md"
+    },
+    {
+      "source": "website/docs/developer-guide/hosted-profile-owners.md",
+      "target": "website/docs/developer-guide/hosted-profile-owners.md"
+    },
+    {
+      "source": "website/docs/developer-guide/image-gen-provider-plugin.md",
+      "target": "website/docs/developer-guide/image-gen-provider-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/macos-bundle-updates.md",
+      "target": "website/docs/developer-guide/macos-bundle-updates.md"
+    },
+    {
+      "source": "website/docs/developer-guide/memory-provider-plugin.md",
+      "target": "website/docs/developer-guide/memory-provider-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/micro-compaction.md",
+      "target": "website/docs/developer-guide/micro-compaction.md"
+    },
+    {
+      "source": "website/docs/developer-guide/middleware.md",
+      "target": "website/docs/developer-guide/middleware.md"
+    },
+    {
+      "source": "website/docs/developer-guide/model-provider-plugin.md",
+      "target": "website/docs/developer-guide/model-provider-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/multiplexing-gateway.md",
+      "target": "website/docs/developer-guide/multiplexing-gateway.md"
+    },
+    {
+      "source": "website/docs/developer-guide/observer-hooks.md",
+      "target": "website/docs/developer-guide/observer-hooks.md"
+    },
+    {
+      "source": "website/docs/developer-guide/plugin-llm-access.md",
+      "target": "website/docs/developer-guide/plugin-llm-access.md"
+    },
+    {
+      "source": "website/docs/developer-guide/plugins/application-declarations.md",
+      "target": "website/docs/developer-guide/plugins/application-declarations.md"
+    },
+    {
+      "source": "website/docs/developer-guide/plugins/catalog-submission.md",
+      "target": "website/docs/developer-guide/plugins/catalog-submission.md"
+    },
+    {
+      "source": "website/docs/developer-guide/plugins/index.md",
+      "target": "website/docs/developer-guide/plugins/index.md"
+    },
+    {
+      "source": "website/docs/developer-guide/plugins/public-api.md",
+      "target": "website/docs/developer-guide/plugins/public-api.md"
+    },
+    {
+      "source": "website/docs/developer-guide/pm-audit-status.md",
+      "target": "website/docs/developer-guide/pm-audit-status.md"
+    },
+    {
+      "source": "website/docs/developer-guide/programmatic-integration.md",
+      "target": "website/docs/developer-guide/programmatic-integration.md"
+    },
+    {
+      "source": "website/docs/developer-guide/prompt-assembly.md",
+      "target": "website/docs/developer-guide/prompt-assembly.md"
+    },
+    {
+      "source": "website/docs/developer-guide/provider-runtime.md",
+      "target": "website/docs/developer-guide/provider-runtime.md"
+    },
+    {
+      "source": "website/docs/developer-guide/relay-connector-contract.md",
+      "target": "website/docs/developer-guide/relay-connector-contract.md"
+    },
+    {
+      "source": "website/docs/developer-guide/relay-shared-metrics.md",
+      "target": "website/docs/developer-guide/relay-shared-metrics.md"
+    },
+    {
+      "source": "website/docs/developer-guide/secret-source-plugin.md",
+      "target": "website/docs/developer-guide/secret-source-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/session-storage.md",
+      "target": "website/docs/developer-guide/session-storage.md"
+    },
+    {
+      "source": "website/docs/developer-guide/shared-bundle-builds.md",
+      "target": "website/docs/developer-guide/shared-bundle-builds.md"
+    },
+    {
+      "source": "website/docs/developer-guide/source-update-completion.md",
+      "target": "website/docs/developer-guide/source-update-completion.md"
+    },
+    {
+      "source": "website/docs/developer-guide/stable-releases.md",
+      "target": "website/docs/developer-guide/stable-releases.md"
+    },
+    {
+      "source": "website/docs/developer-guide/state-db-recovery.md",
+      "target": "website/docs/developer-guide/state-db-recovery.md"
+    },
+    {
+      "source": "website/docs/developer-guide/streaming-tts.md",
+      "target": "website/docs/developer-guide/streaming-tts.md"
+    },
+    {
+      "source": "website/docs/developer-guide/subagent-lifecycle-api.md",
+      "target": "website/docs/developer-guide/subagent-lifecycle-api.md"
+    },
+    {
+      "source": "website/docs/developer-guide/terminal-environment-plugin.md",
+      "target": "website/docs/developer-guide/terminal-environment-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/tools-runtime.md",
+      "target": "website/docs/developer-guide/tools-runtime.md"
+    },
+    {
+      "source": "website/docs/developer-guide/trajectory-format.md",
+      "target": "website/docs/developer-guide/trajectory-format.md"
+    },
+    {
+      "source": "website/docs/developer-guide/video-gen-provider-plugin.md",
+      "target": "website/docs/developer-guide/video-gen-provider-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/web-search-provider-plugin.md",
+      "target": "website/docs/developer-guide/web-search-provider-plugin.md"
+    },
+    {
+      "source": "website/docs/developer-guide/worktree-ui-dev.md",
+      "target": "website/docs/developer-guide/worktree-ui-dev.md"
+    },
+    {
+      "source": "website/docs/getting-started/installation.md",
+      "target": "website/docs/getting-started/installation.md"
+    },
+    {
+      "source": "website/docs/getting-started/learning-path.md",
+      "target": "website/docs/getting-started/learning-path.md"
+    },
+    {
+      "source": "website/docs/getting-started/nix-setup.md",
+      "target": "website/docs/getting-started/nix-setup.md"
+    },
+    {
+      "source": "website/docs/getting-started/official-domains.md",
+      "target": "website/docs/getting-started/official-domains.md"
+    },
+    {
+      "source": "website/docs/getting-started/platform-support.md",
+      "target": "website/docs/getting-started/platform-support.md"
+    },
+    {
+      "source": "website/docs/getting-started/quickstart.md",
+      "target": "website/docs/getting-started/quickstart.md"
+    },
+    {
+      "source": "website/docs/getting-started/termux.md",
+      "target": "website/docs/getting-started/termux.md"
+    },
+    {
+      "source": "website/docs/getting-started/updating.md",
+      "target": "website/docs/getting-started/updating.md"
+    },
+    {
+      "source": "website/docs/guides/agent-email-address.md",
+      "target": "website/docs/guides/agent-email-address.md"
+    },
+    {
+      "source": "website/docs/guides/automate-with-cron.md",
+      "target": "website/docs/guides/automate-with-cron.md"
+    },
+    {
+      "source": "website/docs/guides/automation-blueprints.md",
+      "target": "website/docs/guides/automation-blueprints.md"
+    },
+    {
+      "source": "website/docs/guides/aws-bedrock.md",
+      "target": "website/docs/guides/aws-bedrock.md"
+    },
+    {
+      "source": "website/docs/guides/azure-foundry.md",
+      "target": "website/docs/guides/azure-foundry.md"
+    },
+    {
+      "source": "website/docs/guides/cron-script-only.md",
+      "target": "website/docs/guides/cron-script-only.md"
+    },
+    {
+      "source": "website/docs/guides/cron-troubleshooting.md",
+      "target": "website/docs/guides/cron-troubleshooting.md"
+    },
+    {
+      "source": "website/docs/guides/daily-briefing-bot.md",
+      "target": "website/docs/guides/daily-briefing-bot.md"
+    },
+    {
+      "source": "website/docs/guides/delegation-patterns.md",
+      "target": "website/docs/guides/delegation-patterns.md"
+    },
+    {
+      "source": "website/docs/guides/desktop-native-signin.md",
+      "target": "website/docs/guides/desktop-native-signin.md"
+    },
+    {
+      "source": "website/docs/guides/github-pr-review-agent.md",
+      "target": "website/docs/guides/github-pr-review-agent.md"
+    },
+    {
+      "source": "website/docs/guides/google-gemini.md",
+      "target": "website/docs/guides/google-gemini.md"
+    },
+    {
+      "source": "website/docs/guides/google-vertex.md",
+      "target": "website/docs/guides/google-vertex.md"
+    },
+    {
+      "source": "website/docs/guides/local-llm-on-mac.md",
+      "target": "website/docs/guides/local-llm-on-mac.md"
+    },
+    {
+      "source": "website/docs/guides/local-ollama-setup.md",
+      "target": "website/docs/guides/local-ollama-setup.md"
+    },
+    {
+      "source": "website/docs/guides/manage-hermes-cloud-with-mcp.md",
+      "target": "website/docs/guides/manage-hermes-cloud-with-mcp.md"
+    },
+    {
+      "source": "website/docs/guides/microsoft-graph-app-registration.md",
+      "target": "website/docs/guides/microsoft-graph-app-registration.md"
+    },
+    {
+      "source": "website/docs/guides/migrate-from-openclaw.md",
+      "target": "website/docs/guides/migrate-from-openclaw.md"
+    },
+    {
+      "source": "website/docs/guides/minimax-oauth.md",
+      "target": "website/docs/guides/minimax-oauth.md"
+    },
+    {
+      "source": "website/docs/guides/oauth-over-ssh.md",
+      "target": "website/docs/guides/oauth-over-ssh.md"
+    },
+    {
+      "source": "website/docs/guides/operate-teams-meeting-pipeline.md",
+      "target": "website/docs/guides/operate-teams-meeting-pipeline.md"
+    },
+    {
+      "source": "website/docs/guides/pipe-script-output.md",
+      "target": "website/docs/guides/pipe-script-output.md"
+    },
+    {
+      "source": "website/docs/guides/python-library.md",
+      "target": "website/docs/guides/python-library.md"
+    },
+    {
+      "source": "website/docs/guides/run-hermes-with-nous-portal.md",
+      "target": "website/docs/guides/run-agent-with-nous-portal.md"
+    },
+    {
+      "source": "website/docs/guides/run-nemotron-3-ultra-free.md",
+      "target": "website/docs/guides/run-nemotron-3-ultra-free.md"
+    },
+    {
+      "source": "website/docs/guides/secure-hermes-on-a-work-machine.md",
+      "target": "website/docs/guides/secure-agent-on-a-work-machine.md"
+    },
+    {
+      "source": "website/docs/guides/team-telegram-assistant.md",
+      "target": "website/docs/guides/team-telegram-assistant.md"
+    },
+    {
+      "source": "website/docs/guides/tips.md",
+      "target": "website/docs/guides/tips.md"
+    },
+    {
+      "source": "website/docs/guides/troubleshooting-agent-quality.md",
+      "target": "website/docs/guides/troubleshooting-agent-quality.md"
+    },
+    {
+      "source": "website/docs/guides/use-mcp-with-hermes.md",
+      "target": "website/docs/guides/use-mcp-with-agent.md"
+    },
+    {
+      "source": "website/docs/guides/use-soul-with-hermes.md",
+      "target": "website/docs/guides/use-soul-with-agent.md"
+    },
+    {
+      "source": "website/docs/guides/use-voice-mode-with-hermes.md",
+      "target": "website/docs/guides/use-voice-mode-with-agent.md"
+    },
+    {
+      "source": "website/docs/guides/webhook-github-pr-review.md",
+      "target": "website/docs/guides/webhook-github-pr-review.md"
+    },
+    {
+      "source": "website/docs/guides/work-with-skills.md",
+      "target": "website/docs/guides/work-with-skills.md"
+    },
+    {
+      "source": "website/docs/guides/xai-grok-oauth.md",
+      "target": "website/docs/guides/xai-grok-oauth.md"
+    },
+    {
+      "source": "website/docs/index.mdx",
+      "target": "website/docs/index.mdx"
+    },
+    {
+      "source": "website/docs/integrations/index.md",
+      "target": "website/docs/integrations/index.md"
+    },
+    {
+      "source": "website/docs/integrations/nous-portal.md",
+      "target": "website/docs/integrations/nous-portal.md"
+    },
+    {
+      "source": "website/docs/integrations/providers.md",
+      "target": "website/docs/integrations/providers.md"
+    },
+    {
+      "source": "website/docs/reference/application-identity.md",
+      "target": "website/docs/reference/application-identity.md"
+    },
+    {
+      "source": "website/docs/reference/automation-blueprints-catalog.mdx",
+      "target": "website/docs/reference/automation-blueprints-catalog.mdx"
+    },
+    {
+      "source": "website/docs/reference/cli-commands.md",
+      "target": "website/docs/reference/cli-commands.md"
+    },
+    {
+      "source": "website/docs/reference/cli-symbols.md",
+      "target": "website/docs/reference/cli-symbols.md"
+    },
+    {
+      "source": "website/docs/reference/environment-variables.md",
+      "target": "website/docs/reference/environment-variables.md"
+    },
+    {
+      "source": "website/docs/reference/faq.md",
+      "target": "website/docs/reference/faq.md"
+    },
+    {
+      "source": "website/docs/reference/mcp-config-reference.md",
+      "target": "website/docs/reference/mcp-config-reference.md"
+    },
+    {
+      "source": "website/docs/reference/model-catalog.md",
+      "target": "website/docs/reference/model-catalog.md"
+    },
+    {
+      "source": "website/docs/reference/optional-skills-catalog.md",
+      "target": "website/docs/reference/optional-skills-catalog.md"
+    },
+    {
+      "source": "website/docs/reference/package-management.md",
+      "target": "website/docs/reference/package-management.md"
+    },
+    {
+      "source": "website/docs/reference/profile-commands.md",
+      "target": "website/docs/reference/profile-commands.md"
+    },
+    {
+      "source": "website/docs/reference/skills-catalog.md",
+      "target": "website/docs/reference/skills-catalog.md"
+    },
+    {
+      "source": "website/docs/reference/slash-commands.md",
+      "target": "website/docs/reference/slash-commands.md"
+    },
+    {
+      "source": "website/docs/reference/tools-reference.md",
+      "target": "website/docs/reference/tools-reference.md"
+    },
+    {
+      "source": "website/docs/reference/toolsets-reference.md",
+      "target": "website/docs/reference/toolsets-reference.md"
+    },
+    {
+      "source": "website/docs/user-guide/bot-mode.md",
+      "target": "website/docs/user-guide/bot-mode.md"
+    },
+    {
+      "source": "website/docs/user-guide/checkpoints-and-rollback.md",
+      "target": "website/docs/user-guide/checkpoints-and-rollback.md"
+    },
+    {
+      "source": "website/docs/user-guide/cli.md",
+      "target": "website/docs/user-guide/cli.md"
+    },
+    {
+      "source": "website/docs/user-guide/configuration.md",
+      "target": "website/docs/user-guide/configuration.md"
+    },
+    {
+      "source": "website/docs/user-guide/configuring-models.md",
+      "target": "website/docs/user-guide/configuring-models.md"
+    },
+    {
+      "source": "website/docs/user-guide/desktop.md",
+      "target": "website/docs/user-guide/desktop.md"
+    },
+    {
+      "source": "website/docs/user-guide/docker.md",
+      "target": "website/docs/user-guide/docker.md"
+    },
+    {
+      "source": "website/docs/user-guide/egress/index.md",
+      "target": "website/docs/user-guide/egress/index.md"
+    },
+    {
+      "source": "website/docs/user-guide/egress/iron-proxy.md",
+      "target": "website/docs/user-guide/egress/iron-proxy.md"
+    },
+    {
+      "source": "website/docs/user-guide/egress/network-isolation.md",
+      "target": "website/docs/user-guide/egress/network-isolation.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/acp.md",
+      "target": "website/docs/user-guide/features/acp.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/api-server.md",
+      "target": "website/docs/user-guide/features/api-server.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/batch-processing.md",
+      "target": "website/docs/user-guide/features/batch-processing.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/bot-screen.md",
+      "target": "website/docs/user-guide/features/bot-screen.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/browser.md",
+      "target": "website/docs/user-guide/features/browser.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/built-in-plugins.md",
+      "target": "website/docs/user-guide/features/built-in-plugins.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/code-execution.md",
+      "target": "website/docs/user-guide/features/code-execution.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/codex-app-server-runtime.md",
+      "target": "website/docs/user-guide/features/codex-app-server-runtime.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/computer-use.md",
+      "target": "website/docs/user-guide/features/computer-use.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/context-files.md",
+      "target": "website/docs/user-guide/features/context-files.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/context-references.md",
+      "target": "website/docs/user-guide/features/context-references.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/credential-pools.md",
+      "target": "website/docs/user-guide/features/credential-pools.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/credential-vault.md",
+      "target": "website/docs/user-guide/features/credential-vault.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/cron.md",
+      "target": "website/docs/user-guide/features/cron.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/curator.md",
+      "target": "website/docs/user-guide/features/curator.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/delegation.md",
+      "target": "website/docs/user-guide/features/delegation.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/deliverable-mode.md",
+      "target": "website/docs/user-guide/features/deliverable-mode.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/document-extraction.md",
+      "target": "website/docs/user-guide/features/document-extraction.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/extending-the-dashboard.md",
+      "target": "website/docs/user-guide/features/extending-the-dashboard.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/fallback-providers.md",
+      "target": "website/docs/user-guide/features/fallback-providers.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/goals.md",
+      "target": "website/docs/user-guide/features/goals.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/heartbeat.md",
+      "target": "website/docs/user-guide/features/heartbeat.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/honcho.md",
+      "target": "website/docs/user-guide/features/honcho.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/hooks.md",
+      "target": "website/docs/user-guide/features/hooks.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/image-generation.md",
+      "target": "website/docs/user-guide/features/image-generation.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/kanban-multi-gateway.md",
+      "target": "website/docs/user-guide/features/kanban-multi-gateway.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/kanban-tutorial.md",
+      "target": "website/docs/user-guide/features/kanban-tutorial.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/kanban-worker-lanes.md",
+      "target": "website/docs/user-guide/features/kanban-worker-lanes.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/kanban.md",
+      "target": "website/docs/user-guide/features/kanban.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/language-packs.md",
+      "target": "website/docs/user-guide/features/language-packs.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/loops.md",
+      "target": "website/docs/user-guide/features/loops.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/lsp.md",
+      "target": "website/docs/user-guide/features/lsp.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/mcp.md",
+      "target": "website/docs/user-guide/features/mcp.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/memory-providers.md",
+      "target": "website/docs/user-guide/features/memory-providers.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/memory.md",
+      "target": "website/docs/user-guide/features/memory.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/mixture-of-agents.md",
+      "target": "website/docs/user-guide/features/mixture-of-agents.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/overview.md",
+      "target": "website/docs/user-guide/features/overview.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/personality.md",
+      "target": "website/docs/user-guide/features/personality.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/pets.md",
+      "target": "website/docs/user-guide/features/pets.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/plugin-catalog.md",
+      "target": "website/docs/user-guide/features/plugin-catalog.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/plugins.md",
+      "target": "website/docs/user-guide/features/plugins.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/provider-routing.md",
+      "target": "website/docs/user-guide/features/provider-routing.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/skills.md",
+      "target": "website/docs/user-guide/features/skills.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/skins.md",
+      "target": "website/docs/user-guide/features/skins.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/spotify.md",
+      "target": "website/docs/user-guide/features/spotify.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/subscription-proxy.md",
+      "target": "website/docs/user-guide/features/subscription-proxy.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/tool-gateway.md",
+      "target": "website/docs/user-guide/features/tool-gateway.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/tool-search.md",
+      "target": "website/docs/user-guide/features/tool-search.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/tools.md",
+      "target": "website/docs/user-guide/features/tools.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/tts.md",
+      "target": "website/docs/user-guide/features/tts.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/vision.md",
+      "target": "website/docs/user-guide/features/vision.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/voice-mode.md",
+      "target": "website/docs/user-guide/features/voice-mode.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/wake-word.md",
+      "target": "website/docs/user-guide/features/wake-word.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/web-dashboard.md",
+      "target": "website/docs/user-guide/features/web-dashboard.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/web-search.md",
+      "target": "website/docs/user-guide/features/web-search.md"
+    },
+    {
+      "source": "website/docs/user-guide/features/x-search.md",
+      "target": "website/docs/user-guide/features/x-search.md"
+    },
+    {
+      "source": "website/docs/user-guide/git-worktrees.md",
+      "target": "website/docs/user-guide/git-worktrees.md"
+    },
+    {
+      "source": "website/docs/user-guide/import-from-other-agents.md",
+      "target": "website/docs/user-guide/import-from-other-agents.md"
+    },
+    {
+      "source": "website/docs/user-guide/local-models.md",
+      "target": "website/docs/user-guide/local-models.md"
+    },
+    {
+      "source": "website/docs/user-guide/managed-scope.md",
+      "target": "website/docs/user-guide/managed-scope.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/a2a.md",
+      "target": "website/docs/user-guide/messaging/a2a.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/discord.md",
+      "target": "website/docs/user-guide/messaging/discord.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/email.md",
+      "target": "website/docs/user-guide/messaging/email.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/google_chat.md",
+      "target": "website/docs/user-guide/messaging/google_chat.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/homeassistant.md",
+      "target": "website/docs/user-guide/messaging/homeassistant.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/index.md",
+      "target": "website/docs/user-guide/messaging/index.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/line.md",
+      "target": "website/docs/user-guide/messaging/line.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/mattermost.md",
+      "target": "website/docs/user-guide/messaging/mattermost.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/msgraph-webhook.md",
+      "target": "website/docs/user-guide/messaging/msgraph-webhook.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/open-webui.md",
+      "target": "website/docs/user-guide/messaging/open-webui.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/photon.md",
+      "target": "website/docs/user-guide/messaging/photon.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/relay.md",
+      "target": "website/docs/user-guide/messaging/relay.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/signal.md",
+      "target": "website/docs/user-guide/messaging/signal.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/slack.md",
+      "target": "website/docs/user-guide/messaging/slack.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/sms.md",
+      "target": "website/docs/user-guide/messaging/sms.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/teams-meetings.md",
+      "target": "website/docs/user-guide/messaging/teams-meetings.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/teams.md",
+      "target": "website/docs/user-guide/messaging/teams.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/telegram.md",
+      "target": "website/docs/user-guide/messaging/telegram.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/webhooks.md",
+      "target": "website/docs/user-guide/messaging/webhooks.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/weixin.md",
+      "target": "website/docs/user-guide/messaging/weixin.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/whatsapp-cloud.md",
+      "target": "website/docs/user-guide/messaging/whatsapp-cloud.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/whatsapp.md",
+      "target": "website/docs/user-guide/messaging/whatsapp.md"
+    },
+    {
+      "source": "website/docs/user-guide/messaging/yuanbao.md",
+      "target": "website/docs/user-guide/messaging/yuanbao.md"
+    },
+    {
+      "source": "website/docs/user-guide/multi-connection-desktop.md",
+      "target": "website/docs/user-guide/multi-connection-desktop.md"
+    },
+    {
+      "source": "website/docs/user-guide/multi-profile-gateways.md",
+      "target": "website/docs/user-guide/multi-profile-gateways.md"
+    },
+    {
+      "source": "website/docs/user-guide/profile-distributions.md",
+      "target": "website/docs/user-guide/profile-distributions.md"
+    },
+    {
+      "source": "website/docs/user-guide/profiles.md",
+      "target": "website/docs/user-guide/profiles.md"
+    },
+    {
+      "source": "website/docs/user-guide/remote-config.md",
+      "target": "website/docs/user-guide/remote-config.md"
+    },
+    {
+      "source": "website/docs/user-guide/secrets/bitwarden.md",
+      "target": "website/docs/user-guide/secrets/bitwarden.md"
+    },
+    {
+      "source": "website/docs/user-guide/secrets/command.md",
+      "target": "website/docs/user-guide/secrets/command.md"
+    },
+    {
+      "source": "website/docs/user-guide/secrets/index.md",
+      "target": "website/docs/user-guide/secrets/index.md"
+    },
+    {
+      "source": "website/docs/user-guide/secrets/onepassword.md",
+      "target": "website/docs/user-guide/secrets/onepassword.md"
+    },
+    {
+      "source": "website/docs/user-guide/security.md",
+      "target": "website/docs/user-guide/security.md"
+    },
+    {
+      "source": "website/docs/user-guide/session-storage-recovery.md",
+      "target": "website/docs/user-guide/session-storage-recovery.md"
+    },
+    {
+      "source": "website/docs/user-guide/sessions.md",
+      "target": "website/docs/user-guide/sessions.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/apple/apple-apple-notes.md",
+      "target": "website/docs/user-guide/skills/bundled/apple/apple-apple-notes.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/apple/apple-apple-reminders.md",
+      "target": "website/docs/user-guide/skills/bundled/apple/apple-apple-reminders.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/apple/apple-findmy.md",
+      "target": "website/docs/user-guide/skills/bundled/apple/apple-findmy.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/apple/apple-imessage.md",
+      "target": "website/docs/user-guide/skills/bundled/apple/apple-imessage.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code.md",
+      "target": "website/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex.md",
+      "target": "website/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-computer-use.md",
+      "target": "website/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-computer-use.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md",
+      "target": "website/docs/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/creative/creative-architecture-diagram.md",
+      "target": "website/docs/user-guide/skills/bundled/creative/creative-architecture-diagram.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/creative/creative-ascii-video.md",
+      "target": "website/docs/user-guide/skills/bundled/creative/creative-ascii-video.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/creative/creative-baoyu-infographic.md",
+      "target": "website/docs/user-guide/skills/bundled/creative/creative-baoyu-infographic.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/creative/creative-claude-design.md",
+      "target": "website/docs/user-guide/skills/bundled/creative/creative-claude-design.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/creative/creative-humanizer.md",
+      "target": "website/docs/user-guide/skills/bundled/creative/creative-humanizer.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/creative/creative-manim-video.md",
+      "target": "website/docs/user-guide/skills/bundled/creative/creative-manim-video.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/creative/creative-p5js.md",
+      "target": "website/docs/user-guide/skills/bundled/creative/creative-p5js.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/creative/creative-popular-web-designs.md",
+      "target": "website/docs/user-guide/skills/bundled/creative/creative-popular-web-designs.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/creative/creative-songwriting-and-ai-music.md",
+      "target": "website/docs/user-guide/skills/bundled/creative/creative-songwriting-and-ai-music.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/devops/devops-sdlc-review.md",
+      "target": "website/docs/user-guide/skills/bundled/devops/devops-sdlc-review.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/email/email-email-inbox-triage.md",
+      "target": "website/docs/user-guide/skills/bundled/email/email-email-inbox-triage.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/email/email-himalaya.md",
+      "target": "website/docs/user-guide/skills/bundled/email/email-himalaya.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/media/media-youtube-content.md",
+      "target": "website/docs/user-guide/skills/bundled/media/media-youtube-content.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian.md",
+      "target": "website/docs/user-guide/skills/bundled/note-taking/note-taking-obsidian.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/productivity/productivity-document-to-action-items.md",
+      "target": "website/docs/user-guide/skills/bundled/productivity/productivity-document-to-action-items.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/productivity/productivity-google-workspace.md",
+      "target": "website/docs/user-guide/skills/bundled/productivity/productivity-google-workspace.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/productivity/productivity-maps.md",
+      "target": "website/docs/user-guide/skills/bundled/productivity/productivity-maps.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/productivity/productivity-meeting-action-items.md",
+      "target": "website/docs/user-guide/skills/bundled/productivity/productivity-meeting-action-items.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/productivity/productivity-microsoft-office.md",
+      "target": "website/docs/user-guide/skills/bundled/productivity/productivity-microsoft-office.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/productivity/productivity-pdf.md",
+      "target": "website/docs/user-guide/skills/bundled/productivity/productivity-pdf.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/productivity/productivity-product-price-monitor.md",
+      "target": "website/docs/user-guide/skills/bundled/productivity/productivity-product-price-monitor.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/productivity/productivity-teams-meeting-pipeline.md",
+      "target": "website/docs/user-guide/skills/bundled/productivity/productivity-teams-meeting-pipeline.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/productivity/productivity-weekly-review-planning.md",
+      "target": "website/docs/user-guide/skills/bundled/productivity/productivity-weekly-review-planning.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/research/research-arxiv.md",
+      "target": "website/docs/user-guide/skills/bundled/research/research-arxiv.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/research/research-competitor-news-monitor.md",
+      "target": "website/docs/user-guide/skills/bundled/research/research-competitor-news-monitor.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/research/research-grounded-citations.md",
+      "target": "website/docs/user-guide/skills/bundled/research/research-grounded-citations.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/social-media/social-media-xurl.md",
+      "target": "website/docs/user-guide/skills/bundled/social-media/social-media-xurl.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/software-development/software-development-codebase-inspection.md",
+      "target": "website/docs/user-guide/skills/bundled/software-development/software-development-codebase-inspection.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/software-development/software-development-dogfood.md",
+      "target": "website/docs/user-guide/skills/bundled/software-development/software-development-dogfood.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/software-development/software-development-github.md",
+      "target": "website/docs/user-guide/skills/bundled/software-development/software-development-github.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review.md",
+      "target": "website/docs/user-guide/skills/bundled/software-development/software-development-requesting-code-review.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/software-development/software-development-simplify-code.md",
+      "target": "website/docs/user-guide/skills/bundled/software-development/software-development-simplify-code.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/software-development/software-development-spike.md",
+      "target": "website/docs/user-guide/skills/bundled/software-development/software-development-spike.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging.md",
+      "target": "website/docs/user-guide/skills/bundled/software-development/software-development-systematic-debugging.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development.md",
+      "target": "website/docs/user-guide/skills/bundled/software-development/software-development-test-driven-development.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/bundled/web/web-blocked-page-recovery.md",
+      "target": "website/docs/user-guide/skills/bundled/web/web-blocked-page-recovery.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/google-workspace.md",
+      "target": "website/docs/user-guide/skills/google-workspace.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-agent-merge-conflict-arbiter.md",
+      "target": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-agent-merge-conflict-arbiter.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-antigravity-cli.md",
+      "target": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-antigravity-cli.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-blackbox.md",
+      "target": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-blackbox.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-dynamic-workflow.md",
+      "target": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-dynamic-workflow.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-grok.md",
+      "target": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-grok.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-opencode.md",
+      "target": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-opencode.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-openhands.md",
+      "target": "website/docs/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-openhands.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/blockchain/blockchain-evm.md",
+      "target": "website/docs/user-guide/skills/optional/blockchain/blockchain-evm.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/blockchain/blockchain-hyperliquid.md",
+      "target": "website/docs/user-guide/skills/optional/blockchain/blockchain-hyperliquid.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/blockchain/blockchain-solana.md",
+      "target": "website/docs/user-guide/skills/optional/blockchain/blockchain-solana.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/communication/communication-one-three-one-rule.md",
+      "target": "website/docs/user-guide/skills/optional/communication/communication-one-three-one-rule.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-ai-presenter-video.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-ai-presenter-video.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-anatomy.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-anatomy.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-archify.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-archify.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-ascii-art.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-ascii-art.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-auteur.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-auteur.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-baoyu-article-illustrator.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-baoyu-article-illustrator.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-baoyu-comic.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-baoyu-comic.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-brag-slim.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-brag-slim.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-brag.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-brag.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-comfyui.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-comfyui.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-concept-diagrams.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-concept-diagrams.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-creative-ideation.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-creative-ideation.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-design-md.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-design-md.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-draw-your-font.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-draw-your-font.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-dream-loop.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-dream-loop.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-excalidraw.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-excalidraw.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-heartmula.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-heartmula.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-hyperframes.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-hyperframes.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-impeccable.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-impeccable.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-ip-as-logo.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-ip-as-logo.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-kanban-video-orchestrator.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-kanban-video-orchestrator.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-meme-generation.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-meme-generation.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-mono-color.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-mono-color.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-pixel-art.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-pixel-art.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-pretext.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-pretext.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-simple-english.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-simple-english.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-sketch.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-sketch.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-social-media-content-calendar.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-social-media-content-calendar.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-system-atlas.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-system-atlas.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-tldraw-offline.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-tldraw-offline.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/creative/creative-unreal-mcp.md",
+      "target": "website/docs/user-guide/skills/optional/creative/creative-unreal-mcp.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/data-science/data-science-jupyter-notebook.md",
+      "target": "website/docs/user-guide/skills/optional/data-science/data-science-jupyter-notebook.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/devops/devops-actual-setup.md",
+      "target": "website/docs/user-guide/skills/optional/devops/devops-actual-setup.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/devops/devops-docker-management.md",
+      "target": "website/docs/user-guide/skills/optional/devops/devops-docker-management.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/devops/devops-hermes-s6-container-supervision.md",
+      "target": "website/docs/user-guide/skills/optional/devops/devops-hermes-s6-container-supervision.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/devops/devops-inference-sh-cli.md",
+      "target": "website/docs/user-guide/skills/optional/devops/devops-inference-sh-cli.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/devops/devops-pinggy-tunnel.md",
+      "target": "website/docs/user-guide/skills/optional/devops/devops-pinggy-tunnel.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/devops/devops-setup-wizard-generator.md",
+      "target": "website/docs/user-guide/skills/optional/devops/devops-setup-wizard-generator.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/devops/devops-watchers.md",
+      "target": "website/docs/user-guide/skills/optional/devops/devops-watchers.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/dogfood/dogfood-adversarial-ux-test.md",
+      "target": "website/docs/user-guide/skills/optional/dogfood/dogfood-adversarial-ux-test.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/email/email-agentmail.md",
+      "target": "website/docs/user-guide/skills/optional/email/email-agentmail.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/finance/finance-3-statement-model.md",
+      "target": "website/docs/user-guide/skills/optional/finance/finance-3-statement-model.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/finance/finance-comps-analysis.md",
+      "target": "website/docs/user-guide/skills/optional/finance/finance-comps-analysis.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/finance/finance-dcf-model.md",
+      "target": "website/docs/user-guide/skills/optional/finance/finance-dcf-model.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/finance/finance-excel-author.md",
+      "target": "website/docs/user-guide/skills/optional/finance/finance-excel-author.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/finance/finance-lbo-model.md",
+      "target": "website/docs/user-guide/skills/optional/finance/finance-lbo-model.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/finance/finance-merger-model.md",
+      "target": "website/docs/user-guide/skills/optional/finance/finance-merger-model.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/finance/finance-polymarket.md",
+      "target": "website/docs/user-guide/skills/optional/finance/finance-polymarket.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/finance/finance-pptx-author.md",
+      "target": "website/docs/user-guide/skills/optional/finance/finance-pptx-author.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/finance/finance-stocks.md",
+      "target": "website/docs/user-guide/skills/optional/finance/finance-stocks.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/gaming/gaming-minecraft-modpack-server.md",
+      "target": "website/docs/user-guide/skills/optional/gaming/gaming-minecraft-modpack-server.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/gaming/gaming-pokemon-player.md",
+      "target": "website/docs/user-guide/skills/optional/gaming/gaming-pokemon-player.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/health/health-fitness-nutrition.md",
+      "target": "website/docs/user-guide/skills/optional/health/health-fitness-nutrition.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/health/health-neuroskill-bci.md",
+      "target": "website/docs/user-guide/skills/optional/health/health-neuroskill-bci.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mcp/mcp-fastmcp.md",
+      "target": "website/docs/user-guide/skills/optional/mcp/mcp-fastmcp.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mcp/mcp-mcp-oauth-remote-gateway.md",
+      "target": "website/docs/user-guide/skills/optional/mcp/mcp-mcp-oauth-remote-gateway.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mcp/mcp-mcporter.md",
+      "target": "website/docs/user-guide/skills/optional/mcp/mcp-mcporter.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/media/media-gif-search.md",
+      "target": "website/docs/user-guide/skills/optional/media/media-gif-search.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/media/media-songsee.md",
+      "target": "website/docs/user-guide/skills/optional/media/media-songsee.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-accelerate.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-accelerate.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-chroma.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-chroma.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-evaluation-evaluating-llms-harness.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-evaluation-evaluating-llms-harness.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-faiss.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-faiss.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-flash-attention.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-flash-attention.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-inference-llama-cpp.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-inference-llama-cpp.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-inference-serving-llms-vllm.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-inference-serving-llms-vllm.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-lambda-labs.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-lambda-labs.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-modal.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-modal.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-models-segment-anything-model.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-models-segment-anything-model.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-nemo-curator.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-nemo-curator.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-obliteratus.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-obliteratus.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-peft.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-peft.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-pytorch-fsdp.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-pytorch-fsdp.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-pytorch-lightning.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-pytorch-lightning.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-research-dspy.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-research-dspy.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-saelens.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-saelens.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-simpo.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-simpo.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-slime.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-slime.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-tensorrt-llm.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-tensorrt-llm.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-torchtitan.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-torchtitan.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-training-axolotl.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-training-axolotl.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/mlops/mlops-training-unsloth.md",
+      "target": "website/docs/user-guide/skills/optional/mlops/mlops-training-unsloth.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/payments/payments-stripe-link-cli.md",
+      "target": "website/docs/user-guide/skills/optional/payments/payments-stripe-link-cli.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/payments/payments-stripe-projects.md",
+      "target": "website/docs/user-guide/skills/optional/payments/payments-stripe-projects.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-box.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-box.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-canvas.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-canvas.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-decision-questionnaire.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-decision-questionnaire.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-here-now.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-here-now.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-live-dashboard.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-live-dashboard.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-memento-flashcards.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-memento-flashcards.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-property-listings.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-property-listings.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-shop.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-shop.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-siyuan.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-siyuan.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/productivity/productivity-telephony.md",
+      "target": "website/docs/user-guide/skills/optional/productivity/productivity-telephony.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-bioinformatics.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-bioinformatics.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-blogwatcher.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-blogwatcher.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-darwinian-evolver.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-darwinian-evolver.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-domain-intel.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-domain-intel.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-drug-discovery.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-drug-discovery.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-gitnexus-explorer.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-gitnexus-explorer.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-llm-wiki.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-llm-wiki.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-osint-investigation.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-osint-investigation.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-parallel-cli.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-parallel-cli.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-qmd.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-qmd.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-research-paper-writing.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-research-paper-writing.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-rss-feeds.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-rss-feeds.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/research/research-scrapling.md",
+      "target": "website/docs/user-guide/skills/optional/research/research-scrapling.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/security/security-1password.md",
+      "target": "website/docs/user-guide/skills/optional/security/security-1password.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/security/security-godmode.md",
+      "target": "website/docs/user-guide/skills/optional/security/security-godmode.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/security/security-oss-forensics.md",
+      "target": "website/docs/user-guide/skills/optional/security/security-oss-forensics.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/security/security-sherlock.md",
+      "target": "website/docs/user-guide/skills/optional/security/security-sherlock.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/security/security-unbroker.md",
+      "target": "website/docs/user-guide/skills/optional/security/security-unbroker.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/security/security-web-pentest.md",
+      "target": "website/docs/user-guide/skills/optional/security/security-web-pentest.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/smart-home/smart-home-openhue.md",
+      "target": "website/docs/user-guide/skills/optional/smart-home/smart-home-openhue.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/social-media/social-media-reddit-reading.md",
+      "target": "website/docs/user-guide/skills/optional/social-media/social-media-reddit-reading.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-ast-grep.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-ast-grep.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-code-wiki.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-code-wiki.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-grill-me.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-grill-me.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-hermes-agent-skill-authoring.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-hermes-agent-skill-authoring.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-inspecting-hermes-desktop-dom.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-inspecting-hermes-desktop-dom.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-node-inspect-debugger.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-node-inspect-debugger.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-pr-lens.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-pr-lens.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-python-debugpy.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-python-debugpy.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-rest-graphql-debug.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-rest-graphql-debug.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/software-development/software-development-subagent-driven-development.md",
+      "target": "website/docs/user-guide/skills/optional/software-development/software-development-subagent-driven-development.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/web-development/web-development-cloudflare-temporary-deploy.md",
+      "target": "website/docs/user-guide/skills/optional/web-development/web-development-cloudflare-temporary-deploy.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/web-development/web-development-har-derived-api-client.md",
+      "target": "website/docs/user-guide/skills/optional/web-development/web-development-har-derived-api-client.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/web-development/web-development-page-agent.md",
+      "target": "website/docs/user-guide/skills/optional/web-development/web-development-page-agent.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/web-development/web-development-publish-site.md",
+      "target": "website/docs/user-guide/skills/optional/web-development/web-development-publish-site.md"
+    },
+    {
+      "source": "website/docs/user-guide/skills/optional/web-development/web-development-scrollcraft.md",
+      "target": "website/docs/user-guide/skills/optional/web-development/web-development-scrollcraft.md"
+    },
+    {
+      "source": "website/docs/user-guide/switching-to-source.md",
+      "target": "website/docs/user-guide/switching-to-source.md"
+    },
+    {
+      "source": "website/docs/user-guide/which-file-does-what.md",
+      "target": "website/docs/user-guide/which-file-does-what.md"
+    },
+    {
+      "source": "website/docs/user-guide/windows-native.md",
+      "target": "website/docs/user-guide/windows-native.md"
+    },
+    {
+      "source": "website/docs/user-guide/windows-wsl-quickstart.md",
+      "target": "website/docs/user-guide/windows-wsl-quickstart.md"
+    },
+    {
+      "source": "website/docs/user-stories.mdx",
+      "target": "website/docs/user-stories.mdx"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/acp-internals.md",
+      "target": "website/docs/zh-Hans/developer-guide/acp-internals.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/adding-platform-adapters.md",
+      "target": "website/docs/zh-Hans/developer-guide/adding-platform-adapters.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/adding-providers.md",
+      "target": "website/docs/zh-Hans/developer-guide/adding-providers.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/adding-tools.md",
+      "target": "website/docs/zh-Hans/developer-guide/adding-tools.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/agent-loop.md",
+      "target": "website/docs/zh-Hans/developer-guide/agent-loop.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/architecture.md",
+      "target": "website/docs/zh-Hans/developer-guide/architecture.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/browser-supervisor.md",
+      "target": "website/docs/zh-Hans/developer-guide/browser-supervisor.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/context-compression-and-caching.md",
+      "target": "website/docs/zh-Hans/developer-guide/context-compression-and-caching.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/context-engine-plugin.md",
+      "target": "website/docs/zh-Hans/developer-guide/context-engine-plugin.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/contributing.md",
+      "target": "website/docs/zh-Hans/developer-guide/contribution-guide.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/creating-skills.md",
+      "target": "website/docs/zh-Hans/developer-guide/creating-skills.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/cron-internals.md",
+      "target": "website/docs/zh-Hans/developer-guide/cron-internals.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/extending-the-cli.md",
+      "target": "website/docs/zh-Hans/developer-guide/extending-the-cli.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/gateway-internals.md",
+      "target": "website/docs/zh-Hans/developer-guide/gateway-internals.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/image-gen-provider-plugin.md",
+      "target": "website/docs/zh-Hans/developer-guide/image-gen-provider-plugin.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/memory-provider-plugin.md",
+      "target": "website/docs/zh-Hans/developer-guide/memory-provider-plugin.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/model-provider-plugin.md",
+      "target": "website/docs/zh-Hans/developer-guide/model-provider-plugin.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/plugin-llm-access.md",
+      "target": "website/docs/zh-Hans/developer-guide/plugin-llm-access.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/plugins/index.md",
+      "target": "website/docs/zh-Hans/developer-guide/plugins/index.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/programmatic-integration.md",
+      "target": "website/docs/zh-Hans/developer-guide/programmatic-integration.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/prompt-assembly.md",
+      "target": "website/docs/zh-Hans/developer-guide/prompt-assembly.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/provider-runtime.md",
+      "target": "website/docs/zh-Hans/developer-guide/provider-runtime.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/session-storage.md",
+      "target": "website/docs/zh-Hans/developer-guide/session-storage.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/tools-runtime.md",
+      "target": "website/docs/zh-Hans/developer-guide/tools-runtime.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/trajectory-format.md",
+      "target": "website/docs/zh-Hans/developer-guide/trajectory-format.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/video-gen-provider-plugin.md",
+      "target": "website/docs/zh-Hans/developer-guide/video-gen-provider-plugin.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/developer-guide/web-search-provider-plugin.md",
+      "target": "website/docs/zh-Hans/developer-guide/web-search-provider-plugin.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/getting-started/installation.md",
+      "target": "website/docs/zh-Hans/getting-started/installation.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/getting-started/learning-path.md",
+      "target": "website/docs/zh-Hans/getting-started/learning-path.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/getting-started/nix-setup.md",
+      "target": "website/docs/zh-Hans/getting-started/nix-setup.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/getting-started/quickstart.md",
+      "target": "website/docs/zh-Hans/getting-started/quickstart.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/getting-started/termux.md",
+      "target": "website/docs/zh-Hans/getting-started/termux.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/getting-started/updating.md",
+      "target": "website/docs/zh-Hans/getting-started/updating.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/automate-with-cron.md",
+      "target": "website/docs/zh-Hans/guides/automate-with-cron.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/automation-blueprints.md",
+      "target": "website/docs/zh-Hans/guides/automation-blueprints.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/aws-bedrock.md",
+      "target": "website/docs/zh-Hans/guides/aws-bedrock.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/azure-foundry.md",
+      "target": "website/docs/zh-Hans/guides/azure-foundry.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/cron-script-only.md",
+      "target": "website/docs/zh-Hans/guides/cron-script-only.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/cron-troubleshooting.md",
+      "target": "website/docs/zh-Hans/guides/cron-troubleshooting.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/daily-briefing-bot.md",
+      "target": "website/docs/zh-Hans/guides/daily-briefing-bot.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/delegation-patterns.md",
+      "target": "website/docs/zh-Hans/guides/delegation-patterns.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/github-pr-review-agent.md",
+      "target": "website/docs/zh-Hans/guides/github-pr-review-agent.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/google-gemini.md",
+      "target": "website/docs/zh-Hans/guides/google-gemini.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/local-llm-on-mac.md",
+      "target": "website/docs/zh-Hans/guides/local-llm-on-mac.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/local-ollama-setup.md",
+      "target": "website/docs/zh-Hans/guides/local-ollama-setup.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/microsoft-graph-app-registration.md",
+      "target": "website/docs/zh-Hans/guides/microsoft-graph-app-registration.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/migrate-from-openclaw.md",
+      "target": "website/docs/zh-Hans/guides/migrate-from-openclaw.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/minimax-oauth.md",
+      "target": "website/docs/zh-Hans/guides/minimax-oauth.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/oauth-over-ssh.md",
+      "target": "website/docs/zh-Hans/guides/oauth-over-ssh.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/operate-teams-meeting-pipeline.md",
+      "target": "website/docs/zh-Hans/guides/operate-teams-meeting-pipeline.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/pipe-script-output.md",
+      "target": "website/docs/zh-Hans/guides/pipe-script-output.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/python-library.md",
+      "target": "website/docs/zh-Hans/guides/python-library.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/run-hermes-with-nous-portal.md",
+      "target": "website/docs/zh-Hans/guides/run-agent-with-nous-portal.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/team-telegram-assistant.md",
+      "target": "website/docs/zh-Hans/guides/team-telegram-assistant.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/tips.md",
+      "target": "website/docs/zh-Hans/guides/tips.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/use-mcp-with-hermes.md",
+      "target": "website/docs/zh-Hans/guides/use-mcp-with-agent.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/use-soul-with-hermes.md",
+      "target": "website/docs/zh-Hans/guides/use-soul-with-agent.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/use-voice-mode-with-hermes.md",
+      "target": "website/docs/zh-Hans/guides/use-voice-mode-with-agent.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/webhook-github-pr-review.md",
+      "target": "website/docs/zh-Hans/guides/webhook-github-pr-review.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/work-with-skills.md",
+      "target": "website/docs/zh-Hans/guides/work-with-skills.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/guides/xai-grok-oauth.md",
+      "target": "website/docs/zh-Hans/guides/xai-grok-oauth.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/index.mdx",
+      "target": "website/docs/zh-Hans/index.mdx"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/integrations/index.md",
+      "target": "website/docs/zh-Hans/integrations/index.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/integrations/nous-portal.md",
+      "target": "website/docs/zh-Hans/integrations/nous-portal.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/integrations/providers.md",
+      "target": "website/docs/zh-Hans/integrations/providers.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/cli-commands.md",
+      "target": "website/docs/zh-Hans/reference/cli-commands.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/environment-variables.md",
+      "target": "website/docs/zh-Hans/reference/environment-variables.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/faq.md",
+      "target": "website/docs/zh-Hans/reference/faq.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/mcp-config-reference.md",
+      "target": "website/docs/zh-Hans/reference/mcp-config-reference.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/model-catalog.md",
+      "target": "website/docs/zh-Hans/reference/model-catalog.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/optional-skills-catalog.md",
+      "target": "website/docs/zh-Hans/reference/optional-skills-catalog.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/profile-commands.md",
+      "target": "website/docs/zh-Hans/reference/profile-commands.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/skills-catalog.md",
+      "target": "website/docs/zh-Hans/reference/skills-catalog.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/slash-commands.md",
+      "target": "website/docs/zh-Hans/reference/slash-commands.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/tools-reference.md",
+      "target": "website/docs/zh-Hans/reference/tools-reference.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/reference/toolsets-reference.md",
+      "target": "website/docs/zh-Hans/reference/toolsets-reference.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/bot-mode.md",
+      "target": "website/docs/zh-Hans/user-guide/bot-mode.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/checkpoints-and-rollback.md",
+      "target": "website/docs/zh-Hans/user-guide/checkpoints-and-rollback.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/cli.md",
+      "target": "website/docs/zh-Hans/user-guide/cli.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/configuration.md",
+      "target": "website/docs/zh-Hans/user-guide/configuration.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/configuring-models.md",
+      "target": "website/docs/zh-Hans/user-guide/configuring-models.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/docker.md",
+      "target": "website/docs/zh-Hans/user-guide/docker.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/acp.md",
+      "target": "website/docs/zh-Hans/user-guide/features/acp.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/api-server.md",
+      "target": "website/docs/zh-Hans/user-guide/features/api-server.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/batch-processing.md",
+      "target": "website/docs/zh-Hans/user-guide/features/batch-processing.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/browser.md",
+      "target": "website/docs/zh-Hans/user-guide/features/browser.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/built-in-plugins.md",
+      "target": "website/docs/zh-Hans/user-guide/features/built-in-plugins.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/code-execution.md",
+      "target": "website/docs/zh-Hans/user-guide/features/code-execution.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/codex-app-server-runtime.md",
+      "target": "website/docs/zh-Hans/user-guide/features/codex-app-server-runtime.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/computer-use.md",
+      "target": "website/docs/zh-Hans/user-guide/features/computer-use.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/context-files.md",
+      "target": "website/docs/zh-Hans/user-guide/features/context-files.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/context-references.md",
+      "target": "website/docs/zh-Hans/user-guide/features/context-references.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/credential-pools.md",
+      "target": "website/docs/zh-Hans/user-guide/features/credential-pools.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/cron.md",
+      "target": "website/docs/zh-Hans/user-guide/features/cron.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/curator.md",
+      "target": "website/docs/zh-Hans/user-guide/features/curator.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/delegation.md",
+      "target": "website/docs/zh-Hans/user-guide/features/delegation.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/deliverable-mode.md",
+      "target": "website/docs/zh-Hans/user-guide/features/deliverable-mode.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/extending-the-dashboard.md",
+      "target": "website/docs/zh-Hans/user-guide/features/extending-the-dashboard.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/fallback-providers.md",
+      "target": "website/docs/zh-Hans/user-guide/features/fallback-providers.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/goals.md",
+      "target": "website/docs/zh-Hans/user-guide/features/goals.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/honcho.md",
+      "target": "website/docs/zh-Hans/user-guide/features/honcho.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/hooks.md",
+      "target": "website/docs/zh-Hans/user-guide/features/hooks.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/image-generation.md",
+      "target": "website/docs/zh-Hans/user-guide/features/image-generation.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/kanban-tutorial.md",
+      "target": "website/docs/zh-Hans/user-guide/features/kanban-tutorial.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/kanban-worker-lanes.md",
+      "target": "website/docs/zh-Hans/user-guide/features/kanban-worker-lanes.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/kanban.md",
+      "target": "website/docs/zh-Hans/user-guide/features/kanban.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/lsp.md",
+      "target": "website/docs/zh-Hans/user-guide/features/lsp.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/mcp.md",
+      "target": "website/docs/zh-Hans/user-guide/features/mcp.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/memory-providers.md",
+      "target": "website/docs/zh-Hans/user-guide/features/memory-providers.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/memory.md",
+      "target": "website/docs/zh-Hans/user-guide/features/memory.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/overview.md",
+      "target": "website/docs/zh-Hans/user-guide/features/overview.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/personality.md",
+      "target": "website/docs/zh-Hans/user-guide/features/personality.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/plugins.md",
+      "target": "website/docs/zh-Hans/user-guide/features/plugins.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/provider-routing.md",
+      "target": "website/docs/zh-Hans/user-guide/features/provider-routing.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/skills.md",
+      "target": "website/docs/zh-Hans/user-guide/features/skills.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/skins.md",
+      "target": "website/docs/zh-Hans/user-guide/features/skins.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/spotify.md",
+      "target": "website/docs/zh-Hans/user-guide/features/spotify.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/subscription-proxy.md",
+      "target": "website/docs/zh-Hans/user-guide/features/subscription-proxy.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/tool-gateway.md",
+      "target": "website/docs/zh-Hans/user-guide/features/tool-gateway.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/tools.md",
+      "target": "website/docs/zh-Hans/user-guide/features/tools.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/tts.md",
+      "target": "website/docs/zh-Hans/user-guide/features/tts.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/vision.md",
+      "target": "website/docs/zh-Hans/user-guide/features/vision.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/voice-mode.md",
+      "target": "website/docs/zh-Hans/user-guide/features/voice-mode.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/web-dashboard.md",
+      "target": "website/docs/zh-Hans/user-guide/features/web-dashboard.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/web-search.md",
+      "target": "website/docs/zh-Hans/user-guide/features/web-search.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/features/x-search.md",
+      "target": "website/docs/zh-Hans/user-guide/features/x-search.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/git-worktrees.md",
+      "target": "website/docs/zh-Hans/user-guide/git-worktrees.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/discord.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/discord.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/email.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/email.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/google_chat.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/google_chat.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/homeassistant.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/homeassistant.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/index.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/index.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/line.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/line.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/mattermost.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/mattermost.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/msgraph-webhook.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/msgraph-webhook.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/open-webui.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/open-webui.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/signal.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/signal.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/slack.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/slack.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/sms.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/sms.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/teams-meetings.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/teams-meetings.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/teams.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/teams.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/telegram.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/telegram.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/webhooks.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/webhooks.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/weixin.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/weixin.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/whatsapp.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/whatsapp.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/messaging/yuanbao.md",
+      "target": "website/docs/zh-Hans/user-guide/messaging/yuanbao.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/profile-distributions.md",
+      "target": "website/docs/zh-Hans/user-guide/profile-distributions.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/profiles.md",
+      "target": "website/docs/zh-Hans/user-guide/profiles.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/secrets/bitwarden.md",
+      "target": "website/docs/zh-Hans/user-guide/secrets/bitwarden.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/secrets/index.md",
+      "target": "website/docs/zh-Hans/user-guide/secrets/index.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/security.md",
+      "target": "website/docs/zh-Hans/user-guide/security.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/sessions.md",
+      "target": "website/docs/zh-Hans/user-guide/sessions.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/apple/apple-apple-notes.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/apple/apple-apple-notes.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/apple/apple-apple-reminders.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/apple/apple-apple-reminders.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/apple/apple-findmy.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/apple/apple-findmy.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/apple/apple-imessage.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/apple/apple-imessage.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-codex.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/creative/creative-architecture-diagram.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/creative/creative-architecture-diagram.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/creative/creative-ascii-video.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/creative/creative-ascii-video.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/creative/creative-baoyu-infographic.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/creative/creative-baoyu-infographic.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/creative/creative-claude-design.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/creative/creative-claude-design.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/creative/creative-humanizer.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/creative/creative-humanizer.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/creative/creative-manim-video.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/creative/creative-manim-video.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/creative/creative-p5js.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/creative/creative-p5js.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/creative/creative-popular-web-designs.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/creative/creative-popular-web-designs.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/creative/creative-songwriting-and-ai-music.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/creative/creative-songwriting-and-ai-music.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/email/email-himalaya.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/email/email-himalaya.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/media/media-youtube-content.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/media/media-youtube-content.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/note-taking/note-taking-obsidian.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/note-taking/note-taking-obsidian.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/productivity/productivity-google-workspace.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/productivity/productivity-google-workspace.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/productivity/productivity-maps.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/productivity/productivity-maps.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/productivity/productivity-teams-meeting-pipeline.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/productivity/productivity-teams-meeting-pipeline.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/research/research-arxiv.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/research/research-arxiv.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/social-media/social-media-xurl.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/social-media/social-media-xurl.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/software-development/software-development-dogfood.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/software-development/software-development-dogfood.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/software-development/software-development-requesting-code-review.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/software-development/software-development-requesting-code-review.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/software-development/software-development-spike.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/software-development/software-development-spike.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/software-development/software-development-systematic-debugging.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/software-development/software-development-systematic-debugging.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/bundled/software-development/software-development-test-driven-development.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/bundled/software-development/software-development-test-driven-development.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/google-workspace.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/google-workspace.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-blackbox.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-blackbox.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/blockchain/blockchain-evm.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/blockchain/blockchain-evm.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/blockchain/blockchain-hyperliquid.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/blockchain/blockchain-hyperliquid.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/blockchain/blockchain-solana.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/blockchain/blockchain-solana.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/communication/communication-one-three-one-rule.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/communication/communication-one-three-one-rule.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/creative/creative-concept-diagrams.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/creative/creative-concept-diagrams.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/creative/creative-heartmula.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/creative/creative-heartmula.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/creative/creative-hyperframes.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/creative/creative-hyperframes.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/creative/creative-kanban-video-orchestrator.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/creative/creative-kanban-video-orchestrator.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/creative/creative-meme-generation.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/creative/creative-meme-generation.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/data-science/data-science-jupyter-notebook.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/data-science/data-science-jupyter-notebook.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/devops/devops-docker-management.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/devops/devops-docker-management.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/devops/devops-inference-sh-cli.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/devops/devops-inference-sh-cli.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/devops/devops-pinggy-tunnel.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/devops/devops-pinggy-tunnel.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/devops/devops-watchers.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/devops/devops-watchers.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/dogfood/dogfood-adversarial-ux-test.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/dogfood/dogfood-adversarial-ux-test.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/email/email-agentmail.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/email/email-agentmail.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/finance/finance-3-statement-model.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/finance/finance-3-statement-model.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/finance/finance-comps-analysis.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/finance/finance-comps-analysis.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/finance/finance-dcf-model.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/finance/finance-dcf-model.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/finance/finance-excel-author.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/finance/finance-excel-author.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/finance/finance-lbo-model.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/finance/finance-lbo-model.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/finance/finance-merger-model.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/finance/finance-merger-model.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/finance/finance-polymarket.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/finance/finance-polymarket.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/finance/finance-pptx-author.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/finance/finance-pptx-author.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/finance/finance-stocks.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/finance/finance-stocks.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/health/health-fitness-nutrition.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/health/health-fitness-nutrition.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/health/health-neuroskill-bci.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/health/health-neuroskill-bci.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mcp/mcp-fastmcp.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mcp/mcp-fastmcp.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mcp/mcp-mcporter.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mcp/mcp-mcporter.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-accelerate.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-accelerate.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-chroma.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-chroma.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-faiss.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-faiss.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-flash-attention.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-flash-attention.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-lambda-labs.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-lambda-labs.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-modal.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-modal.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-models-segment-anything-model.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-models-segment-anything-model.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-nemo-curator.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-nemo-curator.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-peft.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-peft.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-pytorch-fsdp.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-pytorch-fsdp.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-pytorch-lightning.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-pytorch-lightning.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-saelens.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-saelens.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-simpo.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-simpo.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-slime.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-slime.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-tensorrt-llm.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-tensorrt-llm.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-torchtitan.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-torchtitan.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-training-axolotl.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-training-axolotl.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/mlops/mlops-training-unsloth.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/mlops/mlops-training-unsloth.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/productivity/productivity-canvas.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/productivity/productivity-canvas.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/productivity/productivity-here-now.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/productivity/productivity-here-now.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/productivity/productivity-memento-flashcards.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/productivity/productivity-memento-flashcards.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/productivity/productivity-shop.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/productivity/productivity-shop.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/productivity/productivity-siyuan.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/productivity/productivity-siyuan.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/productivity/productivity-telephony.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/productivity/productivity-telephony.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/research/research-bioinformatics.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/research/research-bioinformatics.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/research/research-darwinian-evolver.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/research/research-darwinian-evolver.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/research/research-domain-intel.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/research/research-domain-intel.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/research/research-drug-discovery.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/research/research-drug-discovery.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/research/research-gitnexus-explorer.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/research/research-gitnexus-explorer.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/research/research-osint-investigation.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/research/research-osint-investigation.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/research/research-parallel-cli.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/research/research-parallel-cli.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/research/research-qmd.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/research/research-qmd.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/research/research-scrapling.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/research/research-scrapling.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/security/security-1password.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/security/security-1password.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/security/security-oss-forensics.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/security/security-oss-forensics.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/security/security-sherlock.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/security/security-sherlock.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/software-development/software-development-rest-graphql-debug.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/software-development/software-development-rest-graphql-debug.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/skills/optional/web-development/web-development-page-agent.md",
+      "target": "website/docs/zh-Hans/user-guide/skills/optional/web-development/web-development-page-agent.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/windows-native.md",
+      "target": "website/docs/zh-Hans/user-guide/windows-native.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-guide/windows-wsl-quickstart.md",
+      "target": "website/docs/zh-Hans/user-guide/windows-wsl-quickstart.md"
+    },
+    {
+      "source": "website/i18n/zh-Hans/docusaurus-plugin-content-docs/current/user-stories.mdx",
+      "target": "website/docs/zh-Hans/user-stories.mdx"
+    }
+  ],
+  "englishFallbackPages": [
+    "zh-Hans/developer-guide/billing-lifecycle.md",
+    "zh-Hans/developer-guide/browser-provider-plugin.md",
+    "zh-Hans/developer-guide/browser-vault-plugin.md",
+    "zh-Hans/developer-guide/chronos-managed-cron-contract.md",
+    "zh-Hans/developer-guide/cli-internals.md",
+    "zh-Hans/developer-guide/codebase-ownership.md",
+    "zh-Hans/developer-guide/completion-backlog-delivery.md",
+    "zh-Hans/developer-guide/config-backend.md",
+    "zh-Hans/developer-guide/delegation-provider-plugin.md",
+    "zh-Hans/developer-guide/desktop-plugin-sdk.md",
+    "zh-Hans/developer-guide/egress-internals.md",
+    "zh-Hans/developer-guide/gateway-classic-cli.md",
+    "zh-Hans/developer-guide/gateway-command-parity.md",
+    "zh-Hans/developer-guide/gateway-local-sessions.md",
+    "zh-Hans/developer-guide/gateway-monitoring.md",
+    "zh-Hans/developer-guide/gateway-session-lifecycle.md",
+    "zh-Hans/developer-guide/hosted-profile-owners.md",
+    "zh-Hans/developer-guide/macos-bundle-updates.md",
+    "zh-Hans/developer-guide/micro-compaction.md",
+    "zh-Hans/developer-guide/middleware.md",
+    "zh-Hans/developer-guide/multiplexing-gateway.md",
+    "zh-Hans/developer-guide/observer-hooks.md",
+    "zh-Hans/developer-guide/plugins/application-declarations.md",
+    "zh-Hans/developer-guide/plugins/catalog-submission.md",
+    "zh-Hans/developer-guide/plugins/public-api.md",
+    "zh-Hans/developer-guide/pm-audit-status.md",
+    "zh-Hans/developer-guide/relay-connector-contract.md",
+    "zh-Hans/developer-guide/relay-shared-metrics.md",
+    "zh-Hans/developer-guide/secret-source-plugin.md",
+    "zh-Hans/developer-guide/shared-bundle-builds.md",
+    "zh-Hans/developer-guide/source-update-completion.md",
+    "zh-Hans/developer-guide/stable-releases.md",
+    "zh-Hans/developer-guide/state-db-recovery.md",
+    "zh-Hans/developer-guide/streaming-tts.md",
+    "zh-Hans/developer-guide/subagent-lifecycle-api.md",
+    "zh-Hans/developer-guide/terminal-environment-plugin.md",
+    "zh-Hans/developer-guide/worktree-ui-dev.md",
+    "zh-Hans/getting-started/official-domains.md",
+    "zh-Hans/getting-started/platform-support.md",
+    "zh-Hans/guides/agent-email-address.md",
+    "zh-Hans/guides/desktop-native-signin.md",
+    "zh-Hans/guides/google-vertex.md",
+    "zh-Hans/guides/manage-hermes-cloud-with-mcp.md",
+    "zh-Hans/guides/run-nemotron-3-ultra-free.md",
+    "zh-Hans/guides/secure-hermes-on-a-work-machine.md",
+    "zh-Hans/guides/troubleshooting-agent-quality.md",
+    "zh-Hans/reference/application-identity.md",
+    "zh-Hans/reference/automation-blueprints-catalog.mdx",
+    "zh-Hans/reference/cli-symbols.md",
+    "zh-Hans/reference/package-management.md",
+    "zh-Hans/user-guide/desktop.md",
+    "zh-Hans/user-guide/egress/index.md",
+    "zh-Hans/user-guide/egress/iron-proxy.md",
+    "zh-Hans/user-guide/egress/network-isolation.md",
+    "zh-Hans/user-guide/features/bot-screen.md",
+    "zh-Hans/user-guide/features/credential-vault.md",
+    "zh-Hans/user-guide/features/document-extraction.md",
+    "zh-Hans/user-guide/features/heartbeat.md",
+    "zh-Hans/user-guide/features/kanban-multi-gateway.md",
+    "zh-Hans/user-guide/features/language-packs.md",
+    "zh-Hans/user-guide/features/loops.md",
+    "zh-Hans/user-guide/features/mixture-of-agents.md",
+    "zh-Hans/user-guide/features/pets.md",
+    "zh-Hans/user-guide/features/plugin-catalog.md",
+    "zh-Hans/user-guide/features/tool-search.md",
+    "zh-Hans/user-guide/features/wake-word.md",
+    "zh-Hans/user-guide/import-from-other-agents.md",
+    "zh-Hans/user-guide/local-models.md",
+    "zh-Hans/user-guide/managed-scope.md",
+    "zh-Hans/user-guide/messaging/a2a.md",
+    "zh-Hans/user-guide/messaging/photon.md",
+    "zh-Hans/user-guide/messaging/relay.md",
+    "zh-Hans/user-guide/messaging/whatsapp-cloud.md",
+    "zh-Hans/user-guide/multi-connection-desktop.md",
+    "zh-Hans/user-guide/multi-profile-gateways.md",
+    "zh-Hans/user-guide/remote-config.md",
+    "zh-Hans/user-guide/secrets/command.md",
+    "zh-Hans/user-guide/secrets/onepassword.md",
+    "zh-Hans/user-guide/session-storage-recovery.md",
+    "zh-Hans/user-guide/skills/bundled/autonomous-ai-agents/autonomous-ai-agents-computer-use.md",
+    "zh-Hans/user-guide/skills/bundled/devops/devops-sdlc-review.md",
+    "zh-Hans/user-guide/skills/bundled/email/email-email-inbox-triage.md",
+    "zh-Hans/user-guide/skills/bundled/productivity/productivity-document-to-action-items.md",
+    "zh-Hans/user-guide/skills/bundled/productivity/productivity-meeting-action-items.md",
+    "zh-Hans/user-guide/skills/bundled/productivity/productivity-microsoft-office.md",
+    "zh-Hans/user-guide/skills/bundled/productivity/productivity-pdf.md",
+    "zh-Hans/user-guide/skills/bundled/productivity/productivity-product-price-monitor.md",
+    "zh-Hans/user-guide/skills/bundled/productivity/productivity-weekly-review-planning.md",
+    "zh-Hans/user-guide/skills/bundled/research/research-competitor-news-monitor.md",
+    "zh-Hans/user-guide/skills/bundled/research/research-grounded-citations.md",
+    "zh-Hans/user-guide/skills/bundled/software-development/software-development-codebase-inspection.md",
+    "zh-Hans/user-guide/skills/bundled/software-development/software-development-github.md",
+    "zh-Hans/user-guide/skills/bundled/software-development/software-development-simplify-code.md",
+    "zh-Hans/user-guide/skills/bundled/web/web-blocked-page-recovery.md",
+    "zh-Hans/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-agent-merge-conflict-arbiter.md",
+    "zh-Hans/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-antigravity-cli.md",
+    "zh-Hans/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-dynamic-workflow.md",
+    "zh-Hans/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-grok.md",
+    "zh-Hans/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-opencode.md",
+    "zh-Hans/user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-openhands.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-ai-presenter-video.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-anatomy.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-archify.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-ascii-art.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-auteur.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-baoyu-article-illustrator.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-baoyu-comic.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-brag-slim.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-brag.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-comfyui.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-creative-ideation.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-design-md.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-draw-your-font.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-dream-loop.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-excalidraw.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-impeccable.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-ip-as-logo.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-mono-color.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-pixel-art.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-pretext.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-simple-english.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-sketch.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-social-media-content-calendar.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-system-atlas.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-tldraw-offline.md",
+    "zh-Hans/user-guide/skills/optional/creative/creative-unreal-mcp.md",
+    "zh-Hans/user-guide/skills/optional/devops/devops-actual-setup.md",
+    "zh-Hans/user-guide/skills/optional/devops/devops-hermes-s6-container-supervision.md",
+    "zh-Hans/user-guide/skills/optional/devops/devops-setup-wizard-generator.md",
+    "zh-Hans/user-guide/skills/optional/gaming/gaming-minecraft-modpack-server.md",
+    "zh-Hans/user-guide/skills/optional/gaming/gaming-pokemon-player.md",
+    "zh-Hans/user-guide/skills/optional/mcp/mcp-mcp-oauth-remote-gateway.md",
+    "zh-Hans/user-guide/skills/optional/media/media-gif-search.md",
+    "zh-Hans/user-guide/skills/optional/media/media-songsee.md",
+    "zh-Hans/user-guide/skills/optional/mlops/mlops-evaluation-evaluating-llms-harness.md",
+    "zh-Hans/user-guide/skills/optional/mlops/mlops-inference-llama-cpp.md",
+    "zh-Hans/user-guide/skills/optional/mlops/mlops-inference-serving-llms-vllm.md",
+    "zh-Hans/user-guide/skills/optional/mlops/mlops-obliteratus.md",
+    "zh-Hans/user-guide/skills/optional/mlops/mlops-research-dspy.md",
+    "zh-Hans/user-guide/skills/optional/payments/payments-stripe-link-cli.md",
+    "zh-Hans/user-guide/skills/optional/payments/payments-stripe-projects.md",
+    "zh-Hans/user-guide/skills/optional/productivity/productivity-box.md",
+    "zh-Hans/user-guide/skills/optional/productivity/productivity-decision-questionnaire.md",
+    "zh-Hans/user-guide/skills/optional/productivity/productivity-live-dashboard.md",
+    "zh-Hans/user-guide/skills/optional/productivity/productivity-property-listings.md",
+    "zh-Hans/user-guide/skills/optional/research/research-blogwatcher.md",
+    "zh-Hans/user-guide/skills/optional/research/research-llm-wiki.md",
+    "zh-Hans/user-guide/skills/optional/research/research-research-paper-writing.md",
+    "zh-Hans/user-guide/skills/optional/research/research-rss-feeds.md",
+    "zh-Hans/user-guide/skills/optional/security/security-godmode.md",
+    "zh-Hans/user-guide/skills/optional/security/security-unbroker.md",
+    "zh-Hans/user-guide/skills/optional/security/security-web-pentest.md",
+    "zh-Hans/user-guide/skills/optional/smart-home/smart-home-openhue.md",
+    "zh-Hans/user-guide/skills/optional/social-media/social-media-reddit-reading.md",
+    "zh-Hans/user-guide/skills/optional/software-development/software-development-ast-grep.md",
+    "zh-Hans/user-guide/skills/optional/software-development/software-development-code-wiki.md",
+    "zh-Hans/user-guide/skills/optional/software-development/software-development-grill-me.md",
+    "zh-Hans/user-guide/skills/optional/software-development/software-development-hermes-agent-skill-authoring.md",
+    "zh-Hans/user-guide/skills/optional/software-development/software-development-inspecting-hermes-desktop-dom.md",
+    "zh-Hans/user-guide/skills/optional/software-development/software-development-node-inspect-debugger.md",
+    "zh-Hans/user-guide/skills/optional/software-development/software-development-pr-lens.md",
+    "zh-Hans/user-guide/skills/optional/software-development/software-development-python-debugpy.md",
+    "zh-Hans/user-guide/skills/optional/software-development/software-development-subagent-driven-development.md",
+    "zh-Hans/user-guide/skills/optional/web-development/web-development-cloudflare-temporary-deploy.md",
+    "zh-Hans/user-guide/skills/optional/web-development/web-development-har-derived-api-client.md",
+    "zh-Hans/user-guide/skills/optional/web-development/web-development-publish-site.md",
+    "zh-Hans/user-guide/skills/optional/web-development/web-development-scrollcraft.md",
+    "zh-Hans/user-guide/switching-to-source.md",
+    "zh-Hans/user-guide/which-file-does-what.md"
+  ],
+  "sourceResources": [
+    {
+      "source": "website/static/.nojekyll",
+      "target": "website/docs/.nojekyll"
+    },
+    {
+      "source": "website/static/api/model-catalog.json",
+      "target": "website/docs/api/model-catalog.json"
+    },
+    {
+      "source": "website/static/api/plugin-catalog.json",
+      "target": "website/docs/api/plugin-catalog.json"
+    },
+    {
+      "source": "website/static/api/plugins-meta.json",
+      "target": "website/docs/api/plugins-meta.json"
+    },
+    {
+      "source": "website/static/api/plugins.json",
+      "target": "website/docs/api/plugins.json"
+    },
+    {
+      "source": "website/static/api/skills-meta.json",
+      "target": "website/docs/api/skills-meta.json"
+    },
+    {
+      "source": "website/static/api/skills.json",
+      "target": "website/docs/api/skills.json"
+    },
+    {
+      "source": "website/static/img/apple-touch-icon.png",
+      "target": "website/docs/img/apple-touch-icon.png"
+    },
+    {
+      "source": "website/static/img/catalog/official-art-card-one.jpg",
+      "target": "website/docs/img/catalog/official-art-card-one.jpg"
+    },
+    {
+      "source": "website/static/img/catalog/official-art-card-two.jpg",
+      "target": "website/docs/img/catalog/official-art-card-two.jpg"
+    },
+    {
+      "source": "website/static/img/catalog/official-art-feature.jpg",
+      "target": "website/docs/img/catalog/official-art-feature.jpg"
+    },
+    {
+      "source": "website/static/img/catalog/official-art.jpg",
+      "target": "website/docs/img/catalog/official-art.jpg"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-channels.png",
+      "target": "website/docs/img/dashboard/admin-channels.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-config.png",
+      "target": "website/docs/img/dashboard/admin-config.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-hook-create.png",
+      "target": "website/docs/img/dashboard/admin-hook-create.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-mcp.png",
+      "target": "website/docs/img/dashboard/admin-mcp.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-pairing.png",
+      "target": "website/docs/img/dashboard/admin-pairing.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-sessions.png",
+      "target": "website/docs/img/dashboard/admin-sessions.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-skills-hub.png",
+      "target": "website/docs/img/dashboard/admin-skills-hub.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-system-curator.png",
+      "target": "website/docs/img/dashboard/admin-system-curator.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-system-ops.png",
+      "target": "website/docs/img/dashboard/admin-system-ops.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-system-top.png",
+      "target": "website/docs/img/dashboard/admin-system-top.png"
+    },
+    {
+      "source": "website/static/img/dashboard/admin-webhooks.png",
+      "target": "website/docs/img/dashboard/admin-webhooks.png"
+    },
+    {
+      "source": "website/static/img/docs/cli-layout.svg",
+      "target": "website/docs/img/docs/cli-layout.svg"
+    },
+    {
+      "source": "website/static/img/docs/dashboard-models/auxiliary-expanded.png",
+      "target": "website/docs/img/docs/dashboard-models/auxiliary-expanded.png"
+    },
+    {
+      "source": "website/static/img/docs/dashboard-models/overview.png",
+      "target": "website/docs/img/docs/dashboard-models/overview.png"
+    },
+    {
+      "source": "website/static/img/docs/dashboard-models/picker-dialog.png",
+      "target": "website/docs/img/docs/dashboard-models/picker-dialog.png"
+    },
+    {
+      "source": "website/static/img/docs/dashboard-models/use-as-dropdown.png",
+      "target": "website/docs/img/docs/dashboard-models/use-as-dropdown.png"
+    },
+    {
+      "source": "website/static/img/docs/session-recap.svg",
+      "target": "website/docs/img/docs/session-recap.svg"
+    },
+    {
+      "source": "website/static/img/docs/tui-session-orchestrator/session-orchestrator-demo.mp4",
+      "target": "website/docs/img/docs/tui-session-orchestrator/session-orchestrator-demo.mp4"
+    },
+    {
+      "source": "website/static/img/docs/tui-session-orchestrator/session-orchestrator.png",
+      "target": "website/docs/img/docs/tui-session-orchestrator/session-orchestrator.png"
+    },
+    {
+      "source": "website/static/img/favicon-16x16.png",
+      "target": "website/docs/img/favicon-16x16.png"
+    },
+    {
+      "source": "website/static/img/favicon-32x32.png",
+      "target": "website/docs/img/favicon-32x32.png"
+    },
+    {
+      "source": "website/static/img/favicon.ico",
+      "target": "website/docs/img/favicon.ico"
+    },
+    {
+      "source": "website/static/img/favicon.svg",
+      "target": "website/docs/img/favicon.svg"
+    },
+    {
+      "source": "website/static/img/hermes-agent-banner.png",
+      "target": "website/docs/img/hermes-agent-banner.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/01-board-overview.png",
+      "target": "website/docs/img/kanban-tutorial/01-board-overview.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/02-board-flat.png",
+      "target": "website/docs/img/kanban-tutorial/02-board-flat.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/03-drawer-schema-task.png",
+      "target": "website/docs/img/kanban-tutorial/03-drawer-schema-task.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/04b-drawer-retry-history-scrolled.png",
+      "target": "website/docs/img/kanban-tutorial/04b-drawer-retry-history-scrolled.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/06-drawer-crash-recovery.png",
+      "target": "website/docs/img/kanban-tutorial/06-drawer-crash-recovery.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/07-fleet-transcribes.png",
+      "target": "website/docs/img/kanban-tutorial/07-fleet-transcribes.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/08-pipeline-auth.png",
+      "target": "website/docs/img/kanban-tutorial/08-pipeline-auth.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/09-drawer-pipeline-review.png",
+      "target": "website/docs/img/kanban-tutorial/09-drawer-pipeline-review.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/10-drawer-in-flight.png",
+      "target": "website/docs/img/kanban-tutorial/10-drawer-in-flight.png"
+    },
+    {
+      "source": "website/static/img/kanban-tutorial/11-drawer-gave-up.png",
+      "target": "website/docs/img/kanban-tutorial/11-drawer-gave-up.png"
+    },
+    {
+      "source": "website/static/img/logo-dark.png",
+      "target": "website/docs/img/logo-dark.png"
+    },
+    {
+      "source": "website/static/img/logo.png",
+      "target": "website/docs/img/logo.png"
+    },
+    {
+      "source": "website/static/img/nous-logo-dark.png",
+      "target": "website/docs/img/nous-logo-dark.png"
+    },
+    {
+      "source": "website/static/img/nous-logo.png",
+      "target": "website/docs/img/nous-logo.png"
+    },
+    {
+      "source": "website/static/llms-full.txt",
+      "target": "website/docs/llms-full.txt"
+    },
+    {
+      "source": "website/static/llms.txt",
+      "target": "website/docs/llms.txt"
+    },
+    {
+      "source": "website/static/oauth/client-metadata.json",
+      "target": "website/docs/oauth/client-metadata.json"
+    }
+  ],
+  "categoryMetadata": {
+    "docs/developer-guide/_category_.json": {
+      "label": "Developer Guide",
+      "position": 3,
+      "link": {
+        "type": "generated-index",
+        "description": "Contribute to Hermes Agent — architecture, tools, skills, and more."
+      }
+    },
+    "docs/getting-started/_category_.json": {
+      "label": "Getting Started",
+      "position": 1,
+      "link": {
+        "type": "generated-index",
+        "description": "Get up and running with Hermes Agent in minutes."
+      }
+    },
+    "docs/guides/_category_.json": {
+      "label": "Guides & Tutorials",
+      "position": 2,
+      "collapsible": true,
+      "collapsed": false
+    },
+    "docs/reference/_category_.json": {
+      "label": "Reference",
+      "position": 4,
+      "link": {
+        "type": "generated-index",
+        "description": "Complete reference for CLI commands, environment variables, and configuration."
+      }
+    },
+    "docs/user-guide/_category_.json": {
+      "label": "User Guide",
+      "position": 2,
+      "link": {
+        "type": "generated-index",
+        "description": "Learn how to use Hermes Agent effectively."
+      }
+    },
+    "docs/user-guide/features/_category_.json": {
+      "label": "Features",
+      "position": 4,
+      "link": {
+        "type": "generated-index",
+        "description": "Explore the powerful features of Hermes Agent."
+      }
+    },
+    "docs/user-guide/messaging/_category_.json": {
+      "label": "Messaging Gateway",
+      "position": 3,
+      "link": {
+        "type": "doc",
+        "id": "user-guide/messaging/index"
+      }
+    }
+  }
+}

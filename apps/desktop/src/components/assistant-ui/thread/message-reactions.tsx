@@ -1,13 +1,15 @@
+import { appText } from '@noone/shared/application-identity'
+import { Plus } from '@noone/ui/icons'
 import { EmojiPicker } from 'frimousse'
 import { type FC, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
+import { useAppName } from '@/hooks/use-app-name'
 import { triggerHaptic } from '@/lib/haptics'
-import { Plus } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { QUICK_REACTIONS } from '@/store/reactions'
-import type { MessageReaction } from '@/types/hermes'
+import type { MessageReaction } from '@/types/agent-client'
 
 // Served from the app's own origin (vite.config.ts `hermes:emojibase-assets`
 // plugin bundles emojibase-data): Electron must work offline, and the app
@@ -164,10 +166,10 @@ export const ReactionBadge: FC<{
   onRetract?: () => void
   reactions: MessageReaction[]
 }> = ({ className, onRetract, reactions }) => {
+  const appName = useAppName()
   if (!reactions.length) {
     return null
   }
-
   return (
     <span
       className={cn('flex items-center gap-1 text-[0.8125rem] leading-none', className)}
@@ -197,7 +199,7 @@ export const ReactionBadge: FC<{
           <span
             className="reaction-pop leading-none"
             key={`${reaction.author}-${reaction.emoji}`}
-            title="Reacted by Hermes"
+            title={appText("Reacted by {app_name}", appName)}
           >
             {reaction.emoji}
           </span>

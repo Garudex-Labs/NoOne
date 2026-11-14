@@ -1,10 +1,10 @@
 import './catalog-discovery.css'
 
-import { featuredPicks, groupCatalogPlugins, isOfficialSkillSource, PLUGIN_CATEGORIES } from '@hermes/shared'
+import { featuredPicks, groupCatalogPlugins, isOfficialSkillSource, PLUGIN_CATEGORIES } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
 import { type ReactNode, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 
 import { BENTO_COLUMNS, packBento } from './catalog-bento'
@@ -111,7 +111,7 @@ export function CatalogDiscovery({ entries, kind, card, onCategory, actions, nar
               <h2><Button className="text-[length:inherit] font-[inherit] text-(--ui-text-primary) hover:text-(--ui-text-primary)" onClick={() => onCategory(category)} size="inline" variant="text">{catalogLabel(label)}</Button></h2>
               <p>{kind === 'plugins' ? PLUGIN_CATEGORIES[category]?.blurb : t.catalog.skillsFor(catalogLabel(label))}</p>
             </div>
-            {items.length > packBento(items).length && <Button onClick={() => onCategory(category)} size="inline" variant="text">{t.catalog.seeAll}<Codicon name="arrow-right" /></Button>}
+            {items.length > packBento(items).length && <Button onClick={() => onCategory(category)} size="inline" variant="text">{t.catalog.seeAll}<AppIcon name="arrow-right" /></Button>}
           </header>
           {bento(items, undefined, index % 2 === 1)}
         </section>

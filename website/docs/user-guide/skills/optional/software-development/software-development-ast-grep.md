@@ -1,35 +1,43 @@
 ---
 title: "Ast Grep — AST-aware structural code search and rewrite via ast-grep"
-sidebar_label: "Ast Grep"
+sidebarTitle: "Ast Grep"
 description: "AST-aware structural code search and rewrite via ast-grep"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Ast Grep
+# Ast Grep {#ast-grep}
 
 AST-aware structural code search and rewrite via ast-grep.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/software-development/ast-grep` |
+| Source | Optional — install with `noone skills install official/software-development/ast-grep` |
 | Path | `optional-skills/software-development/ast-grep` |
 | Version | `1.0.0` |
-| Author | Yeongyu Kim (code-yeongyu), adapted by Hermes Agent |
+| Author | Yeongyu Kim (code-yeongyu), adapted by {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `ast`, `codemod`, `refactoring`, `structural-search`, `code-search`, `rewrite`, `tree-sitter` |
 | Related skills | [`simplify-code`](../../bundled/software-development/software-development-simplify-code.md), [`systematic-debugging`](../../bundled/software-development/software-development-systematic-debugging.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# ast-grep
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# ast-grep {#ast-grep-1}
 
 `ast-grep` (binary also named `sg`) is an **AST-aware search and rewrite tool** across 25 languages. It treats your pattern as code, parses it the same way it parses your project, and matches structurally. It is the right tool whenever your question depends on **code shape** rather than text bytes.
 
@@ -39,7 +47,7 @@ Upstream source: vendored from [code-yeongyu/ast-grep-skill](https://github.com/
 
 ---
 
-## When to use this skill
+## When to use this skill {#when-to-use-this-skill}
 
 Use it whenever the question is about **code structure**, not bytes:
 
@@ -54,16 +62,16 @@ Use it whenever the question is about **code structure**, not bytes:
 
 Switch to `search_files` (or plain `rg`) when the question is text-shaped (string literal contents, comments, license headers, file names, cross-language regex). When in doubt, ask: "does the answer depend on the language's syntax tree, or just on the file's bytes?" If the former, ast-grep. If the latter, search_files.
 
-Hermes integration notes:
+{{app-name}} integration notes:
 - Run the helper and `sg` through the `terminal` tool. Single-quote every pattern so the shell never expands `$VAR`.
 - For find→read chains around matches, use `--json-out` and process with `execute_code` rather than piping through interpreters.
-- This complements (does not replace) Hermes's `patch` tool: `patch` is for targeted edits you author; ast-grep is for pattern-driven bulk rewrites across many sites.
+- This complements (does not replace) {{app-name}}'s `patch` tool: `patch` is for targeted edits you author; ast-grep is for pattern-driven bulk rewrites across many sites.
 
 ---
 
-## Three things the agent must internalize
+## Three things the agent must internalize {#three-things-the-agent-must-internalize}
 
-### 1. ast-grep is NOT regex
+### 1. ast-grep is NOT regex {#1-ast-grep-is-not-regex}
 
 The wildcards are `$VAR` (one AST node) and `$$$` (zero or more nodes). Regex syntax fails silently:
 
@@ -76,11 +84,11 @@ The wildcards are `$VAR` (one AST node) and `$$$` (zero or more nodes). Regex sy
 
 The full anti-pattern table is in `references/pitfalls.md` §1. The helper's `validate` subcommand catches these mechanically — call it before debugging "no matches" by hand.
 
-### 2. Patterns must be valid code
+### 2. Patterns must be valid code {#2-patterns-must-be-valid-code}
 
 The pattern itself must parse. `def $FN($$$):` fails because the trailing `:` makes it incomplete; use `def $FN($$$)`. `function $NAME` without params/body fails; use `function $NAME($$$) { $$$ }`. Full table per language in `references/pitfalls.md` §2.
 
-### 3. `--update-all` and `--json` are mutually exclusive (silently)
+### 3. `--update-all` and `--json` are mutually exclusive (silently) {#3---update-all-and---json-are-mutually-exclusive-silently}
 
 This is the single biggest gotcha when scripting. `sg run -p P -r R --json --update-all` returns the JSON but **does not mutate files**. To both preview AND apply, run **two passes**:
 
@@ -93,11 +101,11 @@ The helper does this automatically when you call `replace --apply`. Read `refere
 
 ---
 
-## The helper script — `scripts/ast_grep_helper.py`
+## The helper script — `scripts/ast_grep_helper.py` {#the-helper-script--scriptsast_grep_helperpy}
 
 A single-file Python 3 stdlib wrapper. Same on every OS. The agent's default entry point.
 
-### `search` — find all matches of a pattern
+### `search` — find all matches of a pattern {#search--find-all-matches-of-a-pattern}
 
 ```bash
 python scripts/ast_grep_helper.py search 'console.log($MSG)' --lang ts src/
@@ -111,7 +119,7 @@ Flags:
 - `-C 3` (context lines)
 - `--json-out` (raw JSON instead of human format)
 
-### `replace` — rewrite by pattern, dry-run by default
+### `replace` — rewrite by pattern, dry-run by default {#replace--rewrite-by-pattern-dry-run-by-default}
 
 ```bash
 # Dry-run preview (default — no files mutated)
@@ -126,7 +134,7 @@ The helper:
 2. Runs pass 1 with `--json=compact` to collect matches and show a preview.
 3. If `--apply` is set, runs pass 2 with `--update-all` to mutate files.
 
-### `scan` — run YAML rules
+### `scan` — run YAML rules {#scan--run-yaml-rules}
 
 ```bash
 # Discover sgconfig.yml from cwd and run all rules
@@ -142,7 +150,7 @@ python scripts/ast_grep_helper.py scan -U src/
 python scripts/ast_grep_helper.py scan --report-style short src/
 ```
 
-### `validate` — offline pattern check (no `sg` call)
+### `validate` — offline pattern check (no `sg` call) {#validate--offline-pattern-check-no-sg-call}
 
 Useful for CI lints, pre-commit hooks, and quick sanity checks:
 
@@ -154,7 +162,7 @@ python scripts/ast_grep_helper.py validate 'console.log($MSG)' --lang ts
 # → exit 0: pattern looks plausible for ast-grep.
 ```
 
-### `langs` / `doctor` / `install`
+### `langs` / `doctor` / `install` {#langs--doctor--install}
 
 ```bash
 python scripts/ast_grep_helper.py langs       # list 25 supported languages and aliases
@@ -166,7 +174,7 @@ python scripts/ast_grep_helper.py install     # delegate to install.sh / install
 
 ---
 
-## Direct `sg` use (when the helper isn't enough)
+## Direct `sg` use (when the helper isn't enough) {#direct-sg-use-when-the-helper-isnt-enough}
 
 The helper is opinionated. For full control, drop to `sg`. The skill ships a CLI cheat sheet in `references/cli.md`. The minimal idioms:
 
@@ -204,9 +212,9 @@ When using `sg` directly in a shell, **always single-quote patterns** so `$VAR` 
 
 ---
 
-## Decision tree — what to use, when
+## Decision tree — what to use, when {#decision-tree--what-to-use-when}
 
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```
 USER asks for "find/rewrite/codemod"
 │
@@ -222,13 +230,13 @@ USER asks for "find/rewrite/codemod"
 └─ multiple repos / federated search
    └→ a search engine + then ast-grep / rg / LSP per-repo
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
 If the user says "find all" or "every", default to ast-grep when the target is shaped (function, class, call, import, statement). Default to search_files when the target is text (string content, comment, license header, file name, identifier substring).
 
 ---
 
-## Always run dry-run first when rewriting
+## Always run dry-run first when rewriting {#always-run-dry-run-first-when-rewriting}
 
 A bad pattern silently rewrites the wrong thing. The helper's `replace` defaults to dry-run for this reason. The flow is:
 
@@ -242,7 +250,7 @@ Never apply a rewrite that you have not first dry-run. After an `--apply` in a g
 
 ---
 
-## When `sg` returns 0 matches but you know the code is there
+## When `sg` returns 0 matches but you know the code is there {#when-sg-returns-0-matches-but-you-know-the-code-is-there}
 
 In priority order:
 
@@ -256,7 +264,7 @@ Do not blindly retry with variations. Each failure has a reason; surface it.
 
 ---
 
-## When to use YAML rules vs inline `-p` patterns
+## When to use YAML rules vs inline `-p` patterns {#when-to-use-yaml-rules-vs-inline--p-patterns}
 
 **Use inline `-p`** when:
 - One-off ad-hoc query.
@@ -273,7 +281,7 @@ The full YAML rule schema is in `references/yaml-rules.md`. Project setup (`sgco
 
 ---
 
-## Output discipline
+## Output discipline {#output-discipline}
 
 - `sg run --json=compact` produces an array of match objects: `{ file, range: {start, end}, text, replacement?, lines, language, ... }`.
 - Without `--json`, `sg` produces human-readable colored output suitable for terminals.
@@ -284,7 +292,7 @@ When summarizing for the user, **always include the count of files affected**, n
 
 ---
 
-## Required reading (in order of priority)
+## Required reading (in order of priority) {#required-reading-in-order-of-priority}
 
 1. `references/patterns.md` — meta-variables, naming rules, strictness levels. Read when you're unsure why a pattern doesn't match.
 2. `references/pitfalls.md` — the failure-mode field guide. Read when 0 matches surprises you.
@@ -296,7 +304,7 @@ When summarizing for the user, **always include the count of files affected**, n
 
 ---
 
-## Invariants (do not break)
+## Invariants (do not break) {#invariants-do-not-break}
 
 - **Validate before searching.** When emitting a pattern programmatically, call `helper validate` first. It catches the regex-misuse class of mistakes that account for ~70% of "0 matches" debug sessions.
 - **Dry-run before applying.** Never run `sg run -r ... --update-all` without first inspecting the matches. The helper's `replace` enforces this by default.

@@ -1,12 +1,11 @@
 ---
-sidebar_position: 18
 title: "Browser CDP Supervisor"
-description: "How Hermes detects and responds to native JS dialogs and interacts with cross-origin iframes via a persistent CDP connection."
+description: "How the agent detects and responds to native JS dialogs and interacts with cross-origin iframes via a persistent CDP connection."
 ---
 
-# Browser CDP Supervisor
+# Browser CDP Supervisor {#browser-cdp-supervisor}
 
-The CDP supervisor closes two long-standing gaps in Hermes' browser tooling:
+The CDP supervisor closes two long-standing gaps in {{app-name}}' browser tooling:
 
 1. **Native JS dialogs** (`alert`/`confirm`/`prompt`/`beforeunload`) block the
    page's JS thread. Without supervision, the agent has no way to know a
@@ -20,11 +19,11 @@ The supervisor solves both by holding a persistent WebSocket to the backend's
 CDP endpoint per browser task, tracking pending dialogs and frame structure
 in its snapshot, and exposing a `browser_dialog` tool for explicit responses.
 
-## Backend support
+## Backend support {#backend-support}
 
 | Backend | Dialog detect | Dialog respond | Frame tree | OOPIF `Runtime.evaluate` via `browser_cdp(frame_id=...)` |
 |---|---|---|---|---|
-| Local Chromium (launched by Hermes for `browser_exec`) / `/browser connect` | ✓ | ✓ full workflow | ✓ | ✓ |
+| Local Chromium (launched by {{app-name}} for `browser_exec`) / `/browser connect` | ✓ | ✓ full workflow | ✓ | ✓ |
 | Browserbase | ✓ (via bridge) | ✓ full workflow (via bridge) | ✓ | ✓ |
 
 **Browserbase quirk.** Browserbase's CDP proxy uses Playwright internally and
@@ -41,14 +40,14 @@ From the page's perspective, `prompt()` still returns the agent-supplied
 string. From the agent's perspective, it's the same `browser_dialog(action=...)`
 API either way.
 
-The Camofox catalog plugin (`hermes plugins install camofox`) drives a REST-only
+The Camofox catalog plugin (`noone plugins install camofox`) drives a REST-only
 browser with no CDP surface, so the supervisor does not apply to it.
 
-## Architecture
+## Architecture {#architecture}
 
-### CDPSupervisor
+### CDPSupervisor {#cdpsupervisor}
 
-One `asyncio.Task` running in a background daemon thread per Hermes `task_id`.
+One `asyncio.Task` running in a background daemon thread per {{app-name}} `task_id`.
 Holds a persistent WebSocket to the backend's CDP endpoint. Maintains:
 
 - **Dialog queue** — `List[PendingDialog]` with `{id, type, message, default_prompt, session_id, opened_at}`
@@ -65,7 +64,7 @@ Subscribes on attach:
 Thread-safe state access via a snapshot lock; tool handlers (sync) read the
 frozen snapshot without awaiting.
 
-### Lifecycle
+### Lifecycle {#lifecycle}
 
 - **Start:** `SupervisorRegistry.get_or_start(task_id, cdp_url)` — called when
   `browser_exec` attaches to a session (local, cloud provider or CDP override)
@@ -81,7 +80,7 @@ frozen snapshot without awaiting.
   old supervisor is stopped and a fresh one started — state is never reused
   across endpoints.
 
-### Dialog policy
+### Dialog policy {#dialog-policy}
 
 Configurable via `config.yaml` under `browser.dialog_policy`:
 
@@ -96,7 +95,7 @@ Configurable via `config.yaml` under `browser.dialog_policy`:
 
 Policy is per-task; no per-dialog overrides.
 
-## Trusted plugin CDP access
+## Trusted plugin CDP access {#trusted-plugin-cdp-access}
 
 In-process plugin code can send raw CDP commands over a task's supervisor
 connection through one public call, instead of writing the supervisor's private
@@ -144,9 +143,9 @@ not already reach, and it enforces no origin, consent or target-ownership
 policy: a plugin that acts on pages must enforce its own. It is not exposed as a
 model tool and has no config switch.
 
-## Agent surface
+## Agent surface {#agent-surface}
 
-### `browser_dialog` tool
+### `browser_dialog` tool {#browser_dialog-tool}
 
 ```
 browser_dialog(action, prompt_text=None, dialog_id=None)
@@ -159,7 +158,7 @@ browser_dialog(action, prompt_text=None, dialog_id=None)
 Tool is response-only. With a single pending dialog, `dialog_id` can be
 omitted.
 
-### Supervisor snapshot
+### Supervisor snapshot {#supervisor-snapshot}
 
 `CDPSupervisor.snapshot()` carries three fields while a supervisor is attached:
 
@@ -198,13 +197,13 @@ omitted.
   pages. `truncated: true` surfaces when limits were hit; agents needing
   the full tree can use `browser_cdp` with `Page.getFrameTree`.
 
-### Availability gating
+### Availability gating {#availability-gating}
 
 `browser_dialog` and `browser_cdp` gate on CDP reachability (the supervisor
 can only run when a CDP endpoint is reachable). Without one, the dialog tool is
 hidden — no schema bloat.
 
-## Cross-origin iframe interaction
+## Cross-origin iframe interaction {#cross-origin-iframe-interaction}
 
 `browser_cdp(frame_id=...)` routes CDP calls (notably `Runtime.evaluate`)
 through the supervisor's already-connected WebSocket using the OOPIF's child
@@ -219,7 +218,7 @@ On Browserbase, this is the only reliable path for iframe interaction —
 stateless CDP connections (opened per `browser_cdp` call) hit signed-URL
 expiry, while the supervisor's long-lived connection keeps a valid session.
 
-## File layout
+## File layout {#file-layout}
 
 - `tools/browser_supervisor.py` — `CDPSupervisor`, `SupervisorRegistry`, `PendingDialog`, `FrameInfo`
 - `tools/browser_supervisor_capture.py` — `CapturedCDP` / `CapturedCDPInvalid`, the trusted-plugin CDP seam behind `SUPERVISOR_REGISTRY.capture`
@@ -227,16 +226,16 @@ expiry, while the supervisor's long-lived connection keeps a valid session.
 - `tools/browser_session_cdp.py` — `ensure_cdp_supervisor` / `stop_cdp_supervisor`, `/browser connect` reattach, dialog-policy config
 - `tools/browser_session_lifecycle.py` — per-session teardown (supervisor stopped first)
 - `toolsets.py` — registers `browser_dialog` in `browser`, `hermes-acp`, `hermes-api-server`, and core toolsets (gated on CDP reachability)
-- `hermes_cli/config.py` — `browser.dialog_policy` and `browser.dialog_timeout_s` defaults
+- `agent_cli/config.py` — `browser.dialog_policy` and `browser.dialog_timeout_s` defaults
 
-## Non-goals
+## Non-goals {#non-goals}
 
 - Streaming dialog/frame events live to the user (would require gateway hooks)
 - Persisting dialog history across sessions (in-memory only)
 - Per-iframe dialog policies (agent can express this via `dialog_id`)
 - Replacing `browser_cdp` — it stays as the escape hatch for the long tail (cookies, viewport, network throttling)
 
-## Testing
+## Testing {#testing}
 
 Unit tests (`tests/tools/test_browser_supervisor.py`) use an asyncio mock CDP
 server that speaks enough of the protocol to exercise all state transitions:

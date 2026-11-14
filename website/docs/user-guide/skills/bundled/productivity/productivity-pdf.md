@@ -1,42 +1,50 @@
 ---
 title: "Pdf — PDF files: create, read, merge, fill, OCR, edit text"
-sidebar_label: "Pdf"
+sidebarTitle: "Pdf"
 description: "PDF files: create, read, merge, fill, OCR, edit text"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Pdf
+# Pdf {#pdf}
 
 PDF files: create, read, merge, fill, OCR, edit text.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/productivity/pdf` |
 | Version | `1.1.0` |
-| Author | Nous Research |
+| Author | Garudex Labs |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `pdf`, `documents`, `forms`, `ocr`, `text-extraction`, `reportlab`, `pypdf`, `pdfplumber`, `pymupdf`, `marker` |
 | Related skills | [`microsoft-office`](../../bundled/productivity/productivity-microsoft-office.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# PDF Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# PDF Skill {#pdf-skill}
 
 Create PDFs from structured specs, build and fill AcroForm forms (with layout linting and visual overlays), extract text/tables/metadata, merge/split/rotate/watermark/stamp pages, export page images, manage metadata and attachments, and encrypt/decrypt — using pypdf, reportlab, and pdfplumber. Two absorbed capabilities live in references/ (read the matching file before those tasks):
 
 - **Scanned/image-only PDFs and OCR** (pymupdf fast path, marker-pdf quality path, scripts/extract_pymupdf.py + scripts/extract_marker.py): `references/ocr-extraction.md`
 - **Editing text inside an existing PDF via natural-language prompts** (nano-pdf CLI): `references/nano-pdf-editing.md`
 
-## When to Use
+## When to Use {#when-to-use}
 
 - Generate a report, invoice, or multi-page document as PDF.
 - Build a fillable AcroForm (text/checkbox/radio/dropdown) from a JSON spec, linting the layout first.
@@ -46,21 +54,21 @@ Create PDFs from structured specs, build and fill AcroForm forms (with layout li
 - Fill or flatten AcroForm forms; encrypt or decrypt with passwords.
 - NOT for scanned/image-only PDFs (use `references/ocr-extraction.md`) and NOT for pixel-perfect HTML-to-PDF rendering (use a headless browser).
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Python 3.10+ with `pypdf`, `reportlab`, `pdfplumber`.
 - Pick the interpreter with `terminal`. Use `python` when it already imports
-  the libraries (the Hermes Docker image ships them). Otherwise, when `hermes`
-  is on PATH, let Hermes build its shared, pinned documents environment under
-  the Hermes home: it survives container restarts, never touches the Hermes
+  the libraries (the {{app-name}} Docker image ships them). Otherwise, when `hermes`
+  is on PATH, let {{app-name}} build its shared, pinned documents environment under
+  the {{app-name}} home: it survives container restarts, never touches the {{app-name}}
   install itself, and is safe to run from several agents at once. When it is
-  not (the terminal runs in a Docker sandbox, which has no Hermes), the block
+  not (the terminal runs in a Docker sandbox, which has no {{app-name}}), the block
   builds a venv in the sandbox home with the same pinned versions. Use this
   exact block in every document skill so they all share one environment:
 
   ```bash
   python -c "import pypdf, reportlab, pdfplumber" 2>/dev/null && PY=python || if command -v hermes >/dev/null 2>&1; then
-    PY="$(hermes pm environment documents --extra documents --extra documents-pdf)"
+    PY="$(noone pm environment documents --extra documents --extra documents-pdf)"
   else
     PY="$HOME/.cache/hermes-docs-venv/bin/python"
     "$PY" -c "import docx, openpyxl, pptx, reportlab, pypdf, pdfplumber, pypdfium2" 2>/dev/null || (
@@ -84,15 +92,15 @@ Create PDFs from structured specs, build and fill AcroForm forms (with layout li
   "$PY" scripts/pdf_create.py --help
   ```
 
-  Run every helper below with `"$PY"`. In PowerShell (Hermes runs on that
+  Run every helper below with `"$PY"`. In PowerShell ({{app-name}} runs on that
   host, so it is on PATH):
-  `$env:PY = hermes pm environment documents --extra documents --extra documents-pdf`.
-  Never `pip install` into the interpreter that runs Hermes or into the
-  `hermes pm environment` one; Hermes owns both.
+  `$env:PY = noone pm environment documents --extra documents --extra documents-pdf`.
+  Never `pip install` into the interpreter that runs {{app-name}} or into the
+  `noone pm environment` one; {{app-name}} owns both.
 - Page rasterization (`pdf_page_image.py`, overlay rendering) uses `pypdfium2`, which the documents environment already has (if your `python` lacks it, switch `PY` to that environment with the command above), or poppler's `pdftoppm` on PATH. Scripts fall back pypdfium2 → pdftoppm and report `{"rendered": false, "missing": [...]}` (exit 0) when neither exists.
 - Each helper script checks imports lazily and prints an install hint if a dependency is missing.
 
-## How to Run
+## How to Run {#how-to-run}
 
 All helpers live in `scripts/` and are argparse CLIs — run them with the `terminal` tool; every one supports `--help`. They read/write JSON strictly as UTF-8, print JSON results to stdout, and exit non-zero on failure.
 
@@ -120,7 +128,7 @@ python scripts/pdf_meta.py doc.pdf --attach data.csv -o out.pdf
 python scripts/pdf_meta.py doc.pdf --list-attachments | --extract-attachments dir/
 ```
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Task | Tool | Command / API |
 |---|---|---|
@@ -140,7 +148,7 @@ python scripts/pdf_meta.py doc.pdf --list-attachments | --extract-attachments di
 | Set/clear metadata, attachments | pypdf | `pdf_meta.py --set-meta / --attach / --extract-attachments` |
 | Compress content streams | pypdf | `pdf_split.py f.pdf --pages 1-N --compress` |
 
-## Procedure
+## Procedure {#procedure}
 
 1. **Inspect first.** Run `pdf_read.py file.pdf --meta`. Check `encrypted` (if true, decrypt first with `pdf_secure.py --decrypt`) and `likely_scanned_pages`. If pages are image-only, export them with `pdf_page_image.py --pages <scanned> --dpi 300 --out-dir imgs/` and hand the PNGs to the `references/ocr-extraction.md` skill — do not report empty text as "no content".
 2. **Create.** Write a JSON spec with `write_file` (elements: `heading`, `paragraph`, `table`, `image`, `pagebreak`; optional `title`/`author` metadata; page numbers are added automatically), then run `pdf_create.py`. Verify visually with `vision_analyze` on a rendered page image if layout matters.
@@ -152,7 +160,7 @@ python scripts/pdf_meta.py doc.pdf --list-attachments | --extract-attachments di
 8. **Secure.** Encrypt with distinct user/owner passwords and AES-256. To remove a password you know, `--decrypt` writes an unencrypted copy.
 9. **Verify** (see below) before reporting success.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Scanned PDFs**: empty `extract_text()` plus page images means there is no text layer. Route to `references/ocr-extraction.md`; do not fabricate text.
 - **Flattening limits**: `pdf_fill_form.py --flatten` uses pypdf's flatten support, which converts widget appearances into page content. It is reliable for plain text fields and checkboxes but can drop or misrender exotic widgets (rich text, custom appearance streams, some radio groups). Verify the flattened output visually with `vision_analyze`; for bulletproof flattening use an external renderer (e.g. Ghostscript or `pdftoppm`+reassembly) as a fallback.
@@ -168,7 +176,7 @@ python scripts/pdf_meta.py doc.pdf --list-attachments | --extract-attachments di
 - **PDF/A is out of scope**: pypdf/reportlab cannot produce or validate conformant PDF/A. If archival conformance is required, run Ghostscript via the `terminal` tool (e.g. `gs -dPDFA=2 -dPDFACompatibilityPolicy=1 -sColorConversionStrategy=UseDeviceIndependentColor -sDEVICE=pdfwrite -o out.pdf in.pdf` with a suitable ICC profile) and validate with veraPDF — both are external installs, and the result still needs validation, not assumption.
 - Rotation must be a multiple of 90; encrypted inputs must be decrypted before any other operation.
 
-## Verification
+## Verification {#verification}
 
 - After create/merge/split: `pdf_read.py out.pdf --meta` — confirm `page_count`, and per-page `rotation` when you rotated.
 - After extraction: check the JSON is non-empty and spot-check a known string or cell.

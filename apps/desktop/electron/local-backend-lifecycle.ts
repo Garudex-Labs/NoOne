@@ -1,3 +1,5 @@
+import { appText } from '@noone/shared/application-identity'
+
 import { createBackendShutdownCoordinator } from './backend-ownership'
 import { markExpectedTransition } from './crash-forensics'
 
@@ -75,7 +77,7 @@ export function createLocalBackendLifecycle<Child>(
   }
 
   const shutdown = createBackendShutdownCoordinator((): Promise<void> => {
-    controller.abort(markExpectedTransition(new Error('Hermes Desktop is quitting.')))
+    controller.abort(markExpectedTransition(new Error(appText('{app_name} Desktop is quitting.'))))
     deps.cancelSetup()
 
     return waitForTeardown([...starts, ...[...children].map(stop), ...stops.values()], deps.timeoutMs ?? 7_000)

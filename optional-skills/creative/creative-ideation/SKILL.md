@@ -3,7 +3,7 @@ name: creative-ideation
 title: Creative Ideation — Routed Library of Creative Methods
 description: "Generate ideas via named methods from creative practice."
 version: 2.1.0
-author: SHL0MS
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

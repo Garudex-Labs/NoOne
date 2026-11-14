@@ -234,7 +234,7 @@ class MemoryProvider(ABC):
         """
 
     def backup_paths(self) -> list[str]:
-        """Absolute paths of provider state OUTSIDE HERMES_HOME for ``hermes backup``/``import``
+        """Absolute paths of provider state OUTSIDE HERMES_HOME for ``noone backup``/``import``
         (paths outside the home dir are skipped). MUST work without ``initialize()`` or network."""
         return []
 

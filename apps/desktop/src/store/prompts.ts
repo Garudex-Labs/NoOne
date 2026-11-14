@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 import { atom, computed, type ReadableAtom } from 'nanostores'
 
 import { $clarifyRequest, $clarifyRequests } from './clarify'
@@ -8,7 +9,7 @@ import { ambientRequestFor } from './session-gone-latch'
 import { requestForOwnedSession } from './session-states'
 
 // Blocking interactive prompts the gateway raises mid-turn. Each is a
-// server→client JSON-RPC request (`tui_gateway/server_requests.py`) the Python
+// server→client JSON-RPC request (`agent_backend/server_requests.py`) the Python
 // side blocks on; `requestId` is that request's id and the card answers through
 // `store/server-requests.ts::respondToServerRequest`. Without a renderer for
 // these the channel answers -32601 and the tool fails fast.
@@ -371,7 +372,7 @@ export async function answerApproval(
   }
 
   if (!gateway) {
-    throw new Error('Hermes gateway is not connected')
+    throw new Error(appText('{app_name} gateway is not connected'))
   }
 
   const params = {

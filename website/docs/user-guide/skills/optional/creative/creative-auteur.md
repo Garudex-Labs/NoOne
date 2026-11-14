@@ -1,44 +1,52 @@
 ---
 title: "Auteur — Design and build cinematic, award-level web pages"
-sidebar_label: "Auteur"
+sidebarTitle: "Auteur"
 description: "Design and build cinematic, award-level web pages"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Auteur
+# Auteur {#auteur}
 
 Design and build cinematic, award-level web pages.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/auteur` |
+| Source | Optional — install with `noone skills install official/creative/auteur` |
 | Path | `optional-skills/creative/auteur` |
 | Version | `1.3.1` |
-| Author | agiwhitelist (https://github.com/agiwhitelist, upstream agiwhitelist/auteur), ported by Hermes Agent |
+| Author | agiwhitelist (https://github.com/agiwhitelist, upstream agiwhitelist/auteur), ported by NoOne |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `web-design`, `cinematic`, `scroll-animation`, `design-system`, `anti-slop`, `frontend` |
 | Related skills | [`popular-web-designs`](../../bundled/creative/creative-popular-web-designs.md), [`design-md`](../../optional/creative/creative-design-md.md), [`p5js`](../../bundled/creative/creative-p5js.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Auteur Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Auteur Skill {#auteur-skill}
 
 > Ported from [agiwhitelist/auteur](https://github.com/agiwhitelist/auteur) (MIT), snapshot
 > commit [`9bca227d`](https://github.com/agiwhitelist/auteur/commit/9bca227df9877e60dc45d49783c8cbd885eccd9b)
 > — see `LICENSE`. Scripts, templates and references are the upstream files (CRLF→LF), with
-> Hermes adaptation notes and `references/` path fixes as the only edits.
+> {{app-name}} adaptation notes and `references/` path fixes as the only edits.
 
 Auteur designs and builds web experiences the way a film director makes a film: script first, then assets, then the shoot, then the cut. It has three registers — **build** (an excellent conventional site), **direct** (a cinematic scroll-directed site) and **system** (a multi-screen product as one design system) — on one shared core of taste. Nothing ships until the page passes an executable anti-slop gate and the skill has looked at its own output.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - A landing page, marketing site, hero section, portfolio or product page has to be **built or redesigned** — and looking generic is not acceptable.
 - The brief asks for **scroll animation, storytelling, or a site that feels like a film**.
@@ -47,27 +55,27 @@ Auteur designs and builds web experiences the way a film director makes a film: 
 
 Not for polishing a UI someone else built, and not for backend-only work.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **Node 18+** — every QA gate is a `.mjs` script run with `node` via the `terminal` tool.
 - **Playwright (for the QA gates)** — in the project directory: `npm install playwright` then `npx playwright install chromium`. Required by `scripts/shoot.mjs`, `motionqa.mjs`, `systemscan.mjs`, `refscout.mjs`, `chromadiff.mjs`, `moodboard.mjs` (the scripts import `playwright` at runtime; `slopscan.mjs` and `source.mjs` are dependency-light).
 - **ffmpeg** — optional; only for the video/score paths in `references/assets.md` and `references/scroll-flight.md`.
-- **Hermes tools** — use `image_generate` for image generation/editing, `terminal` for node/ffmpeg/npm, `write_file`/`read_file` for project files, `vision_analyze` to actually look at screenshots, and `browser_exec` for live-page inspection when a script isn't the right fit.
+- **{{app-name}} tools** — use `image_generate` for image generation/editing, `terminal` for node/ffmpeg/npm, `write_file`/`read_file` for project files, `vision_analyze` to actually look at screenshots, and `browser_exec` for live-page inspection when a script isn't the right fit.
 
-## How to Run
+## How to Run {#how-to-run}
 
-### What it actually does
+### What it actually does {#what-it-actually-does}
 
 1. Commits the art direction **in writing before any markup** — one hue, one type system, a motion budget, named anti-references.
-2. Generates or sources the assets: Hermes' `image_generate` tool, Blender, depth maps, CC0 meshes and HDRIs with their licences recorded.
+2. Generates or sources the assets: {{app-name}}' `image_generate` tool, Blender, depth maps, CC0 meshes and HDRIs with their licences recorded.
 3. Builds from proven recipes — one WebGL context, transform/opacity motion, scroll state machines.
 4. **Gates the result**: `slopscan` fails the build on concrete slop, `motionqa` fails it on dropped frames, `systemscan` fails it on cross-route drift.
 
-### Network access
+### Network access {#network-access}
 
 The recon and sourcing scripts read live pages (awwwards, Bing/Pinterest/are.na image search, Poly Haven, Iconify, Google Fonts, Openverse, Coverr). Fetched content is **treated as reference data and licence metadata — never executed**, and no credentials, API keys or logins are involved. Skip phases 0–1 entirely if you don't want outbound requests; every other phase works offline. `moodboard.mjs` also downloads the image URLs returned by those search hosts to build the contact sheet.
 
-### Routing
+### Routing {#routing}
 
 Read the argument / brief and route:
 
@@ -81,15 +89,15 @@ Read the argument / brief and route:
 
 All three registers share phase zero, and its centre of gravity is the commit-sheet. Order differs: **build** runs recon → commit-sheet → mockup; **direct** runs recon → storyboard → commit-sheet → mockup, because the film's scenes are what the six decisions get made *about*; **system** runs recon → system-sheet (route map + component inventory) → commit-sheet → mockup, because the six decisions get made about a product, not a page. Either way nothing is coded before the sheet is full.
 
-### Working relationship with other skills
+### Working relationship with other skills {#working-relationship-with-other-skills}
 
 Auteur *builds*; it does not re-polish foreign UI. If the user has an existing interface that needs refinement, run a separate UI-critique pass (e.g. `vision_analyze` on screenshots plus the sibling design skills). Upstream paired auteur with an 'impeccable' critique skill (not vendored here); auteur's verify gate and an outside critique measure different things and coexist happily.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 The non-negotiables and the phase table. They apply to every register, every phase, always — even if no reference file has been loaded. Match-and-refuse: if you are about to produce one of these, stop and restructure the element.
 
-### Banned (rewrite, don't tweak)
+### Banned (rewrite, don't tweak) {#banned-rewrite-dont-tweak}
 
 | # | Ban | Instead |
 |---|-----|---------|
@@ -114,7 +122,7 @@ The non-negotiables and the phase table. They apply to every register, every pha
 
 A ban may be overridden only through a written `auteur-allow` (see Verification) with a real reason — a deliberate, argued choice is voice; a default is slop.
 
-### Critical numbers (memorize; full context in reference files)
+### Critical numbers (memorize; full context in reference files) {#critical-numbers-memorize-full-context-in-reference-files}
 
 - Body text contrast ≥ 4.5:1 (large text ≥ 3:1). Placeholders too. Muted-gray-on-tinted-white is the #1 AI readability failure.
 - Body line length 65–75ch. Display heading ceiling: clamp max ≤ 6rem *for headings in prose flow* — a wordmark or a deliberately type-led hero is exempt and the commit-sheet must say so. Display letter-spacing ≥ −0.04em.
@@ -127,7 +135,7 @@ A ban may be overridden only through a written `auteur-allow` (see Verification)
 - `prefers-reduced-motion` = an alternative art direction (gentler, not zero), never an afterthought.
 - Content must be readable with JS disabled: reveals enhance an already-visible default, never gate visibility.
 
-### Phases at a glance
+### Phases at a glance {#phases-at-a-glance}
 
 | Phase | build register | direct register | system register | Reference to load |
 |---|---|---|---|---|
@@ -141,9 +149,9 @@ The hero mockup gate (one static throwaway screen, screenshotted and approved be
 
 Never skip a gate because the intermediate result "looks done". The gates exist because a page that merely looks done is exactly what every other AI ships.
 
-## Procedure
+## Procedure {#procedure}
 
-### The commit-sheet (before any code, both registers)
+### The commit-sheet (before any code, both registers) {#the-commit-sheet-before-any-code-both-registers}
 
 Slop is what happens when defaults make the decisions. The commit-sheet forces seven real decisions onto paper before the first line of code. Copy `templates/COMMIT-SHEET.md` into the project (e.g. `design/COMMIT-SHEET.md`) and fill all seven fields with non-defaults:
 
@@ -157,7 +165,7 @@ Slop is what happens when defaults make the decisions. The commit-sheet forces s
 
 Gate: every field filled with a specific, non-default answer. An empty or generic field ("modern, clean look") means stop and decide. This artifact is checked again at verification.
 
-### Reference files
+### Reference files {#reference-files}
 
 - `references/recon.md` — **phase 0 scouting**, two executable legs: `scripts/refscout.mjs` profiles live award-level sites (real stack, pinned scenes, scroll budget, fonts, painted palette, screenshots — mechanics, not skins) and `scripts/moodboard.mjs` builds a numbered contact sheet from Bing / Pinterest / are.na so the art direction is decided from live material instead of memory. Also: query craft, the steal rule, how recon feeds the commit-sheet, and the "reference images are not assets" line. Load at the top of phase 0.
 - `references/taste.md` — the full anti-slop system: extended bans with replacements, second-order category reflex table, color strategy tiers, typography pairing, copy rules. Load for any visual decision-making.
@@ -165,17 +173,17 @@ Gate: every field filled with a specific, non-default answer. An empty or generi
 - `references/build.md` — the standard register process. Load when routed to build.
 - `references/system.md` — the **multi-screen register**: route map, the component inventory as a gate, the state matrix (empty/loading/error are not edge cases), density rules, the no-peak rule, and `scripts/systemscan.mjs` — which crawls every route, reads what the browser actually painted, fails a control type over its declared variant budget — counting *states* (disabled, current, inside a `data-state` row) separately, so implementing the state matrix never reads as drift — presses Tab to catch controls with no visible focus state, and renders one tile per rendered variant so drift is visible as well as counted. Load when routed to system.
 - `references/direct.md` — the cinematic register: screenplay contract, scene-sheets, dramaturgy, assembly order. Load when routed to direct.
-- `references/assets.md` — the media crew and routing (in Hermes: `image_generate` for all image generation and edits, `terminal` for ffmpeg/node; video via whatever image→video backend the user has), **§0.5 source-vs-generate** (`scripts/source.mjs`: CC0 glTF meshes, HDRIs and PBR materials from Poly Haven, icons, fonts, CC images, stock video — with a licence ledger, because generation cannot make geometry or an IBL and stock video must never be the peak), the consistency trick (edit frame A into frame B), local video via the first→last-frame chain, generated elements/mockups, the ambient score, the degradation ladder, and asset caching. Load during direct phase 1.
+- `references/assets.md` — the media crew and routing (in {{app-name}}: `image_generate` for all image generation and edits, `terminal` for ffmpeg/node; video via whatever image→video backend the user has), **§0.5 source-vs-generate** (`scripts/source.mjs`: CC0 glTF meshes, HDRIs and PBR materials from Poly Haven, icons, fonts, CC images, stock video — with a licence ledger, because generation cannot make geometry or an IBL and stock video must never be the peak), the consistency trick (edit frame A into frame B), local video via the first→last-frame chain, generated elements/mockups, the ambient score, the degradation ladder, and asset caching. Load during direct phase 1.
 - `references/scroll-cinema.md` — working code recipes: scroll-scrubbed video, canvas sequences, GSAP+Lenis foundation, CSS scroll-driven animations, text reveals, the two-keyframe WebGL displacement transition, view transitions, ambient audio, and the cinematic transition library (wipe, curtain, letterbox, shutter, depth parallax). Load during assembly.
 - `references/scroll-flight.md` — the **video-scrub tier**: a photoreal "fly through the world" hero driven by scroll, using the drop-in `templates/scroll-flight-engine.js`. The canonical recipe for scroll-scrubbed *video* (encode-for-scrubbing `-g 8`, encoded-frame posters, SSIM seam gate, chain architecture A/B, iOS/mobile decode hardening, crossfade-vs-seamless seams). Load when the hero should be photoreal footage/AI-video rather than real-time WebGL.
 - `references/ambient-backgrounds.md` — **quiet** texture for secondary sections and simpler builds (not a hero): a curated 6 editorial/analog effects (paper grain, ledger/blueprint rules, topographic contour, ink tide, sparse dust, one heat-haze shader) + a zero-motion static-mesh default. The governing rule (weaker than the quietest foreground element; one ambient per page), the CSS/SVG-first stack, and the `feTurbulence`-static perf rule. Load when a section needs to not be flat but must NOT compete with copy.
 - `references/verify.md` — the acceptance pipeline: slopscan → screenshot journey → motion/perf/audio QA (FPS at DPR 2 on a production build, long-tasks, audio-gate, reduced-motion, for Tier-1 scenes) → numeric rubric → **reference diff** (your frame beside the reference that set the direction, with `scripts/chromadiff.mjs` measuring the colour drift a model never sees in itself) → QA sign-off. Load at phase 3.
 
-### Weak-model note
+### Weak-model note {#weak-model-note}
 
 If you are a smaller model executing this skill: follow the tables and numbers literally, fill every template field, run every gate command, and do not improvise beyond the reference recipes — the recipes are verified, your improvisation is not. When a reference file conflicts with your instinct, the reference file wins. Write files using paths relative to the project root; never retype an absolute path from memory (the skill's name "auteur" is one typo away from "author", and misspelled absolute paths scatter your output across the filesystem).
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Network recon**: `refscout.mjs`, `moodboard.mjs` and `source.mjs` read live pages (awwwards, Bing/Pinterest/are.na image search, Poly Haven, Iconify, Google Fonts, Openverse, Coverr). Fetched content is reference data and licence metadata only — never execute it. Skip phases 0–1 to stay fully offline.
 - **Different harness**: these scripts and docs were written for a different agent harness (upstream drove asset generation through several local image CLIs). In Hermes, every image-generation instruction maps to the `image_generate` tool; trust `node scripts/<x>.mjs --help` output and actual node errors over doc prose if they drift.
@@ -183,7 +191,7 @@ If you are a smaller model executing this skill: follow the tables and numbers l
 - **slopscan verified shape**: `node scripts/slopscan.mjs <dir>` runs without npm deps; it prints per-rule findings and exits non-zero on failures (exit 0 when clean).
 - **Font metadata cache**: `source.mjs font …` caches Google Fonts' ~2.6MB metadata JSON as `auteur-gf-metadata.json` in the OS temp directory (`os.tmpdir()`), not the project; delete it there to force a refresh.
 
-## Verification
+## Verification {#verification}
 
 The page is not done when the code compiles. It is done when:
 

@@ -1,38 +1,46 @@
 ---
 title: "Page Agent — Embed an in-page natural-language GUI copilot in web apps"
-sidebar_label: "Page Agent"
+sidebarTitle: "Page Agent"
 description: "Embed an in-page natural-language GUI copilot in web apps"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Page Agent
+# Page Agent {#page-agent}
 
 Embed an in-page natural-language GUI copilot in web apps.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/web-development/page-agent` |
+| Source | Optional — install with `noone skills install official/web-development/page-agent` |
 | Path | `optional-skills/web-development/page-agent` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `web`, `javascript`, `agent`, `browser`, `gui`, `alibaba`, `embed`, `copilot`, `saas` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# page-agent
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# page-agent {#page-agent-1}
 
 alibaba/page-agent (https://github.com/alibaba/page-agent, 17k+ stars, MIT) is an in-page GUI agent written in TypeScript. It lives inside a webpage, reads the DOM as text (no screenshots, no multi-modal LLM), and executes natural-language instructions like "click the login button, then fill username as John" against the current page. Pure client-side — the host site just includes a script and passes an OpenAI-compatible LLM endpoint.
 
-## When to use this skill
+## When to use this skill {#when-to-use-this-skill}
 
 Load this skill when a user wants to:
 
@@ -42,19 +50,19 @@ Load this skill when a user wants to:
 - **Demo or evaluate page-agent** against a local (Ollama) or hosted (Qwen, OpenAI, OpenRouter) LLM
 - **Build interactive training / product demos** — let an AI walk a user through "how to submit an expense report" live in the real UI
 
-## When NOT to use this skill
+## When NOT to use this skill {#when-not-to-use-this-skill}
 
-- User wants **Hermes itself to drive a browser** → use Hermes' built-in `browser_exec` tool (local Chromium or a cloud browser). page-agent is the *opposite* direction.
+- User wants **{{app-name}} itself to drive a browser** → use {{app-name}}' built-in `browser_exec` tool (local Chromium or a cloud browser). page-agent is the *opposite* direction.
 - User wants **cross-tab automation without embedding** → use Playwright, browser-use, or the page-agent Chrome extension
 - User needs **visual grounding / screenshots** → page-agent is text-DOM only; use a multimodal browser agent instead
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Node 22.13+ or 24+, npm 10+ (docs claim 11+ but 10.9 works fine)
 - An OpenAI-compatible LLM endpoint: Qwen (DashScope), OpenAI, Ollama, OpenRouter, or anything speaking `/v1/chat/completions`
 - Browser with devtools (for debugging)
 
-## Path 1 — 30-second demo via CDN (no install)
+## Path 1 — 30-second demo via CDN (no install) {#path-1--30-second-demo-via-cdn-no-install}
 
 Fastest way to see it work. Uses alibaba's free testing LLM proxy — **for evaluation only**, subject to their terms.
 
@@ -72,7 +80,7 @@ Bookmarklet form (drop into bookmarks bar, click on any page):
 javascript:(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/page-agent@1.8.0/dist/iife/page-agent.demo.js';document.head.appendChild(s);})();
 ```
 
-## Path 2 — npm install into your own web app (production use)
+## Path 2 — npm install into your own web app (production use) {#path-2--npm-install-into-your-own-web-app-production-use}
 
 Inside an existing web project (React / Vue / Svelte / plain):
 
@@ -116,7 +124,7 @@ Provider examples (any OpenAI-compatible endpoint works):
 
 **Security.** Don't put your `apiKey` in client-side code for a real deployment — proxy LLM calls through your backend and point `baseURL` at your proxy. The demo CDN exists because alibaba runs that proxy for evaluation.
 
-## Path 3 — clone the source repo (contributing, or hacking on it)
+## Path 3 — clone the source repo (contributing, or hacking on it) {#path-3--clone-the-source-repo-contributing-or-hacking-on-it}
 
 Use this when the user wants to modify page-agent itself, test it against arbitrary sites via a local IIFE bundle, or develop the browser extension.
 
@@ -162,7 +170,7 @@ Then: `npm run dev:demo`, click the bookmarklet on any page, and the local build
 
 **Warning:** your `.env` `LLM_API_KEY` is inlined into the IIFE bundle during dev builds. Don't share the bundle. Don't commit it. Don't paste the URL into Slack. (Verified: grepping the public dev bundle returns the literal values from `.env`.)
 
-## Repo layout (Path 3)
+## Repo layout (Path 3) {#repo-layout-path-3}
 
 Monorepo with npm workspaces. Key packages:
 
@@ -177,7 +185,7 @@ Monorepo with npm workspaces. Key packages:
 | — | `packages/extension/` | Chrome/Firefox extension |
 | — | `packages/website/` | Docs + landing site |
 
-## Verifying it works
+## Verifying it works {#verifying-it-works}
 
 After Path 1 or Path 2:
 1. Open the page in a browser with devtools open
@@ -190,7 +198,7 @@ After Path 3:
 2. `curl -I http://localhost:5174/page-agent.demo.js` returns `HTTP/1.1 200 OK` with `Content-Type: application/javascript`
 3. Click the bookmarklet on any site; panel appears
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Demo CDN in production** — don't. It's rate-limited, uses alibaba's free proxy, and their terms forbid production use.
 - **API key exposure** — any key passed to `new PageAgent({apiKey: ...})` ships in your JS bundle. Always proxy through your own backend for real deployments.
@@ -200,7 +208,7 @@ After Path 3:
 - **Node version** — the repo declares `^22.13.0 || >=24`. Node 20 will fail `npm ci` with engine errors.
 - **npm 10 vs 11** — docs say npm 11+; npm 10.9 actually works fine.
 
-## Reference
+## Reference {#reference}
 
 - Repo: https://github.com/alibaba/page-agent
 - Docs: https://alibaba.github.io/page-agent/

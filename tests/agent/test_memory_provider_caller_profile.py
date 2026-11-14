@@ -15,7 +15,7 @@ from agent.memory_manager import MemoryManager
 from agent.memory_provider import MemoryProvider, ctx_bound
 from agent.secret_scope import is_multiplex_active
 from agent.tool_executor import _resolve_sequential_dispatch, _ToolCallRef
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 _TOOL = "pw_remember"
 
@@ -70,10 +70,10 @@ class _Scope:
         self.home = home
 
     def __enter__(self):
-        self.token = set_hermes_home_override(str(self.home))
+        self.token = set_agent_home_override(str(self.home))
 
     def __exit__(self, *exc):
-        reset_hermes_home_override(self.token)
+        reset_agent_home_override(self.token)
 
 
 def _agent(home, gsk, provider_cls=_ProcessWideProvider, *, initialize=True):
@@ -146,7 +146,7 @@ def _assert_generic_refusal(result, caplog, *homes):
     """The model/chat sees a generic refusal pointing at a log every host writes (errors.log; gateway.log
     too on a gateway); the log keeps the check's code and the homes."""
     error = result.get("error", "")
-    assert "refused" in error and "hermes logs errors" in error, result
+    assert "refused" in error and "noone logs errors" in error, result
     assert _REFUSAL_CODE not in error and not any(str(home) in error for home in homes), result
     logged = "\n".join(r.getMessage() for r in caplog.records if r.name == "agent.memory_caller_scope")
     assert _REFUSAL_CODE in logged, logged
@@ -188,11 +188,11 @@ def test_multiplexed_call_without_a_caller_scope_is_refused_even_for_the_process
     monkeypatch.setenv("HERMES_HOME", str(alpha_home))
     alpha = _agent(alpha_home, "agent:alpha:api_server:dm:1")
     for dispatch in (_sequential, _concurrent):
-        token = set_hermes_home_override(None)
+        token = set_agent_home_override(None)
         try:
             result = json.loads(dispatch(alpha, "unscoped"))
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         _assert_generic_refusal(result, caplog, alpha_home)
     assert _ProcessWideProvider.stores == {}
 
@@ -239,8 +239,8 @@ class _InstanceScopedProvider(MemoryProvider):
         self._home = kwargs["hermes_home"]
 
     def _record(self, what):
-        from hermes_constants import get_hermes_home
-        type(self).events.append((what, self._home, str(get_hermes_home())))
+        from agent_constants import get_agent_home
+        type(self).events.append((what, self._home, str(get_agent_home())))
 
     def get_tool_schemas(self):
         return [{"name": _HOOK_TOOL, "description": "remember", "parameters": {"type": "object", "properties": {}}}]
@@ -360,7 +360,7 @@ def test_tool_calls_reuse_what_initialize_bound(homes, monkeypatch):
 def test_refused_checkpoint_compression_fails_closed(homes):
     alpha_home, beta_home = homes
     alpha = _manager(alpha_home)
-    with _Scope(beta_home), pytest.raises(RuntimeError, match="hermes logs errors"):
+    with _Scope(beta_home), pytest.raises(RuntimeError, match="noone logs errors"):
         alpha.on_pre_compress([{"role": "user", "content": "x"}], require_checkpoint=True)
 
 
@@ -369,7 +369,7 @@ def test_refusals_are_written_to_gateway_log():
     import logging
 
     from agent import memory_caller_scope
-    from hermes_logging import COMPONENT_PREFIXES, _ComponentFilter
+    from agent_logging import COMPONENT_PREFIXES, _ComponentFilter
     record = logging.LogRecord(memory_caller_scope.logger.name, logging.WARNING, __file__, 1, "refused", (), None)
     assert _ComponentFilter(COMPONENT_PREFIXES["gateway"]).filter(record)
 

@@ -17,10 +17,10 @@ const gatewayMocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   setApiRequestProfile: vi.fn(),
   getProfiles: vi.fn(async () => ({ profiles: [] })),
-  HermesGateway: class {
+  AgentGateway: class {
     connectionState = 'closed'
     close = vi.fn(() => {
       this.connectionState = 'closed'

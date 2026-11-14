@@ -22,12 +22,12 @@ from gateway.wake import session_owned_by_profile
 
 
 def _kbc():
-    from hermes_cli import kanban_db_connect
+    from agent_cli import kanban_db_connect
     return kanban_db_connect
 
 
 def _kbn():
-    from hermes_cli import kanban_db_notify
+    from agent_cli import kanban_db_notify
     return kanban_db_notify
 
 
@@ -38,7 +38,7 @@ def _pin_first():
     env pins ``HERMES_KANBAN_DB`` every board must resolve to the pinned file
     or the notifier reads per-slug DBs nobody writes (see
     ``kanban_db.pin_first_board_resolution``)."""
-    from hermes_cli import kanban_db
+    from agent_cli import kanban_db
     return kanban_db.pin_first_board_resolution()
 
 # "status" covers dashboard drag-drop and `_set_status_direct()`.
@@ -141,7 +141,7 @@ def _warn_anchorless_thread_sub_once(sub: dict, platform: str) -> None:
     _ANCHORLESS_WARNED.add(key)
     logger.warning(
         "kanban notifier: subscription for %s on %s thread %s has no parent_chat_id anchor and matched no "
-        "profile route; it will not be delivered. Re-subscribe with `hermes kanban notify-subscribe ... "
+        "profile route; it will not be delivered. Re-subscribe with `noone kanban notify-subscribe ... "
         "--parent-chat-id <channel id> [--guild-id <guild id>]`.",
         sub.get("task_id"), platform, sub.get("chat_id"),
     )
@@ -216,7 +216,7 @@ def _adapter_for_subscription(runner: Any, platform: Any, sub: dict, owner_profi
                     sub, platform,
                     "kanban notifier: subscription for %s on %s chat %s is stamped with profile %s but a "
                     "profile_routes entry pins that chat to profile %s; it will not be delivered. "
-                    "Re-subscribe with `hermes kanban notify-subscribe ... --notifier-profile %s`.",
+                    "Re-subscribe with `noone kanban notify-subscribe ... --notifier-profile %s`.",
                     profile, route.profile, route.profile)
                 return None
             from gateway.run import _multiplex_profile_homes
@@ -683,7 +683,7 @@ class _KanbanNotification:
         _source._transport_adapter_ref = weakref.ref(self.adapter)
         from gateway.run import _async_profile_runtime_scope
         if self.sub_profile and getattr(getattr(self.runner, "config", None), "multiplex_profiles", False):
-            from hermes_cli.profiles import profile_exists
+            from agent_cli.profiles import profile_exists
             if not profile_exists(self.sub_profile):
                 raise RuntimeError(f"Kanban wake profile {self.sub_profile!r} no longer exists")
         async with _async_profile_runtime_scope(self.runner._resolve_profile_home_for_source(_source)):

@@ -1,6 +1,7 @@
+import { appText } from '../../application-identity';
 import React from "react";
-import Layout from "@theme/Layout";
-import Link from "@docusaurus/Link";
+import Layout from "../DocLayout";
+import { DocLink as Link } from "../DocLink";
 import { type CatalogPlugin, CATEGORY_ORDER, categoryOf, formatDate, formatStars, repoUrl } from "./catalog";
 import MiniCard from "./MiniCard";
 import styles from "./pages.module.css";
@@ -37,7 +38,7 @@ export default function AuthorPage({ data }: { data: AuthorPageData }) {
   return (
     <Layout
       title={`Plugins by ${author.name} · Plugin Catalog`}
-      description={`${plugins.length} Hermes Agent plugin${plugins.length === 1 ? "" : "s"} by ${author.name} in the reviewed catalog.`}
+      description={appText(`${plugins.length} {app_name} plugin${plugins.length === 1 ? "" : "s"} by ${author.name} in the reviewed catalog.`)}
     >
       <div className={styles.page}>
         <nav className={styles.crumbs} aria-label="Breadcrumb">

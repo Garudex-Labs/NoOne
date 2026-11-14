@@ -23,47 +23,12 @@ MAX_ACTIVE_POLICY_EVENTS = 64
 # budget, so they are bounded on their own: sizing the reply budget exactly must leave room.
 MAX_ACTIVE_RETRY_RECEIPTS = 64
 MAX_THREAD_TRANSCRIPT_EVENTS = 24
-_TRANSCRIPT_SCHEMA_VERSION = 5  # 5: rebuild threads an old settle closed under a newer message
+_TRANSCRIPT_SCHEMA_VERSION = 1
 MAX_TRANSCRIPT_POLICY_EVENTS = MAX_THREAD_TRANSCRIPT_EVENTS * (MAX_ACTIVE_POLICY_EVENTS + 2)
 _TERMINAL_KINDS = frozenset({"turn.settled", "turn.failed", "turn.cancelled", "turn.deferred"})
 # What a Continue restores into a reopened discussion's active projection (the cap's activity is not one).
 _REOPENED_KINDS = (*sorted(_TERMINAL_KINDS), "message.member", "room.assignment", "room.routed", "room.continued")
 
-_SCHEMA_DDL = (
-    """CREATE TABLE IF NOT EXISTS hosted_room_policy_capacity (
-        singleton INTEGER PRIMARY KEY CHECK(singleton=1), max_active_events INTEGER NOT NULL)""",
-    """CREATE TABLE IF NOT EXISTS hosted_room_policy_cursors (
-        room_id TEXT PRIMARY KEY, through_seq INTEGER NOT NULL DEFAULT 0,
-        stopped_through_seq INTEGER NOT NULL DEFAULT 0, updated_at REAL NOT NULL DEFAULT 0)""",
-    """CREATE TABLE IF NOT EXISTS hosted_room_policy_threads (
-        room_id TEXT NOT NULL, thread_id TEXT NOT NULL, discussion_event_id TEXT NOT NULL,
-        latest_user_seq INTEGER NOT NULL, completed INTEGER NOT NULL DEFAULT 0,
-        PRIMARY KEY(room_id, thread_id))""",
-    """CREATE INDEX IF NOT EXISTS idx_hosted_room_policy_pending
-        ON hosted_room_policy_threads(room_id, completed, latest_user_seq, thread_id)""",
-    """CREATE TABLE IF NOT EXISTS hosted_room_policy_events (
-        room_id TEXT NOT NULL, thread_id TEXT NOT NULL, discussion_event_id TEXT NOT NULL,
-        seq INTEGER NOT NULL, event_json TEXT NOT NULL, PRIMARY KEY(room_id, seq))""",
-    """CREATE INDEX IF NOT EXISTS idx_hosted_room_policy_events_active
-        ON hosted_room_policy_events(room_id, discussion_event_id, seq)""",
-    """CREATE TABLE IF NOT EXISTS hosted_room_policy_watermarks (
-        room_id TEXT NOT NULL, thread_id TEXT NOT NULL, member_id TEXT NOT NULL,
-        seen_through_seq INTEGER NOT NULL, PRIMARY KEY(room_id, thread_id, member_id))""",
-    """CREATE TABLE IF NOT EXISTS hosted_room_policy_publications (
-        room_id TEXT NOT NULL, task_id TEXT NOT NULL, kind TEXT NOT NULL,
-        execution_generation INTEGER NOT NULL DEFAULT 0, seq INTEGER NOT NULL,
-        PRIMARY KEY(room_id, task_id, kind, execution_generation))""",
-    # Transcript stores only references into the already bounded room log, so
-    # prompt payloads are never duplicated outside room byte limits.
-    """CREATE TABLE IF NOT EXISTS hosted_room_policy_transcript (
-        room_id TEXT NOT NULL, thread_id TEXT NOT NULL, seq INTEGER NOT NULL,
-        kind TEXT NOT NULL, settled_seq INTEGER, PRIMARY KEY(room_id, thread_id, seq))""",
-    """CREATE TABLE IF NOT EXISTS hosted_room_policy_transcript_state (
-        room_id TEXT PRIMARY KEY, schema_version INTEGER NOT NULL)""",
-    """CREATE INDEX IF NOT EXISTS idx_hosted_room_user_thread
-       ON hosted_room_events(room_id, json_extract(payload_json, '$.thread_id'), seq)
-       WHERE kind='message.user'""",
-)
 
 _ROOM_EVENT_COLUMNS = hosted_rooms._EVENT_COLUMNS
 _DELETE_ACTIVE_EVENTS_SQL = ("DELETE FROM hosted_room_policy_events WHERE room_id=? AND discussion_event_id=?")
@@ -149,8 +114,8 @@ class HostedRoomPolicyCheckpoint:
         # LIMIT also reads one overflow sentinel; keep its parameter inside SQLite's integer range.
         capacity = min(2**63 - 2, max(MAX_ACTIVE_POLICY_EVENTS, max_active_events))
         with self._transaction() as conn:
-            for ddl in _SCHEMA_DDL:
-                conn.execute(ddl)
+            from agent_cli.database_migrations import initialize_database
+            initialize_database(conn, "hosted_room_policy")
             # Preserve replay capacity across restarts with a lower scheduling budget.
             conn.execute("""INSERT INTO hosted_room_policy_capacity(singleton, max_active_events)
                 VALUES (1, ?) ON CONFLICT(singleton) DO UPDATE SET
@@ -162,12 +127,12 @@ class HostedRoomPolicyCheckpoint:
 
     def _connect(self) -> sqlite3.Connection:
         # Late import: a gateway that outlives an on-disk upgrade has the OLD sqlite_util cached.
-        from hermes_cli.sqlite_util import open_db
+        from agent_cli.sqlite_util import open_db
 
         return open_db(self.db_path, db_label="shared-state.db (room policy checkpoint)", busy_timeout_ms=10_000)
 
     def _transaction(self):
-        from hermes_cli.sqlite_util import transaction
+        from agent_cli.sqlite_util import transaction
 
         return transaction(self._connect())
 
@@ -354,7 +319,7 @@ class HostedRoomPolicyCheckpoint:
                 "through_seq"])
         transcript_state = conn.execute(
             "SELECT schema_version FROM hosted_room_policy_transcript_state WHERE room_id=?", (room_id,)).fetchone()
-        if transcript_state is None or int(transcript_state["schema_version"]) < _TRANSCRIPT_SCHEMA_VERSION:
+        if transcript_state is None:
             # Rebuild derived history without rewriting admissions or the room log.
             for table in ("hosted_room_policy_events", "hosted_room_policy_threads",
                           "hosted_room_policy_watermarks", "hosted_room_policy_transcript"):

@@ -121,7 +121,7 @@ def make_startup_runner(tmp_path):
 
 def patch_startup_side_effects(monkeypatch, tmp_path):
     monkeypatch.setattr(gateway_run, "_hermes_home", tmp_path)
-    monkeypatch.setattr("hermes_cli.plugins.discover_plugins", lambda: None)
+    monkeypatch.setattr("agent_cli.plugins.discover_plugins", lambda: None)
     monkeypatch.setattr("agent.shell_hooks.register_from_config", lambda *args, **kwargs: None)
     monkeypatch.setattr("tools.process_registry.process_registry.recover_from_checkpoint", lambda: 0)
 
@@ -172,7 +172,7 @@ def _patch_aborted_startup(monkeypatch, runner_cls):
     monkeypatch.setattr("gateway.status.remove_pid_file", lambda: None)
     monkeypatch.setattr("gateway.status.release_gateway_runtime_lock", lambda: None)
     monkeypatch.setattr("tools.skills_sync.sync_skills", lambda quiet=True: None)
-    monkeypatch.setattr("hermes_logging.setup_logging", lambda hermes_home, mode: None)
+    monkeypatch.setattr("agent_logging.setup_logging", lambda hermes_home, mode: None)
     monkeypatch.setattr("gateway.run.GatewayRunner", runner_cls)
 
 
@@ -190,10 +190,10 @@ async def test_start_gateway_does_not_start_cron_after_aborted_startup(tmp_path,
     class AbortedStartupRunner:
         def __init__(self, config):
             from gateway.session import SessionStore
-            from hermes_state import SessionDB
-            from hermes_constants import get_hermes_home
-            self.session_store = SessionStore(get_hermes_home() / 'sessions', config)
-            self._session_db = SessionDB(get_hermes_home() / 'state.db')
+            from agent_state import SessionDB
+            from agent_constants import get_agent_home
+            self.session_store = SessionStore(get_agent_home() / 'sessions', config)
+            self._session_db = SessionDB(get_agent_home() / 'state.db')
             self.session_store._db = self._session_db
             self._draining = False
             self.config = config
@@ -242,10 +242,10 @@ async def test_start_gateway_preserves_service_restart_fallback_after_aborted_st
     class AbortedStartupRunner:
         def __init__(self, config):
             from gateway.session import SessionStore
-            from hermes_state import SessionDB
-            from hermes_constants import get_hermes_home
-            self.session_store = SessionStore(get_hermes_home() / 'sessions', config)
-            self._session_db = SessionDB(get_hermes_home() / 'state.db')
+            from agent_state import SessionDB
+            from agent_constants import get_agent_home
+            self.session_store = SessionStore(get_agent_home() / 'sessions', config)
+            self._session_db = SessionDB(get_agent_home() / 'state.db')
             self.session_store._db = self._session_db
             self._draining = False
             self.config = config
@@ -302,10 +302,10 @@ async def test_start_gateway_classifies_startup_signal_exit(
     class AbortedStartupRunner:
         def __init__(self, config):
             from gateway.session import SessionStore
-            from hermes_state import SessionDB
-            from hermes_constants import get_hermes_home
-            self.session_store = SessionStore(get_hermes_home() / 'sessions', config)
-            self._session_db = SessionDB(get_hermes_home() / 'state.db')
+            from agent_state import SessionDB
+            from agent_constants import get_agent_home
+            self.session_store = SessionStore(get_agent_home() / 'sessions', config)
+            self._session_db = SessionDB(get_agent_home() / 'state.db')
             self.session_store._db = self._session_db
             self._draining = False
             self.config = config
@@ -374,7 +374,7 @@ async def test_failure_exit_still_stops_cron_housekeeping_and_mcp(monkeypatch):
 
     monkeypatch.setattr(gateway_run, "_shutdown_mcp_servers_nonblocking", fake_mcp_shutdown)
     monkeypatch.setattr(gateway_run, "_stop_cron_provider", lambda provider: stopped.append("provider"))
-    monkeypatch.setattr("hermes_cli.nous_auth_keepalive.stop_nous_auth_keepalive", lambda: None)
+    monkeypatch.setattr("agent_cli.nous_auth_keepalive.stop_nous_auth_keepalive", lambda: None)
     runner = MagicMock(should_exit_with_failure=True, exit_reason="boom", exit_code=None)
 
     from gateway.run_bootstrap import _start_gateway_shutdown_tail

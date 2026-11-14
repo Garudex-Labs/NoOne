@@ -1,16 +1,16 @@
 import { useStore } from '@nanostores/react'
+import { type IconComponent, Monitor, Package, Settings2, Wrench } from '@noone/ui/icons'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
 
+import { getEnvVars, getHermesConfigSchema } from '@/agent-client'
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { $pluginRecords } from '@/contrib/plugins-store'
-import { getEnvVars, getHermesConfigSchema } from '@/hermes'
 import { useI18n } from '@/i18n'
-import { type IconComponent, Monitor, Package, Settings2, Wrench } from '@/lib/icons'
 import { $agentPlugins, isDesktopRelevantPlugin, loadAgentPlugins } from '@/store/agent-plugins'
 import { $gatewayState } from '@/store/session'
 
-import { useHermesConfigRecord } from '../hooks/use-config-record'
+import { useAgentConfigRecord } from '../hooks/use-config-record'
 import { useOnProfileSwitch } from '../hooks/use-on-profile-switch'
 
 import { SECTIONS } from './constants'
@@ -39,7 +39,7 @@ export interface PluginSearchEntry {
  */
 export function useSettingsSearchCatalog(enabled: boolean) {
   const { t } = useI18n()
-  const configQuery = useHermesConfigRecord()
+  const configQuery = useAgentConfigRecord()
 
   const schemaQuery = useQuery({
     queryKey: ['hermes-config-schema'],

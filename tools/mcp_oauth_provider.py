@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import urlsplit
 
 if TYPE_CHECKING:
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
 logger = logging.getLogger(__name__)
 
 # Authorization servers that advertise ``authorization_response_iss_parameter_supported`` and then
@@ -29,7 +29,7 @@ _DISCOVERY_CONTEXT_LEAD = "Could not read authorization-server metadata"
 def _default_auth_request_user_agent() -> str:
     """``Hermes-Agent/<version>`` for SDK-built OAuth requests that would otherwise carry no User-Agent at
     all; versioned so an operator debugging a WAF block can tell which client they are looking at."""
-    from hermes_cli.version_info import get_version_info
+    from agent_cli.version_info import get_version_info
     return f"Hermes-Agent/{get_version_info().base_version}"
 
 
@@ -211,15 +211,15 @@ class HermesProviderMixin:
         return stamp_default_user_agent(request)
 
     def _coerce_client_secret_post(self) -> None:
-        """Same rule as ``HermesTokenStorage._coerce_secret_auth_method``, applied to the
+        """Same rule as ``AgentTokenStorage._coerce_secret_auth_method``, applied to the
         in-memory client info BEFORE the SDK builds a token-endpoint request from it."""
         info = self.context.client_info
         if not info:
             return
         from mcp.shared.auth import OAuthClientInformationFull
-        from tools.mcp_oauth import HermesTokenStorage
+        from tools.mcp_oauth import AgentTokenStorage
         data = info.model_dump(mode="json", exclude_none=True)
-        if HermesTokenStorage._coerce_secret_auth_method(data):
+        if AgentTokenStorage._coerce_secret_auth_method(data):
             self.context.client_info = OAuthClientInformationFull.model_validate(data)
 
     async def _exchange_token_authorization_code(self, *args: Any, **kwargs: Any):
@@ -337,7 +337,7 @@ class HermesProviderMixin:
         """True when the installed token is not known to be past due.
 
         Storage clamps a past-due token to ``expires_in == 0`` on read (see
-        HermesTokenStorage.get_tokens); the SDK's is_token_valid() compares
+        AgentTokenStorage.get_tokens); the SDK's is_token_valid() compares
         ``time.time() <= expiry`` and still reports True for that boundary,
         which would make us adopt a token the server rejects immediately.
         ``expires_in`` is optional in RFC 6749: None means no expiry was
@@ -411,8 +411,8 @@ class HermesProviderMixin:
         then enforce refresh-token issuer binding."""
         await super()._initialize()
         storage = self.context.storage
-        from tools.mcp_oauth import HermesTokenStorage
-        if isinstance(storage, HermesTokenStorage) and self.context.oauth_metadata is None:
+        from tools.mcp_oauth import AgentTokenStorage
+        if isinstance(storage, AgentTokenStorage) and self.context.oauth_metadata is None:
             meta = storage.load_oauth_metadata()
             if meta is not None:
                 self.context.oauth_metadata = meta
@@ -576,10 +576,10 @@ def google_offline_access_params(context: Any) -> dict[str, str]:
 def bind_issuer_from_context(context: Any) -> None:
     """Record the discovered issuer so the next ``storage.set_tokens`` (exchange or refresh) carries
     it. No-op when metadata is not discovered yet or storage is not Hermes'."""
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
     storage = getattr(context, "storage", None)
     issuer = _metadata_issuer(context)
-    if isinstance(storage, HermesTokenStorage) and issuer:
+    if isinstance(storage, AgentTokenStorage) and issuer:
         storage.bind_issuer(issuer)
 
 
@@ -592,10 +592,10 @@ def enforce_refresh_token_issuer(context: Any) -> None:
     access token stays usable; full re-authorization happens at expiry. Token files predating the field
     adopt the current issuer once rather than forcing a re-login. Runs after ``_initialize`` restored
     tokens + metadata, before the SDK's ``can_refresh_token()`` decision."""
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
     storage = getattr(context, "storage", None)
     tokens = getattr(context, "current_tokens", None)
-    if not isinstance(storage, HermesTokenStorage) or tokens is None or not getattr(tokens, "refresh_token", None):
+    if not isinstance(storage, AgentTokenStorage) or tokens is None or not getattr(tokens, "refresh_token", None):
         return
     current = _metadata_issuer(context)
     if current is None:  # not discovered yet; the SDK's 401-branch discovery + _store_tokens stamp it later
@@ -611,17 +611,17 @@ def enforce_refresh_token_issuer(context: Any) -> None:
         tokens.refresh_token = None
 
 
-def prepare_oauth_config(server_name: str, server_url: str, oauth_config: dict | None) -> tuple[dict, HermesTokenStorage]:
+def prepare_oauth_config(server_name: str, server_url: str, oauth_config: dict | None) -> tuple[dict, AgentTokenStorage]:
     """Copy the ``oauth:`` block, apply provider defaults, open its token storage. The copy
     matters: later steps record ``_resolved_port`` / ``_cimd_url`` in the dict, which must
     never leak back into the caller's config."""
     from tools import mcp_oauth as mo
     cfg = dict(oauth_config or {})
     mo.apply_oauth_provider_defaults(cfg, server_name=server_name, server_url=server_url)
-    return cfg, mo.HermesTokenStorage(server_name)
+    return cfg, mo.AgentTokenStorage(server_name)
 
 
-def build_provider_kwargs(cfg: dict, storage: HermesTokenStorage, *, ssh_proxy_hint: bool) -> dict[str, Any]:
+def build_provider_kwargs(cfg: dict, storage: AgentTokenStorage, *, ssh_proxy_hint: bool) -> dict[str, Any]:
     """Resolve the callback port and return the shared provider constructor kwargs. Order
     matters: metadata needs the resolved port, pre-registration needs the metadata.
     ``ssh_proxy_hint`` lets the redirect handler tailor its remote-session hint to a configured

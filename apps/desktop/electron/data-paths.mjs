@@ -4,7 +4,7 @@
 // extensionless TypeScript directly). No Electron imports here; only node:path.
 //
 // data-paths.ts re-exports these names and adds the TypeScript-facing
-// `HermesHomeOptions` interface. Keep the two in lockstep: every behavior in
+// `AgentHomeOptions` interface. Keep the two in lockstep: every behavior in
 // this file is exercised by data-paths.test.ts through the re-export.
 
 import path from 'node:path'

@@ -399,7 +399,7 @@ class GoogleChatAdapter(BasePlatformAdapter):
     _LEGACY_USER_IDENTITY = "__legacy__"
 
     def __init__(self, config: PlatformConfig):
-        # Bundled platform plugins are looked up by enum value (matches Teams, IRC).
+        # Bundled platform plugins are looked up by enum value (matches Teams).
         super().__init__(config, Platform("google_chat"))
         # Load here (not only in connect()) so direct method calls see real
         # ``MediaFileUpload`` / ``HttpError`` classes. Idempotent.
@@ -428,7 +428,7 @@ class GoogleChatAdapter(BasePlatformAdapter):
         # Last inbound thread per space: DMs get a NEW thread per top-level message but users
         # see one conversation, so thread_id leaves the source (stable session key) and is cached here.
         self._last_inbound_thread: dict[str, str] = {}
-        from hermes_constants import get_hermes_home as _get_hermes_home
+        from agent_constants import get_agent_home as _get_hermes_home
         self._thread_count_store = _ThreadCountStore(_get_hermes_home() / "google_chat_thread_counts.json")
         # In-flight typing-card creates per chat_id: reserved BEFORE the API call so
         # concurrent _keep_typing calls wait instead of duplicating cards.
@@ -543,7 +543,7 @@ class GoogleChatAdapter(BasePlatformAdapter):
     # -- bot identity --------------------------------------------------------
     def _bot_id_cache_path(self) -> _Path:
         """Resolved at call time so multiplexed profiles don't share one cache file."""
-        from hermes_constants import get_hermes_home as _get_hermes_home
+        from agent_constants import get_agent_home as _get_hermes_home
         return _get_hermes_home() / "google_chat_bot_id.json"
 
     def _load_cached_bot_id(self) -> Optional[str]:
@@ -1667,10 +1667,10 @@ Full guide: website/docs/user-guide/messaging/google_chat.md
 
 
 def interactive_setup() -> None:
-    """``hermes setup`` wizard: print GCP instructions, prompt for env vars, persist to ``~/.hermes/.env``."""
-    from hermes_cli.cli_output import print_info, print_success, print_warning, prompt, prompt_yes_no
-    from hermes_cli.config import get_env_value, save_env_value
-    from hermes_cli.setup_platforms import declines_reconfigure
+    """``noone setup`` wizard: print GCP instructions, prompt for env vars, persist to ``~/.hermes/.env``."""
+    from agent_cli.cli_output import print_info, print_success, print_warning, prompt, prompt_yes_no
+    from agent_cli.config import get_env_value, save_env_value
+    from agent_cli.setup_platforms import declines_reconfigure
     if declines_reconfigure("Google Chat", "Reconfigure Google Chat?", "GOOGLE_CHAT_SUBSCRIPTION_NAME"):
         return
     for line in _SETUP_WALKTHROUGH.splitlines():
@@ -1705,7 +1705,7 @@ def interactive_setup() -> None:
         save_env_value("GOOGLE_CHAT_HOME_CHANNEL", home.strip())
     print()
     print_success("Google Chat configuration saved to ~/.hermes/.env")
-    print_info("Restart the gateway: hermes gateway restart")
+    print_info("Restart the gateway: noone gateway restart")
 
 
 # Strict resource-name patterns: anything outside Chat's documented character set
@@ -1734,7 +1734,7 @@ async def _standalone_send(
     media_files: Optional[list[str]] = None, force_document: bool = False,
 ) -> dict[str, Any]:
     """POST one Chat message via REST without the SDK (``send_message_tool`` when the
-    gateway runner is not in-process, e.g. ``hermes cron``). Needs SA credentials and a
+    gateway runner is not in-process, e.g. ``noone cron``). Needs SA credentials and a
     validated space name; ``media_files`` / ``force_document`` are signature parity only."""
     if not chat_id:
         return _standalone_error("chat_id (space resource) is required")
@@ -1794,7 +1794,7 @@ def register(ctx) -> None:
     ctx.register_platform(
         name="google_chat",
         dashboard_description="Connect Hermes to Google Chat via Cloud Pub/Sub.",
-        docs_url="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/google_chat",
+        docs_url="https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/google_chat.md",
         label="Google Chat",
         adapter_factory=lambda cfg: GoogleChatAdapter(cfg),
         check_fn=_check_for_registry,
@@ -1802,7 +1802,7 @@ def register(ctx) -> None:
         validate_config=_validate_config,
         is_connected=_is_connected,
         required_env=["GOOGLE_CHAT_SERVICE_ACCOUNT_JSON"],
-        install_hint="Run `hermes setup` to install Google Chat support.",
+        install_hint="Run `noone setup` to install Google Chat support.",
         setup_fn=interactive_setup,
         env_enablement_fn=_env_enablement,
         cron_deliver_env_var="GOOGLE_CHAT_HOME_CHANNEL",

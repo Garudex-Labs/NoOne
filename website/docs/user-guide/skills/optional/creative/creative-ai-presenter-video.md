@@ -1,35 +1,43 @@
 ---
 title: "Ai Presenter Video — Make a verified AI presenter video from script + image"
-sidebar_label: "Ai Presenter Video"
+sidebarTitle: "Ai Presenter Video"
 description: "Make a verified AI presenter video from script + image"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Ai Presenter Video
+# Ai Presenter Video {#ai-presenter-video}
 
 Make a verified AI presenter video from script + image.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/ai-presenter-video` |
+| Source | Optional — install with `noone skills install official/creative/ai-presenter-video` |
 | Path | `optional-skills/creative/ai-presenter-video` |
 | Version | `1.0.0` |
-| Author | cclank (https://github.com/cclank/lanshu-create-ai-presenter-video), ported by Hermes Agent |
+| Author | cclank (https://github.com/cclank/lanshu-create-ai-presenter-video), ported by {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `video`, `presenter`, `avatar`, `lipsync`, `tts`, `captions`, `creative` |
 | Related skills | [`hyperframes`](../../optional/creative/creative-hyperframes.md), [`kanban-video-orchestrator`](../../optional/creative/creative-kanban-video-orchestrator.md), [`comfyui`](../../optional/creative/creative-comfyui.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# AI Presenter Video
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# AI Presenter Video {#ai-presenter-video-1}
 
 Turn a topic (or finished script) plus ONE authorized adult presenter image
 into a complete, publish-ready presenter-led video: locked narration, avatar
@@ -44,13 +52,13 @@ is actually available in the session (FAL video/image models via
 the whisper/STT tooling, ffmpeg for everything deterministic).
 
 > Ported from cclank/lanshu-create-ai-presenter-video (MIT). Upstream body
-> kept substantively verbatim in `references/`; Hermes adaptations live in
+> kept substantively verbatim in `references/`; {{app-name}} adaptations live in
 > this hub file. Scripts are deterministic (no network, no credentials).
 
-## Hermes adaptations (read first)
+## {{app-name}} adaptations (read first) {#hermes-adaptations-read-first}
 
 - **Skill dir resolution** — upstream hardcoded its own agent's skills path.
-  In Hermes the loader expands `${HERMES_SKILL_DIR}` to this skill's installed
+  In {{app-name}} the loader expands `${HERMES_SKILL_DIR}` to this skill's installed
   directory, so every command below uses that token directly:
 
   ```bash
@@ -85,7 +93,7 @@ the whisper/STT tooling, ffmpeg for everything deterministic).
   `errors` (block everything) from `remote_blockers` (block only remote
   generation) — local script/audio work may proceed while remote is blocked.
 
-## Workflow
+## Workflow {#workflow}
 
 1. **Start or resume a job.** New job:
 
@@ -156,7 +164,7 @@ the whisper/STT tooling, ffmpeg for everything deterministic).
    both, writes a delivery report JSON, and emits a nine-frame contact sheet.
    Inspect the contact sheet with `vision_analyze` before claiming completion.
 
-## Operating rules (non-negotiable)
+## Operating rules (non-negotiable) {#operating-rules-non-negotiable}
 
 - Confirm image rights, adult status, remote-upload approval, and
   voice-cloning authorization before the relevant remote action.
@@ -172,13 +180,13 @@ the whisper/STT tooling, ffmpeg for everything deterministic).
 - Do not claim completion until the final files fully decode and the contact
   sheet or full playback has been reviewed.
 
-## Defaults for minimal input
+## Defaults for minimal input {#defaults-for-minimal-input}
 
 9:16, 1080×1920, 30fps; topic-derived videos target 45–75s; stock voice when
 no authorized sample; presenter-led layout with hook → 2–4 beats → close;
 no music/CTA unless requested; language inferred from the request.
 
-## Reference routing
+## Reference routing {#reference-routing}
 
 - `references/generation.md` — intake, content, voice, capability selection,
   presenter prompts, paid generation, provider changes.
@@ -187,7 +195,7 @@ no music/CTA unless requested; language inferred from the request.
 - `references/qa-recovery.md` — technical acceptance, visual acceptance, and
   recovery for lip-sync/identity/hands/exposure/freeze/caption/audio faults.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - `preflight.py` requires ffprobe; on a bare box install ffmpeg first.
 - The consent booleans set by init flags land under `input.*`; editing them
@@ -201,7 +209,7 @@ no music/CTA unless requested; language inferred from the request.
   presenter segments accordingly and reuse the pilot's seed/params for
   consistency where the endpoint supports it.
 
-## Verification
+## Verification {#verification}
 
 Validated hands-on (Aug 2026): `init_job.py` → `job.json` with correct state
 machine; `preflight.py` correctly blocked on unreviewed inputs, flipped to

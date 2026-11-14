@@ -3,27 +3,27 @@ title: "Observer Hooks"
 description: "Read-only telemetry contract for plugins: event families, correlation IDs, payload safety"
 ---
 
-# Hermes Observer Hooks
+# {{app-name}} Observer Hooks {#hermes-observer-hooks}
 
-Hermes observer hooks are the read-only telemetry contract for plugins that
+{{app-name}} observer hooks are the read-only telemetry contract for plugins that
 need to reconstruct agent execution without changing runtime behavior. This
 contract supports trace, metrics, audit, replay, and export integrations such
 as Langfuse, OpenTelemetry-style collectors, and NeMo Relay.
 
 Observer hooks are intentionally backend-neutral. They expose stable lifecycle
 events, correlation IDs, sanitized payloads, timing, status, and error fields.
-They do not replace Hermes' planner, model providers, memory, tool registry,
+They do not replace {{app-name}}' planner, model providers, memory, tool registry,
 approval UX, CLI, gateway behavior, or execution semantics.
 
 Behavior-changing request or execution wrappers are outside this observer
 contract. Observer hooks should report what happened; they should not replace
 provider requests, tool arguments, or execution callbacks.
 
-Hermes also has a first-party NeMo Relay shared-metrics path. It uses these
+{{app-name}} also has a first-party NeMo Relay shared-metrics path. It uses these
 lifecycle boundaries directly and does not require enabling an observability
 plugin. See [Relay shared metrics](relay-shared-metrics.md).
 
-## Contract
+## Contract {#contract}
 
 Plugins register observer callbacks from `register(ctx)`:
 
@@ -51,7 +51,7 @@ The plugin manager injects this field into every hook payload:
 telemetry_schema_version = "hermes.observer.v1"
 ```
 
-Hook callbacks are fail-open. Hermes catches callback exceptions, logs a
+Hook callbacks are fail-open. {{app-name}} catches callback exceptions, logs a
 warning, and keeps the agent loop running.
 
 Most observer hook return values are ignored. The exceptions are older
@@ -67,7 +67,7 @@ behavior-affecting hooks:
 Telemetry plugins should treat these behavior-affecting returns as optional
 compatibility features, not as observability requirements.
 
-## Correlation IDs
+## Correlation IDs {#correlation-ids}
 
 Observer payloads use stable IDs so plugins can join events without relying on
 callback order alone.
@@ -87,9 +87,9 @@ callback order alone.
 Consumers should prefer explicit fields over parsing compound IDs. In
 particular, `api_request_id` is an opaque correlation value.
 
-## Event Families
+## Event Families {#event-families}
 
-### Session Lifecycle
+### Session Lifecycle {#session-lifecycle}
 
 Session hooks describe conversation boundaries and resets:
 
@@ -108,7 +108,7 @@ Common fields include `session_id`, `completed`, `interrupted`, `reason`,
 boundary for a chat identity. Use `on_session_finalize` and `on_session_reset`
 for lifecycle cleanup that must happen once per session identity.
 
-### Turn-Scoped LLM Hooks
+### Turn-Scoped LLM Hooks {#turn-scoped-llm-hooks}
 
 These hooks frame the user turn, not individual provider API attempts:
 
@@ -128,7 +128,7 @@ Common `post_llm_call` fields include `session_id`, `turn_id`,
 Use request-scoped API hooks for LLM span telemetry. Use `pre_llm_call` and
 `post_llm_call` for turn-level context, compatibility, and final turn summary.
 
-### Request-Scoped API Hooks
+### Request-Scoped API Hooks {#request-scoped-api-hooks}
 
 API hooks describe provider attempts inside the agent loop:
 
@@ -168,7 +168,7 @@ API hooks describe provider attempts inside the agent loop:
 The sanitized `request`, `response`, and `error` fields are the canonical
 observer inputs for new consumers.
 
-### Tool Lifecycle
+### Tool Lifecycle {#tool-lifecycle}
 
 Tool hooks describe individual tool calls:
 
@@ -196,18 +196,18 @@ Tool hooks describe individual tool calls:
 `post_tool_call` is emitted for blocked and cancelled paths so telemetry
 plugins can close spans cleanly.
 
-### Human Input Lifecycle
+### Human Input Lifecycle {#human-input-lifecycle}
 
 `on_human_input_request` / `on_human_input_resolved` fire around every point
 where the agent blocks for a person: sudo password prompts (`kind="sudo"`),
 `clarify` questions (`kind="clarify"`) and approval prompts
-(`kind="approval"`) on CLI, TUI/Desktop, ACP and gateway platforms. Fields:
+(`kind="approval"`) on CLI, Desktop, ACP and gateway platforms. Fields:
 `kind`, `request_id` (shared by the pair), `session_id`, `session_key`,
 `platform`, and a force-redacted `prompt`; the resolved hook adds `outcome`.
 The typed password or answer is never included. Smart (aux-LLM) approvals do
 not fire it. Source: `tools/human_input_hooks.py`.
 
-### Approval Lifecycle
+### Approval Lifecycle {#approval-lifecycle}
 
 Approval hooks describe dangerous-command approval prompts:
 
@@ -227,7 +227,7 @@ Approval hooks are observer-only. Plugins cannot pre-answer or veto approvals
 from these hooks. To prevent a tool from reaching approval, use
 `pre_tool_call` blocking.
 
-### Subagent Lifecycle
+### Subagent Lifecycle {#subagent-lifecycle}
 
 Subagent hooks describe delegated child-agent work:
 
@@ -250,7 +250,7 @@ are intentionally excluded.
 Observers can use these hooks to model nested trajectories while keeping child
 agent execution linked to the parent turn that spawned it.
 
-## Payload Safety
+## Payload Safety {#payload-safety}
 
 Observer payloads are designed for telemetry consumers, not raw object access.
 New consumers should use the sanitized API payloads:
@@ -268,10 +268,10 @@ Legacy compatibility fields such as `request_messages`, `conversation_history`,
 and `assistant_message` may still be present for existing plugins. New
 observability consumers should prefer the sanitized payloads.
 
-## Performance
+## Performance {#performance}
 
 The default uninstrumented path should stay cheap. Expensive request/response
-payload construction is gated behind `has_hook(...)`, so Hermes only builds
+payload construction is gated behind `has_hook(...)`, so {{app-name}} only builds
 sanitized API telemetry payloads when at least one plugin registered the
 relevant hook.
 
@@ -282,7 +282,7 @@ Plugin authors should preserve this property:
 - Keep hook callbacks fast and fail-open.
 - Offload network export or batch writes when practical.
 
-## Writing An Observer Plugin
+## Writing An Observer Plugin {#writing-an-observer-plugin}
 
 Minimal observer plugin:
 
@@ -333,12 +333,12 @@ Use `session_id`, `turn_id`, `api_request_id`, and `tool_call_id` for span
 correlation. Use subagent and approval hooks when the export format supports
 nested agent work or security lifecycle events.
 
-## Existing Consumers
+## Existing Consumers {#existing-consumers}
 
 The official [Langfuse catalog plugin](https://github.com/NousResearch/hermes-official-plugins/tree/main/langfuse) demonstrates direct hook-based
 observability for turns, provider requests, and tool calls.
 
-The native NeMo Relay SDK integration maps Hermes session, turn, LLM, and tool
+The native NeMo Relay SDK integration maps {{app-name}} session, turn, LLM, and tool
 lifecycles to Relay. Relay's discovered user and system configuration, or an
 explicit file selected with `HERMES_NEMO_RELAY_PLUGINS_TOML`, can add
 [ATOF, ATIF, or OTEL](https://docs.nvidia.com/nemo/relay/configure-plugins/observability/about)

@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import {
   Children,
   type CSSProperties,
@@ -10,7 +11,6 @@ import {
 } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { RowButton } from '@/components/ui/row-button'
 import { Switch } from '@/components/ui/switch'
@@ -298,12 +298,12 @@ export function DetailPane({
               size="icon"
               variant="ghost"
             >
-              <Codicon name={collapsed ? 'chevron-up' : 'chevron-down'} size="0.8125rem" />
+              <AppIcon name={collapsed ? 'chevron-up' : 'chevron-down'} size="0.8125rem" />
             </Button>
           </Tip>
           {onClose && (
             <Button aria-label={t.common.close} className={ICON_BUTTON} onClick={onClose} size="icon" variant="ghost">
-              <Codicon name="close" size="0.8125rem" />
+              <AppIcon name="close" size="0.8125rem" />
             </Button>
           )}
         </div>
@@ -363,7 +363,7 @@ export function ListStripMenu({
           size="icon"
           variant="ghost"
         >
-          <Codicon name="kebab-vertical" size="0.8125rem" />
+          <AppIcon name="kebab-vertical" size="0.8125rem" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44" sideOffset={6}>

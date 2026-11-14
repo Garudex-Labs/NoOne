@@ -1,14 +1,13 @@
 ---
-sidebar_position: 4
 title: "Tutorial: Team Telegram Assistant"
 description: "Step-by-step guide to setting up a Telegram bot that your whole team can use for code help, research, system admin, and more"
 ---
 
-# Set Up a Team Telegram Assistant
+# Set Up a Team Telegram Assistant {#set-up-a-team-telegram-assistant}
 
-This tutorial walks you through setting up a Telegram bot powered by Hermes Agent that multiple team members can use. By the end, your team will have a shared AI assistant they can message for help with code, research, system administration, and anything else — secured with per-user authorization.
+This tutorial walks you through setting up a Telegram bot powered by {{app-name}} that multiple team members can use. By the end, your team will have a shared AI assistant they can message for help with code, research, system administration, and anything else — secured with per-user authorization.
 
-## What We're Building
+## What We're Building {#what-were-building}
 
 A Telegram bot that:
 
@@ -20,21 +19,29 @@ A Telegram bot that:
 
 ---
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 Before starting, make sure you have:
 
-- **Hermes Agent installed** on a server or VPS (not your laptop — the bot needs to stay running). Follow the [installation guide](../getting-started/installation.md) if you haven't yet.
+- **{{app-name}} installed** on a server or VPS (not your laptop — the bot needs to stay running). Follow the [installation guide](../getting-started/installation.md) if you haven't yet.
 - **A Telegram account** for yourself (the bot owner)
 - **An LLM provider configured** — at minimum, an API key for OpenAI, Anthropic, or another supported provider in `~/.hermes/.env`
 
-:::tip
-A $5/month VPS is plenty for running the gateway. Hermes itself is lightweight — the LLM API calls are what cost money, and those happen remotely.
-:::
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+A $5/month VPS is plenty for running the gateway. {{app-name}} itself is lightweight — the LLM API calls are what cost money, and those happen remotely.
+
+</Tip>
 
 ---
 
-## Step 1: Create a Telegram Bot
+## Step 1: Create a Telegram Bot {#step-1-create-a-telegram-bot}
 
 Every Telegram bot starts with **@BotFather** — Telegram's official bot for creating bots.
 
@@ -57,7 +64,7 @@ Every Telegram bot starts with **@BotFather** — Telegram's official bot for cr
    ```
    Choose your bot, then enter something like:
    ```
-   Team AI assistant powered by Hermes Agent. DM me for help with code, research, debugging, and more.
+   Team AI assistant powered by NoOne. DM me for help with code, research, debugging, and more.
    ```
 
 5. **Set bot commands** (optional — gives users a command menu):
@@ -73,25 +80,33 @@ Every Telegram bot starts with **@BotFather** — Telegram's official bot for cr
    stop - Stop the current task
    ```
 
-:::warning
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
 Keep your bot token secret. Anyone with the token can control the bot. If it leaks, use `/revoke` in BotFather to generate a new one.
-:::
+
+</Warning>
 
 ---
 
-## Step 2: Configure the Gateway
+## Step 2: Configure the Gateway {#step-2-configure-the-gateway}
 
 You have two options: the interactive setup wizard (recommended) or manual configuration.
 
-### Option A: Interactive Setup (Recommended)
+### Option A: Interactive Setup (Recommended) {#option-a-interactive-setup-recommended}
 
 ```bash
-hermes gateway setup
+noone gateway setup
 ```
 
 This walks you through everything with arrow-key selection. Pick **Telegram**, paste your bot token, and enter your user ID when prompted.
 
-### Option B: Manual Configuration
+### Option B: Manual Configuration {#option-b-manual-configuration}
 
 Add these lines to `~/.hermes/.env`:
 
@@ -103,7 +118,7 @@ TELEGRAM_BOT_TOKEN=7123456789:AAH1bGciOiJSUzI1NiIsInR5cCI6Ikp...
 TELEGRAM_ALLOWED_USERS=123456789
 ```
 
-### Finding Your User ID
+### Finding Your User ID {#finding-your-user-id}
 
 Your Telegram user ID is a numeric value (not your username). To find it:
 
@@ -111,20 +126,28 @@ Your Telegram user ID is a numeric value (not your username). To find it:
 2. It instantly replies with your numeric user ID
 3. Copy that number into `TELEGRAM_ALLOWED_USERS`
 
-:::info
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
 Telegram user IDs are permanent numbers like `123456789`. They're different from your `@username`, which can change. Always use the numeric ID for allowlists.
-:::
+
+</Info>
 
 ---
 
-## Step 3: Start the Gateway
+## Step 3: Start the Gateway {#step-3-start-the-gateway}
 
-### Quick Test
+### Quick Test {#quick-test}
 
 Run the gateway in the foreground first to make sure everything works:
 
 ```bash
-hermes gateway
+noone gateway
 ```
 
 You should see output like:
@@ -137,22 +160,22 @@ You should see output like:
 
 Open Telegram, find your bot, and send it a message. If it replies, you're in business. Press `Ctrl+C` to stop.
 
-### Production: Install as a Service
+### Production: Install as a Service {#production-install-as-a-service}
 
 For a persistent deployment that survives reboots:
 
 ```bash
-hermes gateway install
-sudo hermes gateway install --system   # Linux only: boot-time system service
+noone gateway install
+sudo noone gateway install --system   # Linux only: boot-time system service
 ```
 
 This creates a background service: a user-level **systemd** service on Linux by default, a **launchd** service on macOS, or a boot-time Linux system service if you pass `--system`.
 
 ```bash
 # Linux — manage the default user service
-hermes gateway start
-hermes gateway stop
-hermes gateway status
+noone gateway start
+noone gateway stop
+noone gateway status
 
 # View live logs
 journalctl --user -u hermes-gateway -f
@@ -161,37 +184,45 @@ journalctl --user -u hermes-gateway -f
 sudo loginctl enable-linger $USER
 
 # Linux servers — explicit system-service commands
-sudo hermes gateway start --system
-sudo hermes gateway status --system
+sudo noone gateway start --system
+sudo noone gateway status --system
 journalctl -u hermes-gateway -f
 ```
 
 ```bash
 # macOS — manage the service
-hermes gateway start
-hermes gateway stop
+noone gateway start
+noone gateway stop
 tail -f ~/.hermes/logs/gateway.log
 ```
 
-:::tip macOS PATH
-The launchd plist captures your shell PATH at install time so gateway subprocesses can find tools like Node.js and ffmpeg. If you install new tools later, re-run `hermes gateway install` to update the plist.
-:::
+<Tip>
 
-### Verify It's Running
+<div className="doc-callout-title">
+
+macOS PATH
+
+</div>
+
+The launchd plist captures your shell PATH at install time so gateway subprocesses can find tools like Node.js and ffmpeg. If you install new tools later, re-run `noone gateway install` to update the plist.
+
+</Tip>
+
+### Verify It's Running {#verify-its-running}
 
 ```bash
-hermes gateway status
+noone gateway status
 ```
 
 Then send a test message to your bot on Telegram. You should get a response within a few seconds.
 
 ---
 
-## Step 4: Set Up Team Access
+## Step 4: Set Up Team Access {#step-4-set-up-team-access}
 
 Now let's give your teammates access. There are two approaches.
 
-### Approach A: Static Allowlist
+### Approach A: Static Allowlist {#approach-a-static-allowlist}
 
 Collect each team member's Telegram user ID (have them message [@userinfobot](https://t.me/userinfobot)) and add them as a comma-separated list:
 
@@ -203,10 +234,10 @@ TELEGRAM_ALLOWED_USERS=123456789,987654321,555555555
 Restart the gateway after changes:
 
 ```bash
-hermes gateway stop && hermes gateway start
+noone gateway stop && noone gateway start
 ```
 
-### Approach B: DM Pairing (Recommended for Teams)
+### Approach B: DM Pairing (Recommended for Teams) {#approach-b-dm-pairing-recommended-for-teams}
 
 DM pairing is more flexible — you don't need to collect user IDs upfront. Here's how it works:
 
@@ -238,11 +269,19 @@ hermes pairing revoke telegram 987654321
 hermes pairing clear-pending
 ```
 
-:::tip
-DM pairing is ideal for teams because you don't need to restart the gateway when adding new users. Approvals take effect immediately.
-:::
+<Tip>
 
-### Security Considerations
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+DM pairing is ideal for teams because you don't need to restart the gateway when adding new users. Approvals take effect immediately.
+
+</Tip>
+
+### Security Considerations {#security-considerations}
 
 - **Never set `GATEWAY_ALLOW_ALL_USERS=true`** on a bot with terminal access — anyone who finds your bot could run commands on your server
 - Pairing codes expire after **1 hour** and use cryptographic randomness
@@ -252,9 +291,9 @@ DM pairing is ideal for teams because you don't need to restart the gateway when
 
 ---
 
-## Step 5: Configure the Bot
+## Step 5: Configure the Bot {#step-5-configure-the-bot}
 
-### Set a Home Channel
+### Set a Home Channel {#set-a-home-channel}
 
 A **home channel** is where the bot delivers cron job results and proactive messages. Without one, scheduled tasks have nowhere to send output.
 
@@ -269,7 +308,7 @@ TELEGRAM_HOME_CHANNEL_NAME="Team Updates"
 
 To find a channel ID, add [@userinfobot](https://t.me/userinfobot) to the group — it will report the group's chat ID.
 
-### Configure Tool Progress Display
+### Configure Tool Progress Display {#configure-tool-progress-display}
 
 Control how much detail the bot shows when using tools. In `~/.hermes/config.yaml`:
 
@@ -287,11 +326,11 @@ display:
 
 Users can also change this per-session with the `/verbose` command in chat.
 
-### Set Up a Personality with SOUL.md
+### Set Up a Personality with SOUL.md {#set-up-a-personality-with-soulmd}
 
 Customize how the bot communicates by editing `~/.hermes/SOUL.md`:
 
-For a full guide, see [Use SOUL.md with Hermes](./use-soul-with-hermes.md).
+For a full guide, see [Use SOUL.md with {{app-name}}](./use-soul-with-hermes.md).
 
 ```markdown
 # Soul
@@ -301,7 +340,7 @@ values directness. When debugging, always ask for error logs
 before guessing at solutions.
 ```
 
-### Add Project Context
+### Add Project Context {#add-project-context}
 
 If your team works on specific projects, create context files so the bot knows your stack:
 
@@ -315,17 +354,25 @@ If your team works on specific projects, create context files so the bot knows y
 - Always suggest writing tests for new code
 ```
 
-:::info
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
 Context files are injected into every session's system prompt. Keep them concise — every character counts against your token budget.
-:::
+
+</Info>
 
 ---
 
-## Step 6: Set Up Scheduled Tasks
+## Step 6: Set Up Scheduled Tasks {#step-6-set-up-scheduled-tasks}
 
 With the gateway running, you can schedule recurring tasks that deliver results to your team channel.
 
-### Daily Standup Summary
+### Daily Standup Summary {#daily-standup-summary}
 
 Message the bot on Telegram:
 
@@ -340,7 +387,7 @@ Format as a brief standup-style summary.
 
 The agent creates a cron job automatically and delivers results to the chat where you asked (or the home channel).
 
-### Server Health Check
+### Server Health Check {#server-health-check}
 
 ```
 Every 6 hours, check disk usage with 'df -h', memory with 'free -h',
@@ -348,27 +395,35 @@ and Docker container status with 'docker ps'. Report anything unusual —
 partitions above 80%, containers that have restarted, or high memory usage.
 ```
 
-### Managing Scheduled Tasks
+### Managing Scheduled Tasks {#managing-scheduled-tasks}
 
 ```bash
 # From the CLI
-hermes cron list          # View all scheduled jobs
-hermes cron status        # Check if scheduler is running
+noone cron list          # View all scheduled jobs
+noone cron status        # Check if scheduler is running
 
 # From Telegram chat
 /cron list                # View jobs
 /cron remove <job_id>     # Remove a job
 ```
 
-:::warning
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
 Cron job prompts run in completely fresh sessions with no memory of prior conversations. Make sure each prompt contains **all** the context the agent needs — file paths, URLs, server addresses, and clear instructions.
-:::
+
+</Warning>
 
 ---
 
-## Production Tips
+## Production Tips {#production-tips}
 
-### Use Docker for Safety
+### Use Docker for Safety {#use-docker-for-safety}
 
 On a shared team bot, use Docker as the terminal backend so agent commands run in a container instead of on your host:
 
@@ -390,11 +445,11 @@ terminal:
 
 This way, even if someone asks the bot to run something destructive, your host system is protected.
 
-### Monitor the Gateway
+### Monitor the Gateway {#monitor-the-gateway}
 
 ```bash
 # Check if the gateway is running
-hermes gateway status
+noone gateway status
 
 # Watch live logs (Linux)
 journalctl --user -u hermes-gateway -f
@@ -403,16 +458,16 @@ journalctl --user -u hermes-gateway -f
 tail -f ~/.hermes/logs/gateway.log
 ```
 
-### Keep Hermes Updated
+### Keep {{app-name}} Updated {#keep-hermes-updated}
 
 From Telegram, send `/update` to the bot — it will pull the latest version and restart. Or from the server:
 
 ```bash
-hermes update
-hermes gateway stop && hermes gateway start
+noone update
+noone gateway stop && noone gateway start
 ```
 
-### Log Locations
+### Log Locations {#log-locations}
 
 | What | Location |
 |------|----------|
@@ -424,7 +479,7 @@ hermes gateway stop && hermes gateway start
 
 ---
 
-## Going Further
+## Going Further {#going-further}
 
 You've got a working team Telegram assistant. Here are some next steps:
 

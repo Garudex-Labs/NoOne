@@ -765,7 +765,7 @@ class TestMediaDeliveryDefaultMode:
         cover each profile's ``.env`` / ``auth.json`` / ``state.db`` / transcripts whether the emitting
         turn is the launch (default) profile's or the secondary's own (HERMES_HOME override), while
         the profile's cache artifacts and plain agent-written files stay deliverable."""
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+        from agent_constants import reset_agent_home_override, set_agent_home_override
 
         self._patch_roots(monkeypatch)
         fake_home = tmp_path / "home"
@@ -784,12 +784,12 @@ class TestMediaDeliveryDefaultMode:
             path.write_bytes(b"SECRET=1\n")
 
         for scope in (None, profile_b):  # default profile's turn, then beta's own turn
-            token = set_hermes_home_override(scope)
+            token = set_agent_home_override(scope)
             try:
                 assert [rel for rel in denied if BasePlatformAdapter.validate_media_delivery_path(str(profile_b / rel))] == []
                 assert [rel for rel in allowed if not BasePlatformAdapter.validate_media_delivery_path(str(profile_b / rel))] == []
             finally:
-                reset_hermes_home_override(token)
+                reset_agent_home_override(token)
 
     def test_strict_mode_envvar_restores_legacy_behavior(self, tmp_path, monkeypatch):
         """Setting HERMES_MEDIA_DELIVERY_STRICT=1 reactivates the older
@@ -1270,7 +1270,7 @@ class TestTruncateMessage:
         Regression: the 4.0 factor-attribution table in the pre-market
         briefing (8 rows x 5 cols) was split mid-table — chunk 1 ended on a
         truncated data row, chunk 2 started with an orphaned row — and
-        neither half rendered as a table in Feishu.
+        neither half rendered as a table in a client.
         """
         adapter = self._adapter()
         rows = [

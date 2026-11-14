@@ -1,7 +1,8 @@
-import { Codicon, type CodiconProps } from '@/components/ui/codicon'
+import { AppIcon, type AppIconProps } from '@noone/ui/app-icon'
+
 import { cn } from '@/lib/utils'
 
-interface DisclosureCaretProps extends Omit<CodiconProps, 'name'> {
+interface DisclosureCaretProps extends Omit<AppIconProps, 'name'> {
   open: boolean
 }
 
@@ -10,7 +11,7 @@ interface DisclosureCaretProps extends Omit<CodiconProps, 'name'> {
 // hover/opacity styling; twMerge resolves transition conflicts.
 export function DisclosureCaret({ className, open, size = '0.75rem', ...props }: DisclosureCaretProps) {
   return (
-    <Codicon
+    <AppIcon
       className={cn('shrink-0 transition-transform duration-150', open && 'rotate-90', className)}
       name="chevron-right"
       size={size}

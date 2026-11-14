@@ -26,7 +26,7 @@ from typing import Callable
 
 import psutil
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from tools.environments.base import _file_mtime_key
 from utils import mtime_is_racy
 
@@ -68,7 +68,7 @@ _SYNC_BACK_STALE_SECONDS = 30 * 60
 def _sync_back_max_bytes() -> int:
     """Extraction cap; config.yaml ``terminal.sync_back_max_bytes`` overrides it for trees that
     legitimately exceed 2 GiB (a skipped extraction silently discards the whole download)."""
-    from hermes_cli.config import load_config
+    from agent_cli.config import load_config
 
     raw = ((load_config() or {}).get("terminal") or {}).get(_SYNC_BACK_MAX_BYTES_KEY)
     if raw is not None:
@@ -328,7 +328,7 @@ class FileSyncManager:
             logger.debug("sync_back: no prior push state — skipping")
             return
 
-        lock_path = (hermes_home or get_hermes_home()) / ".sync.lock"
+        lock_path = (hermes_home or get_agent_home()) / ".sync.lock"
         lock_path.parent.mkdir(parents=True, exist_ok=True)
 
         last_exc: Exception | None = None

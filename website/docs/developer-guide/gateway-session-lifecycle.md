@@ -3,13 +3,13 @@ title: "Gateway Session Lifecycle"
 description: "SessionSource, SessionEntry, SessionStore, session-key rules and multi-user isolation in the gateway"
 ---
 
-# Session Lifecycle
+# Session Lifecycle {#session-lifecycle}
 
 > **Audience:** Gateway developers and maintainers
 > **Source files:** `gateway/session.py` (~1200 lines + `session_*.py` siblings), `gateway/run.py` (~5500 lines facade + `run_*.py` phases), `gateway/config.py`
 > **Last updated:** 2026-06-16
 
-## Overview
+## Overview {#overview}
 
 A **session** represents a continuous conversation between the agent and one or more users on a
 messaging platform. The session lifecycle governs when conversations persist, when they reset,
@@ -26,12 +26,12 @@ The session system lives primarily in two modules:
 
 ---
 
-## 1. SessionSource — Message Origin Descriptor
+## 1. SessionSource — Message Origin Descriptor {#1-sessionsource--message-origin-descriptor}
 
 `SessionSource` is a frozen record of *where a message came from*. It is attached to every
 incoming `MessageEvent` and used for routing, isolation, and context injection.
 
-### Fields
+### Fields {#fields}
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -43,7 +43,7 @@ incoming `MessageEvent` and used for routing, isolation, and context injection.
 | `user_name` | `Optional[str]` | `None` | Display name of the message author. Injected into system prompt. |
 | `thread_id` | `Optional[str]` | `None` | Forum topic / Discord thread / Slack thread identifier. Differentiates threaded conversations. |
 | `chat_topic` | `Optional[str]` | `None` | Channel topic or description (Discord channel topic, Slack channel purpose). |
-| `user_id_alt` | `Optional[str]` | `None` | Platform-specific stable alternative ID (Signal UUID, Feishu union_id). Used when `user_id` is ephemeral. |
+| `user_id_alt` | `Optional[str]` | `None` | Platform-specific stable alternative ID (Signal UUID). Used when `user_id` is ephemeral. |
 | `chat_id_alt` | `Optional[str]` | `None` | Signal group internal ID — maps a Signal group V2 identifier to its canonical form. |
 | `is_bot` | `bool` | `False` | True when the message author is a bot or webhook (Discord bots). |
 | `guild_id` | `Optional[str]` | `None` | Discord guild / Slack workspace / Matrix server scope identifier. |
@@ -51,7 +51,7 @@ incoming `MessageEvent` and used for routing, isolation, and context injection.
 | `message_id` | `Optional[str]` | `None` | ID of the triggering message. Used for pin/reply/react operations and Discord ID injection (the injected `[Triggering message id: …]` note rides the API-bound message only; the persisted user row keeps the authored text). |
 | `role_authorized` | `bool` | `False` | True when adapter granted access via a platform role (not individual user ID). |
 
-### Key Methods
+### Key Methods {#key-methods}
 
 - **`description`** (property: `str`) — Human-readable summary e.g. `"DM with Alice"`,
   `"group: My Group, thread: 12345"`.
@@ -59,12 +59,12 @@ incoming `MessageEvent` and used for routing, isolation, and context injection.
 
 ---
 
-## 2. SessionEntry — Active Session Record
+## 2. SessionEntry — Active Session Record {#2-sessionentry--active-session-record}
 
 `SessionEntry` is the per-session metadata record stored in memory and persisted to
 `{sessions_dir}/sessions.json`. Each entry maps a `session_key` to its current `session_id`.
 
-### Fields
+### Fields {#fields-1}
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -85,7 +85,7 @@ incoming `MessageEvent` and used for routing, isolation, and context injection.
 | `cost_status` | `str` | `"unknown"` | Cost tracking status label. |
 | `last_prompt_tokens` | `int` | `0` | Last API-reported prompt token count. Used for accurate compression pre-check. |
 
-### Boolean Flags (State Machine)
+### Boolean Flags (State Machine) {#boolean-flags-state-machine}
 
 SessionEntry has several boolean flags that form a simple state machine governing session
 behavior on the next access.
@@ -102,7 +102,7 @@ behavior on the next access.
 | `resume_reason` | `Optional[str]` | `None` | Why resume was marked: `"restart_timeout"`, `"shutdown_timeout"`, `"restart_interrupted"`. |
 | `last_resume_marked_at` | `Optional[datetime]` | `None` | Timestamp of the last resume-pending marking. |
 
-### State Transition Logic (get_or_create_session)
+### State Transition Logic (get_or_create_session) {#state-transition-logic-get_or_create_session}
 
 ```
                     ┌──────────┐
@@ -146,13 +146,13 @@ behavior on the next access.
 
 ---
 
-## 3. SessionStore — Storage and Operations
+## 3. SessionStore — Storage and Operations {#3-sessionstore--storage-and-operations}
 
 `SessionStore` is the main storage layer. It maintains an in-memory dict (`_entries`) persisted
 to `sessions.json`, with SQLite (`SessionDB`) as the canonical store for session metadata and
 message transcripts.
 
-### Constructor
+### Constructor {#constructor}
 
 ```python
 SessionStore(sessions_dir: Path, config: GatewayConfig, has_active_processes_fn=None)
@@ -163,7 +163,7 @@ SessionStore(sessions_dir: Path, config: GatewayConfig, has_active_processes_fn=
 - `has_active_processes_fn` — Optional callback keyed by `session_key` to check for running
   background processes. Sessions with active processes are protected from routing-entry pruning.
 
-### Operations (Methods)
+### Operations (Methods) {#operations-methods}
 
 | Method | Description |
 |---|---|
@@ -182,15 +182,15 @@ SessionStore(sessions_dir: Path, config: GatewayConfig, has_active_processes_fn=
 | `append_to_transcript(session_id, message, skip_db=False)` | Append a message to SQLite transcript. `skip_db=True` prevents duplicate writes when the agent already persisted. |
 | `rewrite_transcript(session_id, messages)` | Full replacement of session transcript (used by `/retry`, `/undo`, `/compress`). |
 | `load_transcript(session_id)` | Load all messages from a session's SQLite transcript. |
-| `rewind_session(session_id, n=1)` | Back up `n` user turns via soft-delete (keeps audit trail); thin wrapper over `SessionDB.rewind_user_turn` (`hermes_state_rewind.py`), the one rewind shared with CLI `/undo`/`/retry` and the TUI. Returns `{rewound_count, turns_undone, target_text}`. |
+| `rewind_session(session_id, n=1)` | Back up `n` user turns via soft-delete (keeps audit trail); thin wrapper over `SessionDB.rewind_user_turn` (`agent_state_rewind.py`), the one rewind shared with CLI `/undo`/`/retry` and the TUI. Returns `{rewound_count, turns_undone, target_text}`. |
 
-### Internal Helpers
+### Internal Helpers {#internal-helpers}
 
 - `_ensure_loaded()` / `_ensure_loaded_locked()` — Load `sessions.json` into `_entries` dict.
 - `_save()` — Atomic write to `sessions.json` via temp file + `atomic_replace`.
 - `_generate_session_key(source)` — Delegates to `build_session_key()` with config params.
 
-### Storage Layout
+### Storage Layout {#storage-layout}
 
 ```
 {sessions_dir}/
@@ -199,25 +199,25 @@ SessionStore(sessions_dir: Path, config: GatewayConfig, has_active_processes_fn=
   {session_id}.jsonl     # (Legacy, removed in spec 002)
 ```
 
-The canonical transcript store is SQLite via `SessionDB` (from `hermes_state`). The
+The canonical transcript store is SQLite via `SessionDB` (from `agent_state`). The
 `sessions.json` file persists the `session_key → session_id` mapping and entry metadata
 (flags, timestamps, token counts). If SQLite is unavailable, the store falls back to
 JSONL, but this is a degradation path.
 
 ---
 
-## 4. SessionKey Generation Rules
+## 4. SessionKey Generation Rules {#4-sessionkey-generation-rules}
 
 Session keys are deterministic strings that identify a conversation lane. They are generated
 by `build_session_key(source, group_sessions_per_user, thread_sessions_per_user)`.
 
-### Key Format
+### Key Format {#key-format}
 
 ```
 agent:main:{platform}:{chat_type}[:{chat_id}][:{thread_id}][:{participant_id}]
 ```
 
-### DM Rules
+### DM Rules {#dm-rules}
 
 | Scenario | Key |
 |---|---|
@@ -232,7 +232,7 @@ agent:main:{platform}:{chat_type}[:{chat_id}][:{thread_id}][:{participant_id}]
 - Without `chat_id`, falls back to `user_id_alt` or `user_id` as participant_id.
 - Without any identifier, all DMs on that platform collapse to one shared session.
 
-### Group/Channel Rules
+### Group/Channel Rules {#groupchannel-rules}
 
 | Scenario | Key |
 |---|---|
@@ -252,7 +252,7 @@ agent:main:{platform}:{chat_type}[:{chat_id}][:{thread_id}][:{participant_id}]
 - `participant_id` = `user_id_alt` or `user_id` (in that priority).
 - WhatsApp identifiers are canonicalized to handle JID/LID alias flips.
 
-### Special Case: WhatApp
+### Special Case: WhatApp {#special-case-whatapp}
 
 WhatsApp phone numbers go through `canonical_whatsapp_identifier()` which strips the
 `@s.whatsapp.net` suffix and normalizes to E.164 format. This prevents session fragmentation
@@ -260,12 +260,12 @@ when the bridge returns different alias forms of the same phone number.
 
 ---
 
-## 5. Multi-User Isolation Strategy
+## 5. Multi-User Isolation Strategy {#5-multi-user-isolation-strategy}
 
 Multi-user isolation determines whether multiple users in the same chat share a conversation
 or each get their own private session.
 
-### Decision Logic (`is_shared_multi_user_session`)
+### Decision Logic (`is_shared_multi_user_session`) {#decision-logic-is_shared_multi_user_session}
 
 ```python
 def is_shared_multi_user_session(source, *, group_sessions_per_user, thread_sessions_per_user):
@@ -276,7 +276,7 @@ def is_shared_multi_user_session(source, *, group_sessions_per_user, thread_sess
     return not group_sessions_per_user       # Groups: isolated unless shared
 ```
 
-### Summary
+### Summary {#summary}
 
 | Chat Type | Default | Config Control |
 |---|---|---|
@@ -284,7 +284,7 @@ def is_shared_multi_user_session(source, *, group_sessions_per_user, thread_sess
 | Group/Channel | Per-user isolation | `group_sessions_per_user` (default: True) |
 | Thread (forum, discord) | Shared (all participants see same context) | `thread_sessions_per_user` (default: False) |
 
-### Impact on System Prompt
+### Impact on System Prompt {#impact-on-system-prompt}
 
 When `shared_multi_user_session=True`, the system prompt omits a fixed user name and instead
 states: *"Multi-user \{thread|session\} — messages are prefixed with [sender name]. Multiple
@@ -293,7 +293,7 @@ gateway at runtime, preserving prompt caching (the system prompt doesn't change 
 
 ---
 
-## 6. Explicit Conversation Boundaries
+## 6. Explicit Conversation Boundaries {#6-explicit-conversation-boundaries}
 
 Inactivity and wall-clock time never rotate a conversation. `/new` and `/reset`
 create an explicit boundary; context compression continues to manage long histories.
@@ -305,12 +305,12 @@ Resource-only eviction and WebSocket orphan reaping leave conversations resumabl
 
 ---
 
-## 7. Restart Recovery Flow
+## 7. Restart Recovery Flow {#7-restart-recovery-flow}
 
 The restart recovery system ensures that in-flight sessions are preserved across gateway
 restarts, crashes, and drain timeouts. It is the solution to issue #7536.
 
-### Startup Recovery Sequence
+### Startup Recovery Sequence {#startup-recovery-sequence}
 
 ```
 Gateway starts
@@ -352,7 +352,7 @@ Gateway starts
 └───────────────────────────────┘
 ```
 
-### Crash recovery (`_recover_unclean_sessions`)
+### Crash recovery (`_recover_unclean_sessions`) {#crash-recovery-_recover_unclean_sessions}
 
 Called on gateway startup when no `.clean_shutdown` marker exists (a crash or unexpected
 exit). It acts only on durable active-turn markers, never on recency: a chat that was merely
@@ -381,13 +381,13 @@ build (naive local time) is read as host-local time.
 A turn already in the ledger is redelivered by the ledger sweep, which also clears any
 `resume_pending` for that session, so it is never both delivered and re-answered.
 
-### Stuck-Loop Detection (`_suspend_stuck_loop_sessions`)
+### Stuck-Loop Detection (`_suspend_stuck_loop_sessions`) {#stuck-loop-detection-_suspend_stuck_loop_sessions}
 
 Counts consecutive restarts via a JSON file (`{HERMES_HOME}/restart_counts.json`). If a
 session has been active across 3+ consecutive restarts, it's auto-suspended so the user
 gets a clean slate.
 
-### Drain-Timeout Marking
+### Drain-Timeout Marking {#drain-timeout-marking}
 
 On graceful shutdown/restart, the drain system calls `mark_resume_pending()` for any
 session that was mid-turn when the drain timeout fired. Reasons:
@@ -398,7 +398,7 @@ session that was mid-turn when the drain timeout fired. Reasons:
 
 All three reasons are in `_AUTO_RESUME_REASONS` and eligible for startup auto-resume.
 
-### Auto-Resume on Next Access
+### Auto-Resume on Next Access {#auto-resume-on-next-access}
 
 When `get_or_create_session()` encounters `resume_pending=True`:
 
@@ -411,7 +411,7 @@ When `get_or_create_session()` encounters `resume_pending=True`:
    and the next restart will retry. The stuck-loop counter handles terminal escalation
    (3 retries → suspended).
 
-### Clean Shutdown Marker (`.clean_shutdown`)
+### Clean Shutdown Marker (`.clean_shutdown`) {#clean-shutdown-marker-clean_shutdown}
 
 Written at the end of a graceful shutdown. On next startup:
 
@@ -419,12 +419,12 @@ Written at the end of a graceful shutdown. On next startup:
   were already drained, so no sessions are stuck.
 - Then delete the marker.
 
-This prevents unwanted auto-resets after `hermes update`, `hermes gateway restart`,
+This prevents unwanted auto-resets after `noone update`, `noone gateway restart`,
 or `/restart`.
 
 ---
 
-## 8. Message Queuing Flow
+## 8. Message Queuing Flow {#8-message-queuing-flow}
 
 The message queuing system handles two scenarios:
 
@@ -433,7 +433,7 @@ The message queuing system handles two scenarios:
 2. **`/queue` FIFO** — Explicit `/queue` commands that must each produce their own full
    agent turn, in order, without merging.
 
-### Data Structures
+### Data Structures {#data-structures}
 
 ```
 adapter._pending_messages: Dict[session_key, MessageEvent]
@@ -445,7 +445,7 @@ SessionState.conversation.queued_events: List[MessageEvent]  (one per session_ke
         slot is occupied. Promoted one-at-a-time after each drain.
 ```
 
-### Enqueue (`_enqueue_fifo`)
+### Enqueue (`_enqueue_fifo`) {#enqueue-_enqueue_fifo}
 
 ```
 _enqueue_fifo(session_key, event, adapter)
@@ -460,7 +460,7 @@ _enqueue_fifo(session_key, event, adapter)
 Append to the session's queued_events (overflow tail)
 ```
 
-### Dequeue / Promotion (`_promote_queued_event`)
+### Dequeue / Promotion (`_promote_queued_event`) {#dequeue--promotion-_promote_queued_event}
 
 Called at the drain site after the slot was consumed. If there's an overflow item:
 
@@ -468,11 +468,11 @@ Called at the drain site after the slot was consumed. If there's an overflow ite
 - When `pending_event` exists, stage overflow head in the slot for the next recursion.
 - If no adapter available, push back to the session's `queued_events` (don't silently drop).
 
-### Queue Depth
+### Queue Depth {#queue-depth}
 
 `_queue_depth(session_key, adapter)` returns `len(overflow) + (1 if slot occupied else 0)`.
 
-### Clearing
+### Clearing {#clearing}
 
 Queued events for a session are cleared on `/new` and `/reset` (via `_handle_reset_command`).
 `/stop` drops the single-slot follow-up the user sent during the interrupted turn. An
@@ -494,7 +494,7 @@ notice with `status="interrupted"` and the child's partial output. `/new` and `/
 in `_handle_reset_command`; the shared helper's earlier call is idempotent there (a hard interrupt
 requested twice is one stop).
 
-### FIFO Invariant
+### FIFO Invariant {#fifo-invariant}
 
 Each `/queue` invocation produces exactly one full agent turn, in FIFO order, with no
 merging. The single-slot `_pending_messages` + overflow `queued_events` design ensures
@@ -502,7 +502,7 @@ that repeated sends during an active turn don't cause out-of-order processing.
 
 ---
 
-## 9. Session Context Injection
+## 9. Session Context Injection {#9-session-context-injection}
 
 `SessionContext` is built from a `SessionSource` and `GatewayConfig` and injected into the
 agent's system prompt. It tells the agent:
@@ -512,7 +512,7 @@ agent's system prompt. It tells the agent:
 - Where it can deliver scheduled task outputs
 - Whether this is a shared multi-user session
 
-### Construction (`build_session_context`)
+### Construction (`build_session_context`) {#construction-build_session_context}
 
 ```python
 def build_session_context(source, config, session_entry=None) -> SessionContext
@@ -523,7 +523,7 @@ def build_session_context(source, config, session_entry=None) -> SessionContext
 3. Determines `shared_multi_user_session` via `is_shared_multi_user_session()`.
 4. Attaches session metadata (key, id, timestamps) if `session_entry` is provided.
 
-### PII Redaction (`build_session_context_prompt`)
+### PII Redaction (`build_session_context_prompt`) {#pii-redaction-build_session_context_prompt}
 
 The dynamic system prompt section (`## Current Session Context`) can optionally redact
 personally identifiable information before sending to the LLM:
@@ -538,7 +538,7 @@ operations always use the original values.
 
 ---
 
-## 10. Background Housekeeping
+## 10. Background Housekeeping {#10-background-housekeeping}
 
 The `_session_housekeeping_watcher` periodically sweeps idle cached agents, sheds
 cache entries under memory pressure, and prunes old routing entries hourly.
@@ -553,12 +553,12 @@ by a timer watcher.
 
 ---
 
-## 11. Agent Cache
+## 11. Agent Cache {#11-agent-cache}
 
 The gateway maintains an LRU cache of `AIAgent` instances keyed by `session_key` to
 preserve prompt caching across turns.
 
-### Cache Properties
+### Cache Properties {#cache-properties}
 
 - **Max size:** 128 entries (`agent.agent_cache.max_size`, default `_AGENT_CACHE_MAX_SIZE`).
 - **Eviction policy:** Least-recently-used (LRU via `OrderedDict`).
@@ -567,7 +567,7 @@ preserve prompt caching across turns.
 - **Memory budget:** `agent.agent_cache.memory_high_mb` (default `auto`) — see below.
 - **Lock:** `_agent_cache_lock` (threading) for thread safety.
 
-### Memory-Pressure Eviction
+### Memory-Pressure Eviction {#memory-pressure-eviction}
 
 A cached agent pins `_session_messages`, the full live transcript including tool
 outputs — tens of MB on a session with 100+ tool calls. The entry cap and the idle
@@ -599,7 +599,7 @@ Three classes of session are never shed:
 uncapped. Set a number to pin it, or `0`/`off` to disable the pass entirely. Helpers
 live in `gateway/agent_cache_pressure.py`.
 
-### Cache Lifecycle
+### Cache Lifecycle {#cache-lifecycle}
 
 ```
 Message arrives
@@ -622,7 +622,7 @@ run_conversation()  →  agent processes message
 Housekeeping soft-releases idle agents without ending transcripts
 ```
 
-### Cleanup Flow
+### Cleanup Flow {#cleanup-flow}
 
 Resource eviction removes the cached agent and commits memory before soft-releasing
 clients. Full `_cleanup_agent_resources(agent)` teardown is reserved for actual
@@ -630,7 +630,7 @@ conversation boundaries and shutdown.
 
 ---
 
-## Appendix: Key Configuration
+## Appendix: Key Configuration {#appendix-key-configuration}
 
 | Config Key | Type | Default | Description |
 |---|---|---|---|
@@ -645,7 +645,7 @@ conversation boundaries and shutdown.
 | `agent.agent_cache.max_evictions_per_pass` | `int` | `16` | Cap on sessions shed per pressure pass |
 | `agent.agent_cache.protect_recent` | `int` | `8` | MRU sessions the pressure pass never touches |
 
-## State database and FTS recovery
+## State database and FTS recovery {#state-database-and-fts-recovery}
 
 The canonical transcript lives in the `sessions` and `messages` tables. FTS5
 tables and their sync triggers are derived indexes that can be detached and
@@ -653,7 +653,7 @@ rebuilt without deleting canonical messages. See
 [State DB recovery](state-db-recovery.md) for the bounded live failure
 mode and the explicit repair procedure.
 
-### Conversation lifetime
+### Conversation lifetime {#conversation-lifetime}
 
 No idle or daily reset settings are supported. Explicit `/new` and `/reset`,
 compaction, suspension and crash recovery retain their separate lifecycle roles.

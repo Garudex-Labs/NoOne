@@ -1,4 +1,4 @@
-import { REASONING_EFFORTS } from '@hermes/shared'
+import { REASONING_EFFORTS } from '@noone/shared'
 
 import {
   DropdownMenuItem,

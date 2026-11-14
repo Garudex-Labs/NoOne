@@ -1,13 +1,9 @@
-"""Platform scope rules for configured toolsets."""
+"""Legacy import boundary; implementation lives in agent_cli.toolset_scope.
 
-from typing import Set
+Retained for shipped updater/plugin compatibility, sharing the canonical module.
+"""
+from importlib import import_module
+import sys
 
-
-# Toolsets without a restriction entry are available on every platform.
-_TOOLSET_PLATFORM_RESTRICTIONS = {"discord": {"discord"}, "discord_admin": {"discord"}}
-
-
-def toolset_allowed_for_platform(ts_key: str, platform: str) -> bool:
-    """Return whether ``ts_key`` is available on ``platform``."""
-    allowed: set[str] | None = _TOOLSET_PLATFORM_RESTRICTIONS.get(ts_key)
-    return allowed is None or platform in allowed
+_current = import_module('agent_cli.toolset_scope')
+sys.modules[__name__] = _current

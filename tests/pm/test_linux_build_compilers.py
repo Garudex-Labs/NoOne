@@ -59,14 +59,14 @@ def test_pinned_interpreter_builds_with_gcc_when_its_clang_is_missing(tmp_path, 
 def test_build_failure_without_any_compiler_names_the_install(tmp_path):
     from pm.environment import BuildFailure, classify_uv_failure
 
-    # uv's real tail when neither clang++ nor g++ exists (python-olm 3.2.16, Ubuntu 24.04).
-    missing = ("error: Failed to build `python-olm==3.2.16`\n  ├─▶ The build backend returned an error\n"
+    # A build backend failure when neither clang++ nor g++ exists.
+    missing = ("error: Failed to build `example-native==1.0.0`\n  ├─▶ The build backend returned an error\n"
                "  ╰─▶ Call to `setuptools.build_meta.build_wheel` failed (exit status: 1)\n"
                "      error: [Errno 2] No such file or directory: 'clang++'\n")
     failure = classify_uv_failure("pip", 1, missing)
     assert isinstance(failure, BuildFailure)
     assert "build-essential" in failure.remedy
-    other = classify_uv_failure("pip", 1, missing.replace("'clang++'", "'libolm/include/olm.h'"))
+    other = classify_uv_failure("pip", 1, missing.replace("'clang++'", "'native/include/library.h'"))
     assert "build-essential" not in other.remedy
     absent = missing.replace("[Errno 2] No such file or directory: 'clang++'",
                              "command 'clang++' failed: No such file or directory")

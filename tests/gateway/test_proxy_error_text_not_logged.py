@@ -69,7 +69,7 @@ def test_proxy_mode_turn_error(monkeypatch, caplog, proxy, password):
     runner = object.__new__(GatewayRunner)
     runner.adapters, runner._running_agents, runner._agent_cache = {}, {}, {}
     runner.config = MagicMock()
-    source = SessionSource(platform=Platform.MATRIX, chat_id="!r:s", chat_type="group", user_id="@u:s")
+    source = SessionSource(platform=Platform.MATTERMOST, chat_id="!r:s", chat_type="group", user_id="@u:s")
     exc = _aiohttp_error(f"{proxy}/v1/chat/completions", as_url=True)  # the upstream itself, not a proxy
     with patch("gateway.run._load_gateway_config", return_value={}), caplog.at_level(logging.DEBUG):
         reply = asyncio.run(runner._run_agent_via_proxy(
@@ -152,40 +152,6 @@ def test_discord_connect_error(monkeypatch, caplog, proxy, password):
     _assert_safe(_logs(caplog), password, exc)
 
 
-@pytest.mark.parametrize("proxy, password", CASES)
-@pytest.mark.parametrize("site", ["whoami", "login", "initial_sync", "sync_loop"])
-def test_matrix_error(monkeypatch, caplog, proxy, password, site):
-    from plugins.platforms.matrix import adapter as matrix_adapter
-
-    monkeypatch.setenv("MATRIX_PROXY", proxy)
-    adapter = matrix_adapter.MatrixAdapter(PlatformConfig(
-        enabled=True, token="syt_test_token" if site == "whoami" else "",
-        extra={"homeserver": "https://matrix.example.org", "user_id": "@bot:example.org", "password": "pw"}))
-    exc = _aiohttp_error(proxy)
-    client = MagicMock()
-    client.whoami = client.login = client.sync = AsyncMock(side_effect=exc)
-    client.sync_store.get_next_batch = AsyncMock(return_value="b1")
-    real_sleep = asyncio.sleep
-
-    async def _sleep_then_close(delay, *a, **kw):
-        adapter._closing = True
-        await real_sleep(0)
-
-    async def _run():
-        if site in ("whoami", "login"):
-            api = MagicMock()
-            api.session.close = AsyncMock()
-            assert await adapter._connect_authenticate(client, api) is False
-        elif site == "initial_sync":
-            await adapter._connect_initial_sync(client)
-        else:
-            adapter._client = client
-            with patch.object(matrix_adapter.asyncio, "sleep", _sleep_then_close):
-                await adapter._sync_loop()
-
-    with caplog.at_level(logging.DEBUG):
-        asyncio.run(_run())
-    _assert_safe(_logs(caplog), password, exc)
 
 
 @pytest.mark.parametrize("proxy, password", [c for c in CASES if c.values[0].startswith("http://")])
@@ -207,22 +173,6 @@ def test_slack_connect_error(monkeypatch, caplog, proxy, password):
     _assert_safe(_logs(caplog), password, exc)
 
 
-@pytest.mark.parametrize("proxy", [
-    None, "http://proxy.example.com:3128", "socks5://10.0.0.1:1080",
-    # Rendering lowercases scheme/host and drops port zero-padding; nothing is left out.
-    "HTTP://proxy:3128", "http://Proxy.Corp:3128", "http://[2001:DB8::1]:3128", "http://proxy:03128/"])
-def test_error_through_a_secret_free_proxy_keeps_its_text(monkeypatch, caplog, proxy):
-    """No proxy, or one whose URL is all shown: no secret involved, the user keeps the detail."""
-    from plugins.platforms.matrix import adapter as matrix_adapter
-
-    adapter = matrix_adapter.MatrixAdapter(PlatformConfig(
-        enabled=True, token="", extra={"homeserver": "https://matrix.example.org"}))
-    adapter._proxy_url = proxy
-    client = MagicMock()
-    client.sync = AsyncMock(side_effect=RuntimeError("homeserver said M_UNKNOWN"))
-    with caplog.at_level(logging.DEBUG):
-        asyncio.run(adapter._connect_initial_sync(client))
-    assert "homeserver said M_UNKNOWN" in _logs(caplog)
 
 
 @pytest.mark.parametrize("url", ["file:///AgentTokenProbe987", "fi\nle:///AgentTokenProbe987", "\x01file:///AgentTokenProbe987"])
@@ -237,7 +187,7 @@ def test_proxy_mode_file_url_error_hides_the_path(monkeypatch, caplog, url):
     runner = object.__new__(GatewayRunner)
     runner.adapters, runner._running_agents, runner._agent_cache = {}, {}, {}
     runner.config = MagicMock()
-    source = SessionSource(platform=Platform.MATRIX, chat_id="!r:s", chat_type="group", user_id="@u:s")
+    source = SessionSource(platform=Platform.MATTERMOST, chat_id="!r:s", chat_type="group", user_id="@u:s")
     with patch("gateway.run._load_gateway_config", return_value={}), caplog.at_level(logging.DEBUG):
         reply = asyncio.run(runner._run_agent_via_proxy(
             message="hi", context_prompt="", history=[], source=source, session_id="s"))["final_response"]

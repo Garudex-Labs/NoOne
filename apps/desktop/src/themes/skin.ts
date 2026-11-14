@@ -1,8 +1,9 @@
+import { appText } from '@noone/shared/application-identity'
 /**
  * Hermes skin → DesktopTheme converter.
  *
  * A "skin" is the CLI/TUI theme unit: a YAML file in `$HERMES_HOME/skins/` (or a
- * built-in) resolved by `hermes_cli/skin_engine.py` and pushed to every surface
+ * built-in) resolved by `agent_cli/skin_engine.py` and pushed to every surface
  * over JSON-RPC (`gateway.ready`, `skin.changed`, `config.get skin`). This is the
  * one place the desktop turns that CLI-shaped palette into a `DesktopTheme`, so a
  * skin Hermes authors from a prompt lights up all three surfaces from one file.
@@ -14,9 +15,8 @@
  * both `colors` and `darkColors` get the converted palette; `renderedModeFor`
  * still picks `.dark` from the real background luminance.
  */
-
-import { ensureContrast, mix } from '@hermes/shared/color'
-import type { HermesSkin, SkinColors } from '@hermes/shared/skin'
+import { ensureContrast, mix } from '@noone/shared/color'
+import type { AgentSkin, SkinColors } from '@noone/shared/skin'
 
 import { luminance, normalizeHex, readableInk } from './color'
 import type { DesktopTheme, DesktopThemeColors } from './types'
@@ -44,7 +44,7 @@ const titleCase = (name: string): string => name.charAt(0).toUpperCase() + name.
  * Convert a resolved skin into a `DesktopTheme`, or null when it carries no
  * usable colors (so a broken/empty skin never registers junk).
  */
-export function skinToDesktopTheme(skin: HermesSkin): DesktopTheme | null {
+export function skinToDesktopTheme(skin: AgentSkin): DesktopTheme | null {
   const name = (skin.name ?? '').trim()
   const colors = skin.colors
 
@@ -109,7 +109,7 @@ export function skinToDesktopTheme(skin: HermesSkin): DesktopTheme | null {
   return {
     name,
     label: titleCase(name),
-    description: 'Hermes skin',
+    description: appText('{app_name} skin'),
     // Single palette in both slots: a skin is one-mode, so the light/dark toggle
     // shouldn't invert it. renderedModeFor still paints `.dark` from luminance.
     colors: palette,

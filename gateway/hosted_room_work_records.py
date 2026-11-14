@@ -179,7 +179,7 @@ def initialize(conn: sqlite3.Connection) -> None:
 
 
 def _budget(conn, table, proposed):
-    total_sql, count_sql = storage.usage_sql((SOURCE_TABLE, PENDING_TABLE, storage.INVALID_TABLE))
+    total_sql, count_sql = storage.usage_sql((SOURCE_TABLE, PENDING_TABLE))
     total, count = conn.execute(f"SELECT {total_sql}, {count_sql}").fetchone()
     keys = ["room_id", "producer_gateway_id", "producer_epoch"]
     if table == PENDING_TABLE:

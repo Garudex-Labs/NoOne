@@ -1,8 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useContext, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { Kbd, KbdCombo } from '@/components/ui/kbd'
 import { SearchField } from '@/components/ui/search-field'
@@ -141,7 +141,7 @@ function ShortcutSettings({ includeScreenshot }: { includeScreenshot: boolean })
           onClick={resetAllBindings}
           type="button"
         >
-          <Codicon name="discard" size="0.8125rem" />
+          <AppIcon name="discard" size="0.8125rem" />
           {k.resetAll}
         </button>
       </div>
@@ -252,7 +252,7 @@ function KeybindRow({ action }: { action: KeybindActionMeta }) {
 
       {conflict && (
         <span className="flex size-4 items-center justify-center text-amber-500/90" title={k.conflictWith(conflict)}>
-          <Codicon name="warning" size="0.8125rem" />
+          <AppIcon name="warning" size="0.8125rem" />
         </span>
       )}
 
@@ -286,7 +286,7 @@ function KeybindRow({ action }: { action: KeybindActionMeta }) {
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name="close" size="0.8125rem" />
+              <AppIcon name="close" size="0.8125rem" />
             </Button>
           </Tip>
         ) : (
@@ -301,7 +301,7 @@ function KeybindRow({ action }: { action: KeybindActionMeta }) {
             size="icon-xs"
             variant="ghost"
           >
-            <Codicon name="discard" size="0.8125rem" />
+            <AppIcon name="discard" size="0.8125rem" />
           </Button>
         </Tip>
       )}

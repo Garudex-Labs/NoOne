@@ -1,14 +1,13 @@
 ---
-sidebar_position: 3
 title: "Document Extraction"
 description: "How read_file converts PDFs, Office documents, and notebooks to text — and what to do when a PDF is scanned images"
 ---
 
-# Document Extraction
+# Document Extraction {#document-extraction}
 
 The `read_file` tool automatically converts common document formats to readable text, so the agent can inspect a PDF or spreadsheet the same way it reads source code.
 
-## Supported formats
+## Supported formats {#supported-formats}
 
 | Format | Extensions | Converter | Availability |
 |--------|-----------|-----------|--------------|
@@ -23,7 +22,7 @@ The `read_file` tool automatically converts common document formats to readable 
 
 \* The optional converter is the `firecrawl-anydoc` package, installed lazily where installs are permitted (`security.allow_lazy_installs` in `config.yaml`). Without it, the three stdlib formats still work; other formats fall back to the binary-file guard.
 
-SQLite files render as a schema overview rather than a dump: each table's `CREATE` statement, row count and first five rows, plus the list of indexes, views and triggers. The database is opened read-only (`mode=ro&immutable=1`, so a live database another process holds open is still readable without locks); for anything beyond the preview, query it from the terminal with `sqlite3`. A `.db` that is not SQLite (the magic bytes do not match) is refused with the real reason. Hermes's own read denylist applies before extraction, so protected stores under `HERMES_HOME` stay unreadable.
+SQLite files render as a schema overview rather than a dump: each table's `CREATE` statement, row count and first five rows, plus the list of indexes, views and triggers. The database is opened read-only (`mode=ro&immutable=1`, so a live database another process holds open is still readable without locks); for anything beyond the preview, query it from the terminal with `sqlite3`. A `.db` that is not SQLite (the magic bytes do not match) is refused with the real reason. {{app-name}}'s own read denylist applies before extraction, so protected stores under `HERMES_HOME` stay unreadable.
 
 `read_file` also flags unresolved git merge conflicts: when the returned range contains balanced `<<<<<<< ` / `>>>>>>> ` marker lines, the result carries `conflict_blocks: N` and a hint to resolve them before editing around them. A lone marker inside a string or a test fixture is not counted.
 
@@ -33,7 +32,7 @@ Notebook cell outputs longer than 20,000 characters are truncated; the truncatio
 
 Extraction works with remote terminal backends (Docker, Modal, SSH): the file's bytes are transferred across the backend boundary and converted host-side, so a document inside a sandbox reads the same as a local one.
 
-## Scanned PDFs: the coverage warning
+## Scanned PDFs: the coverage warning {#scanned-pdfs-the-coverage-warning}
 
 PDF conversion reads the **text layer only**. Pages that are scanned images — common in legal documents, resale packages, signed contracts, faxes — contain no text layer and silently convert to nothing. The telltale signature is section headers with empty bodies.
 
@@ -60,6 +59,14 @@ The warning lists the exact page ranges and the recovery paths:
 
 Detection uses poppler's `pdftotext` for per-page text counts. If poppler is not installed, extraction still works — the coverage check is silently skipped.
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 The agent handles the warning on its own — it will offer to render or OCR the missing pages. If you're reading extractions yourself, treat "header with an empty body" as a scanned section, not a missing one.
-:::
+
+</Tip>

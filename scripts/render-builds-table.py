@@ -1,4 +1,4 @@
-#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-hermes-env" python3 "$0" "$@"'
+#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-agent-env" python3 "$0" "$@"'
 """Render the release download tables into <!-- HERMES_BUILDS_TABLE -->, and
 the same rows as standalone pages in the bucket.
 
@@ -58,7 +58,7 @@ from scripts.releases.desktop_targets import TARGETS as DESKTOP_TARGETS
 
 MARKER = "<!-- HERMES_BUILDS_TABLE -->"
 END_MARKER = "<!-- /HERMES_BUILDS_TABLE -->"
-DEFAULT_REPO = "NousResearch/hermes-agent"
+DEFAULT_REPO = "Garudex-Labs/NoOne"
 
 # Asset name shapes (electron-builder artifactName in
 # apps/desktop/electron-builder.config.cjs):
@@ -491,7 +491,7 @@ def supersedes(existing_page: str | None, tag: str) -> bool:
     recorded = recorded_build(existing_page)
     if not recorded:
         return True
-    from hermes_cli.update_channel import canary_timestamp, is_canary_tag
+    from agent_cli.update_channel import canary_timestamp, is_canary_tag
     if is_canary_tag(recorded) != is_canary_tag(tag):
         return False
     if is_canary_tag(tag):
@@ -638,7 +638,7 @@ def main() -> int:
     archive = args.archive or args.tag
 
     if args.channel_build:
-        from hermes_cli.release_channels import ChannelReader
+        from agent_cli.release_channels import ChannelReader
         from scripts.releases.channel_publish import read_request
         if args.tag or args.summary_commit or not args.summary_out or not args.r2_base_url:
             parser.error("Channel summary needs --summary-out and --r2-base-url; no tag/commit mode")

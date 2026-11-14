@@ -64,7 +64,7 @@ from tools.tool_result_storage import (
     extract_persisted_path,
 )
 from tools.budget_config import BudgetConfig, DEFAULT_BUDGET, budget_for_context_window
-from hermes_cli.observability.shared_metrics_efficiency import note_tool_result, record_tool_batch
+from agent_cli.observability.shared_metrics_efficiency import note_tool_result, record_tool_batch
 
 # A tool result this large (raw stdout, file dumps) is the biggest allocation a turn ever drops.
 # The commit only flags it: the string is still referenced by the publish frames here, so the
@@ -219,7 +219,7 @@ def _flush_session_db_after_tool_progress(agent, messages: list, *, stage: str) 
         return persisted
     except Exception as exc:
         agent._incremental_persistence_failed = True
-        from hermes_state import classify_persistence_error
+        from agent_state import classify_persistence_error
         agent._last_persistence_error_cause = classify_persistence_error(exc)
         logger.warning("Incremental tool-call persistence failed after %s: %s", stage, exc)
         return False
@@ -228,7 +228,7 @@ def _flush_session_db_after_tool_progress(agent, messages: list, *, stage: str) 
 def _image_generate_parallel_limit() -> int:
     """Configured image-generation parallelism cap (conservative: backend bursts hit rate limits)."""
     try:
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
 
         cfg = load_config() or {}
         image_gen = cfg.get("image_gen") if isinstance(cfg, dict) else None
@@ -407,10 +407,6 @@ def _unwrap_tool_search_call(
             return function_name, function_args, None
         underlying, underlying_args, err = _ts.resolve_underlying_call(function_args)
         if err or not underlying:
-            return function_name, function_args, None
-        if underlying == _ts.CONNECTOR_BATCH_SENTINEL:
-            # Both executors retain the wrapper: scope/probe/hooks run per entry
-            # in the batch dispatcher, not against a synthetic registry name.
             return function_name, function_args, None
         if underlying not in _tool_search_scoped_names(agent):
             # Session-gated GUI tools name their missing surface (#120413);
@@ -663,7 +659,7 @@ def _pre_tool_block(agent, ref: _ToolCallRef):
     """Run ``pre_tool_call`` plugin hooks; returns ``(block_message, final_args)`` with any
     hook-modified args applied. Hook failures never block."""
     try:
-        from hermes_cli.plugins import _dispatch_pre_tool_call_hooks
+        from agent_cli.plugins import _dispatch_pre_tool_call_hooks
 
         block_msg, modified_args = _dispatch_pre_tool_call_hooks(
             ref.name,
@@ -773,7 +769,7 @@ def _run_agent_tool_execution_middleware(
 ) -> _ManagedToolResult:
     """Run Relay rewrites before Hermes policy and dispatch exactly once."""
     from agent import relay_tools
-    from hermes_cli.middleware import (
+    from agent_cli.middleware import (
         apply_tool_request_middleware,
         run_tool_execution_middleware,
     )
@@ -795,7 +791,7 @@ def _run_agent_tool_execution_middleware(
     def _authorized_dispatch(final_args: dict[str, Any]) -> Any:
         with dispatch_lock:
             if state.dispatched:
-                raise RuntimeError("Hermes tool execution callback invoked more than once")
+                raise RuntimeError("Agent tool execution callback invoked more than once")
             state.dispatched = True
             state.blocked = False
             state.args = final_args
@@ -1103,7 +1099,7 @@ def _commit_tool_result(
     pre-persist content for UI previews) or ``None`` when the flush failed (stop the batch).
     """
     function_name, function_args, tool_call_id, effective_task_id = ref.name, ref.args, ref.call_id, ref.task_id
-    from hermes_cli.observability.shared_metrics_harness import observe_tool_outcome
+    from agent_cli.observability.shared_metrics_harness import observe_tool_outcome
 
     observe_tool_outcome(agent, function_name, is_error)
     if not (blocked or is_error):

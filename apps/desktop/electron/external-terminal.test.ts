@@ -4,23 +4,23 @@ import { test } from 'vitest'
 
 import {
   buildTerminalScript,
+  cliResumeArgs,
   posixQuote,
   resolveTerminalLaunch,
   terminalScriptEnv,
   terminalScriptExtension,
-  tuiResumeArgs,
   windowsQuote
 } from './external-terminal'
 
 const never = () => null
 const always = (command: string) => `/usr/bin/${command}`
 
-test('tuiResumeArgs resumes the session in the TUI', () => {
-  assert.deepEqual(tuiResumeArgs('20260814_101010_abc123'), ['--tui', '--resume', '20260814_101010_abc123'])
+test('cliResumeArgs resumes the session in the TUI', () => {
+  assert.deepEqual(cliResumeArgs('20260814_101010_abc123'), ['--cli', '--resume', '20260814_101010_abc123'])
 })
 
-test('tuiResumeArgs pins the profile ahead of the mode flag', () => {
-  assert.deepEqual(tuiResumeArgs('sess', 'work'), ['--profile', 'work', '--tui', '--resume', 'sess'])
+test('cliResumeArgs pins the profile ahead of the mode flag', () => {
+  assert.deepEqual(cliResumeArgs('sess', 'work'), ['--profile', 'work', '--cli', '--resume', 'sess'])
 })
 
 test('posixQuote survives embedded single quotes', () => {
@@ -46,7 +46,7 @@ test('terminalScriptEnv skips empty values and an absent home', () => {
 
 test('buildTerminalScript execs the resolved runtime with its env', () => {
   const script = buildTerminalScript({
-    args: ['-m', 'hermes_cli.main', '--tui', '--resume', 'sess'],
+    args: ['-m', 'agent_cli.main', '--cli', '--resume', 'sess'],
     command: '/home/b/.hermes/hermes-agent/venv/bin/python',
     cwd: "/home/b/o'brien",
     env: { PYTHONPATH: '/home/b/.hermes/hermes-agent' },
@@ -59,7 +59,7 @@ test('buildTerminalScript execs the resolved runtime with its env', () => {
       '#!/bin/sh',
       `cd '/home/b/o'\\''brien' || exit 1`,
       `export PYTHONPATH='/home/b/.hermes/hermes-agent'`,
-      `exec '/home/b/.hermes/hermes-agent/venv/bin/python' '-m' 'hermes_cli.main' '--tui' '--resume' 'sess'`,
+      `exec '/home/b/.hermes/hermes-agent/venv/bin/python' '-m' 'agent_cli.main' '--cli' '--resume' 'sess'`,
       ''
     ].join('\n')
   )
@@ -67,7 +67,7 @@ test('buildTerminalScript execs the resolved runtime with its env', () => {
 
 test('buildTerminalScript emits a cmd script on Windows', () => {
   const script = buildTerminalScript({
-    args: ['--tui', '--resume', 'sess'],
+    args: ['--cli', '--resume', 'sess'],
     command: 'C:\\hermes\\venv\\Scripts\\hermes.exe',
     cwd: 'C:\\Users\\b',
     env: { PYTHONUTF8: '1' },
@@ -78,7 +78,7 @@ test('buildTerminalScript emits a cmd script on Windows', () => {
     '@echo off',
     'cd /d "C:\\Users\\b"',
     'set "PYTHONUTF8=1"',
-    '"C:\\hermes\\venv\\Scripts\\hermes.exe" "--tui" "--resume" "sess"',
+    '"C:\\hermes\\venv\\Scripts\\hermes.exe" "--cli" "--resume" "sess"',
     ''
   ])
 })
@@ -132,14 +132,14 @@ test('Linux with no emulator installed reports no launch', () => {
   assert.equal(resolveTerminalLaunch({ findOnPath: never, platform: 'linux', scriptPath: '/tmp/x.sh' }), null)
 })
 
-test('tuiResumeArgs drops a profile value that is not a valid profile id', () => {
+test('cliResumeArgs drops a profile value that is not a valid profile id', () => {
   // A non-slug (numeric roster id, display label) must never cross into the
   // TUI launch argv — the CLI used to str()-coerce it into profiles/0 (#88842).
-  assert.deepEqual(tuiResumeArgs('sess', 0 as unknown as string), ['--tui', '--resume', 'sess'])
-  assert.deepEqual(tuiResumeArgs('sess', ''), ['--tui', '--resume', 'sess'])
-  assert.deepEqual(tuiResumeArgs('sess', 'Not A Slug!'), ['--tui', '--resume', 'sess'])
+  assert.deepEqual(cliResumeArgs('sess', 0 as unknown as string), ['--cli', '--resume', 'sess'])
+  assert.deepEqual(cliResumeArgs('sess', ''), ['--cli', '--resume', 'sess'])
+  assert.deepEqual(cliResumeArgs('sess', 'Not A Slug!'), ['--cli', '--resume', 'sess'])
 })
 
-test('tuiResumeArgs normalizes a valid profile id like the CLI', () => {
-  assert.deepEqual(tuiResumeArgs('sess', 'Work'), ['--profile', 'work', '--tui', '--resume', 'sess'])
+test('cliResumeArgs normalizes a valid profile id like the CLI', () => {
+  assert.deepEqual(cliResumeArgs('sess', 'Work'), ['--profile', 'work', '--cli', '--resume', 'sess'])
 })

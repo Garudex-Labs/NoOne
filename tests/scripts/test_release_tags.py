@@ -18,7 +18,7 @@ def test_every_stable_selector_rejects_legacy_calver_tags():
     """One shared stable grammar: a CalVer tag (v2026.9.21) must be refused by
     every stable admission path, or a workflow_call carrying the old GitHub
     'latest' tag would be admitted for docker/stable publication."""
-    from hermes_cli.source_releases import _valid_tag
+    from agent_cli.source_releases import _valid_tag
     from scripts.releases.docker import DockerReleaseError, require_stable_tag
     from scripts.releases.semver import compare
 
@@ -69,14 +69,14 @@ def test_canary_tag_order_and_remote_selection(release_repo):
 def test_github_repo_parsed_from_ssh_and_https_urls(tmp_path, release_repo):
     urls = {
         "fork": "git@github.com:ethernet8023/hermes-agent.git",
-        "origin": "https://github.com/NousResearch/hermes-agent",
+        "origin": "https://github.com/Garudex-Labs/NoOne",
         "gitlab": "git@gitlab.com:someone/elsewhere.git",
     }
     for name, url in urls.items():
         subprocess.run(['git', 'config', f'remote.{name}.url', url], cwd=tmp_path, check=True)
 
     assert release.remote_github_repo("fork") == "ethernet8023/hermes-agent"
-    assert release.remote_github_repo("origin") == "NousResearch/hermes-agent"
+    assert release.remote_github_repo("origin") == "Garudex-Labs/NoOne"
     assert release.remote_github_repo("gitlab") is None
     subprocess.run(['git', 'config', 'url.https://github.com/fork/.pushInsteadOf',
                     'https://github.com/NousResearch/'], cwd=tmp_path, check=True)

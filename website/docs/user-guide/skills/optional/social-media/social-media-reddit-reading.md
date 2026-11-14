@@ -1,42 +1,50 @@
 ---
 title: "Reddit Reading — Read Reddit: subreddits, search, threads, users"
-sidebar_label: "Reddit Reading"
+sidebarTitle: "Reddit Reading"
 description: "Read Reddit: subreddits, search, threads, users"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Reddit Reading
+# Reddit Reading {#reddit-reading}
 
 Read Reddit: subreddits, search, threads, users. No browser.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/social-media/reddit-reading` |
+| Source | Optional — install with `noone skills install official/social-media/reddit-reading` |
 | Path | `optional-skills/social-media/reddit-reading` |
 | Version | `1.0.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Reddit`, `Social Media`, `Research`, `Discussions`, `Community` |
 | Related skills | [`rss-feeds`](../../optional/research/research-rss-feeds.md), [`grounded-citations`](../../bundled/research/research-grounded-citations.md), [`blocked-page-recovery`](../../bundled/web/web-blocked-page-recovery.md), [`xurl`](../../bundled/social-media/social-media-xurl.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Reddit Reading Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Reddit Reading Skill {#reddit-reading-skill}
 
 Reads Reddit content — subreddit listings, site or subreddit search, full threads with
 comments, and user activity — from a server or headless machine where the normal routes
 are dead. It does not post, vote, or log in as a user. Idea credit: the per-platform
 backend routing in [Agent Reach](https://github.com/Panniantong/Agent-Reach).
 
-## When to Use
+## When to Use {#when-to-use}
 
 - "What is r/LocalLLaMA saying about X", "find Reddit threads on Y", "summarise this
   Reddit thread", "what has u/someone posted lately".
@@ -45,7 +53,7 @@ backend routing in [Agent Reach](https://github.com/Panniantong/Agent-Reach).
   this skill is the working path.
 - Not for posting, voting, messaging, or anything needing a user login.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 **None.** No Reddit account, login, cookie, or API key is needed. The default backend is
 Reddit's public Atom feeds (`.rss` endpoints), the only unauthenticated route Reddit still
@@ -74,7 +82,7 @@ missing or rejected it falls back to the anonymous feeds and says so on stderr.
 | Thread data | post + top-level comments, no scores | nested comments, scores, comment counts |
 | Acts as a user | no | no |
 
-## How to Run
+## How to Run {#how-to-run}
 
 Run every command through `terminal` with the skill-relative script path:
 
@@ -87,7 +95,7 @@ python3 scripts/reddit.py user spez --limit 10
 python3 scripts/reddit.py --json search "topic"                  # machine-readable
 ```
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 Every command works on both backends; the script chooses the backend, you never pass a flag.
 
@@ -100,7 +108,7 @@ Every command works on both backends; the script chooses the backend, you never 
 | User posts/comments | `user NAME` | ✔ | ✔ |
 | Backend + rate limit | `doctor` | ✔ | ✔ |
 
-## Procedure
+## Procedure {#procedure}
 
 ① `doctor` once per task if you have not called it this session — it tells you which
 backend is live and how many seconds remain in the anonymous window.
@@ -118,10 +126,10 @@ than stopping at titles; the listing only carries the first ~300 characters of e
 
 ⑤ If the user needs sustained Reddit access (monitoring, more than ~10 calls), stop and
 ask them to register the app credentials (Prerequisites) rather than grinding through the
-throttle. Tell them plainly: it is a free app registration, not logging Hermes into their
+throttle. Tell them plainly: it is a free app registration, not logging {{app-name}} into their
 account. Never ask for a Reddit password or browser cookies.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - `www.reddit.com/…/.json`, `api.reddit.com` and `old.reddit.com` return 403 or an
   empty "Welcome to Reddit" shell for datacentre IPs. Do not fall back to them; do not
@@ -138,7 +146,7 @@ account. Never ask for a Reddit password or browser cookies.
   the script already waits out the window once. More than one 429 in a row means the
   task needs the app credentials.
 
-## Verification
+## Verification {#verification}
 
 `python3 scripts/reddit.py doctor` prints `anonymous_feed: ok` and an
 `x-ratelimit-reset` value; `sub announcements --limit 1` returns one entry with a

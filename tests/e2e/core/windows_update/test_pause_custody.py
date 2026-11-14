@@ -4,7 +4,7 @@ Failure class: the durable pause record changes hands — a recovering launch cl
 folds an orphaned set into its own record — and a crash or a rival at the transfer boundary must
 neither lose nor double a paused gateway. Each cell plants the exact schedule with the INSTALLED
 code: a driver (the install's venv python) runs the real pause-record module and stops itself on
-the named source line; every recovery is a real ``hermes gateway status`` launch through the
+the named source line; every recovery is a real ``noone gateway status`` launch through the
 published ``hermes.exe`` that really restarts the real gateway.
 
 * claim race: a launch is paused inside its claim, between taking the set and naming itself in it
@@ -44,14 +44,14 @@ _RESTARTING = "Restarting gateway(s) paused by an interrupted"
 _MISSING_SERVICE = "hermes-e2e-no-such-gateway-service"
 
 # Every driver: the installed module behind the same bootstrap a launch runs (a resume imports
-# hermes_cli.main, whose bootstrap would otherwise re-enter this script mid-resume), and a hook that
+# agent_cli.main, whose bootstrap would otherwise re-enter this script mid-resume), and a hook that
 # stops on one line of it (kill or park).
 _DRIVER = """
 import inspect, json, os, sys, time
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
-import hermes_bootstrap  # as every launch does: re-enters the managed interpreter with its dependencies
-from hermes_cli import update_pause_record as r
+import agent_bootstrap  # as every launch does: re-enters the managed interpreter with its dependencies
+from agent_cli import update_pause_record as r
 
 def stop_at(fn, texts, action, flag=None):
     lines, start = inspect.getsourcelines(fn)
@@ -154,7 +154,7 @@ def _running(machine, not_pid: int, timeout: float) -> int | None:
 
 
 def _fresh_gateway(machine) -> int:
-    """A real gateway started now (``hermes gateway run``); its pid once it reports running."""
+    """A real gateway started now (``noone gateway run``); its pid once it reports running."""
     (machine.hermes_home / "gateway_state.json").unlink(missing_ok=True)
     proc = machine.spawn_gateway()
     pid = int(machine.wait_gateway_running().get("pid") or 0)
@@ -163,7 +163,7 @@ def _fresh_gateway(machine) -> int:
 
 
 def _paused_gateway(machine) -> int:
-    """A real gateway, stopped the way a pause stops it (a clean ``hermes gateway stop``, not a
+    """A real gateway, stopped the way a pause stops it (a clean ``noone gateway stop``, not a
     hard kill whose stale lock state slows the next ``--replace``). Its (now dead) pid."""
     pid = _fresh_gateway(machine)
     machine.hermes("gateway", "stop", label="pause-stop", timeout=180)
@@ -279,7 +279,7 @@ def _gone(pid: int, timeout: float) -> bool:
 # The real pause, killed on one line of the installed update_cmd_windows (texts present before and
 # after round 6, so the same cell runs on the red branch).
 _PAUSE = """
-from hermes_cli import update_cmd_windows as w
+from agent_cli import update_cmd_windows as w
 stop_at(getattr(w, sys.argv[2]), (sys.argv[3],), "kill")
 w._pause_windows_gateways_for_update()
 """
@@ -418,7 +418,7 @@ def test_a_gateway_the_update_never_asked_is_left_serving_and_a_user_stop_is_fin
     assert journey["never_owed_while"] == [], fail_with(
         m, f"a gateway never asked to stop is held as draining (owed while it serves: {journey['never_owed_while']})",
         during)
-    assert journey["never_gone"], fail_with(m, "premise: the user's `hermes gateway stop` did not stop it",
+    assert journey["never_gone"], fail_with(m, "premise: the user's `noone gateway stop` did not stop it",
                                             journey["never_user_stop"])
     assert _restarts(after.stdout) == 0 and journey["never_running_after"] is None, fail_with(
         m, "a gateway the user stopped was restarted for an update that never stopped it", after)

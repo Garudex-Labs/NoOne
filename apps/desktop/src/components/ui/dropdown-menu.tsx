@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { DropdownMenu as DropdownMenuPrimitive } from 'radix-ui'
 import * as React from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { usePopoverPortalContainer } from '@/components/ui/dialog-portal-context'
 import {
   menuItemClass,
@@ -332,7 +332,7 @@ function DropdownMenuCheckboxItem({
     >
       {children}
       <DropdownMenuPrimitive.ItemIndicator className="ml-auto flex items-center pl-2 text-foreground">
-        <Codicon name="check" size="0.75rem" />
+        <AppIcon name="check" size="0.75rem" />
       </DropdownMenuPrimitive.ItemIndicator>
     </DropdownMenuPrimitive.CheckboxItem>
   )
@@ -364,7 +364,7 @@ function DropdownMenuRadioItem({
     >
       {children}
       <DropdownMenuPrimitive.ItemIndicator className="ml-auto flex items-center pl-2 text-foreground">
-        <Codicon name="check" size="0.75rem" />
+        <AppIcon name="check" size="0.75rem" />
       </DropdownMenuPrimitive.ItemIndicator>
     </DropdownMenuPrimitive.RadioItem>
   )
@@ -469,7 +469,7 @@ function DropdownMenuSubTrigger({
       {...hoverProps}
     >
       {children}
-      {!hideChevron && <Codicon className="ml-auto text-(--ui-text-tertiary)" name="chevron-right" size="1rem" />}
+      {!hideChevron && <AppIcon className="ml-auto text-(--ui-text-tertiary)" name="chevron-right" size="1rem" />}
     </DropdownMenuPrimitive.SubTrigger>
   )
 }

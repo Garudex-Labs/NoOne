@@ -102,13 +102,13 @@ def test_partial_override_falls_back_to_defaults(settings_env):
 
 
 def test_persisted_override_is_shown_before_the_first_turn_after_restart(settings_env, monkeypatch):
-    import hermes_state
+    import agent_state
     from gateway.session import SessionStore
 
     def _no_sqlite():
         raise RuntimeError("SQLite disabled in test")
 
-    monkeypatch.setattr(hermes_state, "SessionDB", _no_sqlite)
+    monkeypatch.setattr(agent_state, "SessionDB", _no_sqlite)
     adapter, runner, source, home = settings_env
     (home / "config.yaml").write_text("model:\n  default: default-model\n  provider: default-provider\n")
     before_restart = SessionStore(sessions_dir=home / "sessions", config=GatewayConfig())

@@ -1,20 +1,20 @@
 ---
 title: "Saelens — Train sparse autoencoders to interpret model features"
-sidebar_label: "Saelens"
+sidebarTitle: "Saelens"
 description: "Train sparse autoencoders to interpret model features"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Saelens
+# Saelens {#saelens}
 
 Train sparse autoencoders to interpret model features.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/saelens` |
+| Source | Optional — install with `noone skills install official/mlops/saelens` |
 | Path | `optional-skills/mlops/saelens` |
 | Version | `1.0.1` |
 | Author | Orchestra Research |
@@ -23,25 +23,33 @@ Train sparse autoencoders to interpret model features.
 | Platforms | linux, macos, windows |
 | Tags | `Sparse Autoencoders`, `SAE`, `Mechanistic Interpretability`, `Feature Discovery`, `Superposition` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# SAELens: Sparse Autoencoders for Mechanistic Interpretability
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# SAELens: Sparse Autoencoders for Mechanistic Interpretability {#saelens-sparse-autoencoders-for-mechanistic-interpretability}
 
 SAELens is the primary library for training and analyzing Sparse Autoencoders (SAEs) - a technique for decomposing polysemantic neural network activations into sparse, interpretable features. Based on Anthropic's groundbreaking research on monosemanticity.
 
 **GitHub**: [jbloomAus/SAELens](https://github.com/jbloomAus/SAELens) (1,100+ stars)
 
-## The Problem: Polysemanticity & Superposition
+## The Problem: Polysemanticity & Superposition {#the-problem-polysemanticity--superposition}
 
 Individual neurons in neural networks are **polysemantic** - they activate in multiple, semantically distinct contexts. This happens because models use **superposition** to represent more features than they have neurons, making interpretability difficult.
 
 **SAEs solve this** by decomposing dense activations into sparse, monosemantic features - typically only a small number of features activate for any given input, and each feature corresponds to an interpretable concept.
 
-## When to Use SAELens
+## When to Use SAELens {#when-to-use-saelens}
 
 **Use SAELens when you need to:**
 - Discover interpretable features in model activations
@@ -55,7 +63,7 @@ Individual neurons in neural networks are **polysemantic** - they activate in mu
 - You want causal intervention experiments → Use **pyvene** or **TransformerLens**
 - You need production steering → Consider direct activation engineering
 
-## Installation
+## Installation {#installation}
 
 ```bash
 pip install sae-lens
@@ -63,9 +71,9 @@ pip install sae-lens
 
 Requirements: Python 3.10+, transformer-lens>=2.0.0
 
-## Core Concepts
+## Core Concepts {#core-concepts}
 
-### What SAEs Learn
+### What SAEs Learn {#what-saes-learn}
 
 SAEs are trained to reconstruct model activations through a sparse bottleneck:
 
@@ -78,16 +86,16 @@ Input Activation → Encoder → Sparse Features → Decoder → Reconstructed A
 
 **Loss Function**: `MSE(original, reconstructed) + L1_coefficient × L1(features)`
 
-### Key Validation (Anthropic Research)
+### Key Validation (Anthropic Research) {#key-validation-anthropic-research}
 
 In "Towards Monosemanticity", human evaluators found **70% of SAE features genuinely interpretable**. Features discovered include:
 - DNA sequences, legal language, HTTP requests
 - Hebrew text, nutrition statements, code syntax
 - Sentiment, named entities, grammatical structures
 
-## Workflow 1: Loading and Analyzing Pre-trained SAEs
+## Workflow 1: Loading and Analyzing Pre-trained SAEs {#workflow-1-loading-and-analyzing-pre-trained-saes}
 
-### Step-by-Step
+### Step-by-Step {#step-by-step}
 
 ```python
 from transformer_lens import HookedTransformer
@@ -124,7 +132,7 @@ reconstructed = sae.decode(sae_features)
 reconstruction_error = (activations - reconstructed).norm()
 ```
 
-### Available Pre-trained SAEs
+### Available Pre-trained SAEs {#available-pre-trained-saes}
 
 | Release | Model | Layers |
 |---------|-------|--------|
@@ -132,16 +140,16 @@ reconstruction_error = (activations - reconstructed).norm()
 | `gemma-2b-res` | Gemma 2B | Residual streams |
 | Various on HuggingFace | Search tag `saelens` | Various |
 
-### Checklist
+### Checklist {#checklist}
 - [ ] Load model with TransformerLens
 - [ ] Load matching SAE for target layer
 - [ ] Encode activations to sparse features
 - [ ] Identify top-activating features per token
 - [ ] Validate reconstruction quality
 
-## Workflow 2: Training a Custom SAE
+## Workflow 2: Training a Custom SAE {#workflow-2-training-a-custom-sae}
 
-### Step-by-Step
+### Step-by-Step {#step-by-step-1}
 
 ```python
 from sae_lens import (
@@ -205,7 +213,7 @@ print(f"CE Loss Recovered: {trainer.metrics['ce_loss_score']}")
 > (`architecture`, `expansion_factor`, `hook_layer`, `activation_fn`/`activation_fn_kwargs`,
 > `use_ghost_grads`, ghost grads, b_dec/decoder init options) were removed in v6.
 
-### Key Hyperparameters
+### Key Hyperparameters {#key-hyperparameters}
 
 | Parameter | Typical Value | Effect |
 |-----------|---------------|--------|
@@ -214,7 +222,7 @@ print(f"CE Loss Recovered: {trainer.metrics['ce_loss_score']}")
 | `lr` | 1e-4 to 1e-3 | Standard optimizer LR |
 | `l1_warm_up_steps` | 500-2000 | Prevents early feature death |
 
-### Evaluation Metrics
+### Evaluation Metrics {#evaluation-metrics}
 
 | Metric | Target | Meaning |
 |--------|--------|---------|
@@ -223,7 +231,7 @@ print(f"CE Loss Recovered: {trainer.metrics['ce_loss_score']}")
 | **Dead Features** | &lt;5% | Features that never activate |
 | **Explained Variance** | >90% | Reconstruction quality |
 
-### Checklist
+### Checklist {#checklist-1}
 - [ ] Choose target layer and hook point
 - [ ] Set expansion factor (d_sae = 4-16× d_model)
 - [ ] Tune L1 coefficient for desired sparsity
@@ -232,9 +240,9 @@ print(f"CE Loss Recovered: {trainer.metrics['ce_loss_score']}")
 - [ ] Validate L0 and CE loss recovery
 - [ ] Check dead feature ratio
 
-## Workflow 3: Feature Analysis and Steering
+## Workflow 3: Feature Analysis and Steering {#workflow-3-feature-analysis-and-steering}
 
-### Analyzing Individual Features
+### Analyzing Individual Features {#analyzing-individual-features}
 
 ```python
 from transformer_lens import HookedTransformer
@@ -265,7 +273,7 @@ for text in test_texts:
     print(f"{activation:.3f}: {text}")
 ```
 
-### Feature Steering
+### Feature Steering {#feature-steering}
 
 ```python
 def steer_with_feature(model, sae, prompt, feature_idx, strength=5.0):
@@ -289,7 +297,7 @@ def steer_with_feature(model, sae, prompt, feature_idx, strength=5.0):
     return model.to_string(output[0])
 ```
 
-### Feature Attribution
+### Feature Attribution {#feature-attribution}
 
 ```python
 # Which features most affect a specific output?
@@ -314,13 +322,13 @@ for idx, val in zip(top_features.indices, top_features.values):
     print(f"  Feature {idx.item()}: {val.item():.3f}")
 ```
 
-## Common Issues & Solutions
+## Common Issues & Solutions {#common-issues--solutions}
 
 > All examples below use the v6 nested config: SAE-specific options go in the `sae=`
 > sub-config (`StandardTrainingSAEConfig` / `TopKTrainingSAEConfig` / etc.), training
 > knobs stay on the top-level `LanguageModelSAERunnerConfig`.
 
-### Issue: High dead feature ratio
+### Issue: High dead feature ratio {#issue-high-dead-feature-ratio}
 ```python
 from sae_lens import LanguageModelSAERunnerConfig, StandardTrainingSAEConfig
 
@@ -337,7 +345,7 @@ cfg = LanguageModelSAERunnerConfig(
 )
 ```
 
-### Issue: Poor reconstruction (low CE recovery)
+### Issue: Poor reconstruction (low CE recovery) {#issue-poor-reconstruction-low-ce-recovery}
 ```python
 # Reduce sparsity penalty and/or add capacity (both on the SAE sub-config)
 cfg = LanguageModelSAERunnerConfig(
@@ -349,7 +357,7 @@ cfg = LanguageModelSAERunnerConfig(
 )
 ```
 
-### Issue: Features not interpretable
+### Issue: Features not interpretable {#issue-features-not-interpretable}
 ```python
 from sae_lens import LanguageModelSAERunnerConfig, StandardTrainingSAEConfig, TopKTrainingSAEConfig
 
@@ -363,7 +371,7 @@ cfg = LanguageModelSAERunnerConfig(
 )
 ```
 
-### Issue: Memory errors during training
+### Issue: Memory errors during training {#issue-memory-errors-during-training}
 ```python
 cfg = LanguageModelSAERunnerConfig(
     sae=StandardTrainingSAEConfig(d_in=768, d_sae=768*8, l1_coefficient=8e-5),
@@ -373,7 +381,7 @@ cfg = LanguageModelSAERunnerConfig(
 )
 ```
 
-## Integration with Neuronpedia
+## Integration with Neuronpedia {#integration-with-neuronpedia}
 
 Browse pre-trained SAE features at [neuronpedia.org](https://neuronpedia.org):
 
@@ -383,7 +391,7 @@ Browse pre-trained SAE features at [neuronpedia.org](https://neuronpedia.org):
 # → neuronpedia.org/gpt2-small/8-res-jb/1234
 ```
 
-## Key Classes Reference
+## Key Classes Reference {#key-classes-reference}
 
 | Class | Purpose |
 |-------|---------|
@@ -395,33 +403,33 @@ Browse pre-trained SAE features at [neuronpedia.org](https://neuronpedia.org):
 | `ActivationsStore` | Activation collection and batching |
 | `HookedSAETransformer` | TransformerLens + SAE integration |
 
-## Reference Documentation
+## Reference Documentation {#reference-documentation}
 
 For detailed API documentation, tutorials, and advanced usage, see the `references/` folder:
 
 | File | Contents |
 |------|----------|
-| [references/README.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/saelens/references/README.md) | Overview and quick start guide |
-| [references/api.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/saelens/references/api.md) | Complete API reference for SAE, TrainingSAE, configurations |
-| [references/tutorials.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/saelens/references/tutorials.md) | Step-by-step tutorials for training, analysis, steering |
+| [references/README.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/saelens/references/README.md) | Overview and quick start guide |
+| [references/api.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/saelens/references/api.md) | Complete API reference for SAE, TrainingSAE, configurations |
+| [references/tutorials.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/saelens/references/tutorials.md) | Step-by-step tutorials for training, analysis, steering |
 
-## External Resources
+## External Resources {#external-resources}
 
-### Tutorials
+### Tutorials {#tutorials}
 - [Basic Loading & Analysis](https://github.com/jbloomAus/SAELens/blob/main/tutorials/basic_loading_and_analysing.ipynb)
 - [Training a Sparse Autoencoder](https://github.com/jbloomAus/SAELens/blob/main/tutorials/training_a_sparse_autoencoder.ipynb)
 - [ARENA SAE Curriculum](https://www.lesswrong.com/posts/LnHowHgmrMbWtpkxx/intro-to-superposition-and-sparse-autoencoders-colab)
 
-### Papers
+### Papers {#papers}
 - [Towards Monosemanticity](https://transformer-circuits.pub/2023/monosemantic-features) - Anthropic (2023)
 - [Scaling Monosemanticity](https://transformer-circuits.pub/2024/scaling-monosemanticity/) - Anthropic (2024)
 - [Sparse Autoencoders Find Highly Interpretable Features](https://arxiv.org/abs/2309.08600) - Cunningham et al. (ICLR 2024)
 
-### Official Documentation
+### Official Documentation {#official-documentation}
 - [SAELens Docs](https://jbloomaus.github.io/SAELens/)
 - [Neuronpedia](https://neuronpedia.org) - Feature browser
 
-## SAE Architectures
+## SAE Architectures {#sae-architectures}
 
 | Architecture | Description | Use Case |
 |--------------|-------------|----------|

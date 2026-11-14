@@ -1,26 +1,33 @@
 ---
 title: "Windows (Native) Guide"
-description: "Run Hermes Agent natively on Windows 10 / 11 — install, feature matrix, UTF-8 console, Git Bash, gateway as a Scheduled Task, editor handling, PATH, uninstall, and common pitfalls"
-sidebar_label: "Windows (Native)"
-sidebar_position: 3
+description: "Run the agent natively on Windows 10 / 11 — install, feature matrix, UTF-8 console, Git Bash, gateway as a Scheduled Task, editor handling, PATH, uninstall, and common pitfalls"
+sidebarTitle: "Windows (Native)"
 ---
 
-# Windows (Native) Guide
+# Windows (Native) Guide {#windows-native-guide}
 
-Hermes runs natively on Windows 10 and Windows 11 — no WSL, no Cygwin, no Docker. This page is the deep dive: what works natively, what's WSL-only, what the installer actually does, and the Windows-specific knobs you might need to touch.
+{{app-name}} runs natively on Windows 10 and Windows 11 — no WSL, no Cygwin, no Docker. This page is the deep dive: what works natively, what's WSL-only, what the installer actually does, and the Windows-specific knobs you might need to touch.
 
 If you just want to install, the one-liner on the [landing page](../index.mdx) or [Installation page](../getting-started/installation#windows-native) is all you need. Come back here when something surprises you.
 
-:::tip Want WSL instead?
-If you prefer a POSIX environment for `fork` semantics or Linux-style file watchers, see the **[Windows (WSL2) Guide](./windows-wsl-quickstart.md)**. Both coexist cleanly: native data lives under `%LOCALAPPDATA%\hermes`, WSL data lives under `~/.hermes`.
-:::
+<Tip>
 
-## Quick install
+<div className="doc-callout-title">
+
+Want WSL instead?
+
+</div>
+
+If you prefer a POSIX environment for `fork` semantics or Linux-style file watchers, see the **[Windows (WSL2) Guide](./windows-wsl-quickstart.md)**. Both coexist cleanly: native data lives under `%LOCALAPPDATA%\hermes`, WSL data lives under `~/.hermes`.
+
+</Tip>
+
+## Quick install {#quick-install}
 
 Open **PowerShell** (or Windows Terminal) and run:
 
 ```powershell
-iex (irm https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.ps1)
+iex (irm https://raw.githubusercontent.com/Garudex-Labs/NoOne/main/scripts/install.ps1)
 ```
 
 No admin rights required. The installer goes to `%LOCALAPPDATA%\hermes\` and adds `hermes` to your **User PATH** — open a new terminal after it finishes.
@@ -28,12 +35,12 @@ No admin rights required. The installer goes to `%LOCALAPPDATA%\hermes\` and add
 **Installer options** use a scriptblock:
 
 ```powershell
-& ([scriptblock]::Create((irm https://hermes-agent.nousresearch.com/install.ps1))) -NonInteractive -Channel main
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Garudex-Labs/NoOne/main/scripts/install.ps1))) -NonInteractive -Channel main
 ```
 
 | Parameter | Purpose |
 |---|---|
-| `-Channel stable\|main` | `stable` (default): the latest published release. `main`: every commit, saved like `hermes update --set-channel main`. `$env:HERMES_INSTALL_CHANNEL` sets it for a plain `irm \| iex`. |
+| `-Channel stable\|main` | `stable` (default): the latest published release. `main`: every commit, saved like `noone update --set-channel main`. `$env:HERMES_INSTALL_CHANNEL` sets it for a plain `irm \| iex`. |
 | `-Branch NAME` | Select the source branch; default `main`. Another branch is installed at its tip. |
 | `-Commit SHA` | Select a commit after the branch checkout. |
 | `-HermesHome PATH` | Select the data directory. |
@@ -48,7 +55,7 @@ No admin rights required. The installer goes to `%LOCALAPPDATA%\hermes\` and add
 The current script does not accept `-NoVenv` or `-Tag`. `-SkipSetup` is still accepted as a deprecated alias for `-NonInteractive` so older install wrappers keep binding.
 To diagnose an unexpected short Windows path, use `-ShowResolvedPaths` first.
 
-### MSIX / App Installer and Microsoft Store
+### MSIX / App Installer and Microsoft Store {#msix--app-installer-and-microsoft-store}
 
 The bundled desktop is separate from the source script. Its MSIX package
 requires **Windows 11 22H2 or later**. Windows 10 source-script support does
@@ -65,19 +72,19 @@ Windows Settings → Apps → Advanced app settings → App execution aliases
 controls the aliases.
 
 Sideload updates use the app's Update control and Windows App Installer.
-Hermes downloads a local descriptor before teardown and registers automatic
+{{app-name}} downloads a local descriptor before teardown and registers automatic
 relaunch. It does not require the `ms-appinstaller:` URL protocol. An unknown
 update-check result is not a claim that the package is current.
 
 The Microsoft Store variant uses its Partner Center package identity and Store
-updates. It does not use the sideload feed. `hermes update` inside either
+updates. It does not use the sideload feed. `noone update` inside either
 bundled runtime does not run Git against package files.
 
-`Hermes-Setup.exe` is a different, bootstrap installer. It provisions a source
+`NoOne-Setup.exe` is a different, bootstrap installer. It provisions a source
 checkout through the scripts. Do not confuse it with the self-contained MSIX
 package. See [Updating & Uninstalling](../getting-started/updating.md).
 
-### Dependency bootstrap
+### Dependency bootstrap {#dependency-bootstrap}
 
 PM owns managed tools. Feature code asks PM for the package it needs
 (`pm.ensure("<package>")`, e.g. `cua-driver` for Computer Use) instead of
@@ -87,11 +94,11 @@ recorded state; a missing optional tool is fetched on demand only when
 permits it. `install.ps1` has no `-Ensure` mode.
 
 ```powershell
-hermes pm doctor
-hermes pm install
+noone pm doctor
+noone pm install
 ```
 
-## What the source installer does
+## What the source installer does {#what-the-source-installer-does}
 
 1. Locate Git, or stage the verified Git for Windows pin when Git is absent.
 2. Clone the selected repository branch and apply an optional commit pin.
@@ -107,19 +114,27 @@ environment before imports. PM can publish a new writable environment without
 replacing libraries already loaded by a running process. There is no tiered
 pip fallback to silently reduce the installed feature set.
 
-:::tip Skip provider hunting on Windows
-On Windows, per-tool API key setup (Firecrawl, FAL, Browser Use, OpenAI TTS) is the highest-friction part of getting a useful agent. A [Nous Portal](./features/tool-gateway.md) subscription covers the model **and** all of those tools through one OAuth login. After the installer finishes, run `hermes setup --portal` to wire everything up.
-:::
+<Tip>
 
-## Feature matrix
+<div className="doc-callout-title">
+
+Skip provider hunting on Windows
+
+</div>
+
+On Windows, per-tool API key setup (Firecrawl, FAL, Browser Use, OpenAI TTS) is the highest-friction part of getting a useful agent. A [Nous Portal](./features/tool-gateway.md) subscription covers the model **and** all of those tools through one OAuth login. After the installer finishes, run `noone setup --portal` to wire everything up.
+
+</Tip>
+
+## Feature matrix {#feature-matrix}
 
 Windows support is feature- and architecture-specific. The base interfaces run
 natively, but some optional SDKs are excluded from particular targets.
 
 | Feature | Native Windows | WSL2 |
 |---|---|---|
-| CLI (`hermes chat`, `hermes setup`, `hermes gateway`, …) | ✓ | ✓ |
-| Interactive TUI (`hermes --tui`) | ✓ | ✓ |
+| CLI (`noone chat`, `noone setup`, `noone gateway`, …) | ✓ | ✓ |
+| Interactive TUI (`noone --cli`) | ✓ | ✓ |
 | Messaging gateway (Telegram, Discord, Slack, WhatsApp, 15+ platforms) | ✓ | ✓ |
 | Cron scheduler | ✓ | ✓ |
 | Browser tool (Chromium via Node) | ✓ | ✓ |
@@ -133,7 +148,7 @@ The dashboard uses its `pywinpty`/ConPTY bridge on Windows and `ptyprocess`
 on POSIX. A missing or broken native dependency can make the terminal
 unavailable; WSL is an alternative, not a requirement of the current design.
 
-### Optional dependency limits
+### Optional dependency limits {#optional-dependency-limits}
 
 - Matrix's native encrypted adapter is Linux-only; use a supported proxy route
   or a Linux backend on Windows.
@@ -146,9 +161,9 @@ unavailable; WSL is an alternative, not a requirement of the current design.
 The platform markers in `pyproject.toml` define the packaged dependency set.
 A general gateway or voice feature claim does not override those markers.
 
-## How Hermes runs shell commands on Windows
+## How {{app-name}} runs shell commands on Windows {#how-hermes-runs-shell-commands-on-windows}
 
-Hermes's terminal tool runs commands through **Git Bash**, same strategy Claude Code uses. This sidesteps the POSIX-vs-Windows gap without rewriting every tool.
+{{app-name}}'s terminal tool runs commands through **Git Bash**, same strategy Claude Code uses. This sidesteps the POSIX-vs-Windows gap without rewriting every tool.
 
 `pm.shell()` owns Bash resolution. It first checks the Git package recorded in
 PM facts, then the provisioned `PATH`. If a PATH candidate belongs to a WindowsApps
@@ -162,11 +177,11 @@ Do not disable Windows security controls to work around that boundary.
 The current installer does not set `HERMES_GIT_BASH_PATH`. MinGit is not a
 replacement for Git for Windows with Bash.
 
-## UTF-8 console on Windows
+## UTF-8 console on Windows {#utf-8-console-on-windows}
 
-Python's default stdio on Windows uses the console's active code page (usually cp1252 or cp437). Hermes's banner, slash-command list, tool feed, Rich panels, and skill descriptions all contain Unicode. Without intervention, any of that crashes with `UnicodeEncodeError: 'charmap' codec can't encode character…`.
+Python's default stdio on Windows uses the console's active code page (usually cp1252 or cp437). {{app-name}}'s banner, slash-command list, tool feed, Rich panels, and skill descriptions all contain Unicode. Without intervention, any of that crashes with `UnicodeEncodeError: 'charmap' codec can't encode character…`.
 
-The fix is in `hermes_cli/stdio.py::configure_windows_stdio()`, called early in every entry point (`cli.py::main`, `hermes_cli/main.py::main`, `gateway/run.py::main`). It:
+The fix is in `agent_cli/stdio.py::configure_windows_stdio()`, called early in every entry point (`cli.py::main`, `agent_cli/main.py::main`, `gateway/run.py::main`). It:
 
 1. Flips the console code page to CP_UTF8 (65001) via `kernel32.SetConsoleCP` / `SetConsoleOutputCP`.
 2. Reconfigures `sys.stdout` / `sys.stderr` / `sys.stdin` to UTF-8 with `errors='replace'`.
@@ -177,11 +192,11 @@ Idempotent. No-op on non-Windows.
 
 **Opt out:** `HERMES_DISABLE_WINDOWS_UTF8=1` in the environment falls back to the legacy cp1252 stdio path. Useful for bisecting an encoding bug; unlikely to be the right setting in normal operation.
 
-## The editor (`Ctrl-X Ctrl-E`, `/edit`)
+## The editor (`Ctrl-X Ctrl-E`, `/edit`) {#the-editor-ctrl-x-ctrl-e-edit}
 
 Pre-#21561, pressing `Ctrl-X Ctrl-E` or typing `/edit` silently did nothing on Windows. prompt_toolkit has a hardcoded POSIX-absolute fallback list (`/usr/bin/nano`, `/usr/bin/pico`, `/usr/bin/vi`, …) that never resolves on Windows — even with full Git for Windows installed.
 
-Hermes's Windows stdio shim now sets `EDITOR=notepad` as a default. Notepad ships with every Windows install and works as a blocking editor — `subprocess.call(["notepad", file])` blocks until the window closes.
+{{app-name}}'s Windows stdio shim now sets `EDITOR=notepad` as a default. Notepad ships with every Windows install and works as a blocking editor — `subprocess.call(["notepad", file])` blocks until the window closes.
 
 **User overrides still win** (they're checked before the setdefault):
 
@@ -192,7 +207,7 @@ Hermes's Windows stdio shim now sets `EDITOR=notepad` as a default. Notepad ship
 | Neovim | `$env:EDITOR = "nvim"` |
 | Helix | `$env:EDITOR = "hx"` |
 
-The `--wait` flag on VS Code is critical — without it the editor returns immediately and Hermes gets a blank buffer back.
+The `--wait` flag on VS Code is critical — without it the editor returns immediately and {{app-name}} gets a blank buffer back.
 
 Set it permanently in your PowerShell profile:
 
@@ -203,50 +218,50 @@ $env:EDITOR = "code --wait"
 
 Or as a User environment variable in System Settings so every new shell picks it up.
 
-## `Ctrl+Enter` for newline in the CLI
+## `Ctrl+Enter` for newline in the CLI {#ctrlenter-for-newline-in-the-cli}
 
-Windows Terminal passes `Ctrl+Enter` through as a dedicated key sequence. Hermes binds it to "insert newline" so you can compose multi-line prompts in the CLI without falling back to `Esc`-then-`Enter`. Works in Windows Terminal, VS Code integrated terminal, and any modern Windows console host that honors VT escape sequences.
+Windows Terminal passes `Ctrl+Enter` through as a dedicated key sequence. {{app-name}} binds it to "insert newline" so you can compose multi-line prompts in the CLI without falling back to `Esc`-then-`Enter`. Works in Windows Terminal, VS Code integrated terminal, and any modern Windows console host that honors VT escape sequences.
 
 On legacy `cmd.exe` consoles `Ctrl+Enter` collapses to plain `Enter` — use `Esc Enter` instead, or upgrade to Windows Terminal (it's free and installed by default on Windows 11).
 
-## Running the gateway at Windows login
+## Running the gateway at Windows login {#running-the-gateway-at-windows-login}
 
-`hermes gateway install` on Windows uses **Scheduled Tasks** with a Startup-folder fallback — no admin required.
+`noone gateway install` on Windows uses **Scheduled Tasks** with a Startup-folder fallback — no admin required.
 
-### Install
+### Install {#install}
 
 ```powershell
-hermes gateway install
+noone gateway install
 ```
 
 What happens under the hood:
 
 1. `schtasks /Create /SC ONLOGON /RL LIMITED /TN Hermes_Gateway` — registers a task that runs at your login with standard (non-elevated) permissions. No UAC prompt.
 2. If schtasks is blocked by group policy, falls back to writing a small `Hermes_Gateway.vbs` launcher (run hidden via `wscript.exe`) into `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`. Same effect, slightly cruder. A VBScript is used rather than a `cmd.exe` shortcut because a console allocated at logon can receive a close event that kills the gateway before it finishes starting.
-   Only one of the two is ever kept: a successful task install removes any Startup-folder entry (including a legacy `Hermes_Gateway.cmd`), the fallback is skipped while a task is still registered, and `hermes update` / `hermes doctor --fix` clean up older installs that have both, since both would launch the gateway at logon.
+   Only one of the two is ever kept: a successful task install removes any Startup-folder entry (including a legacy `Hermes_Gateway.cmd`), the fallback is skipped while a task is still registered, and `noone update` / `noone doctor --fix` clean up older installs that have both, since both would launch the gateway at logon.
 3. Spawns the gateway **detached via `pythonw.exe`** — not `python.exe`. `pythonw.exe` has no console attached, which immunizes it against `CTRL_C_EVENT` broadcasts from sibling processes (a real issue that used to kill the gateway when you Ctrl+C'd anything in the same process group).
 
 Flags used when spawning: `DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW | CREATE_BREAKAWAY_FROM_JOB`.
 
-### Manage
+### Manage {#manage}
 
 ```powershell
-hermes gateway status      # Merged view: schtasks + Startup folder + running PID
-hermes gateway start       # Starts the gateway in the background (asks about login auto-start only on a TTY when nothing is installed)
-hermes gateway stop        # Writes the planned-stop marker, waits for the gateway to drain (≤ agent.restart_drain_timeout, capped at 30 s), then force-kills only if it is still alive
-hermes gateway restart     # Same drain-first stop, then a fresh start
-hermes gateway uninstall   # Removes schtasks entry, Startup shortcut, pid file
+noone gateway status      # Merged view: schtasks + Startup folder + running PID
+noone gateway start       # Starts the gateway in the background (asks about login auto-start only on a TTY when nothing is installed)
+noone gateway stop        # Writes the planned-stop marker, waits for the gateway to drain (≤ agent.restart_drain_timeout, capped at 30 s), then force-kills only if it is still alive
+noone gateway restart     # Same drain-first stop, then a fresh start
+noone gateway uninstall   # Removes schtasks entry, Startup shortcut, pid file
 ```
 
-`hermes gateway status` is idempotent — call it a thousand times in a row and it will never accidentally kill the gateway. (Pre-PR #21561 it silently did, via `os.kill(pid, 0)` colliding with `CTRL_C_EVENT` at the C level — see "process management internals" below if you care about the story.)
+`noone gateway status` is idempotent — call it a thousand times in a row and it will never accidentally kill the gateway. (Pre-PR #21561 it silently did, via `os.kill(pid, 0)` colliding with `CTRL_C_EVENT` at the C level — see "process management internals" below if you care about the story.)
 
-Login auto-start is only ever installed on an explicit answer: `hermes gateway install`, a `Y` on a real terminal, or `HERMES_GATEWAY_INSTALL_START_ON_LOGIN=1`. A scripted or piped `hermes gateway start` (no TTY, or `HERMES_NONINTERACTIVE=1`) starts the gateway without touching the Scheduled Task or the Startup folder; set `HERMES_GATEWAY_INSTALL_START_ON_LOGIN=0` to skip the question on a terminal too.
+Login auto-start is only ever installed on an explicit answer: `noone gateway install`, a `Y` on a real terminal, or `HERMES_GATEWAY_INSTALL_START_ON_LOGIN=1`. A scripted or piped `noone gateway start` (no TTY, or `HERMES_NONINTERACTIVE=1`) starts the gateway without touching the Scheduled Task or the Startup folder; set `HERMES_GATEWAY_INSTALL_START_ON_LOGIN=0` to skip the question on a terminal too.
 
-### Why not a Windows Service?
+### Why not a Windows Service? {#why-not-a-windows-service}
 
-Services require admin rights to install and tie the gateway's lifecycle to machine boot, not user login. The typical Hermes user wants: log in → gateway available, log out → gateway gone. Scheduled Tasks do exactly that without elevation. If you genuinely want a service, use `nssm` or `sc create` manually — but you probably don't. If you do, name it `Hermes*` or point its binary path inside the Hermes install (`venv\Scripts\hermes.exe`, the checkout, or `gateway-service\`): `hermes update` stops and restarts only services it can positively identify as Hermes-owned through the Service Control Manager, and pauses a Scheduled-Task-launched gateway by PID (Task Scheduler itself is never touched).
+Services require admin rights to install and tie the gateway's lifecycle to machine boot, not user login. The typical {{app-name}} user wants: log in → gateway available, log out → gateway gone. Scheduled Tasks do exactly that without elevation. If you genuinely want a service, use `nssm` or `sc create` manually — but you probably don't. If you do, name it `Hermes*` or point its binary path inside the {{app-name}} install (`venv\Scripts\hermes.exe`, the checkout, or `gateway-service\`): `noone update` stops and restarts only services it can positively identify as {{app-name}}-owned through the Service Control Manager, and pauses a Scheduled-Task-launched gateway by PID (Task Scheduler itself is never touched).
 
-## Data layout
+## Data layout {#data-layout}
 
 | Path | Contents |
 |---|---|
@@ -261,21 +276,21 @@ them. A full deletion of `%LOCALAPPDATA%\hermes` also deletes user data and
 can affect other installations that share it. Use the uninstall command or
 Windows package removal instead of deleting that root to repair an app.
 
-## Browser tool
+## Browser tool {#browser-tool}
 
-The browser tool (`browser_exec`) is part of Hermes's Python environment.
-For local browsing, Hermes launches the pinned Chromium that PM installs
-(`hermes pm install chromium` if it is missing); set `browser.executable_path`
+The browser tool (`browser_exec`) is part of {{app-name}}'s Python environment.
+For local browsing, {{app-name}} launches the pinned Chromium that PM installs
+(`noone pm install chromium` if it is missing); set `browser.executable_path`
 to use another Chromium-family binary. Cloud browsers are selected in
-`hermes tools`. A self-contained MSIX includes the browser tools in its payload.
+`noone tools`. A self-contained MSIX includes the browser tools in its payload.
 
 On Windows ARM64, the pinned Chromium is the x64 build and runs under
 Windows' x64 emulation. This differs from the native ARM64 Python runtime.
 See [Browser automation](./features/browser.md) for browser sources.
 
-## Running Hermes on Windows — practical notes
+## Running {{app-name}} on Windows — practical notes {#running-hermes-on-windows--practical-notes}
 
-### PATH after install
+### PATH after install {#path-after-install}
 
 The installer adds `%LOCALAPPDATA%\hermes\bin` to your **User PATH** via `[Environment]::SetEnvironmentVariable`. Existing terminals don't pick this up — open a new PowerShell window (or Windows Terminal tab) after installation. Close-and-reopen, don't `$env:PATH += …` by hand unless you know what you're doing.
 
@@ -283,12 +298,12 @@ Verify:
 
 ```powershell
 Get-Command hermes        # should print C:\Users\<you>\AppData\Local\hermes\bin\hermes.exe
-hermes --version
+noone --version
 ```
 
-### Environment variables
+### Environment variables {#environment-variables}
 
-Hermes honors both `$env:X` (process-scope) and User environment variables (permanent, set in System Properties → Environment Variables). Setting API keys in `%LOCALAPPDATA%\hermes\.env` (your `HERMES_HOME`) is the normal path — same as Linux:
+{{app-name}} honors both `$env:X` (process-scope) and User environment variables (permanent, set in System Properties → Environment Variables). Setting API keys in `%LOCALAPPDATA%\hermes\.env` (your `HERMES_HOME`) is the normal path — same as Linux:
 
 ```
 OPENROUTER_API_KEY=sk-or-...
@@ -297,16 +312,16 @@ TELEGRAM_BOT_TOKEN=...
 
 Don't put secrets in User environment variables unless you specifically want every Windows process to see them (it isn't what you want).
 
-### Windows-specific env vars
+### Windows-specific env vars {#windows-specific-env-vars}
 
 These only affect native Windows installs:
 
 | Variable | Effect |
 |---|---|
 | `HERMES_DISABLE_WINDOWS_UTF8` | Set to `1` to disable the UTF-8 stdio shim and fall back to the locale code page. Useful for bisecting an encoding bug. |
-| `EDITOR` / `VISUAL` | Your editor for `/edit` and `Ctrl-X Ctrl-E`. Hermes defaults to `notepad` if both are unset. |
+| `EDITOR` / `VISUAL` | Your editor for `/edit` and `Ctrl-X Ctrl-E`. {{app-name}} defaults to `notepad` if both are unset. |
 
-## Uninstall
+## Uninstall {#uninstall}
 
 From PowerShell:
 
@@ -315,49 +330,57 @@ hermes uninstall
 ```
 
 For source installs, the uninstaller removes owned launchers, service entries,
-and application files. Review `hermes uninstall --dry-run` before removal.
+and application files. Review `noone uninstall --dry-run` before removal.
 `--full` also removes data; `--data` removes data without removing packaged code.
 For MSIX or Store installations, remove the app through Windows Settings →
 Apps → Installed apps. The CLI refuses to delete package-owned code.
 
-:::caution User-data deletion
-Before deleting data, stop every Hermes process that uses the selected `HERMES_HOME` and make a backup.
-Review `hermes uninstall --dry-run` before choosing a data-removal mode.
+<Warning>
+
+<div className="doc-callout-title">
+
+User-data deletion
+
+</div>
+
+Before deleting data, stop every {{app-name}} process that uses the selected `HERMES_HOME` and make a backup.
+Review `noone uninstall --dry-run` before choosing a data-removal mode.
 Do not recursively delete the default data root to repair one application or profile.
 A custom `HERMES_HOME` can be elsewhere, and package removal does not remove that data.
-:::
 
-The `hermes uninstall` CLI subcommand also handles the case where the schtasks entry was registered under a different task name (older installs) — it searches by install path rather than by hardcoded task name.
+</Warning>
 
-## Process management internals
+The `noone uninstall` CLI subcommand also handles the case where the schtasks entry was registered under a different task name (older installs) — it searches by install path rather than by hardcoded task name.
+
+## Process management internals {#process-management-internals}
 
 This is background material — skip unless you're debugging an "it's killing itself" weirdness.
 
 On Linux and macOS, the POSIX idiom `os.kill(pid, 0)` is a no-op permission check: "is this PID alive and can I signal it?" On Windows, Python's `os.kill` maps `sig=0` to `CTRL_C_EVENT` — they collide at integer value 0 — and routes it through `GenerateConsoleCtrlEvent(0, pid)`, which broadcasts Ctrl+C to the **entire console process group** containing the target PID. That's [bpo-14484](https://bugs.python.org/issue14484), open since 2012. It won't be fixed because changing it would break scripts that depend on the current behavior.
 
-Consequence: any codepath that said "check if this PID is alive" via `os.kill(pid, 0)` on Windows was silently killing the target. Hermes migrated every such site (14 across 11 files) to `gateway.status._pid_exists()`, which uses `psutil.pid_exists()` (which in turn uses `OpenProcess + GetExitCodeProcess` on Windows — no signals). If you're writing a plugin or patch, use `psutil.pid_exists()` directly or `gateway.status._pid_exists()` — never `os.kill(pid, 0)`.
+Consequence: any codepath that said "check if this PID is alive" via `os.kill(pid, 0)` on Windows was silently killing the target. {{app-name}} migrated every such site (14 across 11 files) to `gateway.status._pid_exists()`, which uses `psutil.pid_exists()` (which in turn uses `OpenProcess + GetExitCodeProcess` on Windows — no signals). If you're writing a plugin or patch, use `psutil.pid_exists()` directly or `gateway.status._pid_exists()` — never `os.kill(pid, 0)`.
 
 `scripts/check-windows-footguns.py` enforces this in CI: any new `os.kill(pid, 0)` call fails the `Windows footguns (blocking)` check unless the line carries a `# windows-footgun: ok — <reason>` marker.
 
-## Common pitfalls
+## Common pitfalls {#common-pitfalls}
 
 **`hermes: command not found` right after install.**
 Open a new PowerShell window. The installer added `%LOCALAPPDATA%\hermes\bin` to User PATH, but existing shells need to be restarted to pick it up. In the meantime you can run `& "$env:LOCALAPPDATA\hermes\bin\hermes.exe"`.
 
 **`WinError 193: %1 is not a valid Win32 application` when running a tool.**
-You hit a shebang-script invocation that bypassed the `.cmd` shim. Hermes resolves commands through `shutil.which(cmd, path=local_bin)` so PATHEXT picks up `.CMD` — if you're invoking the tool via a hardcoded path instead, switch to the `.cmd` variant (e.g., `npx.cmd`, not `npx`).
+You hit a shebang-script invocation that bypassed the `.cmd` shim. {{app-name}} resolves commands through `shutil.which(cmd, path=local_bin)` so PATHEXT picks up `.CMD` — if you're invoking the tool via a hardcoded path instead, switch to the `.cmd` variant (e.g., `npx.cmd`, not `npx`).
 
 **`[scriptblock]::Create(...)` fails with `The assignment expression is not valid`.**
 Your download of `install.ps1` picked up a UTF-8 BOM. The `irm | iex` form strips BOMs automatically; `[scriptblock]::Create((irm ...))` does not. Re-run with the simple `irm | iex` form, or download the script manually and save it without a BOM via `[IO.File]::WriteAllText($path, $text, (New-Object Text.UTF8Encoding $false))`.
 
 **Gateway won't stay running after restart.**
-Check `hermes gateway status` — it merges the schtasks entry, the Startup-folder shortcut (if used), and the live PID. If schtasks is registered but not running, group policy may be blocking `ONLOGON` triggers. Run `schtasks /Query /TN Hermes_Gateway /V /FO LIST` (`Hermes_Gateway_<profile>` for a named profile) to see the task's failure reason. The Startup-folder fallback engages automatically only when `schtasks` itself fails to register the task; there is no environment variable or flag to force it.
+Check `noone gateway status` — it merges the schtasks entry, the Startup-folder shortcut (if used), and the live PID. If schtasks is registered but not running, group policy may be blocking `ONLOGON` triggers. Run `schtasks /Query /TN Hermes_Gateway /V /FO LIST` (`Hermes_Gateway_<profile>` for a named profile) to see the task's failure reason. The Startup-folder fallback engages automatically only when `schtasks` itself fails to register the task; there is no environment variable or flag to force it.
 
 **`/edit` still does nothing after setting `$env:EDITOR`.**
 You set it in the current process only; close and reopen the shell, or set it at User scope in System Properties → Environment Variables. Verify with `echo $env:EDITOR` in a new PowerShell window.
 
 **Browser tool launches but tools time out.**
-Run `hermes doctor` and `hermes pm doctor`. Use `hermes tools` to inspect the
+Run `noone doctor` and `noone pm doctor`. Use `noone tools` to inspect the
 selected browser provider. A slow first Chromium start can be given more time
 with `browser.command_timeout` (the launch timeout floor, in seconds). Do not
 install an unrelated Playwright revision into a signed app payload.
@@ -366,12 +389,12 @@ install an unrelated Playwright revision into a signed app payload.
 The UTF-8 stdio shim didn't activate. Check that `HERMES_DISABLE_WINDOWS_UTF8` is NOT set (`Get-ChildItem env:HERMES_DISABLE_WINDOWS_UTF8`). If it's empty and you still see `?`, the console host (very old `cmd.exe`) may not support UTF-8 at all — switch to Windows Terminal.
 
 **Gateway can't send Telegram photos — "`BadRequest: payload contains invalid characters`".**
-This is unrelated to Windows but sometimes surfaces first there. Usually it means your file path contains unescaped backslashes in a JSON body. Telegram should be receiving paths Hermes normalizes, not raw Windows paths — if you're seeing this inside a custom plugin, make sure you're passing the Hermes-provided path, not `str(Path(...))` from user input.
+This is unrelated to Windows but sometimes surfaces first there. Usually it means your file path contains unescaped backslashes in a JSON body. Telegram should be receiving paths {{app-name}} normalizes, not raw Windows paths — if you're seeing this inside a custom plugin, make sure you're passing the {{app-name}}-provided path, not `str(Path(...))` from user input.
 
 **"Works on my other machine" encoding weirdness after `git pull`.**
-If you edited Hermes config or a skill on Windows using a non-UTF-8 editor (Notepad on older Windows versions, some Chinese IMEs), the file may have been saved with a BOM. Hermes tolerates `utf-8-sig` on most config reads, but a BOM inside a folded YAML scalar (`description: >`) silently breaks YAML parsing. Re-save the file as plain UTF-8 without BOM.
+If you edited {{app-name}} config or a skill on Windows using a non-UTF-8 editor (Notepad on older Windows versions, some Chinese IMEs), the file may have been saved with a BOM. {{app-name}} tolerates `utf-8-sig` on most config reads, but a BOM inside a folded YAML scalar (`description: >`) silently breaks YAML parsing. Re-save the file as plain UTF-8 without BOM.
 
-## Where to go next
+## Where to go next {#where-to-go-next}
 
 - **[Installation](../getting-started/installation.md)** — the full install page, including Linux/macOS/WSL2.
 - **[Windows (WSL2) Guide](./windows-wsl-quickstart.md)** — if you want POSIX semantics or the dashboard terminal pane.

@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 from gateway.platforms.event import MessageEvent
-from hermes_state_runtime import list_session_admissions
+from agent_state_runtime import list_session_admissions
 from tests.waiting import async_wait_until, wait_until
 
 
@@ -16,7 +16,7 @@ def rows(authority, sid):
 
 async def verify_envelope_guards(runner, source):
     from gateway.session_contract import SessionActor, Submission
-    from hermes_state_runtime import RuntimeStoreError
+    from agent_state_runtime import RuntimeStoreError
     authority = runner.session_authority
     ref = authority.register(source)
     before = rows(authority, ref.session_id)
@@ -56,7 +56,7 @@ async def prepare_crash(runner, adapter, source, peer):
         text='UNKNOWN_FOLLOWER', source=source, message_id='unknown-follower')))
     await async_wait_until(lambda: any(r['request_id'] == 'unknown-follower' for r in rows(authority, sid)),
                            timeout=5, what='unknown-follower committed')
-    # The receive coroutine is released at durable commit (serial IRC/Signal loops keep
+    # The receive coroutine is released at durable commit (serial Signal loops keep
     # reading); the follower itself stays queued behind the started head until the crash.
     await asyncio.wait_for(follower, 5)
     assert [r['status'] for r in rows(authority, sid) if r['request_id'] == 'unknown-follower'] == ['queued']

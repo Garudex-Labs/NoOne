@@ -13,7 +13,7 @@ from gateway.config import GatewayConfig, Platform
 from gateway.platforms.base import MessageEvent, MessageType
 from gateway.run import GatewayRunner, _profile_runtime_scope
 from gateway.session import SessionSource
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from tools import write_approval as wa
 
 
@@ -55,7 +55,7 @@ async def test_idle_dispatch_runs_table_handlers_under_the_routed_runtime(homes)
     # must still resolve the routed runtime for the handler.
     with _profile_runtime_scope(launch):
         handled, reply = await runner._hm_dispatch_canonical_command(event, event.source, "k", "memory")
-        assert get_hermes_home() == launch  # scope restored after dispatch
+        assert get_agent_home() == launch  # scope restored after dispatch
 
     assert handled and staged["id"] in reply
     assert not list((launch / "pending" / "memory").glob("*.json"))
@@ -64,11 +64,11 @@ async def test_idle_dispatch_runs_table_handlers_under_the_routed_runtime(homes)
 @pytest.mark.asyncio
 async def test_busy_dispatch_binds_the_same_runtime_scope(homes):
     launch, routed = homes
-    from hermes_cli.commands import resolve_command
+    from agent_cli.commands import resolve_command
     seen = {}
 
     async def _probe(_event):
-        seen["home"] = get_hermes_home()
+        seen["home"] = get_agent_home()
         return "ok"
 
     runner = _runner(routed)

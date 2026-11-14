@@ -1,20 +1,20 @@
 ---
 title: "Songsee — Audio spectrograms/features (mel, chroma, MFCC) via CLI"
-sidebar_label: "Songsee"
+sidebarTitle: "Songsee"
 description: "Audio spectrograms/features (mel, chroma, MFCC) via CLI"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Songsee
+# Songsee {#songsee}
 
 Audio spectrograms/features (mel, chroma, MFCC) via CLI.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/media/songsee` |
+| Source | Optional — install with `noone skills install official/media/songsee` |
 | Path | `optional-skills/media/songsee` |
 | Version | `1.0.0` |
 | Author | community |
@@ -22,17 +22,25 @@ Audio spectrograms/features (mel, chroma, MFCC) via CLI.
 | Platforms | linux, macos, windows |
 | Tags | `Audio`, `Visualization`, `Spectrogram`, `Music`, `Analysis` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# songsee
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# songsee {#songsee-1}
 
 Generate spectrograms and multi-panel audio feature visualizations from audio files.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 Requires [Go](https://go.dev/doc/install):
 ```bash
@@ -41,7 +49,7 @@ go install github.com/steipete/songsee/cmd/songsee@latest
 
 Optional: `ffmpeg` for formats beyond WAV/MP3.
 
-## Quick Start
+## Quick Start {#quick-start}
 
 ```bash
 # Basic spectrogram
@@ -60,7 +68,7 @@ songsee track.mp3 --start 12.5 --duration 8 -o slice.jpg
 cat track.mp3 | songsee - --format png -o out.png
 ```
 
-## Visualization Types
+## Visualization Types {#visualization-types}
 
 Use `--viz` with comma-separated values:
 
@@ -78,7 +86,7 @@ Use `--viz` with comma-separated values:
 
 Multiple `--viz` types render as a grid in a single image.
 
-## Common Flags
+## Common Flags {#common-flags}
 
 | Flag | Description |
 |------|-------------|
@@ -91,7 +99,7 @@ Multiple `--viz` types render as a grid in a single image.
 | `--format` | Output format: `jpg` or `png` |
 | `-o` | Output file path |
 
-## Notes
+## Notes {#notes}
 
 - WAV and MP3 are decoded natively; other formats require `ffmpeg`
 - Output images can be inspected with `vision_analyze` for automated audio analysis

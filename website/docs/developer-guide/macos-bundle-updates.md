@@ -1,4 +1,4 @@
-# macOS bundle updates
+# macOS bundle updates {#macos-bundle-updates}
 
 Tagged macOS bundles use `electron-updater`. The bundled and Light stamps
 name that owner. Stable and canary are separate application identities; each
@@ -11,7 +11,7 @@ Checks and apply requests explain that the developer must provide a new build.
 This applies to the desktop and its bundled CLI, not to an unrelated remote
 backend the desktop connects to.
 
-## Feed contract
+## Feed contract {#feed-contract}
 
 Channel registration lives in R2 at `releases/channels/NAME.json`, not in a
 checked-in channel map. Channel bundles resolve that record and its digest-bound
@@ -51,16 +51,16 @@ with different bytes. Mutable feeds use `Cache-Control: no-store`.
 Canary retention protects the artifacts and blockmaps referenced by live feeds.
 An unreadable feed prevents pruning.
 
-## Client lifecycle
+## Client lifecycle {#client-lifecycle}
 
 Checks never download automatically. Apply rechecks the release, downloads it,
-and waits for Squirrel.Mac to accept the signed app. Only then does Hermes stop
+and waits for Squirrel.Mac to accept the signed app. Only then does {{app-name}} stop
 its app-owned backends and request installation/relaunch. Unrelated quits do
 not trigger installation. Downloads and native-verification failures leave
 backends running. Concurrent checks cannot replace an apply operation's target.
 The existing checkout updater never mutates the sealed app bundle.
 
-## Release environment
+## Release environment {#release-environment}
 
 The existing `release-signing` environment supplies:
 
@@ -79,14 +79,14 @@ into memory and crashes downloading one that size
 ([electron/electron#55089](https://github.com/electron/electron/issues/55089)).
 The Darwin publish job waits for the arm64 build and its smoke, and serializes channel writes.
 
-## Verification limits
+## Verification limits {#verification-limits}
 
 Helper tests exercise the strategy, native-event ordering, feed validation,
 conditional publication, and retention. They are not proof of a signed install
 or actual app replacement.
 
 Native macOS packaged-update drivers are part of the existing
-[install/update family](https://github.com/NousResearch/hermes-agent/blob/main/tests/install/BUNDLED_UPDATES.md). The stable gate
+[install/update family](https://github.com/Garudex-Labs/NoOne/blob/main/tests/install/BUNDLED_UPDATES.md). The stable gate
 requires signed-package transitions on both architectures. Each acceptance
 claim needs a successful native run for the exact old/new package pair.
 Workflow definitions and historical helper results do not establish acceptance

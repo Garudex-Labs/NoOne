@@ -346,7 +346,7 @@ class TestBuildApiKwargsAIGateway:
 
 class TestBuildApiKwargsNousPortal:
     def test_includes_nous_product_tags(self, monkeypatch):
-        from agent.portal_tags import nous_portal_tags
+        from agent.conversation_scope import nous_portal_tags
         agent = _make_agent(
             monkeypatch,
             "nous",
@@ -763,7 +763,7 @@ class TestAuxiliaryClientProviderPriority:
         }
         with patch("agent.auxiliary_client._read_nous_auth", return_value=nous_auth), \
              patch("agent.auxiliary_client.OpenAI"), \
-             patch("hermes_cli.models.get_nous_recommended_aux_model", return_value=None):
+             patch("agent_cli.models.get_nous_recommended_aux_model", return_value=None):
             _client, model = get_text_auxiliary_client()
         assert model == _NOUS_MODEL
 

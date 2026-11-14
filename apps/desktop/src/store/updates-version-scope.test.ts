@@ -53,7 +53,7 @@ vi.mock('@/store/connections', () => ({
   refreshConnectionsRegistry: () => Promise.resolve($mockConnectionsRegistry.get())
 }))
 
-vi.mock('@/hermes', () => ({ checkHermesUpdate: vi.fn(), updateHermes: vi.fn(), getActionStatus: vi.fn() }))
+vi.mock('@/agent-client', () => ({ checkHermesUpdate: vi.fn(), updateHermes: vi.fn(), getActionStatus: vi.fn() }))
 vi.mock('@/store/gateway-reconnect', () => ({ reconnectGateway: vi.fn() }))
 
 const { refreshDesktopVersion, $desktopVersion, startUpdatePoller, stopUpdatePoller } = await import('./updates')

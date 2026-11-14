@@ -6,7 +6,7 @@ survive process restarts and appear in ``session_search``; ``load_session`` /
 """
 from __future__ import annotations
 
-from hermes_constants import get_hermes_home, translate_cwd_for_wsl_backend, windows_path_to_wsl
+from agent_constants import get_agent_home, translate_cwd_for_wsl_backend, windows_path_to_wsl
 
 import copy
 import json
@@ -253,7 +253,7 @@ class SessionManager:
         from acp_adapter.catalog import read_catalog_rows
         from pathlib import Path
 
-        path = Path(self._db_instance.db_path) if self._db_instance is not None else get_hermes_home() / "state.db"
+        path = Path(self._db_instance.db_path) if self._db_instance is not None else get_agent_home() / "state.db"
         return read_catalog_rows(path)
 
     def display_history(self, session_id: str) -> Optional[list[dict[str, Any]]]:
@@ -281,7 +281,7 @@ class SessionManager:
         _register_task_cwd(session_id, cwd)
         self._persist(state)
         # Promote the authoritative column and claim an ordering generation, the
-        # same contract tui_gateway/session_workdir.py uses: a git probe may only
+        # same contract agent_backend/session_workdir.py uses: a git probe may only
         # publish while its generation is still current, so a slow probe for a
         # previous workspace cannot overwrite a newer claim (A -> B -> A).
         self._schedule_git_metadata(state, self._claim_cwd_generation(state))
@@ -302,7 +302,7 @@ class SessionManager:
         this process is the session end: the client that drove the
         conversation is gone. Without this writer, source='acp' rows keep
         ``ended_at`` NULL forever and the ended-session guard shared by
-        prune/archive (``hermes_state_maintenance``) can never reach them.
+        prune/archive (``agent_state_maintenance``) can never reach them.
         A later load/resume reopens the row (see ``_restore``), the same
         contract the TUI gateway's resume path uses. Best-effort: teardown
         must never raise. Returns the number of sessions ended.
@@ -345,8 +345,8 @@ class SessionManager:
         acquire, so the ACP server holds ONE writer on state.db instead of two (#100896)."""
         if self._db_instance is None:
             try:
-                from hermes_state_registry import acquire
-                self._db_instance = acquire(get_hermes_home() / "state.db")
+                from agent_state_registry import acquire
+                self._db_instance = acquire(get_agent_home() / "state.db")
             except Exception:
                 logger.debug("SessionDB unavailable for ACP persistence", exc_info=True)
         if self._db_instance is not None and not self._cwd_backfilled:
@@ -458,7 +458,7 @@ class SessionManager:
 
         def _run() -> None:
             try:
-                from tui_gateway import git_probe
+                from agent_backend import git_probe
                 branch, root = git_probe.branch(cwd), git_probe.common_repo_root(cwd)
                 if not (branch or root):
                     return
@@ -528,10 +528,10 @@ class SessionManager:
 
         from run_agent import AIAgent
         from agent.skill_utils import parse_config_string_list
-        from hermes_cli.config import load_config
-        from hermes_cli.runtime_provider import resolve_runtime_provider
-        from hermes_cli.tools_config import _get_platform_tools, enabled_mcp_server_names
-        from hermes_constants import resolve_reasoning_config
+        from agent_cli.config import load_config
+        from agent_cli.runtime_provider import resolve_runtime_provider
+        from agent_cli.tools_config import _get_platform_tools, enabled_mcp_server_names
+        from agent_constants import resolve_reasoning_config
 
         config = load_config()
         model_cfg = config.get("model")
@@ -568,7 +568,7 @@ class SessionManager:
         # those rows then restore onto the endpoint they used instead of failing closed.
         requested = requested_provider or config_provider
         if requested == "custom" and base_url:
-            from hermes_cli.runtime_provider_custom import find_custom_provider_identity
+            from agent_cli.runtime_provider_custom import find_custom_provider_identity
             try:
                 requested = find_custom_provider_identity(base_url) or requested
             except Exception:
@@ -604,9 +604,9 @@ class SessionManager:
         # join a slow-but-reachable server would be invisible all session. ensure_* also
         # (re)starts discovery if the entry spawn never ran or connected zero servers.
         # Bounded by ``mcp_discovery_timeout`` (config.yaml, ~1.5s); late servers are
-        # picked up by HermesACPAgent._schedule_mcp_late_refresh.
+        # picked up by ACPAgent._schedule_mcp_late_refresh.
         try:
-            from hermes_cli.mcp_startup import ensure_mcp_discovery_before_agent_build
+            from agent_cli.mcp_startup import ensure_mcp_discovery_before_agent_build
 
             ensure_mcp_discovery_before_agent_build(logger=logger, thread_name="acp-mcp-discovery")
         except Exception:
@@ -615,7 +615,7 @@ class SessionManager:
         try:
             agent = AIAgent(**kwargs)
         except Exception as exc:
-            # The bare-AIAgent fallback dies with "No LLM provider configured. Run `hermes setup`" on a
+            # The bare-AIAgent fallback dies with "No LLM provider configured. Run `noone setup`" on a
             # machine that is configured and was working a call earlier; the swallowed resolution
             # failure (revoked OAuth, disabled provider, ...) is the actionable error (#91090).
             if resolve_error is not None:

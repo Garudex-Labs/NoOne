@@ -38,6 +38,7 @@ export {
   type SettlementDeps,
   type SettlementOutcome
 } from './charge-settlement'
+export { HERMES_CLOUD_MANAGED, isHermesCloudUrl } from './cloud-connection'
 export {
   contrastRatio,
   darken,
@@ -67,7 +68,6 @@ export { fileUrlToNativePath } from './file-url'
 export { compactNumber } from './format'
 export { type FuzzyMatch, fuzzyRank, fuzzyScore, fuzzyScoreMulti, type RankedItem } from './fuzzy'
 export * from './gateway-events'
-export { HERMES_CLOUD_MANAGED, isHermesCloudUrl } from './hermes-cloud'
 export {
   applyDocumentLocale,
   type EndonymLocale,
@@ -137,7 +137,7 @@ export {
 export { randomUuid } from './session-http-mutations'
 export { skillInvocationText } from './skill-scaffold'
 export {
-  type HermesSkin,
+  type AgentSkin,
   SKIN_BRANDING_TOKENS,
   SKIN_COLOR_TOKENS,
   type SkinBranding,
@@ -201,13 +201,13 @@ export {
 export { type UpdateDebt, updateDebt, type UpdateDebtReceipt, type UpdateDebtStep } from './update-debt'
 export { mergeUsage, usageFromTick, type UsageTickPayload } from './usage-tick'
 export {
+  type AgentWebSocketUrlOptions,
   BROWSER_NATIVE_DIAL,
   buildHermesWebSocketUrl,
   type GatewayAuthMode,
   GatewayReauthRequiredError,
   type GatewayWsConnection,
   type GatewayWsUrlResult,
-  type HermesWebSocketUrlOptions,
   isGatewayReauthRequired,
   normalizeBasePath,
   resolveGatewayWsUrl,

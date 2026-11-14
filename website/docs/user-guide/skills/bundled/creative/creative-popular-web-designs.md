@@ -1,61 +1,70 @@
 ---
 title: "Popular Web Designs — 54 real design systems (Stripe, Linear, Vercel) as HTML/CSS"
-sidebar_label: "Popular Web Designs"
+sidebarTitle: "Popular Web Designs"
 description: "54 real design systems (Stripe, Linear, Vercel) as HTML/CSS"
 ---
 
+
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Popular Web Designs
+# Popular Web Designs {#popular-web-designs}
 
 54 real design systems (Stripe, Linear, Vercel) as HTML/CSS.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/creative/popular-web-designs` |
 | Version | `1.0.0` |
-| Author | Hermes Agent + Teknium (design systems sourced from VoltAgent/awesome-design-md) |
+| Author | RAWx18 (design systems sourced from VoltAgent/awesome-design-md) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Popular Web Designs
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Popular Web Designs {#popular-web-designs-1}
 
 54 real-world design systems ready for use when generating HTML/CSS. Each template captures a
 site's complete visual language: color palette, typography hierarchy, component styles, spacing
 system, shadows, responsive behavior, and practical agent prompts with exact CSS values.
 
-## Related design skills
+## Related design skills {#related-design-skills}
 
 - **`claude-design`** — use for the design *process and taste* (scoping a brief,
   producing variants, verifying a local HTML artifact, avoiding AI-design slop).
   Pair it with this skill when the user wants a thoughtfully-designed page styled
   after a known brand: `claude-design` drives the workflow, this skill supplies
   the visual vocabulary.
-- **`design-md`** (optional: `hermes skills install official/creative/design-md`) —
+- **`design-md`** (optional: `noone skills install official/creative/design-md`) —
   use when the deliverable is a formal DESIGN.md token spec file, not a rendered artifact.
 
-## How to Use
+## How to Use {#how-to-use}
 
 1. Pick a design from the catalog below
 2. Load it: `skill_view(name="popular-web-designs", file_path="templates/<site>.md")`
 3. Use the design tokens and component specs when generating HTML
 4. Pair with the `generative-widgets` skill to serve the result via cloudflared tunnel
 
-Each template includes a **Hermes Implementation Notes** block at the top with:
+Each template includes a **{{app-name}} Implementation Notes** block at the top with:
 - CDN font substitute and Google Fonts `<link>` tag (ready to paste)
 - CSS font-family stacks for primary and monospace
 - Reminders to use `write_file` for HTML creation and `browser_exec` (`capture_screenshot()`) for verification
 
-## HTML Generation Pattern
+## HTML Generation Pattern {#html-generation-pattern}
 
 ```html
 <!DOCTYPE html>
@@ -94,7 +103,7 @@ Each template includes a **Hermes Implementation Notes** block at the top with:
 Write the file with `write_file`, serve with the `generative-widgets` workflow (cloudflared tunnel),
 and verify the result with `browser_exec`: open the page, `capture_screenshot()`, and inspect the image to confirm visual accuracy.
 
-## Font Substitution Reference
+## Font Substitution Reference {#font-substitution-reference}
 
 Most sites use proprietary fonts unavailable via CDN. Each template maps to a Google Fonts
 substitute that preserves the design's character. Common mappings:
@@ -122,9 +131,9 @@ substitution loss occurs. When a substitute is used (DM Sans for Circular, Sourc
 for sohne-var), follow the template's weight, size, and letter-spacing values closely —
 those carry more visual identity than the specific font face.
 
-## Design Catalog
+## Design Catalog {#design-catalog}
 
-### AI & Machine Learning
+### AI & Machine Learning {#ai--machine-learning}
 
 | Template | Site | Style |
 |---|---|---|
@@ -141,7 +150,7 @@ those carry more visual identity than the specific font face.
 | `voltagent.md` | VoltAgent | Void-black canvas, emerald accent, terminal-native |
 | `x.ai.md` | xAI | Stark monochrome, futuristic minimalism, full monospace |
 
-### Developer Tools & Platforms
+### Developer Tools & Platforms {#developer-tools--platforms}
 
 | Template | Site | Style |
 |---|---|---|
@@ -160,7 +169,7 @@ those carry more visual identity than the specific font face.
 | `warp.md` | Warp | Dark IDE-like interface, block-based command UI |
 | `zapier.md` | Zapier | Warm orange, friendly illustration-driven |
 
-### Infrastructure & Cloud
+### Infrastructure & Cloud {#infrastructure--cloud}
 
 | Template | Site | Style |
 |---|---|---|
@@ -171,7 +180,7 @@ those carry more visual identity than the specific font face.
 | `sanity.md` | Sanity | Red accent, content-first editorial layout |
 | `stripe.md` | Stripe | Signature purple gradients, weight-300 elegance |
 
-### Design & Productivity
+### Design & Productivity {#design--productivity}
 
 | Template | Site | Style |
 |---|---|---|
@@ -186,7 +195,7 @@ those carry more visual identity than the specific font face.
 | `pinterest.md` | Pinterest | Red accent, masonry grid, image-first layout |
 | `webflow.md` | Webflow | Blue-accented, polished marketing site aesthetic |
 
-### Fintech & Crypto
+### Fintech & Crypto {#fintech--crypto}
 
 | Template | Site | Style |
 |---|---|---|
@@ -195,7 +204,7 @@ those carry more visual identity than the specific font face.
 | `revolut.md` | Revolut | Sleek dark interface, gradient cards, fintech precision |
 | `wise.md` | Wise | Bright green accent, friendly and clear |
 
-### Enterprise & Consumer
+### Enterprise & Consumer {#enterprise--consumer}
 
 | Template | Site | Style |
 |---|---|---|
@@ -208,7 +217,7 @@ those carry more visual identity than the specific font face.
 | `spotify.md` | Spotify | Vibrant green on dark, bold type, album-art-driven |
 | `uber.md` | Uber | Bold black and white, tight type, urban energy |
 
-## Choosing a Design
+## Choosing a Design {#choosing-a-design}
 
 Match the design to the content:
 

@@ -4,7 +4,7 @@ SQLite next to the executions ledger (same connection/pragma pattern as ``cron/e
 Caps are a documented contract: ``MAX_VALUE_BYTES`` (16 KB per value, UTF-8) and
 ``MAX_JOB_TOTAL_BYTES`` (64 KB per job, key+value). Oversized writes raise ``ValueError`` and leave
 the store untouched — the notepad is prompt-injected each run. Write path is the CLI
-(``hermes cron notepad <job_id> set ...``) via the terminal tool; no model tool is added.
+(``noone cron notepad <job_id> set ...``) via the terminal tool; no model tool is added.
 """
 
 from __future__ import annotations
@@ -15,11 +15,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
-from hermes_constants import get_hermes_home
-from hermes_time import now as _hermes_now
+from agent_constants import get_agent_home
+from agent_time import now as _hermes_now
 
 # Optional test override. Production resolves the path at transaction time so multiplexed profile
-# ticks (set_hermes_home_override) cannot leak one profile's notepad rows into the import-time home
+# ticks (set_agent_home_override) cannot leak one profile's notepad rows into the import-time home
 # — and remove_job's clear_notepad cannot wipe the wrong profile's DB.
 # Same pattern as cron/executions.py. See #86519.
 NOTEPAD_FILE: Optional[Path] = None
@@ -30,15 +30,15 @@ _lock = threading.RLock()
 
 
 def _current_notepad_file() -> Path:
-    return NOTEPAD_FILE or (get_hermes_home().resolve() / "cron" / "notepad.db")
+    return NOTEPAD_FILE or (get_agent_home().resolve() / "cron" / "notepad.db")
 
 
 def _connect() -> sqlite3.Connection:
     # Late imports: a scheduler daemon that outlives an on-disk upgrade already has the OLD
-    # ``hermes_cli.sqlite_util`` / ``cron.jobs`` cached, so new names must be resolved at call time,
+    # ``agent_cli.sqlite_util`` / ``cron.jobs`` cached, so new names must be resolved at call time,
     # not at import time (the guarantee cron/ledger.py used to carry, see e24c8499).
     from cron.jobs import _ensure_cron_dir
-    from hermes_cli.sqlite_util import open_db
+    from agent_cli.sqlite_util import open_db
 
     path = _current_notepad_file()
     _ensure_cron_dir(path.parent)
@@ -46,20 +46,13 @@ def _connect() -> sqlite3.Connection:
 
 
 def _initialize_schema(conn: sqlite3.Connection) -> None:
-    conn.execute(
-        """CREATE TABLE IF NOT EXISTS cron_notepad (
-             job_id TEXT NOT NULL,
-             key TEXT NOT NULL,
-             value TEXT NOT NULL,
-             updated_at TEXT NOT NULL,
-             PRIMARY KEY (job_id, key)
-           )"""
-    )
+    from agent_cli.database_migrations import initialize_database
+    initialize_database(conn, "cron_notepad")
 
 
 @contextmanager
 def _transaction() -> Iterator[sqlite3.Connection]:
-    from hermes_cli.sqlite_util import transaction
+    from agent_cli.sqlite_util import transaction
 
     with _lock, transaction(_connect()) as conn:
         yield conn
@@ -160,7 +153,7 @@ def render_notepad_section(job_id: str) -> str:
         "## Job notepad (persistent across runs)\n"
         "This durable scratchpad survives between scheduled runs of this "
         "job. Update it via the CLI, e.g.:\n"
-        f"`hermes cron notepad {job_id} set <key> <value>` "
-        f"(also: get/delete/list; `hermes cron notepad {job_id} delete "
+        f"`noone cron notepad {job_id} set <key> <value>` "
+        f"(also: get/delete/list; `noone cron notepad {job_id} delete "
         "<key>` removes an entry).\n\n" + "\n".join(lines) + "\n\n"
     )

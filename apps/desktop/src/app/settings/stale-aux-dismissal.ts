@@ -1,5 +1,5 @@
-import type { StaleAuxAssignment } from '@/hermes'
-import { getApiRequestProfile, profileScopeKey } from '@/hermes'
+import type { StaleAuxAssignment } from '@/agent-client'
+import { getApiRequestProfile, profileScopeKey } from '@/agent-client'
 import { readKey, writeKey } from '@/lib/storage'
 
 // Acknowledged stale-aux banner. The warning exists to catch a forgotten pin

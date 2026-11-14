@@ -2,7 +2,7 @@
 
 Covers ``_format_exec_approval`` (template-attr driven exec-approval text),
 ``_format_choice_page`` (picker pagination core), ``_truncate_preview``, and
-byte-parity of the rewired adapters (telegram/feishu/matrix) against their
+byte-parity of the rewired adapters (telegram) against their
 historical inline formatting.
 """
 

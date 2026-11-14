@@ -39,7 +39,7 @@ class _ApprovalEntry:
         self.authority = _ctx.prompt_authority()
         self.acknowledged = False
         # Surface hook run once when the wait ends by ANY path (answer, timeout, interrupt, /approve from
-        # another client): the tui_gateway withdraws its open server→client request through it.
+        # another client): the agent_backend withdraws its open server→client request through it.
         self.settle = None
         self.observers = []
         self.result: str | None = None  # "once"|"session"|"always"|"deny"

@@ -136,27 +136,6 @@ def test_catch_up_rejects_non_boolean(home):
 # --- ledger schema --------------------------------------------------------------------------
 
 
-def test_a_pre_existing_ledger_is_widened_without_losing_rows(home):
-    db = home / "cron" / "executions.db"
-    db.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(db)
-    conn.execute(
-        """CREATE TABLE executions (
-             id TEXT PRIMARY KEY, job_id TEXT NOT NULL, source TEXT NOT NULL,
-             process_id TEXT NOT NULL, pid INTEGER NOT NULL, process_started_at INTEGER,
-             status TEXT NOT NULL CHECK(status IN
-               ('claimed','running','completed','failed','unknown')),
-             claimed_at TEXT NOT NULL, started_at TEXT, finished_at TEXT, error TEXT)""")
-    conn.execute(
-        "INSERT INTO executions (id, job_id, source, process_id, pid, status, claimed_at) "
-        "VALUES ('old', 'j1', 'builtin', 'p', 1, 'completed', '2026-01-01T00:00:00+00:00')")
-    conn.commit()
-    conn.close()
-
-    from cron.executions import record_missed_occurrences
-
-    record_missed_occurrences("j1", count=2, first_instant=None, detail="test")
-    assert sorted(r["status"] for r in _ledger("j1")) == ["completed", "missed"]
 
 
 # --- stopping a live run --------------------------------------------------------------------

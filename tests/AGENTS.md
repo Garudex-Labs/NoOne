@@ -1,4 +1,4 @@
-# tests/ — how Hermes tests are written and run
+# tests/ — how NoOne tests are written and run
 
 Applies on top of the root `AGENTS.md`. Read it before adding or changing any test.
 
@@ -38,10 +38,10 @@ just test tests/agent/test_foo.py -k test_x             # same runner; refuses t
   wall-clock bounds ≥ 2s, event-based sync, no `assert not _wait_until(...)` races. A new
   non-zero `time.sleep`/`asyncio.sleep` in a test fails the ratchet (HX013): wait on an Event or
   poll with `tests.waiting.wait_until` / `async_wait_until`.
-- **Placement mirrors the source tree.** A test lives in `tests/<top-level source dir>/` (`tests/hermes_cli/`,
-  `tests/agent/`, `tests/hermes_state/`, `tests/gateway/relay/`, ...); installer/updater script tests
+- **Placement mirrors the source tree.** A test lives in `tests/<top-level source dir>/` (`tests/agent_cli/`,
+  `tests/agent/`, `tests/agent_state/`, `tests/gateway/relay/`, ...); installer/updater script tests
   under `tests/scripts/{install,desktop_update}/`. Only tests of root-level modules (`batch_runner`,
-  `utils`, `hermes_constants`, packaging) sit directly in `tests/`. No issue numbers in filenames —
+  `utils`, `agent_constants`, packaging) sit directly in `tests/`. No issue numbers in filenames —
   cite the issue in the module docstring (`test_89315_x.py` → `test_x.py`, "Regression for #89315").
 - **Placement (CI lanes):** `scripts/ci/classify_changes.py` picks jobs by changed files. A Python test
   asserting about `package.json`, `pnpm-lock.yaml`, `tsconfig.json`, or `.ts/.tsx/.js/
@@ -49,8 +49,8 @@ just test tests/agent/test_foo.py -k test_x             # same runner; refuses t
   classifier fails open). Such tests belong in the vitest suite, not `tests/*.py`.
 - **Tests must not write to `~/.hermes/`.** The autouse `_isolate_hermes_home` fixture in
   `tests/conftest.py` redirects `HERMES_HOME`; never hardcode `~/.hermes/` in tests. Profile
-  tests also mock `Path.home()` so `_get_profiles_root()` / `_get_default_hermes_home()` stay
-  in the temp dir (pattern: `tests/hermes_cli/test_profiles.py`):
+  tests also mock `Path.home()` so `_get_profiles_root()` / `_get_default_agent_home()` stay
+  in the temp dir (pattern: `tests/agent_cli/test_profiles.py`):
   ```python
   @pytest.fixture
   def profile_env(tmp_path, monkeypatch):
@@ -102,7 +102,7 @@ fully replaced — `platforms` is the only host-gating marker in the tree.
 real Windows process behavior that mocks cannot reproduce (venv-holder
 scans, process-tree parentage, launcher/worker chains, detach semantics),
 there is an on-demand workflow `windows-venv-e2e.yml` that runs
-`tests/hermes_cli/test_venv_holder_windows_live.py` on a real
+`tests/agent_cli/test_venv_holder_windows_live.py` on a real
 `windows-latest` runner — spawning actual processes and driving the real
 detection code, no mocked psutil. It fires ONLY on pushes to `wine2e/**`
 branches (inert on PRs and main; costs nothing on normal work). The proven

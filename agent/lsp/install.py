@@ -18,8 +18,8 @@ import threading
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
-from hermes_cli._subprocess_compat import windows_hide_flags
-from hermes_constants import find_node_executable, with_hermes_node_path
+from agent_cli._subprocess_compat import windows_hide_flags
+from agent_constants import find_node_executable, with_agent_node_path
 
 logger = logging.getLogger("agent.lsp.install")
 
@@ -84,9 +84,9 @@ def _is_windows() -> bool:
 
 def hermes_lsp_bin_dir() -> Path:
     """Return the Hermes-owned bin staging dir for LSP servers."""
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
-    p = get_hermes_home() / "lsp" / "bin"
+    p = get_agent_home() / "lsp" / "bin"
     p.mkdir(parents=True, exist_ok=True)
     return p
 
@@ -224,7 +224,7 @@ _NODE_PM_ARGV: dict[str, Callable[[str], list]] = {
 def _node_package_manager() -> Optional[str]:
     """``lsp.package_manager`` from config (npm default); an unknown value fails closed (``None``)."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
         lsp_cfg = load_config_readonly().get("lsp") or {}
     except Exception:
         return "npm"
@@ -262,9 +262,9 @@ def _install_npm(pkg: str, bin_name: str, extra_pkgs: Optional[list] = None) -> 
     install_targets = [pkg] + list(extra_pkgs or [])
     cmd = [pm_bin, *_NODE_PM_ARGV[pm](str(staging)), *install_targets]
     logger.info("[install] %s %s", pm, " ".join(cmd[1:]))
-    from tools.environments.local import hermes_subprocess_env
+    from tools.environments.local import agent_subprocess_env
     # Package install scripts are third-party code: scrubbed env, never Hermes' credentials.
-    if not _run_installer(pm, pkg, cmd, timeout=300, env=with_hermes_node_path(hermes_subprocess_env())):
+    if not _run_installer(pm, pkg, cmd, timeout=300, env=with_agent_node_path(agent_subprocess_env())):
         return None
     found = _first_existing(staging / "node_modules" / ".bin" / bin_name)
     if found is not None:
@@ -283,8 +283,8 @@ def _install_go(pkg: str, bin_name: str) -> Optional[str]:
         return None
     staging = hermes_lsp_bin_dir()
     logger.info("[install] go install %s (GOBIN=%s)", pkg, staging)
-    from tools.environments.local import hermes_subprocess_env
-    env = {**hermes_subprocess_env(), "GOBIN": str(staging)}
+    from tools.environments.local import agent_subprocess_env
+    env = {**agent_subprocess_env(), "GOBIN": str(staging)}
     if not _run_installer("go", pkg, [go, "install", pkg], timeout=600, env=env):
         return None
     bin_path = (staging / bin_name).with_suffix(".exe") if _is_windows() else staging / bin_name

@@ -29,7 +29,6 @@ def _reset_signal_scheduler():
 from gateway.config import Platform
 from tools.send_message_tool import (
     _resolve_slack_user_target,
-    _send_matrix_via_adapter,
     _send_to_platform,
     send_message_tool,
 )
@@ -119,7 +118,7 @@ class _StreamingAiohttpSession:
 def _discord_entry():
     """Return the live Discord PlatformEntry, importing lazily so plugin
     discovery is forced exactly once and patches survive across tests."""
-    from hermes_cli.plugins import discover_plugins
+    from agent_cli.plugins import discover_plugins
     from gateway.platform_registry import platform_registry
     discover_plugins()
     return platform_registry.get("discord")
@@ -169,7 +168,7 @@ class _patch_discord_sender:
 def _slack_entry():
     """Return the live Slack PlatformEntry, importing lazily so plugin
     discovery is forced exactly once and patches survive across tests."""
-    from hermes_cli.plugins import discover_plugins
+    from agent_cli.plugins import discover_plugins
     from gateway.platform_registry import platform_registry
     discover_plugins()
     return platform_registry.get("slack")
@@ -275,47 +274,7 @@ def _ensure_slack_mock(monkeypatch):
 
 
 class TestSendMessageTool:
-    def test_ntfy_topic_target_is_explicit(self):
-        chat_id, thread_id, is_explicit = _parse_target_ref("ntfy", "alerts-channel")
 
-        assert chat_id == "alerts-channel"
-        assert thread_id is None
-        assert is_explicit is True
-
-    def test_ntfy_topic_target_bypasses_channel_directory(self):
-        ntfy_platform = Platform("ntfy")
-        ntfy_cfg = SimpleNamespace(enabled=True, token=None, extra={"topic": "hermes-in"})
-        config = SimpleNamespace(
-            platforms={ntfy_platform: ntfy_cfg},
-            get_home_channel=lambda _platform: None,
-        )
-
-        with patch("gateway.config.load_gateway_config", return_value=config), \
-             patch("tools.interrupt.is_interrupted", return_value=False), \
-             patch("gateway.channel_directory.resolve_channel_name", side_effect=AssertionError("should not resolve ntfy topics")), \
-             patch("model_tools._run_async", side_effect=_run_async_immediately), \
-             patch("tools.send_message_tool._send_to_platform", new=AsyncMock(return_value={"success": True})) as send_mock, \
-             patch("gateway.mirror.mirror_to_session", return_value=True):
-            result = json.loads(
-                send_message_tool(
-                    {
-                        "action": "send",
-                        "target": "ntfy:alerts-channel",
-                        "message": "done",
-                    }
-                )
-            )
-
-        assert result["success"] is True
-        send_mock.assert_awaited_once_with(
-            ntfy_platform,
-            ntfy_cfg,
-            "alerts-channel",
-            "done",
-            thread_id=None,
-            media_files=[],
-            force_document=False,
-        )
 
 
     def test_media_tag_outside_allowed_roots_is_not_sent(self, tmp_path, monkeypatch):
@@ -361,9 +320,9 @@ class TestSendMessageTool:
 
     def test_missing_media_is_reported_to_the_caller_and_hermes_send_exits_nonzero(self, tmp_path, monkeypatch):
         """#115908: a MEDIA path that does not exist on the host was dropped with only a host-side
-        warning while ``hermes send`` printed success:true and exited 0. The surviving attachment is
+        warning while ``noone send`` printed success:true and exited 0. The surviving attachment is
         still sent; the payload names the drop and the CLI exit code follows it."""
-        from hermes_cli.send_cmd import _emit_result
+        from agent_cli.send_cmd import _emit_result
 
         monkeypatch.setenv("HERMES_MEDIA_DELIVERY_STRICT", "0")
         config, telegram_cfg = _make_config()
@@ -529,13 +488,13 @@ class TestSendToPlatformChunking:
     def test_signal_long_message_is_chunked(self, monkeypatch):
         """Standalone Signal sends split at the adapter's 8000-char limit.
 
-        The standalone path (hermes send / cron / MCP) speaks raw JSON-RPC via
+        The standalone path (noone send / cron / MCP) speaks raw JSON-RPC via
         _send_signal and bypasses SignalAdapter.send(), so the shared
         truncate_message() pass in _send_to_platform must know Signal's limit
         (regression for #67279 / #57929 — long sends were rejected whole).
         """
         from plugins.platforms.signal.adapter import MAX_MESSAGE_LENGTH as SIGNAL_MAX
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
         from gateway.platform_registry import platform_registry
 
         sent = []
@@ -629,103 +588,6 @@ class TestSendToPlatformChunking:
 
 
 
-class TestMatrixMediaLiveAdapterReuse:
-    """Verify _send_matrix_via_adapter reuses the live gateway adapter
-    when available, avoiding per-message E2EE re-init storms (#46310)."""
-
-    def test_live_adapter_skips_connect_disconnect(self, tmp_path):
-        """When a live gateway adapter exists, no connect() or disconnect()
-        should be called — the persistent E2EE session is reused."""
-        img_path = tmp_path / "photo.png"
-        img_path.write_bytes(b"\x89PNG\r\n")
-
-        calls = []
-
-        class LiveAdapter:
-            async def send(self, chat_id, message, metadata=None):
-                calls.append(("send", chat_id, message))
-                return SimpleNamespace(success=True, message_id="$text")
-
-            async def send_image_file(self, chat_id, path, metadata=None):
-                calls.append(("send_image_file", chat_id, path))
-                return SimpleNamespace(success=True, message_id="$img")
-
-        live_adapter = LiveAdapter()
-        fake_runner = SimpleNamespace(
-            adapters={Platform.MATRIX: live_adapter}
-        )
-
-        with patch(
-            "gateway.run._gateway_runner_ref",
-            return_value=fake_runner,
-        ), patch.dict(
-            sys.modules, {"plugins.platforms.matrix.adapter": SimpleNamespace()}
-        ):
-            result = asyncio.run(
-                _send_matrix_via_adapter(
-                    SimpleNamespace(enabled=True, token="tok", extra={}),
-                    "!room:example.com",
-                    "here is an image",
-                    media_files=[(str(img_path), False)],
-                )
-            )
-
-        assert result["success"] is True
-        assert result["message_id"] == "$img"
-        # Only send + send_image_file; no connect / disconnect
-        assert calls == [
-            ("send", "!room:example.com", "here is an image"),
-            ("send_image_file", "!room:example.com", str(img_path)),
-        ]
-
-    def test_live_adapter_not_available_falls_back_to_ephemeral(self, tmp_path):
-        """When _gateway_runner_ref returns None, the ephemeral adapter
-        path (connect + disconnect) is used as before."""
-        doc_path = tmp_path / "doc.pdf"
-        doc_path.write_bytes(b"%PDF-1.4")
-
-        calls = []
-
-        class EphemeralAdapter:
-            def __init__(self, _config):
-                pass
-
-            async def connect(self):
-                calls.append(("connect",))
-                return True
-
-            async def send(self, chat_id, message, metadata=None):
-                calls.append(("send", chat_id, message))
-                return SimpleNamespace(success=True, message_id="$txt")
-
-            async def send_document(self, chat_id, path, metadata=None):
-                calls.append(("send_document", chat_id, path))
-                return SimpleNamespace(success=True, message_id="$doc")
-
-            async def disconnect(self):
-                calls.append(("disconnect",))
-
-        fake_module = SimpleNamespace(MatrixAdapter=EphemeralAdapter)
-
-        with patch(
-            "gateway.run._gateway_runner_ref", return_value=None
-        ), patch.dict(sys.modules, {"plugins.platforms.matrix.adapter": fake_module}):
-            result = asyncio.run(
-                _send_matrix_via_adapter(
-                    SimpleNamespace(enabled=True, token="tok", extra={}),
-                    "!room:example.com",
-                    "report attached",
-                    media_files=[(str(doc_path), False)],
-                )
-            )
-
-        assert result["success"] is True
-        assert calls == [
-            ("connect",),
-            ("send", "!room:example.com", "report attached"),
-            ("send_document", "!room:example.com", str(doc_path)),
-            ("disconnect",),
-        ]
 
 # ---------------------------------------------------------------------------
 # HTML auto-detection in Telegram send
@@ -891,12 +753,6 @@ class TestParseTargetRef:
             ("discord", "-1001234567890:17585", "-1001234567890", "17585"),
             ("discord", "1003724596514", "1003724596514", None),
             ("discord", "  123456:789  ", "123456", "789"),
-            # Matrix: room id, room:thread-event, user MXID
-            ("matrix", "!HLOQwxYGgFPMPJUSNR:matrix.org:$thread123:matrix.org",
-             "!HLOQwxYGgFPMPJUSNR:matrix.org", "$thread123:matrix.org"),
-            ("matrix", "!HLOQwxYGgFPMPJUSNR:matrix.org",
-             "!HLOQwxYGgFPMPJUSNR:matrix.org", None),
-            ("matrix", "@hermes:matrix.org", "@hermes:matrix.org", None),
             # Phone platforms: E.164 keeps its '+' for signal-cli; groups and
             # bare digits also resolve.
             ("signal", "+41791234567", "+41791234567", None),
@@ -938,7 +794,6 @@ class TestParseTargetRef:
 
     def test_non_explicit_targets_fall_through_to_resolution(self):
         cases = [
-            ("matrix", "#general:matrix.org"),   # alias needs resolution
             ("signal", "  group:  "),            # empty group id
             ("signal", "+123"),                  # E.164 too short
             ("signal", "+1234567890123456"),     # E.164 too long
@@ -965,7 +820,6 @@ class TestParseTargetRef:
             ("discord", "@someone"),
             ("telegram", "+15551234567"),
             ("discord", "+15551234567"),
-            ("matrix", "+15551234567"),
             ("telegram", "120363408391911677@g.us"),
             ("signal", "149606612619433@lid"),
             ("discord", "C0B0QV5434G"),
@@ -1497,8 +1351,8 @@ class _FakePlatform:
 class TestSendViaAdapterStandaloneFallback:
     """Coverage for the out-of-process plugin-platform send path.
 
-    When the gateway runner is not in this process (e.g. ``hermes cron``
-    runs separately from ``hermes gateway``), ``_send_via_adapter`` should
+    When the gateway runner is not in this process (e.g. ``noone cron``
+    runs separately from ``noone gateway``), ``_send_via_adapter`` should
     fall through to the plugin's ``standalone_sender_fn`` registered on
     its ``PlatformEntry``.  Without the hook, the existing error string
     is returned (with a more helpful tail).
@@ -1516,36 +1370,6 @@ class TestSendViaAdapterStandaloneFallback:
             standalone_sender_fn=send_fn,
         )
 
-    @pytest.mark.asyncio
-    async def test_live_ntfy_adapter_receives_explicit_publish_topic(self, monkeypatch):
-        from tools.send_message_tool import _send_via_adapter
-
-        platform = Platform("ntfy")
-        recorded = {}
-
-        class Adapter:
-            async def send(self, *, chat_id, content, metadata=None):
-                recorded["chat_id"] = chat_id
-                recorded["content"] = content
-                recorded["metadata"] = metadata
-                return SimpleNamespace(success=True, message_id="ntfy-id")
-
-        runner = SimpleNamespace(adapters={platform: Adapter()})
-        fake_gateway_run = ModuleType("gateway.run")
-        fake_gateway_run._gateway_runner_ref = lambda: runner
-        monkeypatch.setitem(sys.modules, "gateway.run", fake_gateway_run)
-
-        result = await _send_via_adapter(
-            platform,
-            SimpleNamespace(extra={"publish_topic": "configured-topic"}),
-            "alerts-channel",
-            "done",
-        )
-
-        assert result == {"success": True, "message_id": "ntfy-id"}
-        assert recorded["chat_id"] == "alerts-channel"
-        assert recorded["content"] == "done"
-        assert recorded["metadata"] == {"publish_topic": "alerts-channel"}
 
 
     @pytest.mark.asyncio
@@ -1587,7 +1411,7 @@ class TestSendViaAdapterStandaloneFallback:
             return {"success": True, "platform": "fakeplatform", "chat_id": chat_id}
 
         monkeypatch.setattr("gateway.run._gateway_runner_ref", lambda: None)
-        monkeypatch.setattr("hermes_cli.plugins.discover_plugins",
+        monkeypatch.setattr("agent_cli.plugins.discover_plugins",
                             lambda *a, **k: platform_registry.register(self._make_entry(send)))
         try:
             result = await _send_via_adapter(_FakePlatform("fakeplatform"), SimpleNamespace(extra={}), "chat-1", "hi")

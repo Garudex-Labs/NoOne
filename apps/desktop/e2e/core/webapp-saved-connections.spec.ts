@@ -138,7 +138,7 @@ async function startGateway(label: string, host: string, password: null | string
   }
 
   fs.appendFileSync(path.join(sandbox.hermesHome, 'config.yaml'), config)
-  const started = run(sandbox, ['-m', 'hermes_cli.main', 'webapp', '--no-open', '--skip-build'])
+  const started = run(sandbox, ['-m', 'agent_cli.main', 'webapp', '--no-open', '--skip-build'])
   expect(started.code, started.output).toBe(0)
 
   // A plain gateway is reached at the address it binds; only the gated hub declares an alias.

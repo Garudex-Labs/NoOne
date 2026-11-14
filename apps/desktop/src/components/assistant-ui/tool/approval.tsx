@@ -2,6 +2,8 @@
 
 import { useAuiState } from '@assistant-ui/react'
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { ChevronDown, Loader2 } from '@noone/ui/icons'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { createContext, type FC, useCallback, useContext, useMemo, useRef, useState } from 'react'
 
@@ -9,7 +11,6 @@ import { useSessionView } from '@/app/chat/session-view'
 import { SCAFFOLD_LABEL_CLASS, ScaffoldRow } from '@/components/chat/scaffold-row'
 import { Button } from '@/components/ui/button'
 import { CardStack, type CardStackAction } from '@/components/ui/card-stack'
-import { Codicon } from '@/components/ui/codicon'
 import {
   Dialog,
   DialogContent,
@@ -21,7 +22,6 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { ChevronDown, Loader2 } from '@/lib/icons'
 import { releaseApprovalKey } from '@/lib/keybinds/approval-keys'
 import { cn } from '@/lib/utils'
 import { $gateway } from '@/store/gateway'
@@ -335,7 +335,7 @@ const ApprovalCard: FC<ApprovalCardProps> = ({ request, total, position, stack }
       ref={cardRef}
     >
       <div className="flex items-center gap-2 px-2.5 pt-2 text-xs text-(--ui-text-secondary)">
-        <Codicon name="terminal" size="0.875rem" />
+        <AppIcon name="terminal" size="0.875rem" />
         <span>{showsDescription ? copy.commandDetails : copy.command}</span>
         {total > 1 && (
           <span className="ml-auto text-[0.6875rem] tabular-nums text-(--ui-text-tertiary)">

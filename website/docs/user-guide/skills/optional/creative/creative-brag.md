@@ -1,35 +1,43 @@
 ---
 title: "Brag — Project launch video via Hyperframes, upstream-maintained"
-sidebar_label: "Brag"
+sidebarTitle: "Brag"
 description: "Project launch video via Hyperframes, upstream-maintained"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Brag
+# Brag {#brag}
 
 Project launch video via Hyperframes, upstream-maintained.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/brag` |
+| Source | Optional — install with `noone skills install official/creative/brag` |
 | Path | `optional-skills/creative/brag` |
 | Version | `0.4.0` |
-| Author | Shunit Haviv Hakimi (shunithaviv) |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `video`, `launch-video`, `marketing`, `hyperframes`, `motion-graphics`, `share-copy` |
 | Related skills | [`brag-slim`](../../optional/creative/creative-brag-slim.md), [`hyperframes`](../../optional/creative/creative-hyperframes.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Brag (upstream-maintained)
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Brag (upstream-maintained) {#brag-upstream-maintained}
 
 > **Catalog stub.** This entry is maintained upstream at
 > [latent-spaces/brag](https://github.com/latent-spaces/brag): the project
@@ -50,14 +58,14 @@ and `--voice` (Kokoro narration, off by default).
 On Claude Opus 5.5 it hands off to its bundled copy of `brag-slim` unless the
 invocation asks for `--full` or `--voice`.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Node.js 22+, FFmpeg on `PATH`, and the Hyperframes CLI (`npx hyperframes
   doctor` confirms the environment).
 - The Hyperframes path (`--full`, `--voice`, or any model other than Opus 5.5)
   loads HeyGen's domain skills by name: `hyperframes-core`,
   `hyperframes-animation`, `hyperframes-creative`, `hyperframes-keyframes` and
-  `hyperframes-cli`, installed with `hermes skills install
+  `hyperframes-cli`, installed with `noone skills install
   heygen-com/hyperframes/skills/<name>`. The skills guard currently blocks four
   of the five on HTML comments and credential docs in their examples
   (`hyperframes-creative` scores dangerous, which `--force` cannot override),

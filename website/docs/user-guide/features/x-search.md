@@ -1,19 +1,18 @@
 ---
 title: X (Twitter) Search
 description: Search X (Twitter) posts and threads from within the agent using xAI's built-in x_search Responses tool — works with either a SuperGrok OAuth login or an XAI_API_KEY.
-sidebar_label: X (Twitter) Search
-sidebar_position: 7
+sidebarTitle: X (Twitter) Search
 ---
 
-# X (Twitter) Search
+# X (Twitter) Search {#x-twitter-search}
 
 The `x_search` tool lets the agent search X (Twitter) posts, profiles, and threads directly. It's backed by xAI's built-in `x_search` tool on the Responses API at `https://api.x.ai/v1/responses` — Grok itself runs the search server-side and returns synthesized results with citations to the originating posts.
 
 **Use this instead of `web_search`** when you specifically want current discussion, reactions, or claims **on X**. For general web pages, keep using `web_search` / `web_extract`.
 
-## `x_search` vs `xurl`
+## `x_search` vs `xurl` {#x_search-vs-xurl}
 
-Hermes can expose two different X surfaces:
+{{app-name}} can expose two different X surfaces:
 
 | Surface | Use it for | Do not use it for |
 |---------|------------|-------------------|
@@ -22,29 +21,37 @@ Hermes can expose two different X surfaces:
 
 For mixed workflows, use `x_search` to discover candidate public posts, then switch to `xurl read` or another exact `xurl` command after the target post/user/action is clear. Any state-changing X action must be confirmed by `xurl` output or the X API response; an `x_search` answer is never evidence that a write happened.
 
-:::tip
-If you're paying Portal for an xAI model anyway, Live Search calls bill against the same xAI key configured for chat. See [Nous Portal](../../integrations/nous-portal.md).
-:::
+<Tip>
 
-## Authentication
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+If you're paying Portal for an xAI model anyway, Live Search calls bill against the same xAI key configured for chat. See [Nous Portal](../../integrations/nous-portal.md).
+
+</Tip>
+
+## Authentication {#authentication}
 
 `x_search` registers when **either** xAI credential path is available:
 
 | Credential | Source | Setup |
 |------------|--------|-------|
-| **SuperGrok / X Premium+ OAuth** | Browser login at `accounts.x.ai`, refreshed automatically | `hermes auth add xai-oauth` — see [xAI Grok OAuth (SuperGrok / X Premium+)](../../guides/xai-grok-oauth.md) |
+| **SuperGrok / X Premium+ OAuth** | Browser login at `accounts.x.ai`, refreshed automatically | `noone auth add xai-oauth` — see [xAI Grok OAuth (SuperGrok / X Premium+)](../../guides/xai-grok-oauth.md) |
 | **`XAI_API_KEY`** (preferred) | Paid xAI API key | Set in `~/.hermes/.env` |
 
 Both hit the same endpoint with the same payload — the only difference is the bearer token. **When both are configured, the explicit `XAI_API_KEY` wins** — the subscription OAuth bearer authorizes `/v1/responses` but answers x_search in a degraded Grok explanatory mode with no citations, while the API key returns real posts. Note this means x_search runs against metered API billing when a key is set; remove `XAI_API_KEY` to fall back to your subscription quota (with the degraded-answer caveat).
 
 The tool's `check_fn` runs the xAI credential resolver every time the model's tool list is rebuilt. A `True` return means the bearer is fetchable AND non-empty AND (if it had expired) successfully refreshed. Revoked tokens with a failed refresh hide the tool from the schema; the model simply can't see it.
 
-## Enabling the tool
+## Enabling the tool {#enabling-the-tool}
 
-Auto-enables when xAI credentials (OAuth token or `XAI_API_KEY`) are present. Disable explicitly via `hermes tools` → Search → x_search if you don't want this.
+Auto-enables when xAI credentials (OAuth token or `XAI_API_KEY`) are present. Disable explicitly via `noone tools` → Search → x_search if you don't want this.
 
 ```bash
-hermes tools
+noone tools
 # → 🐦 X (Twitter) Search   (press space to toggle on)
 ```
 
@@ -55,7 +62,7 @@ The picker offers two credential choices:
 
 Either choice satisfies the gating. You can pick whichever credentials you already have; the tool works identically with both. If both end up configured, OAuth is preferred at call time.
 
-## Configuration
+## Configuration {#configuration}
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -83,7 +90,7 @@ x_search:
 `reasoning: {effort: ...}`. Leave it unset for models that do not support
 configurable reasoning. Invalid values fail before an API request is made.
 
-## Tool parameters
+## Tool parameters {#tool-parameters}
 
 The agent calls `x_search` with these arguments:
 
@@ -107,7 +114,7 @@ The tool returns JSON with:
 - `credential_source` — `"xai-oauth"` if OAuth resolved, `"xai"` if API key resolved
 - `model`, `query`, `provider`, `tool`, `success`
 
-### Date validation
+### Date validation {#date-validation}
 
 `from_date` / `to_date` are validated client-side before the HTTP call:
 
@@ -118,7 +125,7 @@ The tool returns JSON with:
 
 Validation failures surface as a structured `{"error": "..."}` tool result, never as an HTTP call to xAI.
 
-## Example
+## Example {#example}
 
 Talking to the agent:
 
@@ -132,24 +139,24 @@ The agent will:
 
 If the next user request is "reply to the best one" or "like that post", the agent should switch to the `xurl` skill, confirm the exact target post, and use the X API action. `x_search` remains a discovery tool.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
-### "No xAI credentials available"
+### "No xAI credentials available" {#no-xai-credentials-available}
 
-The tool surfaces this when both auth paths fail. Either set `XAI_API_KEY` in `~/.hermes/.env` or run `hermes auth add xai-oauth` and complete the browser login. Then restart your session so the agent re-reads the tool registry.
+The tool surfaces this when both auth paths fail. Either set `XAI_API_KEY` in `~/.hermes/.env` or run `noone auth add xai-oauth` and complete the browser login. Then restart your session so the agent re-reads the tool registry.
 
-### "`x_search` is not enabled for this model"
+### "`x_search` is not enabled for this model" {#x_search-is-not-enabled-for-this-model}
 
 The configured `x_search.model` doesn't have access to the server-side `x_search` tool. Switch to `grok-4.5` (the default) or another Grok model that supports it. Check the [xAI documentation](https://docs.x.ai/) for the current list.
 
-### Tool doesn't appear in the schema
+### Tool doesn't appear in the schema {#tool-doesnt-appear-in-the-schema}
 
 Two possible causes:
 
-1. **Toolset not enabled.** Run `hermes tools` and confirm `🐦 X (Twitter) Search` is checked.
-2. **No xAI credentials.** The check_fn returns False, so the schema stays hidden. Run `hermes auth status` to confirm xai-oauth login state, and check that `XAI_API_KEY` is set (if you're using the API-key path).
+1. **Toolset not enabled.** Run `noone tools` and confirm `🐦 X (Twitter) Search` is checked.
+2. **No xAI credentials.** The check_fn returns False, so the schema stays hidden. Run `noone auth status` to confirm xai-oauth login state, and check that `XAI_API_KEY` is set (if you're using the API-key path).
 
-### `degraded: true` — answer with no citations
+### `degraded: true` — answer with no citations {#degraded-true--answer-with-no-citations}
 
 When you used `allowed_x_handles`, `excluded_x_handles`, or a date range and the response comes back with `degraded: true`, xAI's X index returned no matching posts but Grok still produced a synthesized answer from its own training data. The answer is unsourced — do not treat it as a real X result.
 
@@ -159,7 +166,7 @@ Causes worth checking:
 - **Date range too narrow** or sliding past today's posts; widen and retry.
 - **xAI index gap.** Some active accounts intermittently fail to surface in `x_search` even when they post regularly. Retry after a few minutes, or use the `xurl` skill for direct X API reads when you need an exact handle's timeline.
 
-## See Also
+## See Also {#see-also}
 
 - [xAI Grok OAuth (SuperGrok / Premium+)](../../guides/xai-grok-oauth.md) — the OAuth setup guide
 - [xurl skill](../skills/bundled/social-media/social-media-xurl.md) — official X API CLI for authenticated account actions

@@ -87,7 +87,7 @@ _IDLE_UNLOAD_CHECK_INTERVAL = 30  # seconds between idle checks
 def _load_stt_config() -> dict:
     """Load the ``stt`` section from user config, falling back to defaults."""
     try:
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         return load_config().get("stt") or {}
     except Exception:
         return {}
@@ -254,8 +254,6 @@ def _get_provider(stt_config: dict) -> str:
     explicit = "provider" in stt_config
     provider = stt_config.get("provider", DEFAULT_PROVIDER)
     # The managed "Nous Subscription" selection is the OpenAI backend routed via the managed gateway.
-    if isinstance(provider, str) and provider.strip().lower() == "nous":
-        provider = "openai"
     if explicit and provider == "local":
         # Legacy DEFAULT_CONFIG seeded ``stt.provider: local`` on every install, so only a
         # raw config.yaml selection counts as explicit; otherwise autodetect (local-first anyway).
@@ -549,7 +547,7 @@ def _no_provider_error(provider: str, stt_config: dict[str, Any]) -> dict[str, A
     if "provider" in stt_config and provider_key and provider_key not in BUILTIN_STT_PROVIDERS and provider_key != "none":
         return _unregistered_stt_provider_error(provider_key)
     # An explicit openai selection flattened to "none" has a specific reason (e.g. managed gateway down).
-    # Surface it — with its `hermes tools` remediation — instead of the all-provider setup hint (#93045).
+    # Surface it — with its `noone tools` remediation — instead of the all-provider setup hint (#93045).
     if provider_key == "none" and str(stt_config.get("provider") or "") == "openai" and _HAS_OPENAI:
         reason = _openai_audio_unavailable_reason()
         if reason is not None:

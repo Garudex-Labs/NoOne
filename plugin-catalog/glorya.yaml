@@ -9,7 +9,7 @@ tier: community
 category: tools
 requires_hermes: ">=0.22.5"
 docs_url: https://github.com/Glorya-AI/hermes-plugin#readme
-image: https://raw.githubusercontent.com/Glorya-AI/hermes-plugin/e6ffa2bb4e6180686ebf276ff5b9744c029842f8/assets/glorya-hermes.png
+image: https://raw.githubusercontent.com/Glorya-AI/hermes-plugin/e6ffa2bb4e6180686ebf276ff5b9744c029842f8/assets/glorya-agent.png
 readme: true
 platforms: []
 capabilities:

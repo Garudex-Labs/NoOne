@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { DesktopUpdateStatus, DesktopVersionInfo, HermesConnection } from '@/global'
+import type { AgentConnection, DesktopUpdateStatus, DesktopVersionInfo } from '@/global'
 import { en } from '@/i18n/en'
 import { $confirmRequest, settleConfirm } from '@/store/confirm'
 import type * as SessionStore from '@/store/session'
@@ -25,7 +25,7 @@ vi.mock('@/store/session', async (importOriginal): Promise<Record<string, unknow
   const actual = await importOriginal<typeof SessionStore>()
   const { atom } = await import('nanostores')
 
-  return { ...actual, $connection: atom<HermesConnection | null>(null) }
+  return { ...actual, $connection: atom<AgentConnection | null>(null) }
 })
 
 vi.mock('@/store/updates', async (): Promise<Record<string, unknown>> => {
@@ -61,7 +61,7 @@ vi.mock('@/store/updates', async (): Promise<Record<string, unknown>> => {
   }
 })
 
-function connection(mode: 'local' | 'remote'): HermesConnection {
+function connection(mode: 'local' | 'remote'): AgentConnection {
   return {
     baseUrl: 'http://gateway:9119',
     isFullscreen: false,

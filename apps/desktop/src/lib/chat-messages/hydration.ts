@@ -1,4 +1,4 @@
-import { skillInvocationText } from '@hermes/shared'
+import { skillInvocationText } from '@noone/shared'
 
 import { formatRefValue } from '@/components/assistant-ui/directive-text'
 import { splitLeadingAttachmentRefs } from '@/components/assistant-ui/reference-kinds'
@@ -6,7 +6,7 @@ import { extractImageRefs } from '@/lib/embedded-images'
 import { parseErrorSurface } from '@/lib/error-surface'
 import { dedupeGeneratedImageEchoesInParts } from '@/lib/generated-images'
 import { isTodoToolName } from '@/lib/todos'
-import type { MessageReaction, SessionMessage } from '@/types/hermes'
+import type { MessageReaction, SessionMessage } from '@/types/agent-client'
 
 import {
   assistantTextPart,
@@ -546,7 +546,7 @@ export function toChatMessages(messages: SessionMessage[]): ChatMessage[] {
     const displayRole = isMachineNotice(message.display_kind) ? 'system' : message.role
 
     // Persisted user turns carry `@image:<path>` directive lines inline in
-    // the text (see tui_gateway/server.py's persist-time rewrite). The
+    // the text (see agent_backend/server.py's persist-time rewrite). The
     // read-only bubble clamps its body to ~2 lines, and a large inline image
     // thumbnail pushes any caption text below the clamp's visible area — so
     // pull image refs out into `attachmentRefs` (same shape the local

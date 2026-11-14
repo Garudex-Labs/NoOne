@@ -11,7 +11,7 @@ from gateway.config import GatewayConfig, Platform, PlatformConfig
 from gateway.platforms.base import BasePlatformAdapter, ProcessingOutcome, SendResult
 from gateway.platforms.event import MessageEvent
 from gateway.run import GatewayRunner
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 
 class RecordingAdapter(BasePlatformAdapter):
@@ -33,15 +33,15 @@ class RecordingAdapter(BasePlatformAdapter):
         return {"id": chat_id}
 
     async def send(self, chat_id, content, reply_to=None, metadata=None):
-        self.attempts.append((content, get_hermes_home()))
+        self.attempts.append((content, get_agent_home()))
         if self.fail_text_once:
             self.fail_text_once = False
             return SendResult(success=False, error="invalid markup")
-        self.wire.append((content, get_hermes_home(), metadata))
+        self.wire.append((content, get_agent_home(), metadata))
         return SendResult(success=True, message_id=f"sent-{len(self.wire)}")
 
     async def send_document(self, chat_id, file_path, **kwargs):
-        self.attempts.append((file_path, get_hermes_home()))
+        self.attempts.append((file_path, get_agent_home()))
         if self.fail_media:
             return SendResult(success=False, error="transport rejected attachment")
         return await super().send_document(chat_id, file_path, **kwargs)
@@ -148,7 +148,7 @@ async def test_recursive_three_turn_chain_then_human(profiles, monkeypatch, diag
         assert authorized[-1] == "denied"
         assert len(calls) == 4 and adapter.wire == before
         assert denied.internal is False and denied.allow_gateway_control is True
-        assert get_hermes_home() == root
+        assert get_agent_home() == root
     finally:
         await adapter.cancel_background_tasks()
 

@@ -66,9 +66,9 @@ class HermesMCPOAuthProvider(HermesProviderMixin, *_SDK_BASES):
         self._hermes_preregistered = preregistered
 
     def _hermes_storage(self):
-        """The context storage when it is a ``HermesTokenStorage``, else None."""
-        from tools.mcp_oauth import HermesTokenStorage
-        return self.context.storage if isinstance(self.context.storage, HermesTokenStorage) else None
+        """The context storage when it is a ``AgentTokenStorage``, else None."""
+        from tools.mcp_oauth import AgentTokenStorage
+        return self.context.storage if isinstance(self.context.storage, AgentTokenStorage) else None
 
     def _log_nonfatal(self, what: str, exc: BaseException) -> None:
         logger.debug("MCP OAuth '%s': %s failed (non-fatal): %s", self._hermes_server_name, what, exc)
@@ -76,7 +76,7 @@ class HermesMCPOAuthProvider(HermesProviderMixin, *_SDK_BASES):
     async def _initialize(self) -> None:
         """Load stored state, seed ``token_expiry_time``, restore/prefetch metadata. The SDK's
         ``_initialize`` never calls ``update_token_expiry``, so a restarted process would ship stale
-        Bearer tokens as "valid"; seeding the expiry (``HermesTokenStorage`` persists absolute
+        Bearer tokens as "valid"; seeding the expiry (``AgentTokenStorage`` persists absolute
         ``expires_at``) makes the SDK refresh first. Metadata is restored from disk, else discovered
         pre-flight when we hold tokens but no metadata: otherwise ``_refresh_token`` guesses
         ``{server_url}/token`` (wrong for split-origin providers), 404s, and we fall to browser reauth."""
@@ -337,8 +337,8 @@ class MCPOAuthManager:
 
     @staticmethod
     def _key(server_name: str, hermes_home: str | Path | None = None) -> tuple[str, str]:
-        from hermes_constants import get_hermes_home
-        home = Path(hermes_home) if hermes_home is not None else get_hermes_home()
+        from agent_constants import get_agent_home
+        home = Path(hermes_home) if hermes_home is not None else get_agent_home()
         return (str(home.expanduser().resolve(strict=False)), server_name)
 
     def _build_provider(self, server_name: str, entry: _ProviderEntry) -> Optional[Any]:

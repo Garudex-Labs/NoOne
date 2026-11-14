@@ -1,8 +1,8 @@
-import { LOCAL_CONNECTION_ID, registryBackendScopeKey } from '@hermes/shared'
+import { LOCAL_CONNECTION_ID, registryBackendScopeKey } from '@noone/shared'
 import { atom, batch, computed } from 'nanostores'
 
-import type { HermesConnection } from '@/global'
-import { getProfiles, hermesApi, setApiRequestProfile, STARTUP_REQUEST_TIMEOUT_MS } from '@/hermes'
+import { getProfiles, hermesApi, setApiRequestProfile, STARTUP_REQUEST_TIMEOUT_MS } from '@/agent-client'
+import type { AgentConnection } from '@/global'
 import { hostHas } from '@/lib/host-capabilities'
 import { persistStore } from '@/lib/persist-store'
 import { initialGatewayProfile } from '@/lib/platform'
@@ -34,7 +34,7 @@ import { exitProjectScope } from '@/store/project-scope'
 import { $connection, clearComposerSelectionOwner, setComposerSelectionOwner, setConnection } from '@/store/session'
 import type { SessionOwnerRoute } from '@/store/session-request-router'
 import { reloadOpenStarmapGraph, resetStarmapGraph } from '@/store/starmap'
-import type { ProfileInfo } from '@/types/hermes'
+import type { ProfileInfo } from '@/types/agent-client'
 
 // Canonical key for a profile: trimmed, empty → "default". Used everywhere we
 // compare a session's owning profile against the live gateway's profile.
@@ -71,7 +71,7 @@ export const $profilesByConnection = atom<ReadonlyMap<string, ProfileInfo[]>>(ne
 // Registry descriptors carry their connection id (a slug, so it never contains
 // ':'); legacy primaries are keyed by endpoint. Null is a reconnect blip (see
 // setConnection), not a source.
-function profileListSource(connection: HermesConnection | null): null | string {
+function profileListSource(connection: AgentConnection | null): null | string {
   if (!connection) {
     return null
   }
@@ -500,7 +500,7 @@ export const $hydrationSyncProfile = atom<string | null>(null)
 
 // ── Hover-intent backend pre-warm ───────────────────────────────────────────
 // A cold switch to a profile whose gateway descriptor isn't cached pays the
-// `hermes gateway ensure` round-trip plus the socket connect before the sidebar
+// `noone gateway ensure` round-trip plus the socket connect before the sidebar
 // can repopulate. The pointer entering a profile square in the rail signals the
 // switch a few hundred ms before the click lands, so we run the same dial +
 // connect chain then (openGatewayForProfile — without activating).
@@ -582,7 +582,7 @@ const DESCRIPTOR_LOOKUP_TIMEOUT_MS = 20_000
 // and its decline path turned routine registry churn into dead profile
 // clicks (#89622) — reverted in #89785. Do not reintroduce fail-closed
 // switching at this seam.
-async function resolveConnectionForProfile(profile: string): Promise<HermesConnection | null> {
+async function resolveConnectionForProfile(profile: string): Promise<AgentConnection | null> {
   const getConnection = window.hermesDesktop?.getConnection
 
   if (!getConnection) {
@@ -750,7 +750,7 @@ export async function ensureGatewayProfile(
 // getConnection (the local pool). Same best-effort, fail-open contract as
 // resolveConnectionForProfile: a failed lookup resolves null and keeps the
 // previous descriptor.
-async function resolveConnectionForAgent(connectionId: string, profile: string): Promise<HermesConnection | null> {
+async function resolveConnectionForAgent(connectionId: string, profile: string): Promise<AgentConnection | null> {
   const getConnectionFor = window.hermesDesktop?.getConnectionFor
 
   if (!getConnectionFor) {

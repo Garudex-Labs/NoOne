@@ -1,34 +1,41 @@
 ---
-sidebar_position: 6
 title: "WhatsApp Business (Cloud API)"
-description: "Set up Hermes Agent as a WhatsApp bot via Meta's official Business Cloud API"
+description: "Set up the agent as a WhatsApp bot via Meta's official Business Cloud API"
 ---
 
-# WhatsApp Business Cloud API Setup
+# WhatsApp Business Cloud API Setup {#whatsapp-business-cloud-api-setup}
 
 Python dependency commands on this page use a
 [PM-prepared source checkout](../../reference/package-management.md#developer-workflow).
-After a dependency change, reactivate the checkout and restart Hermes.
+After a dependency change, reactivate the checkout and restart {{app-name}}.
 
-Hermes can connect to WhatsApp through Meta's **official** WhatsApp Business Cloud API. This is the production-grade path: no Node.js bridge subprocess, no QR codes, no account-ban risk.
+{{app-name}} can connect to WhatsApp through Meta's **official** WhatsApp Business Cloud API. This is the production-grade path: no Node.js bridge subprocess, no QR codes, no account-ban risk.
 
 In exchange:
 
 - You need a **Meta Business account** (not personal WhatsApp).
 - The bot operates on a dedicated business phone number, not your personal number.
-- The Hermes gateway needs a **public HTTPS URL** so Meta can deliver inbound messages via webhook.
-- Replies more than 24 hours after the user's last message require a pre-approved **template** (this is Meta's "customer service window" rule, not a Hermes limit).
+- The {{app-name}} gateway needs a **public HTTPS URL** so Meta can deliver inbound messages via webhook.
+- Replies more than 24 hours after the user's last message require a pre-approved **template** (this is Meta's "customer service window" rule, not a {{app-name}} limit).
 
 If those constraints don't work for your use case, the [Baileys bridge integration](./whatsapp.md) is the alternative — personal account, no public URL needed, but unofficial and ban-prone.
 
-:::tip Which one should I use?
+<Tip>
+
+<div className="doc-callout-title">
+
+Which one should I use?
+
+</div>
+
 - **Cloud API (this guide)** — running a real business bot, want stability, fine with the Meta verification + template paperwork
 - **[Baileys bridge](./whatsapp.md)** — personal projects, quick demos, single-user setups, willing to risk the bot phone number's account
-:::
+
+</Tip>
 
 ---
 
-## Quick start
+## Quick start {#quick-start}
 
 ```bash
 hermes whatsapp-cloud
@@ -40,16 +47,16 @@ The rest of this page is the manual reference.
 
 ---
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 1. **A Meta Business account**.  Create one at [business.facebook.com](https://business.facebook.com/).
 2. **A Meta app with WhatsApp enabled**.  See "Creating the Meta app" below.
 3. **A way to expose a local port to the public internet** with HTTPS.  Cloudflare Tunnel (`cloudflared`) is recommended — free, no port forwarding, no domain required.  ngrok, your own domain with a reverse proxy + TLS, or a VPS with the gateway directly bound to a public IP all work too.
-4. **Optional but recommended**: ffmpeg on `PATH` so outbound voice messages render as native WhatsApp voice-note bubbles (green waveform) instead of MP3 audio attachments. Hermes degrades gracefully if absent.
+4. **Optional but recommended**: ffmpeg on `PATH` so outbound voice messages render as native WhatsApp voice-note bubbles (green waveform) instead of MP3 audio attachments. {{app-name}} degrades gracefully if absent.
 
 ---
 
-## Creating the Meta app
+## Creating the Meta app {#creating-the-meta-app}
 
 1. Go to [developers.facebook.com/apps](https://developers.facebook.com/apps) → **Create App**.
 2. Choose use case: **"Connect with customers through WhatsApp"** → **Next**.
@@ -69,7 +76,7 @@ You'll need these values from the dashboard — the wizard prompts for them in t
 
 ---
 
-## Permanent token (production)
+## Permanent token (production) {#permanent-token-production}
 
 Temporary access tokens expire after **24 hours**, which means a token generated today stops working tomorrow.  For production deployments use a **System User permanent token**:
 
@@ -90,11 +97,11 @@ System User tokens don't expire unless you explicitly revoke them.
 
 ---
 
-## Exposing Hermes to the internet
+## Exposing {{app-name}} to the internet {#exposing-hermes-to-the-internet}
 
-The Cloud API delivers inbound messages by HTTPS POST to your webhook URL — that means the Hermes gateway has to be reachable from Meta's servers.  Three common ways:
+The Cloud API delivers inbound messages by HTTPS POST to your webhook URL — that means the {{app-name}} gateway has to be reachable from Meta's servers.  Three common ways:
 
-### Cloudflare Tunnel (recommended)
+### Cloudflare Tunnel (recommended) {#cloudflare-tunnel-recommended}
 
 Free, no port forwarding, works on Windows / macOS / Linux.  Runs as a separate process alongside the gateway.
 
@@ -119,11 +126,19 @@ cloudflared tunnel --url http://localhost:8090
 
 Note the printed URL — that's what you'll give Meta.
 
-:::warning Quick tunnels rotate
-The free quick-tunnel URL changes every time you restart `cloudflared`.  For a stable URL, log in with `cloudflared tunnel login` and create a named tunnel.  Free Cloudflare accounts get unlimited named tunnels — see [Cloudflare's docs](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/) for the named-tunnel workflow.
-:::
+<Warning>
 
-### ngrok
+<div className="doc-callout-title">
+
+Quick tunnels rotate
+
+</div>
+
+The free quick-tunnel URL changes every time you restart `cloudflared`.  For a stable URL, log in with `cloudflared tunnel login` and create a named tunnel.  Free Cloudflare accounts get unlimited named tunnels — see [Cloudflare's docs](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/) for the named-tunnel workflow.
+
+</Warning>
+
+### ngrok {#ngrok}
 
 ```bash
 ngrok http 8090
@@ -131,13 +146,13 @@ ngrok http 8090
 
 Free tier shows a different URL on each restart.  Paid tier gives you a stable subdomain.
 
-### Your own domain + reverse proxy
+### Your own domain + reverse proxy {#your-own-domain--reverse-proxy}
 
 If you already have a server with a TLS cert (Caddy, nginx, etc.), point a route at `localhost:8090`.  This is the most stable option for production but requires existing infrastructure.
 
 ---
 
-## Configuring the webhook on Meta's side
+## Configuring the webhook on Meta's side {#configuring-the-webhook-on-metas-side}
 
 Once your tunnel is running:
 
@@ -147,7 +162,7 @@ Once your tunnel is running:
    python -c "import secrets; print(secrets.token_urlsafe(32))"
    ```
    Save it as `WHATSAPP_CLOUD_VERIFY_TOKEN` in `~/.hermes/.env`.
-3. Start the Hermes gateway: `hermes gateway`.
+3. Start the {{app-name}} gateway: `noone gateway`.
 4. In the Meta App Dashboard → **WhatsApp → Configuration** (or **Use cases → Customize → Configuration** depending on UI version) → click **Edit** on the Webhook section.
 5. Fill in:
    - **Callback URL**: `https://abc123.trycloudflare.com/whatsapp/webhook`
@@ -170,7 +185,7 @@ curl "$TUNNEL/health"
 
 ---
 
-## Recipient whitelist (Meta-side)
+## Recipient whitelist (Meta-side) {#recipient-whitelist-meta-side}
 
 In development mode (before your app goes through App Review), Meta restricts which numbers your bot can message:
 
@@ -182,9 +197,9 @@ Up to 5 numbers in dev mode.  Going to App Review removes this limit.
 
 ---
 
-## Allowlist (Hermes-side)
+## Allowlist ({{app-name}}-side) {#allowlist-hermes-side}
 
-In addition to Meta's recipient whitelist, Hermes has its own per-platform allowlist that controls **which incoming messages the agent processes**.  Add to `~/.hermes/.env`:
+In addition to Meta's recipient whitelist, {{app-name}} has its own per-platform allowlist that controls **which incoming messages the agent processes**.  Add to `~/.hermes/.env`:
 
 ```bash
 # Comma-separated phone numbers, country code, no '+' / spaces / dashes
@@ -198,7 +213,7 @@ The wizard sets this in step 6.  Without an allowlist, **every inbound message i
 
 ---
 
-## Polishing your bot's WhatsApp profile
+## Polishing your bot's WhatsApp profile {#polishing-your-bots-whatsapp-profile}
 
 WhatsApp displays a **name and profile picture** for your bot in the chat header and contact list. These can't be set via the Cloud API — they live in Meta's Business Manager.
 
@@ -215,7 +230,7 @@ The `hermes whatsapp-cloud` wizard prints these links at the end of setup. None 
 
 ---
 
-## Configuration reference
+## Configuration reference {#configuration-reference}
 
 All settings live in `~/.hermes/.env`.  Required values are in **bold**.
 
@@ -239,9 +254,9 @@ You can have **both** the Baileys (`whatsapp`) and Cloud (`whatsapp_cloud`) adap
 
 ---
 
-## Features
+## Features {#features}
 
-### Inbound
+### Inbound {#inbound}
 
 - **Text messages** — passed straight to the agent.
 - **Images** — auto-downloaded and attached to the agent's input. Models with native vision (Claude, GPT-4o, Gemini, etc.) read the image directly; non-vision models receive an auto-generated text description.
@@ -250,16 +265,16 @@ You can have **both** the Baileys (`whatsapp`) and Cloud (`whatsapp_cloud`) adap
 - **Button taps** — when the user taps a button the bot sent earlier (clarify choice, command approval, slash-command confirm), the tap is routed directly to the right handler. Stale taps fall back to being treated as regular text input.
 - **Reply context** — when the user replies to a previous message, the agent sees the original text as context. Quoting an image, voice note, video or document (yours or one the bot sent, e.g. a cron-delivered chart) also attaches that file to the turn, so "what is this?" under a quoted image works. Meta's webhook carries only the quoted message id, so this resolves from a local index of recent sends/receives (last 1000 messages per gateway); older quotes arrive without the attachment.
 
-### Outbound
+### Outbound {#outbound}
 
 - **Text** — markdown is auto-converted to WhatsApp's flavored syntax (`**bold**` → `*bold*`, `~~strike~~` → `~strike~`, headers → bold, `[link](url)` → `link (url)`). Long messages split at 4096 chars per chunk.
 - **Images** — agent-generated images and local image files both supported, delivered as native photo attachments.
 - **Voice messages** — text-to-speech output is converted via ffmpeg into the native WhatsApp voice-note bubble (green waveform). Without ffmpeg installed, falls back to an MP3 audio attachment. See "Voice messages" below.
 - **Video / documents** — both supported, sent as native attachments.
 
-### Interactive UX
+### Interactive UX {#interactive-ux}
 
-When the agent invokes any of these flows, Hermes uses WhatsApp's native interactive messages — tap-to-answer buttons instead of "reply with the number" prompts:
+When the agent invokes any of these flows, {{app-name}} uses WhatsApp's native interactive messages — tap-to-answer buttons instead of "reply with the number" prompts:
 
 - **`clarify` tool** — multi-choice questions render as quick-reply buttons (1–3 choices) or a tap-to-open list sheet (4+ choices). Picking "✏️ Other" lets the user type a free-form answer that the agent receives as the resolution.
 - **Dangerous-command approvals** — when the agent's terminal/code execution hits a gated command, the user sees `✅ Approve` / `❌ Deny` buttons instead of needing to type `/approve` or `/deny`.
@@ -267,9 +282,9 @@ When the agent invokes any of these flows, Hermes uses WhatsApp's native interac
 
 All interactive prompts gracefully degrade to plain text if the buttons fail to render (e.g. on legacy WhatsApp clients).
 
-### Read receipts and typing indicator
+### Read receipts and typing indicator {#read-receipts-and-typing-indicator}
 
-Hermes acknowledges inbound messages immediately:
+{{app-name}} acknowledges inbound messages immediately:
 
 - Your message shows **blue double-checkmarks** as soon as the gateway receives it.
 - The bot's name in your WhatsApp chat shows **"typing…"** while the agent is preparing a reply.
@@ -277,11 +292,11 @@ Hermes acknowledges inbound messages immediately:
 
 This makes it obvious when the bot has seen your message versus when it's still working on a response.
 
-### Voice messages
+### Voice messages {#voice-messages}
 
 WhatsApp distinguishes between a "voice note" (the green waveform bubble) and a generic audio file attachment. The difference is purely codec: voice notes need to be `audio/ogg` with `opus` encoding.
 
-Hermes TTS produces MP3. Two paths:
+{{app-name}} TTS produces MP3. Two paths:
 
 - **With ffmpeg on PATH** (recommended) — outbound TTS is converted and arrives as a proper voice note. Install:
   - Windows: `winget install Gyan.FFmpeg`
@@ -298,9 +313,9 @@ curl http://localhost:8090/health
 
 ---
 
-## Known limitations
+## Known limitations {#known-limitations}
 
-### 24-hour conversation window
+### 24-hour conversation window {#24-hour-conversation-window}
 
 Meta only allows **free-form messages** within a 24-hour window after the user's last inbound message. Outside that window, the only thing Meta's API accepts is a pre-approved **message template**.
 
@@ -311,38 +326,38 @@ Meta only allows **free-form messages** within a 24-hour window after the user's
 - **Long-running `delegate_task` async results** that take longer than 24h fail the same way.
 - **Webhook subscribers** that route external events to WhatsApp fail when the user hasn't DM'd the bot recently.
 
-Hermes warns the agent about this window in its system prompt, so the model knows to mention it when scheduling delayed messages.
+{{app-name}} warns the agent about this window in its system prompt, so the model knows to mention it when scheduling delayed messages.
 
-Message-template support (the workaround for outside-window sends) is not yet implemented in Hermes. If you need it, please [open an issue](https://github.com/NousResearch/hermes-agent/issues) — it's planned but waiting on a clear demand signal.
+Message-template support (the workaround for outside-window sends) is not yet implemented in {{app-name}}. If you need it, please [open an issue](https://github.com/Garudex-Labs/NoOne/issues) — it's planned but waiting on a clear demand signal.
 
-### Group chats
+### Group chats {#group-chats}
 
-The Cloud API has limited group support (capability-tier gated by Meta).  Hermes's `whatsapp_cloud` adapter currently handles **direct messages only** in v1.  If you need group chats, use the Baileys bridge.
+The Cloud API has limited group support (capability-tier gated by Meta).  {{app-name}}'s `whatsapp_cloud` adapter currently handles **direct messages only** in v1.  If you need group chats, use the Baileys bridge.
 
-### Outbound rate limit
+### Outbound rate limit {#outbound-rate-limit}
 
-Meta's default throughput is **80 messages/second per business phone number**, with upgrades available.  Hermes doesn't currently enforce this client-side — extremely high-volume sends could hit Meta's limit.
+Meta's default throughput is **80 messages/second per business phone number**, with upgrades available.  {{app-name}} doesn't currently enforce this client-side — extremely high-volume sends could hit Meta's limit.
 
 ---
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
-### Setup verification fails ("URL couldn't be validated") in Meta dashboard
+### Setup verification fails ("URL couldn't be validated") in Meta dashboard {#setup-verification-fails-url-couldnt-be-validated-in-meta-dashboard}
 
 Almost always one of:
 
 - **Tunnel URL is wrong or stale** — cloudflared quick tunnels rotate.  Get a fresh URL and update both `.env` and Meta's dashboard.
 - **Verify token mismatch** — the token in `~/.hermes/.env`'s `WHATSAPP_CLOUD_VERIFY_TOKEN` must match exactly what you typed into Meta's dashboard.  Run the curl probe above to confirm the gateway's verify handshake works locally first.
-- **Gateway not running** — check `hermes gateway` is up.
-- **App Secret not set** — without it, Hermes refuses inbound POSTs with 503.  Meta interprets that as "can't validate."
+- **Gateway not running** — check `noone gateway` is up.
+- **App Secret not set** — without it, {{app-name}} refuses inbound POSTs with 503.  Meta interprets that as "can't validate."
 
-### `graph error 100`: Object with ID '...' does not exist
+### `graph error 100`: Object with ID '...' does not exist {#graph-error-100-object-with-id--does-not-exist}
 
 You pasted your phone number (10-11 digits) into `WHATSAPP_CLOUD_PHONE_NUMBER_ID` instead of the Phone Number ID (Meta's 15-17 digit internal ID).  Re-check the API Setup page — the Phone Number ID is shown *below* the "From" dropdown.
 
 The wizard catches this with a validator now, but it's worth knowing if you're configuring manually.
 
-### `graph error 190`: Authentication Error
+### `graph error 190`: Authentication Error {#graph-error-190-authentication-error}
 
 Your access token is invalid.  Subcodes:
 
@@ -350,39 +365,39 @@ Your access token is invalid.  Subcodes:
 - `subcode 467` — token invalidated (revoked or password changed).
 - Other 190 — token didn't have the required permissions when generated.  Make sure all three (`business_management`, `whatsapp_business_messaging`, `whatsapp_business_management`) were selected.
 
-### `graph error 131047`: Re-engagement message
+### `graph error 131047`: Re-engagement message {#graph-error-131047-re-engagement-message}
 
 The 24-hour conversation window expired (see "Known limitations").  Either:
 
 - Ask the user to DM the bot first to reopen the window.
-- Wait for template support to land in Hermes.
+- Wait for template support to land in {{app-name}}.
 
-### Inbound message: `media metadata fetch failed (status=401)`
+### Inbound message: `media metadata fetch failed (status=401)` {#inbound-message-media-metadata-fetch-failed-status401}
 
 Same 401 root causes as outbound (`graph error 190`) — the access token is invalid or expired.  Fix the token.
 
-### Bot replies appear as raw JSON / tool-call leakage
+### Bot replies appear as raw JSON / tool-call leakage {#bot-replies-appear-as-raw-json--tool-call-leakage}
 
-Common cause: the toolset configured for `whatsapp_cloud` is missing the tools the agent wants to call.  Check `hermes tools list` and verify the platform is using `hermes-whatsapp` (the default Cloud adapter toolset, same as Baileys).
+Common cause: the toolset configured for `whatsapp_cloud` is missing the tools the agent wants to call.  Check `noone tools list` and verify the platform is using `hermes-whatsapp` (the default Cloud adapter toolset, same as Baileys).
 
-If the model emits tool-call-shaped text instead of a structured call, it usually means the toolset was effectively empty.  See `hermes_cli/platforms.py` for the platform → default toolset mapping.
+If the model emits tool-call-shaped text instead of a structured call, it usually means the toolset was effectively empty.  See `agent_cli/platforms.py` for the platform → default toolset mapping.
 
-### STT (voice note transcription) returns empty / "could not transcribe"
+### STT (voice note transcription) returns empty / "could not transcribe" {#stt-voice-note-transcription-returns-empty--could-not-transcribe}
 
-The default `stt.provider: local` requires `python -c "import pm; pm.sync_venv(['stt-whisper'], explicit=True)"`.  If you're a Nous subscriber, you can route STT through the managed gateway instead — select **Nous Subscription** for speech-to-text in `hermes tools`, or set it directly:
+The default `stt.provider: local` requires `python -c "import pm; pm.sync_venv(['stt-whisper'], explicit=True)"`.  If you're a Nous subscriber, you can route STT through the managed gateway instead — select **Nous Subscription** for speech-to-text in `noone tools`, or set it directly:
 
 ```bash
-hermes config set stt.provider nous
-hermes gateway restart
+noone config set stt.provider nous
+noone gateway restart
 ```
 
 This uses your Nous Portal access token instead of needing a separate OpenAI key. (Older docs suggested `stt.use_gateway true` — that flag is legacy; the provider selection alone controls routing now.)
 
 ---
 
-## Security notes
+## Security notes {#security-notes}
 
-- **Treat the App Secret like a password** — anyone with it can forge webhook payloads that Hermes will accept as authentic.
+- **Treat the App Secret like a password** — anyone with it can forge webhook payloads that {{app-name}} will accept as authentic.
 - **The verify token is a shared secret** — leaks are lower-stakes (worst case someone could re-subscribe Meta's webhook to a different URL of theirs), but still avoid committing it.
 - **The access token is your bot's identity** — System User tokens are equivalent to long-lived API keys.  Rotate immediately if a deployment is compromised.
 - **The webhook endpoint accepts only signed requests when `WHATSAPP_CLOUD_APP_SECRET` is set** — leave it set even in development.  Without it, the gateway refuses inbound delivery with HTTP 503.
@@ -390,7 +405,7 @@ This uses your Nous Portal access token instead of needing a separate OpenAI key
 
 ---
 
-## Comparison to the Baileys bridge
+## Comparison to the Baileys bridge {#comparison-to-the-baileys-bridge}
 
 | | Baileys (`hermes whatsapp`) | Cloud API (`hermes whatsapp-cloud`) |
 |---|---|---|
@@ -410,11 +425,11 @@ This uses your Nous Portal access token instead of needing a separate OpenAI key
 | Interactive buttons | Text fallback only | Native (clarify, approval, slash-confirm) |
 | Production use | Risky (Meta can ban) | Designed for it |
 
-Most users running Hermes for personal projects prefer Baileys. Most users running customer-facing bots prefer Cloud API.
+Most users running {{app-name}} for personal projects prefer Baileys. Most users running customer-facing bots prefer Cloud API.
 
 ---
 
-## See also
+## See also {#see-also}
 
 - [Meta's official WhatsApp Business Cloud API docs](https://developers.facebook.com/documentation/business-messaging/whatsapp/) — authoritative reference for the underlying platform, pricing, App Review, and Meta-side rate limits.
 - [WhatsApp (Baileys bridge) Setup](whatsapp.md) — the alternative integration for personal projects.

@@ -19,10 +19,10 @@
  * Their state stays visible on the MCP page.
  */
 
-import type { McpServersStatusResult } from '@hermes/shared'
+import type { McpServersStatusResult } from '@noone/shared'
 
+import { getHermesConfigRecord, setMcpServerEnabled } from '@/agent-client'
 import { $apiRequestScope } from '@/api/client'
-import { getHermesConfigRecord, setMcpServerEnabled } from '@/hermes'
 import { translateNow } from '@/i18n'
 import { isLoopbackPreviewUrl } from '@/lib/local-preview'
 import { getServers, type McpServerEntry, serverEnabled } from '@/lib/mcp-servers'

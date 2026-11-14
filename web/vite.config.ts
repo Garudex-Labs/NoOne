@@ -1,4 +1,5 @@
 import { defineConfig, type Plugin } from "vite";
+import { applicationIdentityHtml } from "../scripts/build/application-identity.mjs";
 import babel from "@rolldown/plugin-babel";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 
@@ -25,8 +26,8 @@ const configDir: string = fileURLToPath(new URL(".", import.meta.url));
 const BACKEND = process.env.HERMES_DASHBOARD_URL ?? "http://127.0.0.1:9119";
 
 /**
- * In production the Python `hermes dashboard` server injects a one-shot
- * session token into `index.html` (see `hermes_cli/web_server.py`). The
+ * In production the Python `noone dashboard` server injects a one-shot
+ * session token into `index.html` (see `agent_cli/web_server.py`). The
  * Vite dev server serves its own `index.html`, so unless we forward that
  * token, every protected `/api/*` call 401s.
  *
@@ -52,7 +53,7 @@ function hermesDevToken(): Plugin {
         if (!match) {
           console.warn(
             `[hermes] Could not find session token in ${BACKEND} — ` +
-              `is \`hermes dashboard\` running? /api calls will 401.`,
+              `is \`noone dashboard\` running? /api calls will 401.`,
           );
           return;
         }
@@ -73,7 +74,7 @@ function hermesDevToken(): Plugin {
       } catch (err) {
         console.warn(
           `[hermes] Dashboard at ${BACKEND} unreachable — ` +
-            `start it with \`hermes dashboard\` or set HERMES_DASHBOARD_URL. ` +
+            `start it with \`noone dashboard\` or set HERMES_DASHBOARD_URL. ` +
             `(${(err as Error).message})`,
         );
       }
@@ -88,6 +89,7 @@ export default defineConfig({
     postcss: { plugins: [] },
   },
   plugins: [
+    applicationIdentityHtml(),
     react(),
     // Babel resolves the compiler preset's plugin from its cwd; builders run Vite from the
     // checkout root, where only this workspace's node_modules has it.
@@ -98,7 +100,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(configDir, "./src"),
-      "@hermes/shared": path.resolve(configDir, "../apps/shared/src"),
+      "@noone/shared": path.resolve(configDir, "../apps/shared/src"),
     },
     // When @nous-research/ui is symlinked via `file:../../design-language`,
     // Node's module resolution would pick up shared deps from
@@ -120,7 +122,7 @@ export default defineConfig({
     ],
   },
   build: {
-    outDir: "../hermes_cli/web_dist",
+    outDir: "../agent_cli/web_dist",
     emptyOutDir: true,
     // Shell stays a bit over Vite's 500 kB default after vendor splits;
     // page/xterm chunks load on demand. Keep a modest ceiling so a true
@@ -182,7 +184,7 @@ export default defineConfig({
         // upgrades arrive that way however BACKEND is reached (port forwards
         // included). The backend trusts no fixed dev port.
       },
-      // Same host as `hermes dashboard` must serve these; Vite has no
+      // Same host as `noone dashboard` must serve these; Vite has no
       // dashboard-plugins/* files, so without this, plugin scripts 404
       // or receive index.html in dev.
       "/dashboard-plugins": BACKEND,

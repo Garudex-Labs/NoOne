@@ -9,7 +9,7 @@ codebase already exposes. Implements **A2A Protocol v1.0** (JSON-RPC binding).
 Earlier A2A attempts (#4135, #4948, #4952, #11025) added a standalone server
 package (`a2a_adapter/`) and/or patched `gateway/run.py` + `gateway/config.py`.
 Since then the codebase grew `ctx.register_platform()` (the plugin
-platform-adapter API — used by irc, line, teams, ntfy, simplex, …) and
+platform-adapter API — used by line, teams, …) and
 `ctx.register_tool()`. That makes the standing policy achievable: **plugins
 must not touch core files.** A2A now lives entirely under
 `plugins/platforms/a2a/`.

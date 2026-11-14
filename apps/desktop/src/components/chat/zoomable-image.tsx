@@ -1,13 +1,13 @@
 'use client'
 
 import { useStore } from '@nanostores/react'
+import { Download, ZoomIn, ZoomOut } from '@noone/ui/icons'
 import { type ComponentProps, useEffect, useRef } from 'react'
 
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useZoomPan } from '@/components/ui/use-zoom-pan'
 import { useImageDownload } from '@/hooks/use-image-download'
 import { useI18n } from '@/i18n'
-import { Download, ZoomIn, ZoomOut } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { $transcriptLightbox, closeTranscriptLightbox, openTranscriptLightbox } from '@/store/transcript-lightbox'
 

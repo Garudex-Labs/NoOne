@@ -3,7 +3,7 @@ secret scope (#77548 cluster; #72348 / #86905 precedent).
 
 Under ``gateway.multiplex_profiles`` ``os.environ`` holds the DEFAULT profile's values. A raw
 ``os.getenv`` in an adapter's own gate let the default's ``GATEWAY_ALLOW_ALL_USERS=true`` open every
-secondary email/QQ/WhatsApp/Matrix/Teams/Slack/LINE/DingTalk bot, and the default's allowlist decide
+secondary email/WhatsApp/Teams/Slack/LINE bot, and the default's allowlist decide
 who may approve on a secondary bot. Two invariants per adapter: the default env never answers a
 scoped gate; the scope's own opt-in/allowlist does.
 """
@@ -19,9 +19,9 @@ from gateway.config import PlatformConfig
 _DEFAULT_ENV = {
     "GATEWAY_ALLOW_ALL_USERS": "true", "GATEWAY_ALLOWED_USERS": "default-admin",
     "TEAMS_ALLOW_ALL_USERS": "true", "TEAMS_ALLOWED_USERS": "default-admin",
-    "MATRIX_ALLOWED_USERS": "@default-admin:example.org", "MATRIX_IGNORE_USER_PATTERNS": r"^@spam:.*",
+
     "WHATSAPP_ALLOWED_USERS": "+15550001111", "SLACK_ALLOW_BOTS": "all", "SLACK_API_HUMAN_USERS": "U0DEFAULT",
-    "LINE_ALLOW_ALL_USERS": "true", "LINE_ALLOWED_USERS": "Udefault", "DINGTALK_ALLOWED_USERS": "default-admin",
+    "LINE_ALLOW_ALL_USERS": "true", "LINE_ALLOWED_USERS": "Udefault",
     "EMAIL_ALLOWED_USERS": "bot2-admin@example.org",
 }
 
@@ -43,11 +43,6 @@ def _scope(secrets):
         ss.reset_secret_scope(token)
 
 
-def _matrix(extra=None):
-    from plugins.platforms.matrix.adapter import MatrixAdapter
-
-    return MatrixAdapter(PlatformConfig(enabled=True, token="t", extra={"homeserver": "https://m.example",
-                                                                       "user_id": "@bot:m.example", **(extra or {})}))
 
 
 def _whatsapp():
@@ -66,12 +61,6 @@ def _slack():
     return adapter
 
 
-def _dingtalk():
-    from plugins.platforms.dingtalk.adapter import DingTalkAdapter
-
-    adapter = DingTalkAdapter.__new__(DingTalkAdapter)
-    adapter.config = PlatformConfig(enabled=True, extra={})
-    return adapter
 
 
 def _email():
@@ -97,9 +86,6 @@ _GATES = [
     ("email.gateway_allowlist", {"GATEWAY_ALLOWED_USERS": "bot2-admin@example.org"},
      lambda: _email()._sender_accepted("bot2-admin@example.org", {"sender_authenticated": True}),
      False, True),
-    ("qqbot.open_dm", {"QQ_ALLOW_ALL_USERS": "true"},
-     lambda: __import__("plugins.platforms.qqbot.adapter", fromlist=["QQAdapter"]).QQAdapter._open_dm_opted_in(object.__new__(__import__("plugins.platforms.qqbot.adapter", fromlist=["QQAdapter"]).QQAdapter)),
-     False, True),
     ("whatsapp.open_dm", {"GATEWAY_ALLOW_ALL_USERS": "true"},
      lambda: __import__("gateway.platforms.whatsapp_common", fromlist=["WhatsAppBehaviorMixin"]).WhatsAppBehaviorMixin._open_dm_opted_in(_whatsapp()),
      False, True),
@@ -110,19 +96,11 @@ _GATES = [
      lambda: __import__("plugins.platforms.teams.adapter", fromlist=["TeamsAdapter"]).TeamsAdapter._card_action_denied(
          SimpleNamespace(aad_object_id="clicker")) is None,
      False, True),
-    ("matrix.authorized_user", {"MATRIX_ALLOWED_USERS": "@bot2-admin:example.org"},
-     lambda: _matrix()._is_authorized_user("@bot2-admin:example.org"),
-     False, True),
-    ("matrix.ignored_patterns", {"MATRIX_IGNORE_USER_PATTERNS": r"^@bot2-spam:.*"},
-     lambda: [p.pattern for p in _matrix()._ignored_user_patterns],
-     [], [r"^@bot2-spam:.*"]),
     ("slack.allow_bots", {"SLACK_ALLOW_BOTS": "mentions"}, lambda: _slack()._slack_allow_bots(), "none", "mentions"),
     ("slack.api_human_users", {"SLACK_API_HUMAN_USERS": "U0BOT2"},
      lambda: set(_slack()._slack_api_human_users()), set(), {"U0BOT2"}),
     ("line.allow_all", {"LINE_ALLOW_ALL_USERS": "true"}, lambda: _line().allow_all, False, True),
     ("line.allowed_users", {"LINE_ALLOWED_USERS": "Ubot2"}, lambda: _line().allowed_users, set(), {"Ubot2"}),
-    ("dingtalk.allowed_users", {"DINGTALK_ALLOWED_USERS": "Bot2Admin"},
-     lambda: {u.lower() for u in _dingtalk()._csv_setting("allowed_users", "DINGTALK_ALLOWED_USERS")}, set(), {"bot2admin"}),
 ]
 
 

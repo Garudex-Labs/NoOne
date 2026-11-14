@@ -6,7 +6,7 @@ retries, fallbacks, compression, post-turn hooks). Symbols that callers patch on
 ``_ra`` so those patches keep working."""
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import inspect
 import json
 import logging
@@ -36,13 +36,13 @@ from agent.surface_switch import (
     identity_line_value, note_inert_pinned_tools, runtime_host_value, stage_surface_switch_note,
 )
 from agent.turn_context import PRE_LLM_BLOCK_EXIT_REASON, PreflightCompressionTimedOut, build_turn_context
-from hermes_cli.observability.shared_metrics_efficiency import record_cache_break, record_prompt_rebuild
-from hermes_cli.plugins_dispatch import held_stream_transforms
+from agent_cli.observability.shared_metrics_efficiency import record_cache_break, record_prompt_rebuild
+from agent_cli.plugins_dispatch import held_stream_transforms
 from agent.turn_retry_state import TurnRetryState
 from agent.turn_scripted_prelude import Prelude, play_prelude
 # Phase helpers of the turn loop, bound at import so a source-tree swap cannot load a
 # skewed phase mid-turn.
-from agent.turn_api_call import handle_api_interrupt, nous_rate_limit_guard, perform_api_call
+from agent.turn_api_call import handle_api_interrupt, perform_api_call
 from agent.turn_api_error import handle_api_error
 from agent.turn_api_request import build_api_request
 from agent.turn_failure_copy import FAILED_TURN_DISPLAY_KIND, OPEN_TURN_TAIL_ROLES, failed_turn_notice, site_copy
@@ -60,14 +60,14 @@ from agent.turn_request_assembly import assemble_api_request
 from agent.turn_response_check import check_api_response
 from agent.turn_response_intake import normalize_model_response
 from agent.turn_tool_round import run_tool_round
-from hermes_logging import set_session_context
+from agent_logging import set_session_context
 from tools.skill_provenance import set_current_write_origin
 from utils import base_url_host_matches
 
 logger = logging.getLogger(__name__)
 
-# Must mirror _STALE_TOOL_CALL_MARKER_RE in hermes_state.py; kept local so importing
-# hermes_state (module-level DEFAULT_DB_PATH) is not forced at load time.
+# Must mirror _STALE_TOOL_CALL_MARKER_RE in agent_state.py; kept local so importing
+# agent_state (module-level DEFAULT_DB_PATH) is not forced at load time.
 _STALE_MARKER_RE = re.compile(r"^\[[A-Za-z_][A-Za-z0-9_.-]*\]$")
 
 # Shared by _apply_active_turn_redirect and the api_messages ghost-row filter so both sites cannot drift.
@@ -416,8 +416,8 @@ def _ollama_context_limit_error(agent: Any, request_tokens: int) -> Optional[str
 
     model = getattr(agent, "model", "") or "the selected model"
     logger.warning(
-        "Ollama runtime context too small for Hermes tool use: model=%s provider=%s base_url=%s "
-        "runtime_context=%d minimum_context=%d estimated_request_tokens=%d tool_count=%d session=%s",
+        app_text("Ollama runtime context too small for {app_name} tool use: model=%s provider=%s base_url=%s "
+        "runtime_context=%d minimum_context=%d estimated_request_tokens=%d tool_count=%d session=%s", percent_format=True),
         model, getattr(agent, "provider", "") or "unknown",
         getattr(agent, "base_url", "") or "unknown base URL", runtime_ctx, MINIMUM_CONTEXT_LENGTH,
         request_tokens, len(getattr(agent, "tools", None) or []),
@@ -445,7 +445,7 @@ def _maybe_grow_local_window(agent: Any, compressor: Any,
     ):
         return None
     try:
-        from hermes_cli.local_runtime.growth import maybe_grow_window
+        from agent_cli.local_runtime.growth import maybe_grow_window
         current_window = int(getattr(compressor, "context_length", 0) or 0)
         if current_window <= 0:
             return None
@@ -464,23 +464,6 @@ def _ra():
     return run_agent
 
 
-def _nous_entitlement_message(capability: str, *, billing: bool = False) -> str:
-    """``billing``: the request hit a billing wall. A usage-window account then gets its own next
-    step (top-up link); its plan is still live, so the entitlement copy alone would say nothing."""
-    try:
-        from hermes_cli.nous_account import (
-            format_nous_portal_entitlement_message,
-            format_usage_window_block_guidance,
-            get_nous_portal_account_info,
-        )
-        account_info = get_nous_portal_account_info(force_fresh=True)
-        if billing and (window_guidance := format_usage_window_block_guidance(account_info)):
-            return window_guidance
-        return format_nous_portal_entitlement_message(
-            account_info, capability=capability, in_chat=True
-        ) or ""
-    except Exception:
-        return ""
 
 
 def _print_guidance(agent, message: str) -> bool:
@@ -492,8 +475,6 @@ def _print_guidance(agent, message: str) -> bool:
     return True
 
 
-def _print_nous_entitlement_guidance(agent, capability: str) -> bool:
-    return _print_guidance(agent, _nous_entitlement_message(capability))
 
 
 def _system_prompt_for_hooks(api_kwargs: Any, request_messages: Any) -> Any:
@@ -509,17 +490,11 @@ def _system_prompt_for_hooks(api_kwargs: Any, request_messages: Any) -> Any:
     return system_prompt
 
 
-def _is_nous_inference_route(provider: str, base_url: str) -> bool:
-    return (provider or "").strip().lower() == "nous" or base_url_host_matches(
-        str(base_url or ""), "inference-api.nousresearch.com"
-    )
 
 
 def _billing_or_entitlement_message(
     *, capability: str, provider: str, base_url: str, model: str, unverified: bool = False
 ) -> str:
-    if _is_nous_inference_route(provider, base_url):
-        return _nous_entitlement_message(capability, billing=True)
 
     provider_label = (provider or "").strip() or "the selected provider"
     model_label = (model or "").strip() or "the selected model"
@@ -545,7 +520,7 @@ def _billing_or_entitlement_message(
                 "at https://claude.ai/settings/usage",
                 switch,
                 # The exhaustion latch replays the stored error without a request.
-                "Retry with a fresh credential state: `hermes auth reset anthropic`. Until that "
+                "Retry with a fresh credential state: `noone auth reset anthropic`. Until that "
                 "cooldown clears, this error can be replayed from cache without contacting the API.",
             ])
         return "\n".join([
@@ -772,7 +747,7 @@ def _refresh_bot_chat_tools(agent) -> None:
     """Rebuild ``agent.tools`` for a Bot Chat capability refresh through the builder that
     created the session, so the refreshed set is what a fresh desktop/TUI session gets
     (#124211). A canonical Bot Chat never forks, so its tools[] is otherwise a fossil of
-    session creation: ``hermes tools enable/disable`` writes ``platform_toolsets`` and the
+    session creation: ``noone tools enable/disable`` writes ``platform_toolsets`` and the
     automatic between-turns refresh reuses the build-time selection. Only the desktop/TUI
     gateway keeps agents alive across turns; every other surface builds a fresh agent whose
     tools[] already reflects config. No prefix preservation: a disabled toolset must drop,
@@ -790,7 +765,7 @@ def _refresh_bot_chat_tools(agent) -> None:
             refresh_agent_mcp_tools(agent, enabled_override=list(policy.toolsets),
                                     quiet_mode=True, content_aware=True)
             return
-        from tui_gateway.server import _load_disabled_toolsets, _load_enabled_toolsets
+        from agent_backend.server import _load_disabled_toolsets, _load_enabled_toolsets
         refresh_agent_mcp_tools(
             agent, enabled_override=_load_enabled_toolsets(platform),
             disabled_override=_load_disabled_toolsets(), quiet_mode=True, content_aware=True)
@@ -929,7 +904,7 @@ def _restore_or_build_system_prompt(agent, system_message, conversation_history)
     # Persistence-disabled forks share their parent's session ID and are not real sessions.
     if not getattr(agent, "_persist_disabled", False):
         try:
-            from hermes_cli.lifecycle import invoke_hook as _invoke_hook
+            from agent_cli.lifecycle import invoke_hook as _invoke_hook
             _invoke_hook(
                 "on_session_start", session_id=agent.session_id, model=agent.model,
                 platform=getattr(agent, "platform", None) or "",
@@ -1428,7 +1403,7 @@ def _decode_inline_moa_turn(user_message, persist_user_message):
     """Decode a MoA preset encoded into ``user_message``; returns ``(user_message,
     moa_config, persist_user_message)``, unchanged with ``moa_config=None`` otherwise."""
     try:
-        from hermes_cli.moa_config import decode_moa_turn
+        from agent_cli.moa_config import decode_moa_turn
         _decoded_message, _decoded_moa_config = decode_moa_turn(user_message)
         if _decoded_moa_config is not None:
             if persist_user_message is None:
@@ -1581,11 +1556,6 @@ def _run_api_retry_loop(agent, s: _LoopState) -> Optional[dict[str, Any]]:
     Returns a turn result dict when a phase ends the turn, else None once the loop is left
     (success, a restart armed on ``s._retry``, interrupt, or retries exhausted)."""
     while s.retry_count < s.max_retries:
-        _ng = _run_phase(nous_rate_limit_guard, agent, s)
-        if _ng.action == "return":
-            return _ng.result
-        if _ng.action == "break":
-            return None
         try:
             _run_phase(build_api_request, agent, s)
             if _run_phase(perform_api_call, agent, s).action == "break":

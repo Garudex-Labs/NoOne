@@ -1,20 +1,20 @@
 ---
 title: "Baoyu Article Illustrator — Article illustrations: type × style × palette consistency"
-sidebar_label: "Baoyu Article Illustrator"
+sidebarTitle: "Baoyu Article Illustrator"
 description: "Article illustrations: type × style × palette consistency"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Baoyu Article Illustrator
+# Baoyu Article Illustrator {#baoyu-article-illustrator}
 
 Article illustrations: type × style × palette consistency.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/baoyu-article-illustrator` |
+| Source | Optional — install with `noone skills install official/creative/baoyu-article-illustrator` |
 | Path | `optional-skills/creative/baoyu-article-illustrator` |
 | Version | `1.57.0` |
 | Author | 宝玉 (JimLiu) |
@@ -22,23 +22,31 @@ Article illustrations: type × style × palette consistency.
 | Platforms | linux, macos, windows |
 | Tags | `article-illustration`, `creative`, `image-generation` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Article Illustrator
+<div className="doc-callout-title">
 
-Adapted from [baoyu-article-illustrator](https://github.com/JimLiu/baoyu-skills) for Hermes Agent's tool ecosystem.
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Article Illustrator {#article-illustrator}
+
+Adapted from [baoyu-article-illustrator](https://github.com/JimLiu/baoyu-skills) for {{app-name}}'s tool ecosystem.
 
 Analyze articles, identify illustration positions, generate images with **Type × Style × Palette** consistency.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Trigger this skill when the user asks to illustrate an article, add images to an article, generate illustrations for content, or uses phrases like "为文章配图", "illustrate article", or "add images". The user provides an article (file path or pasted content) and optionally specifies type, style, palette, or density.
 
-## Three Dimensions
+## Three Dimensions {#three-dimensions}
 
 | Dimension | Controls | Examples |
 |-----------|----------|----------|
@@ -48,9 +56,9 @@ Trigger this skill when the user asks to illustrate an article, add images to an
 
 Combine freely: `type=infographic, style=vector-illustration, palette=macaron`.
 
-Or use presets: `edu-visual` → type + style + palette in one shot. See [style-presets.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/style-presets.md).
+Or use presets: `edu-visual` → type + style + palette in one shot. See [style-presets.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/style-presets.md).
 
-## Types
+## Types {#types}
 
 | Type | Best For |
 |------|----------|
@@ -61,13 +69,13 @@ Or use presets: `edu-visual` → type + style + palette in one shot. See [style-
 | `framework` | Models, architecture |
 | `timeline` | History, evolution |
 
-## Styles
+## Styles {#styles}
 
-See [references/styles.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/styles.md) for Core Styles, the full gallery, and Type × Style compatibility.
+See [references/styles.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/styles.md) for Core Styles, the full gallery, and Type × Style compatibility.
 
-## Output Structure
+## Output Structure {#output-structure}
 
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```
 {output-dir}/
 ├── source-{slug}.{ext}    # Only for pasted content
@@ -76,7 +84,7 @@ See [references/styles.md](https://github.com/NousResearch/hermes-agent/blob/mai
 │   └── NN-{type}-{slug}.md
 └── NN-{type}-{slug}.png
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
 **Default output directory**:
 
@@ -89,14 +97,14 @@ If the user asks for a different layout (e.g., images alongside the article, or 
 
 **Slug**: 2-4 words, kebab-case. **Conflict**: append `-YYYYMMDD-HHMMSS`.
 
-## Core Principles
+## Core Principles {#core-principles}
 
 - **Visualize concepts, not metaphors** — if the article uses a metaphor (e.g., "电锯切西瓜"), illustrate the underlying concept, not the literal image.
 - **Labels use article data** — actual numbers, terms, and quotes from the article, not generic placeholders.
 - **Prompt files are reproducibility records** — every illustration must have a saved prompt file under `prompts/` before any image is generated.
 - **Strip secrets** — scan source content for API keys, tokens, or credentials before writing anything to disk.
 
-## Workflow
+## Workflow {#workflow}
 
 ```
 - [ ] Step 1: Detect reference images (if provided)
@@ -108,7 +116,7 @@ If the user asks for a different layout (e.g., images alongside the article, or 
 - [ ] Step 7: Finalize
 ```
 
-### Step 1: Detect Reference Images
+### Step 1: Detect Reference Images {#step-1-detect-reference-images}
 
 If the user supplies reference images (paths pasted inline, attachments, or a URL):
 
@@ -116,9 +124,9 @@ If the user supplies reference images (paths pasted inline, attachments, or a UR
 2. **Do not** try to copy the binary via `write_file` / `read_file` — those are text-only. If you want a local copy for the record, use `terminal` (`cp "$src" "{output-dir}/references/NN-ref-{slug}.{ext}"`). The skill itself never needs to read the binary; it works off the vision description.
 3. Since `image_generate` doesn't take image inputs, the vision description is what gets embedded in prompts during Step 5.
 
-Full procedures: [references/workflow.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md#step-1-detect-reference-images).
+Full procedures: [references/workflow.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md#step-1-detect-reference-images).
 
-### Step 2: Analyze
+### Step 2: Analyze {#step-2-analyze}
 
 | Analysis | Output |
 |----------|--------|
@@ -129,9 +137,9 @@ Full procedures: [references/workflow.md](https://github.com/NousResearch/hermes
 
 Read source (file path → `read_file`, or pasted text) and write the analysis to `{output-dir}/analysis.md` using `write_file`.
 
-Full procedures: [references/workflow.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md#step-2-analyze).
+Full procedures: [references/workflow.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md#step-2-analyze).
 
-### Step 3: Confirm Settings
+### Step 3: Confirm Settings {#step-3-confirm-settings}
 
 Use the `clarify` tool. Put the independent questions in one `questions` array (up to 5). Skip any question whose answer is already present in the user's request.
 
@@ -145,9 +153,9 @@ Use the `clarify` tool. Put the independent questions in one `questions` array (
 
 Don't ask more than 2-3 `clarify` questions in a row. If the user already specified these in their request, skip entirely.
 
-Full procedures: [references/workflow.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md#step-3-confirm-settings).
+Full procedures: [references/workflow.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md#step-3-confirm-settings).
 
-### Step 4: Generate Outline → `outline.md`
+### Step 4: Generate Outline → `outline.md` {#step-4-generate-outline--outlinemd}
 
 Save `{output-dir}/outline.md` using `write_file` with frontmatter (type, density, style, palette, image_count) and one entry per illustration:
 
@@ -159,21 +167,21 @@ Save `{output-dir}/outline.md` using `write_file` with frontmatter (type, densit
 **Filename**: 01-infographic-concept-name.png
 ```
 
-Full template: [references/workflow.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md#step-4-generate-outline).
+Full template: [references/workflow.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md#step-4-generate-outline).
 
-### Step 5: Generate Prompts
+### Step 5: Generate Prompts {#step-5-generate-prompts}
 
 **BLOCKING**: Every illustration must have a saved prompt file before any image is generated — the prompt file is the reproducibility record.
 
 For each illustration:
 
-1. Create a prompt file per [references/prompt-construction.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/prompt-construction.md).
+1. Create a prompt file per [references/prompt-construction.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/prompt-construction.md).
 2. Save to `{output-dir}/prompts/NN-{type}-{slug}.md` using `write_file` with YAML frontmatter.
 3. Prompts MUST use type-specific templates with structured sections (ZONES / LABELS / COLORS / STYLE / ASPECT).
 4. LABELS MUST include article-specific data: actual numbers, terms, metrics, quotes.
 5. Process references (`direct`/`style`/`palette`) per prompt frontmatter — for `direct` usage, embed a textual description of the reference in the prompt (since `image_generate` doesn't take reference-image inputs).
 
-### Step 6: Generate Images
+### Step 6: Generate Images {#step-6-generate-images}
 
 For each prompt file:
 
@@ -184,9 +192,9 @@ For each prompt file:
 
 Note: the underlying image-generation backend is user-configured (default: FAL FLUX 2 Klein 9B) and is NOT agent-selectable via `image_generate`. Do not write model names into prompts expecting them to route.
 
-### Step 7: Finalize
+### Step 7: Finalize {#step-7-finalize}
 
-Insert `![description](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/{relative-path}/NN-{type}-{slug}.png)` after the corresponding paragraph. Alt text: concise description in the article's language.
+Insert `![description](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/{relative-path}/NN-{type}-{slug}.png)` after the corresponding paragraph. Alt text: concise description in the article's language.
 
 Report:
 
@@ -196,7 +204,7 @@ Article: [path] | Type: [type] | Density: [level] | Style: [style] | Palette: [p
 Images: X/N generated
 ```
 
-## Modification
+## Modification {#modification}
 
 | Action | Steps |
 |--------|-------|
@@ -204,17 +212,17 @@ Images: X/N generated
 | Add | Position → Prompt → Generate → Update outline → Insert |
 | Delete | Delete files → Remove reference → Update outline |
 
-## References
+## References {#references}
 
 | File | Content |
 |------|---------|
-| [references/workflow.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md) | Detailed procedures |
-| [references/usage.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/usage.md) | Invocation examples |
-| [references/styles.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/styles.md) | Style gallery + Palette gallery |
-| [references/style-presets.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/style-presets.md) | Preset shortcuts (type + style + palette) |
-| [references/prompt-construction.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/creative/baoyu-article-illustrator/references/prompt-construction.md) | Prompt templates |
+| [references/workflow.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/workflow.md) | Detailed procedures |
+| [references/usage.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/usage.md) | Invocation examples |
+| [references/styles.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/styles.md) | Style gallery + Palette gallery |
+| [references/style-presets.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/style-presets.md) | Preset shortcuts (type + style + palette) |
+| [references/prompt-construction.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/creative/baoyu-article-illustrator/references/prompt-construction.md) | Prompt templates |
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 1. **Data integrity is paramount** — never summarize, paraphrase, or alter source statistics. "73% increase" stays "73% increase".
 2. **Strip secrets** — scan source content for API keys, tokens, or credentials before including in any output file.

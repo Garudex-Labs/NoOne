@@ -1,7 +1,7 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 
 import { ConnectionGlyph } from '@/app/chat/sidebar/connection-glyph'
-import { Codicon } from '@/components/ui/codicon'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -80,7 +80,7 @@ export function TerminalRail() {
             onClick={() => setTerminalTakeover(false)}
             type="button"
           >
-            <Codicon name="chevron-down" size="0.8125rem" />
+            <AppIcon name="chevron-down" size="0.8125rem" />
           </button>
         </Tip>
       </div>
@@ -135,7 +135,7 @@ function TerminalRailItem({ active, canCloseOthers, index, term, toggleHint }: T
               role="tab"
               type="button"
             >
-              <Codicon
+              <AppIcon
                 className={cn(term.kind === 'agent' && !active && 'text-primary')}
                 name={term.kind === 'agent' ? 'agent' : 'terminal'}
                 size="0.875rem"
@@ -146,7 +146,7 @@ function TerminalRailItem({ active, canCloseOthers, index, term, toggleHint }: T
                   data-terminal-host={shown === 'removed' ? 'removed' : shown.connection.id}
                 >
                   {shown === 'removed' ? (
-                    <Codicon className="text-(--ui-text-quaternary)" name="debug-disconnect" size="0.625rem" />
+                    <AppIcon className="text-(--ui-text-quaternary)" name="debug-disconnect" size="0.625rem" />
                   ) : (
                     <ConnectionGlyph className="size-2.5 [&_svg]:size-2.5" connection={shown.connection} />
                   )}

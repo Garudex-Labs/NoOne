@@ -1,41 +1,49 @@
 ---
 title: "Adversarial Ux Test — Roleplay a hostile user to find and triage UX pain points"
-sidebar_label: "Adversarial Ux Test"
+sidebarTitle: "Adversarial Ux Test"
 description: "Roleplay a hostile user to find and triage UX pain points"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Adversarial Ux Test
+# Adversarial Ux Test {#adversarial-ux-test}
 
 Roleplay a hostile user to find and triage UX pain points.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/dogfood/adversarial-ux-test` |
+| Source | Optional — install with `noone skills install official/dogfood/adversarial-ux-test` |
 | Path | `optional-skills/dogfood/adversarial-ux-test` |
 | Version | `1.0.0` |
-| Author | Omni @ Comelse |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `qa`, `ux`, `testing`, `adversarial`, `dogfood`, `personas`, `user-testing` |
 | Related skills | [`dogfood`](../../bundled/software-development/software-development-dogfood.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Adversarial UX Test
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Adversarial UX Test {#adversarial-ux-test-1}
 
 Roleplay the worst-case user for your product — the person who hates technology, doesn't want your software, and will find every reason to complain. Then filter their feedback through a pragmatism layer to separate real UX problems from "I hate computers" noise.
 
 Think of it as an automated "mom test" — but angry.
 
-## Why This Works
+## Why This Works {#why-this-works}
 
 Most QA finds bugs. This finds **friction**. A technically correct app can still be unusable for real humans. The adversarial persona catches:
 - Confusing terminology that makes sense to developers but not users
@@ -47,7 +55,7 @@ Most QA finds bugs. This finds **friction**. A technically correct app can still
 
 The **pragmatism filter** (Phase 3) is what makes this useful instead of just entertaining. Without it, you'd add a "print this page" button to every screen because Grandpa can't figure out PDFs.
 
-## How to Use
+## How to Use {#how-to-use}
 
 Tell the agent:
 ```
@@ -58,7 +66,7 @@ Tell the agent:
 
 You can provide a persona or let the agent generate one based on your product's target audience.
 
-## Step 1: Define the Persona
+## Step 1: Define the Persona {#step-1-define-the-persona}
 
 If no persona is provided, generate one by answering:
 
@@ -68,15 +76,15 @@ If no persona is provided, generate one by answering:
 4. **What would make them give up?** (too many clicks, jargon, slow, confusing)
 5. **How do they talk when frustrated?** (blunt, sweary, dismissive, sighing)
 
-### Good Persona Example
+### Good Persona Example {#good-persona-example}
 > **"Big Mick" McAllister** — 58-year-old S&C coach. Uses WhatsApp and that's it. His "spreadsheet" is a paper notebook. "If I can't figure it out in 10 seconds I'm going back to my notebook." Needs to log session results for 25 players. Hates small text, jargon, and passwords.
 
-### Bad Persona Example
+### Bad Persona Example {#bad-persona-example}
 > "A user who doesn't like the app" — too vague, no constraints, no voice.
 
 The persona must be **specific enough to stay in character** for 20 minutes of testing.
 
-## Step 2: Become the Asshole (Browse as the Persona)
+## Step 2: Become the Asshole (Browse as the Persona) {#step-2-become-the-asshole-browse-as-the-persona}
 
 1. Read any available project docs for app context and URLs
 2. **Fully inhabit the persona** — their frustrations, limitations, goals
@@ -101,7 +109,7 @@ The persona must be **specific enough to stay in character** for 20 minutes of t
 6. Take screenshots of every pain point
 7. Check browser console for JS errors on every page
 
-## Step 3: The Rant (Write Feedback in Character)
+## Step 3: The Rant (Write Feedback in Character) {#step-3-the-rant-write-feedback-in-character}
 
 Write the feedback AS THE PERSONA — in their voice, with their frustrations. This is not a bug report. This is a real human venting.
 
@@ -126,7 +134,7 @@ SPECIFIC COMPLAINTS:
 VERDICT: "[one-line persona quote summarizing their experience]"
 ```
 
-## Step 4: The Pragmatism Filter (Critical — Do Not Skip)
+## Step 4: The Pragmatism Filter (Critical — Do Not Skip) {#step-4-the-pragmatism-filter-critical--do-not-skip}
 
 Step OUT of the persona. Evaluate each complaint as a product person:
 
@@ -135,7 +143,7 @@ Step OUT of the persona. Evaluate each complaint as a product person:
 - **WHITE: PERSONA NOISE** — "I hate computers" talking, not a product problem. Skip it.
 - **GREEN: FEATURE REQUEST** — Good idea hidden in the complaint. Consider it.
 
-### Filter Criteria
+### Filter Criteria {#filter-criteria}
 1. Would a 35-year-old competent-but-busy user have the same complaint? → RED
 2. Is this a genuine accessibility issue (font size, contrast, click targets)? → RED
 3. Is this "I want it to work like paper" resistance to digital? → WHITE
@@ -145,7 +153,7 @@ Step OUT of the persona. Evaluate each complaint as a product person:
 
 **This filter is MANDATORY.** Never ship raw persona complaints as tickets.
 
-## Step 5: Create Tickets
+## Step 5: Create Tickets {#step-5-create-tickets}
 
 For **RED** and **GREEN** items only:
 - Clear, actionable title
@@ -160,7 +168,7 @@ For **YELLOW** items: one catch-all ticket with all notes.
 
 **Max 10 tickets per session** — focus on the worst issues.
 
-## Step 6: Report
+## Step 6: Report {#step-6-report}
 
 Deliver:
 1. The persona rant (Step 3) — entertaining and visceral
@@ -168,7 +176,7 @@ Deliver:
 3. Tickets created (Step 5) — with links
 4. Screenshots of key issues
 
-## Tips
+## Tips {#tips}
 
 - **One persona per session.** Don't mix perspectives.
 - **Stay in character during Steps 2-3.** Break character only at Step 4.
@@ -183,7 +191,7 @@ Deliver:
 - **Subscription/paywall testing is critical.** Test with expired accounts, not just active ones. The "what happens when you can't pay" experience reveals whether the product respects users or holds their data hostage.
 - **Count the clicks to accomplish the persona's ONE task.** If it's more than 5, that's almost always a RED finding regardless of persona tech level.
 
-## Example Personas by Industry
+## Example Personas by Industry {#example-personas-by-industry}
 
 These are starting points — customize for your specific product:
 
@@ -198,7 +206,7 @@ These are starting points — customize for your specific product:
 | Healthcare | Senior GP | 63 | Dictates notes, nurse handles the computer |
 | Education | Veteran teacher | 57 | Chalk and talk, worksheets in ring binders |
 
-## Rules
+## Rules {#rules}
 
 - Stay in character during Steps 2-3
 - Be genuinely mean but fair — find real problems, not manufactured ones

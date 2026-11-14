@@ -1,8 +1,8 @@
-"""`hermes profile install` / `hermes profile update` against a real distribution with cron jobs.
+"""`noone profile install` / `noone profile update` against a real distribution with cron jobs.
 
 A distribution author schedules jobs with the real CLI (``hermes -p author cron create``) and
 publishes the profile directory; a user installs it, schedules a job of their own, and later
-pulls the author's next version with ``hermes profile update``. Every step is a fresh sandboxed
+pulls the author's next version with ``noone profile update``. Every step is a fresh sandboxed
 CLI process over a fake HOME; the assertions read the cron store the scheduler itself reads
 (``cron/jobs.json``) and the CLI's own ``cron list``.
 
@@ -47,7 +47,7 @@ class World:
         self.after_update: list[dict] = []
 
     def cli(self, *args: str):
-        cp = H.run([PY, "-m", "hermes_cli.main", *args], env=self.env, cwd=self.root, writable=[self.root], timeout=300)
+        cp = H.run([PY, "-m", "agent_cli.main", *args], env=self.env, cwd=self.root, writable=[self.root], timeout=300)
         self.log.append(H.describe(cp, 1500))
         assert cp.returncode == 0 and I.TRACEBACK not in cp.stdout + cp.stderr, H.describe(cp)
         return cp

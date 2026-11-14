@@ -40,7 +40,7 @@ _GH_EXTENSION_ERROR = (
     "If `copilot` already resolves to the new CLI but you still see this,\npoint Hermes at it explicitly:\n"
     "  export HERMES_COPILOT_ACP_COMMAND=/path/to/new/copilot\n\n"
     "Alternative: use the `copilot` provider (no ACP, hits the Copilot API\ndirectly with a Copilot subscription "
-    "token) via `hermes setup`.\n\nOriginal error:\n"
+    "token) via `noone setup`.\n\nOriginal error:\n"
 )
 
 
@@ -135,10 +135,10 @@ def _former_attribute(name: str) -> Any:
         return _COMPAT[name]
     if name in _FORWARDED:
         return getattr(_acp, name)
-    if name == "hermes_subprocess_env":
-        from tools.environments.local import hermes_subprocess_env  # lazy: hermes_cli.config may still be importing
+    if name == "agent_subprocess_env":
+        from tools.environments.local import agent_subprocess_env  # lazy: agent_cli.config may still be importing
 
-        return hermes_subprocess_env
+        return agent_subprocess_env
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -154,4 +154,4 @@ def __getattr__(name: str) -> Any:
 
 
 def __dir__() -> list[str]:
-    return sorted({*globals(), *_COMPAT, *_FORWARDED, "hermes_subprocess_env"})
+    return sorted({*globals(), *_COMPAT, *_FORWARDED, "agent_subprocess_env"})

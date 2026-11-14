@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 /**
  * remote-lifecycle.ts
  *
@@ -25,7 +26,7 @@
  * the minted one (which the dashboard may regen).
  */
 
-import crypto from 'node:crypto'
+import { appText } from '@noone/shared/application-identity'
 
 import { READY_IN_MERGED_OUTPUT_RE } from './backend-ready'
 import { parseRemoteProfileListing } from './connection-registry'
@@ -42,7 +43,7 @@ const READY_RE = READY_IN_MERGED_OUTPUT_RE // the remote log is `>> log 2>&1`: m
 const REMOTE_LOCK_DIR = '~/.hermes/desktop-ssh'
 const SUPPORTED_REMOTE_OS = new Set(['Linux', 'Darwin'])
 // On a busy remote host a healthy cold boot can take 60-150s before the
-// freshly spawned `hermes serve --isolated` prints its READY line (event-loop
+// freshly spawned `noone serve --isolated` prints its READY line (event-loop
 // stalls of 5-27s each during spawn storms are routine). The historical 45s
 // budget gave up milliseconds before a healthy backend announced ready and
 // surfaced a timeout toast (issue #94642). A roomier default absorbs the
@@ -225,7 +226,7 @@ async function locateHermes(ssh, remoteHermesPath) {
     }
 
     const err: any = new Error(
-      `The Hermes path you set is not an executable on the remote host: "${remoteHermesPath}". ` +
+      appText(`The {app_name} path you set is not an executable on the remote host: "${remoteHermesPath}". `) +
         'Check the path (it must be the full path to the `hermes` binary on the remote, e.g. ' +
         '~/hermes-agent/.venv/bin/hermes), or clear it to auto-detect.'
     )
@@ -263,9 +264,9 @@ async function locateHermes(ssh, remoteHermesPath) {
   }
 
   const err: any = new Error(
-    'Hermes is not installed on the remote host (could not find a `hermes` executable). ' +
-      'Install it on the remote with:  curl -fsSL https://hermes-agent.nousresearch.com/install.sh | sh  ' +
-      '— or set the Hermes path explicitly in the SSH connection settings.'
+    appText('{app_name} is not installed on the remote host (could not find a `hermes` executable). ') +
+      'Install it on the remote with:  curl -fsSL https://raw.githubusercontent.com/Garudex-Labs/NoOne/main/scripts/install.sh | sh  ' +
+      appText('— or set the {app_name} path explicitly in the SSH connection settings.')
   )
 
   err.kind = 'hermes-not-found'
@@ -294,7 +295,7 @@ async function probeRemotePlatform(ssh) {
 
   if (!SUPPORTED_REMOTE_OS.has(osName)) {
     const err: any = new Error(
-      `Unsupported remote platform "${osName || 'unknown'}". Hermes Desktop SSH mode supports Linux, macOS, and Windows remote hosts.`
+      appText(`Unsupported remote platform "${osName || 'unknown'}". {app_name} Desktop SSH mode supports Linux, macOS, and Windows remote hosts.`)
     )
 
     err.kind = 'unsupported-platform'
@@ -313,7 +314,7 @@ async function probeRemoteHermesHome(ssh) {
 
     return out || '~/.hermes'
   } catch (cause) {
-    const error: any = new Error('Could not resolve the remote Hermes home.')
+    const error: any = new Error(appText('Could not resolve the remote {app_name} home.'))
     error.kind = 'transient-transport-error'
     error.cause = cause
     throw error
@@ -355,7 +356,7 @@ async function assertRemoteInstallUpdateClear(ssh, hermesHome, hermesPath = '') 
         .split(/\r?\n/)
         .pop() || ''
   } catch (cause) {
-    const error: any = new Error('Could not prove that the remote Hermes install is clear for SSH startup.')
+    const error: any = new Error(appText('Could not prove that the remote {app_name} install is clear for SSH startup.'))
     error.kind = 'update-in-progress'
     error.cause = cause
     throw error
@@ -369,10 +370,10 @@ async function assertRemoteInstallUpdateClear(ssh, hermesHome, hermesPath = '') 
 
   const error: any = new Error(
     live
-      ? `Remote Hermes update process ${live[1]} is still running; SSH startup is paused.`
+      ? appText(`Remote {app_name} update process ${live[1]} is still running; SSH startup is paused.`)
       : observation === 'HELD'
-        ? 'A process the remote Hermes update started still holds the install; SSH startup is paused.'
-        : 'The remote Hermes update marker is unreadable, malformed, or locked; refusing SSH startup.'
+        ? appText('A process the remote {app_name} update started still holds the install; SSH startup is paused.')
+        : appText('The remote {app_name} update marker is unreadable, malformed, or locked; refusing SSH startup.')
   )
 
   error.kind = 'update-in-progress'
@@ -393,7 +394,7 @@ async function listRemoteHermesProfiles(ssh, platform: any = null) {
   try {
     listing = await ssh.exec(`if [ -d ${dir} ]; then ls -1 ${dir}; fi`)
   } catch (cause) {
-    const error: any = new Error('Could not list remote Hermes profiles.')
+    const error: any = new Error(appText('Could not list remote {app_name} profiles.'))
     error.kind = 'transient-transport-error'
     error.cause = cause
     throw error
@@ -409,7 +410,7 @@ async function readRemoteInstallId(ssh, platform: any = null) {
     return readWindowsRemoteInstallId(ssh, platform)
   }
 
-  // The stable backend identity the roster collapses on (`hermes_cli/install_identity.py`:
+  // The stable backend identity the roster collapses on (`agent_cli/install_identity.py`:
   // `<install root>/install_id`, opaque hex). Read from the INSTALL root, so an ssh connection
   // pinned to `<root>/profiles/<name>` reports the same id as one pointed at the root — they are
   // one backend. Read-only: a missing file is left missing (minting identity is the install's job,
@@ -421,7 +422,7 @@ async function readRemoteInstallId(ssh, platform: any = null) {
   try {
     out = await ssh.exec(`if [ -f ${file} ]; then cat ${file}; fi`)
   } catch (cause) {
-    const error: any = new Error('Could not read the remote Hermes install id.')
+    const error: any = new Error(appText('Could not read the remote {app_name} install id.'))
     error.kind = 'transient-transport-error'
     error.cause = cause
     throw error
@@ -443,7 +444,7 @@ function assertSafeRemoteHome(home) {
   const value = String(home || '').trim()
 
   if (!/^(\/|~\/)[A-Za-z0-9._/+-]+$/.test(value) || value.includes('..')) {
-    const error: any = new Error('Unsafe remote Hermes home.')
+    const error: any = new Error(appText('Unsafe remote {app_name} home.'))
     error.kind = 'unsafe-path'
     throw error
   }
@@ -1247,7 +1248,7 @@ function remoteProfileMissingError(output) {
   const createCommand = match[2]?.trim()
 
   const err: any = new Error(
-    `The remote Hermes profile '${profile}' does not exist. ` +
+    appText(`The remote {app_name} profile '${profile}' does not exist. `) +
       `Select an existing remote profile${createCommand ? ` or create it with: ${createCommand}` : '.'}`
   )
 
@@ -1312,8 +1313,8 @@ async function spawnRemoteDashboard(
 ) {
   if (!(await remoteSupportsSshOwnership(ssh, hermesPath))) {
     const err: any = new Error(
-      'The remote Hermes install does not support --ssh-session-token-file and --ssh-owner-nonce. ' +
-        'Update Hermes on the remote host to continue using Desktop SSH mode.'
+      appText('The remote {app_name} install does not support --ssh-session-token-file and --ssh-owner-nonce. ') +
+        appText('Update {app_name} on the remote host to continue using Desktop SSH mode.')
     )
 
     err.kind = 'update-required'
@@ -1568,7 +1569,7 @@ async function connect(deps) {
   const hermesVersion = await probeHermesVersion(ssh, hermesPath)
 
   if (hermesVersion) {
-    log(`remote hermes version: ${hermesVersion}`)
+    log(`remote noone version: ${hermesVersion}`)
   }
 
   const reuseToken = deps.reuseToken || ''
@@ -1584,7 +1585,7 @@ async function connect(deps) {
     )
 
     const error: any = new Error(
-      `The remote ownership record ${lpath} does not match this Hermes Desktop build (${lock.reason}). ` +
+      appText(`The remote ownership record ${lpath} does not match this {app_name} Desktop build (${lock.reason}). `) +
         'It was probably written by a different or modified desktop build sharing this remote, or the file is corrupt. ' +
         'Refusing to reap or overwrite it — that could kill a live SSH backend owned by another build. ' +
         'If nothing else uses this remote, delete that file on the remote host and reconnect.'

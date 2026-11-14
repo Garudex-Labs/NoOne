@@ -68,7 +68,7 @@ export type Route = 'welcome' | 'progress' | 'success' | 'failure'
 
 /// How the installer was launched, mirrored from src-tauri AppMode.
 /// 'install' = first-run onboarding (bare launch). 'update' = driven by the
-/// desktop app handing off via `Hermes-Setup.exe --update`.
+/// desktop app handing off via `NoOne-Setup.exe --update`.
 export type AppMode = 'install' | 'update'
 
 export const $route = atom<Route>('welcome')
@@ -191,7 +191,7 @@ export async function initialize(): Promise<void> {
   try {
     const [logPath, hermesHome, mode] = await Promise.all([
       invoke<string>('get_log_path'),
-      invoke<string>('get_hermes_home'),
+      invoke<string>('get_agent_home'),
       invoke<AppMode>('get_mode')
     ])
 
@@ -329,7 +329,7 @@ export async function startUpdate(): Promise<void> {
     return
   }
 
-  // Update is driven by the desktop handing off (Hermes-Setup.exe --update);
+  // Update is driven by the desktop handing off (NoOne-Setup.exe --update);
   // there's no welcome click. Reset + jump straight to progress, then let the
   // Rust side stream the synthetic update manifest.
   $bootstrap.set(INITIAL)

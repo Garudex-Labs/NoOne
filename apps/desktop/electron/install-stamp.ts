@@ -85,6 +85,8 @@ export interface InstallStamp {
   updateMechanism: 'self' | 'app-installer' | 'electron-updater' | 'external' | 'microsoft-store'
   baseVersion: string | null
   displayVersion: string | null
+  /** Project release label; build/channel identifiers remain separate provenance. */
+  releaseVersion?: string
   distance: number | null
   payload: ArtifactKind
   /** Present on bundled artifacts. Validated at build time, never discovered at boot. */
@@ -121,7 +123,7 @@ export const INSTALL_STAMP: Readonly<InstallStamp> | null =
  *    installers, repair-reinstall escalation and update checkouts must
  *    never run; drift means rebuild, updates mean the steward.
  *  - 'checkout': a git tree with venv machinery, provisioner-on-demand
- *    and `hermes update`.
+ *    and `noone update`.
  *
  * Derived from the stamp CONSTANT, never from filesystem probes: a
  * payload/venv/marker probe answers "is this artifact intact?", not

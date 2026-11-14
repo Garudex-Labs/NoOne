@@ -1,5 +1,5 @@
+import { hermesApi } from '@/agent-client'
 import { type OwnerScope, ownerScoped, profileScoped } from '@/api/client'
-import { hermesApi } from '@/hermes'
 
 /**
  * GPT-Live voice chat: the full-duplex voice frontend that DELEGATES to Hermes.

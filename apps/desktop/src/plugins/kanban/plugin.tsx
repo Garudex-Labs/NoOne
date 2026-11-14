@@ -12,9 +12,9 @@
 import './kanban.css'
 
 import {
+  type AgentPlugin,
+  AppIcon,
   cn,
-  Codicon,
-  type HermesPlugin,
   host,
   type KeybindContribution,
   KEYBINDS_AREA,
@@ -28,7 +28,7 @@ import {
   Tip,
   useQuery,
   useValue
-} from '@hermes/plugin-sdk'
+} from '@noone/plugin-sdk'
 
 import { $boardSlug, bindApi, boardKey, fetchBoard, useKanbanScope } from './api'
 import { KanbanBoardPage } from './board'
@@ -71,14 +71,14 @@ function KanbanCount() {
         onClick={() => host.navigate('/kanban')}
         type="button"
       >
-        <Codicon name="project" size="0.7rem" />
+        <AppIcon name="project" size="0.7rem" />
         <span>{active}</span>
       </button>
     </Tip>
   )
 }
 
-const plugin: HermesPlugin = {
+const plugin: AgentPlugin = {
   id: 'kanban',
   name: 'Kanban',
   description: 'Multi-agent task board — board page, sidebar entry, and a live in-flight count in the status bar.',

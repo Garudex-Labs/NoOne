@@ -8,12 +8,12 @@ responsive (p99 < 1s) with zero event-loop stalls.
 
 What it does
 ------------
-1. Spawns a SCRATCH dashboard (``hermes dashboard``) bound to loopback on a
+1. Spawns a SCRATCH dashboard (``noone dashboard``) bound to loopback on a
    free port, with an ISOLATED ``HERMES_HOME`` (temp dir, minimal seeded state).
    It NEVER touches the live :9119 dashboard / ai.hermes.dashboard / live
    state.db. Loopback bind ⇒ no auth gate (web_server.should_require_auth).
 2. Arms the synthetic GIL-heavy turn seam (``HERMES_ISO_CERTIFY_SYNTH_TURN=1``,
-   see ``tui_gateway/synthetic_turn.py``) so 6 concurrent turns reproduce the
+   see ``agent_backend/synthetic_turn.py``) so 6 concurrent turns reproduce the
    ``take_gil`` interpreter-contention regime WITHOUT real model calls. A
    network/sleep stub would release the GIL and NOT reproduce the incident, so
    it would be a fake green — the synthetic turn is pure-Python CPU on purpose.
@@ -121,7 +121,7 @@ def seed_scratch_home(home: Path, *, isolation: str, heartbeat_secs: int, respaw
         "memory": {"enabled": False},
     }
     # config.yaml is the canonical config; write it directly.
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
 
     (home / "config.yaml").write_text(yaml.safe_dump(cfg, sort_keys=True), encoding="utf-8")
     # A stub .env so credential resolution doesn't spelunk the real home.
@@ -174,7 +174,7 @@ class ScratchDashboard:
         env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         env["HERMES_ISO_CERTIFY_SYNTH_TURN"] = "1"
         cmd = [
-            python, "-m", "hermes_cli.main", "dashboard",
+            python, "-m", "agent_cli.main", "dashboard",
             "--no-open", "--host", "127.0.0.1", "--port", str(self.port),
         ]
         self.proc = subprocess.Popen(

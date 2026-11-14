@@ -18,13 +18,13 @@
     "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@hermes/plugin-sdk": ["./src/sdk/index.ts"],
-      "@hermes/shared/ansi": ["../shared/src/ansi.ts"],
-      "@hermes/shared/billing": ["../shared/src/billing-types.ts"],
-      "@hermes/shared/color": ["../shared/src/color.ts"],
-      "@hermes/shared/i18n": ["../shared/src/i18n.ts"],
-      "@hermes/shared/translucency": ["../shared/src/translucency.ts"],
-      "@hermes/shared": ["../shared/src/index.ts"]
+      "@noone/plugin-sdk": ["./src/sdk/index.ts"],
+      "@noone/shared/ansi": ["../shared/src/ansi.ts"],
+      "@noone/shared/billing": ["../shared/src/billing-types.ts"],
+      "@noone/shared/color": ["../shared/src/color.ts"],
+      "@noone/shared/i18n": ["../shared/src/i18n.ts"],
+      "@noone/shared/translucency": ["../shared/src/translucency.ts"],
+      "@noone/shared": ["../shared/src/index.ts"]
     }
   },
   "include": ["src", "../shared/src"],

@@ -18,7 +18,7 @@ pytest.importorskip(
 )
 
 from tools.mcp_oauth import (
-    HermesTokenStorage,
+    AgentTokenStorage,
     OAuthNonInteractiveError,
     build_oauth_auth,
     remove_oauth_tokens,
@@ -69,13 +69,13 @@ def _hit_callback_when_ready(url: str, timeout: float = 15.0) -> None:
 
 
 # ---------------------------------------------------------------------------
-# HermesTokenStorage
+# AgentTokenStorage
 # ---------------------------------------------------------------------------
 
 class TestHermesTokenStorage:
     def test_roundtrip_tokens(self, tmp_path, monkeypatch):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("test-server")
+        storage = AgentTokenStorage("test-server")
 
         import asyncio
 
@@ -107,7 +107,7 @@ class TestHermesTokenStorage:
         the fix shipped for ``agent/google_oauth.py`` in #19673.
         """
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("perm-test-server")
+        storage = AgentTokenStorage("perm-test-server")
 
         import asyncio
         mock_token = MagicMock()
@@ -132,7 +132,7 @@ class TestHermesTokenStorage:
         from mcp.shared.auth import OAuthClientInformationFull
 
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("supabase")
+        storage = AgentTokenStorage("supabase")
         client_info = OAuthClientInformationFull.model_validate({
             "client_id": "client-id",
             "client_secret": "secret",
@@ -159,7 +159,7 @@ class TestHermesTokenStorage:
             "token_endpoint_auth_method": "none",
         }))
 
-        loaded = asyncio.run(HermesTokenStorage("supabase").get_client_info())
+        loaded = asyncio.run(AgentTokenStorage("supabase").get_client_info())
 
         assert loaded is not None
         assert loaded.token_endpoint_auth_method == "client_secret_post"
@@ -172,7 +172,7 @@ class TestHermesTokenStorage:
         from tools.mcp_oauth_device import DeviceOAuthMetadata
 
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("bad-server")
+        storage = AgentTokenStorage("bad-server")
         d = tmp_path / "mcp-tokens"
         d.mkdir(parents=True)
         (d / "bad-server.json").write_text("NOT VALID JSON{{{")
@@ -203,7 +203,7 @@ class TestHermesTokenStorage:
         import logging
 
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("bad-server")
+        storage = AgentTokenStorage("bad-server")
         d = tmp_path / "mcp-tokens"
         d.mkdir(parents=True)
         secret = "sk-live-QQQQQQQQ"  # short enough that pydantic's input echo does not elide it
@@ -322,19 +322,19 @@ class TestPathTraversal:
 
     def test_dots_and_slashes_sanitized(self, tmp_path, monkeypatch):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("../../../etc/passwd")
+        storage = AgentTokenStorage("../../../etc/passwd")
         path = storage._tokens_path()
         resolved = path.resolve()
         assert resolved.is_relative_to((tmp_path / "mcp-tokens").resolve())
 
     def test_normal_name_unchanged(self, tmp_path, monkeypatch):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("my-mcp-server")
+        storage = AgentTokenStorage("my-mcp-server")
         assert "my-mcp-server.json" in str(storage._tokens_path())
 
     def test_special_chars_sanitized(self, tmp_path, monkeypatch):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("server@host:8080/path")
+        storage = AgentTokenStorage("server@host:8080/path")
         path = storage._tokens_path()
         assert "@" not in path.name
         assert ":" not in path.name
@@ -519,7 +519,7 @@ class TestCallbackPortReservation:
     @staticmethod
     def _seed_client_info(tmp_path, payload):
         """Write *payload* verbatim to the real ``mcp-tokens/srv.client.json`` under a temp home."""
-        storage = HermesTokenStorage("srv", hermes_home=tmp_path)
+        storage = AgentTokenStorage("srv", hermes_home=tmp_path)
         path = storage._client_info_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload), encoding="utf-8")
@@ -609,7 +609,7 @@ class TestInvalidateTokensOnClientChange:
     def _seed(self, tmp_path, monkeypatch, client_id="client-a",
               client_secret=None):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("chg-server")
+        storage = AgentTokenStorage("chg-server")
         d = tmp_path / "mcp-tokens"
         d.mkdir(parents=True, exist_ok=True)
         info = {"client_id": client_id, "redirect_uris": ["http://localhost:1455/callback"]}
@@ -653,7 +653,7 @@ class TestInvalidateTokensOnClientChange:
     def test_no_prior_client_info_is_noop(self, tmp_path, monkeypatch):
         from tools.mcp_oauth import _invalidate_tokens_on_client_change
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("fresh-server")
+        storage = AgentTokenStorage("fresh-server")
         d = tmp_path / "mcp-tokens"
         d.mkdir(parents=True, exist_ok=True)
         (d / "fresh-server.json").write_text(json.dumps({
@@ -917,7 +917,7 @@ def test_build_oauth_auth_preserves_server_url_path():
          patch.object(mcp_oauth, "HermesOAuthClientProvider", _FakeProvider), \
          patch.object(mcp_oauth, "_is_interactive", return_value=True), \
          patch.object(mcp_oauth, "_maybe_preregister_client"), \
-         patch.object(mcp_oauth, "HermesTokenStorage") as mock_storage_cls:
+         patch.object(mcp_oauth, "AgentTokenStorage") as mock_storage_cls:
         mock_storage_cls.return_value = MagicMock(has_cached_tokens=lambda: True)
         build_oauth_auth(
             server_name="notion",
@@ -1025,7 +1025,7 @@ class TestWaitForCallbackSkipIntegration:
 class TestPoisonClientRegistration:
     def test_poison_backs_up_and_removes_client_and_meta(self, tmp_path, monkeypatch):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        storage = HermesTokenStorage("srv")
+        storage = AgentTokenStorage("srv")
         d = tmp_path / "mcp-tokens"
         d.mkdir(parents=True)
         (d / "srv.json").write_text('{"access_token": "keep-me"}')

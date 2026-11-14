@@ -51,7 +51,7 @@ def test_local_viewer_turn_prompts_and_saves_the_secret(monkeypatch):
     from gateway.session_secret_prompt import secret_prompt_scope
     from tools.skills_tool_setup import _capture_required_environment_variables
     saved = []
-    from hermes_cli import config
+    from agent_cli import config
     monkeypatch.setattr(config, 'save_env_value_secure',
                         lambda key, value: saved.append((key, value)) or {'success': True, 'stored_as': key,
                                                                           'validated': False})
@@ -69,7 +69,7 @@ def test_local_viewer_turn_prompts_and_saves_the_secret(monkeypatch):
         worker.join(5)
     assert request['params'] == {'session_id': 's1', 'env_var': 'HAB_KEY', 'prompt': 'Enter the key',
                                  'metadata': {'skill_name': 'hab-skill'}}
-    from tui_gateway.contracts.registry import SERVER_REQUESTS, validate_params
+    from agent_backend.contracts.registry import SERVER_REQUESTS, validate_params
     assert validate_params(SERVER_REQUESTS['secret'], request['params'])[1] is None
     assert saved == [('HAB_KEY', 'sekrit')]
     assert out['missing_names'] == [] and out['gateway_setup_hint'] is None

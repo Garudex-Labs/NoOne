@@ -263,7 +263,7 @@ def test_explicit_home_pins_transcripts_across_raw_thread_boundary(tmp_path, mon
     """Ambient resolve falls through to process HERMES_HOME when the session's
     ContextVar override is dropped by a raw threading.Thread boundary; an
     explicit home keeps transcripts + manifest under the originating profile."""
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     process_home = tmp_path / "process-default"
     session_home = tmp_path / "session-profile"
@@ -271,7 +271,7 @@ def test_explicit_home_pins_transcripts_across_raw_thread_boundary(tmp_path, mon
     session_home.mkdir()
 
     monkeypatch.setenv("HERMES_HOME", str(process_home))
-    token = set_hermes_home_override(session_home)
+    token = set_agent_home_override(session_home)
     out = {}
     try:
         def worker():
@@ -284,7 +284,7 @@ def test_explicit_home_pins_transcripts_across_raw_thread_boundary(tmp_path, mon
         t.start()
         t.join()
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
     expected_root = session_home / "cache" / "delegation" / "live"
     assert out["paths"], "transcripts were created"

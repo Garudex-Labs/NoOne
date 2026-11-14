@@ -55,50 +55,8 @@ class TestCredentialFingerprint:
         assert fp1 is not None
         assert "shared-project-secret" not in fp1
 
-    def test_reads_feishu_app_id(self):
-        """Feishu/Lark authenticates via app_id/app_secret, not a token.
 
-        Without _app_id in the fingerprint attribute list, every Feishu
-        adapter in a multiplexed gateway returns None here and the
-        same-credential conflict check is silently skipped — N profiles
-        spawn WebSocket clients against the same app, which evict each
-        other in a 1000 bye loop until all go offline.
-        """
-        class _FeishuAdapter:
-            def __init__(self):
-                self._app_id = "cli_a1b2c3"
-                self._app_secret = "top-secret"
 
-        fp1 = GatewayRunner._adapter_credential_fingerprint(_FeishuAdapter())
-        fp2 = GatewayRunner._adapter_credential_fingerprint(_FeishuAdapter())
-
-        assert fp1 is not None
-        assert fp1 == fp2  # same app -> same fingerprint -> conflict detected
-        assert "cli_a1b2c3" not in fp1  # log-safe, never the raw credential
-
-    def test_distinct_feishu_app_ids_distinct_fp(self):
-        class _FeishuAdapter:
-            def __init__(self, app_id):
-                self._app_id = app_id
-                self._app_secret = "s"
-
-        fp_a = GatewayRunner._adapter_credential_fingerprint(_FeishuAdapter("app-A"))
-        fp_b = GatewayRunner._adapter_credential_fingerprint(_FeishuAdapter("app-B"))
-
-        assert fp_a is not None and fp_b is not None
-        assert fp_a != fp_b
-
-    @pytest.mark.parametrize("attr", ["_client_id", "_bot_id"])
-    def test_reads_app_style_ids_teams_wecom(self, attr):
-        """Teams (_client_id) and WeCom (_bot_id) are the same class as Feishu:
-        id/secret pairs, no token — cloned profiles must collide."""
-        a = types.SimpleNamespace(**{attr: "app-1"})
-        b = types.SimpleNamespace(**{attr: "app-1"})
-        c = types.SimpleNamespace(**{attr: "app-2"})
-        fp = GatewayRunner._adapter_credential_fingerprint
-        assert fp(a) is not None and fp(a) == fp(b)
-        assert fp(a) != fp(c)
-        assert "app-1" not in fp(a)
 
     def test_reads_config_token(self):
         """Adapters like Discord store token on `config`, not on self.
@@ -257,7 +215,7 @@ def _install_secondary_reconnect_context(
 
     monkeypatch.setattr(gateway_run, "_profile_runtime_scope", fake_scope)
     monkeypatch.setattr(
-        "hermes_cli.profiles.get_profile_dir", lambda name: Path("/profiles") / name
+        "agent_cli.profiles.get_profile_dir", lambda name: Path("/profiles") / name
     )
     monkeypatch.setattr(
         "gateway.config.load_gateway_config",
@@ -277,10 +235,10 @@ def _stub_secondary_start(monkeypatch, runner):
     async def connect(adapter, platform):
         return True
 
-    monkeypatch.setattr("hermes_cli.env_loader.hydrate_profile_secret_sources", lambda h: {})
+    monkeypatch.setattr("agent_cli.env_loader.hydrate_profile_secret_sources", lambda h: {})
     monkeypatch.setattr(gateway_run, "_load_gateway_config", dict)
     monkeypatch.setattr(runner, "_snapshot_profile_busy_modes", lambda *a, **k: None)
-    monkeypatch.setattr("hermes_cli.plugins.discover_plugins", lambda: None)
+    monkeypatch.setattr("agent_cli.plugins.discover_plugins", lambda: None)
     monkeypatch.setattr(runner, "_connect_initial_adapter_with_timeout", connect)
 
 
@@ -323,13 +281,13 @@ class TestSecondaryProfileFatalRecovery:
             return True
 
         monkeypatch.setattr(
-            "hermes_cli.env_loader.hydrate_profile_secret_sources", slow_hydrate
+            "agent_cli.env_loader.hydrate_profile_secret_sources", slow_hydrate
         )
         monkeypatch.setattr(runner, "_connect_adapter_with_timeout", connect)
         monkeypatch.setattr(runner, "_connect_initial_adapter_with_timeout", connect)
         monkeypatch.setattr(gateway_run, "_load_gateway_config", dict)
         monkeypatch.setattr(runner, "_snapshot_profile_busy_modes", lambda *a, **k: None)
-        monkeypatch.setattr("hermes_cli.plugins.discover_plugins", lambda: None)
+        monkeypatch.setattr("agent_cli.plugins.discover_plugins", lambda: None)
         if entry == "startup":
             coro = runner._start_one_profile_adapters(
                 "reviewer", Path("/profiles/reviewer"), {}
@@ -360,10 +318,10 @@ class TestSecondaryProfileFatalRecovery:
         _install_secondary_reconnect_context(monkeypatch, runner, adapter)
         synced = []
         runner._sync_voice_mode_state_to_adapter = synced.append
-        monkeypatch.setattr("hermes_cli.env_loader.hydrate_profile_secret_sources", lambda h: {})
+        monkeypatch.setattr("agent_cli.env_loader.hydrate_profile_secret_sources", lambda h: {})
         monkeypatch.setattr(gateway_run, "_load_gateway_config", dict)
         monkeypatch.setattr(runner, "_snapshot_profile_busy_modes", lambda *a, **k: None)
-        monkeypatch.setattr("hermes_cli.plugins.discover_plugins", lambda: None)
+        monkeypatch.setattr("agent_cli.plugins.discover_plugins", lambda: None)
 
         async def connect(a, platform):
             return True
@@ -396,9 +354,9 @@ class TestSecondaryProfileFatalRecovery:
         redelivery_homes = []
 
         async def redeliver(platform, *, profile=None):
-            from hermes_constants import get_hermes_home
+            from agent_constants import get_agent_home
 
-            redelivery_homes.append(Path(get_hermes_home()))
+            redelivery_homes.append(Path(get_agent_home()))
             return 0
 
         runner._redeliver_failed_obligations_for_platform.side_effect = redeliver
@@ -766,11 +724,10 @@ class TestSecondaryProfileConfigHandling:
         runner._profile_adapters = {}
         runner.adapters = {}
 
+        line = Platform("line")
         reviewer_cfg = GatewayConfig(multiplex_profiles=True)
         reviewer_cfg.platforms = {
-            # connection_mode=webhook: with #52563's conditional check merged,
-            # default (websocket) Feishu does not bind a port.
-            Platform.FEISHU: PlatformConfig(enabled=True, extra={"connection_mode": "webhook"}),
+            line: PlatformConfig(enabled=True, extra={"port": 8081}),
             Platform.WEBHOOK: PlatformConfig(enabled=True, extra={"port": 8644}),
             Platform.TELEGRAM: PlatformConfig(enabled=True, token="t"),
         }
@@ -790,9 +747,9 @@ class TestSecondaryProfileConfigHandling:
 
         connected = await runner._start_one_profile_adapters("reviewer", "/tmp/x", {})
 
-        assert connected == 2
-        assert set(created) == {Platform.FEISHU, Platform.TELEGRAM}  # webhook is a default-listener mirror
-        assert created[Platform.FEISHU]._shared_listener_profile == "reviewer"
+        assert connected == len(created)
+        assert set(created) == {line, Platform.TELEGRAM}  # webhook is a default-listener mirror
+        assert created[line]._shared_listener_profile == "reviewer"
         assert getattr(created[Platform.TELEGRAM], "_shared_listener_profile", None) is None
 
     def test_configured_secondary_adapter_namespaces_runtime_status(self):
@@ -918,11 +875,11 @@ class TestSecondaryProfileConfigHandling:
             ]
 
         monkeypatch.setattr(
-            "hermes_cli.profiles.profiles_to_serve",
+            "agent_cli.profiles.profiles_to_serve",
             fake_profiles_to_serve,
         )
         monkeypatch.setattr(
-            "hermes_cli.profiles.get_active_profile_name",
+            "agent_cli.profiles.get_active_profile_name",
             lambda: "default",
         )
         monkeypatch.setattr(runner, "_start_one_profile_adapters", fake_start_one)
@@ -976,14 +933,14 @@ class TestSecondaryProfileConfigHandling:
             )
 
         monkeypatch.setattr(
-            "hermes_cli.profiles.profiles_to_serve",
+            "agent_cli.profiles.profiles_to_serve",
             lambda multiplex, **kw: [
                 ("default", Path("/tmp/default")),
                 ("unsafe", Path("/tmp/unsafe")),
             ],
         )
         monkeypatch.setattr(
-            "hermes_cli.profiles.get_active_profile_name",
+            "agent_cli.profiles.get_active_profile_name",
             lambda: "default",
         )
         monkeypatch.setattr(runner, "_start_one_profile_adapters", fake_start_one)
@@ -1191,7 +1148,7 @@ class TestSecondaryProfileHookRegistration:
                 ],
             }
         }
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda: profile_cfg)
+        monkeypatch.setattr("agent_cli.config.load_config", lambda: profile_cfg)
 
         seen = []
         monkeypatch.setattr(
@@ -1209,31 +1166,6 @@ class TestSecondaryProfileHookRegistration:
         assert ("webhook", profile_cfg) in seen
 
 
-class TestFeishuPortBindingConditional:
-    """Feishu websocket mode does NOT bind a port; only webhook mode does (#52563)."""
-
-    @pytest.mark.asyncio
-    async def test_feishu_websocket_mode_not_rejected(self, monkeypatch):
-        """Feishu in websocket mode (the default) should NOT raise MultiplexConfigError."""
-        from gateway.run import MultiplexConfigError
-        from gateway.config import GatewayConfig, Platform, PlatformConfig
-
-        runner = GatewayRunner.__new__(GatewayRunner)
-        runner.config = GatewayConfig(multiplex_profiles=True)
-        runner._profile_adapters = {}
-
-        reviewer_cfg = GatewayConfig(multiplex_profiles=True)
-        reviewer_cfg.platforms = {
-            Platform.FEISHU: PlatformConfig(
-                enabled=True,
-                extra={"app_id": "cli_xxx", "app_secret": "sec", "connection_mode": "websocket"},
-            ),
-        }
-        monkeypatch.setattr("gateway.config.load_gateway_config", lambda: reviewer_cfg)
-        monkeypatch.setattr(runner, "_create_adapter", lambda p, c: None)
-
-        connected = await runner._start_one_profile_adapters("reviewer", "/tmp/x", {})
-        assert connected == 0  # no error, just nothing connected
 
 
 class TestSecondarySkipsCredentiallessPlatforms:

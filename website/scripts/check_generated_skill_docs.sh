@@ -11,7 +11,7 @@
 # to `git diff`) out of the real index.
 set -euo pipefail
 
-paths=(website/docs website/sidebars.ts website/i18n)
+paths=(website/docs/user-guide/skills website/docs/reference/skills-catalog.md website/docs/reference/optional-skills-catalog.md website/docs/docs.json)
 index="$(mktemp)"
 trap 'rm -f "$index"' EXIT
 cp "$(git rev-parse --git-path index)" "$index"
@@ -20,7 +20,7 @@ if [ "$#" -gt 0 ]; then
   git add -A -- "${paths[@]}"
   "$@"
 fi
-git add -N website/docs website/sidebars.ts
+git add -N -- "${paths[@]}"
 if ! git diff --exit-code --stat -- "${paths[@]}"; then
   echo "::error::website/scripts/generate-skill-docs.py output differs from the committed docs; run it and commit the result"
   exit 1

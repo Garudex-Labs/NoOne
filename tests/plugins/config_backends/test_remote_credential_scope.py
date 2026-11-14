@@ -44,7 +44,7 @@ def launch_home(tmp_path, monkeypatch):
 
 @pytest.fixture
 def refreshes(monkeypatch):
-    from hermes_cli import auth, auth_nous
+    from agent_cli import auth, auth_nous
 
     seen: list[tuple[str, str]] = []
 
@@ -129,7 +129,7 @@ def test_another_profiles_bound_scope_does_not_route_this_profiles_token(launch_
 
 def test_scope_is_reset_when_resolution_fails(launch_home, monkeypatch):
     from agent.secret_scope import current_secret_scope
-    from hermes_cli import auth
+    from agent_cli import auth
 
     set_multiplex_active(True)
 
@@ -149,8 +149,8 @@ def test_scope_is_reset_when_resolution_fails(launch_home, monkeypatch):
 
 def test_home_and_scope_are_restored_when_the_scope_build_fails(launch_home, monkeypatch):
     from agent.secret_scope import current_secret_scope_home
-    from hermes_constants import get_hermes_home_override, reset_hermes_home_override, set_hermes_home_override
-    from tui_gateway import launch_profile_policy
+    from agent_constants import get_agent_home_override, reset_agent_home_override, set_agent_home_override
+    from agent_backend import launch_profile_policy
 
     secondary = _profile(launch_home / "profiles" / "work", OTHER)
     set_multiplex_active(True)
@@ -159,16 +159,16 @@ def test_home_and_scope_are_restored_when_the_scope_build_fails(launch_home, mon
         raise RuntimeError("unreadable managed .env")
 
     monkeypatch.setattr(launch_profile_policy, "owner_secret_scope", boom)
-    home_token = set_hermes_home_override(str(launch_home))
+    home_token = set_agent_home_override(str(launch_home))
     scope_token = set_secret_scope({}, profile_home=str(launch_home))
     try:
         with pytest.raises(credentials.PlaneCredentialError):
             credentials.plane_token(secondary)
-        assert get_hermes_home_override() == str(launch_home)
+        assert get_agent_home_override() == str(launch_home)
         assert current_secret_scope_home() == str(launch_home)
     finally:
         reset_secret_scope(scope_token)
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
 
 
 def test_launch_profile_keeps_its_env_only_override_frozen_at_activation(tmp_path, monkeypatch, refreshes):
@@ -179,7 +179,7 @@ def test_launch_profile_keeps_its_env_only_override_frozen_at_activation(tmp_pat
     monkeypatch.setenv("HERMES_HOME", str(home))
     monkeypatch.setenv("HERMES_SHARED_AUTH_DIR", str(tmp_path / "shared"))
     monkeypatch.setenv("HERMES_PORTAL_BASE_URL", STAGING)
-    from tui_gateway.launch_profile_policy import activate_multi_profile_hosting
+    from agent_backend.launch_profile_policy import activate_multi_profile_hosting
     activate_multi_profile_hosting()  # freezes the launch env
     monkeypatch.setenv("HERMES_PORTAL_BASE_URL", OTHER)  # poisoned afterwards
 
@@ -204,7 +204,7 @@ def test_secondary_never_borrows_the_launch_profiles_env_override(launch_home, m
 def test_single_profile_binds_nothing(launch_home, refreshes, monkeypatch):
     """Not multiplexing: no scope is bound and the process env still routes (unchanged behaviour)."""
     from agent.secret_scope import current_secret_scope
-    from hermes_cli import auth
+    from agent_cli import auth
 
     monkeypatch.setenv("HERMES_PORTAL_BASE_URL", OTHER)
     real = auth.resolve_nous_access_token

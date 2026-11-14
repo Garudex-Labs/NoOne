@@ -1,4 +1,5 @@
-import { Codicon } from '@/components/ui/codicon'
+import { AppIcon } from '@noone/ui/app-icon'
+
 import {
   ContextMenuItem,
   ContextMenuSub,
@@ -76,13 +77,13 @@ export function SplitSubmenu({ close, disabled, kit, label, onSplit }: SplitSubm
           close?.()
         }}
       >
-        <Codicon name="split-horizontal" size="0.875rem" />
+        <AppIcon name="split-horizontal" size="0.875rem" />
         <span>{label}</span>
       </SubTrigger>
       <SubContent>
         {SPLIT_DIRS.map(({ dir, icon, label: dirLabel }) => (
           <Item key={dir} onSelect={() => split(dir)}>
-            <Codicon name={icon} size="0.875rem" />
+            <AppIcon name={icon} size="0.875rem" />
             <span>{dirLabel}</span>
           </Item>
         ))}

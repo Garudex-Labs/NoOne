@@ -13,7 +13,7 @@ from agent.secret_scope import (
     set_multiplex_active,
     set_secret_scope,
 )
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 from gateway.config import (
     ChannelOverride,
     GatewayConfig,
@@ -185,18 +185,6 @@ class TestGetConnectedPlatforms:
         assert Platform.SLACK not in connected
 
 
-    def test_dingtalk_recognised_via_env_vars(self, monkeypatch):
-        """DingTalk configured via env vars (no extras) should still be
-        recognised as connected — covers the case where _apply_env_overrides
-        hasn't populated extras yet."""
-        monkeypatch.setenv("DINGTALK_CLIENT_ID", "env_cid")
-        monkeypatch.setenv("DINGTALK_CLIENT_SECRET", "env_sec")
-        config = GatewayConfig(
-            platforms={
-                Platform.DINGTALK: PlatformConfig(enabled=True, extra={}),
-            },
-        )
-        assert Platform.DINGTALK in config.get_connected_platforms()
 
 
 class TestStreamingConfig:
@@ -381,7 +369,7 @@ class TestLoadGatewayConfig:
 
     def test_multiplex_profiles_from_nested_gateway_section(self, tmp_path, monkeypatch):
         """``gateway.multiplex_profiles: true`` (the nested form written by
-        ``hermes config set gateway.multiplex_profiles true``) must enable
+        ``noone config set gateway.multiplex_profiles true``) must enable
         multiplexing when loaded via load_gateway_config().
 
         Regression: load_gateway_config() only surfaced the *top-level*
@@ -769,7 +757,7 @@ class TestLoadGatewayConfig:
         override the shared process stamp — an isolated multiplex scope is
         never consulted for globals. (A single-profile gateway, or the profile
         the process is launched under, still activates via its .env because
-        load_hermes_dotenv exports that file into os.environ at startup.)"""
+        load_agent_dotenv exports that file into os.environ at startup.)"""
         from agent import secret_scope as ss
 
         hermes_home = tmp_path / ".hermes"
@@ -883,38 +871,6 @@ class TestLoadGatewayConfig:
         assert os.environ.get("DISCORD_THREAD_REQUIRE_MENTION") == "true"
 
 
-    def test_bridges_nested_gateway_platforms_dingtalk_allowed_users_to_env(self, tmp_path, monkeypatch):
-        """gateway.platforms.dingtalk.extra.allowed_users must reach
-        DINGTALK_ALLOWED_USERS — it's the documented config.yaml alternative
-        to the env var (website/docs/user-guide/messaging/dingtalk.md), the
-        adapter reads it from PlatformConfig.extra, but gateway auth
-        (_is_user_authorized) only consults the env var.
-        """
-        hermes_home = tmp_path / ".hermes"
-        hermes_home.mkdir()
-        config_path = hermes_home / "config.yaml"
-        config_path.write_text(
-            "gateway:\n"
-            "  platforms:\n"
-            "    dingtalk:\n"
-            "      enabled: true\n"
-            "      extra:\n"
-            "        allowed_users:\n"
-            "          - user-id-1\n"
-            "          - user-id-2\n",
-            encoding="utf-8",
-        )
-
-        monkeypatch.setenv("HERMES_HOME", str(hermes_home))
-        monkeypatch.delenv("DINGTALK_ALLOWED_USERS", raising=False)
-
-        config = load_gateway_config()
-
-        assert config.platforms[Platform.DINGTALK].extra["allowed_users"] == [
-            "user-id-1",
-            "user-id-2",
-        ]
-        assert os.environ.get("DINGTALK_ALLOWED_USERS") == "user-id-1,user-id-2"
 
     @pytest.mark.parametrize("yaml_text", ["gateway:\n  allow_all_users: true\n", "allow_all_users: true\n"])
     def test_allow_all_users_yaml_reaches_the_authz_gate(self, tmp_path, monkeypatch, yaml_text):
@@ -965,7 +921,7 @@ class TestLoadGatewayConfig:
         and the restart/dashboard child envs never carry the bridged value (a sticky env var would make
         the restarted gateway ignore the flipped config and stay open)."""
         from gateway.run_shutdown import GatewayShutdownMixin
-        from hermes_cli.web_server_gateway import _profile_action_environment
+        from agent_cli.web_server_gateway import _profile_action_environment
 
         hermes_home = tmp_path / ".hermes"
         hermes_home.mkdir()
@@ -1165,13 +1121,13 @@ class TestLoadGatewayConfig:
         # os.environ (single-profile overlay semantics, #67827) and this test
         # would no longer exercise the cross-profile isolation it's about.
         set_multiplex_active(True)
-        home_token = set_hermes_home_override(str(secondary_home))
+        home_token = set_agent_home_override(str(secondary_home))
         secret_token = set_secret_scope({"DISCORD_BOT_TOKEN": "worker-token"})
         try:
             config = load_gateway_config()
         finally:
             reset_secret_scope(secret_token)
-            reset_hermes_home_override(home_token)
+            reset_agent_home_override(home_token)
             set_multiplex_active(False)
 
         assert config.multiplex_profiles is True
@@ -1312,16 +1268,6 @@ class TestHomeChannelEnvOverrides:
                 ("ch_abc123", "General"),
             ),
             (
-                Platform.MATRIX,
-                PlatformConfig(
-                    enabled=True,
-                    token="syt_abc123",
-                    extra={"homeserver": "https://matrix.example.org"},
-                ),
-                {"MATRIX_HOME_ROOM": "!room123:example.org", "MATRIX_HOME_ROOM_NAME": "Bot Room"},
-                ("!room123:example.org", "Bot Room"),
-            ),
-            (
                 Platform.EMAIL,
                 PlatformConfig(
                     enabled=True,
@@ -1409,7 +1355,7 @@ class TestMultiplexProfilesConfig:
 
 
     def test_multiplex_profiles_nested_under_gateway(self, tmp_path, monkeypatch):
-        """gateway.multiplex_profiles (the form written by `hermes config set
+        """gateway.multiplex_profiles (the form written by `noone config set
         gateway.multiplex_profiles true`) must be honored. Regression test for
         the silent-fallback bug where the loader only forwarded the top-level
         key, so users who wrote it under gateway: got multiplex_profiles=False
@@ -1593,7 +1539,7 @@ class TestOnAllAdaptersDown:
     """gateway.on_all_adapters_down: what the runner does when the last messaging
     adapter goes down (#118080). Default 'exit' preserves the service-restart
     contract; 'stay_alive' is for launchers with no supervising service manager
-    (the desktop app's direct `hermes serve` child)."""
+    (the desktop app's direct `noone serve` child)."""
 
     def test_default_is_exit(self):
         config = GatewayConfig.from_dict({})

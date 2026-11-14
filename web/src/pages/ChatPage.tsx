@@ -1,5 +1,5 @@
 /**
- * ChatPage — embeds `hermes --tui` inside the dashboard.
+ * ChatPage — embeds `noone --tui` inside the dashboard.
  *
  *   <div host> (dashboard chrome)                                         .
  *     └─ <div wrapper> (rounded, dark bg, padded — the "terminal window"  .
@@ -11,38 +11,68 @@
  *              ▼                                                          .
  *     WebSocket /api/pty?token=<session>                                  .
  *          ▼                                                              .
- *     FastAPI pty_ws  (hermes_cli/web_server.py)                          .
+ *     FastAPI pty_ws  (agent_cli/web_server.py)                          .
  *          ▼                                                              .
- *     POSIX PTY → `node ui-tui/dist/entry.js` → tui_gateway + AIAgent     .
+ *     POSIX PTY → `node ui-tui/dist/entry.js` → agent_backend + AIAgent     .
  */
 
+import "@xterm/xterm/css/xterm.css";
+
+import { PanelRight, RotateCcw, X } from "@noone/ui/icons";
+import { Button } from "@nous-research/ui/ui/components/button";
+import { Typography } from "@nous-research/ui/ui/components/typography/index";
 import { FitAddon } from "@xterm/addon-fit";
 import { Unicode11Addon } from "@xterm/addon-unicode11";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import { WebglAddon } from "@xterm/addon-webgl";
 import { Terminal } from "@xterm/xterm";
-import "@xterm/xterm/css/xterm.css";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Typography } from "@nous-research/ui/ui/components/typography/index";
-import { cn } from "@/lib/utils";
-import { PanelRight, RotateCcw, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router";
 
-import { ChatSidebar } from "@/components/ChatSidebar";
 import { ChatSessionList } from "@/components/ChatSessionList";
+import { ChatSidebar } from "@/components/ChatSidebar";
 import { usePageHeader } from "@/contexts/usePageHeader";
+import { useProfileScope } from "@/contexts/useProfileScope";
 import { useI18n } from "@/i18n";
 import { api } from "@/lib/api";
-import { readStoredWorkspace, writeStoredWorkspace } from "@/lib/chat-workspaces";
+import { errorMessage } from "@/lib/api-error";
 import { latchChatActivation } from "@/lib/chat-activation";
+import { generateChannelId } from "@/lib/chat-channel-id";
+import { sendCopyLastCommand } from "@/lib/chat-copy-last";
+import { CopyLastButton } from "@/lib/chat-copy-last-button";
+import { attachChatImageDropListeners } from "@/lib/chat-image-drop";
 import { readChatPanelCollapsed, toggleChatPanelCollapsed } from "@/lib/chat-panel-collapsed";
-import { copyTextToClipboard } from "@/lib/clipboard";
 import { normalizeSessionTitle } from "@/lib/chat-title";
+import { readStoredWorkspace, writeStoredWorkspace } from "@/lib/chat-workspaces";
+import { uploadChatImage } from "@/lib/chatImagePaste";
+import { copyTextToClipboard } from "@/lib/clipboard";
+import { maybeReloadForLoopbackWsAuthFailure } from "@/lib/dashboard-auth-reload";
+import { computeKeyboardInset, keyboardRevealScrollDelta } from "@/lib/keyboard-inset";
+import { ptyAttachToken } from "@/lib/pty-attach-token";
+import {
+  PTY_GAVE_UP_BANNER,
+  PTY_RECONNECTING_BANNER,
+  PTY_SESSION_ENDED_MESSAGE,
+  PTY_SESSION_ENDED_TERMINAL_LINE,
+  PTY_START_FAILED_MESSAGE,
+  PTY_TOKEN_MISSING_BANNER,
+  type PtyBannerAction,
+  ptyReconnectExhausted,
+  ptyRejectionBanner,
+} from "@/lib/pty-close-copy";
 import { createPtyCompositionForwarder } from "@/lib/pty-composition";
 import { shouldRestoreTerminalFocus } from "@/lib/pty-focus";
-import { PtyResumeSanitizer } from "@/lib/pty-resume-sanitizer";
+import {
+  resolvePtyKeyboardShortcut,
+  sendPtyShortcutSequence,
+} from "@/lib/pty-keyboard-shortcuts";
+import {
+  MOBILE_REPLACEMENT_WINDOW_MS,
+  normalizePtyMobileInput,
+  shouldTreatInputAsMobileReplacement,
+} from "@/lib/pty-mobile-input";
+import { SGR_MOUSE_RE } from "@/lib/pty-mouse-report";
 import {
   PTY_CONNECTING_TIMEOUT_MS,
   PTY_KEEPALIVE_INTERVAL_MS,
@@ -62,50 +92,12 @@ import {
   shouldFinishResumeHydrationOnChunk,
   shouldShowResumeLoadingOverlay,
 } from "@/lib/pty-resume-loading";
-import {
-  MOBILE_REPLACEMENT_WINDOW_MS,
-  normalizePtyMobileInput,
-  shouldTreatInputAsMobileReplacement,
-} from "@/lib/pty-mobile-input";
-import { computeKeyboardInset, keyboardRevealScrollDelta } from "@/lib/keyboard-inset";
-import {
-  resolvePtyKeyboardShortcut,
-  sendPtyShortcutSequence,
-} from "@/lib/pty-keyboard-shortcuts";
+import { PtyResumeSanitizer } from "@/lib/pty-resume-sanitizer";
 import {
   isViewportPinnedToBottom,
   parseResumeControlMessage,
   shouldFollowPtyOutput,
 } from "@/lib/pty-scroll";
-import { installTerminalTouchScroll } from "@/lib/terminal-touch-scroll";
-import { uploadChatImage } from "@/lib/chatImagePaste";
-import { attachChatImageDropListeners } from "@/lib/chat-image-drop";
-import { maybeReloadForLoopbackWsAuthFailure } from "@/lib/dashboard-auth-reload";
-import {
-  PTY_GAVE_UP_BANNER,
-  PTY_RECONNECTING_BANNER,
-  PTY_SESSION_ENDED_MESSAGE,
-  PTY_SESSION_ENDED_TERMINAL_LINE,
-  PTY_START_FAILED_MESSAGE,
-  PTY_TOKEN_MISSING_BANNER,
-  ptyReconnectExhausted,
-  ptyRejectionBanner,
-  type PtyBannerAction,
-} from "@/lib/pty-close-copy";
-import { ptyAttachToken } from "@/lib/pty-attach-token";
-import {
-  refitWhenTerminalFontLoads,
-  TERMINAL_FONT_FAMILY,
-} from "@/lib/terminal-font-refit";
-import { generateChannelId } from "@/lib/chat-channel-id";
-import { sendCopyLastCommand } from "@/lib/chat-copy-last";
-import { CopyLastButton } from "@/lib/chat-copy-last-button";
-import {
-  probeWebglSupport,
-  shouldUseWebglRenderer,
-  textNeedsDomShaping,
-} from "@/lib/xterm-webgl-gating";
-import { loseWebglContexts } from "@/lib/xterm-webgl-release";
 import {
   buildTerminalTheme,
   DEFAULT_TERMINAL_BACKGROUND,
@@ -114,11 +106,20 @@ import {
   terminalLineHeightForWidth,
   terminalTierWidthPx,
 } from "@/lib/terminal-appearance";
+import {
+  refitWhenTerminalFontLoads,
+  TERMINAL_FONT_FAMILY,
+} from "@/lib/terminal-font-refit";
+import { installTerminalTouchScroll } from "@/lib/terminal-touch-scroll";
+import { cn } from "@/lib/utils";
+import {
+  probeWebglSupport,
+  shouldUseWebglRenderer,
+  textNeedsDomShaping,
+} from "@/lib/xterm-webgl-gating";
+import { loseWebglContexts } from "@/lib/xterm-webgl-release";
 import { PluginSlot } from "@/plugins";
 import { useTheme } from "@/themes";
-import { useProfileScope } from "@/contexts/useProfileScope";
-import { errorMessage } from "@/lib/api-error";
-import { SGR_MOUSE_RE } from "@/lib/pty-mouse-report";
 
 // Per-tab keep-alive identity (`?attach=`): lives in pty-attach-token.ts so a
 // second tab — including a Chrome "Duplicate tab" — gets its own PTY instead of
@@ -553,7 +554,7 @@ export default function ChatPage({ isActive = true }: { isActive?: boolean }) {
     //      terminal has a selection, then emits an OSC 52 escape.  Our
     //      OSC 52 handler below decodes that escape and writes to the
     //      browser clipboard — so the flow works just like it does in
-    //      `hermes --tui`.
+    //      `noone --tui`.
     //
     //   2. **Ctrl/Cmd+Shift+C.**  Belt-and-suspenders shortcut that
     //      operates directly on xterm's selection, useful if the TUI

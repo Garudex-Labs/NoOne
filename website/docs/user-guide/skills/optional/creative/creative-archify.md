@@ -1,40 +1,48 @@
 ---
 title: "Archify — Validated interactive HTML diagrams, upstream-maintained"
-sidebar_label: "Archify"
+sidebarTitle: "Archify"
 description: "Validated interactive HTML diagrams, upstream-maintained"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Archify
+# Archify {#archify}
 
 Validated interactive HTML diagrams, upstream-maintained.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/archify` |
+| Source | Optional — install with `noone skills install official/creative/archify` |
 | Path | `optional-skills/creative/archify` |
 | Version | `2.17.0` |
-| Author | tt-a1i |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `diagram`, `architecture`, `workflow`, `sequence`, `dataflow`, `state-machine`, `mermaid`, `html`, `svg` |
 | Related skills | [`architecture-diagram`](../../bundled/creative/creative-architecture-diagram.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md), [`concept-diagrams`](../../optional/creative/creative-concept-diagrams.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Archify (upstream-maintained)
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Archify (upstream-maintained) {#archify-upstream-maintained}
 
 > **Catalog stub.** This entry is maintained upstream at
 > [tt-a1i/archify](https://github.com/tt-a1i/archify): the project ships a
 > self-contained skill directory (`archify/`) with the Node CLI, schemas,
-> renderers, examples and references. `hermes skills install
+> renderers, examples and references. `noone skills install
 > official/creative/archify` pulls the current tree live from that repo
 > (quarantined and scanned like any hub install) — this directory holds only
 > the catalog metadata, so the vendored copy can never go stale.
@@ -48,7 +56,7 @@ plain-language requirements or pasted Mermaid (`flowchart`, `sequenceDiagram`,
 real code. Every candidate goes through a 9-check `validate` / `deliver`
 receipt, so the output is verifiable rather than eyeballed.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Node.js 18+ on `PATH` (`node bin/archify.mjs doctor` confirms the install;
   no `npm install` is needed inside the skill package).

@@ -194,7 +194,7 @@ async def _standalone_send(
 ) -> dict[str, Any]:
     """Acquire a Bot Framework bearer token and POST a single message activity; used by
     ``send_message_tool._send_via_adapter`` when the gateway runner is not in this process
-    (``hermes cron``). ``TEAMS_SERVICE_URL`` is allowlisted and ``chat_id`` charset-checked
+    (``noone cron``). ``TEAMS_SERVICE_URL`` is allowlisted and ``chat_id`` charset-checked
     (SSRF/path traversal). ``media_files`` / ``force_document`` are signature parity only — text-only."""
     extra = getattr(pconfig, "extra", {}) or {}
     client_id, client_secret, tenant_id = _credentials(pconfig)
@@ -408,7 +408,7 @@ class TeamsAdapter(BasePlatformAdapter):
             # Set up aiohttp app first — the bridge adapter wires SDK routes into it. client_max_size: Bot
             # Framework activities are JSON (caps out well under 1 MiB); an explicit cap keeps
             # oversized/chunked bodies from being buffered unbounded on a 0.0.0.0 bind (same pattern as
-            # webhook.py / raft, #58536/#58902).
+            # webhook.py, #58536/#58902).
             aiohttp_app = web.Application(client_max_size=_MAX_BODY_BYTES)
             aiohttp_app.router.add_get("/health", lambda _: web.Response(text="ok"))
             self._app = App(
@@ -827,9 +827,9 @@ _SETUP_INTRO = (  # "" → blank line
 
 
 def interactive_setup() -> None:
-    from hermes_cli.config import get_env_value, save_env_value
-    from hermes_cli.cli_output import prompt, prompt_yes_no, print_info, print_success, print_warning
-    from hermes_cli.setup_platforms import declines_reconfigure
+    from agent_cli.config import get_env_value, save_env_value
+    from agent_cli.cli_output import prompt, prompt_yes_no, print_info, print_success, print_warning
+    from agent_cli.setup_platforms import declines_reconfigure
     if declines_reconfigure("Teams", "Reconfigure Teams?", "TEAMS_CLIENT_ID"):
         return
     for line in _SETUP_INTRO:
@@ -855,19 +855,19 @@ def interactive_setup() -> None:
     print()
     print_success("Teams configuration saved to ~/.hermes/.env")
     print_info("Install the app in Teams:  teams app install --id <teamsAppId>")
-    print_info("Restart the gateway:       hermes gateway restart")
+    print_info("Restart the gateway:       noone gateway restart")
 
 
 def _install_hint() -> str:
     """Point to the setup flow that requests PM's declared Teams extra."""
-    return "Teams SDK missing — run `hermes setup`, configure Teams, then restart the gateway"
+    return "Teams SDK missing — run `noone setup`, configure Teams, then restart the gateway"
 
 
 def register(ctx) -> None:
     ctx.register_platform(
         name="teams", label="Microsoft Teams", adapter_factory=lambda cfg: TeamsAdapter(cfg),
         dashboard_description="Connect Hermes to Microsoft Teams chats via the Bot Framework.",
-        docs_url="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams",
+        docs_url="https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/teams.md",
         check_fn=check_requirements,  # PASSIVE probe — never installs
         ensure_deps_fn=check_teams_requirements,  # ACTIVE lazy-installer, run by create_adapter()
         validate_config=validate_config, is_connected=is_connected,

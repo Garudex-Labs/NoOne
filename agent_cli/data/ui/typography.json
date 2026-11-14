@@ -1,0 +1,18 @@
+{
+  "sans": "\"Inter\", \"Segoe WPC\", \"Segoe UI\", -apple-system, BlinkMacSystemFont, \"SF Pro Text\", \"SF Pro Display\", system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", emoji",
+  "mono": "\"JetBrains Mono\", \"Cascadia Code\", \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Liberation Mono\", \"Noto Sans Mono\", \"Noto Mono\", \"SF Mono\", ui-monospace, Menlo, Monaco, Consolas, monospace, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\", emoji",
+  "scale": {
+    "caption": "12px",
+    "label": "14px",
+    "body": "16px",
+    "section": "20px",
+    "page": "24px",
+    "display": "32px"
+  },
+  "weight": {
+    "regular": 400,
+    "medium": 500,
+    "semibold": 600,
+    "bold": 700
+  }
+}

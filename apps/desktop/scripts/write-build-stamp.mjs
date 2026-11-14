@@ -125,19 +125,22 @@ export function stageDesktopLaunchers(root, identity = productIdentity) {
   const manifest = JSON.parse(readFileSync(file, 'utf8'))
   const windows = manifest.target.startsWith('win32')
   const commands = {}
-  const launchers = []
+  const launchers = new Set()
   for (const [name, source] of Object.entries(manifest.runtime.commands)) {
-    const alias = name.replace(/^hermes(?=-|$)/, identity.cliName)
+    const alias = name.replace(/^(?:hermes|noone)(?=-|$)/, identity.cliName)
     const destination = posix.join(posix.dirname(source), `${alias}${windows ? '.exe' : ''}`)
     if (source !== destination && existsSync(join(root, source))) {
       copyFileSync(join(root, source), join(root, destination))
     }
     if (!existsSync(join(root, destination))) throw new Error(`Missing desktop launcher: ${destination}`)
     commands[name] = destination
-    launchers.push(alias)
+    launchers.add(alias)
+    if (identity.cliName === "noone" && identity.stableState !== false && /^hermes(?=-|$)/.test(name)) {
+      launchers.add(name)
+    }
   }
   manifest.runtime.commands = commands
-  manifest.launchers = launchers
+  manifest.launchers = [...launchers]
   writeFileSync(file, JSON.stringify(manifest, null, 2) + '\n')
   return manifest
 }
@@ -207,7 +210,8 @@ function main() {
 /** One artifact schema for source, bundled and Light builds.
  * The PM bundle builder supplies launch paths only for bundled artifacts.
  */
-export function buildStampPayload(stamp, env = process.env, platform = process.platform, payload = null) {
+export function buildStampPayload(stamp, env = process.env, platform = process.platform, payload = null,
+  releaseVersion = JSON.parse(readFileSync(join(DESKTOP_ROOT, "package.json"), "utf8")).version) {
   const variant = (env.HERMES_DESKTOP_VARIANT || "").trim()
   const channelBuild = channelBuildRequest(env)
   if (channelBuild && (stamp.commit !== channelBuild.commit || stamp.dirty)) throw new Error('Channel build identity does not match stamp')
@@ -218,7 +222,6 @@ export function buildStampPayload(stamp, env = process.env, platform = process.p
   if (commitBuild && env.HERMES_PAYLOAD_TAG) {
     throw new Error('Commit builds cannot also set a release tag')
   }
-  const version = env.HERMES_PAYLOAD_VERSION || (env.HERMES_PAYLOAD_TAG || '').replace(/^v/, '') || null
   // The bundle's baked runtime defaults/clears, recorded as data so the smoke
   // driver can predict the app's resolved Hermes home without reimplementing
   // the banner. Only commit bundles carry one, but the field is harmless when
@@ -232,10 +235,9 @@ export function buildStampPayload(stamp, env = process.env, platform = process.p
     dirty: stamp.dirty,
     source: channelBuild ? 'channel-build' : commitBuild ? 'commit-build' : stamp.source,
     commitDate: stamp.commitDate ?? null,
-    baseVersion: channelBuild?.sourceVersion ?? stamp.baseVersion ?? version?.split('-')[0] ?? null,
-    displayVersion: channelBuild
-      ? `${channelBuild.sourceVersion} (${channelBuild.channel} #${channelBuild.sequence}, ${channelBuild.commit.slice(0, 7)})`
-      : stamp.displayVersion ?? version,
+    baseVersion: releaseVersion,
+    displayVersion: releaseVersion,
+    releaseVersion,
     distance: stamp.distance ?? null
   }
 
@@ -244,7 +246,6 @@ export function buildStampPayload(stamp, env = process.env, platform = process.p
   if (channelBuild?.receiverCandidate) {
     delete base.channelBuild
     base.source = 'build'
-    base.displayVersion = channelBuild.version
   }
   if (variant === 'bundled') base.receiverProtocol = 1
 

@@ -1,5 +1,7 @@
-// Relative, not `@hermes/shared`: esbuild bundles electron/ without tsconfig paths.
-import { isHermesCloudUrl } from '../../shared/src/hermes-cloud'
+import { appText } from '@noone/shared/application-identity'
+
+// Relative, not `@noone/shared`: esbuild bundles electron/ without tsconfig paths.
+import { isHermesCloudUrl } from '../../shared/src/cloud-connection'
 
 // A cold backend boot (plugin discovery + route mounting at web_server import
 // time) can take 45-60s on slower hardware. A 45s deadline makes first-boot
@@ -19,7 +21,7 @@ export const DEFAULT_HEALTH_PROBE_TIMEOUT_MS = 5_000
 type FetchPublicJson = (url: string, options?: { timeoutMs?: number }) => Promise<unknown>
 type FetchJson = (url: string, token?: string | null, options?: { timeoutMs?: number }) => Promise<unknown>
 
-export interface HermesReadyOptions {
+export interface AgentReadyOptions {
   fetchPublicJson: FetchPublicJson
   fetchJson: FetchJson
   token?: string | null
@@ -246,7 +248,7 @@ function supersededError() {
   return error
 }
 
-export async function waitForHermesReady(baseUrl: string, options: HermesReadyOptions): Promise<void> {
+export async function waitForHermesReady(baseUrl: string, options: AgentReadyOptions): Promise<void> {
   const timeoutMs = options.timeoutMs ?? DEFAULT_BACKEND_READY_TIMEOUT_MS
   const pollMs = options.pollMs ?? DEFAULT_BACKEND_READY_POLL_MS
   const healthProbeTimeoutMs = options.healthProbeTimeoutMs ?? DEFAULT_HEALTH_PROBE_TIMEOUT_MS
@@ -302,7 +304,7 @@ export async function waitForHermesReady(baseUrl: string, options: HermesReadyOp
       }
 
       if (options.alreadyBound && isConnectionRefusedError(error)) {
-        throw new Error(`Hermes backend did not become ready: ${(error as Error).message}`)
+        throw new Error(appText(`{app_name} backend did not become ready: ${(error as Error).message}`))
       }
 
       // An explicitly missing route means the backend predates /api/health.
@@ -335,5 +337,5 @@ export async function waitForHermesReady(baseUrl: string, options: HermesReadyOp
     throw cloudError
   }
 
-  throw new Error(`Hermes backend did not become ready: ${detail}`)
+  throw new Error(appText(`{app_name} backend did not become ready: ${detail}`))
 }

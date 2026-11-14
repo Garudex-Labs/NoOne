@@ -259,7 +259,7 @@ async def test_connect_clears_previous_fatal_error(monkeypatch):
     """Regression: a successful connect() must clear any prior fatal-error
     state via _mark_connected(), not just set self._running = True directly.
 
-    Every other platform adapter (Telegram, WeCom, Matrix, ...) calls
+    Every other platform adapter (Telegram, ...) calls
     _mark_connected() on a successful connect, which clears
     _fatal_error_code/_fatal_error_message/_fatal_error_retryable and
     rewrites the runtime status file as "connected". DiscordAdapter used to
@@ -656,7 +656,7 @@ async def test_safe_sync_recreated_survives_rate_limit_between_mutations():
 @pytest.mark.asyncio
 async def test_post_connect_initialization_retries_fingerprint_after_timeout(tmp_path, monkeypatch):
     adapter = DiscordAdapter(PlatformConfig(enabled=True, token="test-token"))
-    monkeypatch.setattr("hermes_constants.get_hermes_home", lambda: tmp_path)
+    monkeypatch.setattr("agent_constants.get_agent_home", lambda: tmp_path)
 
     class _DesiredCommand:
         def to_dict(self, tree):
@@ -933,7 +933,7 @@ async def test_skill_catalog_scan_runs_off_the_event_loop(monkeypatch):
             # Only a free loop can set loop_ticked while this wait is in progress.
             return ({}, [("x", "desc", "/x")], 0) if loop_ticked.wait(timeout=1) else ({}, [], 0)
 
-        monkeypatch.setattr("hermes_cli.commands_platforms.discord_skill_commands_by_category", _blocking_scan)
+        monkeypatch.setattr("agent_cli.commands_platforms.discord_skill_commands_by_category", _blocking_scan)
         task = asyncio.create_task(run_site())
         await asyncio.to_thread(scan_started.wait, 1)
         loop_ticked.set()

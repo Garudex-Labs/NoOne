@@ -2,13 +2,13 @@ import { act, cleanup, render } from '@testing-library/react'
 import { useRef } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as HermesModule from '@/hermes'
+import type * as AgentModule from '@/agent-client'
 import { textPart } from '@/lib/chat-messages'
 import { createClientSessionState } from '@/lib/chat-runtime'
 import { $sessionTiles, publishSessionState } from '@/store/session-states'
 
-vi.mock('@/hermes', async importOriginal => {
-  const actual = await importOriginal<typeof HermesModule>()
+vi.mock('@/agent-client', async importOriginal => {
+  const actual = await importOriginal<typeof AgentModule>()
 
   return {
     ...actual,
@@ -84,7 +84,7 @@ describe('useTranscriptPeerSync (#65047)', () => {
 
     publishSessionState(RUNTIME, local)
 
-    const { getLatestSessionMessages } = await import('@/hermes')
+    const { getLatestSessionMessages } = await import('@/agent-client')
     vi.mocked(getLatestSessionMessages).mockResolvedValue({
       session_id: STORED,
       messages: [
@@ -139,7 +139,7 @@ describe('useTranscriptPeerSync (#65047)', () => {
   })
 
   it('ignores a peer ping for a session this window is not viewing', async () => {
-    const { getLatestSessionMessages } = await import('@/hermes')
+    const { getLatestSessionMessages } = await import('@/agent-client')
     vi.mocked(getLatestSessionMessages).mockClear()
     const { useTranscriptPeerSync } = await import('./use-transcript-peer-sync')
 

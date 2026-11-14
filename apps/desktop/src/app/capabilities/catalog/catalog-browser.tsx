@@ -1,9 +1,9 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo, type ReactNode, useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import { PageLoader } from '@/components/page-loader'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ErrorState } from '@/components/ui/error-state'
 import { Masonry } from '@/components/ui/masonry'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -208,7 +208,7 @@ function CatalogSearchHeader({
             {actions}
             <Tip label={viewToggleLabel}>
               <Button aria-label={viewToggleLabel} onClick={onToggleView} size="icon-xs" variant="ghost">
-                <Codicon name={cardView ? 'list-unordered' : 'extensions'} />
+                <AppIcon name={cardView ? 'list-unordered' : 'extensions'} />
               </Button>
             </Tip>
           </>
@@ -544,7 +544,7 @@ export const CatalogBrowser = memo(function CatalogBrowser({
                   <DetailColumn footer={c.snapshotHint}>
                     <div className="sm:hidden">
                       <Button onClick={() => setDetailOpen(false)} size="sm" variant="text">
-                        <Codicon name="arrow-left" />
+                        <AppIcon name="arrow-left" />
                         {c.back}
                       </Button>
                     </div>

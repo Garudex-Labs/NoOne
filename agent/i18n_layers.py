@@ -28,9 +28,9 @@ from typing import Any, Mapping
 logger = logging.getLogger(__name__)
 
 CORE_SURFACE = "core"
-SURFACES: tuple[str, ...] = (CORE_SURFACE, "tui", "desktop")
+SURFACES: tuple[str, ...] = (CORE_SURFACE, "desktop")
 
-# ``en``, ``zh-hant``, ``pt-br``, ``sr-latn-rs``: lowercase language subtag + optional region/script parts.
+# ``en``, ``hi-in``, ``en-gb``, ``sr-latn-rs``: lowercase language subtag + optional region/script parts.
 _LANGUAGE_ID_RE = re.compile(r"^[a-z]{2,3}(-[a-z0-9]{2,8})*$")
 # ``pl.yaml`` -> (pl, core); ``pl.tui.yaml`` -> (pl, tui). Anything else in a locales dir is ignored.
 _LOCALE_FILE_RE = re.compile(r"^(?P<lang>[a-z]{2,3}(?:-[a-z0-9]{2,8})*)(?:\.(?P<surface>[a-z]+))?\.ya?ml$")
@@ -73,7 +73,7 @@ def non_text_leaves(node: Any, prefix: str = "") -> list[str]:
 def parse_locale_file(path: Path) -> dict[str, str]:
     """Parse one locale YAML into a flat catalog. Raises on unreadable/unparseable input or a non-mapping
     document — the strict form for registration and validation."""
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
     with Path(path).open("r", encoding="utf-8-sig") as handle:
         data = yaml.safe_load(handle)
     if data is None:
@@ -147,7 +147,7 @@ def register_pack(lang: str, surface: str, messages: Mapping[str, str], *, sourc
     """Add a pack layer for ``(lang, surface)``; later registrations shadow earlier ones key by key."""
     lang_id = normalize_language_id(lang)
     if not is_language_id(lang_id):
-        raise ValueError(f"invalid language id {lang!r} (expected e.g. 'pl', 'pt-br', 'zh-hant')")
+        raise ValueError(f"invalid language id {lang!r} (expected e.g. 'pl', 'hi-in', 'en-gb')")
     if surface not in SURFACES:
         raise ValueError(f"unknown locale surface {surface!r} (expected one of {', '.join(SURFACES)})")
     entry = PackEntry(lang_id, surface, dict(messages), source, endonym or None, bool(rtl), next(_tokens))

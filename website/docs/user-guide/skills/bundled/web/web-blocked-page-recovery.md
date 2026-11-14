@@ -1,42 +1,50 @@
 ---
 title: "Blocked Page Recovery — Use when a fetch fails: 403/429, paywall, WAF, bot wall"
-sidebar_label: "Blocked Page Recovery"
+sidebarTitle: "Blocked Page Recovery"
 description: "Use when a fetch fails: 403/429, paywall, WAF, bot wall"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Blocked Page Recovery
+# Blocked Page Recovery {#blocked-page-recovery}
 
 Use when a fetch fails: 403/429, paywall, WAF, bot wall.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/web/blocked-page-recovery` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Research`, `Archives`, `Wayback`, `Paywall`, `WAF`, `Fallback` |
 | Related skills | [`grounded-citations`](../../bundled/research/research-grounded-citations.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Blocked-Page Recovery
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Blocked-Page Recovery {#blocked-page-recovery-1}
 
 When a page won't fetch — 403/429, Cloudflare "Just a moment...", a paywall,
 or a bot-detection interstitial — don't give up and don't loop on the same
 URL. Third-party services often hold a **copy** of the page. Work down this
 ladder, cheapest first.
 
-## The ladder
+## The ladder {#the-ladder}
 
 ```
 1. Wayback Machine  — archive.org "available" API  (snapshot + timestamp)
@@ -55,7 +63,7 @@ python3 scripts/recover_page.py "https://example.com/blocked-article" --json
 The script tries each route in order, validates every body (see "Fake
 successes" below), and prints the first genuine hit with its provenance.
 
-## Provenance discipline (non-negotiable)
+## Provenance discipline (non-negotiable) {#provenance-discipline-non-negotiable}
 
 Every recovered copy carries a provenance you MUST preserve when citing:
 
@@ -68,9 +76,9 @@ Every recovered copy carries a provenance you MUST preserve when citing:
 If the user needs *current* data (prices, availability, breaking news), a
 snapshot is context, not an answer — say so explicitly and note its age.
 
-## Manual routes
+## Manual routes {#manual-routes}
 
-### 1. Wayback Machine (best provenance, try first)
+### 1. Wayback Machine (best provenance, try first) {#1-wayback-machine-best-provenance-try-first}
 
 ```bash
 # Discovery: returns closest snapshot URL + timestamp as JSON
@@ -90,7 +98,7 @@ CDX intermittently returns 503 under load — if it does, fall back to the
 Works for: any publicly crawled URL. Fails for: robots-blocked sites,
 never-crawled URLs, JS-only SPAs (snapshots don't render).
 
-### 2. archive.today (paywalls, deleted content)
+### 2. archive.today (paywalls, deleted content) {#2-archivetoday-paywalls-deleted-content}
 
 User-submitted archives — often has paywalled news articles Wayback lacks.
 Rate-limits aggressively (429) and rotates domains, so iterate:
@@ -105,7 +113,7 @@ done
 **Validate the body, not the status code** — a 429 still ships several KB of
 rate-limit HTML that looks like a success to a size check alone.
 
-### 3. Jina Reader (requires JINA_API_KEY)
+### 3. Jina Reader (requires JINA_API_KEY) {#3-jina-reader-requires-jina_api_key}
 
 `r.jina.ai` re-renders the live page in a real browser server-side and
 returns markdown. Anonymous access is dead (401 → Turnstile); a key is
@@ -118,7 +126,7 @@ curl -s -H "Authorization: Bearer $JINA_API_KEY" "https://r.jina.ai/{URL}"
 Handles JS SPAs that archives can't. Skip this route entirely when the env
 var is unset.
 
-### 4. API-first pivot
+### 4. API-first pivot {#4-api-first-pivot}
 
 WAFs protect the HTML surface far more aggressively than the data endpoints
 behind it. After 2-3 blocked attempts on a site, stop fighting the HTML and
@@ -129,7 +137,7 @@ look for:
   you did recover)
 - A sitemap (`/sitemap.xml`) revealing canonical URLs that may not be gated
 
-## Fake successes — routes that LIE
+## Fake successes — routes that LIE {#fake-successes--routes-that-lie}
 
 These return HTTP 200 with a plausible body that is NOT the page. The script
 rejects them automatically; reject them manually too:
@@ -147,7 +155,7 @@ Detection heuristics the script applies: body under a per-route byte floor;
 meta-refresh/JS-redirect stubs whose target is the original host; interstitial
 titles ("Just a moment", "Redirecting", "Google Search", "Attention Required").
 
-## Proxy relays: don't
+## Proxy relays: don't {#proxy-relays-dont}
 
 Generic "web proxy" relays are man-in-the-middle by construction. Never send
 cookies or Authorization headers through one, and don't use them for anything

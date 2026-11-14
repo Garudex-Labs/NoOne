@@ -5,7 +5,6 @@ Two approvals can share one chat session: the first card's request ends (timeout
 the first card must not resolve the newer request, which the user has not seen yet.
 """
 
-import importlib.util
 import os
 import sys
 from types import SimpleNamespace
@@ -15,11 +14,6 @@ import pytest
 
 from gateway.config import PlatformConfig
 from gateway.platforms.base import SendResult
-
-if importlib.util.find_spec("lark_oapi") is None and "lark_oapi" not in sys.modules:
-    _lark = MagicMock()
-    for _name in ("lark_oapi", "lark_oapi.api.im.v1", "lark_oapi.event", "lark_oapi.event.callback_type"):
-        sys.modules.setdefault(_name, _lark)
 
 from tools import approval
 from tools.approval_gateway_wait import _ApprovalEntry
@@ -70,29 +64,8 @@ async def _press_slack_card(request_id):
     await adapter._handle_approval_action(AsyncMock(), body, {"action_id": "hermes_approve_once", "value": SESSION})
 
 
-async def _press_feishu_card(request_id):
-    from plugins.platforms.feishu.adapter import FeishuAdapter
-    adapter = FeishuAdapter(PlatformConfig(enabled=True))
-    adapter._client = MagicMock()
-    adapter.set_authorization_check(lambda *_a, **_k: True)
-    sent = SimpleNamespace(success=lambda: True, data=SimpleNamespace(message_id="m1"))
-    with patch.object(adapter, "_feishu_send_with_retry", new=AsyncMock(return_value=sent)), \
-            patch.object(adapter, "send", new=AsyncMock()):
-        await adapter.send_exec_approval(chat_id="oc_1", command="rm -rf build", session_key=SESSION, request_id=request_id)
-        await adapter._resolve_approval(next(iter(adapter._approval_state)), "once", "Alice", open_id="ou_1", chat_id="oc_1")
 
 
-async def _press_matrix_card(request_id):
-    from plugins.platforms.matrix.adapter import MatrixAdapter
-    adapter = MatrixAdapter(PlatformConfig(enabled=True, token="tok", extra={"homeserver": "https://matrix.example.org"}))
-    adapter._user_id, adapter._client = "@bot:example.org", MagicMock()
-    adapter.set_authorization_check(lambda *_a, **_k: True)
-    with patch.object(adapter, "send", new=AsyncMock(return_value=SendResult(success=True, message_id="$card"))), \
-            patch.object(adapter, "_send_reaction", new=AsyncMock(return_value=None)):
-        await adapter.send_exec_approval(chat_id="!room:x", command="rm -rf build", session_key=SESSION, request_id=request_id)
-        await adapter._on_reaction(SimpleNamespace(
-            sender="@alice:x", event_id="$react", room_id="!room:x",
-            content={"m.relates_to": {"event_id": "$card", "key": "✅"}}))
 
 
 async def _press_whatsapp_card(request_id):
@@ -137,7 +110,7 @@ async def _press_relay_card(request_id):
         prompt_response={"prompt_id": stub.sent[-1]["prompt_id"], "option_id": "once"}))
 
 
-_PRESSES = [_press_telegram_card, _press_slack_card, _press_feishu_card, _press_matrix_card, _press_whatsapp_card,
+_PRESSES = [_press_telegram_card, _press_slack_card, _press_whatsapp_card,
             _press_teams_card, _press_relay_card]
 
 
@@ -157,22 +130,3 @@ async def test_card_resolves_its_own_request(newer_request_pending, press):
 
     assert newer_request_pending.event.is_set()
     assert newer_request_pending.result == pressed
-
-
-@pytest.mark.asyncio
-async def test_matrix_settled_card_reports_expiry(newer_request_pending):
-    """A reaction on a settled Matrix card says it expired and retires the card, as the other adapters do."""
-    from agent.i18n import t
-    from plugins.platforms.matrix.adapter import MatrixAdapter
-    adapter = MatrixAdapter(PlatformConfig(enabled=True, token="tok", extra={"homeserver": "https://matrix.example.org"}))
-    adapter._user_id, adapter._client = "@bot:example.org", MagicMock()
-    adapter.set_authorization_check(lambda *_a, **_k: True)
-    send = AsyncMock(return_value=SendResult(success=True, message_id="$card"))
-    with patch.object(adapter, "send", new=send), patch.object(adapter, "_send_reaction", new=AsyncMock(return_value=None)):
-        await adapter.send_exec_approval(chat_id="!room:x", command="rm -rf build", session_key=SESSION, request_id="req-old")
-        await adapter._on_reaction(SimpleNamespace(
-            sender="@alice:x", event_id="$react", room_id="!room:x",
-            content={"m.relates_to": {"event_id": "$card", "key": "\u2705"}}))
-
-    assert send.await_args_list[-1].args[:2] == ("!room:x", t("platform.matrix.approval.expired"))
-    assert "$card" not in adapter._approval_prompts_by_event

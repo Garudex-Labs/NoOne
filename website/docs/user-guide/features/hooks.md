@@ -1,23 +1,22 @@
 ---
-sidebar_position: 6
 title: "Event Hooks"
 description: "Run custom code at key lifecycle points — log activity, send alerts, post to webhooks"
 ---
 
-# Event Hooks
+# Event Hooks {#event-hooks}
 
-Hermes has four hook systems that run custom code at key lifecycle points:
+{{app-name}} has four hook systems that run custom code at key lifecycle points:
 
 | System | Registered via | Runs in | Use case |
 |--------|---------------|---------|----------|
 | **[Gateway hooks](#gateway-event-hooks)** | `HOOK.yaml` + `handler.py` in `~/.hermes/hooks/` | Gateway only | Logging, alerts, webhooks |
 | **[Plugin hooks](#plugin-hooks)** | `ctx.register_hook()` in a [plugin](./plugins.md) | CLI + Gateway | Tool interception, metrics, guardrails |
-| **[Shell hooks](#shell-hooks)** | `hooks:` block in profile `config.yaml` pointing at shell scripts | CLI + Gateway + Desktop/TUI/dashboard chat | Drop-in scripts for blocking, auto-formatting, context injection |
+| **[Shell hooks](#shell-hooks)** | `hooks:` block in profile `config.yaml` pointing at shell scripts | CLI + Gateway + Desktop/dashboard chat | Drop-in scripts for blocking, auto-formatting, context injection |
 | **[Outbound webhooks](#outbound-webhooks)** | `hooks.outbound:` list in `~/.hermes/config.yaml` | CLI + Gateway | Push signed lifecycle events to external HTTP endpoints — CI, dashboards, other agents |
 
 Hook callback errors are isolated and logged rather than crashing the agent. Hooks are not all passive: directive/control hooks can change flow, transforms can replace content, and a shell `pre_tool_call` hook can block or fail closed.
 
-## Gateway Event Hooks
+## Gateway Event Hooks {#gateway-event-hooks}
 
 Gateway hooks fire automatically during gateway operation (Telegram, Discord, Slack, WhatsApp, Teams) without blocking the main agent pipeline.
 
@@ -25,13 +24,13 @@ Gateway hooks fire automatically during gateway operation (Telegram, Discord, Sl
 
 The hooks directory is a **trusted-by-placement** extension point — the documented contract since `3988c3c245f` (April 2026), when the comparison table below first recorded its consent model as "Implicit (dir trust)". It has no enable list, and `plugins.enabled` / `plugins.disabled` do not apply to it — gateway hooks are not plugins. Exactly what loads:
 
-- **When:** once, at gateway startup (`HookRegistry.discover_and_load()`, called from `gateway/run_startup.py`). Under [multi-profile gateways](../multi-profile-gateways.md), each served profile's own `hooks/` is loaded the first time an event fires inside that profile. The CLI, TUI, Desktop and cron never load gateway hooks.
+- **When:** once, at gateway startup (`HookRegistry.discover_and_load()`, called from `gateway/run_startup.py`). Under [multi-profile gateways](../multi-profile-gateways.md), each served profile's own `hooks/` is loaded the first time an event fires inside that profile. The CLI, Desktop and cron never load gateway hooks.
 - **What:** every subdirectory of `<profile home>/hooks/` (`~/.hermes/hooks/` for the default profile) that contains both a `HOOK.yaml` parsing to a mapping with a non-empty `events` list **and** a `handler.py`. Directories missing either file are skipped silently; an invalid manifest or an empty `events` list is skipped with a `[hooks] Skipping …` log line.
 - **How:** `handler.py` is imported in-process — its module body runs at import, and its `handle` function is registered for the declared events. It runs as the gateway process with the same access as the gateway itself (loaded credentials, tools, plugin state). There is no sandbox, no first-use prompt, and `HERMES_SAFE_MODE` does not skip this loader.
 
 Dropping the two files into the directory **is** the opt-in; removing (or renaming) `HOOK.yaml` or the directory is the opt-out. Anyone who can write into your profile home can already run code as you through `config.yaml` shell hooks or `plugins.enabled`, so the directory sits inside the same trust envelope as the rest of `~/.hermes/` — see [Trusted-by-placement extension points](../security.md#trusted-by-placement) on the security page. Review a hook's `handler.py` before you place it, exactly as you would a plugin before enabling it.
 
-### Creating a Hook
+### Creating a Hook {#creating-a-hook}
 
 Each hook is a directory under `~/.hermes/hooks/` containing two files:
 
@@ -42,7 +41,7 @@ Each hook is a directory under `~/.hermes/hooks/` containing two files:
     └── handler.py     # Python handler function
 ```
 
-#### HOOK.yaml
+#### HOOK.yaml {#hookyaml}
 
 ```yaml
 name: my-hook
@@ -55,7 +54,7 @@ events:
 
 The `events` list determines which events trigger your handler. You can subscribe to any combination of events, including wildcards like `command:*`.
 
-#### handler.py
+#### handler.py {#handlerpy}
 
 ```python
 import json
@@ -81,7 +80,7 @@ async def handle(event_type: str, context: dict):
 - Can be `async def` or regular `def` — both work
 - Errors are caught and logged, never crashing the agent
 
-### Available Events
+### Available Events {#available-events}
 
 | Event | When it fires | Context keys |
 |-------|---------------|--------------|
@@ -97,17 +96,25 @@ async def handle(event_type: str, context: dict):
 | `reaction:removed` | An emoji reaction was removed from a message the bot can see. Requires the `reaction_removed` bot event subscription. | same shape as `reaction:added` |
 | `command:*` | Any slash command executed | `platform`, `user_id`, `command`, `args` |
 
-#### Wildcard Matching
+#### Wildcard Matching {#wildcard-matching}
 
 Handlers registered for `command:*` fire for any `command:` event (`command:model`, `command:reset`, etc.). Monitor all slash commands with a single subscription.
 
-:::tip Threaded replies
+<Tip>
+
+<div className="doc-callout-title">
+
+Threaded replies
+
+</div>
+
 A handler posting a follow-up message into the same Telegram forum topic should include `message_thread_id=int(thread_id)` when `chat_type == "forum"` and `thread_id` is non-empty.
-:::
 
-### Examples
+</Tip>
 
-#### Telegram Alert on Long Tasks
+### Examples {#examples}
+
+#### Telegram Alert on Long Tasks {#telegram-alert-on-long-tasks}
 
 Send yourself a message when the agent takes more than 10 steps:
 
@@ -140,7 +147,7 @@ async def handle(event_type: str, context: dict):
             )
 ```
 
-#### Command Usage Logger
+#### Command Usage Logger {#command-usage-logger}
 
 Track which slash commands are used:
 
@@ -173,7 +180,7 @@ def handle(event_type: str, context: dict):
         f.write(json.dumps(entry) + "\n")
 ```
 
-#### Session Start Webhook
+#### Session Start Webhook {#session-start-webhook}
 
 POST to an external service on new sessions:
 
@@ -200,26 +207,26 @@ async def handle(event_type: str, context: dict):
         }, timeout=5)
 ```
 
-### Tutorial: BOOT.md — Run a Startup Checklist on Every Gateway Boot
+### Tutorial: BOOT.md — Run a Startup Checklist on Every Gateway Boot {#tutorial-bootmd--run-a-startup-checklist-on-every-gateway-boot}
 
 A popular pattern from the community: drop a Markdown checklist at `~/.hermes/BOOT.md`, and have the agent run it once every time the gateway starts. Useful for "on every boot, check overnight cron failures and ping me on Discord if anything failed," or "summarize the last 24h of deploy.log and post it to Slack #ops."
 
-This tutorial shows how to build it yourself as a user-defined hook. Hermes does not ship a built-in BOOT.md hook — you wire up exactly the behavior you want.
+This tutorial shows how to build it yourself as a user-defined hook. {{app-name}} does not ship a built-in BOOT.md hook — you wire up exactly the behavior you want.
 
-#### What we're building
+#### What we're building {#what-were-building}
 
 1. A file at `~/.hermes/BOOT.md` with natural-language startup instructions.
 2. A gateway hook that fires on `gateway:startup`, spawns a one-shot agent with your gateway's resolved model/credentials, and runs the BOOT.md instructions.
 3. A `[SILENT]` convention so the agent can opt out of sending a message when there's nothing to report.
 
-#### Step 1: Write your checklist
+#### Step 1: Write your checklist {#step-1-write-your-checklist}
 
 Create `~/.hermes/BOOT.md`. Write it as if you were giving instructions to a human assistant:
 
 ```markdown
 # Startup Checklist
 
-1. Run `hermes cron list` and check if any scheduled jobs failed overnight.
+1. Run `noone cron list` and check if any scheduled jobs failed overnight.
 2. If any failed, summarize them for Discord #ops (the hook delivers your final response to its configured target).
 3. Check if `/opt/app/deploy.log` has any ERROR lines from the last 24 hours. If yes, summarize them and include in the same report.
 4. If nothing went wrong, reply with only `[SILENT]` so no message is sent.
@@ -227,7 +234,7 @@ Create `~/.hermes/BOOT.md`. Write it as if you were giving instructions to a hum
 
 The agent sees this as part of its prompt, so anything you can describe in plain language works — tool calls, shell commands, sending messages, summarizing files.
 
-#### Step 2: Create the hook
+#### Step 2: Create the hook {#step-2-create-the-hook}
 
 ```text
 ~/.hermes/hooks/boot-md/
@@ -328,35 +335,35 @@ The two key lines:
 
 Without these, a bare `AIAgent()` falls back to built-in defaults and will 401 against any non-default endpoint.
 
-#### Step 3: Test it
+#### Step 3: Test it {#step-3-test-it}
 
 Restart the gateway:
 
 ```bash
-hermes gateway restart
+noone gateway restart
 ```
 
 Watch the logs:
 
 ```bash
-hermes logs --follow --level INFO | grep boot-md
+noone logs --follow --level INFO | grep boot-md
 ```
 
 You should see `Running BOOT.md (N chars)` followed by either `boot-md completed: ...` (summary of what the agent did) or `boot-md completed (nothing to report)` when the agent replied with an exact silence token such as `[SILENT]`.
 
 Delete `~/.hermes/BOOT.md` to disable the checklist — the hook stays loaded but silently skips when the file isn't there.
 
-#### Extending the pattern
+#### Extending the pattern {#extending-the-pattern}
 
 - **Schedule-aware checklists:** key off `datetime.now().weekday()` inside BOOT.md's instructions ("if it's Monday, also check the weekly deploy log"). The instructions are free-form text, so anything the agent can reason about is fair game.
 - **Multiple checklists:** point the hook at a different file (`STARTUP.md`, `MORNING.md`, etc.) and register separate hook directories for each.
 - **Non-agent variant:** if you don't need a full agent loop, skip `AIAgent` entirely and have the handler post a fixed notification directly via `httpx`. Cheaper, faster, and has no provider dependency.
 
-#### Why this isn't a built-in
+#### Why this isn't a built-in {#why-this-isnt-a-built-in}
 
-An earlier version of Hermes shipped this as a built-in hook and silently spawned an agent with bare defaults on every gateway boot. That surprised users with custom endpoints and made the feature invisible to users who didn't know it was running. Keeping it as a documented pattern — built by you, in your hooks directory — means you see exactly what it does and opt in by writing the files.
+An earlier version of {{app-name}} shipped this as a built-in hook and silently spawned an agent with bare defaults on every gateway boot. That surprised users with custom endpoints and made the feature invisible to users who didn't know it was running. Keeping it as a documented pattern — built by you, in your hooks directory — means you see exactly what it does and opt in by writing the files.
 
-### How It Works
+### How It Works {#how-it-works}
 
 1. On gateway startup, `HookRegistry.discover_and_load()` scans `~/.hermes/hooks/`
 2. Each subdirectory with `HOOK.yaml` + `handler.py` is imported in-process — no enable list is consulted (see [Trust model](#gateway-hook-trust))
@@ -364,11 +371,19 @@ An earlier version of Hermes shipped this as a built-in hook and silently spawne
 4. At each lifecycle point, `hooks.emit()` fires all matching handlers
 5. Errors in any handler are caught and logged — a broken hook never crashes the agent
 
-:::info
-Gateway hooks only fire in the **gateway** (Telegram, Discord, Slack, WhatsApp, Teams). The CLI does not load gateway hooks. For hooks that work everywhere, use [plugin hooks](#plugin-hooks).
-:::
+<Info>
 
-## Plugin Hooks
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+Gateway hooks only fire in the **gateway** (Telegram, Discord, Slack, WhatsApp, Teams). The CLI does not load gateway hooks. For hooks that work everywhere, use [plugin hooks](#plugin-hooks).
+
+</Info>
+
+## Plugin Hooks {#plugin-hooks}
 
 [Plugins](./plugins.md) can register hooks that fire in **both CLI and gateway** sessions. These are registered programmatically via `ctx.register_hook()` in your plugin's `register()` function.
 
@@ -397,9 +412,9 @@ def register(ctx):
 - The catalog below is descriptive: **observers** ignore returns, **transforms** accept the first valid string replacement, and **directive/control** hooks consume documented return shapes. Plugin middleware is a separate registry and surface, not another hook category.
 - Correlation fields such as `turn_id`, `api_request_id`, `task_id`, `session_id`, and `api_call_count` are hook-specific and may be absent. Treat IDs as opaque.
 - Tool hooks also carry `conversation_id`: the conversation's first session id, which stays the same when a rotating compression replaces `session_id`, and which a delegated subagent shares with its delegator. Key per-conversation state on it.
-- Runtime event-name validity comes from `hermes_cli.plugins.VALID_HOOKS`. `hermes hooks list` lists configured shell/outbound hooks, not every available event; `hermes hooks test <event>` reports the valid set only when an invalid event is supplied.
+- Runtime event-name validity comes from `agent_cli.plugins.VALID_HOOKS`. `hermes hooks list` lists configured shell/outbound hooks, not every available event; `hermes hooks test <event>` reports the valid set only when an invalid event is supplied.
 
-### Cache-safe system prompt sections
+### Cache-safe system prompt sections {#cache-safe-system-prompt-sections}
 
 Plugins that need durable, always-on guidance can register a bounded system
 prompt section instead of injecting the same text through `pre_llm_call` on
@@ -446,7 +461,7 @@ other environment data must not silently mutate a session's cached prompt.
 Such a hook needs a concrete consumer and the same frozen/resume-safe semantics
 before it can be added.
 
-### Shipped plugin-hook catalog
+### Shipped plugin-hook catalog {#shipped-plugin-hook-catalog}
 
 Payload fields below are the exact event-specific fields supplied by each call site. For backward compatibility, `PluginManager` also adds `telemetry_schema_version="hermes.observer.v1"` to every plugin-hook callback. That legacy envelope marker does not mean all hook payloads share one semantic schema; new versioned contracts belong to their concrete event or capability family.
 
@@ -472,24 +487,24 @@ Payload fields below are the exact event-specific fields supplied by each call s
 | `on_interim_message` | Observer | Dispatched when a mid-loop assistant message is surfaced before the final answer (streaming or non-streaming); return ignored. | `text`, `already_streamed`, `turn_id`, `iteration`, `session_id`, `model`, `provider`, `surface` | Full interim assistant text. |
 | `transform_api_error_classification` | Transform | On each failed provider attempt, at the top of the built-in classifier; all callbacks run, then the first dict with a valid `reason` wins (run-all-then-pick-first), and skipped valid results log a runtime warning. Python plugins only. | `provider`, `model`, `status_code`, `error_type`, `error_code`, `error_message`, `error_body`, `error`, `approx_tokens`, `context_length`, `num_messages` | `error_message` and `error_body` may contain raw provider/user data. |
 | `on_session_start` | Observer | First turn of a new session; return ignored. | `session_id`, `model`, `platform` | Identifiers and routing metadata only. |
-| `on_session_open` | Observer | Once each time a client creates or opens a local session (CLI, TUI, Desktop, ACP, kanban/A2A workers), in the gateway under the session's profile, before its first turn; never for messaging chats. Timeout-bounded; return ignored. | `session_id`, `platform`, `reason` (`create` or `resume`) | Session identifiers only. |
-| `on_session_end` | Observer | Canonically at each turn finalization; CLI/TUI exits have additional reduced legacy shapes. Return ignored. | Canonical: `session_id`, `task_id`, `turn_id`, `completed`, `failed`, `interrupted`, `turn_exit_reason`, `model`, `platform`; exit paths may add `reason`/`api_request_id` and omit fields. | IDs, model/platform, and outcome; canonical payload has no message body. |
-| `on_session_finalize` | Observer | CLI/TUI/gateway teardown through `finalize_session`; gateway shutdown may finalize without a reset. Return ignored. | Surface-dependent `session_id`, `platform`, optionally `reason`, `old_session_id`, `new_session_id` | Session and routing identifiers. |
-| `on_session_reset` | Observer | CLI/TUI session boundary and gateway after the replacement session exists; return ignored. | CLI: `session_id`, `platform`, `reason`; TUI: `session_id`, `platform`; gateway: those plus `reason`, `old_session_id`, `new_session_id` | Session and routing identifiers. |
-| `on_session_delete` | Observer | After a session delete or deliberate archive commits (CLI, TUI, Desktop/dashboard, gateway API, sweeps, prune); return ignored. | `session_id`, `reason`, `profile`, optional `deleted_ids` (full set when more than one row went), `sessions_dir` | Session identifiers only; no message content. |
-| `post_compaction` | Observer | Once per committed compaction, on every path: automatic and manual compaction in the agent loop (CLI, TUI, Desktop, gateway hygiene, overflow recovery), the gateway's `/compress` (`session.mutate compress`), Codex app-server compactions, micro-compaction and proactive tool-result pruning. Not fired for attempts that changed nothing (aborted, blocked, refused). Timeout-bounded; return ignored. | `session_id`, `old_session_id`, `kind`, `reason`, `before_tokens`, `after_tokens`, `messages_removed` | Identifiers and counts only. |
+| `on_session_open` | Observer | Once each time a client creates or opens a local session (CLI, Desktop, ACP, kanban/A2A workers), in the gateway under the session's profile, before its first turn; never for messaging chats. Timeout-bounded; return ignored. | `session_id`, `platform`, `reason` (`create` or `resume`) | Session identifiers only. |
+| `on_session_end` | Observer | Canonically at each turn finalization; CLI exits have additional reduced legacy shapes. Return ignored. | Canonical: `session_id`, `task_id`, `turn_id`, `completed`, `failed`, `interrupted`, `turn_exit_reason`, `model`, `platform`; exit paths may add `reason`/`api_request_id` and omit fields. | IDs, model/platform, and outcome; canonical payload has no message body. |
+| `on_session_finalize` | Observer | CLI/gateway teardown through `finalize_session`; gateway shutdown may finalize without a reset. Return ignored. | Surface-dependent `session_id`, `platform`, optionally `reason`, `old_session_id`, `new_session_id` | Session and routing identifiers. |
+| `on_session_reset` | Observer | CLI session boundary and gateway after the replacement session exists; return ignored. | CLI: `session_id`, `platform`, `reason`; TUI: `session_id`, `platform`; gateway: those plus `reason`, `old_session_id`, `new_session_id` | Session and routing identifiers. |
+| `on_session_delete` | Observer | After a session delete or deliberate archive commits (CLI, Desktop/dashboard, gateway API, sweeps, prune); return ignored. | `session_id`, `reason`, `profile`, optional `deleted_ids` (full set when more than one row went), `sessions_dir` | Session identifiers only; no message content. |
+| `post_compaction` | Observer | Once per committed compaction, on every path: automatic and manual compaction in the agent loop (CLI, Desktop, gateway hygiene, overflow recovery), the gateway's `/compress` (`session.mutate compress`), Codex app-server compactions, micro-compaction and proactive tool-result pruning. Not fired for attempts that changed nothing (aborted, blocked, refused). Timeout-bounded; return ignored. | `session_id`, `old_session_id`, `kind`, `reason`, `before_tokens`, `after_tokens`, `messages_removed` | Identifiers and counts only. |
 | `post_curator_run` | Observer | After a curator pass wrote its per-run report (`logs/curator/<run>/run.json` + `REPORT.md`), in the process that ran the pass. Return ignored. | `run_dir`, `run_json_path`, `report_md_path`, `dry_run` | Local filesystem paths; the report names skills. |
 | `agent_loop_stopped` | Observer | Immediately after a real running agent is interrupted — gateway `_interrupt_and_clear_session` or TUI/desktop `session.interrupt`; return ignored. | `session_key`, `platform`, `reason`, `invalidation_reason` | Session/routing identifiers and interruption reasons; no message body. |
 | `on_skill_lifecycle` | Observer | After an authoritative skill-usage state change; return ignored. | `action`, `skill_name`, `provenance`, `task_id`, `session_id`, `use_count`, `reused`, `reuse_after_patch` | Exposes the local skill name and provenance. |
 | `subagent_start` | Observer | Child constructed and about to run; return ignored. | `parent_session_id`, `parent_turn_id`, `parent_subagent_id`, `child_session_id`, `child_subagent_id`, `child_role`, `child_goal` | Child goal may contain user/project content. |
 | `subagent_stop` | Observer | Child exit; return ignored. | `parent_session_id`, `parent_turn_id`, `child_session_id`, `child_role`, `child_summary`, `child_status`, `tool_call_history`, `duration_ms` | Summary and redacted tool-history metadata may reveal project structure. |
-| `pre_gateway_dispatch` | Directive/control | Once per incoming non-internal message, at ingress: platform-adapter messages before auth/pairing/dispatch; webhook and relay deliveries after their authorization, before the admission commits; never for local CLI/TUI/Desktop or API turns, a retry of a committed delivery, or a queued admission when it executes. First valid `skip`, `rewrite`, or `allow` controls flow. | `event`, `gateway`, `session_store` | Extremely privileged in-process objects expose inbound user/routing data and host handles. |
+| `pre_gateway_dispatch` | Directive/control | Once per incoming non-internal message, at ingress: platform-adapter messages before auth/pairing/dispatch; webhook and relay deliveries after their authorization, before the admission commits; never for local CLI/Desktop or API turns, a retry of a committed delivery, or a queued admission when it executes. First valid `skip`, `rewrite`, or `allow` controls flow. | `event`, `gateway`, `session_store` | Extremely privileged in-process objects expose inbound user/routing data and host handles. |
 | `post_gateway_admission` | Directive/control (fail-open) | Admitted non-internal message after auth, pause/drain, pending-reply, running-session and slash-command lanes, inside the claimed session slot and the routed profile's scope; first `handled` result skips the agent turn, anything else (including a raise or timeout) runs it. | `session_key`, `platform`, `source` (dict snapshot), `message_id`, `text` | Inbound text is untrusted user data; no runner or session-store handles are passed. |
 | `gateway_platform_event` | Observer | After the gateway's profile-scoped authorization succeeds, when a supported platform-native event is normalized at the gateway boundary (Telegram: reactions, message edits; Discord: message edits/deletes, thread created/renamed); return ignored. | `platform`, `event_type`, `payload` (event-type-specific dict — see the per-event contracts below) | Normalized plain-dict envelope only; raw SDK objects, adapter handles, and bot clients are never exposed. |
 | `pre_command` | Observer | Recognized slash command about to be dispatched, before the handler runs, on CLI and gateway cold-path dispatch; return ignored in v1 (directive-shaped dicts are logged at debug). A command the classic CLI, TUI or Desktop sends to the gateway through `slash.exec` or `command.dispatch` fires it once, in the gateway, with `surface` and `platform` both `"cli"` as before (Ink and Desktop fired it through the CLI slash worker) and `session_key` the session id. A recognized command the classic CLI runs itself is reported to the gateway (`command.observe`) once it has run, and so are these TUI commands: `/help`, `/history`, `/clear`, `/new`, `/tools` (not `enable`/`disable`), `/usage` and `/reasoning` (a level once the gateway accepts it). The gateway fires it there after replying, so neither client loads plugin code; a command either client refuses fires nothing. This is a deliberate change from the classic CLI before the unified gateway, which fired it for every recognized command just before dispatch: now a command fires it only if it runs, so one that is refused or that the client has no handler for (`/handoff` in a gateway session, `/start`) fires nothing. A TUI change the gateway applies, such as `/reasoning high`, fires it once the gateway accepts the change, so after the change has taken effect. A gateway older than the client fires no hook for those commands (the classic CLI prints a one-time notice). Known gap: Desktop's own pickers, actions and dedicated RPCs (commands it answers without `slash.exec`) fire nothing yet, and neither do the other commands the TUI answers itself or through a dedicated gateway call, such as `/title`, `/undo`, `/retry`, `/model`, `/compress`, `/branch`, `/save`, `/copy`, `/queue`, `/steer`, `/bg`, `/btw`, `/skin`, `/yolo`, `/busy`, `/fast`, `/verbose`, `/rollback`, `/reload-mcp`, `/quit` and `/reasoning --global`. During a local session's turn every command that still runs fires it except `/stop`, `/approve` and `/deny`; a command that is refused (rejected while busy, or named as unavailable on the gateway) fires nothing. Each callback is timeout-bounded (`plugins.hook_callback_timeout`); each delivery waits on a thread of its own, never a worker shared with other sessions or the event loop's executor. One session's commands reach it in order, and a callback still running for that session (hung) is skipped for its later commands instead of running out of order, without holding up other sessions. Gateway running-agent intercept commands (`/stop`, `/approve` during an active run) are deliberately excluded — control-plane escape hatches must stay outside plugin reach. | `surface` (`"cli"` \| `"gateway"`), `command` (canonical name), `alias_used`, `args_raw`, `session_key`, `platform` | `args_raw` may contain user content or secrets typed after the command. |
 | `pre_approval_request` | Observer | Before prompted or smart approval; return ignored. | `command`, `description`, `pattern_key`, `pattern_keys`, `session_key`, `surface`, `turn_id`, `tool_call_id` | Command may contain secrets; smart observer preparation force-redacts, but surfaces do not all have identical redaction. |
 | `post_approval_response` | Observer | After a decision, timeout, or gateway notification failure; return ignored. | `command`, `description`, `pattern_key`, `pattern_keys`, `session_key`, `surface`, `turn_id`, `tool_call_id`, `choice`; smart path may add `decided_by` | Same command sensitivity plus decision metadata. |
-| `on_human_input_request` | Observer | The agent is about to block on a person — sudo password prompt, `clarify` question, or dangerous-command approval — on CLI, Ink TUI/Desktop, ACP and gateway platforms; return ignored. | `kind` (`"sudo"` \| `"clarify"` \| `"approval"`), `request_id`, `session_id`, `session_key`, `platform`, `prompt` | `prompt` is always force-redacted; the typed password or answer is never passed. |
+| `on_human_input_request` | Observer | The agent is about to block on a person — sudo password prompt, `clarify` question, or dangerous-command approval — on CLI, Ink Desktop, ACP and gateway platforms; return ignored. | `kind` (`"sudo"` \| `"clarify"` \| `"approval"`), `request_id`, `session_id`, `session_key`, `platform`, `prompt` | `prompt` is always force-redacted; the typed password or answer is never passed. |
 | `on_human_input_resolved` | Observer | Exactly once per `on_human_input_request`, when the wait ends (answered, skipped, timed out, withdrawn, or failed); return ignored. | Same as the request plus `outcome` | Outcome only — never the answer itself. |
 | `on_room_member_activity` | Observer | While a hosted Group Chat member turn runs on the Bot Mode gateway, once per runtime event the member session emits (tool start/complete, approval request, message/reasoning deltas, errors); queued per consumer off the token path; return ignored. | `room_id`, `thread_id`, `member_id`, `turn_id`, `task_id`, `execution_generation`, `kind`, `seq`, `payload` | `payload` is the client-safe session event body: tool args and results, redacted approval commands, streamed member text. |
 | `kanban_task_claimed` | Observer | After claim commit, in dispatcher process before worker spawn; return ignored. | `task_id`, `profile_name`, `board`, `assignee`, `run_id` | Board/task/profile/assignee identifiers. |
@@ -503,7 +518,7 @@ Payload fields below are the exact event-specific fields supplied by each call s
 
 ---
 
-### Streaming output hooks
+### Streaming output hooks {#streaming-output-hooks}
 
 These observer-only hooks let plugins consume streaming LLM output for telemetry, live dashboards, or TTS pipelines without changing the response. They are delivered through host-owned bounded queues with one background worker per registered callback, so plugin callbacks never run inline on the token path. If one callback stalls, only that callback's queue can fill and drop its oldest pending observer event; other observers continue receiving events independently.
 
@@ -524,7 +539,7 @@ Common fields for all four hooks:
 |-----------|------|-------------|
 | `turn_id` | `str` | Opaque turn identifier, when available |
 | `iteration` | `int` | Current API-call/tool-loop iteration |
-| `session_id` | `str` | Current Hermes session id |
+| `session_id` | `str` | Current {{app-name}} session id |
 | `model` | `str` | Active model identifier |
 | `provider` | `str` | Active provider name |
 | `surface` | `str` | Calling surface, e.g. `cli`, `discord`, `telegram` |
@@ -551,7 +566,7 @@ Return values are ignored. To keep the stream fast, callbacks should enqueue the
 
 ---
 
-### `pre_tool_call`
+### `pre_tool_call` {#pre_tool_call}
 
 Fires **immediately before** every tool execution — built-in tools and plugin tools alike.
 
@@ -595,7 +610,7 @@ Shell hooks also accept the Claude Code-compatible format:
 
 Both formats are normalized internally to `{"action": "modify", "args": {...}}`.
 
-If a `pre_tool_call` callback exceeds `plugins.hook_callback_timeout` (or is still running from a previous timed-out fire), Hermes **fails closed**: the tool is blocked with a timeout message rather than proceeding without a policy decision. The same applies to a callback that raises: the block message names the callback and the error. A hung callback is skipped for a 60s suppression window; after that a new tool call runs it again (up to three abandoned workers per callback, so a permanently hung plugin blocks tool calls with a warning naming it instead of silently wedging the agent until restart).
+If a `pre_tool_call` callback exceeds `plugins.hook_callback_timeout` (or is still running from a previous timed-out fire), {{app-name}} **fails closed**: the tool is blocked with a timeout message rather than proceeding without a policy decision. The same applies to a callback that raises: the block message names the callback and the error. A hung callback is skipped for a 60s suppression window; after that a new tool call runs it again (up to three abandoned workers per callback, so a permanently hung plugin blocks tool calls with a warning naming it instead of silently wedging the agent until restart).
 
 **Use cases:** Logging, audit trails, tool call counters, blocking dangerous operations, rate limiting, per-user policy enforcement, argument sanitization, path rewriting, injecting default parameters.
 
@@ -630,7 +645,7 @@ def register(ctx):
 
 ---
 
-### `post_tool_call`
+### `post_tool_call` {#post_tool_call}
 
 Fires **immediately after** every tool execution returns.
 
@@ -681,7 +696,7 @@ def register(ctx):
 
 ---
 
-### `pre_llm_call`
+### `pre_llm_call` {#pre_llm_call}
 
 Fires **once per turn**, before the tool-calling loop begins. All valid callback returns are aggregated in plugin order and injected into the current turn's user message.
 
@@ -722,9 +737,9 @@ return "Recalled memories:\n- User likes Python"
 return None
 ```
 
-**Where context is injected:** Always the **user message**, never the system prompt. This preserves the prompt cache — the system prompt stays identical across turns, so cached tokens are reused. The system prompt is Hermes's territory (model guidance, tool enforcement, personality, skills). Plugins contribute context alongside the user's input.
+**Where context is injected:** Always the **user message**, never the system prompt. This preserves the prompt cache — the system prompt stays identical across turns, so cached tokens are reused. The system prompt is {{app-name}}'s territory (model guidance, tool enforcement, personality, skills). Plugins contribute context alongside the user's input.
 
-The clean user-message `content` remains unchanged. For replay and prompt-cache stability, Hermes may persist the exact API-bound message, including plugin-injected context, in the row's `api_content` sidecar.
+The clean user-message `content` remains unchanged. For replay and prompt-cache stability, {{app-name}} may persist the exact API-bound message, including plugin-injected context, in the row's `api_content` sidecar.
 
 On a **multimodal turn** (the user message is a list of content parts — an image attachment, or text sent as parts) there is no string sidecar: the joined context is appended to that turn's content as one extra `{"type": "text"}` part, before the first request, and the part is persisted with the turn so a resumed session, compaction and replay all see the same message the model saw. Earlier messages and the system prompt are never touched.
 
@@ -771,7 +786,7 @@ def register(ctx):
 
 ---
 
-### `post_llm_call`
+### `post_llm_call` {#post_llm_call}
 
 Fires **once per turn**, after the tool-calling loop completes and the agent has produced a final response. Only fires on **successful** turns — does not fire if the turn was interrupted.
 
@@ -835,11 +850,11 @@ def register(ctx):
 
 ---
 
-### `pre_verify`
+### `pre_verify` {#pre_verify}
 
 Fires **once per turn when the agent edited code**, just before it finishes (after the built-in verify-on-stop guard). This is a user/plugin policy gate: a callback can keep the agent going — run a check, defer it, tidy the diff — instead of letting it stop.
 
-Hermes' shipped verification guidance is not a default `pre_verify` hook. It is appended to the evidence-based verify-on-stop nudge when edited code lacks fresh verification evidence, so it does not create a second default continuation path. Set `agent.verify_guidance: false` to keep that built-in evidence nudge terse.
+{{app-name}}' shipped verification guidance is not a default `pre_verify` hook. It is appended to the evidence-based verify-on-stop nudge when edited code lacks fresh verification evidence, so it does not create a second default continuation path. Set `agent.verify_guidance: false` to keep that built-in evidence nudge terse.
 
 **Callback signature:**
 
@@ -900,7 +915,7 @@ For standing guidance that should shape the built-in missing-evidence nudge, use
 
 ---
 
-### `transform_api_error_classification`
+### `transform_api_error_classification` {#transform_api_error_classification}
 
 Fires once per failed API call, at the top of `agent/error_classifier.classify_api_error()`, before the built-in pipeline. Provider plugins use it to own their provider's error quirks without core patches. It is behavior-changing (transform family): the returned classification drives retry, compression, credential rotation, and fallback routing.
 
@@ -917,7 +932,7 @@ Dispatch is run-all-then-pick-first: every callback runs, failures are isolated,
 
 ---
 
-### `on_session_start`
+### `on_session_start` {#on_session_start}
 
 Fires **once** when a brand-new session is created. Does **not** fire on session continuation (when the user sends a second message in an existing session).
 
@@ -958,9 +973,9 @@ def register(ctx):
 
 ---
 
-### `on_session_open`
+### `on_session_open` {#on_session_open}
 
-Fires when a client **creates or opens** a local session: a new chat in `hermes`, the TUI or Desktop, or `hermes --resume` / the session picker reopening a stored one. Use it to get ready for a conversation before the model sees it, for example a memory plugin pre-loading recent context or a status bar showing the session as open. Distinct from [`on_session_start`](#on_session_start), which fires during the first agent turn and never on a reopen.
+Fires when a client **creates or opens** a local session: a new chat in `hermes`, the TUI or Desktop, or `noone --resume` / the session picker reopening a stored one. Use it to get ready for a conversation before the model sees it, for example a memory plugin pre-loading recent context or a status bar showing the session as open. Distinct from [`on_session_start`](#on_session_start), which fires during the first agent turn and never on a reopen.
 
 **Callback signature:**
 
@@ -990,7 +1005,7 @@ def register(ctx):
 
 ---
 
-### `on_session_end`
+### `on_session_end` {#on_session_end}
 
 Fires at the **very end** of every `run_conversation()` call, regardless of outcome. Also fires from the CLI's exit handler if the agent was mid-turn when the user quit.
 
@@ -1058,7 +1073,7 @@ def register(ctx):
 
 ---
 
-### `on_session_finalize`
+### `on_session_finalize` {#on_session_finalize}
 
 Fires when the CLI or gateway **tears down** an active session — for example, when the user runs `/new` or the CLI quits with an active agent. Resource-only idle cache eviction does not finalize the durable conversation. Use it to flush state tied to the outgoing session ID. On gateway reset, the replacement session already exists before this callback runs.
 
@@ -1073,20 +1088,19 @@ def my_callback(session_id: str | None, platform: str, **kwargs):
 | `session_id` | `str` or `None` | The outgoing session ID. May be `None` if no active session existed. |
 | `platform` | `str` | `"cli"` or the messaging platform name (`"telegram"`, `"discord"`, etc.). |
 
-**Fires:** In CLI/TUI teardown (including the end of a `hermes -z` one-shot run, success or failure) and in gateway reset or shutdown paths. Gateway shutdown can finalize without a matching `on_session_reset`.
+**Fires:** In CLI teardown (including the end of a `noone -z` one-shot run, success or failure) and in gateway reset or shutdown paths. Gateway shutdown can finalize without a matching `on_session_reset`.
 
-**Return value — show the user a message:** return a non-empty `str`, or a dict with a `"message"` string, and Hermes shows it to the user as a notice. It never becomes a model turn and never edits the assistant's reply. Return `None` to show nothing. Where it appears:
+**Return value — show the user a message:** return a non-empty `str`, or a dict with a `"message"` string, and {{app-name}} shows it to the user as a notice. It never becomes a model turn and never edits the assistant's reply. Return `None` to show nothing. Where it appears:
 
 | Surface | Shown as |
 |---------|---------|
 | CLI `/new` | Printed in the terminal before the new session starts. |
-| CLI quit | Printed above the exit summary (`hermes --resume …`). |
-| `hermes chat -q` / `-z` one-shot | Printed to **stderr**, so stdout still holds only the answer. |
-| TUI `/new` | A system line in the fresh session's transcript. |
+| CLI quit | Printed above the exit summary (`noone --resume …`). |
+| `noone chat -q` / `-z` one-shot | Printed to **stderr**, so stdout still holds only the answer. |
 | Messaging gateway `/new` or `/reset` | Sent to the chat that owned the session, as its own message. |
 | Gateway shutdown / restart | Sent to each active chat before the adapters disconnect. |
 
-It is not delivered when nobody is there to see it: idle-expiry and cache eviction in the gateway, quitting the TUI, TUI/Desktop sessions closed by the reaper or a disconnect, and Desktop new-chat or chat delete. It is also not delivered from cron jobs, which don't finalize sessions. In those cases the message is dropped and the hook still runs.
+It is not delivered when nobody is there to see it: idle-expiry and cache eviction in the gateway, quitting the TUI, Desktop sessions closed by the reaper or a disconnect, and Desktop new-chat or chat delete. It is also not delivered from cron jobs, which don't finalize sessions. In those cases the message is dropped and the hook still runs.
 
 ```python
 def digest(session_id, **kwargs):
@@ -1102,7 +1116,7 @@ def register(ctx):
 
 ---
 
-### `on_session_reset`
+### `on_session_reset` {#on_session_reset}
 
 Fires at a CLI or TUI session boundary, or when the gateway **swaps in a new session key** for an active chat. This lets plugins react to cleared conversation state without waiting for the next `on_session_start`.
 
@@ -1128,9 +1142,9 @@ def my_callback(session_id: str, platform: str, **kwargs):
 
 ---
 
-### `on_session_delete`
+### `on_session_delete` {#on_session_delete}
 
-Fires **once per operation, after the transaction commits**, when a session actually went away: deleted (single, bulk, the empty-session sweep, retention prune, ghost-prune maintenance, profile repair) or deliberately archived. Every surface ends in the same `SessionDB` methods, so CLI (`hermes sessions delete|prune|archive`, `/exit --delete`), TUI, Desktop/dashboard (single and bulk delete, archive) and the gateway API server are all covered. Plugins that keep per-session state on disk can clean up without polling the session store.
+Fires **once per operation, after the transaction commits**, when a session actually went away: deleted (single, bulk, the empty-session sweep, retention prune, ghost-prune maintenance, profile repair) or deliberately archived. Every surface ends in the same `SessionDB` methods, so CLI (`noone sessions delete|prune|archive`, `/exit --delete`), TUI, Desktop/dashboard (single and bulk delete, archive) and the gateway API server are all covered. Plugins that keep per-session state on disk can clean up without polling the session store.
 
 **Callback signature:**
 
@@ -1160,7 +1174,7 @@ See the **[Build a Plugin guide](../../developer-guide/plugins/index.md)** for t
 
 ---
 
-### `post_compaction`
+### `post_compaction` {#post_compaction}
 
 Fires once after a compaction **committed**, so plugins (memory providers, context engines, external knowledge stores) can tell that detail they injected earlier was just summarized away and re-inject it, typically from their next `pre_llm_call`.
 
@@ -1185,7 +1199,7 @@ def my_callback(session_id: str, kind: str, reason: str, **kwargs):
 
 **Use cases:** Re-inject session context after compaction, refresh an external index, count compactions.
 
-### `post_curator_run`
+### `post_curator_run` {#post_curator_run}
 
 Fires once after a curator pass has written its per-run report directory, so a plugin or shell hook can react to what the curator changed (route new skills to another profile, override an archival, write an audit log) instead of polling `logs/curator/`.
 
@@ -1206,7 +1220,7 @@ def my_callback(run_dir: str, run_json_path: str, report_md_path: str, dry_run: 
 
 **Return value:** Ignored. A callback that raises is logged and skipped; the curator pass is unaffected.
 
-### `agent_loop_stopped`
+### `agent_loop_stopped` {#agent_loop_stopped}
 
 Fires when the gateway **interrupts a running agent turn** — the user ran `/stop` while the loop was working, or the running-agent fast-path inside `/new` cleared the in-flight run before swapping the session. Unlike `on_session_finalize`, this fires earlier, while a turn is mid-flight, so plugins can drop per-turn external resources the agent loop will never consume (e.g. an outbound RPC that was waiting for a tool result).
 
@@ -1233,7 +1247,7 @@ def my_callback(session_key: str, platform: str, reason: str, invalidation_reaso
 
 ---
 
-### `subagent_start`
+### `subagent_start` {#subagent_start}
 
 Fires **once per child agent** after `delegate_task` has constructed the child `AIAgent` and before that child is run. Whether you delegate a single task or a batch of three, this hook fires once for each child.
 
@@ -1298,13 +1312,21 @@ def register(ctx):
     ctx.register_hook("subagent_start", log_subagent_start)
 ```
 
-:::info
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
 `subagent_start` is useful for delegation observability, but it is not a blocking policy hook. To block delegation before a child is built, use [`pre_tool_call`](#pre_tool_call) to block the `delegate_task` tool call.
-:::
+
+</Info>
 
 ---
 
-### `subagent_stop`
+### `subagent_stop` {#subagent_stop}
 
 Fires **once per child agent** after `delegate_task` finishes. Whether you delegated a single task or a batch of three, this hook fires once for each child. Dispatch is serialised on the parent thread after child futures drain, and each Python callback body runs on that same caller thread (not on a timeout worker).
 
@@ -1347,13 +1369,21 @@ def register(ctx):
     ctx.register_hook("subagent_stop", log_subagent)
 ```
 
-:::info
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
 With heavy delegation (e.g. orchestrator roles × 5 leaves × nested depth), `subagent_stop` fires many times per turn. Keep your callback fast; push expensive work to a background queue.
-:::
+
+</Info>
 
 ---
 
-### `pre_gateway_dispatch`
+### `pre_gateway_dispatch` {#pre_gateway_dispatch}
 
 Fires **once per incoming `MessageEvent`** in the gateway, at ingress, after the internal-event guard and before the message is admitted or dispatched. Where it runs relative to authorization depends on how the message arrived (see **Fires** below). This is the interception point for gateway-level message-flow policies (listen-only windows, human handover, per-chat routing, etc.) that don't fit cleanly into any single platform adapter.
 
@@ -1375,7 +1405,7 @@ def my_callback(event, gateway, session_store, **kwargs):
 |------|--------------------|
 | Platform adapters (Telegram, Discord, Slack, …) and relay slash commands | In `GatewayRunner._handle_message()` (`_hm_admit_event` in `gateway/run_inbound.py`), **before** auth/pairing, so a plugin can handle unauthorized senders. |
 | Webhook deliveries and relay messages | In `admit_producer` (`gateway/platforms/webhook_ingress.py`), **after** the delivery's authorization and **before** its admission commits: a refused sender never reaches the hook, a skipped delivery is never admitted, and a rewrite is what gets admitted. A provider retry or relay re-send of a delivery that was already admitted resolves to that admission without calling the hook again. On the relay, admission with a registered hook runs off the relay socket reader, so a callback may await `gateway.adapters[...].send(...)`; one chat's messages still wait for each other, in arrival order. |
-| Local CLI, TUI, Desktop and API-server turns | Never. |
+| Local CLI, Desktop and API-server turns | Never. |
 | A queued admission when it executes (first run or restart replay) | Never: the message already passed the hook at ingress, so a `skip` can't drop admitted input. |
 
 **Return value:** `None` or a dict. The first recognized action dict wins; remaining plugin results are ignored. Exceptions in plugin callbacks are caught and logged; the gateway always falls through to normal dispatch on error.
@@ -1424,7 +1454,7 @@ def register(ctx):
 
 ---
 
-### `post_gateway_admission`
+### `post_gateway_admission` {#post_gateway_admission}
 
 Fires **once per admitted, non-internal message** in the gateway, after authorization, bot admission, pause/drain, pending-reply intercepts (clarify, confirmations), the running-session lane (steering, busy commands) and idle slash-command dispatch. Rejected, ignored, internal and control traffic never reaches it. It runs inside the claimed session slot, so concurrent messages for the same chat queue behind it, and under the message's **routed profile** scope: only that profile's plugins run.
 
@@ -1445,7 +1475,7 @@ def register(ctx):
 
 ---
 
-### `gateway_platform_event`
+### `gateway_platform_event` {#gateway_platform_event}
 
 Fires for supported platform-native events only **after** the gateway's normal, profile-scoped authorization check succeeds. The callback receives plain dictionaries; raw SDK objects, adapter handles, bot clients, and callback contexts are never part of this stable contract.
 
@@ -1486,7 +1516,7 @@ This hook is observer-only: it does **not** add raw-event access or adapter acce
 
 ---
 
-### `pre_approval_request`
+### `pre_approval_request` {#pre_approval_request}
 
 Fires before an approval decision is requested. It covers prompted surfaces—interactive CLI, Ink TUI, gateway platforms, and ACP clients—including protected agent-instruction write prompts and MCP/vault consent prompts, plus `approvals.mode=smart` decisions made without a human prompt (`surface="smart"`). In smart mode, the hook runs before the auxiliary LLM is called.
 
@@ -1538,7 +1568,7 @@ def register(ctx):
 
 ---
 
-### `post_approval_response`
+### `post_approval_response` {#post_approval_response}
 
 Fires after a prompted or smart approval decision, after a prompt times out or is withdrawn (turn interrupted or ended before an answer), or when the gateway cannot deliver the approval notification. Notification failure emits `choice="notify_failed"` before any approval decision exists.
 
@@ -1578,9 +1608,9 @@ def register(ctx):
 
 ---
 
-### `on_human_input_request`
+### `on_human_input_request` {#on_human_input_request}
 
-Fires right before Hermes blocks waiting for a person to type or click something, whatever the prompt is and wherever it shows up. One hook pair covers every blocking prompt, so a notifier ("Hermes is waiting on you") does not have to subscribe to a separate hook per prompt type or pattern-match tool arguments:
+Fires right before {{app-name}} blocks waiting for a person to type or click something, whatever the prompt is and wherever it shows up. One hook pair covers every blocking prompt, so a notifier ("{{app-name}} is waiting on you") does not have to subscribe to a separate hook per prompt type or pattern-match tool arguments:
 
 | `kind` | Prompt | Surfaces |
 |--------|--------|----------|
@@ -1601,14 +1631,14 @@ def my_callback(kind: str, request_id: str, session_id: str, session_key: str,
 |-----------|------|-------------|
 | `kind` | `str` | `"sudo"`, `"clarify"` or `"approval"` |
 | `request_id` | `str` | Unique per prompt; the matching `on_human_input_resolved` carries the same value |
-| `session_id` | `str` | Hermes session id when known, else `""` |
+| `session_id` | `str` | {{app-name}} session id when known, else `""` |
 | `session_key` | `str` | Session/chat routing key, useful for scoping notifications per chat |
 | `platform` | `str` | Gateway platform (`"telegram"`, `"discord"`, ...) or local source (`"cli"`, `"tui"`, `"desktop"`, ...) |
 | `prompt` | `str` | What the person is asked about: the command for `sudo`/`approval`, the question text for `clarify`. Always redacted with the secret redactor, even when `security.redact_secrets` is off |
 
 The sudo password and clarify answers are **never** passed to either hook. **Return value:** ignored; a raising callback is logged and the prompt proceeds. Callbacks run on the thread that is about to block, so keep them fast — hand network calls (push services, webhooks) to a background thread.
 
-### `on_human_input_resolved`
+### `on_human_input_resolved` {#on_human_input_resolved}
 
 Fires exactly once for every `on_human_input_request`, after the wait ends. Same kwargs plus `outcome`:
 
@@ -1642,9 +1672,9 @@ def register(ctx):
 
 ---
 
-### `on_room_member_activity`
+### `on_room_member_activity` {#on_room_member_activity}
 
-Fires while a hosted [Group Chat](../bot-mode.md#groups-and-group-chats) member turn runs. A member executes on a hidden `Group: <room>` session that no client is attached to, so between the room log's `turn.started` and `turn.settled` the turn is a black box. This hook projects the runtime events that session already produces — tool start/complete, approval requests, streamed text and reasoning, errors — stamped with the room coordinates, so a client (Hermes Crew, a dashboard, an audit log) can render tool cards, approval prompts and live member status without inferring anything from text. The Group Chat runtime keeps ownership of execution, scheduling and the durable log; plugins only observe.
+Fires while a hosted [Group Chat](../bot-mode.md#groups-and-group-chats) member turn runs. A member executes on a hidden `Group: <room>` session that no client is attached to, so between the room log's `turn.started` and `turn.settled` the turn is a black box. This hook projects the runtime events that session already produces — tool start/complete, approval requests, streamed text and reasoning, errors — stamped with the room coordinates, so a client ({{app-name}} Crew, a dashboard, an audit log) can render tool cards, approval prompts and live member status without inferring anything from text. The Group Chat runtime keeps ownership of execution, scheduling and the durable log; plugins only observe.
 
 **Callback signature:**
 
@@ -1687,7 +1717,7 @@ def register(ctx):
 
 ---
 
-### `pre_transcription`
+### `pre_transcription` {#pre_transcription}
 
 Fires inside the STT dispatcher (`tools.transcription_tools.transcribe_audio`) **after** the provider has been resolved and **before** any backend is invoked, whether that backend is built-in, a `type: command` provider, or a plugin-registered provider. Lets a plugin steer the transcription request itself instead of only observing the transcript afterwards.
 
@@ -1719,7 +1749,7 @@ def my_callback(
 **Use cases:** Inject a per-user or per-chat vocabulary list before the audio is uploaded, force `language` from the caller's locale, downgrade `model` for long recordings, route noisy sources to a different model.
 
 ```python
-VOCAB = "Hermes, Teknium, Nous Research, kanban"
+VOCAB = "Hermes, RAWx18, Garudex Labs, kanban"
 
 def add_vocab(provider, prompt, source, **kwargs):
     if source != "gateway":
@@ -1734,7 +1764,7 @@ Not every backend accepts a prompt. `local` maps it to faster-whisper's `initial
 
 ---
 
-### `transform_tool_result`
+### `transform_tool_result` {#transform_tool_result}
 
 Fires **after** a tool returns and **before** the result is appended to the conversation. Lets a plugin rewrite ANY tool's result string — not just terminal output — before the model sees it.
 
@@ -1767,7 +1797,7 @@ Applies to every tool. For terminal-only rewriting see `transform_terminal_outpu
 
 ---
 
-### `transform_terminal_output`
+### `transform_terminal_output` {#transform_terminal_output}
 
 Fires inside the `terminal` tool after foreground process capture has already been bounded by the environment, and before the final output limit. It lets plugins replace the captured stdout/stderr; the replacement is still subject to the final output limit.
 
@@ -1812,9 +1842,9 @@ Pairs with `transform_tool_result`, which runs afterward for every tool, includi
 
 ---
 
-### `transform_llm_output`
+### `transform_llm_output` {#transform_llm_output}
 
-Fires **once per turn** after the tool-calling loop completes and the model has produced a final response, **before** that response is delivered to the user (CLI, gateway, or programmatic caller) and **before** the assistant row is persisted — the replacement is what the session stores, what `/resume` shows and what the next turn replays, so the transcript never diverges from what the user saw. Hermes' own trailers (the file-mutation warning, the abnormal-exit note) are appended afterwards and are not part of `response_text`. Lets a plugin rewrite the assistant's final text using classical-programming methods — no extra inference tokens burned on SOUL flavor text or a skill-driven transform.
+Fires **once per turn** after the tool-calling loop completes and the model has produced a final response, **before** that response is delivered to the user (CLI, gateway, or programmatic caller) and **before** the assistant row is persisted — the replacement is what the session stores, what `/resume` shows and what the next turn replays, so the transcript never diverges from what the user saw. {{app-name}}' own trailers (the file-mutation warning, the abnormal-exit note) are appended afterwards and are not part of `response_text`. Lets a plugin rewrite the assistant's final text using classical-programming methods — no extra inference tokens burned on SOUL flavor text or a skill-driven transform.
 
 **Callback signature:**
 
@@ -1874,14 +1904,14 @@ While a plugin loaded in a profile holds the stream, that profile's sessions sho
 
 | Surface | While the reply is held | When the turn ends |
 |---|---|---|
-| Messaging (Telegram, Discord, Slack, Matrix, …) | The platform's typing indicator; no draft, edit or native stream message | The rewrite is sent once as a normal message (a long one splits like any reply) |
+| Messaging (Telegram, Discord, Slack, …) | The platform's typing indicator; no draft, edit or native stream message | The rewrite is sent once as a normal message (a long one splits like any reply) |
 | Slack over Relay | Typing indicator; no `chat.*Stream` message | The rewrite, sent once |
 | TUI, desktop app, classic CLI, ACP editors | The usual busy/thinking indicator; no reply text | The rewrite, shown once |
 | API server (`/v1/chat/completions`, `/v1/responses`, streaming) | The response stream is open with no text | The rewrite is the response's only text |
 
 What else is held:
 
-- **Commentary** (model text sent between tool calls, `display.interim_assistant_messages`) never passes through `transform_llm_output`, so a held turn drops it. It stays in the model's context but is stored hidden, so resuming or reopening the session (TUI, desktop app, dashboard, classic CLI) does not show it either. The same goes for every other model text the user never got: an answer Hermes sent back for another try (late language-server errors, verify-on-stop), a reply cut by the output limit before its continuation, a call to an unknown tool.
+- **Commentary** (model text sent between tool calls, `display.interim_assistant_messages`) never passes through `transform_llm_output`, so a held turn drops it. It stays in the model's context but is stored hidden, so resuming or reopening the session (TUI, desktop app, dashboard, classic CLI) does not show it either. The same goes for every other model text the user never got: an answer {{app-name}} sent back for another try (late language-server errors, verify-on-stop), a reply cut by the output limit before its continuation, a call to an unknown tool.
 - **Every way a turn ends passes through the hook.** A reply cut by the output limit on every continuation, an iteration-budget summary, a provider or compression error, an interrupt: whatever text the turn ends with reaches the user only after `transform_llm_output` saw it, and model text is stored as the rewrite.
 - **A failing hook withholds the reply.** If no hook rewrote the reply and one raised or timed out, the user gets a short "reply withheld" notice, never the original.
 - **The hook set is fixed for the turn.** A held turn runs the `transform_llm_output` hooks that were loaded when it started, even if plugins are re-discovered mid-turn.
@@ -1889,47 +1919,47 @@ What else is held:
 
 `hold_stream` applies to `transform_llm_output` only; on any other hook it is ignored with a warning. Plugins that register `transform_llm_output` without it keep normal streaming.
 
-### API-request observer hooks
+### API-request observer hooks {#api-request-observer-hooks}
 
-#### `pre_api_request`
+#### `pre_api_request` {#pre_api_request}
 
 Fires for each provider attempt immediately before sending it. This is observer-only. The legacy `user_message`, `conversation_history`, and `request_messages` fields are raw and intentionally unsanitized for compatibility; new consumers should prefer the sanitized `request` envelope.
 
-#### `post_api_request`
+#### `post_api_request` {#post_api_request}
 
 Fires after a provider response has been normalized successfully. This is observer-only. Prefer the sanitized `response`; `assistant_message` is the raw normalized message, and `usage` contains accounting data.
 
-#### `api_request_error`
+#### `api_request_error` {#api_request_error}
 
 Fires for a failed provider attempt with status/retry timing, an `error` object, and sanitized `request`. This is observer-only. Error messages may still contain provider or user data.
 
-### Auxiliary-call observer hooks
+### Auxiliary-call observer hooks {#auxiliary-call-observer-hooks}
 
-#### `pre_auxiliary_call` / `post_auxiliary_call`
+#### `pre_auxiliary_call` / `post_auxiliary_call` {#pre_auxiliary_call--post_auxiliary_call}
 
 Auxiliary LLM calls — session titling, context compression, MoA advisors and the aggregator, vision, approval classification, memory and other side tasks — run outside the main tool-calling loop and do **not** fire `pre_api_request` / `post_api_request` (those stay turn-scoped, so a trace-per-turn plugin never sees side traffic by accident). Subscribe to `pre_auxiliary_call` / `post_auxiliary_call` instead: they fire once per physical provider attempt (retries and fallbacks included) with the same payload shape plus `aux_task` (the task name, e.g. `title_generation`, `compression`, `moa_aggregator`, `vision`, `plugin_side_question` for a plugin's [`ctx.side_question`](../../developer-guide/plugin-llm-access.md#asking-the-sessions-own-agent-ctxside_question), which also carries the asking plugin's `plugin_id`). `session_id` / `task_id` / `turn_id` are the parent turn's when the call runs under one, empty otherwise; `api_request_id` (`aux-…`) is shared by every attempt of one logical call and `retry_count` distinguishes them. Both are observer-only and fail-open: a raising or timed-out callback is logged and the auxiliary task proceeds. `post_auxiliary_call` carries `error` / `error_type` when the attempt raised and `streaming: True` (with `usage`/`response` `None`) when the response is handed back as a stream.
 
-### `on_skill_lifecycle`
+### `on_skill_lifecycle` {#on_skill_lifecycle}
 
 Fires after an authoritative skill-usage state change. It is observer-only and exposes the local `skill_name`, provenance, correlation IDs, usage count, and reuse flags.
 
-### Kanban lifecycle observers
+### Kanban lifecycle observers {#kanban-lifecycle-observers}
 
-#### `kanban_task_claimed`
+#### `kanban_task_claimed` {#kanban_task_claimed}
 
 Fires after the claim commit in the dispatcher process, immediately before worker spawn.
 
-#### `kanban_task_completed`
+#### `kanban_task_completed` {#kanban_task_completed}
 
 Fires after completion and cleanup, usually in the worker process. Its `summary` can contain project or user content.
 
-#### `kanban_task_blocked`
+#### `kanban_task_blocked` {#kanban_task_blocked}
 
 Fires after a blocked transition commits, dependency waits included, so the callback can read and write the board. Its `reason` can contain project or user content.
 
 All three kanban hooks are observer-only and carry `task_id`, `profile_name`, `board`, `assignee`, and `run_id`; completed adds `summary`, and blocked adds `reason`.
 
-### Kanban worker-lifecycle, task-mutation, and dispatch observers
+### Kanban worker-lifecycle, task-mutation, and dispatch observers {#kanban-worker-lifecycle-task-mutation-and-dispatch-observers}
 
 Five additional observers (RFC #58548) extend the kanban family. All are observer-only, fire after the relevant transaction commits, and short-circuit on `has_hook` — with no subscriber, dispatch behavior is unchanged. Task-scoped hooks carry the same common fields as the hooks above.
 
@@ -1941,9 +1971,9 @@ Five additional observers (RFC #58548) extend the kanban family. All are observe
 
 ---
 
-## Shell Hooks
+## Shell Hooks {#shell-hooks}
 
-Declare shell-script hooks in your profile's `config.yaml` and Hermes will run them as subprocesses whenever the corresponding plugin-hook event fires — in CLI, gateway, Desktop, TUI, and dashboard chat sessions. No Python plugin authoring required.
+Declare shell-script hooks in your profile's `config.yaml` and {{app-name}} will run them as subprocesses whenever the corresponding plugin-hook event fires — in CLI, gateway, Desktop, TUI, and dashboard chat sessions. No Python plugin authoring required.
 
 Desktop, TUI, and dashboard chat register hooks when building an agent, using that session's profile configuration and consent allowlist. Switching profiles does not reuse another profile's hooks. Existing hook consent requirements and safe-mode behavior still apply; unapproved hooks are skipped rather than silently approved.
 
@@ -1954,9 +1984,9 @@ Use shell hooks when you want a drop-in, single-file script (Bash, Python, anyth
 - **Inject context into the next LLM turn** — prepend `git status` output, the current weekday, or retrieved documents to the user message (see [`pre_llm_call`](#pre_llm_call)).
 - **Observe lifecycle events** — write a log line when a subagent completes (`subagent_stop`) or a session starts (`on_session_start`).
 
-Shell hooks are registered by calling `agent.shell_hooks.register_from_config(cfg)` at both CLI startup (`hermes_cli/main.py`) and gateway startup (`gateway/run.py`). They compose naturally with Python plugin hooks — both flow through the same dispatcher.
+Shell hooks are registered by calling `agent.shell_hooks.register_from_config(cfg)` at both CLI startup (`agent_cli/main.py`) and gateway startup (`gateway/run.py`). They compose naturally with Python plugin hooks — both flow through the same dispatcher.
 
-### Comparison at a glance
+### Comparison at a glance {#comparison-at-a-glance}
 
 | Dimension | Shell hooks | [Plugin hooks](#plugin-hooks) | [Gateway hooks](#gateway-event-hooks) |
 |-----------|-------------|-------------------------------|---------------------------------------|
@@ -1970,7 +2000,7 @@ Shell hooks are registered by calling `agent.shell_hooks.register_from_config(cf
 | Consent | First-use prompt per `(event, command)` pair | Explicit (`plugins.enabled`), then in-process trust | Implicit ([dir trust](#gateway-hook-trust)) |
 | Inter-process isolation | Yes (subprocess) | No (in-process) | No (in-process) |
 
-### Configuration schema
+### Configuration schema {#configuration-schema}
 
 ```yaml
 hooks:
@@ -1986,11 +2016,11 @@ hooks_auto_accept: false         # See "Consent model" below
 
 Event names must be one of the [plugin hook events](#plugin-hooks); typos produce a "Did you mean X?" warning and are skipped. Unknown keys inside a single entry are ignored; missing `command` is a skip-with-warning. `timeout > 300` is clamped with a warning. `fail_closed: true` on an event other than `pre_tool_call` warns and is ignored (only blocking-capable events can fail closed).
 
-On Windows, a `command` that starts with an existing script file — the `~/.hermes/agent-hooks/x.sh` shape the examples below use — is spawned through that file's own interpreter (Git Bash for `.sh`/`.bash`, the running Hermes Python for `.py`), because `CreateProcess` has no shebang support and rejects a bare script with `WinError 193`. Every other command, and every POSIX platform, passes `argv` straight to `Popen`, where the kernel already honours the shebang.
+On Windows, a `command` that starts with an existing script file — the `~/.hermes/agent-hooks/x.sh` shape the examples below use — is spawned through that file's own interpreter (Git Bash for `.sh`/`.bash`, the running {{app-name}} Python for `.py`), because `CreateProcess` has no shebang support and rejects a bare script with `WinError 193`. Every other command, and every POSIX platform, passes `argv` straight to `Popen`, where the kernel already honours the shebang.
 
-### JSON wire protocol
+### JSON wire protocol {#json-wire-protocol}
 
-Each time the event fires, Hermes spawns a subprocess for every matching hook (matcher permitting), pipes a JSON payload to **stdin**, and reads **stdout** back as JSON.
+Each time the event fires, {{app-name}} spawns a subprocess for every matching hook (matcher permitting), pipes a JSON payload to **stdin**, and reads **stdout** back as JSON.
 
 **stdin — payload the script receives:**
 
@@ -2006,7 +2036,7 @@ Each time the event fires, Hermes spawns a subprocess for every matching hook (m
 }
 ```
 
-`profile` names the Hermes profile that fired the hook (`"default"` outside profiles), so one
+`profile` names the {{app-name}} profile that fired the hook (`"default"` outside profiles), so one
 script can serve every profile behind a multiplexed gateway; the subprocess also runs with that
 profile's `HERMES_HOME`. `tool_name` and `tool_input` are `null` for non-tool events (`pre_llm_call`, `subagent_stop`, session lifecycle). The `extra` dict carries all event-specific kwargs (`user_message`, `conversation_history`, `child_role`, `duration_ms`, …). Unserialisable values are stringified rather than omitted.
 
@@ -2049,7 +2079,7 @@ The same field is included by the shared outbound-webhook payload builder.
 
 Except for `pre_tool_call` exit code 2 described below, malformed JSON, ordinary non-zero exit codes, and timeouts fail open by default: they log a warning but do not abort the agent loop. A `fail_closed` hook changes the behavior as described below.
 
-### Exit code 2 = block (Claude Code / Cursor compatible)
+### Exit code 2 = block (Claude Code / Cursor compatible) {#exit-code-2--block-claude-code--cursor-compatible}
 
 A `pre_tool_call` hook that exits with code **2** blocks the tool call even when its stdout carries no block JSON. The block message is resolved in priority order:
 
@@ -2067,7 +2097,7 @@ exit 2
 
 For events whose block directive is not honored (everything except `pre_tool_call`), exit 2 is treated like any other non-zero exit: a warning is logged and stdout is still parsed.
 
-### Fail-open vs fail-closed
+### Fail-open vs fail-closed {#fail-open-vs-fail-closed}
 
 By default shell hooks **fail open**: a spawn error, timeout, or unparseable stdout logs a warning and the action proceeds. That is the right default for observability hooks — but wrong for security gates. A crashed secret-scanner must not silently allow the tool call it was supposed to vet.
 
@@ -2094,9 +2124,9 @@ With `fail_closed: true`, each of these now **blocks** the tool call with `hook 
 
 `fail_closed` only applies to blocking-capable events (`pre_tool_call` today); setting it on any other event logs a warning at config-parse time and is ignored. `hermes hooks test` reflects these semantics — the `parsed` line shows exactly the block shape the dispatcher would receive.
 
-### Worked examples
+### Worked examples {#worked-examples}
 
-#### 1. Auto-format Python files after every write
+#### 1. Auto-format Python files after every write {#1-auto-format-python-files-after-every-write}
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -2117,7 +2147,7 @@ printf '{}\n'
 
 The agent's in-context view of the file is **not** re-read automatically — the reformat only affects the file on disk. Subsequent `read_file` calls pick up the formatted version.
 
-#### 2. Block destructive `terminal` commands
+#### 2. Block destructive `terminal` commands {#2-block-destructive-terminal-commands}
 
 ```yaml
 hooks:
@@ -2139,7 +2169,7 @@ else
 fi
 ```
 
-#### 3. Inject `git status` into every turn (Claude-Code `UserPromptSubmit` equivalent)
+#### 3. Inject `git status` into every turn (Claude-Code `UserPromptSubmit` equivalent) {#3-inject-git-status-into-every-turn-claude-code-userpromptsubmit-equivalent}
 
 ```yaml
 hooks:
@@ -2159,9 +2189,9 @@ else
 fi
 ```
 
-Claude Code's `UserPromptSubmit` event is intentionally not a separate Hermes event — `pre_llm_call` fires at the same place and already supports context injection. Use it here.
+Claude Code's `UserPromptSubmit` event is intentionally not a separate {{app-name}} event — `pre_llm_call` fires at the same place and already supports context injection. Use it here.
 
-#### 4. Log every subagent completion
+#### 4. Log every subagent completion {#4-log-every-subagent-completion}
 
 ```yaml
 hooks:
@@ -2177,21 +2207,21 @@ jq -c '{ts: now, parent: .session_id, extra: .extra}' < /dev/stdin >> "$log"
 printf '{}\n'
 ```
 
-### Consent model
+### Consent model {#consent-model}
 
-Each unique `(event, command)` pair prompts the user for approval the first time Hermes sees it, then persists the decision to `~/.hermes/shell-hooks-allowlist.json`. Subsequent runs (CLI or gateway) skip the prompt. The classic CLI asks on its terminal before it opens its gateway session; the gateway re-reads `hooks:` and the allowlist whenever a local session (CLI, TUI, Desktop) is created or resumed, so a hook added, approved, removed or revoked since the gateway started takes effect then. A change to a profile's allowlist or `hooks:` block (an approval, `hermes hooks revoke`, an edit) also takes effect within about 30 seconds without any session opening, on every profile a gateway serves.
+Each unique `(event, command)` pair prompts the user for approval the first time {{app-name}} sees it, then persists the decision to `~/.hermes/shell-hooks-allowlist.json`. Subsequent runs (CLI or gateway) skip the prompt. The classic CLI asks on its terminal before it opens its gateway session; the gateway re-reads `hooks:` and the allowlist whenever a local session (CLI, Desktop) is created or resumed, so a hook added, approved, removed or revoked since the gateway started takes effect then. A change to a profile's allowlist or `hooks:` block (an approval, `hermes hooks revoke`, an edit) also takes effect within about 30 seconds without any session opening, on every profile a gateway serves.
 
 Three escape hatches bypass the interactive prompt — any one is sufficient:
 
-1. `--accept-hooks` flag on the CLI (e.g. `hermes --accept-hooks chat`)
+1. `--accept-hooks` flag on the CLI (e.g. `noone --accept-hooks chat`)
 2. `HERMES_ACCEPT_HOOKS=1` environment variable
 3. `hooks_auto_accept: true` in `~/.hermes/config.yaml`
 
-Only a foreground `hermes chat` (or `hermes rl`) ever asks. The gateway, cron, `hermes mcp-serve --tools` (the mcp-serve plugin), `hermes acp` and CI never prompt, even when stdin looks like a terminal (a hidden console from a Windows login-item launcher does), so they need one of these three or an allowlist entry. Otherwise a newly-added hook stays un-registered and a warning names the profile's allowlist file it is missing from (`profiles/<name>/shell-hooks-allowlist.json` for a non-default profile). `hermes gateway run --accept-hooks` (like `HERMES_ACCEPT_HOOKS=1` on the gateway) approves the hooks of every profile that gateway serves, including hooks added after it started.
+Only a foreground `noone chat` (or `hermes rl`) ever asks. The gateway, cron, `noone mcp-serve --tools` (the mcp-serve plugin), `hermes acp` and CI never prompt, even when stdin looks like a terminal (a hidden console from a Windows login-item launcher does), so they need one of these three or an allowlist entry. Otherwise a newly-added hook stays un-registered and a warning names the profile's allowlist file it is missing from (`profiles/<name>/shell-hooks-allowlist.json` for a non-default profile). `noone gateway run --accept-hooks` (like `HERMES_ACCEPT_HOOKS=1` on the gateway) approves the hooks of every profile that gateway serves, including hooks added after it started.
 
 **Script edits are silently trusted.** The allowlist keys on the exact command string, not the script's hash, so editing the script on disk does not invalidate consent. `hermes hooks doctor` flags mtime drift so you can spot edits and decide whether to re-approve.
 
-#### Manual allowlisting
+#### Manual allowlisting {#manual-allowlisting}
 
 Manual allowlisting is useful for non-TTY or service-account deployments where an operator cannot answer the first-use prompt interactively. The allowlist file is `~/.hermes/shell-hooks-allowlist.json`, and the expected format is an `approvals` array. Each approval records the hook `event` and the exact `command` string:
 
@@ -2208,7 +2238,7 @@ Manual allowlisting is useful for non-TTY or service-account deployments where a
 
 The command string must match the configured hook command exactly. A path-keyed object with a `sha256` field is not the expected format and will not approve the hook. Verify manual entries with `hermes hooks list`.
 
-### The `hermes hooks` CLI
+### The `hermes hooks` CLI {#the-hermes-hooks-cli}
 
 | Command | What it does |
 |---------|--------------|
@@ -2217,7 +2247,7 @@ The command string must match the configured hook command exactly. A path-keyed 
 | `hermes hooks revoke <command>` | Remove every allowlist entry matching `<command>` (a running gateway stops running it within about 30 seconds) |
 | `hermes hooks doctor` | For every configured hook: check exec bit, allowlist status, mtime drift, JSON output validity, and rough execution time |
 
-### Security
+### Security {#security}
 
 Shell hooks run with **your full user credentials** — same trust boundary as a cron entry or a shell alias. Treat the `hooks:` block in `config.yaml` as privileged configuration:
 
@@ -2226,22 +2256,22 @@ Shell hooks run with **your full user credentials** — same trust boundary as a
 - Re-run `hermes hooks doctor` after you pull a shared config to spot newly-added hooks before they register.
 - If your config.yaml is version-controlled across a team, review PRs that change the `hooks:` section the same way you'd review CI config.
 
-### Ordering and precedence
+### Ordering and precedence {#ordering-and-precedence}
 
 Both Python plugin hooks and shell hooks flow through the same `invoke_hook()` dispatcher. Python plugins are registered first (`discover_and_load()`), shell hooks second (`register_from_config()`), so Python `pre_tool_call` decisions take precedence in tie cases. The first valid block wins — the aggregator returns as soon as any callback produces `{"action": "block", "message": str}` with a non-empty message — and a block anywhere in the list outranks an `approve` returned earlier.
 
-## Outbound Webhooks
+## Outbound Webhooks {#outbound-webhooks}
 
-Outbound webhooks are the push-side mirror of the [inbound webhook platform](../messaging/webhooks.md): inbound webhooks wake Hermes when the world changes; outbound webhooks tell the world when Hermes does something. Configure a list of HTTP endpoints and the lifecycle events they care about, and Hermes POSTs a signed JSON payload to each endpoint whenever a matching event fires — no polling on the receiving end.
+Outbound webhooks are the push-side mirror of the [inbound webhook platform](../messaging/webhooks.md): inbound webhooks wake {{app-name}} when the world changes; outbound webhooks tell the world when {{app-name}} does something. Configure a list of HTTP endpoints and the lifecycle events they care about, and {{app-name}} POSTs a signed JSON payload to each endpoint whenever a matching event fires — no polling on the receiving end.
 
 Typical uses:
 
 - Notify a CI system or dashboard when an agent turn finishes (`on_session_end`)
 - Track subagent completions across a fleet (`subagent_stop`)
 - Feed tool activity into external monitoring (`post_tool_call` with a `matcher`)
-- Wake *another* Hermes instance: point the URL at that instance's inbound webhook
+- Wake *another* {{app-name}} instance: point the URL at that instance's inbound webhook
 
-### Configuration
+### Configuration {#configuration}
 
 Add a `hooks.outbound:` list to `~/.hermes/config.yaml`:
 
@@ -2264,9 +2294,9 @@ Any event from the plugin-hook set is valid (`pre_tool_call`, `post_tool_call`, 
 
 Secrets: prefer `secret_env` (the name of an environment variable, typically set in `~/.hermes/.env`) over an inline `secret:` literal, so the config file stays free of credentials. Entries without a secret are delivered unsigned (flagged as `UNSIGNED` by `hermes hooks list`).
 
-### Wire format
+### Wire format {#wire-format}
 
-Each firing POSTs a JSON body with the same top-level shape as shell hooks' stdin, plus delivery metadata. `profile` names the Hermes profile that emitted the event (`"default"` outside profiles), so receivers behind a multiplexed gateway can tell profiles apart:
+Each firing POSTs a JSON body with the same top-level shape as shell hooks' stdin, plus delivery metadata. `profile` names the {{app-name}} profile that emitted the event (`"default"` outside profiles), so receivers behind a multiplexed gateway can tell profiles apart:
 
 ```json
 {
@@ -2303,10 +2333,10 @@ def verify(body: bytes, header: str, secret: str) -> bool:
 
 Because `delivery_id` and `timestamp` live **inside the signed body**, a verified receiver also gets replay protection for free:
 
-- **Dedupe** on `delivery_id` (or the matching `X-Hermes-Delivery` header) — remember recently seen ids and skip duplicates. Hermes retries failed deliveries once, so the same id can legitimately arrive twice.
+- **Dedupe** on `delivery_id` (or the matching `X-Hermes-Delivery` header) — remember recently seen ids and skip duplicates. {{app-name}} retries failed deliveries once, so the same id can legitimately arrive twice.
 - **Reject stale events** by checking `timestamp` against your clock with a tolerance window (5 minutes is the common default). An attacker replaying a captured request can't forge a fresh timestamp without the secret.
 
-### Delivery semantics
+### Delivery semantics {#delivery-semantics}
 
 - **Fire-and-forget, off the hot path.** Events are serialized and queued instantly; a single background thread performs the HTTP POSTs. A slow or dead endpoint can never stall a tool call or an agent turn.
 - **Notify-only.** Unlike shell hooks, outbound webhooks cannot block tool calls or inject context — the response body is ignored. They observe, never steer.

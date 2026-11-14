@@ -1,14 +1,14 @@
 blank_issues_enabled: true
 contact_links:
   - name: 🔒 Report a security vulnerability
-    url: https://github.com/NousResearch/hermes-agent/security/advisories/new
+    url: https://github.com/Garudex-Labs/NoOne/security/advisories/new
     about: Report vulnerabilities privately — never in a public issue. Read SECURITY.md for scope first.
-  - name: 💬 Nous Research Discord
-    url: https://discord.gg/NousResearch
+  - name: 💬 Project support
+    url: mailto:rawx18.dev@gmail.com
     about: For quick questions, showcasing projects, sharing skills, and community chat.
   - name: 📖 Documentation
-    url: https://github.com/NousResearch/hermes-agent/blob/main/README.md
+    url: https://github.com/Garudex-Labs/NoOne/blob/main/README.md
     about: Check the README and docs before opening an issue.
   - name: 🤝 Contributing Guide
-    url: https://github.com/NousResearch/hermes-agent/blob/main/CONTRIBUTING.md
+    url: https://github.com/Garudex-Labs/NoOne/blob/main/CONTRIBUTING.md
     about: Read this before submitting a PR.

@@ -12,6 +12,7 @@
 
 const fs = require('node:fs')
 const path = require('node:path')
+const applicationName = require('../../agent_cli/data/application_identity.json').default_name
 const feedContract = require('./update-feed.cjs')
 const { createMacSigner } = require('./scripts/mac-sign.mjs')
 
@@ -23,6 +24,7 @@ const {
   appId,
   appNamePascal,
   artifactNamePascal,
+  stableState,
   windowsExecutableName,
   channel,
   msixAppIdWithOrg,
@@ -57,7 +59,7 @@ const channelRequest = channelBuildRequest()
 
 /** @typedef {import("app-builder-lib").Configuration} Configuration */
 
-const [owner, repo] = (process.env.GITHUB_REPOSITORY || 'NousResearch/hermes-agent').split('/')
+const [owner, repo] = (process.env.GITHUB_REPOSITORY || 'Garudex-Labs/NoOne').split('/')
 if (!owner || !repo) {
   throw new Error(`invalid GITHUB_REPOSITORY ${process.env.GITHUB_REPOSITORY}`)
 }
@@ -77,7 +79,7 @@ module.exports = {
   executableName: displayName,
   protocols: [
     {
-      name: `${displayName} Protocol`,
+      name: `${applicationName} Protocol`,
       schemes: ['hermes']
     }
   ],
@@ -105,7 +107,7 @@ module.exports = {
     // Electron bootstrap reads package.productName before main.ts. Keep the
     // shipped stable default, but isolate nonstable userData from first access.
     // A stable-branded channel has no token and keeps stable's userData.
-    ...((channelRequest && token) || appNamePascal !== artifactNamePascal ? { productName: displayName } : {}),
+    ...((channelRequest && token) || !(stableState ?? appNamePascal === artifactNamePascal) ? { productName: displayName } : {}),
     desktopName: appId
   },
   directories: {
@@ -162,22 +164,22 @@ module.exports = {
       : null,
     category: 'public.app-category.developer-tools',
     extendInfo: {
-      CFBundleDisplayName: displayName,
+      CFBundleDisplayName: applicationName,
       CFBundleExecutable: displayName,
       CFBundleName: displayName,
       LSRequiresNativeExecution: true,
-      NSAudioCaptureUsageDescription: `${displayName} uses audio capture for voice conversations.`,
-      NSCameraUsageDescription: `${displayName} uses the camera when a plugin or feature you enable requests it.`,
-      NSMicrophoneUsageDescription: `${displayName} uses the microphone for voice input and voice conversations.`,
-      NSCalendarsUsageDescription: `${displayName} needs access to Calendar to provide requested meeting and scheduling support.`,
-      NSCalendarsFullAccessUsageDescription: `${displayName} needs full access to Calendar to read and manage events when explicitly requested.`,
-      NSRemindersUsageDescription: `${displayName} needs access to Reminders to provide requested personal-assistant and scheduling support.`,
-      NSRemindersFullAccessUsageDescription: `${displayName} needs full access to Reminders to read and manage reminders when explicitly requested.`,
-      NSScreenCaptureUsageDescription: `${displayName} captures the screen when you ask the agent to screenshot or record it.`,
-      NSLocalNetworkUsageDescription: `${displayName} connects to devices on your local network when a plugin or feature you enable requests it.`,
-      NSAppleMusicUsageDescription: `${displayName} accesses your music library when a plugin or feature you enable requests it.`,
-      NSContactsUsageDescription: `${displayName} uses Contacts access when you ask it to read or update your address book.`,
-      NSAppleEventsUsageDescription: `${displayName} uses Apple Events to automate apps you explicitly ask it to control.`
+      NSAudioCaptureUsageDescription: `${applicationName} uses audio capture for voice conversations.`,
+      NSCameraUsageDescription: `${applicationName} uses the camera when a plugin or feature you enable requests it.`,
+      NSMicrophoneUsageDescription: `${applicationName} uses the microphone for voice input and voice conversations.`,
+      NSCalendarsUsageDescription: `${applicationName} needs access to Calendar to provide requested meeting and scheduling support.`,
+      NSCalendarsFullAccessUsageDescription: `${applicationName} needs full access to Calendar to read and manage events when explicitly requested.`,
+      NSRemindersUsageDescription: `${applicationName} needs access to Reminders to provide requested personal-assistant and scheduling support.`,
+      NSRemindersFullAccessUsageDescription: `${applicationName} needs full access to Reminders to read and manage reminders when explicitly requested.`,
+      NSScreenCaptureUsageDescription: `${applicationName} captures the screen when you ask the agent to screenshot or record it.`,
+      NSLocalNetworkUsageDescription: `${applicationName} connects to devices on your local network when a plugin or feature you enable requests it.`,
+      NSAppleMusicUsageDescription: `${applicationName} accesses your music library when a plugin or feature you enable requests it.`,
+      NSContactsUsageDescription: `${applicationName} uses Contacts access when you ask it to read or update your address book.`,
+      NSAppleEventsUsageDescription: `${applicationName} uses Apple Events to automate apps you explicitly ask it to control.`
     },
     target: ['dmg', 'zip'],
     sign: createMacSigner({
@@ -205,13 +207,13 @@ module.exports = {
     // paste onto the stock removable-drive icon). It lives in packaging/ with
     // the background so the `files` whitelist keeps it out of the app bundle.
     icon: 'packaging/dmg-volume.icns',
-    title: 'Hermes Agent Installer',
+    title: `${applicationName} Installer`,
     // A prebuilt .tiff on purpose, not a PNG plus a @2x sibling: dmg-builder's
     // PNG path runs `tiffutil -cathidpicheck`, which on macOS 26 rewrites both
     // frames to 72 dpi and silently drops the 2x representation. A .tiff is
     // handed to dmgbuild untouched (dmg-builder/dist/dmgUtil.js), and living
     // outside assets/ keeps it out of the app bundle via the `files` whitelist.
-    background: 'packaging/nous-dmg-2b.tiff',
+    background: 'packaging/dmg-background.tiff',
     iconSize: 96,
     iconTextSize: 11,
     window: {
@@ -250,7 +252,7 @@ module.exports = {
     applicationId: appNamePascal,
     displayName,
     publisher: store ? mustStoreMsix(storeMsixWhenStore).publisher : OUT_OF_STORE_PUBLISHER,
-    publisherDisplayName: store ? mustStoreMsix(storeMsixWhenStore).publisherDisplayName : 'Nous Research',
+    publisherDisplayName: store ? mustStoreMsix(storeMsixWhenStore).publisherDisplayName : 'Garudex Labs',
     // The native quad is the build time (scripts/msix-shared.mjs::nativeQuad),
     // baked into the manifest template, so the builder's own build-number
     // override would stamp a second, conflicting version.
@@ -280,10 +282,10 @@ module.exports = {
   },
   linux: {
     category: 'Development',
-    maintainer: 'Nous Research <support@nousresearch.com>',
+    maintainer: 'RAWx18 <rawx18.dev@gmail.com>',
     synopsis: light
-      ? 'Remote-only desktop client for Hermes Agent.'
-      : 'Native desktop shell for Hermes Agent.',
+      ? `Remote-only desktop client for ${applicationName}.`
+      : `Native desktop shell for ${applicationName}.`,
     target: ['AppImage']
   }
 }

@@ -1,6 +1,6 @@
 """HTTP client for the agent routes of the config plane (contract.md §7.1, §7.2).
 
-Plain HTTP (D9), stdlib only: it runs inside ``load_hermes_dotenv`` before most of Hermes is
+Plain HTTP (D9), stdlib only: it runs inside ``load_agent_dotenv`` before most of Hermes is
 imported. Every request re-resolves the bearer (contract §10.2).
 """
 from __future__ import annotations
@@ -17,7 +17,7 @@ from typing import Any, Dict, Optional
 from .credentials import plane_token
 from .destination import checked_url, display_url, open_credentialed
 
-DEFAULT_URL = "https://config-config.nousresearch.com"
+
 URL_ENV = "HERMES_CONFIG_REMOTE_URL"
 INSTANCE_ENV = "HERMES_CONFIG_INSTANCE_ID"
 _HTTP_TIMEOUT_S = 15.0
@@ -46,7 +46,7 @@ class TransportError(RuntimeError):
 def base_url() -> str:
     """The configured plane origin (+ path prefix), as configured: :func:`request` checks it
     against the credential destination policy before anything is sent. Messages use :func:`shown_url`."""
-    return (os.environ.get(URL_ENV, "").strip() or DEFAULT_URL).rstrip("/")
+    return (os.environ.get(URL_ENV, "").strip()).rstrip("/")
 
 
 def shown_url() -> str:

@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity';
 /**
  * User-facing error shape for the dashboard REST layer.
  *
@@ -10,7 +11,7 @@
 
 /** The dashboard's own backend could not be reached at all (fetch rejected). */
 export const API_UNREACHABLE_MESSAGE =
-  "Hermes dashboard cannot reach the Hermes service. Is `hermes dashboard` still running?";
+  "Hermes dashboard cannot reach the Hermes service. Is `noone dashboard` still running?";
 
 /** Status → plain sentence, used when the body carries no usable `detail`. */
 const STATUS_COPY: Record<number, string> = {
@@ -29,7 +30,7 @@ const STATUS_COPY: Record<number, string> = {
 };
 
 export function humanizeStatus(status: number): string {
-  return STATUS_COPY[status] ?? `The Hermes service answered with an unexpected error (${status}).`;
+  return STATUS_COPY[status] ?? appText(`The {app_name} service answered with an unexpected error (${status}).`);
 }
 
 /** Pull a human sentence out of a FastAPI-style error body, or null. */

@@ -1,7 +1,7 @@
 """ACP agent wire conformance, part 2: ACP error responses and agent crashes.
 
 The agent (``tests/fakes/providers/fake_acp_agent.py``, behind the ``fake-acp`` user plugin provider) answers ``session/prompt`` with JSON-RPC errors from
-the ACP / JSON-RPC 2.0 error space or dies mid-stream. Each row drives one real ``hermes chat -q`` and
+the ACP / JSON-RPC 2.0 error space or dies mid-stream. Each row drives one real ``noone chat -q`` and
 asserts the retry semantics the user sees:
 
 * transient failures (``-32603`` internal error, a crash after a partial chunk) are retried with a
@@ -161,7 +161,7 @@ def test_auth_failure_remedy_is_an_actionable_command(outcomes):
     out = outcomes["auth_required_not_retried"]
     assert out.run.returncode != 0 and "Authentication required" in out.run.stdout, out.run.describe()
     for command in REMEDY_RE.findall(out.run.stdout):
-        argv = [sys.executable, "-m", "hermes_cli.main", *command.split()[1:]]
+        argv = [sys.executable, "-m", "agent_cli.main", *command.split()[1:]]
         proc = subprocess.run(argv, cwd=out.nh.project, env=out.nh.env(), capture_output=True, text=True,
                               timeout=60, stdin=subprocess.DEVNULL, check=False)
         said = (proc.stdout + proc.stderr).lower()

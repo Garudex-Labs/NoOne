@@ -1,5 +1,5 @@
-import { randomUuid } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { randomUuid } from '@noone/shared'
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
 import { useI18n } from '@/i18n'

@@ -95,7 +95,7 @@ import { $titlebarAppActionsSide, titlebarAppActionsClusterCounts } from '@/stor
 import { armWakeWord, stopClientCapture } from '@/store/wake-word'
 import { isAuxiliaryWindow, isBrowserWindow, isHudWindow, isMainWindow } from '@/store/windows'
 import { useSkinCommand } from '@/themes/use-skin-command'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 import { closeWorkspaceTab } from '../chat/close-tab'
 import { requestComposerInsert } from '../chat/composer/focus'
@@ -105,7 +105,7 @@ import { CommandPalette } from '../command-palette'
 import { triggerAndRefreshCronJobs } from '../cron/cron-actions'
 import { useGatewayBoot } from '../gateway/hooks/use-gateway-boot'
 import { useGatewayRequest } from '../gateway/hooks/use-gateway-request'
-import { useHermesConfigRecord } from '../hooks/use-config-record'
+import { useAgentConfigRecord } from '../hooks/use-config-record'
 import { useKeybinds } from '../hooks/use-keybinds'
 import { useHudHandoff } from '../hud/handoff'
 import { ModelPickerOverlay } from '../model-picker-overlay'
@@ -128,10 +128,10 @@ import {
 import { SessionImportView } from '../session-import'
 import { SessionPickerOverlay } from '../session-picker-overlay'
 import { SessionSwitcher } from '../session-switcher'
+import { useAgentConfig } from '../session/hooks/use-agent-config'
 import { useBackgroundQueueDrain } from '../session/hooks/use-background-queue-drain'
 import { useContextSuggestions } from '../session/hooks/use-context-suggestions'
 import { useCwdActions } from '../session/hooks/use-cwd-actions'
-import { useHermesConfig } from '../session/hooks/use-hermes-config'
 import { useMessageStream } from '../session/hooks/use-message-stream'
 import { useModelControls } from '../session/hooks/use-model-controls'
 import { useOwnerQueueReconcile } from '../session/hooks/use-owner-queue-reconcile'
@@ -452,7 +452,7 @@ export function ContribWiring({ children }: { children: ReactNode }) {
     requestGateway
   })
 
-  const { refreshHermesConfig, sttEnabled, voiceMaxRecordingSeconds } = useHermesConfig({ activeSessionIdRef })
+  const { refreshHermesConfig, sttEnabled, voiceMaxRecordingSeconds } = useAgentConfig({ activeSessionIdRef })
 
   const { applySavedMainModel, followDefaultModel, refreshCurrentModel, selectModel } = useModelControls({
     cacheOwnerConnectionId: activeConnectionId || undefined,
@@ -958,7 +958,7 @@ export function ContribWiring({ children }: { children: ReactNode }) {
   // display.resume_last_session gates the cold-start restore. `undefined` while
   // the record is still loading holds the restore latch open; a failed fetch
   // falls back to the historical behavior (resume).
-  const configRecord = useHermesConfigRecord()
+  const configRecord = useAgentConfigRecord()
 
   const resumeLastSession = configRecord.isPending
     ? undefined

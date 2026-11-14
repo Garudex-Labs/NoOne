@@ -1,39 +1,47 @@
 ---
 title: "Rest Graphql Debug — Debug REST/GraphQL APIs: status codes, auth, schemas, repro"
-sidebar_label: "Rest Graphql Debug"
+sidebarTitle: "Rest Graphql Debug"
 description: "Debug REST/GraphQL APIs: status codes, auth, schemas, repro"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Rest Graphql Debug
+# Rest Graphql Debug {#rest-graphql-debug}
 
 Debug REST/GraphQL APIs: status codes, auth, schemas, repro.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/software-development/rest-graphql-debug` |
+| Source | Optional — install with `noone skills install official/software-development/rest-graphql-debug` |
 | Path | `optional-skills/software-development/rest-graphql-debug` |
 | Version | `1.2.0` |
-| Author | eren-karakus0 |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `api`, `rest`, `graphql`, `http`, `debugging`, `testing`, `curl`, `integration` |
 | Related skills | [`systematic-debugging`](../../bundled/software-development/software-development-systematic-debugging.md), [`test-driven-development`](../../bundled/software-development/software-development-test-driven-development.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# API Testing & Debugging
+<div className="doc-callout-title">
 
-Drive REST and GraphQL diagnosis through Hermes tools — `terminal` for `curl`, `execute_code` for Python `requests`, `web_extract` for vendor docs. Isolate the failing layer before guessing at the fix.
+INFO
 
-## When to Use
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# API Testing & Debugging {#api-testing--debugging}
+
+Drive REST and GraphQL diagnosis through {{app-name}} tools — `terminal` for `curl`, `execute_code` for Python `requests`, `web_extract` for vendor docs. Isolate the failing layer before guessing at the fix.
+
+## When to Use {#when-to-use}
 
 - API returns unexpected status or body
 - Auth fails (401/403 after token refresh, OAuth, API key)
@@ -44,7 +52,7 @@ Drive REST and GraphQL diagnosis through Hermes tools — `terminal` for `curl`,
 
 Skip for UI rendering, DB query tuning, or DNS/firewall infra (escalate).
 
-## Core Principle
+## Core Principle {#core-principle}
 
 **Isolate the layer, then fix.** A 200 OK can hide broken data. A 500 can mask a one-character auth typo. Walk the chain in order; never skip a step.
 
@@ -58,9 +66,9 @@ Skip for UI rendering, DB query tuning, or DNS/firewall infra (escalate).
 6. Semantics      → does the data mean what we assume?
 ```
 
-## 5-Minute Quickstart
+## 5-Minute Quickstart {#5-minute-quickstart}
 
-### REST via terminal
+### REST via terminal {#rest-via-terminal}
 
 ```python
 # Verbose request/response exchange
@@ -79,7 +87,7 @@ terminal('curl -sI https://api.example.com/health')
 terminal('curl -s https://api.example.com/users | python -m json.tool')
 ```
 
-### GraphQL via terminal
+### GraphQL via terminal {#graphql-via-terminal}
 
 ```python
 terminal("""curl -X POST https://api.example.com/graphql \\
@@ -107,7 +115,7 @@ print(data.get("data"))
 ''')
 ```
 
-### Python (requests) via execute_code
+### Python (requests) via execute_code {#python-requests-via-execute_code}
 
 ```python
 execute_code('''
@@ -122,9 +130,9 @@ print(resp.text[:500])
 ''')
 ```
 
-## Layered Debug Flow
+## Layered Debug Flow {#layered-debug-flow}
 
-### Step 1 — Connectivity
+### Step 1 — Connectivity {#step-1--connectivity}
 
 ```python
 terminal('nslookup api.example.com')
@@ -133,7 +141,7 @@ terminal('curl -v --connect-timeout 5 https://api.example.com/health')
 
 Failures: DNS not resolving, firewall, VPN required, proxy missing.
 
-### Step 1.5 — Timeouts
+### Step 1.5 — Timeouts {#step-15--timeouts}
 
 Distinguish *can't reach* from *reaches but slow*:
 
@@ -159,7 +167,7 @@ except ReadTimeout:
 
 Diagnosis: high `time_connect` is network/firewall; high `time_starttransfer` with low `time_connect` is a slow server.
 
-### Step 2 — TLS/SSL
+### Step 2 — TLS/SSL {#step-2--tlsssl}
 
 ```python
 terminal('curl -vI https://api.example.com 2>&1 | grep -E "SSL|subject|expire|issuer"')
@@ -167,7 +175,7 @@ terminal('curl -vI https://api.example.com 2>&1 | grep -E "SSL|subject|expire|is
 
 Failures: expired cert, self-signed, hostname mismatch, missing CA bundle. Use `-k` only for ad-hoc debug, never in code.
 
-### Step 3 — Authentication
+### Step 3 — Authentication {#step-3--authentication}
 
 ```python
 # Token validity check
@@ -189,7 +197,7 @@ Checklist:
 - Right environment? Staging key on prod is a classic
 - API key in header vs query param (`?api_key=…`)?
 
-### Step 4 — Request Format
+### Step 4 — Request Format {#step-4--request-format}
 
 ```python
 terminal("""curl -v -X POST https://api.example.com/endpoint \\
@@ -215,7 +223,7 @@ requests.post(url, files={"file": open("doc.pdf", "rb")})
 
 Common: form-encoded vs JSON, missing required fields, wrong HTTP method, unencoded query params.
 
-### Step 5 — Response Parsing
+### Step 5 — Response Parsing {#step-5--response-parsing}
 
 Always inspect content-type before calling `.json()`:
 
@@ -235,7 +243,7 @@ else:
 
 Failures: HTML error page where JSON expected, empty body, wrong charset.
 
-### Step 6 — Semantic Validation
+### Step 6 — Semantic Validation {#step-6--semantic-validation}
 
 Parsed cleanly — but is the data *correct*?
 
@@ -244,43 +252,43 @@ Parsed cleanly — but is the data *correct*?
 - Timestamps in expected timezone?
 - Pagination returning all results, or just page 1?
 
-## HTTP Status Playbook
+## HTTP Status Playbook {#http-status-playbook}
 
-### 401 Unauthorized — credentials missing or invalid
+### 401 Unauthorized — credentials missing or invalid {#401-unauthorized--credentials-missing-or-invalid}
 
 1. `Authorization` header actually present? (`curl -v` to confirm)
 2. Token correct and unexpired?
 3. Right auth scheme? (`Bearer` vs `Basic` vs `Token`)
 4. Some APIs use query param (`?api_key=…`) instead of header.
 
-### 403 Forbidden — authenticated but not authorized
+### 403 Forbidden — authenticated but not authorized {#403-forbidden--authenticated-but-not-authorized}
 
 1. Token has the required scopes/permissions?
 2. Resource owned by a different account?
 3. IP allowlist blocking you?
 4. CORS in browser? (check `Access-Control-Allow-Origin`)
 
-### 404 Not Found — resource doesn't exist or URL is wrong
+### 404 Not Found — resource doesn't exist or URL is wrong {#404-not-found--resource-doesnt-exist-or-url-is-wrong}
 
 1. Path correct? (trailing slash, typo, version prefix)
 2. Resource ID exists?
 3. Right API version (`/v1/` vs `/v2/`)?
 4. Right base URL (staging vs prod)?
 
-### 409 Conflict — state collision
+### 409 Conflict — state collision {#409-conflict--state-collision}
 
 1. Resource already exists (duplicate create)?
 2. Stale `ETag` / `If-Match`?
 3. Concurrent modification by another process?
 
-### 422 Unprocessable Entity — valid JSON, invalid data
+### 422 Unprocessable Entity — valid JSON, invalid data {#422-unprocessable-entity--valid-json-invalid-data}
 
 The error body usually names the bad fields. Check:
 - Field types (string vs int, date format)
 - Required vs optional
 - Enum values inside the allowed set
 
-### 429 Too Many Requests — rate limited
+### 429 Too Many Requests — rate limited {#429-too-many-requests--rate-limited}
 
 Check `Retry-After` and `X-RateLimit-*` headers. Exponential backoff:
 
@@ -299,7 +307,7 @@ def with_backoff(method, url, **kwargs):
 ''')
 ```
 
-### 5xx — server-side, usually not your fault
+### 5xx — server-side, usually not your fault {#5xx--server-side-usually-not-your-fault}
 
 - **500** — server bug. Capture correlation ID, file with provider.
 - **502** — upstream down. Backoff + retry.
@@ -308,7 +316,7 @@ def with_backoff(method, url, **kwargs):
 
 For all 5xx: backoff with jitter, alert on persistence.
 
-## Pagination & Idempotency
+## Pagination & Idempotency {#pagination--idempotency}
 
 **Pagination.** Verify you're getting *all* results. Look for `next_cursor`, `next_page`, `total_count`. Two patterns:
 - Offset (`?limit=100&offset=200`) — simple, can skip items if data shifts.
@@ -316,7 +324,7 @@ For all 5xx: backoff with jitter, alert on persistence.
 
 **Idempotency.** For non-idempotent operations (POST), send `Idempotency-Key: <uuid>` so retries don't double-charge / double-create. Mandatory for payments and orders.
 
-## Contract Validation
+## Contract Validation {#contract-validation}
 
 Catch schema drift before it hits production:
 
@@ -343,7 +351,7 @@ if issues:
 
 Run after API upgrades, when integrating new third parties, or in CI smoke tests.
 
-## Correlation IDs
+## Correlation IDs {#correlation-ids}
 
 Always capture the provider's request ID — fastest path to vendor support:
 
@@ -373,7 +381,7 @@ Actual:      500 {"error":"internal server error"}
 Repro:       curl -X POST … (auth: <REDACTED>)
 ```
 
-## Regression Test Template
+## Regression Test Template {#regression-test-template}
 
 Drop this into `tests/` and run via `terminal('pytest tests/test_api_smoke.py -v')`:
 
@@ -411,14 +419,14 @@ class TestAPISmoke:
         assert resp.status_code == 401
 ```
 
-## Security
+## Security {#security}
 
-### Token handling
+### Token handling {#token-handling}
 - Never log full tokens. Redact: `Bearer <REDACTED>`.
 - Never hardcode tokens in scripts. Read from env (`os.environ["API_TOKEN"]`) or `${HERMES_HOME:-~/.hermes}/.env`.
 - Rotate immediately if a token surfaces in logs, error messages, or git history.
 
-### Safe logging
+### Safe logging {#safe-logging}
 
 ```python
 def redact_auth(headers: dict) -> dict:
@@ -426,7 +434,7 @@ def redact_auth(headers: dict) -> dict:
     return {k: ("<REDACTED>" if k.lower() in sensitive else v) for k, v in headers.items()}
 ```
 
-### Leak checklist
+### Leak checklist {#leak-checklist}
 
 - [ ] **Credentials in URLs.** API keys in query strings end up in server logs, browser history, referrer headers — use headers.
 - [ ] **PII in error responses.** `404 on /users/123` shouldn't reveal whether the user exists (enumeration).
@@ -435,16 +443,16 @@ def redact_auth(headers: dict) -> dict:
 - [ ] **Tokens echoed back.** Some APIs include the auth token in error details. Verify they don't.
 - [ ] **Verbose `Server` / `X-Powered-By`.** Stack-info leaks. Note for security review.
 
-## Hermes Tool Patterns
+## {{app-name}} Tool Patterns {#hermes-tool-patterns}
 
-### terminal — for curl, dig, openssl
+### terminal — for curl, dig, openssl {#terminal--for-curl-dig-openssl}
 
 ```python
 terminal('curl -sI https://api.example.com')
 terminal('openssl s_client -connect api.example.com:443 -servername api.example.com </dev/null 2>/dev/null | openssl x509 -noout -dates')
 ```
 
-### execute_code — for multi-step Python flows
+### execute_code — for multi-step Python flows {#execute_code--for-multi-step-python-flows}
 
 When debugging spans auth → fetch → paginate → validate, use `execute_code`. Variables persist for the script, results print to stdout, no risk of token spam in your context:
 
@@ -474,7 +482,7 @@ print(f"users={len(all_users)}")
 ''')
 ```
 
-### web_extract — for vendor API docs
+### web_extract — for vendor API docs {#web_extract--for-vendor-api-docs}
 
 Pull the spec for the endpoint you're debugging instead of guessing:
 
@@ -482,7 +490,7 @@ Pull the spec for the endpoint you're debugging instead of guessing:
 web_extract(urls=["https://docs.example.com/api/v1/users"])
 ```
 
-### delegate_task — for full CRUD test sweeps
+### delegate_task — for full CRUD test sweeps {#delegate_task--for-full-crud-test-sweeps}
 
 ```python
 delegate_task(
@@ -503,7 +511,7 @@ Output: pass/fail per endpoint + correlation IDs for failures.
 )
 ```
 
-## Output Format
+## Output Format {#output-format}
 
 When reporting findings:
 
@@ -526,7 +534,7 @@ Missing required field `email`. Server validation rejects before processing.
 -d '{"name":"test","email":"test@example.com"}'
 ```
 
-## Related
+## Related {#related}
 
 - `systematic-debugging` — once the failing API layer is isolated, root-cause your code
 - `test-driven-development` — write the regression test before shipping the fix

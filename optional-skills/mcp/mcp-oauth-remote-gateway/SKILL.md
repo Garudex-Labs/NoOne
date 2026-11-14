@@ -2,7 +2,7 @@
 name: mcp-oauth-remote-gateway
 description: Manual OAuth for remote MCP servers on headless gateways.
 version: 1.0.0
-author: Ben Barclay (benbarclay), Hermes Agent
+author: RAWx18
 license: MIT
 platforms: [linux, macos]
 metadata:
@@ -78,8 +78,8 @@ gateway/bot where `/reload-mcp` triggers the flow with nobody at a prompt.
 ## Preferred Front Door: the Hermes Dashboard (try this BEFORE manual token surgery)
 
 A remote Hermes gateway often also runs the **dashboard** web UI as a SEPARATE
-process (e.g. `hermes dashboard --host 0.0.0.0 --port <port>`; check with
-`ps aux | grep 'hermes dashboard'`). It exposes a connector/MCP console —
+process (e.g. `noone dashboard --host 0.0.0.0 --port <port>`; check with
+`ps aux | grep 'noone dashboard'`). It exposes a connector/MCP console —
 endpoints like `/api/mcp/servers`, `/api/mcp/status`, and `/connectors` (all
 login-gated; a cookieless curl returning 401/302 confirms they exist).
 
@@ -117,7 +117,7 @@ are out of the dashboard's scope regardless.
 ## The Workaround
 
 Do the OAuth dance manually, then write the resulting tokens into the exact files
-Hermes' `HermesTokenStorage` would have written, so on `/reload-mcp` Hermes finds
+Hermes' `AgentTokenStorage` would have written, so on `/reload-mcp` Hermes finds
 cached tokens and skips the browser flow entirely.
 
 Run the shell commands below through the `terminal` tool on the gateway host and
@@ -139,7 +139,7 @@ built-in flow won't work.
 ### 2. Find HERMES_HOME and the config path
 
 ```bash
-HERMES_HOME=$(python3 -c 'from hermes_constants import get_hermes_home; print(get_hermes_home())')
+HERMES_HOME=$(python3 -c 'from agent_constants import get_agent_home; print(get_agent_home())')
 echo "config: $HERMES_HOME/config.yaml"
 echo "tokens: $HERMES_HOME/mcp-tokens/"
 ```
@@ -181,7 +181,7 @@ POST to the `registration_endpoint` with:
 
 ```json
 {
-  "client_name": "Hermes Agent (manual OAuth)",
+  "client_name": "NoOne (manual OAuth)",
   "redirect_uris": ["http://127.0.0.1:8765/callback"],
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
@@ -242,7 +242,7 @@ When the user pastes the callback URL:
 
 ### 8. Write tokens in Hermes' exact schema
 
-`tools/mcp_oauth.py::HermesTokenStorage` expects two files under
+`tools/mcp_oauth.py::AgentTokenStorage` expects two files under
 `$HERMES_HOME/mcp-tokens/` (create dir with `0o700`, files with `0o600`):
 
 **`<server_name>.json`** — the `OAuthToken` pydantic model:
@@ -314,7 +314,7 @@ UA** — Cloudflare will 403 you even though Hermes (which uses httpx) will succ
 
 ### 11. Tell the user to run `/reload-mcp`
 
-On reload, Hermes sees `auth: oauth`, calls `HermesTokenStorage.get_tokens()`,
+On reload, Hermes sees `auth: oauth`, calls `AgentTokenStorage.get_tokens()`,
 finds your cached tokens, skips the browser flow, and registers `mcp_<name>_*`
 tools. Refresh happens automatically before `expires_in` elapses.
 

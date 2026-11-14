@@ -1,4 +1,5 @@
-import type { ModelOptionProvider, ModelPricing, PlanUsage, PlanUsageGauge } from '@hermes/shared'
+import { useStore } from '@nanostores/react'
+import type { ModelOptionProvider, ModelPricing, PlanUsage, PlanUsageGauge } from '@noone/shared'
 import {
   gaugeTitle,
   hasTopTier,
@@ -7,9 +8,8 @@ import {
   planLimit,
   splitRecommended,
   usageTag
-} from '@hermes/shared'
-import { fuzzyRank, modelSearchText } from '@hermes/shared'
-import { useStore } from '@nanostores/react'
+} from '@noone/shared'
+import { fuzzyRank, modelSearchText } from '@noone/shared'
 import { useQuery } from '@tanstack/react-query'
 import { type ReactElement, useMemo, useRef, useState } from 'react'
 
@@ -29,9 +29,9 @@ import {
   useLocalModelsStatus,
   useLocalRuntimeJobs
 } from '@/store/local-runtime-jobs'
-import type { LocalModelLoadProgress, LocalRuntimeJob } from '@/types/hermes'
+import type { LocalModelLoadProgress, LocalRuntimeJob } from '@/types/agent-client'
 
-import type { HermesGateway } from '../hermes'
+import type { AgentGateway } from '../agent-client'
 import { startManualOnboarding } from '../store/onboarding'
 
 import { InlineNotice } from './notifications'
@@ -46,7 +46,7 @@ import { Skeleton } from './ui/skeleton'
 interface ModelPickerDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  gw?: HermesGateway
+  gw?: AgentGateway
   sessionId?: string | null
   currentModel: string
   currentProvider: string

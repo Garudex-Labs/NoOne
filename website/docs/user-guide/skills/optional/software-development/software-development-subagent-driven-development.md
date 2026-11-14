@@ -1,43 +1,51 @@
 ---
 title: "Subagent Driven Development — Execute plans via delegate_task subagents (2-stage review)"
-sidebar_label: "Subagent Driven Development"
+sidebarTitle: "Subagent Driven Development"
 description: "Execute plans via delegate_task subagents (2-stage review)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Subagent Driven Development
+# Subagent Driven Development {#subagent-driven-development}
 
 Execute plans via delegate_task subagents (2-stage review).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/software-development/subagent-driven-development` |
+| Source | Optional — install with `noone skills install official/software-development/subagent-driven-development` |
 | Path | `optional-skills/software-development/subagent-driven-development` |
 | Version | `1.1.0` |
-| Author | Hermes Agent (adapted from obra/superpowers) |
+| Author | {{app-name}} (adapted from obra/superpowers) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `delegation`, `subagent`, `implementation`, `workflow`, `parallel` |
 | Related skills | [`requesting-code-review`](../../bundled/software-development/software-development-requesting-code-review.md), [`test-driven-development`](../../bundled/software-development/software-development-test-driven-development.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Subagent-Driven Development
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Subagent-Driven Development {#subagent-driven-development-1}
+
+## Overview {#overview}
 
 Execute implementation plans by dispatching fresh subagents per task with systematic two-stage review.
 
 **Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use this skill when:
 - You have an implementation plan (from the `plan` skill or user requirements)
@@ -51,9 +59,9 @@ Use this skill when:
 - Consistent quality checks across all tasks
 - Subagents can ask questions before starting work
 
-## The Process
+## The Process {#the-process}
 
-### 1. Read and Parse Plan
+### 1. Read and Parse Plan {#1-read-and-parse-plan}
 
 Read the plan file. Extract ALL tasks with their full text and context upfront. Create a todo list:
 
@@ -71,11 +79,11 @@ todo([
 
 **Key:** Read the plan ONCE. Extract everything. Don't make subagents read the plan file — provide the full task text directly in context.
 
-### 2. Per-Task Workflow
+### 2. Per-Task Workflow {#2-per-task-workflow}
 
 For EACH task in the plan:
 
-#### Step 1: Dispatch Implementer Subagent
+#### Step 1: Dispatch Implementer Subagent {#step-1-dispatch-implementer-subagent}
 
 Use `delegate_task` with complete context:
 
@@ -107,7 +115,7 @@ delegate_task(
 )
 ```
 
-#### Step 2: Dispatch Spec Compliance Reviewer
+#### Step 2: Dispatch Spec Compliance Reviewer {#step-2-dispatch-spec-compliance-reviewer}
 
 After the implementer completes, verify against the original spec:
 
@@ -136,7 +144,7 @@ delegate_task(
 
 **If spec issues found:** Fix gaps, then re-run spec review. Continue only when spec-compliant.
 
-#### Step 3: Dispatch Code Quality Reviewer
+#### Step 3: Dispatch Code Quality Reviewer {#step-3-dispatch-code-quality-reviewer}
 
 After spec compliance passes:
 
@@ -168,13 +176,13 @@ delegate_task(
 
 **If quality issues found:** Fix issues, re-review. Continue only when approved.
 
-#### Step 4: Mark Complete
+#### Step 4: Mark Complete {#step-4-mark-complete}
 
 ```python
 todo([{"id": "task-1", "content": "Create User model with email field", "status": "completed"}], merge=True)
 ```
 
-### 3. Final Review
+### 3. Final Review {#3-final-review}
 
 After ALL tasks are complete, dispatch a final integration reviewer:
 
@@ -192,7 +200,7 @@ delegate_task(
 )
 ```
 
-### 4. Verify and Commit
+### 4. Verify and Commit {#4-verify-and-commit}
 
 ```bash
 # Run full test suite
@@ -205,7 +213,7 @@ git diff --stat
 git add -A && git commit -m "feat: complete [feature name] implementation"
 ```
 
-## Task Granularity
+## Task Granularity {#task-granularity}
 
 **Each task = 2-5 minutes of focused work.**
 
@@ -219,7 +227,7 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 - "Add JWT token generation"
 - "Create registration endpoint"
 
-## Red Flags — Never Do These
+## Red Flags — Never Do These {#red-flags--never-do-these}
 
 - Start implementation without a plan
 - Skip reviews (spec compliance OR code quality)
@@ -234,27 +242,27 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 - **Start code quality review before spec compliance is PASS** (wrong order)
 - Move to next task while either review has open issues
 
-## Handling Issues
+## Handling Issues {#handling-issues}
 
-### If Subagent Asks Questions
+### If Subagent Asks Questions {#if-subagent-asks-questions}
 
 - Answer clearly and completely
 - Provide additional context if needed
 - Don't rush them into implementation
 
-### If Reviewer Finds Issues
+### If Reviewer Finds Issues {#if-reviewer-finds-issues}
 
 - Implementer subagent (or a new one) fixes them
 - Reviewer reviews again
 - Repeat until approved
 - Don't skip the re-review
 
-### If Subagent Fails a Task
+### If Subagent Fails a Task {#if-subagent-fails-a-task}
 
 - Dispatch a new fix subagent with specific instructions about what went wrong
 - Don't try to fix manually in the controller session (context pollution)
 
-## Efficiency Notes
+## Efficiency Notes {#efficiency-notes}
 
 **Why fresh subagent per task:**
 - Prevents context pollution from accumulated state
@@ -270,15 +278,15 @@ git add -A && git commit -m "feat: complete [feature name] implementation"
 - More subagent invocations (implementer + 2 reviewers per task)
 - But catches issues early (cheaper than debugging compounded problems later)
 
-## Integration with Other Skills
+## Integration with Other Skills {#integration-with-other-skills}
 
-### With plan
+### With plan {#with-plan}
 
 This skill EXECUTES plans created by the `plan` skill:
 1. User requirements → plan → implementation plan
 2. Implementation plan → subagent-driven-development → working code
 
-### With test-driven-development
+### With test-driven-development {#with-test-driven-development}
 
 Implementer subagents should follow TDD:
 1. Write failing test first
@@ -288,11 +296,11 @@ Implementer subagents should follow TDD:
 
 Include TDD instructions in every implementer context.
 
-### With requesting-code-review
+### With requesting-code-review {#with-requesting-code-review}
 
 The two-stage review process IS the code review. For final integration review, use the requesting-code-review skill's review dimensions.
 
-### With systematic-debugging
+### With systematic-debugging {#with-systematic-debugging}
 
 If a subagent encounters bugs during implementation:
 1. Follow systematic-debugging process
@@ -300,7 +308,7 @@ If a subagent encounters bugs during implementation:
 3. Write regression test
 4. Resume implementation
 
-## Example Workflow
+## Example Workflow {#example-workflow}
 
 ```
 [Read plan: docs/plans/auth-feature.md]
@@ -347,7 +355,7 @@ If a subagent encounters bugs during implementation:
 [Done!]
 ```
 
-## Remember
+## Remember {#remember}
 
 ```
 Fresh subagent per task
@@ -360,7 +368,7 @@ Catch issues early
 
 **Quality is not an accident. It's the result of systematic process.**
 
-## Further reading (load when relevant)
+## Further reading (load when relevant) {#further-reading-load-when-relevant}
 
 When the orchestration involves significant context usage, long review loops, or complex validation checkpoints, load these references for the specific discipline:
 

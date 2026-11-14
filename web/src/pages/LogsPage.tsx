@@ -1,28 +1,29 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useState,
-  useCallback,
-  useRef,
-} from "react";
-import { FileText, RefreshCw } from "lucide-react";
-import { useSearchParams } from "react-router";
-import { api } from "@/lib/api";
+import { FileText, RefreshCw } from "@noone/ui/icons";
 import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
+import { Label } from "@nous-research/ui/ui/components/label";
 import { FilterGroup, Segmented } from "@nous-research/ui/ui/components/segmented";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Switch } from "@nous-research/ui/ui/components/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
-import { Label } from "@nous-research/ui/ui/components/label";
-import { useI18n } from "@/i18n";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { useSearchParams } from "react-router";
+
 import { usePageHeader } from "@/contexts/usePageHeader";
-import { PluginSlot } from "@/plugins";
+import { useI18n } from "@/i18n";
+import { api } from "@/lib/api";
+import { errorMessage } from "@/lib/api-error";
 // Level classification is unit-tested in @/lib/log-classify; it prefers the
 // structured level token and falls back to word-boundary matching so payload
 // text like "parse_errors=0" can't render an INFO line red.
 import { classifyLine } from "@/lib/log-classify";
-import { errorMessage } from "@/lib/api-error";
+import { PluginSlot } from "@/plugins";
 
 const FILES = ["agent", "errors", "gateway"] as const;
 const LEVELS = ["ALL", "DEBUG", "INFO", "WARNING", "ERROR"] as const;

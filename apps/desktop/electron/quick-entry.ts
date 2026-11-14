@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 /**
  * Quick Entry — the global-hotkey mini composer.
  *
@@ -89,7 +90,7 @@ export function createQuickEntrySubmitRelay(options: {
           reconcilable.add(correlationId)
           resolve({
             code: 'timeout',
-            message: 'Hermes has not confirmed the prompt yet — it may still be delivered.',
+            message: appText('{app_name} has not confirmed the prompt yet — it may still be delivered.'),
             ok: false,
             retryable: false
           })

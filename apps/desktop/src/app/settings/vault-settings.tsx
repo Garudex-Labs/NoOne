@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { KeyRound, Lock, Plus, ShieldLock, Trash2 } from '@noone/ui/icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
@@ -20,7 +21,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { KeyRound, Lock, Plus, ShieldLock, Trash2 } from '@/lib/icons'
 import { $activeConnectionId } from '@/store/connections'
 import { requestGatewayForAgent } from '@/store/gateway'
 import { notify, notifyError } from '@/store/notifications'

@@ -3,13 +3,13 @@
 // self-accept so this module's own reload doesn't reset the cache. Prod strips
 // import.meta.hot → byte-for-byte unchanged live unmount.
 
-import type { HermesConnection } from '@/global'
-import type { HermesGateway } from '@/hermes'
+import type { AgentGateway } from '@/agent-client'
+import type { AgentConnection } from '@/global'
 
 export interface GatewaySurvivor {
-  gateway: HermesGateway
+  gateway: AgentGateway
   profile: string
-  connection: HermesConnection | null
+  connection: AgentConnection | null
 }
 
 // One slot on globalThis, keyed by a process-stable Symbol so repeated imports

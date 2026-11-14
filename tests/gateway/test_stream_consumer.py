@@ -67,9 +67,9 @@ class TestFinalizeCapabilityGate:
     """Verify REQUIRES_EDIT_FINALIZE gates the redundant final edit.
 
     Platforms that don't need an explicit finalize signal (Telegram,
-    Slack, Matrix, …) should skip the redundant final edit when the
+    Slack, …) should skip the redundant final edit when the
     mid-stream edit already delivered the final content.  Platforms that
-    *do* need it (DingTalk AI Cards) must always receive a finalize=True
+    *do* need it (native progress cards) must always receive a finalize=True
     edit at the end of the stream.
     """
 
@@ -126,11 +126,8 @@ class TestEditMessageFinalizeSignature:
             ("plugins.platforms.telegram.adapter", "TelegramAdapter"),
             ("plugins.platforms.discord.adapter", "DiscordAdapter"),
             ("plugins.platforms.slack.adapter", "SlackAdapter"),
-            ("plugins.platforms.matrix.adapter", "MatrixAdapter"),
             ("plugins.platforms.mattermost.adapter", "MattermostAdapter"),
-            ("plugins.platforms.feishu.adapter", "FeishuAdapter"),
             ("plugins.platforms.whatsapp.adapter", "WhatsAppAdapter"),
-            ("plugins.platforms.dingtalk.adapter", "DingTalkAdapter"),
         ],
     )
     def test_edit_message_accepts_finalize(self, module_path, class_name):

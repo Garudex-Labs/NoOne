@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo, useEffect } from 'react'
 
 import { PrTag } from '@/app/chat/pr-tag'
@@ -11,10 +12,9 @@ import {
   renderActionItem
 } from '@/components/ui/actions-menu'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { CopyButton } from '@/components/ui/copy-button'
 import { DiffCount } from '@/components/ui/diff-count'
-import type { HermesGitBranch } from '@/global'
+import type { AgentGitBranch } from '@/global'
 import { useI18n } from '@/i18n'
 import { displayPath } from '@/lib/display-path'
 import { openWorktreeDialog, registerRepoStatusCwd, repoStatusForCwd, repoWorktreesForCwd } from '@/store/coding-status'
@@ -34,7 +34,7 @@ interface CodingStatusRowProps {
    *  branch). Drives the dialog's "convert a branch" picker. */
   onConvertBranch?: (branch: string, path?: null | string, isDefault?: boolean) => Promise<void>
   /** List the repo's local branches for the "convert a branch" picker. */
-  onListBranches?: () => Promise<HermesGitBranch[]>
+  onListBranches?: () => Promise<AgentGitBranch[]>
   /** Open the review pane (changed files + diffs). */
   onOpen?: () => void
   /** Jump into an existing worktree (open a fresh session anchored there). */
@@ -215,7 +215,7 @@ export const CodingStatusRow = memo(function CodingStatusRow({
           // while the strip around it stays inert; size-3.5 fills the slot exactly.
           leading={
             <button className="flex size-3.5 items-center justify-center" onClick={onOpen} type="button">
-              <Codicon className="text-(--ui-green)" name="git-branch" size="0.8rem" />
+              <AppIcon className="text-(--ui-green)" name="git-branch" size="0.8rem" />
             </button>
           }
         >
@@ -282,7 +282,7 @@ export const CodingStatusRow = memo(function CodingStatusRow({
                   size="icon-xs"
                   variant="ghost"
                 >
-                  <Codicon name="kebab-vertical" size="0.8rem" />
+                  <AppIcon name="kebab-vertical" size="0.8rem" />
                 </Button>
               </ActionsMenu>
             )}

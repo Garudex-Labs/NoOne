@@ -37,7 +37,7 @@ import fs from 'node:fs'
 import https from 'node:https'
 import path from 'node:path'
 
-// Relative, not `@hermes/shared/ansi`: the electron bundle is built by esbuild
+// Relative, not `@noone/shared/ansi`: the electron bundle is built by esbuild
 // with no tsconfig path resolution (see scripts/bundle-electron-main.mjs).
 import { stripAnsi } from '../../shared/src/ansi'
 
@@ -99,7 +99,7 @@ function readExistingPinnedCommit(activeRoot: string | null | undefined): string
   }
 
   try {
-    const raw = fs.readFileSync(path.join(activeRoot, '.hermes-bootstrap-complete'), 'utf8')
+    const raw = fs.readFileSync(path.join(activeRoot, '.agent-bootstrap-complete'), 'utf8')
     const parsed = JSON.parse(raw)
 
     return parsed && isPinnedCommit(parsed.pinnedCommit) ? parsed.pinnedCommit : null
@@ -229,7 +229,7 @@ function downloadInstallScript(ref, destPath) {
   // install, the branch for an existing checkout or a non-git fallback stamp
   // (never the all-zero placeholder, which is not a real GitHub commit).
   const scriptName = installScriptName()
-  const url = `https://raw.githubusercontent.com/NousResearch/hermes-agent/${ref}/scripts/${scriptName}`
+  const url = `https://raw.githubusercontent.com/Garudex-Labs/NoOne/${ref}/scripts/${scriptName}`
 
   return new Promise((resolve, reject) => {
     fs.mkdirSync(path.dirname(destPath), { recursive: true })

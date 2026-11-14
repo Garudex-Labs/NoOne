@@ -1,13 +1,13 @@
 import { atom } from 'nanostores'
 
-import { getActionStatus, getStatus, hermesApi, restartGateway } from '@/hermes'
+import { getActionStatus, getStatus, hermesApi, restartGateway } from '@/agent-client'
 import { translateNow } from '@/i18n'
 import { sharedGatewayProfiles } from '@/lib/shared-gateway-restart'
 import { isSignedOutStatus } from '@/lib/signed-out-status'
 import { confirm } from '@/store/confirm'
 import { reconnectGateway } from '@/store/gateway-reconnect'
 import { notify, notifyError } from '@/store/notifications'
-import type { ActionResponse } from '@/types/hermes'
+import type { ActionResponse } from '@/types/agent-client'
 
 const POLL_ATTEMPTS = 18
 const POLL_INTERVAL_MS = 1200

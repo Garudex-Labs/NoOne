@@ -54,8 +54,7 @@ from tools.terminal_tool_backends import (
     _REQUIREMENT_CHECKERS, _VERCEL_SANDBOX_DEFAULT_CWD, _check_plugin_requirements,
     _record_unavailable_reason, terminal_backend_unavailable_reason,
 )
-# display_hermes_home imported lazily at call site (stale-module safety during hermes update)
-from tools.tool_backend_helpers import coerce_modal_mode, managed_nous_tools_enabled
+# display_agent_home imported lazily at call site (stale-module safety during noone update)
 
 
 def _safe_parse_import_env(name: str, default: Any, converter, type_label: str):
@@ -126,10 +125,10 @@ def _container_profile() -> str:
     from a routed profile's chat), else the session's. A session with no profile name (a gateway launched as a
     named profile stamps none on its own chats) is the launch profile's, so it keys that profile by name, like
     the profile's Desktop sessions and its session-less work (:func:`_sessionless_container_key`)."""
-    from hermes_constants import get_hermes_home_override, profile_name_for_home
+    from agent_constants import get_agent_home_override, profile_name_for_home
     from tools.environments.local import _is_routed_home
 
-    override = get_hermes_home_override()
+    override = get_agent_home_override()
     session = _current_session_profile()
     bound = profile_name_for_home(override) if override else None
     if bound and (bound != session if session else _is_routed_home(override)):
@@ -472,10 +471,10 @@ def _routed_home_task_key(profile_scoped: bool) -> Optional[str]:
     Persistent Docker keys the profile name exactly like B's session-bound work, so B keeps ONE
     container instead of a second one per home path.
     """
-    from hermes_constants import get_hermes_home_override, profile_name_for_home
+    from agent_constants import get_agent_home_override, profile_name_for_home
     from tools.environments.local import _is_routed_home
 
-    override = get_hermes_home_override()
+    override = get_agent_home_override()
     if not override or not _is_routed_home(override):
         return None
     profile = profile_name_for_home(override) if profile_scoped else None
@@ -761,11 +760,11 @@ def _ensure_terminal_env_bridged() -> None:
     """Backfill TERMINAL_* env vars from config.yaml when no launcher did.
 
     CLI, gateway and TUI/dashboard PTY launches bridge ``terminal.*`` into env vars
-    at startup; processes that skip those paths (``hermes serve``, Desktop
+    at startup; processes that skip those paths (``noone serve``, Desktop
     in-process agents, desktop cron ticker, ACP) would otherwise fall back to the
     local backend even when config selects docker — running on the host the user
     meant to sandbox. Explicit keys in the ``terminal`` section override matching
-    env values (possibly stale from ``hermes setup``); env values for omitted keys
+    env values (possibly stale from ``noone setup``); env values for omitted keys
     are preserved. Without a terminal section an existing TERMINAL_ENV is kept and
     defaults are backfilled only when none is set. A per-turn terminal scope
     suppresses the bridge entirely: writing scope values into the process-global
@@ -786,9 +785,9 @@ def _ensure_terminal_env_bridged() -> None:
     if get_terminal_scope() is not None:
         return
     # Never write a secondary profile's terminal.* into process-global env.
-    from hermes_constants import get_hermes_home_override
+    from agent_constants import get_agent_home_override
 
-    if get_hermes_home_override() is not None:
+    if get_agent_home_override() is not None:
         return
     global _terminal_config_bridge_attempted
     if _terminal_config_bridge_attempted:
@@ -796,7 +795,7 @@ def _ensure_terminal_env_bridged() -> None:
     _terminal_config_bridge_attempted = True
     # Never let a config problem take the terminal tool down.
     with _quiet("terminal config → env fallback bridge failed"):
-        from hermes_cli.config import apply_terminal_config_to_env, read_raw_config
+        from agent_cli.config import apply_terminal_config_to_env, read_raw_config
 
         raw_config = read_raw_config()
         if isinstance(raw_config.get("terminal"), dict):
@@ -831,7 +830,7 @@ def _resolve_config_cwd(env_type: str, mount_docker_cwd: bool) -> tuple:
     """
     default_cwd = _backend_default_cwd(env_type)
     cwd = _tenv("TERMINAL_CWD", default_cwd)
-    from hermes_cli.config import _is_ssh_remote_tilde_cwd
+    from agent_cli.config import _is_ssh_remote_tilde_cwd
     from tools.environments.sandbox_scope import hosted_scope
     # The backend's own default is an in-sandbox path: its ``~`` is the sandbox home, not ours. So is a
     # hosted scope's ``~``: it names that agent's sandbox home, never this host's HOME.
@@ -871,9 +870,12 @@ def _resolve_config_cwd(env_type: str, mount_docker_cwd: bool) -> tuple:
 
 def _get_env_config() -> dict[str, Any]:
     """Resolve the terminal configuration dict from TERMINAL_* env vars."""
-    from hermes_cli.config_defaults import DEFAULT_SANDBOX_IMAGE as default_image
+    from agent_cli.config_defaults import DEFAULT_SANDBOX_IMAGE as default_image
     _ensure_terminal_env_bridged()
     env_type = _tenv("TERMINAL_ENV", "local")
+    if env_type == "modal" and _tenv("TERMINAL_MODAL_MODE", "").strip().lower() == "managed":
+        raise ValueError(
+            "Managed execution is no longer supported. Explicitly configure your own Modal account or select a local backend.")
     mount_docker_cwd = _tenv_bool("TERMINAL_DOCKER_MOUNT_CWD_TO_WORKSPACE", "false")
 
     # Container/docker-only payloads are parsed only when such a backend is
@@ -899,7 +901,6 @@ def _get_env_config() -> dict[str, Any]:
 
     return {
         "env_type": env_type,
-        "modal_mode": coerce_modal_mode(_tenv("TERMINAL_MODAL_MODE", "auto")),
         "docker_image": _tenv("TERMINAL_DOCKER_IMAGE", default_image),
         "docker_image_pinned": _tenv("TERMINAL_DOCKER_IMAGE_PINNED", "0") == "1",
         "docker_forward_env": docker_forward_env,
@@ -1410,7 +1411,7 @@ def _run_foreground(
 ) -> str:
     """Execute in the foreground with retry on transient errors, then finalize. ``metered``
     is False for Hermes' own control-plane commands (``_host_local``)."""
-    from hermes_cli.observability.shared_metrics_harness import record_terminal_outcome
+    from agent_cli.observability.shared_metrics_harness import record_terminal_outcome
     max_retries = 3
     env_type, eff, effective_timeout = plan.env_type, plan.effective_task_id, plan.effective_timeout
 
@@ -1569,7 +1570,7 @@ def terminal_tool(
     ``_host_local`` forces the local backend for Hermes-owned control-plane
     children (kept in a separate env cache from the configured backend).
     """
-    from hermes_cli.observability.shared_metrics_loop import record_terminal_backend as _metered
+    from agent_cli.observability.shared_metrics_loop import record_terminal_backend as _metered
     plan = None
     try:
         plan = _plan_execution(

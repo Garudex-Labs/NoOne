@@ -1,6 +1,6 @@
 """After a chat moves to a new conversation, an app view of its old one keeps working, off the chat.
 
-Teknium's ruling: a messaging chat's ``/new`` must not lock Desktop / Webapp / mobile users out of
+a messaging chat's ``/new`` must not lock Desktop / Webapp / mobile users out of
 the conversation they have open, and the chat must not get that conversation's replies once it is on
 another one. A Discord chat's conversation A is open in an app; the chat sends ``/new`` and then a
 message, which runs in its new conversation B. The app's prompt on A runs in A on A's own key, and
@@ -68,7 +68,7 @@ def _app():
 async def _app_turn(authority, ref, text):
     """The app's prompt, settled: ``(status, outcome)`` of its admission."""
     from gateway.session_contract import Submission
-    from hermes_state_runtime import list_session_admissions
+    from agent_state_runtime import list_session_admissions
     receipt = await authority.submit(_app(), Submission(text, ref, {'text': text}, 'queue'))
 
     def settled():

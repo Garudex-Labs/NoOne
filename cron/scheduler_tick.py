@@ -32,7 +32,7 @@ def _log_tick_yield_once(reason: str) -> None:
 
 def tick(verbose=True, adapters=None, loop=None, sync=True, *, can_dispatch=None,
          headless: bool = False):
-    from hermes_cli.backend_retirement import retirement
+    from agent_cli.backend_retirement import retirement
 
     # Hold admission through the entire scan/advance/submit handoff. A predicate alone races
     # prepare after the check but before a due job enters the running-job ledger.
@@ -94,7 +94,7 @@ def _tick_admitted(
     headless: bool = False):
     """Check and run all due jobs. File-locked so only one tick runs at a time (gateway ticker vs
     standalone daemon / manual tick). ``can_dispatch``: optional gate; false leaves due jobs for the
-    next allowed tick. ``headless``: the tick runs outside any gateway (system crontab, ``hermes
+    next allowed tick. ``headless``: the tick runs outside any gateway (system crontab, ``noone
     cron tick``) and must refuse agent jobs rather than spawn one. Returns the number of jobs
     executed (0 if another tick holds the lock)."""
     from cron import scheduler as _sched

@@ -1,16 +1,15 @@
 ---
-sidebar_position: 14
 title: "Egress proxy internals"
-description: "How the iron-proxy egress firewall integrates with Hermes — module layout, lifecycle, security invariants, and extension points"
+description: "How the iron-proxy egress firewall integrates with the agent — module layout, lifecycle, security invariants, and extension points"
 ---
 
-# Egress proxy internals
+# Egress proxy internals {#egress-proxy-internals}
 
 This page covers the architecture of the egress credential-injection firewall (`hermes egress` / iron-proxy) from a contributor / plugin author's perspective. End-user setup + usage docs live at [Egress proxy](../user-guide/egress/iron-proxy.md).
 
 The threat model and high-level design are summarised on the user page; this page is about *how* it's wired, where the security-relevant code lives, and what invariants you have to preserve if you touch it.
 
-## Module layout
+## Module layout {#module-layout}
 
 ```text
 pm/security_packages.py              Pinned binary acquisition and publication
@@ -20,19 +19,19 @@ agent/proxy_sources/iron_proxy.py     Core: binary lookup, GPG checks, CA gen, c
                                        subprocess lifecycle, mappings I/O, PID/nonce
                                        defense.  Pure-function surface where possible.
 
-hermes_cli/proxy_cli.py               Wizard + slash command handlers.
+agent_cli/proxy_cli.py               Wizard + slash command handlers.
                                        `hermes egress {install,setup,start,stop,
                                        status,disable,config}`.  Wires the
                                        core module into argparse.
 
-hermes_cli/subcommands/egress.py:_dispatch_egress
+agent_cli/subcommands/egress.py:_dispatch_egress
                                        Top-level subparser dispatcher.
                                        dest='egress_command' (intentionally
                                        disjoint from the inbound OAuth
                                        `hermes proxy` subparser, which uses
                                        dest='proxy_command').
 
-hermes_cli/config.py: proxy schema    The `proxy:` block in DEFAULT_CONFIG.
+agent_cli/config.py: proxy schema    The `proxy:` block in DEFAULT_CONFIG.
                                        Adding a knob means: add it here, add a
                                        wizard prompt or `setdefault` in
                                        proxy_cli.cmd_setup, and document it
@@ -55,7 +54,7 @@ tests/agent/test_iron_proxy.py              Hermetic tests (~70).  Binary instal
                                        deny CIDR defaults, bind policy, CA
                                        TOCTOU, ensure_audit_log behaviour, etc.
 
-tests/hermes_cli/test_iron_proxy_cli.py          CLI handler unit tests (~20).  Argparse
+tests/agent_cli/test_iron_proxy_cli.py          CLI handler unit tests (~20).  Argparse
                                        wiring, fail-loud paths, BWS refresh
                                        wire-up, dest='egress_command'
                                        regression guard.
@@ -65,7 +64,7 @@ tests/agent/test_iron_proxy_e2e.py          Live E2E (gated on HERMES_RUN_E2E=1)
                                        end-to-end token swap verified.
 ```
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 ```text
 hermes egress install
@@ -143,11 +142,11 @@ hermes egress stop
        _cleanup_state_files: unlink pidfile + nonce sibling.
 ```
 
-## Security invariants
+## Security invariants {#security-invariants}
 
 These are the load-bearing properties.  If you touch the module, you must preserve them.  Where there's a regression test, it's named.
 
-### Filesystem perms
+### Filesystem perms {#filesystem-perms}
 
 | Path | Mode | Test |
 |---|---|---|
@@ -163,13 +162,13 @@ These are the load-bearing properties.  If you touch the module, you must preser
 
 All write paths use `os.open(O_WRONLY | O_CREAT | O_NOFOLLOW, 0o600)` + `os.fstat().st_uid` check.  `shutil.copy2` + `os.chmod` is forbidden because it leaks a default-umask window.
 
-### Subprocess env minimisation
+### Subprocess env minimisation {#subprocess-env-minimisation}
 
 `_build_proxy_subprocess_env` MUST NOT use `os.environ.copy()`.  The allowlist is `_PROXY_SUBPROCESS_ENV_ALLOWLIST` (PATH, HOME, locale, etc.) plus the env names referenced by `load_mappings()`.  Everything else stays on the host.
 
 Regression: `test_subprocess_env_strips_unrelated_secrets`, `test_subprocess_env_strips_proxy_recursion_vars`, `test_subprocess_env_keeps_infrastructure_vars`.
 
-### Bind policy
+### Bind policy {#bind-policy}
 
 `_default_http_listen` returns a single-element list: on Linux the docker bridge gateway IP (containers reach the proxy via `host.docker.internal:host-gateway`, which resolves to the bridge gateway — a loopback bind is unreachable from inside containers there); on macOS/Windows Docker Desktop, loopback (VPNkit routes `host.docker.internal` to the host).  Linux without a detectable docker0 bridge falls back to loopback with a warning.  Never `0.0.0.0`, never `:PORT` (INADDR_ANY).
 
@@ -181,19 +180,19 @@ The liveness probes (`start_proxy` poll loop, `get_status`) read the configured 
 
 Regression: `test_default_bind_is_loopback_not_zero_zero` (asserts no INADDR_ANY AND that `http_listens` is NOT in the rendered yaml), `test_default_bind_uses_docker_bridge_on_linux`, `test_default_bind_falls_back_to_loopback_without_bridge`, `test_default_bind_is_loopback_on_macos`, `test_detect_docker_bridge_ip_rejects_dangerous` (parametrized over 8 attack inputs).
 
-### Metrics port collision
+### Metrics port collision {#metrics-port-collision}
 
-`metrics.listen` defaults to `:9090` in iron-proxy v0.39 — the SAME port as Hermes's default `tunnel_port: 9090`.  `build_proxy_config` MUST explicitly pin `metrics.listen: 127.0.0.1:0` so the metrics binding gets an ephemeral loopback port that can never collide with the proxy listener regardless of operator-chosen `tunnel_port`.
+`metrics.listen` defaults to `:9090` in iron-proxy v0.39 — the SAME port as {{app-name}}'s default `tunnel_port: 9090`.  `build_proxy_config` MUST explicitly pin `metrics.listen: 127.0.0.1:0` so the metrics binding gets an ephemeral loopback port that can never collide with the proxy listener regardless of operator-chosen `tunnel_port`.
 
 Regression: `test_metrics_listener_pinned_to_loopback_ephemeral`.
 
-### Default deny CIDRs
+### Default deny CIDRs {#default-deny-cidrs}
 
 `_DEFAULT_UPSTREAM_DENY_CIDRS` covers loopback (v4 + v6), link-local (incl. IMDS at 169.254.169.254 and the IPv4-mapped-v6 form), RFC1918, IPv6 ULA, CGNAT, and the RFC2544 benchmark range.  `build_proxy_config(..., upstream_deny_cidrs=None)` MUST emit the default; only an explicit empty list opts out.
 
 Regression: `test_default_deny_cidrs_present_when_unspecified`, `test_default_deny_includes_ipv4_mapped_v6`.
 
-### Audit log fail-loud
+### Audit log fail-loud {#audit-log-fail-loud}
 
 `ensure_audit_log` raises `RuntimeError` on any `OSError`.  On the pinned v0.39 the daemon never writes this file (no `log.audit_path` field), so `cmd_setup` treats the failure as a WARNING (the file is non-load-bearing until the version bump) and qualifies the success line as "reserved".  When the pin moves to a version with `log.audit_path`, revisit: the pre-create becomes load-bearing for the 0o600-from-first-byte guarantee and the wizard should fail loud again.
 
@@ -201,7 +200,7 @@ Regression: `test_default_deny_cidrs_present_when_unspecified`, `test_default_de
 
 Regression: `test_ensure_audit_log_raises_on_immutable_parent`, `test_audit_log_kwarg_does_not_inject_audit_path_v039`.
 
-### Bitwarden mode fail-loud
+### Bitwarden mode fail-loud {#bitwarden-mode-fail-loud}
 
 When `credential_source: bitwarden` AND `proxy.allow_env_fallback: false` (default):
 - Missing access token env var -> `cmd_start` refuses.
@@ -212,33 +211,33 @@ Falling back to host env in BW mode reintroduces exactly the staleness bug the B
 
 Regression: `test_cmd_start_refuses_when_bitwarden_token_missing` (CLI layer); strict-mode assertions in `_build_proxy_subprocess_env` (daemon layer).
 
-### docker_env collision detection
+### docker_env collision detection {#docker_env-collision-detection}
 
 When `enforce_on_docker: true`, `docker_env` overrides on any of the egress-controlling vars (HTTPS_PROXY, SSL_CERT_FILE, NODE_EXTRA_CA_CERTS, etc.) OR any mapped `real_env_name` (OPENROUTER_API_KEY, etc.) raises `RuntimeError` BEFORE the container starts.
 
 Regression: `test_docker_env_collision_with_proxy_raises_when_enforce`.
 
-### PID recycling defense
+### PID recycling defense {#pid-recycling-defense}
 
 `_pid_alive` MUST consult either the in-process `_proxy_nonce` (same-process case) OR the on-disk `iron-proxy.nonce` (cross-CLI case) before trusting an `argv[0]` basename match.  `stop_proxy` MUST re-check `/proc/<pid>/stat` starttime before SIGKILL and suppress the signal on starttime drift.
 
 Regression: `test_stop_proxy_suppresses_sigkill_on_pid_recycle`, `test_pid_proc_starttime_parses_comm_with_parens`, `test_persisted_nonce_roundtrip`.
 
-### Token preservation on re-setup
+### Token preservation on re-setup {#token-preservation-on-re-setup}
 
 `merge_mappings(existing, discovered, rotate=False)` MUST return prior tokens for providers that overlap.  Re-running `hermes egress setup` cannot silently 401 running sandboxes.  `--rotate-tokens` is the explicit opt-in.
 
 Regression: `test_merge_mappings_preserves_existing_tokens`, `test_merge_mappings_rotate_mints_fresh_tokens`.
 
-### `credential_source` preservation
+### `credential_source` preservation {#credential_source-preservation}
 
 `cmd_setup` MUST NOT downgrade `credential_source: bitwarden` to `env` on re-run without an explicit `--no-bitwarden` flag.  Running `hermes egress setup` (no flag) preserves whatever was previously configured.
 
 Tested via the `cmd_setup` flow in CLI tests (the bitwarden-preservation path is exercised when `--from-bitwarden` is followed by a plain `setup` re-run).
 
-## Extension points
+## Extension points {#extension-points}
 
-### Adding a new bearer-token provider
+### Adding a new bearer-token provider {#adding-a-new-bearer-token-provider}
 
 `_BEARER_PROVIDERS` in `iron_proxy.py` maps env var name -> tuple of upstream hosts.  Adding an entry makes it discoverable by `discover_provider_mappings()`; the wizard mints a token for it automatically when the env var is present.
 
@@ -251,7 +250,7 @@ _BEARER_PROVIDERS: Dict[str, Tuple[str, ...]] = {
 
 Also update `_DEFAULT_ALLOWED_HOSTS` so the proxy allows the upstream by default.  Run `test_discover_provider_mappings_*` to confirm.
 
-### Adding a new header-token provider (x-api-key family)
+### Adding a new header-token provider (x-api-key family) {#adding-a-new-header-token-provider-x-api-key-family}
 
 If the provider authenticates with a static NON-Authorization header (like Anthropic's `x-api-key`, Azure's `api-key`, or Gemini's `x-goog-api-key`), add it to `_HEADER_AUTH_PROVIDERS` — iron-proxy's `secrets.replace.match_headers` targets arbitrary header names, so these are first-class swapped providers:
 
@@ -268,7 +267,7 @@ _HEADER_AUTH_PROVIDERS: Dict[str, Dict[str, Tuple[str, ...]]] = {
 
 Use `aliases` ONLY for interchangeable env-var names of the *same* credential (e.g. `GOOGLE_API_KEY` for `GEMINI_API_KEY`) — aliased names collapse into a single mapping, because two `require: true` rules on the same host reject each other's requests. Also update `_DEFAULT_ALLOWED_HOSTS`.
 
-### Adding a new signature-auth provider (uncovered)
+### Adding a new signature-auth provider (uncovered) {#adding-a-new-signature-auth-provider-uncovered}
 
 If the provider uses SigV4 / SDK-minted OAuth / request signatures, a static header swap cannot cover it.  Add the env var to `_NON_BEARER_PROVIDERS` so the wizard and `hermes egress status` warn about it:
 
@@ -279,7 +278,7 @@ _NON_BEARER_PROVIDERS: Tuple[str, ...] = (
 )
 ```
 
-### Wiring iron-proxy into a non-Docker backend
+### Wiring iron-proxy into a non-Docker backend {#wiring-iron-proxy-into-a-non-docker-backend}
 
 `_egress_proxy_args_for_docker` is Docker-specific.  Backends that want similar wiring need their own analogue that:
 
@@ -292,30 +291,30 @@ _NON_BEARER_PROVIDERS: Tuple[str, ...] = (
 
 The Docker implementation is ~150 lines; expect similar volume for Modal / Daytona / SSH.
 
-### Subscribing to per-request audit events
+### Subscribing to per-request audit events {#subscribing-to-per-request-audit-events}
 
 iron-proxy writes line-delimited JSON to `~/.hermes/proxy/iron-proxy.log` on the currently pinned v0.39 (daemon + per-request records combined; see "Logging on iron-proxy v0.39" in the user guide).  A plugin / external watcher can tail that file and react to allowlist denials, secret swaps, or upstream errors.  When the pinned version is bumped to one that supports `log.audit_path`, the per-request stream moves to `audit.log` and watchers wired to that path go live without operator action.  The schema is documented at [docs.iron.sh/audit](https://docs.iron.sh/audit) (link).
 
-## Testing
+## Testing {#testing}
 
 ```bash
 # Hermetic suite (no network, no real binary)
-scripts/run_tests.sh tests/agent/test_iron_proxy.py tests/hermes_cli/test_iron_proxy_cli.py
+scripts/run_tests.sh tests/agent/test_iron_proxy.py tests/agent_cli/test_iron_proxy_cli.py
 
 # Live E2E (real binary, real curl, real CONNECT tunnel)
 HERMES_RUN_E2E=1 scripts/run_tests.sh tests/agent/test_iron_proxy_e2e.py
 
 # Live PTY smoke against `hermes egress`
-HERMES_HOME=$HOME/.hermes/cache/scratch/hermes-egress-test python3 -m hermes_cli.main egress --help
-HERMES_HOME=$HOME/.hermes/cache/scratch/hermes-egress-test python3 -m hermes_cli.main egress setup --help
+HERMES_HOME=$HOME/.hermes/cache/scratch/hermes-egress-test python3 -m agent_cli.main egress --help
+HERMES_HOME=$HOME/.hermes/cache/scratch/hermes-egress-test python3 -m agent_cli.main egress setup --help
 ```
 
 The CLI uses argparse, so `--help` is a good first probe for "did my new flag register correctly".
 
-## See also
+## See also {#see-also}
 
-- User-facing setup + troubleshooting: [Egress proxy](https://hermes-agent.nousresearch.com/docs/user-guide/egress/iron-proxy)
-- Docker backend internals: [Docker](https://hermes-agent.nousresearch.com/docs/user-guide/docker)
-- Bitwarden Secrets Manager integration: [`hermes secrets bitwarden`](https://hermes-agent.nousresearch.com/docs/user-guide/secrets/bitwarden)
-- CLI command reference: [`hermes egress`](https://hermes-agent.nousresearch.com/docs/reference/cli-commands#hermes-egress)
-- Sandbox-injected environment variables: [Egress proxy (sandbox-injected)](https://hermes-agent.nousresearch.com/docs/reference/environment-variables#egress-proxy-sandbox-injected)
+- User-facing setup + troubleshooting: [Egress proxy](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/egress/iron-proxy.md)
+- Docker backend internals: [Docker](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/docker.md)
+- Bitwarden Secrets Manager integration: [`hermes secrets bitwarden`](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/secrets/bitwarden.md)
+- CLI command reference: [`hermes egress`](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/cli-commands.md#hermes-egress)
+- Sandbox-injected environment variables: [Egress proxy (sandbox-injected)](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/environment-variables.md#egress-proxy-sandbox-injected)

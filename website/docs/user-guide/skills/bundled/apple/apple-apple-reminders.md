@@ -1,61 +1,69 @@
 ---
 title: "Apple Reminders — Apple Reminders via remindctl: add, list, complete"
-sidebar_label: "Apple Reminders"
+sidebarTitle: "Apple Reminders"
 description: "Apple Reminders via remindctl: add, list, complete"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Apple Reminders
+# Apple Reminders {#apple-reminders}
 
 Apple Reminders via remindctl: add, list, complete.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/apple/apple-reminders` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | macos |
 | Tags | `Reminders`, `tasks`, `todo`, `macOS`, `Apple` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Apple Reminders
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Apple Reminders {#apple-reminders-1}
 
 Use `remindctl` to manage Apple Reminders directly from the terminal. Tasks sync across all Apple devices via iCloud.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **macOS** with Reminders.app
 - Install: `brew install steipete/tap/remindctl`
 - Grant Reminders permission when prompted
 - Check: `remindctl status` / Request: `remindctl authorize`
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User mentions "reminder" or "Reminders app"
 - Creating personal to-dos with due dates that sync to iOS
 - Managing Apple Reminders lists
 - User wants tasks to appear on their iPhone/iPad
 
-## When NOT to Use
+## When NOT to Use {#when-not-to-use}
 
 - Scheduling agent alerts → use the cronjob tool instead
 - Calendar events → use Apple Calendar or Google Calendar
 - Project task management → use GitHub Issues, Notion, etc.
 - If user says "remind me" but means an agent alert → clarify first
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
-### View Reminders
+### View Reminders {#view-reminders}
 
 ```bash
 remindctl                    # Today's reminders
@@ -67,7 +75,7 @@ remindctl all                # Everything
 remindctl 2026-01-04         # Specific date
 ```
 
-### Manage Lists
+### Manage Lists {#manage-lists}
 
 ```bash
 remindctl list               # List all lists
@@ -76,7 +84,7 @@ remindctl list Projects --create    # Create list
 remindctl list Work --delete        # Delete list
 ```
 
-### Create Reminders
+### Create Reminders {#create-reminders}
 
 ```bash
 remindctl add "Buy milk"
@@ -84,7 +92,7 @@ remindctl add --title "Call mom" --list Personal --due tomorrow
 remindctl add --title "Meeting prep" --due "2026-02-15 09:00"
 ```
 
-### Due Time vs Alarm / Early Nudge
+### Due Time vs Alarm / Early Nudge {#due-time-vs-alarm--early-nudge}
 
 `--due` and `--alarm` are different fields:
 
@@ -116,14 +124,14 @@ Expected shape:
 
 Apple's public `EKReminder` docs list only reminder-specific properties. Alarm support comes from inherited `EKCalendarItem` behavior exposed by remindctl's `--alarm` flag.
 
-### Complete / Delete
+### Complete / Delete {#complete--delete}
 
 ```bash
 remindctl complete 1 2 3          # Complete by ID
 remindctl delete 4A83 --force     # Delete by ID
 ```
 
-### Output Formats
+### Output Formats {#output-formats}
 
 ```bash
 remindctl today --json       # JSON for scripting
@@ -131,7 +139,7 @@ remindctl today --plain      # TSV format
 remindctl today --quiet      # Counts only
 ```
 
-## Date Formats
+## Date Formats {#date-formats}
 
 Accepted by `--due` and date filters:
 - `today`, `tomorrow`, `yesterday`
@@ -139,7 +147,7 @@ Accepted by `--due` and date filters:
 - `YYYY-MM-DD HH:mm`
 - ISO 8601 (`2026-01-04T12:34:56Z`)
 
-## Rules
+## Rules {#rules}
 
 1. When user says "remind me", clarify: Apple Reminders (syncs to phone) vs agent cronjob alert
 2. Always confirm reminder content and due date before creating

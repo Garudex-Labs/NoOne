@@ -1,6 +1,7 @@
-import { Codicon } from '@/components/ui/codicon'
+import { AppIcon } from '@noone/ui/app-icon'
+
 import { Tip } from '@/components/ui/tooltip'
-import type { HermesBranchPullRequest } from '@/global'
+import type { AgentBranchPullRequest } from '@/global'
 import { cn } from '@/lib/utils'
 import { pullRequestBucket } from '@/store/pull-requests'
 
@@ -14,7 +15,7 @@ const PR_STYLE: Record<string, { className: string; icon: string }> = {
   open: { className: 'text-(--ui-green)', icon: 'git-pull-request' }
 }
 
-export function openPullRequest(pr: HermesBranchPullRequest): void {
+export function openPullRequest(pr: AgentBranchPullRequest): void {
   if (pr.url) {
     void window.hermesDesktop?.openExternal?.(pr.url)
   }
@@ -31,7 +32,7 @@ export function PrTag({
   showIcon = true
 }: {
   className?: string
-  pr: HermesBranchPullRequest
+  pr: AgentBranchPullRequest
   showIcon?: boolean
 }) {
   const style = PR_STYLE[pullRequestBucket(pr)] ?? PR_STYLE.open
@@ -61,7 +62,7 @@ export function PrTag({
         onPointerDown={event => event.stopPropagation()}
         type="button"
       >
-        {showIcon && <Codicon name={style.icon} size="0.75rem" />}
+        {showIcon && <AppIcon name={style.icon} size="0.75rem" />}
         {/* Without the glyph the number needs the `#` to still read as a PR. */}
         <span className="underline-offset-1 group-hover/pr:underline">{showIcon ? pr.number : `#${pr.number}`}</span>
       </button>

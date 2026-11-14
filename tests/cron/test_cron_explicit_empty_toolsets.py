@@ -22,8 +22,8 @@ def hermes_env(tmp_path, monkeypatch):
 
     import importlib
 
-    import hermes_constants
-    importlib.reload(hermes_constants)
+    import agent_constants
+    importlib.reload(agent_constants)
     import cron.jobs
     importlib.reload(cron.jobs)
     import cron.scheduler

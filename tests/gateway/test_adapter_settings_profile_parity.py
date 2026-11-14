@@ -54,30 +54,12 @@ _SETTINGS = [
      lambda m: _slack(m, "_reactions_enabled")),
     ("plugins.platforms.slack.adapter", "SLACK_REACTION_TRIGGER_TARGET", "C_DEFAULT", "C_SECONDARY",
      lambda m: _slack(m, "_slack_reaction_trigger_target")),
-    ("plugins.platforms.matrix.adapter", "MATRIX_REQUIRE_MENTION", "true", "false",
-     lambda m: m.MatrixAdapter._parse_require_mention(PlatformConfig(enabled=True))),
-    ("plugins.platforms.matrix.adapter", "MATRIX_THREAD_REQUIRE_MENTION", "false", "true",
-     lambda m: m.MatrixAdapter._parse_thread_require_mention(PlatformConfig(enabled=True))),
-    ("plugins.platforms.matrix.adapter", "MATRIX_MAX_MESSAGE_LENGTH", "1111", "2222",
-     lambda m: m._resolve_max_message_length(PlatformConfig(enabled=True))),
-    ("plugins.platforms.matrix.adapter", "MATRIX_E2EE_MODE", "required", "off",
-     lambda m: m._resolve_e2ee_mode({})),
-    ("plugins.platforms.matrix.adapter", "MATRIX_ALLOW_PUBLIC_ROOMS", "true", "false",
-     lambda m: m._env_truthy("MATRIX_ALLOW_PUBLIC_ROOMS")),
     ("plugins.platforms.teams.adapter", "TEAMS_PORT", "18001", "18101",
      lambda m: (m._env_enablement() or {}).get("port")),
-    ("plugins.platforms.feishu.adapter", "FEISHU_WEBHOOK_PORT", "18073", "18173",
-     lambda m: m.FeishuAdapter._load_settings({}).webhook_port),
-    ("plugins.platforms.feishu.adapter", "FEISHU_CONNECTION_MODE", "websocket", "webhook",
-     lambda m: m.FeishuAdapter._load_settings({}).connection_mode),
-    ("plugins.platforms.bluebubbles.adapter", "BLUEBUBBLES_WEBHOOK_PORT", "18010", "18110",
-     lambda m: m._extra_or_secret({}, "webhook_port", "BLUEBUBBLES_WEBHOOK_PORT", "0")),
     ("plugins.platforms.signal.adapter", "SIGNAL_REACTIONS", "true", "false",
      lambda m: _signal_reactions(m)),
     ("plugins.platforms.line.adapter", "LINE_PORT", "18015", "18115",
      lambda m: (m._env_enablement() or {}).get("port")),
-    ("plugins.platforms.buzz.adapter", "BUZZ_RELAY_URL", "wss://default.relay", "wss://secondary.relay",
-     lambda m: (m._env_enablement() or {}).get("relay_url")),
     ("plugins.platforms.a2a.adapter", "A2A_AGENT_NAME", "default-agent", "secondary-agent",
      lambda m: m._default_agent_name()),
     ("plugins.platforms.discord.adapter", "DISCORD_COMMAND_SYNC_POLICY", "full", "off",
@@ -111,10 +93,10 @@ def _discord(mod, method):
 def test_served_secondary_resolves_its_own_setting(monkeypatch, module, var, default_value, secondary_value, resolve):
     mod = importlib.import_module(module)
     for name in (var, "LINE_CHANNEL_ACCESS_TOKEN", "LINE_CHANNEL_SECRET", "TEAMS_CLIENT_ID", "TEAMS_CLIENT_SECRET",
-                 "TEAMS_TENANT_ID", "SIGNAL_ACCOUNT", "BUZZ_PRIVATE_KEY"):
+                 "TEAMS_TENANT_ID", "SIGNAL_ACCOUNT", "LINE_CHANNEL_SECRET"):
         monkeypatch.delenv(name, raising=False)
     creds = {"LINE_CHANNEL_ACCESS_TOKEN": "t", "LINE_CHANNEL_SECRET": "s", "TEAMS_CLIENT_ID": "a",
-             "TEAMS_CLIENT_SECRET": "b", "TEAMS_TENANT_ID": "c", "SIGNAL_ACCOUNT": "+1", "BUZZ_PRIVATE_KEY": "k"}
+             "TEAMS_CLIENT_SECRET": "b", "TEAMS_TENANT_ID": "c", "SIGNAL_ACCOUNT": "+1", "LINE_CHANNEL_SECRET": "k"}
     standalone, served = _served(monkeypatch, {var: default_value, **creds}, {var: secondary_value, **creds},
                                  lambda: resolve(mod))
     assert served == standalone, f"{var}: served={served!r} standalone={standalone!r}"

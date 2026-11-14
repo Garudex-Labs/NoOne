@@ -18,7 +18,7 @@
  * Plugin dialog, which still requires the user's explicit confirmation.
  */
 
-import { type ConnectionState, PLUGIN_CATALOG_NAME_RE } from '@hermes/shared'
+import { type ConnectionState, PLUGIN_CATALOG_NAME_RE } from '@noone/shared'
 import type { ReadableAtom } from 'nanostores'
 
 import { isMissingRpcMethod } from '@/lib/gateway-rpc'
@@ -27,11 +27,11 @@ import { requestGatewayForActiveRoute } from '@/store/active-route-request'
 import { activeGatewayProfileKey } from '@/store/gateway'
 import { $gatewayState } from '@/store/session'
 
-export const CATALOG_ORIGIN = 'https://hermes-agent.nousresearch.com'
+export const CATALOG_ORIGIN = 'https://github.com/Garudex-Labs/NoOne/tree/main/website/docs'
 export const PLUGIN_CATALOG_URL = `${CATALOG_ORIGIN}/docs/api/plugins.json`
 export const PLUGIN_CATALOG_DOCS_URL = `${CATALOG_ORIGIN}/docs/user-guide/features/plugin-catalog`
 export const SKILLS_DOCS_URL = `${CATALOG_ORIGIN}/docs/skills/`
-export const SUBMIT_MOD_URL = 'https://github.com/NousResearch/hermes-agent/compare'
+export const SUBMIT_MOD_URL = 'https://github.com/Garudex-Labs/NoOne/compare'
 
 const FETCH_TIMEOUT_MS = 15_000
 const LOOKUP_TIMEOUT_MS = 20_000

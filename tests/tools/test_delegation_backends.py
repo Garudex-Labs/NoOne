@@ -7,13 +7,13 @@ resolution; only child construction/run are stubbed where a test reads what they
 import json
 import types
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 import pytest
 
 from pathlib import Path
 
-from hermes_cli import plugins as plugins_mod
-from hermes_cli.plugins import PluginManager
+from agent_cli import plugins as plugins_mod
+from agent_cli.plugins import PluginManager
 
 REPO_PLUGINS = Path(__file__).resolve().parents[2] / "plugins"
 
@@ -183,7 +183,7 @@ def test_a_missing_backend_fails_closed_and_default_keeps_todays_route(tmp_path,
     assert len(set(definitions)) == 1 and '"option"' not in definitions[0]
     assert [(b["model"], b["override_base_url"]) for b in recorded] == [("pinned-model", "http://127.0.0.1:9/v1")] * 2
     error = outcomes[2]["error"]
-    assert "'not-installed' is not installed" in error and "hermes config set delegation.backend default" in error
+    assert "'not-installed' is not installed" in error and "noone config set delegation.backend default" in error
 
 
 def test_a_backend_route_without_its_own_chain_inherits_delegation_fallback_providers(tmp_path, monkeypatch):
@@ -343,7 +343,7 @@ def test_route_task_always_sees_the_core_task_position(tmp_path, monkeypatch):
 def test_backend_key_reads_through_the_real_loader(tmp_path, monkeypatch):
     """``delegation.backend`` defaults to ``default`` and a configured value reaches the registry."""
     from agent.delegation_registry import configured_backend
-    from hermes_cli.config import load_config
+    from agent_cli.config import load_config
     from tools.delegate_tool_config import _load_config
 
     _, manager = _home(tmp_path / "unset", monkeypatch, {}, plugins=())

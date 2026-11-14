@@ -26,6 +26,8 @@ class _ConstructorStop(BaseException):
     and would swallow an ordinary failure into a green test."""
 
 
+
+
 def _fork_site(site):
     """``(module holding the AIAgent binding, spawn thunk, extra patches)``, resolved lazily.
     batch_runner binds AIAgent at import, so its patch lands on its own global."""
@@ -53,14 +55,6 @@ def _fork_site(site):
         return batch_runner, (lambda: batch_runner._process_single_prompt(
             0, {"prompt": "p"}, 0, {"model": "m", "max_iterations": 3, "distribution": {}},
         )), (patch.object(batch_runner, "sample_toolsets_from_distribution", return_value=["terminal"]),)
-    if site == "feishu_comment":
-        from plugins.platforms.feishu import feishu_comment
-        import run_agent
-
-        return run_agent, (lambda: feishu_comment._run_comment_agent("p", client=object(), session_key="")), (
-            patch.object(feishu_comment, "_resolve_model_and_runtime", return_value=("m", {})),
-            patch.object(feishu_comment, "_load_session_history", return_value=[]),
-        )
     raise AssertionError(f"unknown fork site: {site}")
 
 
@@ -75,8 +69,8 @@ def _capture_fork_kwargs(site, *, checkpoint_required):
 
     cfg = _fork_config(checkpoint_required)
     with ExitStack() as stack:
-        stack.enter_context(patch("hermes_cli.config.load_config", return_value=cfg))
-        stack.enter_context(patch("hermes_cli.config.load_config_readonly", return_value=cfg))
+        stack.enter_context(patch("agent_cli.config.load_config", return_value=cfg))
+        stack.enter_context(patch("agent_cli.config.load_config_readonly", return_value=cfg))
         stack.enter_context(patch.object(binding, "AIAgent", _recorder))
         for extra in extra_patches:
             stack.enter_context(extra)
@@ -86,7 +80,7 @@ def _capture_fork_kwargs(site, *, checkpoint_required):
     return captured
 
 
-_FORK_SITES = ("delegate", "curator", "batch_runner", "feishu_comment")
+_FORK_SITES = ("delegate", "curator", "batch_runner", )
 
 
 @pytest.mark.parametrize("site", _FORK_SITES)
@@ -109,7 +103,7 @@ def test_checkpoint_required_from_config_reads_the_armed_key():
     from agent.conversation_compression_checkpoint import checkpoint_required_from_config
 
     def _with(cfg):
-        with patch("hermes_cli.config.load_config_readonly", return_value=cfg):
+        with patch("agent_cli.config.load_config_readonly", return_value=cfg):
             return checkpoint_required_from_config()
 
     assert _with({"compression": {"checkpoint_required": True}}) is True
@@ -121,7 +115,7 @@ def test_checkpoint_required_from_config_reads_the_armed_key():
     assert _with({"compression": "nonsense"}) is False
     assert _with(None) is False
     # An unreadable config reads as "not armed", matching init_agent.
-    with patch("hermes_cli.config.load_config_readonly", side_effect=RuntimeError("config unreadable")):
+    with patch("agent_cli.config.load_config_readonly", side_effect=RuntimeError("config unreadable")):
         assert checkpoint_required_from_config() is False
 
 
@@ -154,8 +148,8 @@ def _build_agent_with_recording_provider(seen, builtin_memory=False, **extra):
     cfg = {"compression": {}, "agent": {}, "memory": {"provider": "recording", "memory_enabled": builtin_memory,
                                                       "user_profile_enabled": builtin_memory}}
     with (
-        patch("hermes_cli.config.load_config", return_value=cfg),
-        patch("hermes_cli.config.load_config_readonly", return_value=cfg),
+        patch("agent_cli.config.load_config", return_value=cfg),
+        patch("agent_cli.config.load_config_readonly", return_value=cfg),
         patch("plugins.memory.load_memory_provider", return_value=_RecordingProvider(seen)),
         patch("agent.model_metadata.get_model_context_length", return_value=204_800),
         patch("model_tools.get_tool_definitions", return_value=[]),
@@ -197,9 +191,9 @@ def test_fork_keeps_builtin_memory_out_of_its_prompt():
     """The fork loads the provider for the checkpoint only: MEMORY.md and USER.md stay out of its
     system prompt, as with ``skip_memory=True``. The same config without the fork label loads them."""
     from agent.system_prompt import build_system_prompt
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
-    memories = get_hermes_home() / "memories"
+    memories = get_agent_home() / "memories"
     memories.mkdir(parents=True, exist_ok=True)
     (memories / "MEMORY.md").write_text("parent-only agent note\n")
     (memories / "USER.md").write_text("parent-only user profile\n")

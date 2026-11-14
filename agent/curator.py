@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone, UTC
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Set
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from agent.skill_utils import get_disabled_skill_names
 from tools import skill_usage
 from utils import atomic_json_write
@@ -38,7 +38,7 @@ DEFAULT_CONSOLIDATE = False
 # --- .curator_state — persistent scheduler + status ---
 
 def _state_file() -> Path:
-    return get_hermes_home() / "skills" / ".curator_state"
+    return get_agent_home() / "skills" / ".curator_state"
 
 
 def load_state() -> dict[str, Any]:
@@ -84,7 +84,7 @@ def _subdict(node: Any, *keys: str) -> dict[str, Any]:
 def _read_config_section(*path: str, label: str, log: logging.Logger = logger) -> dict[str, Any]:
     """Read a nested section of ~/.hermes/config.yaml. Tolerates missing file."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
         cfg = load_config_readonly()
     except Exception as e:
         log.debug("Failed to load config for %s: %s", label, e)
@@ -121,7 +121,7 @@ _warned_bad_values: set = set()
 
 def _bounded_count(key: str, default: int) -> int:
     """*key* (a ``curator.<key>`` day/hour count), floored at 1 like ``curator prune --days`` already
-    refuses (hermes_cli/curator.py::_cmd_prune). A value < 1 collapses stale_cutoff/archive_cutoff
+    refuses (agent_cli/curator.py::_cmd_prune). A value < 1 collapses stale_cutoff/archive_cutoff
     onto or past "now" in apply_automatic_transitions(), mass-transitioning every skill with any
     past activity on the next automatic pass — unlike the manual prune path this runs unconfirmed,
     so it falls back to the default instead of acting on the bad value."""
@@ -474,7 +474,7 @@ CURATOR_REVIEW_PROMPT = (
 
 def _reports_root() -> Path:
     """``~/.hermes/logs/curator/`` (telemetry next to agent.log, not under skills/). mkdir'd here too so gateway-only / bare-library entry paths work."""
-    root = get_hermes_home() / "logs" / "curator"
+    root = get_agent_home() / "logs" / "curator"
     try:
         root.mkdir(parents=True, exist_ok=True)
     except OSError as e:
@@ -552,7 +552,7 @@ def _parse_structured_summary(llm_final: str) -> dict[str, list[dict[str, str]]]
     data = None
     if match:
         try:
-            import hermes_yaml as yaml
+            import agent_yaml as yaml
             data = yaml.safe_load(match.group(1))
         except Exception:
             pass
@@ -707,7 +707,7 @@ def _notify_post_curator_run(run_dir: Optional[Path], dry_run: bool) -> None:
     pass's state is saved, so a slow plugin load never delays what ``hermes curator status`` reports."""
     if run_dir is None or not ((run_dir / "run.json").is_file() and (run_dir / "REPORT.md").is_file()):
         return
-    from hermes_cli.lifecycle import invoke_hook  # observers + plugins; each callback isolated there
+    from agent_cli.lifecycle import invoke_hook  # observers + plugins; each callback isolated there
     invoke_hook("post_curator_run", run_dir=str(run_dir), run_json_path=str(run_dir / "run.json"),
                 report_md_path=str(run_dir / "REPORT.md"), dry_run=dry_run)
 
@@ -940,7 +940,7 @@ def run_curator_review(
     recorded in ``state.last_report_path`` so users can read what WOULD have happened."""
     consolidate = get_consolidate() if consolidate is None else consolidate
     start = datetime.now(UTC)
-    hermes_home = get_hermes_home()  # the LLM pass may run on a thread with no profile binding
+    hermes_home = get_agent_home()  # the LLM pass may run on a thread with no profile binding
     if dry_run:  # count candidates without mutating state
         counts = {"checked": len(_safe_curated_report()), "marked_stale": 0, "archived": 0, "reactivated": 0}
     else:
@@ -1021,7 +1021,7 @@ def run_curator_review(
 # --- Provider/model resolution for the review fork ---
 
 def _record_run_metric(trigger, dry_run, counts, before_report, after_report, llm_meta, hermes_home) -> None:
-    from hermes_cli.observability.shared_metrics_loop import record_curator_run
+    from agent_cli.observability.shared_metrics_loop import record_curator_run
 
     def what_changed() -> dict[str, int]:
         before, after = _by_name(before_report), _by_name(after_report)
@@ -1082,8 +1082,8 @@ def _resolve_review_provider() -> tuple:
     rp: dict[str, Any] = {}
     overrides, provider, model_name, binding = {}, None, "", None
     try:
-        from hermes_cli.config import load_config_readonly
-        from hermes_cli.runtime_provider import resolve_runtime_provider
+        from agent_cli.config import load_config_readonly
+        from agent_cli.runtime_provider import resolve_runtime_provider
         binding = _resolve_review_runtime(load_config_readonly())
         model_name = binding.model
         rp = resolve_runtime_provider(
@@ -1118,8 +1118,8 @@ def _run_llm_review(prompt: str) -> dict[str, Any]:
         if isinstance(acp_command, str) and acp_command:
             agent_kwargs.update(acp_command=acp_command, acp_args=list(rp.get("args") or []))
         from agent.conversation_compression_checkpoint import checkpoint_required_from_config
-        from hermes_cli.config import load_config_readonly
-        from hermes_constants import resolve_reasoning_config
+        from agent_cli.config import load_config_readonly
+        from agent_constants import resolve_reasoning_config
 
         review_agent = AIAgent(
             model=model_name, provider=provider, api_key=rp.get("api_key"), base_url=rp.get("base_url"),
@@ -1185,7 +1185,7 @@ _CLAIM_STALE_SECONDS = 3600.0
 
 
 def _run_claim_path() -> Path:
-    return get_hermes_home() / "skills" / ".locks" / "curator-run"
+    return get_agent_home() / "skills" / ".locks" / "curator-run"
 
 
 def _claim_run() -> bool:

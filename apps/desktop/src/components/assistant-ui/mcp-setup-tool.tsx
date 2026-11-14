@@ -1,8 +1,9 @@
 'use client'
 
 import { type ToolCallMessagePartProps, useAuiState } from '@assistant-ui/react'
-import type { ConnectionTargetLaunchKind } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import type { ConnectionTargetLaunchKind } from '@noone/shared'
+import { Loader2 } from '@noone/ui/icons'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'
@@ -21,7 +22,6 @@ import { ConnectorCard, ConnectorRow, type ConnectorRowAction, ConnectorSummary 
 import { SetupFormDialog } from '@/components/ui/setup-form-dialog'
 import { useI18n } from '@/i18n'
 import { connectorText, type McpTarget, mcpTargets } from '@/lib/connector-tools'
-import { Loader2 } from '@/lib/icons'
 import { prettyName } from '@/lib/text'
 import { cn } from '@/lib/utils'
 import {

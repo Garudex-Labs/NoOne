@@ -1,66 +1,74 @@
 ---
 title: "Imessage — Send and receive iMessages/SMS via the imsg CLI on macOS"
-sidebar_label: "Imessage"
+sidebarTitle: "Imessage"
 description: "Send and receive iMessages/SMS via the imsg CLI on macOS"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Imessage
+# Imessage {#imessage}
 
 Send and receive iMessages/SMS via the imsg CLI on macOS.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/apple/imessage` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | macos |
 | Tags | `iMessage`, `SMS`, `messaging`, `macOS`, `Apple` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# iMessage
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# iMessage {#imessage-1}
 
 Use `imsg` to read and send iMessage/SMS via macOS Messages.app.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **macOS** with Messages.app signed in
 - Install: `brew install steipete/tap/imsg`
 - Grant Full Disk Access for terminal (System Settings → Privacy → Full Disk Access)
 - Grant Automation permission for Messages.app when prompted
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks to send an iMessage or text message
 - Reading iMessage conversation history
 - Checking recent Messages.app chats
 - Sending to phone numbers or Apple IDs
 
-## When NOT to Use
+## When NOT to Use {#when-not-to-use}
 
 - Telegram/Discord/Slack/WhatsApp messages → use the appropriate gateway channel
 - Group chat management (adding/removing members) → not supported
 - Bulk/mass messaging → always confirm with user first
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
-### List Chats
+### List Chats {#list-chats}
 
 ```bash
 imsg chats --limit 10 --json
 ```
 
-### View History
+### View History {#view-history}
 
 ```bash
 # By chat ID
@@ -70,7 +78,7 @@ imsg history --chat-id 1 --limit 20 --json
 imsg history --chat-id 1 --limit 20 --attachments --json
 ```
 
-### Send Messages
+### Send Messages {#send-messages}
 
 ```bash
 # Text only
@@ -84,26 +92,26 @@ imsg send --to "+14155551212" --text "Hi" --service imessage
 imsg send --to "+14155551212" --text "Hi" --service sms
 ```
 
-### Watch for New Messages
+### Watch for New Messages {#watch-for-new-messages}
 
 ```bash
 imsg watch --chat-id 1 --attachments
 ```
 
-## Service Options
+## Service Options {#service-options}
 
 - `--service imessage` — Force iMessage (requires recipient has iMessage)
 - `--service sms` — Force SMS (green bubble)
 - `--service auto` — Let Messages.app decide (default)
 
-## Rules
+## Rules {#rules}
 
 1. **Always confirm recipient and message content** before sending
 2. **Never send to unknown numbers** without explicit user approval
 3. **Verify file paths** exist before attaching
 4. **Don't spam** — rate-limit yourself
 
-## Example Workflow
+## Example Workflow {#example-workflow}
 
 User: "Text mom that I'll be late"
 

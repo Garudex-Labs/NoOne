@@ -17,18 +17,13 @@ from typing import Any, Dict, List, Optional
 from utils import normalize_proxy_env_vars
 
 from agent.anthropic_credentials import _is_oauth_token, anthropic_route_is_oauth, is_native_anthropic_host
-from agent.anthropic_endpoints import (
-    _base_url_needs_context_1m_beta, _is_azure_anthropic_endpoint, _is_kimi_coding_endpoint,
-    _is_minimax_anthropic_endpoint, _is_nous_portal_endpoint, _is_opencode_endpoint,
-    _is_third_party_anthropic_endpoint, _model_name_is_kimi_family, _normalize_base_url_text,
-    _requires_bearer_auth,
-)
+from agent.anthropic_endpoints import _base_url_needs_context_1m_beta, _is_azure_anthropic_endpoint, _is_kimi_coding_endpoint, _is_minimax_anthropic_endpoint, _is_opencode_endpoint, _is_third_party_anthropic_endpoint, _model_name_is_kimi_family, _normalize_base_url_text, _requires_bearer_auth
 from agent.anthropic_message_convert import (
     convert_messages_to_anthropic, convert_tools_to_anthropic, normalize_model_name,
 )
 from agent.errors import EmptyStreamError
 
-from hermes_cli.version_info import get_version_info
+from agent_cli.version_info import get_version_info
 
 
 # ``import anthropic`` is deliberately NOT at module top: the SDK costs ~220 ms of imports and
@@ -285,7 +280,7 @@ def find_claude_code_cli(command: str) -> Optional[str]:
     agree with version detection about whether the CLI is installed under a GUI/service PATH."""
     if command not in _CLAUDE_CODE_NAMES:
         return None
-    from hermes_platform.resolver import locate_command
+    from agent_platform.resolver import locate_command
 
     found = locate_command(command, known_dirs=_CLAUDE_CODE_PREFIXES).command
     return found[0] if found else None
@@ -370,7 +365,7 @@ def _beta_header(betas: list) -> dict[str, str]:
 def _attribution_headers() -> dict[str, str]:
     """Same client-attribution set sent to OpenRouter / Vercel AI Gateway / Fireworks."""
     return {
-        "HTTP-Referer": "https://hermes-agent.nousresearch.com", "X-Title": "Hermes Agent",
+        "HTTP-Referer": "https://github.com/Garudex-Labs/NoOne/tree/main/website/docs", "X-Title": "Hermes Agent",
         "User-Agent": f"HermesAgent/{get_version_info().base_version}",
     }
 
@@ -462,7 +457,7 @@ def _custom_provider_extra_headers(base_url) -> dict[str, str]:
     if not base_url:
         return {}
     try:
-        from hermes_cli.config import get_custom_provider_extra_headers
+        from agent_cli.config import get_custom_provider_extra_headers
         return get_custom_provider_extra_headers(str(base_url))
     except Exception:
         logger.debug("custom-provider extra_headers skipped for Anthropic client", exc_info=True)
@@ -531,7 +526,7 @@ def build_anthropic_bedrock_client(region: str, timeout: float | None = None):
     from agent.bedrock_adapter import bedrock_guardrail_headers, scoped_aws_session_kwargs
     sdk = _require_sdk("the Bedrock provider")
     if not hasattr(sdk, "AnthropicBedrock"):
-        raise ImportError("anthropic.AnthropicBedrock not available. Run: hermes pm repair")
+        raise ImportError("anthropic.AnthropicBedrock not available. Run: noone pm repair")
     # Routed multiplex profile: its own AWS_* from the secret scope (the SDK would otherwise read the
     # launch profile's process env); unscoped passes nothing and keeps the default chain.
     scoped = scoped_aws_session_kwargs()
@@ -580,7 +575,7 @@ _OAUTH_SYSTEM_REPLACEMENTS = (
 )
 # The slug is rewritten only as a standalone prose word. Joined to a host, path, repo, mailbox
 # or quoted as an identifier (``hermes-agent.nousresearch.com``, ``~/.hermes/hermes-agent/venv``,
-# ``NousResearch/hermes-agent``, ``skill_view(name='hermes-agent')``) it is an address the model
+# ``Garudex-Labs/NoOne``, ``skill_view(name='hermes-agent')``) it is an address the model
 # dereferences, and the rewritten form does not exist (#48860). The OPENING quote marks an
 # identifier; a sentence-final ``.`` or a possessive ``'s`` is prose.
 _OAUTH_SLUG_PATTERN = re.compile(r"""(?<![\w./:@'"`-])hermes-agent(?![\w/@-]|\.\w)""")
@@ -665,8 +660,7 @@ def build_anthropic_kwargs(
     anthropic_tools = convert_tools_to_anthropic(tools) if tools else []
     # Nous Portal routes on its own catalog ids (``anthropic/claude-opus-4.8``); normalizing would
     # make the model unresolvable there (prefix AND dots kept).
-    if not _is_nous_portal_endpoint(base_url):
-        model = normalize_model_name(model, preserve_dots=preserve_dots)
+    model = normalize_model_name(model, preserve_dots=preserve_dots)
     # Non-positive/non-finite values fail locally instead of 400-ing upstream.
     effective_max_tokens = _resolve_anthropic_messages_max_tokens(max_tokens, model, context_length=context_length)
     if context_length and effective_max_tokens > context_length:

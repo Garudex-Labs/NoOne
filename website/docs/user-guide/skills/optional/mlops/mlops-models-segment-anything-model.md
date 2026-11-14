@@ -1,20 +1,20 @@
 ---
 title: "Segment Anything Model — SAM: zero-shot image segmentation via points, boxes, masks"
-sidebar_label: "Segment Anything Model"
+sidebarTitle: "Segment Anything Model"
 description: "SAM: zero-shot image segmentation via points, boxes, masks"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Segment Anything Model
+# Segment Anything Model {#segment-anything-model}
 
 SAM: zero-shot image segmentation via points, boxes, masks.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/segment-anything-model` |
+| Source | Optional — install with `noone skills install official/mlops/segment-anything-model` |
 | Path | `optional-skills/mlops/models/segment-anything-model` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ SAM: zero-shot image segmentation via points, boxes, masks.
 | Platforms | linux, macos, windows |
 | Tags | `Multimodal`, `Image Segmentation`, `Computer Vision`, `SAM`, `Zero-Shot` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Segment Anything Model (SAM)
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Segment Anything Model (SAM) {#segment-anything-model-sam}
 
 Guide to using Meta AI's Segment Anything Model for zero-shot image segmentation.
 
-## When to use SAM
+## When to use SAM {#when-to-use-sam}
 
 **Use SAM when:**
 - Need to segment any object in images without task-specific training
@@ -57,9 +65,9 @@ Guide to using Meta AI's Segment Anything Model for zero-shot image segmentation
 - **GroundingDINO + SAM**: For text-prompted segmentation
 - **SAM 2**: For video segmentation tasks
 
-## Quick start
+## Quick start {#quick-start}
 
-### Installation
+### Installation {#installation}
 
 ```bash
 # From GitHub
@@ -72,7 +80,7 @@ pip install opencv-python pycocotools matplotlib
 pip install transformers
 ```
 
-### Download checkpoints
+### Download checkpoints {#download-checkpoints}
 
 ```bash
 # ViT-H (largest, most accurate) - 2.4GB
@@ -85,14 +93,14 @@ wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_l_0b3195.pth
 wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
 ```
 
-### Basic usage with SamPredictor
+### Basic usage with SamPredictor {#basic-usage-with-sampredictor}
 
 ```python
 import numpy as np
 from segment_anything import sam_model_registry, SamPredictor
 
 # Load model
-sam = sam_model_registry["vit_h"](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/models/segment-anything-model/checkpoint="sam_vit_h_4b8939.pth")
+sam = sam_model_registry["vit_h"](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/models/segment-anything-model/checkpoint="sam_vit_h_4b8939.pth")
 sam.to(device="cuda")
 
 # Create predictor
@@ -117,7 +125,7 @@ masks, scores, logits = predictor.predict(
 best_mask = masks[np.argmax(scores)]
 ```
 
-### HuggingFace Transformers
+### HuggingFace Transformers {#huggingface-transformers}
 
 ```python
 import torch
@@ -148,12 +156,12 @@ masks = processor.image_processor.post_process_masks(
 )
 ```
 
-## Core concepts
+## Core concepts {#core-concepts}
 
-### Model architecture
+### Model architecture {#model-architecture}
 
-<!-- ascii-guard-ignore -->
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
+{/* ascii-guard-ignore */}
 ```
 SAM Architecture:
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
@@ -164,10 +172,10 @@ SAM Architecture:
    Image Embeddings      Prompt Embeddings         Masks + IoU
    (computed once)       (per prompt)             predictions
 ```
-<!-- ascii-guard-ignore-end -->
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
+{/* ascii-guard-ignore-end */}
 
-### Model variants
+### Model variants {#model-variants}
 
 | Model | Checkpoint | Size | Speed | Accuracy |
 |-------|------------|------|-------|----------|
@@ -175,7 +183,7 @@ SAM Architecture:
 | ViT-L | `vit_l` | 1.2 GB | Medium | Good |
 | ViT-B | `vit_b` | 375 MB | Fastest | Good |
 
-### Prompt types
+### Prompt types {#prompt-types}
 
 | Prompt | Description | Use Case |
 |--------|-------------|----------|
@@ -184,9 +192,9 @@ SAM Architecture:
 | Bounding box | Rectangle around object | Larger objects |
 | Previous mask | Low-res mask input | Iterative refinement |
 
-## Interactive segmentation
+## Interactive segmentation {#interactive-segmentation}
 
-### Point prompts
+### Point prompts {#point-prompts}
 
 ```python
 # Single foreground point
@@ -210,7 +218,7 @@ masks, scores, logits = predictor.predict(
 )
 ```
 
-### Box prompts
+### Box prompts {#box-prompts}
 
 ```python
 # Bounding box [x1, y1, x2, y2]
@@ -222,7 +230,7 @@ masks, scores, logits = predictor.predict(
 )
 ```
 
-### Combined prompts
+### Combined prompts {#combined-prompts}
 
 ```python
 # Box + points for precise control
@@ -234,7 +242,7 @@ masks, scores, logits = predictor.predict(
 )
 ```
 
-### Iterative refinement
+### Iterative refinement {#iterative-refinement}
 
 ```python
 # Initial prediction
@@ -253,9 +261,9 @@ masks, scores, logits = predictor.predict(
 )
 ```
 
-## Automatic mask generation
+## Automatic mask generation {#automatic-mask-generation}
 
-### Basic automatic segmentation
+### Basic automatic segmentation {#basic-automatic-segmentation}
 
 ```python
 from segment_anything import SamAutomaticMaskGenerator
@@ -275,7 +283,7 @@ masks = mask_generator.generate(image)
 # - point_coords: generating point
 ```
 
-### Customized generation
+### Customized generation {#customized-generation}
 
 ```python
 mask_generator = SamAutomaticMaskGenerator(
@@ -291,7 +299,7 @@ mask_generator = SamAutomaticMaskGenerator(
 masks = mask_generator.generate(image)
 ```
 
-### Filtering masks
+### Filtering masks {#filtering-masks}
 
 ```python
 # Sort by area (largest first)
@@ -304,9 +312,9 @@ high_quality = [m for m in masks if m['predicted_iou'] > 0.9]
 stable_masks = [m for m in masks if m['stability_score'] > 0.95]
 ```
 
-## Batched inference
+## Batched inference {#batched-inference}
 
-### Multiple images
+### Multiple images {#multiple-images}
 
 ```python
 # Process multiple images efficiently
@@ -323,7 +331,7 @@ for image in images:
     all_masks.append(masks)
 ```
 
-### Multiple prompts per image
+### Multiple prompts per image {#multiple-prompts-per-image}
 
 ```python
 # Process multiple prompts efficiently (one image encoding)
@@ -346,9 +354,9 @@ for point in points:
     all_masks.append(masks[np.argmax(scores)])
 ```
 
-## ONNX deployment
+## ONNX deployment {#onnx-deployment}
 
-### Export model
+### Export model {#export-model}
 
 ```bash
 python scripts/export_onnx_model.py \
@@ -358,7 +366,7 @@ python scripts/export_onnx_model.py \
     --return-single-mask
 ```
 
-### Use ONNX model
+### Use ONNX model {#use-onnx-model}
 
 ```python
 import onnxruntime
@@ -380,9 +388,9 @@ masks = ort_session.run(
 )
 ```
 
-## Common workflows
+## Common workflows {#common-workflows}
 
-### Workflow 1: Annotation tool
+### Workflow 1: Annotation tool {#workflow-1-annotation-tool}
 
 ```python
 import cv2
@@ -403,7 +411,7 @@ def on_click(event, x, y, flags, param):
         display_mask(masks[np.argmax(scores)])
 ```
 
-### Workflow 2: Object extraction
+### Workflow 2: Object extraction {#workflow-2-object-extraction}
 
 ```python
 def extract_object(image, point):
@@ -426,7 +434,7 @@ def extract_object(image, point):
     return rgba
 ```
 
-### Workflow 3: Medical image segmentation
+### Workflow 3: Medical image segmentation {#workflow-3-medical-image-segmentation}
 
 ```python
 # Process medical images (grayscale to RGB)
@@ -442,9 +450,9 @@ masks, scores, _ = predictor.predict(
 )
 ```
 
-## Output format
+## Output format {#output-format}
 
-### Mask data structure
+### Mask data structure {#mask-data-structure}
 
 ```python
 # SamAutomaticMaskGenerator output
@@ -459,7 +467,7 @@ masks, scores, _ = predictor.predict(
 }
 ```
 
-### COCO RLE format
+### COCO RLE format {#coco-rle-format}
 
 ```python
 from pycocotools import mask as mask_utils
@@ -472,20 +480,20 @@ rle["counts"] = rle["counts"].decode("utf-8")
 decoded_mask = mask_utils.decode(rle)
 ```
 
-## Performance optimization
+## Performance optimization {#performance-optimization}
 
-### GPU memory
+### GPU memory {#gpu-memory}
 
 ```python
 # Use smaller model for limited VRAM
-sam = sam_model_registry["vit_b"](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/models/segment-anything-model/checkpoint="sam_vit_b_01ec64.pth")
+sam = sam_model_registry["vit_b"](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/models/segment-anything-model/checkpoint="sam_vit_b_01ec64.pth")
 
 # Process images in batches
 # Clear CUDA cache between large batches
 torch.cuda.empty_cache()
 ```
 
-### Speed optimization
+### Speed optimization {#speed-optimization}
 
 ```python
 # Use half precision
@@ -501,7 +509,7 @@ mask_generator = SamAutomaticMaskGenerator(
 # Export with --return-single-mask for faster inference
 ```
 
-## Common issues
+## Common issues {#common-issues}
 
 | Issue | Solution |
 |-------|----------|
@@ -511,12 +519,12 @@ mask_generator = SamAutomaticMaskGenerator(
 | Edge artifacts | Use stability_score filtering |
 | Small objects missed | Increase points_per_side |
 
-## References
+## References {#references}
 
-- **[Advanced Usage](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/models/segment-anything-model/references/advanced-usage.md)** - Batching, fine-tuning, integration
-- **[Troubleshooting](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/models/segment-anything-model/references/troubleshooting.md)** - Common issues and solutions
+- **[Advanced Usage](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/models/segment-anything-model/references/advanced-usage.md)** - Batching, fine-tuning, integration
+- **[Troubleshooting](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/models/segment-anything-model/references/troubleshooting.md)** - Common issues and solutions
 
-## Resources
+## Resources {#resources}
 
 - **GitHub**: https://github.com/facebookresearch/segment-anything
 - **Paper**: https://arxiv.org/abs/2304.02643

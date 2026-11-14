@@ -1,9 +1,9 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo, useCallback, useState } from 'react'
 
 import { StatusControlRow } from '@/components/chat/status-control-row'
 import { StatusSection } from '@/components/chat/status-section'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   ContextMenu,
@@ -129,25 +129,25 @@ export const SessionControlLoopSection = memo(function SessionControlLoopSection
       <>
         {loop.status === 'active' && (
           <Item disabled={isBusy} onSelect={() => void handleAction('loop.pause')}>
-            <Codicon name="debug-pause" size="0.8rem" />
+            <AppIcon name="debug-pause" size="0.8rem" />
             <span>{ctrl.pauseLoop}</span>
           </Item>
         )}
         {loop.status === 'paused' && (
           <Item disabled={isBusy} onSelect={() => void handleAction('loop.resume')}>
-            <Codicon name="play" size="0.8rem" />
+            <AppIcon name="play" size="0.8rem" />
             <span>{ctrl.resumeLoop}</span>
           </Item>
         )}
         {loop.status !== 'done' && <Sep />}
         {loop.status === 'done' ? (
           <Item disabled={isBusy} onSelect={() => void handleAction('loop.stop')}>
-            <Codicon name="close" size="0.8rem" />
+            <AppIcon name="close" size="0.8rem" />
             <span>{ctrl.dismissLoop}</span>
           </Item>
         ) : (
           <Item disabled={isBusy} onSelect={confirmStopLoop} variant="destructive">
-            <Codicon name="stop-circle" size="0.8rem" />
+            <AppIcon name="stop-circle" size="0.8rem" />
             <span>{ctrl.stopLoop}</span>
           </Item>
         )}
@@ -187,7 +187,7 @@ export const SessionControlLoopSection = memo(function SessionControlLoopSection
                         type="button"
                         variant="ghost"
                       >
-                        <Codicon name="ellipsis" size="0.8rem" />
+                        <AppIcon name="ellipsis" size="0.8rem" />
                       </Button>
                     </DropdownMenuTrigger>
                   </span>
@@ -197,7 +197,7 @@ export const SessionControlLoopSection = memo(function SessionControlLoopSection
                 </DropdownMenu>
               }
               defaultCollapsed={true}
-              icon={<Codicon className={iconClass} name="sync" size="0.8rem" />}
+              icon={<AppIcon className={iconClass} name="sync" size="0.8rem" />}
               label={headerLabel}
             >
               <div>

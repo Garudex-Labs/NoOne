@@ -1,13 +1,13 @@
-# Context Compression and Caching
+# Context Compression and Caching {#context-compression-and-caching}
 
-Hermes Agent uses a dual compression system and Anthropic prompt caching to
+{{app-name}} uses a dual compression system and Anthropic prompt caching to
 manage context window usage efficiently across long conversations.
 
 Source files: `agent/context_engine.py` (ABC), `agent/context_compressor.py` (default engine),
 `agent/prompt_caching.py`, `gateway/run_turn_hygiene.py` (session hygiene), `agent/compression_facade.py` (search for `_compress_context`)
 
 
-## Bedrock context window cache
+## Bedrock context window cache {#bedrock-context-window-cache}
 
 Bedrock context resolution in `agent/model_metadata.py` uses this precedence:
 
@@ -19,10 +19,10 @@ Bedrock context resolution in `agent/model_metadata.py` uses this precedence:
 - **Legacy entries are revalidated.** Old scalar entries have no provenance and
   may be either probe results or fallbacks. Their size does not establish which.
 - **Failed probes use the current table without persisting it.** Failures have a
-  five-minute in-memory cooldown scoped to Hermes home, endpoint, model, and
+  five-minute in-memory cooldown scoped to {{app-name}} home, endpoint, model, and
   region. Expiry or explicit cache invalidation permits another attempt.
 
-The cache remains at `context_length_cache.yaml` under the active Hermes home.
+The cache remains at `context_length_cache.yaml` under the active {{app-name}} home.
 `context_lengths` retains scalar values for older readers. An additive
 `bedrock_confirmed_v1` map binds each confirmed key to its exact value in the
 same atomic write. Generic writes clear that key's provenance. Older writers
@@ -36,7 +36,7 @@ This is Bedrock-specific, not the direct xAI API window. Existing compression
 rules still apply: without output reservation or an explicit token cap, the
 small-window 75% threshold floor yields a 375,000-token trigger at this window.
 
-## Pluggable Context Engine
+## Pluggable Context Engine {#pluggable-context-engine}
 
 Context management is built on the `ContextEngine` ABC (`agent/context_engine.py`). The built-in `ContextCompressor` is the default implementation, but plugins can replace it with alternative engines (e.g., Lossless Context Management).
 
@@ -59,13 +59,13 @@ Selection is config-driven via `context.engine` in `config.yaml`. The resolution
 
 Plugin engines are **never auto-activated** — the user must explicitly set `context.engine` to the plugin's name. The default `"compressor"` always uses the built-in.
 
-Configure via `hermes plugins` → Provider Plugins → Context Engine, or edit `config.yaml` directly.
+Configure via `noone plugins` → Provider Plugins → Context Engine, or edit `config.yaml` directly.
 
 For building a context engine plugin, see [Context Engine Plugins](./context-engine-plugin.md).
 
-## Dual Compression System
+## Dual Compression System {#dual-compression-system}
 
-Hermes has two separate compression layers that operate independently:
+{{app-name}} has two separate compression layers that operate independently:
 
 ```
                      ┌──────────────────────────┐
@@ -80,7 +80,7 @@ Hermes has two separate compression layers that operate independently:
                      └──────────────────────────┘
 ```
 
-### 1. Gateway Session Hygiene (85% threshold)
+### 1. Gateway Session Hygiene (85% threshold) {#1-gateway-session-hygiene-85-threshold}
 
 Located in `gateway/run_turn_hygiene.py` (search for `Session hygiene`). This is a **safety net** that
 runs before the agent processes a message. It prevents API failures when sessions
@@ -98,13 +98,13 @@ The gateway hygiene threshold is intentionally higher than the agent's compresso
 Setting it at 50% (same as the agent) caused premature compression on every turn
 in long gateway sessions.
 
-### 2. Agent ContextCompressor (50% threshold, configurable)
+### 2. Agent ContextCompressor (50% threshold, configurable) {#2-agent-contextcompressor-50-threshold-configurable}
 
 Located in `agent/context_compressor.py`. This is the **primary compression
 system** that runs inside the agent's tool loop with access to accurate,
 API-reported token counts.
 
-#### Token accounting: provider anchors and explicit heuristic fallbacks
+#### Token accounting: provider anchors and explicit heuristic fallbacks {#token-accounting-provider-anchors-and-explicit-heuristic-fallbacks}
 
 Every compaction gate (turn-start preflight, idle, pre-API pressure, post-tool)
 asks the **usage anchor** first (`agent/usage_anchor.py`): the provider's last
@@ -179,7 +179,7 @@ bound per turn so the trigger estimator, the tail-budget walk and gateway
 hygiene all use the same figure. Before the first vision turn a flat 1,500
 default applies.
 
-#### Failure cooldown and provider-proven overflow
+#### Failure cooldown and provider-proven overflow {#failure-cooldown-and-provider-proven-overflow}
 
 A failed or stalled summary attempt arms a per-session **failure cooldown**
 (escalating 60s → 300s → 900s, never shorter than
@@ -236,7 +236,7 @@ attempt anyway:
   the next failure would extend the ladder (#100661). If that attempt fails,
   the cooldown is recorded normally.
 
-#### Attempt telemetry
+#### Attempt telemetry {#attempt-telemetry}
 
 Every `compress_context` call that returns logs one content-free INFO line,
 `context compression attempt telemetry: {...}` (logger
@@ -286,7 +286,7 @@ committed proactive prunes, is also emitted as a `hermes.compaction` mark (see
 [NeMo Relay Shared Metrics](./relay-shared-metrics.md#compaction-marks)).
 
 
-## Configuration
+## Configuration {#configuration}
 
 All compression settings are read from `config.yaml` under the `compression` key:
 
@@ -317,7 +317,7 @@ auxiliary:
     base_url: null           # Custom OpenAI-compatible endpoint
 ```
 
-### Parameter Details
+### Parameter Details {#parameter-details}
 
 | Parameter | Default | Range | Description |
 |-----------|---------|-------|-------------|
@@ -338,7 +338,7 @@ auxiliary:
 | `in_place` | `true` | bool | Compact on the same session id instead of rotating to a new one (see below) |
 | `prepare_ahead` | `false` | bool | Opt-in: near the trigger, write the next summary in the background and splice it at the next automatic compaction when it still covers the same messages (see below) |
 
-### In-place compaction (single stable session id)
+### In-place compaction (single stable session id) {#in-place-compaction-single-stable-session-id}
 
 With `compression.in_place: true` (the default), a compaction **rewrites the live message list on the same session id**: the system prompt is rebuilt, the summarized middle is swapped in, and the pre-compaction turns are soft-archived under the same id (`active=0, compacted=1` in the session store) — still searchable via `session_search` and recoverable, never deleted. There is no `parent_session_id` chain and no `name #N` renumbering; one conversation keeps one durable id for its whole life. This eliminated the session-rotation bug cluster (lost `/goal` state, orphaned sessions, search gaps across boundaries).
 
@@ -356,7 +356,7 @@ and previously issued input IDs unchanged, and commit the transcript, generation
 revision and retry receipt together. Safe-mode sessions use code defaults rather than
 profile compression settings.
 
-### Auxiliary feasibility and tail retention
+### Auxiliary feasibility and tail retention {#auxiliary-feasibility-and-tail-retention}
 
 A smaller auxiliary compression model can lower the live compression trigger without
 changing the selected tail policy. In `lean` mode the selection budget remains based
@@ -378,7 +378,7 @@ auxiliary model is re-probed immediately: the trigger is clamped again before th
 compaction on the new window, or restored to the main model's own value when the
 auxiliary model now fits.
 
-### Per-model threshold overrides
+### Per-model threshold overrides {#per-model-threshold-overrides}
 
 `compression.model_thresholds` lets you trigger compaction at different points
 depending on the active model — useful when you swap between models with very
@@ -419,7 +419,7 @@ Plugin context engines can reuse the same resolution logic via
 override `update_model()` own their own compaction policy and may ignore the
 map.
 
-### Codex gpt-5.x / Astra threshold autoraise
+### Codex gpt-5.x / Astra threshold autoraise {#codex-gpt-5x--astra-threshold-autoraise}
 
 The ChatGPT Codex OAuth backend hard-caps gpt-5.4/5.5/5.6 and gpt-6 Astra at a **272K** context window
 (the same slug exposes 1.05M on OpenAI's direct API and OpenRouter, and smaller
@@ -427,7 +427,7 @@ windows through some resellers). At the default 50% trigger, compaction would fi
 half the window the model can actually use. When the active route is Codex
 OAuth (`provider: openai-codex`) and the model is one of those families (Astra
 matches any slug containing `astra`; the opt-in `-900k` picker variants are
-excluded because they already unlock the wider window), Hermes raises the
+excluded because they already unlock the wider window), {{app-name}} raises the
 trigger to **85%** (~231K) and shows a notice with the opt-out command. The
 notice is shown once per profile — a marker under `$HERMES_HOME`
 (`.codex_gpt55_autoraise_notice`) records that it ran, so repeated agent/session
@@ -437,27 +437,27 @@ the same models on any other provider keep your global `threshold`. To opt back 
 the global value:
 
 ```bash
-hermes config set compression.codex_gpt55_autoraise false
+noone config set compression.codex_gpt55_autoraise false
 ```
 
 To keep the 85% autoraise but hide only the one-time notice:
 
 ```bash
-hermes config set compression.codex_gpt55_autoraise_notice false
+noone config set compression.codex_gpt55_autoraise_notice false
 ```
 
-### Codex large-context `-900k` picker variants (opt-in)
+### Codex large-context `-900k` picker variants (opt-in) {#codex-large-context--900k-picker-variants-opt-in}
 
 The ChatGPT Codex backend *advertises* a 272K window for the gpt-5.4, gpt-5.6
 (Sol/Terra/Luna) and GPT-6 (Sol/Terra/Luna) families, but actually accepts ~911K input tokens
-for ChatGPT-subscription accounts (live-verified Aug 2026). Hermes keeps the
+for ChatGPT-subscription accounts (live-verified Aug 2026). {{app-name}} keeps the
 **advertised 272K as the default** for the base slugs — a bigger window means
 more tokens per request and much faster subscription-usage burn, so the large
 window is strictly opt-in.
 
 To use the large window, pick the explicit `-900k` variant in `/model` (e.g.
 `gpt-6.1-sol-900k`, `gpt-6-sol-900k`, `gpt-6-luna-900k`, `gpt-5.6-sol-900k`,
-`gpt-5.6-terra-900k`, `gpt-5.6-luna-900k`, `gpt-5.4-900k`). These are Hermes-side aliases: the suffix is stripped before
+`gpt-5.6-terra-900k`, `gpt-5.6-luna-900k`, `gpt-5.4-900k`). These are {{app-name}}-side aliases: the suffix is stripped before
 the model id is sent to the backend, and pricing/usage accounting treats them
 as the base model. Slugs that genuinely enforce 272K (gpt-5.5, gpt-5.4-mini)
 have no `-900k` variant. When the authenticated Codex catalog publishes a
@@ -470,11 +470,11 @@ autoraise** described above, while `-900k` variants keep your global
 `compression.threshold` (default 50%, ~450K) — the autoraise exists to stop
 wasting a small window, which a 900K window doesn't need.
 
-### Codex app-server thread compaction
+### Codex app-server thread compaction {#codex-app-server-thread-compaction}
 
 Codex app-server sessions (`api_mode: codex_app_server` — the codex CLI/agent
 runtime) are different from every other route: the codex agent owns the backing
-thread context, so Hermes' auxiliary summarizer cannot shrink it — rewriting the
+thread context, so {{app-name}}' auxiliary summarizer cannot shrink it — rewriting the
 local transcript mirror leaves the real thread growing unbounded until a hard
 context reset. For this runtime, compaction goes through the app-server's own
 mechanism instead:
@@ -482,22 +482,22 @@ mechanism instead:
 - Manual compaction (`/compress`) asks the app-server to compact the thread
   (`thread/compact/start`) and waits for the compaction turn to complete.
 - Automatic compaction is controlled by `compression.codex_app_server_auto`:
-  the default `native` lets the app-server decide when to compact and Hermes
+  the default `native` lets the app-server decide when to compact and {{app-name}}
   records the resulting compaction events (compression counters, session
-  events). Set `hermes` to let Hermes' compression threshold initiate
-  app-server compaction, or `off` to disable Hermes-initiated automatic
+  events). Set `hermes` to let {{app-name}}' compression threshold initiate
+  app-server compaction, or `off` to disable {{app-name}}-initiated automatic
   compaction entirely (codex may still compact natively).
 
-Hermes' local transcript is never rewritten on this runtime — state.db records
+{{app-name}}' local transcript is never rewritten on this runtime — state.db records
 the compaction boundary while the visible transcript stays intact. All other
-routes (including Codex OAuth chat sessions) keep Hermes' summary compressor.
+routes (including Codex OAuth chat sessions) keep {{app-name}}' summary compressor.
 
-### Native Responses compaction (gpt-5.6 and Astra on supported routes)
+### Native Responses compaction (gpt-5.6 and Astra on supported routes) {#native-responses-compaction-gpt-56-and-astra-on-supported-routes}
 
 OpenAI's Responses API supports server-side compaction: when a request includes
 `context_management: [{type: "compaction", compact_threshold: N}]` and the
 rendered input crosses N tokens, the server prunes older context into an opaque
-encrypted `compaction` output item. Hermes captures that item into the
+encrypted `compaction` output item. {{app-name}} captures that item into the
 assistant message's existing replay sidecar and sends it back on subsequent
 turns, standing in for the pruned history — long-horizon recall without a
 client-side summary pass, and ZDR-friendly (`store: false`, no
@@ -538,7 +538,7 @@ usable local trigger exists, automatic mode uses 200,000. The provider minimum
 is 1,024 tokens, so an unusually small local trigger at or below that floor
 cannot preserve strict native first ordering.
 
-### Computed Values (for a 200K context model at defaults)
+### Computed Values (for a 200K context model at defaults) {#computed-values-for-a-200k-context-model-at-defaults}
 
 ```
 context_length       = 200,000
@@ -547,7 +547,14 @@ tail_token_budget    = 100,000 × 0.20 = 20,000
 max_summary_tokens   = min(200,000 × 0.05, 12,000) = 10,000
 ```
 
-:::note Threshold is derived from the MAIN model's context window
+<Note>
+
+<div className="doc-callout-title">
+
+Threshold is derived from the MAIN model's context window
+
+</div>
+
 `threshold_tokens` is `threshold × context_length` (then capped by `compression.threshold_tokens` when set), where `context_length`
 is the **main agent model's** context window — never the auxiliary/summary
 model's. On a 262,144-token model at the default `0.50`, the threshold is
@@ -556,14 +563,15 @@ is a coincidence of the percentage, not a sign that the auxiliary model's window
 is the trigger. The auxiliary model's context window is a separate concern — see
 the "Summary model context length" warning below for how it affects whether a
 summary can be produced, not when compression fires.
-:::
+
+</Note>
 
 
-## Compression Algorithm
+## Compression Algorithm {#compression-algorithm}
 
 The `ContextCompressor.compress()` method follows a 4-phase algorithm:
 
-### Phase 1: Prune Old Tool Results (cheap, no LLM call)
+### Phase 1: Prune Old Tool Results (cheap, no LLM call) {#phase-1-prune-old-tool-results-cheap-no-llm-call}
 
 Old tool results (>200 chars) outside the protected tail are replaced with:
 ```
@@ -579,7 +587,7 @@ results intact in the tail, so the model can use the output it requested. A roun
 exceeds 20% of the input budget (the context window minus the output reservation) can be
 summarized, and its older images are retired so compaction can still make room.
 
-#### Loaded skills across a compaction
+#### Loaded skills across a compaction {#loaded-skills-across-a-compaction}
 
 A skill's instructions are not kept verbatim forever, but the model is always told when they are
 gone. Every `skill_view` result that a pass stubs or summarizes away (whatever its size) carries
@@ -593,7 +601,7 @@ summarized, and the summary quotes that turn as typed (`/skill-name do X`) rathe
 body. A reload after the boundary returns the full skill again. Skills preloaded with `-s` or
 `skills.auto_load` live in the system prompt and are never compacted.
 
-### Phase 2: Determine Boundaries
+### Phase 2: Determine Boundaries {#phase-2-determine-boundaries}
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -617,11 +625,19 @@ Boundaries are aligned to avoid splitting tool_call/tool_result groups.
 The `_align_boundary_backward()` method walks past consecutive tool results
 to find the parent assistant message, keeping groups intact.
 
-### Phase 3: Generate Structured Summary
+### Phase 3: Generate Structured Summary {#phase-3-generate-structured-summary}
 
-:::warning Summary model context length
+<Warning>
+
+<div className="doc-callout-title">
+
+Summary model context length
+
+</div>
+
 The summary model must have a context window **at least as large** as the main agent model's. The entire middle section is sent to the summary model in a single `call_llm(task="compression")` call. If the summary model's context is smaller, the API returns a context-length error — `_generate_summary()` catches it, logs a warning, and returns `None`. The compressor then drops the middle turns **without a summary**, silently losing conversation context. This is the most common cause of degraded compaction quality.
-:::
+
+</Warning>
 
 The middle turns are summarized using the auxiliary LLM with a structured
 template:
@@ -659,7 +675,7 @@ Summary budget scales with the amount of content being compressed:
 - Minimum: 2,000 tokens
 - Maximum: `min(context_length × 0.05, 12,000)` tokens
 
-### Phase 4: Assemble Compressed Messages
+### Phase 4: Assemble Compressed Messages {#phase-4-assemble-compressed-messages}
 
 The compressed message list is:
 1. Head messages (with a note appended to system prompt on first compression)
@@ -670,7 +686,7 @@ Orphaned tool_call/tool_result pairs are cleaned up by `_sanitize_tool_pairs()`:
 - Tool results referencing removed calls → removed
 - Tool calls whose results were removed → stub result injected
 
-### Iterative Re-compression
+### Iterative Re-compression {#iterative-re-compression}
 
 On subsequent compressions, the previous summary is passed to the LLM with
 instructions to **update** it rather than summarize from scratch. This preserves
@@ -681,14 +697,14 @@ The `_previous_summary` field on the compressor instance stores the last summary
 text for this purpose. A deterministic fallback summary is stored there too, since
 it is the handoff the transcript now carries.
 
-### Prepared compaction (opt-in)
+### Prepared compaction (opt-in) {#prepared-compaction-opt-in}
 
 With `compression.prepare_ahead: true` (read at agent construction, so it takes effect on the next
 session or gateway agent rebuild), `agent/prepared_compaction.py` writes the next summary before
 the trigger fires. When the last provider-reported prompt count is within 12% of the trigger
 (`threshold_tokens`) below it, the turn loop starts one background pass, before a tool batch runs or
 at turn end. Turn-end passes are skipped for cron runs, delegated children and one-shot sessions
-(`hermes chat -q`, `-z`), whose agents end with the turn. The pass plans the same window `compress()` plans (`_plan_compaction_window`) and calls
+(`noone chat -q`, `-z`), whose agents end with the turn. The pass plans the same window `compress()` plans (`_plan_compaction_window`) and calls
 the same `_generate_summary` on a copy of the compressor and of the window's messages, so the live
 transcript, the system prompt and the prompt cache are untouched until compaction. There is one pass
 per compaction: while a summary is held, no further pass starts, however much the prompt grows.
@@ -726,16 +742,16 @@ boundary (including a rebind to another session id on `/resume` or `/branch`) is
 cannot publish, and its summary stream is closed rather than billed to completion. A failed pass pauses further passes but never arms the live compressor's failure cooldown. State is per compressor and in memory only, so a gateway agent
 eviction or process restart simply means the next compaction runs inline; releasing the agent (cache
 eviction, a rewind, `close()`) also cancels a running pass. A held summary therefore helps only an
-agent that lives across turns (interactive CLI, TUI/Desktop and messaging sessions); a `-q --resume`
+agent that lives across turns (interactive CLI, Desktop and messaging sessions); a `-q --resume`
 chain builds a new agent per run and gets no head start. Pass log lines carry `session=<id>`, and
 opt-in shared metrics count adoption and every pass and splice outcome
 (`hermes.prepared_compaction.count`, see the shared-metrics guide). Plugin context engines,
 Codex app-server sessions, native Responses compaction and micro-compaction are not prepared.
 
 
-## Before/After Example
+## Before/After Example {#beforeafter-example}
 
-### Before Compression (45 messages, ~95K tokens)
+### Before Compression (45 messages, ~95K tokens) {#before-compression-45-messages-95k-tokens}
 
 ```
 [0] system:    "You are a helpful assistant..." (system prompt)
@@ -754,7 +770,7 @@ Codex app-server sessions, native Responses compaction and micro-compaction are 
 [44] user:      "Great, also add error handling"
 ```
 
-### After Compression (25 messages, ~45K tokens)
+### After Compression (25 messages, ~45K tokens) {#after-compression-25-messages-45k-tokens}
 
 ```
 [0] system:    "You are a helpful assistant...
@@ -791,16 +807,16 @@ Codex app-server sessions, native Responses compaction and micro-compaction are 
 ```
 
 
-## Prompt Caching (Anthropic)
+## Prompt Caching (Anthropic) {#prompt-caching-anthropic}
 
 Source: `agent/prompt_caching.py`
 
 Reduces input token costs by ~75% on multi-turn conversations by caching the
 conversation prefix. Uses Anthropic's `cache_control` breakpoints.
 
-### Strategy: system_and_3
+### Strategy: system_and_3 {#strategy-system_and_3}
 
-Anthropic allows a maximum of 4 `cache_control` breakpoints per request. Hermes
+Anthropic allows a maximum of 4 `cache_control` breakpoints per request. {{app-name}}
 uses the "system_and_3" strategy:
 
 ```
@@ -810,7 +826,7 @@ Breakpoint 3: 2nd-to-last non-system message   ├─ Rolling window
 Breakpoint 4: Last non-system message          ─┘
 ```
 
-### How It Works
+### How It Works {#how-it-works}
 
 `apply_anthropic_cache_control()` deep-copies the messages and injects
 `cache_control` markers:
@@ -831,7 +847,7 @@ The marker is applied differently based on content type:
 | None/empty | Added as `msg["cache_control"]` |
 | Tool messages | Added as `msg["cache_control"]` (native Anthropic only) |
 
-### Cache-Aware Design Patterns
+### Cache-Aware Design Patterns {#cache-aware-design-patterns}
 
 1. **Stable system prompt**: The system prompt is breakpoint 1 and cached across
    all turns. Avoid mutating it mid-conversation (compression appends a note
@@ -853,11 +869,11 @@ The marker is applied differently based on content type:
    credential-pool rotation onto a different account — means the next request
    gets zero cache hits and re-reads the full conversation at undiscounted
    input price. This is inherent to how provider caches work, not something
-   Hermes can avoid; user-facing docs for `/model`, fallback providers, and
+   {{app-name}} can avoid; user-facing docs for `/model`, fallback providers, and
    credential pools carry cost warnings for this reason. Don't add features
    that silently swap the model or credentials mid-session.
 
-### Enabling Prompt Caching
+### Enabling Prompt Caching {#enabling-prompt-caching}
 
 Prompt caching is automatically enabled when:
 - The model is an Anthropic Claude model (detected by model name)
@@ -877,6 +893,6 @@ The CLI shows caching status at startup:
 ```
 
 
-## Context Pressure Warnings
+## Context Pressure Warnings {#context-pressure-warnings}
 
 Intermediate context-pressure warnings have been removed (see the iteration-budget block in `agent/turn_iteration_prep.py`, which notes: "No intermediate pressure warnings — they caused models to 'give up' prematurely on complex tasks"). Compression fires when prompt tokens reach the configured `compression.threshold` (default 50%) with no prior warning step; gateway session hygiene fires as the secondary safety net at 85% of the model's context window.

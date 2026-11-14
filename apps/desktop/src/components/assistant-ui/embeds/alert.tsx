@@ -1,6 +1,6 @@
+import { AlertCircle, AlertTriangle, type IconComponent, Info, Zap } from '@noone/ui/icons'
 import { cloneElement, isValidElement, type ReactNode } from 'react'
 
-import { AlertCircle, AlertTriangle, type IconComponent, Info, Zap } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 export type AlertType = 'caution' | 'important' | 'note' | 'tip' | 'warning'

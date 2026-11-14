@@ -1,7 +1,7 @@
 import { useStore } from '@nanostores/react'
+import { AlertCircle, Clock, type IconComponent } from '@noone/ui/icons'
 import { useEffect, useState } from 'react'
 
-import { AlertCircle, Clock, type IconComponent } from '@/lib/icons'
 import { $petActivity, $petState, type PetState } from '@/store/pet'
 import { $petPluginMessage, type PetMessageTone } from '@/store/pet-plugin-messages'
 

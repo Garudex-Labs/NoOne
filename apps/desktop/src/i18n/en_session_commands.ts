@@ -1,5 +1,6 @@
-import type { SessionCommandNotices } from './types_notices'
+import { appText } from '@noone/shared/application-identity'
 
+import type { SessionCommandNotices } from './types_notices'
 // Typed /undo /retry /steer /queue lines: the Ink TUI's wording on the same gateway.
 export const enSessionCommands: SessionCommandNotices = {
   undoUsage: 'usage: /undo [N]',
@@ -9,7 +10,7 @@ export const enSessionCommands: SessionCommandNotices = {
   retryNothing: 'nothing to retry',
   retryUnsupported: '/retry: retry does not support media or unknown content parts',
   busy: (command: string) =>
-    `session busy — Hermes is still replying. Stop the current reply first (Stop button, or Ctrl+C in a terminal), then run /${command}.`,
+    `session busy — ${appText('{app_name}')} is still replying. Stop the current reply first (Stop button, or Ctrl+C in a terminal), then run /${command}.`,
   busyCompressing: (command: string) =>
     `session busy — a /compress is running; run /${command} when it finishes.`,
   steerUsage: 'usage: /steer <prompt>',
@@ -24,5 +25,5 @@ export const enSessionCommands: SessionCommandNotices = {
   queueEditKept: 'It started or was refused before your edit was saved. Your edited text is in the composer.',
   queueEditUnconfirmedTitle: 'Edit not confirmed',
   queueEditUnconfirmed:
-    'Hermes could not confirm your edit. Save again to retry the same edit; it is never queued twice.'
+    '{app_name} could not confirm your edit. Save again to retry the same edit; it is never queued twice.'
 }

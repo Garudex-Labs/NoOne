@@ -8,7 +8,7 @@ name: Plugin Catalog CI
 #   pinned-source-validate — supply-chain gate: the pinned sha MUST be
 #                            reachable in the entry's repo, and the plugin
 #                            at that exact commit must pass
-#                            `hermes plugins validate`.
+#                            `noone plugins validate`.
 
 on:
   pull_request:
@@ -55,7 +55,7 @@ jobs:
           # "unknown", which plugins checking the host version reject (omh).
           fetch-depth: 0
           filter: blob:none
-          # `hermes plugins validate` below runs pinned-repo code; keep the
+          # `noone plugins validate` below runs pinned-repo code; keep the
           # job's token out of .git/config where that code could read it.
           persist-credentials: false
 

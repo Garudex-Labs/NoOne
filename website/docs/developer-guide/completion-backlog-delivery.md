@@ -1,9 +1,9 @@
 ---
 title: Background completion backlogs
-sidebar_label: Completion backlogs
+sidebarTitle: Completion backlogs
 ---
 
-# Background completion backlogs
+# Background completion backlogs {#background-completion-backlogs}
 
 Interactive surfaces coalesce consecutive background-process completions that are
 already ready for one conversation into a single notification turn. This does not
@@ -16,14 +16,14 @@ has left the process registry and entered the input queue. An entirely consumed
 batch starts no turn. Watching output and async-delegation results remain separate
 notifications, in their original order; they are not folded into completion batches.
 
-## Consumers and ownership
+## Consumers and ownership {#consumers-and-ownership}
 
-- **Classic CLI:** `hermes_cli/cli_process_notifications.py` owns the idle/post-turn
+- **Classic CLI:** `agent_cli/cli_process_notifications.py` owns the idle/post-turn
   drain, compression-aware ownership and final input unwrapping.
-- **TUI and Desktop:** `tui_gateway/session_notifications.py` groups the poller's
+- **TUI and Desktop:** `agent_backend/session_notifications.py` groups the poller's
   ready snapshot after checking ownership. Each process still emits its own UI
   status. Busy sessions requeue structured events, not rendered batch strings.
-- **Post-turn TUI safety net:** `tui_gateway/prompt_turn.py` uses the same routing
+- **Post-turn TUI safety net:** `agent_backend/prompt_turn.py` uses the same routing
   and rendering path. Desktop and dashboard chat clients share this backend.
 - **Messaging gateway:** `gateway/run_notifications.py` already uses its own
   route-keyed short-window batching. This interactive-backlog change does not
@@ -37,7 +37,7 @@ Addressed events still require a provable owner; another live session cannot ado
 them. Delegation delivery continues through its existing durable claim/complete
 ledger, once per delegation rather than once per process batch.
 
-## Local validation and its limits
+## Local validation and its limits {#local-validation-and-its-limits}
 
 `evals/completion_backlog_probe.py REPO OUTPUT.json` starts real local shell children
 in temporary directories, reads their real completion events, and drives the

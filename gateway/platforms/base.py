@@ -18,7 +18,7 @@ import time
 import uuid
 import weakref
 from abc import ABC, abstractmethod
-from hermes_dir_acl import make_user_dir, unusable_dir_remedy
+from agent_dir_acl import make_user_dir, unusable_dir_remedy
 from gateway.platforms.base_log_safety import describe_proxy_error, env_proxy_for_redaction, safe_proxy_url_for_log, safe_url_for_log
 from gateway.platforms.base_image_sniff import _looks_like_image
 from gateway.platforms.base_media_flags import pad_inline_flags
@@ -178,8 +178,6 @@ def _reply_anchor_for_event(event) -> str | None:
         if getattr(source, "chat_type", None) != "dm":
             return None
         return getattr(event, "message_id", None) or getattr(event, "reply_to_message_id", None)
-    if platform == "feishu" and thread_id and getattr(event, "reply_to_message_id", None):
-        return getattr(event, "reply_to_message_id", None)
     return getattr(event, "message_id", None)
 
 
@@ -390,7 +388,7 @@ def proxy_kwargs_for_bot(proxy_url: str | None) -> dict:
 def _config_section(name: str) -> dict:
     """Read-only ``config.yaml`` section ``name``; ``{}`` when unreadable/missing/not a dict."""
     try:
-        from hermes_cli.config import load_config_readonly as _load_config
+        from agent_cli.config import load_config_readonly as _load_config
         cfg = _load_config()  # read-only: .get() only, never mutated
     except Exception:
         return {}
@@ -410,7 +408,7 @@ def gateway_trust_env() -> bool:
 
 def proxy_kwargs_for_aiohttp(proxy_url: str | None) -> tuple[dict, dict]:
     """``(session_kwargs, request_kwargs)`` for a standalone ``aiohttp.ClientSession``. With
-    aiohttp-socks every scheme uses a connector (mautrix-style libs never forward per-request
+    aiohttp-socks every scheme uses a connector (connector-based libraries never forward per-request
     ``proxy=``); without it HTTP falls back to ``({}, {"proxy": url})`` and SOCKS is ignored."""
     if not proxy_url:
         return {}, {}
@@ -446,11 +444,11 @@ from gateway.platforms.base_streaming_tts import (
     AudioFormat, StreamingTTSHandle, streaming_tts_should_skip_whole_file, streaming_tts_turn_key)
 from gateway.platforms.event import MessageEvent, MessageType, ProcessingOutcome
 from gateway.warning_notifications import diagnostic_wake_muted
-from hermes_cli.observability.shared_metrics_gateway import records_delivery, stop_reply_clock
-from hermes_cli.home_data_layout import SECRET_CACHE_STORES
+from agent_cli.observability.shared_metrics_gateway import records_delivery, stop_reply_clock
+from agent_cli.home_data_layout import SECRET_CACHE_STORES
 from gateway.session import SessionSource, build_session_key
 from gateway.session_transcript import TranscriptReadError
-from hermes_constants import CONNECTOR_DOWNLOADS_SUBDIR, get_default_hermes_root, get_hermes_dir, get_hermes_home
+from agent_constants import CONNECTOR_DOWNLOADS_SUBDIR, get_default_agent_root, get_agent_dir, get_agent_home
 from agent.provider_media import GENERATED_SUBDIR, MEDIA_CACHE_MAX_AGE_HOURS
 
 if TYPE_CHECKING:
@@ -463,7 +461,7 @@ GATEWAY_SECRET_CAPTURE_UNSUPPORTED_MESSAGE = (
 
 # One sentence for every "you may not press/run this" refusal on every platform (slash commands,
 # approval buttons, pickers, prompts). ``{platform}`` is the ``Platform.value`` for the
-# ``hermes pairing approve`` command (hermes_cli/subcommands/pairing.py) that lets the owner fix it.
+# ``hermes pairing approve`` command (agent_cli/subcommands/pairing.py) that lets the owner fix it.
 # Kept under 200 chars: Telegram's answerCallbackQuery truncates longer text.
 UNAUTHORIZED_ACTION_NOTICE = (
     "This bot is private and you're not on its allowed list. If you own it, run "
@@ -488,7 +486,7 @@ async def ssrf_redirect_guard(response):
 
 # Inbound images are cached locally for the vision tool (platform URLs are ephemeral).
 # Import-time default; tests monkeypatch it, getters re-resolve per call.
-IMAGE_CACHE_DIR = get_hermes_dir("cache/images", "image_cache")
+IMAGE_CACHE_DIR = get_agent_dir("cache/images", "image_cache")
 
 
 # Inbound media cap (``gateway.max_inbound_media_bytes``): payloads are buffered fully in memory,
@@ -544,11 +542,11 @@ async def read_httpx_body_with_limit(response, *, media_type: str, body=None) ->
 
 def _cache_dir_accessors(kind: str, constant_name: str, new_subpath: str, old_name: str):
     """``(get_<kind>_cache_dir, cleanup_<kind>_cache)`` pair. The getter resolves fresh via
-    get_hermes_dir (active profile) unless a test monkeypatched the module constant away from
+    get_agent_dir (active profile) unless a test monkeypatched the module constant away from
     its import-time default, and creates the directory; ``cleanup(max_age_hours=MEDIA_CACHE_MAX_AGE_HOURS)`` deletes
     older files and returns the count."""
     def get_dir() -> Path:
-        d = get_hermes_dir(new_subpath, old_name)
+        d = get_agent_dir(new_subpath, old_name)
         current = globals().get(constant_name)
         default = _CACHE_DIR_IMPORT_DEFAULTS.get(constant_name)
         if current is not None and default is not None and current != default:
@@ -576,7 +574,7 @@ def _secure_media_cache_dir(cache_dir: Path) -> None:
     local account whenever ``HERMES_HOME`` is traversable — the documented
     ``HERMES_HOME_MODE=0701`` web-server hatch. The mode is passed to ``mkdir``
     so it is set at creation, then reconciled by the house policy helper
-    ``hermes_cli.config._secure_dir`` (managed/NixOS installs keep their
+    ``agent_cli.config._secure_dir`` (managed/NixOS installs keep their
     group-share design: these lazily-created dirs are not covered by the
     module's ``systemd.tmpfiles`` rules, so the mode is left to the
     configured umask/setgid). Best-effort: never fails a media write.
@@ -584,7 +582,7 @@ def _secure_media_cache_dir(cache_dir: Path) -> None:
     try:
         managed = False
         try:
-            from hermes_cli.config import is_managed
+            from agent_cli.config import is_managed
 
             managed = bool(is_managed())
         except Exception:  # pragma: no cover - defensive
@@ -594,7 +592,7 @@ def _secure_media_cache_dir(cache_dir: Path) -> None:
             return
         make_user_dir(cache_dir, parents=True, exist_ok=True, mode=0o700)
         try:
-            from hermes_cli.config import _secure_dir
+            from agent_cli.config import _secure_dir
 
             _secure_dir(cache_dir)
         except Exception as exc:  # pragma: no cover - defensive
@@ -677,7 +675,7 @@ async def cache_image_from_url(url: str, ext: str = ".jpg", retries: int = 2) ->
 
 
 # Audio cache utilities (same pattern as images; feeds the STT tool).
-AUDIO_CACHE_DIR = get_hermes_dir("cache/audio", "audio_cache")
+AUDIO_CACHE_DIR = get_agent_dir("cache/audio", "audio_cache")
 get_audio_cache_dir, cleanup_audio_cache = _cache_dir_accessors(
     "audio", "AUDIO_CACHE_DIR", "cache/audio", "audio_cache")
 
@@ -703,7 +701,7 @@ async def cache_audio_from_url(url: str, ext: str = ".ogg", retries: int = 2) ->
 
 
 # Video cache utilities (same pattern; referenced by local path).
-VIDEO_CACHE_DIR = get_hermes_dir("cache/videos", "video_cache")
+VIDEO_CACHE_DIR = get_agent_dir("cache/videos", "video_cache")
 get_video_cache_dir, cleanup_video_cache = _cache_dir_accessors(
     "video", "VIDEO_CACHE_DIR", "cache/videos", "video_cache")
 
@@ -724,8 +722,8 @@ async def cache_video_from_bytes_async(data: bytes, ext: str = ".mp4") -> str:
 
 
 # Document / screenshot cache utilities (same pattern; referenced by local path).
-DOCUMENT_CACHE_DIR = get_hermes_dir("cache/documents", "document_cache")
-SCREENSHOT_CACHE_DIR = get_hermes_dir("cache/screenshots", "browser_screenshots")
+DOCUMENT_CACHE_DIR = get_agent_dir("cache/documents", "document_cache")
+SCREENSHOT_CACHE_DIR = get_agent_dir("cache/screenshots", "browser_screenshots")
 get_document_cache_dir, cleanup_document_cache = _cache_dir_accessors(
     "document", "DOCUMENT_CACHE_DIR", "cache/documents", "document_cache")
 get_screenshot_cache_dir, cleanup_screenshot_cache = _cache_dir_accessors(
@@ -739,8 +737,8 @@ _CACHE_DIR_IMPORT_DEFAULTS = {
 
 # Launch-time homes: fine for the static ALLOW roots below (per-profile cache roots are
 # enumerated at check time), never for the credential DENY side — see _credential_home_roots.
-_HERMES_HOME = get_hermes_home()
-_HERMES_ROOT = get_default_hermes_root()
+_HERMES_HOME = get_agent_home()
+_HERMES_ROOT = get_default_agent_root()
 MEDIA_DELIVERY_ALLOW_DIRS_ENV = "HERMES_MEDIA_ALLOW_DIRS"
 MEDIA_DELIVERY_TRUST_RECENT_ENV = "HERMES_MEDIA_TRUST_RECENT_FILES"
 MEDIA_DELIVERY_TRUST_RECENT_SECONDS_ENV = "HERMES_MEDIA_TRUST_RECENT_SECONDS"
@@ -797,7 +795,7 @@ def _profile_cache_roots() -> list[Path]:
     which otherwise wins when HERMES_HOME is symlinked under a denied prefix (#31733).
     """
     return [*(p / "cache" / subdir for p in _profile_dirs() for subdir in _MEDIA_DELIVERY_CACHE_SUBDIRS),
-            *(p / CONNECTOR_DOWNLOADS_SUBDIR for p in (get_hermes_home(), *_profile_dirs()))]
+            *(p / CONNECTOR_DOWNLOADS_SUBDIR for p in (get_agent_home(), *_profile_dirs()))]
 
 
 def _profile_dirs() -> list[Path]:
@@ -814,7 +812,7 @@ def _credential_home_roots() -> list[Path]:
     and every ``<root>/profiles/*``. Enumerated at check time like ``_profile_cache_roots`` on
     the allow side — a denylist frozen at import covers only the launch profile, so a
     ``MEDIA:<root>/profiles/<other>/.env`` emitted in any profile's turn would upload it."""
-    return list(dict.fromkeys((get_hermes_home(), _HERMES_ROOT, *_profile_dirs())))
+    return list(dict.fromkeys((get_agent_home(), _HERMES_ROOT, *_profile_dirs())))
 
 
 def _kanban_root() -> Path:
@@ -1008,7 +1006,7 @@ def _translate_docker_container_media_path(
     """
     if not candidate.as_posix().startswith("/"):  # POSIX even on Windows gateways (not is_absolute)
         return None
-    # In-process gateways (Desktop, `hermes serve`) may not have bridged terminal.* config into
+    # In-process gateways (Desktop, `noone serve`) may not have bridged terminal.* config into
     # TERMINAL_* env yet; the bridge is idempotent.
     with contextlib.suppress(Exception):
         from tools.terminal_tool import _ensure_terminal_env_bridged
@@ -1844,7 +1842,7 @@ class BasePlatformAdapter(_SessionModelSettingsMixin, ABC):
     interactive_resume: bool = True
     # Port-binding adapter that answers ``/p/<profile>/...`` for every served profile on the default
     # listener under ``gateway.multiplex_profiles``. Declared per adapter (not in a central list) so
-    # ``hermes gateway migrate`` can tell "URL changes" from "this profile would be skipped" as new
+    # ``noone gateway migrate`` can tell "URL changes" from "this profile would be skipped" as new
     # HTTP-inbound adapters gain the prefix.
     serves_profile_prefix: bool = False
     # Back-reference to the running ``GatewayRunner`` (set by gateway/run.py); ``build_source``
@@ -1940,7 +1938,7 @@ class BasePlatformAdapter(_SessionModelSettingsMixin, ABC):
     @property
     def enforces_own_access_policy(self) -> bool:
         """Whether this adapter enforces its own config-driven access policy at intake
-        (``dm_policy``/``group_policy``/``allow_from``: WeCom, Weixin, QQBot, WhatsApp…). The
+        (``dm_policy``/``group_policy``/``allow_from``: Weixin, WhatsApp…). The
         gateway env allowlist runs *after* the adapter; without one it trusts this flag ONLY when
         the effective policy is a real ``"allowlist"`` — never ``"open"`` (the default), which would
         be a network-exposed fail-open (SECURITY.md §2.6). Open access still requires
@@ -2182,7 +2180,7 @@ class BasePlatformAdapter(_SessionModelSettingsMixin, ABC):
         owner_profile = scoped_lock_owner_label(existing)
         pid_part = f" (PID {owner_pid})" if owner_pid else ""
         holder = f" by the '{owner_profile}' profile gateway{pid_part}" if owner_profile else pid_part
-        remedy = (f" Stop that gateway first (hermes --profile {owner_profile} gateway stop)."
+        remedy = (f" Stop that gateway first (noone --profile {owner_profile} gateway stop)."
                   if owner_profile else " Stop the other gateway first.")
         message = f"{resource_desc} already in use{holder}.{remedy}"
         logger.error('[%s] %s', self.name, message)
@@ -2213,7 +2211,7 @@ class BasePlatformAdapter(_SessionModelSettingsMixin, ABC):
         plugin, so identity alone would double-register). Each factory is isolated so a bad plugin
         can't block connecting."""
         try:
-            from hermes_cli.plugins import get_plugin_manager
+            from agent_cli.plugins import get_plugin_manager
             factories = get_plugin_manager().get_platform_handler_factories(
                 getattr(self.platform, "value", str(self.platform)))
         except Exception as e:  # pragma: no cover - defensive
@@ -2635,7 +2633,7 @@ class BasePlatformAdapter(_SessionModelSettingsMixin, ABC):
                    metadata: Optional[dict[str, Any]] = None) -> SendResult:
         """Send ``content`` (may be markdown) to a chat; returns SendResult with message id."""
 
-    # Surfaces needing an explicit finalize edit (DingTalk AI Cards): the consumer never skips it.
+    # Surfaces needing an explicit finalize edit (native progress cards): the consumer never skips it.
     REQUIRES_EDIT_FINALIZE: bool = False
 
     async def create_handoff_thread(self, parent_chat_id: str, name: str) -> Optional[str]:
@@ -2647,7 +2645,7 @@ class BasePlatformAdapter(_SessionModelSettingsMixin, ABC):
     async def edit_message(
         self, chat_id: str, message_id: str, content: str, *, finalize: bool = False) -> SendResult:
         """Edit a sent message (optional: success=False makes callers send anew). ``finalize`` marks
-        the last edit of a streamed response; surfaces with a distinct "in progress" state (DingTalk
+        the last edit of a streamed response; surfaces with a distinct "in progress" state (native progress cards
         AI Cards) close the message on it and set ``REQUIRES_EDIT_FINALIZE`` so it's routed even
         when content is unchanged."""
         return SendResult(success=False, error="Not supported")
@@ -3970,7 +3968,7 @@ class BasePlatformAdapter(_SessionModelSettingsMixin, ABC):
         src = event.source
         self._canonicalize(src)  # identity FIRST (direct callers may skip handle_message)
         cmd = event.get_command()
-        from hermes_cli.commands import (is_interrupt_then_dispatch, should_bypass_active_session)
+        from agent_cli.commands import (is_interrupt_then_dispatch, should_bypass_active_session)
         if should_bypass_active_session(cmd):
             try:
                 # /stop, /new, /reset: response, then cancel + drain only if the runner accepted it.
@@ -4471,7 +4469,7 @@ class BasePlatformAdapter(_SessionModelSettingsMixin, ABC):
             await self._run_processing_hook("on_processing_complete", event, ProcessingOutcome.FAILURE)
             logger.error("[%s] Error handling message: %s", self.name, e, exc_info=True)
             await self._notify_turn_error(event, e)
-            from hermes_cli.config_backend import ConfigBackendUnavailable as _outage  # this turn only
+            from agent_cli.config_backend import ConfigBackendUnavailable as _outage  # this turn only
             if isinstance(e, (SystemExit, KeyboardInterrupt)) and not isinstance(e, _outage):  # rest contained
                 raise
         finally:

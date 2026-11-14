@@ -1,5 +1,6 @@
-import type { PluginUpdateTranslations } from './types_plugin_update'
+import { appText } from '@noone/shared/application-identity'
 
+import type { PluginUpdateTranslations } from './types_plugin_update'
 /** Copy for updating an installed plugin (Plugins tab): catalog re-pin consent and the security-scan override. */
 export const enPluginUpdate: PluginUpdateTranslations = {
   folderAccess: {
@@ -12,7 +13,7 @@ export const enPluginUpdate: PluginUpdateTranslations = {
     pickerTitle: (name: string) => `Choose a folder for ${name}`,
     pickerButton: 'Allow access',
     refusedProtected: (name: string) =>
-      `${name} cannot use that folder: it holds Hermes settings, keys or plugin data. Choose a folder that does not contain them.`,
+      `${name} cannot use that folder: it holds ${appText('{app_name}')} settings, keys or plugin data. Choose a folder that does not contain them.`,
     loadFailed: (name: string) => `Could not load the folders shared with ${name}.`
   },
   updateToPin: (sha: string) => `Update to ${sha}`,

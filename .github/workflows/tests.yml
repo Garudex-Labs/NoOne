@@ -86,7 +86,7 @@ jobs:
         # select it explicitly (journal_mode config, a pinned vulnerable
         # version), so they run on any interpreter.
         run: |
-          "$HERMES_PYTHON" -c "import sqlite3, sys, hermes_state_wal as w; v = w.is_sqlite_wal_reset_vulnerable(); print(f'Python {sys.version.split()[0]}, SQLite {sqlite3.sqlite_version}, WAL-reset vulnerable: {v}'); sys.exit(1 if v else 0)"
+          "$HERMES_PYTHON" -c "import sqlite3, sys, agent_state_wal as w; v = w.is_sqlite_wal_reset_vulnerable(); print(f'Python {sys.version.split()[0]}, SQLite {sqlite3.sqlite_version}, WAL-reset vulnerable: {v}'); sys.exit(1 if v else 0)"
 
       - name: Restore per-file duration cache
         # scripts/run_tests_parallel.py raises a file's timeout to
@@ -142,7 +142,7 @@ jobs:
         uses: ./.github/actions/check-clean-worktree
 
   e2e:
-    # The core suites spawn real serve / gateway / tui_gateway / MCP / SQLite
+    # The core suites spawn real serve / gateway / agent_backend / MCP / SQLite
     # writer processes per test; a 4-vCPU runner serialises them into timeouts.
     if: inputs.e2e
     runs-on: blacksmith-32vcpu-ubuntu-2404
@@ -170,12 +170,6 @@ jobs:
           test-environment: 'true'
           prune-python-cache: true
 
-      - name: Install Node deps and build the Ink TUI
-        # tests/e2e/core/terminal drives the real `hermes --tui` over a PTY;
-        # HERMES_E2E_REQUIRE_TUI=1 below turns a missing build into a failure.
-        uses: ./.github/actions/retry
-        with:
-          command: pnpm install --frozen-lockfile --filter "{./ui-tui}..." --ignore-scripts && pnpm --dir ui-tui run build
 
       - name: Install ripgrep (prebuilt binary)
         run: |
@@ -194,7 +188,7 @@ jobs:
       - name: Install tmux
         # tests/e2e/core/cli_tmux and the Vertex /bg CLI suite drive real CLIs in tmux. The runner
         # image ships it today; install it if it ever stops, and require_tmux() fails (not skips)
-        # without it under HERMES_E2E_REQUIRE_TUI=1, so the lane can't go green over zero coverage.
+        # without it under AGENT_E2E_REQUIRE_TOOLS=1, so the lane can't go green over zero coverage.
         run: |
           set -euo pipefail
           command -v tmux >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq tmux; }
@@ -204,7 +198,7 @@ jobs:
         # The state.db suites skip on a WAL-reset-vulnerable SQLite; fail
         # instead of reporting green over zero coverage.
         run: |
-          "$HERMES_PYTHON" -c "import sqlite3, hermes_state_wal as w; print('sqlite', sqlite3.sqlite_version); assert not w.is_sqlite_wal_reset_vulnerable()"
+          "$HERMES_PYTHON" -c "import sqlite3, agent_state_wal as w; print('sqlite', sqlite3.sqlite_version); assert not w.is_sqlite_wal_reset_vulnerable()"
 
       - name: Run messaging-gated gateway cases
         # These gateway files drive the REAL Discord/Telegram SDKs and skip when the
@@ -232,7 +226,7 @@ jobs:
 
       - name: Run e2e tests
         # One subprocess per file, in parallel: the core suites spawn real
-        # processes (serve, gateway, tui_gateway, MCP servers, SQLite writers)
+        # processes (serve, gateway, agent_backend, MCP servers, SQLite writers)
         # and must not share interpreter state.
         # tests/e2e/core/upgrade runs in its own job (e2e-upgrade) below.
         run: |
@@ -255,7 +249,7 @@ jobs:
           # exactly-once/compaction suites are race detectors, and a rare
           # corruption that passes on retry is still a corruption.
           HERMES_TEST_FILE_RETRIES: "0"
-          HERMES_E2E_REQUIRE_TUI: "1"
+          AGENT_E2E_REQUIRE_TOOLS: "1"
           OPENROUTER_API_KEY: ""
           OPENAI_API_KEY: ""
           NOUS_API_KEY: ""
@@ -311,7 +305,7 @@ jobs:
         uses: ./.github/actions/check-clean-worktree
 
   e2e-upgrade:
-    # tests/e2e/core/upgrade: a real N-1 -> HEAD `hermes update` (clean,
+    # tests/e2e/core/upgrade: a real N-1 -> HEAD `noone update` (clean,
     # autostash, killed mid-pull / mid-deps, offline), fresh-process import and
     # entrypoint smoke, the config round-trip property matrix, and the lane
     # suites below it (pm: PM environment lifecycle across updates, ...).
@@ -335,7 +329,7 @@ jobs:
           fetch-tags: true
 
       - name: Set up Node
-        # `hermes update` builds the web UI / TUI workspaces.
+        # `noone update` builds the web UI / TUI workspaces.
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # 7.0.0
         with:
           node-version: 26
@@ -410,7 +404,7 @@ jobs:
         # instead of reporting green over zero coverage.
         run: |
           source .venv/bin/activate
-          python -c "import sqlite3, hermes_state_wal as w; print('sqlite', sqlite3.sqlite_version); assert not w.is_sqlite_wal_reset_vulnerable()"
+          python -c "import sqlite3, agent_state_wal as w; print('sqlite', sqlite3.sqlite_version); assert not w.is_sqlite_wal_reset_vulnerable()"
 
       - name: Run upgrade e2e tests (${{ matrix.shard }})
         run: |

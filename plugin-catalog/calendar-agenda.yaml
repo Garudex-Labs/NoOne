@@ -1,8 +1,8 @@
 # Catalog entry for the Hermes Agent Plugin Hackathon.
-# At submission time this file is added to the NousResearch/hermes-agent
+# At submission time this file is added to the Garudex-Labs/NoOne
 # repository as `plugin-catalog/calendar-agenda.yaml` via pull request.
-# Schema: plugin-catalog/README.md in NousResearch/hermes-agent
-# (mirrored at https://hermes-agent.nousresearch.com/docs/developer-guide/plugins/catalog-submission)
+# Schema: plugin-catalog/README.md in Garudex-Labs/NoOne
+# (mirrored at https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/developer-guide/plugins/catalog-submission.md)
 #
 # Attribution: author/maintainer is the owner himself, GitHub `sanpeita`;
 # the plugin is published as `sanpeita/hermes-calendar-agenda`.

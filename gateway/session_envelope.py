@@ -15,7 +15,7 @@ import os
 from gateway.platforms.event import MessageEvent, MessageType
 from gateway.session import SessionSource
 from gateway.session_ingress_media import capture_native_media, restore_native_media
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +70,7 @@ def _adapter_event(event, **changes):
 
 
 def _drop_remote_media(event):
-    """An adapter that could not cache a download leaves its remote URL in ``media_urls`` (DingTalk
-    always does). Capture takes only local files, so that one entry refused the whole message, text
+    """An adapter that could not cache a download leaves its remote URL in ``media_urls`` (    always does). Capture takes only local files, so that one entry refused the whole message, text
     included: drop it and tell the agent instead. Malformed media lists still reach validation."""
     urls, types = event.media_urls, event.media_types
     if not isinstance(event.text, str) or _media_clause(event) is not None or all(map(os.path.isabs, urls)):
@@ -273,7 +272,7 @@ def _snapshot_native(runner, event, provenance, fresh_roles=False, encoded_sourc
     # Only an exact persisted legacy retry retains its old fingerprint. New
     # ordinary admissions must bind homes too, including execution after restart.
     if provenance is not None and not getattr(runner.config, 'multiplex_profiles', False):
-        from hermes_state_runtime import list_session_admissions
+        from agent_state_runtime import list_session_admissions
         from gateway.session_authorities import active_authority
         authority = active_authority(runner)
         entry = runner.session_store.lookup_by_session_key(envelope['route'])

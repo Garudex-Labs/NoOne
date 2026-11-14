@@ -1,7 +1,7 @@
-import type { ModelOptionProvider } from '@hermes/shared'
+import type { ModelOptionProvider } from '@noone/shared'
+import { appText } from '@noone/shared/application-identity'
 import { atom } from 'nanostores'
 
-import { invalidateAllConnectors } from '@/app/capabilities/connectors/data/keys'
 import {
   cancelOAuthSession,
   getGlobalModelOptions,
@@ -14,7 +14,8 @@ import {
   startOAuthLogin,
   submitOAuthCode,
   validateProviderCredential
-} from '@/hermes'
+} from '@/agent-client'
+import { invalidateAllConnectors } from '@/app/capabilities/connectors/data/keys'
 import { translateNow } from '@/i18n'
 import { writeClipboardText } from '@/lib/clipboard'
 import { restOfLongPollGap } from '@/lib/long-poll'
@@ -37,7 +38,7 @@ import { afterOnboardingSurfaceClear, onboardingSurfaceOpen } from '@/store/onbo
 import { captureOnboardingScope, type OnboardingScope } from '@/store/onboarding-scope'
 import { requestRoute } from '@/store/recovery-requests'
 import { setModelPickerOpen } from '@/store/session'
-import type { AppHandoffStatus, OAuthPollResponse, OAuthProvider, OAuthStartResponse } from '@/types/hermes'
+import type { AppHandoffStatus, OAuthPollResponse, OAuthProvider, OAuthStartResponse } from '@/types/agent-client'
 
 type PkceStart = Extract<OAuthStartResponse, { flow: 'pkce' }>
 type DeviceStart = Extract<OAuthStartResponse, { flow: 'device_code' }>
@@ -336,7 +337,7 @@ export function settleLocalRuntimeNotice(runtime: RuntimeReadinessResult) {
 // The Webapp has no Local models pane (the flag is Electron-only), so there the way forward it can
 // offer is another model, and the sentence must not send the user to a pane they cannot open.
 const WEBAPP_LOCAL_RUNTIME_DOWN =
-  "The local model server isn't serving. Start it from the Hermes desktop app or `hermes model` in a terminal, or choose another model."
+  "The local model server isn't serving. Start it from the Hermes desktop app or `noone model` in a terminal, or choose another model."
 
 // Desktop has the pane, so its notice names it next to the button that opens it.
 const DESKTOP_LOCAL_RUNTIME_DOWN =
@@ -359,11 +360,11 @@ function keepConfiguredWithLocalRuntimeDown(reason: string) {
 }
 
 function notifyReady(provider: string) {
-  notify({ kind: 'success', title: 'Hermes is ready', message: `${provider} connected.` })
+  notify({ kind: 'success', title: appText('{app_name} is ready'), message: `${provider} connected.` })
 }
 
 // Human-friendly labels for tools auto-routed through the Nous Tool Gateway,
-// mirroring hermes_cli/nous_subscription._GATEWAY_TOOL_LABELS so the GUI and
+// mirroring agent_cli/nous_subscription._GATEWAY_TOOL_LABELS so the GUI and
 // CLI describe the same thing.
 const GATEWAY_TOOL_LABELS: Record<string, string> = {
   browser: 'browser automation',
@@ -447,7 +448,7 @@ async function fetchProviderDefaultModel(
   }
 
   // Prefer the backend's recommended default — it mirrors the curation
-  // `hermes model` does (for Nous it honors the user's free/paid tier, so a
+  // `noone model` does (for Nous it honors the user's free/paid tier, so a
   // free user gets a free model rather than a paid default like opus). Fall
   // back to the first curated model if the endpoint can't resolve one.
   let defaultModel = String(models[0])
@@ -615,8 +616,8 @@ function providerResolutionFailure(reason: null | string) {
   const detail = reason?.trim()
 
   return detail
-    ? `Connected, but Hermes still cannot resolve a usable provider. ${detail}`
-    : 'Connected, but Hermes still cannot resolve a usable provider.'
+    ? appText(`Connected, but {app_name} still cannot resolve a usable provider. ${detail}`)
+    : appText('Connected, but {app_name} still cannot resolve a usable provider.')
 }
 
 /** Re-read the OAuth provider list into the onboarding cache. Exported so a
@@ -897,7 +898,7 @@ export async function refreshOnboarding(ctx: OnboardingContext, stillWanted?: ()
         kind: 'info',
         title: 'Runtime not ready',
         message:
-          'Hermes Desktop could not verify the running backend on startup. Some features may be unavailable until the gateway is reachable.'
+          appText('{app_name} Desktop could not verify the running backend on startup. Some features may be unavailable until the gateway is reachable.')
       })
     }
 
@@ -1232,7 +1233,7 @@ export async function recheckExternalSignin(ctx: OnboardingContext) {
       provider,
       message:
         reason?.trim() ||
-        `Hermes still cannot reach ${provider.name}. Run \`${provider.cli_command}\` in a terminal first.`
+        appText(`{app_name} still cannot reach ${provider.name}. Run \`${provider.cli_command}\` in a terminal first.`)
     })
   )
 }
@@ -1417,7 +1418,7 @@ export async function saveOnboardingLocalEndpoint(
     if (!runtime.ready) {
       const detail = (runtime.reason ?? '').trim()
 
-      return { ok: false, message: detail || `Saved, but Hermes still cannot reach ${resolvedUrl}.` }
+      return { ok: false, message: detail || appText(`Saved, but {app_name} still cannot reach ${resolvedUrl}.`) }
     }
 
     notifyReady('Local / custom endpoint')

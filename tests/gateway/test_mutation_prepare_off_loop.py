@@ -22,8 +22,8 @@ async def test_model_prepare_waiting_on_a_contended_writer_keeps_the_loop_live(t
     from gateway.session_authority import SessionAuthority
     from gateway.session_controls import AuthorityConnection
     from gateway.session_local import create_local_session
-    from hermes_cli import model_switch
-    import hermes_state_runtime as rt
+    from agent_cli import model_switch
+    import agent_state_runtime as rt
     monkeypatch.setattr(run, '_load_gateway_config', lambda *a: {})
     monkeypatch.setattr(model_switch, 'switch_model', lambda **k: model_switch.ModelSwitchResult(
         success=True, new_model='switched', target_provider='custom', base_url='http://127.0.0.1:9/v1'))
@@ -72,7 +72,7 @@ async def test_model_prepare_waiting_on_a_contended_writer_keeps_the_loop_live(t
             last = now
     # The first dispatch imports the wire-contract registry (a one-time cold import of a few hundred
     # ms on a loaded runner); warm it so the probe measures the prepare writer wait, not module load.
-    import tui_gateway.contracts.registry
+    import agent_backend.contracts.registry
     tick = asyncio.create_task(ticker())
     try:
         await async_wait_until(lambda: gaps, timeout=10, what='the loop-stall probe ticking')

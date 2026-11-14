@@ -1,7 +1,7 @@
 """Profile-isolation regression tests for single-process multi-profile runtimes.
 
 In runtimes that serve every profile from one OS process (the desktop
-``tui_gateway``), the profile boundary is the context-local
+``agent_backend``), the profile boundary is the context-local
 ``_HERMES_HOME_OVERRIDE`` ContextVar, not the process environment.  State that
 escapes the request call stack — import-time-frozen path constants, direct
 ``os.environ`` reads, or worker threads that don't inherit the request context —
@@ -19,10 +19,10 @@ from pathlib import Path
 
 import pytest
 
-from hermes_constants import (
-    get_hermes_home,
-    reset_hermes_home_override,
-    set_hermes_home_override,
+from agent_constants import (
+    get_agent_home,
+    reset_agent_home_override,
+    set_agent_home_override,
 )
 
 
@@ -40,11 +40,11 @@ def two_profiles(tmp_path):
 
 def _under_override(home: Path, fn):
     """Run ``fn`` with the profile override set to ``home`` and reset after."""
-    token = set_hermes_home_override(str(home))
+    token = set_agent_home_override(str(home))
     try:
         return fn()
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 # ---------------------------------------------------------------------------
@@ -211,7 +211,7 @@ class TestThreadContextPropagation:
         """model_tools._run_async's worker-thread branch must keep the override.
 
         This is the generic sync->async bridge for every async tool; if it
-        leaks, every async tool that resolves get_hermes_home() leaks.
+        leaks, every async tool that resolves get_agent_home() leaks.
         """
         import asyncio
 
@@ -219,7 +219,7 @@ class TestThreadContextPropagation:
         import model_tools
 
         async def reads_home():
-            return str(get_hermes_home())
+            return str(get_agent_home())
 
         async def driver():
             # Inside a running loop, _run_async spawns a worker thread + loop.

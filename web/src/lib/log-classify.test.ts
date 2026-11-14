@@ -9,7 +9,7 @@ describe("classifyLine", () => {
     expect(classifyLine(`${TS} DEBUG registry: scanned 12 tools`)).toBe(
       "debug",
     );
-    expect(classifyLine(`${TS} WARNING hermes_state: WAL disabled`)).toBe(
+    expect(classifyLine(`${TS} WARNING agent_state: WAL disabled`)).toBe(
       "warning",
     );
     expect(classifyLine(`${TS} ERROR gateway: connect failed`)).toBe("error");
@@ -20,7 +20,7 @@ describe("classifyLine", () => {
     // Regression: these rendered red with the old substring heuristic.
     expect(
       classifyLine(
-        `${TS} INFO tui_gateway.ws: ws closed peer=127.0.0.1:43212 parse_errors=0 dispatch_crashes=0 send_failures=1`,
+        `${TS} INFO agent_backend.ws: ws closed peer=127.0.0.1:43212 parse_errors=0 dispatch_crashes=0 send_failures=1`,
       ),
     ).toBe("info");
     expect(classifyLine(`${TS} INFO logs: rotating errors.log`)).toBe("info");

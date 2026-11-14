@@ -1,10 +1,9 @@
 ---
-sidebar_position: 3
 title: "Managed Scope"
 description: "Administrator-pinned, user-immutable config and secrets via a system-level managed directory"
 ---
 
-# Managed Scope
+# Managed Scope {#managed-scope}
 
 **Managed scope** lets an administrator push a baseline of configuration and
 secrets that a standard (non-root) user **cannot override**. It is intended for
@@ -16,14 +15,22 @@ When a managed scope is present, the values it specifies win over the user's
 `~/.hermes/config.yaml`, `~/.hermes/.env`, and even the shell environment — for
 exactly the keys it pins. Everything else stays fully user-controlled.
 
-:::note Different from a package-manager–locked install
+<Note>
+
+<div className="doc-callout-title">
+
+Different from a package-manager–locked install
+
+</div>
+
 A package-manager–managed install (declarative-distro / formula) blocks *all*
 config mutation and tells you to use your package manager. Managed scope is a
 separate mechanism: it injects *specific immutable values* on a per-key basis
 rather than locking the whole config. The two are independent and can coexist.
-:::
 
-## Where it lives
+</Note>
+
+## Where it lives {#where-it-lives}
 
 Managed scope is read from a system-level directory, default `/etc/hermes`:
 
@@ -42,27 +49,35 @@ Either file is optional. A missing managed directory or missing file simply
 means "no managed scope," and configuration resolves exactly as it does without
 the feature.
 
-### Relocating the directory
+### Relocating the directory {#relocating-the-directory}
 
 The location can be relocated with the `HERMES_MANAGED_DIR` environment variable
 (for containers or non-`/etc` deployments). This is a deployment/bootstrap path
 knob — like `HERMES_HOME` — set by the same administrator who owns the managed
-files. It is **never persisted** to any `.env` by Hermes.
+files. It is **never persisted** to any `.env` by {{app-name}}.
 
 ```bash
 # Point managed scope at a custom directory (set by IT / the deployment, not the user)
 export HERMES_MANAGED_DIR=/opt/org/hermes-policy
 ```
 
-:::warning
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
 A user who can set `HERMES_MANAGED_DIR` can repoint managed scope at a directory
 they control, defeating it. In a real deployment this variable should be fixed
 by the administrator (e.g. baked into the service unit / container image), not
-left user-settable. `hermes doctor` reports the *resolved* managed directory so
+left user-settable. `noone doctor` reports the *resolved* managed directory so
 a redirect is visible.
-:::
 
-## Precedence
+</Warning>
+
+## Precedence {#precedence}
 
 For the keys a managed layer specifies, the order is (highest wins):
 
@@ -83,37 +98,45 @@ model:
 forces `model.default` for every user while leaving `model.fallback` (and every
 other key) under user control.
 
-:::note Precedence note
+<Note>
+
+<div className="doc-callout-title">
+
+Precedence note
+
+</div>
+
 For the keys it pins, managed scope deliberately wins over the shell environment
 too — otherwise it would not be "managed." This is the one place that inverts the
 usual "an environment variable overrides config.yaml" rule, and it applies only
 to the specific keys the managed layer specifies.
-:::
+
+</Note>
 
 When the managed `config.yaml` pins a non-empty `terminal.backend`, a profile
 `.env` that exists but cannot be read (a sandbox launcher withholds it and
 passes the keys as environment) loads as absent with a warning; without that
-pin the read error still stops Hermes.
+pin the read error still stops {{app-name}}.
 
-## Seeing what's managed
+## Seeing what's managed {#seeing-whats-managed}
 
 ```bash
-hermes config        # shows a header naming the managed source + the pinned keys
-hermes doctor        # reports the resolved managed dir + pinned key counts
+noone config        # shows a header naming the managed source + the pinned keys
+noone doctor        # reports the resolved managed dir + pinned key counts
 ```
 
-If you try to change a managed value, Hermes refuses and names the source:
+If you try to change a managed value, {{app-name}} refuses and names the source:
 
 ```bash
-$ hermes config set model.default my/model
+$ noone config set model.default my/model
 Cannot set 'model.default': it is managed by your administrator
 (/etc/hermes/config.yaml) and cannot be changed.
 ```
 
-The same applies to managed secrets — `hermes config set` / setup will not write
+The same applies to managed secrets — `noone config set` / setup will not write
 a user value for an env key pinned by the managed `.env`.
 
-## Setting up a managed scope (administrators)
+## Setting up a managed scope (administrators) {#setting-up-a-managed-scope-administrators}
 
 ```bash
 sudo mkdir -p /etc/hermes
@@ -135,14 +158,14 @@ sudo chmod 0755 /etc/hermes
 sudo chmod 0644 /etc/hermes/config.yaml /etc/hermes/.env
 ```
 
-Changes take effect on the next Hermes start (a malformed managed file is logged
+Changes take effect on the next {{app-name}} start (a malformed managed file is logged
 loudly and ignored — it never blocks startup, but the admin should check
-`hermes doctor` to confirm the policy is being applied).
+`noone doctor` to confirm the policy is being applied).
 
-## Security model and limitations (v1)
+## Security model and limitations (v1) {#security-model-and-limitations-v1}
 
 - **Enforcement is filesystem permissions only.** If a user has write access to
-  the managed directory (or runs Hermes as `root`), managed scope is advisory.
+  the managed directory (or runs {{app-name}} as `root`), managed scope is advisory.
 - **The managed `.env` is world-readable** (`0644`), so any local user can read
   secrets pushed through it. Use it for shared, non-sensitive values (an org API
   base URL, feature defaults) rather than high-sensitivity secrets.

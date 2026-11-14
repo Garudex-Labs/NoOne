@@ -1,35 +1,43 @@
 ---
 title: "Ip As Logo — Design minimal cute IP mascot marks readable at 32px"
-sidebar_label: "Ip As Logo"
+sidebarTitle: "Ip As Logo"
 description: "Design minimal cute IP mascot marks readable at 32px"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Ip As Logo
+# Ip As Logo {#ip-as-logo}
 
 Design minimal cute IP mascot marks readable at 32px.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/ip-as-logo` |
+| Source | Optional — install with `noone skills install official/creative/ip-as-logo` |
 | Path | `optional-skills/creative/ip-as-logo` |
 | Version | `1.0.0` |
-| Author | s1dashu (https://github.com/s1dashu, upstream s1dashu/ip-as-logo-skill), ported by Hermes Agent |
+| Author | s1dashu (https://github.com/s1dashu, upstream s1dashu/ip-as-logo-skill), ported by NoOne |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `logo`, `mascot`, `branding`, `ip-character`, `image-generation`, `creative` |
 | Related skills | [`pixel-art`](../../optional/creative/creative-pixel-art.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# IP as Logo Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# IP as Logo Skill {#ip-as-logo-skill}
 
 Create the simplest possible cute IP character: a compact, lovable symbol that remains recognizable at `32 × 32`, not a detailed character illustration.
 
@@ -57,16 +65,16 @@ Create the simplest possible cute IP character: a compact, lovable symbol that r
 >   candidates. Only run `vision_analyze` on a result if the user explicitly
 >   asks for a compliance check.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use when a user wants a mascot, IP character, brand character, or "cute logo" for a product, repo, app, or community.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
-- An image-generation backend configured for the built-in `image_generate` tool; check with `hermes tools` and enable one there if the tool reports no backend.
+- An image-generation backend configured for the built-in `image_generate` tool; check with `noone tools` and enable one there if the tool reports no backend.
 - `vision_analyze` only for an explicitly requested compliance check; `delegate_task` only for large batches where the user wants speed.
 
-## Procedure
+## Procedure {#procedure}
 
 1. Parse the request for an explicit IP subject and available product context. Do not ask the user to choose a color mode unless they explicitly want to control it.
 2. When the user has not specified an IP subject and the current workspace is a product repository, inspect relevant read-only context before asking questions. Prefer the README, product docs, package or app metadata, landing-page copy, manifests, and design tokens. Treat context as sufficient when the product purpose, primary audience, and intended personality can be inferred with reasonable confidence.
@@ -82,7 +90,7 @@ Use when a user wants a mascot, IP character, brand character, or "cute logo" fo
    - For a pre-authorized reduced batch (e.g. "generate exactly 2") where the user did not pick directions, prefer one direction with N variants labeled `A1..AN`; state the direction and rationale in the report. Skip the three-direction proposal round whenever the request already authorizes a specific batch and forbids further confirmation — the "always present three directions" rule in step 4 applies only when a proposal round is possible.
    - For any other even default batch size, split candidates equally between lower-left and lower-right. For an odd batch, assign the extra candidate to either side deliberately and record the imbalance. Do not use bottom-center unless the user explicitly requests it.
 7. Default every candidate to exactly three semantic colors in the complete image: exactly two IP base colors plus exactly one background color. Reuse the two IP colors for facial marks rather than introducing additional semantic colors. Follow an explicit user request for another color count. Keep required product cues, identifying features, complexity limits, and any supplied palette consistent enough for useful comparison.
-8. Determine the available image-generation path before promising output. In Hermes this is the `image_generate` tool; if it reports no configured backend, ask the user to enable one (`hermes tools`) instead of fabricating results.
+8. Determine the available image-generation path before promising output. In {{app-name}} this is the `image_generate` tool; if it reports no configured backend, ask the user to enable one (`noone tools`) instead of fabricating results.
 9. If the batch is large and the user wants speed, parallelize candidates via `delegate_task` (one candidate per task, same product brief and shared constraints, one assigned direction or variant each). Otherwise generate candidates through separate `image_generate` calls.
 10. If the user supplies a background palette, reserve every supplied color for backgrounds unless they explicitly say otherwise. Choose exactly two IP base colors independently for the subject and context unless the user also assigns subject colors. Do not treat any historical or example palette as a closed list of allowed backgrounds.
 11. Abstract each subject using the complexity budget below. Generate every candidate as a separate full-resolution square asset; never ask an image model to compose a contact sheet, grid, or multi-image sheet. Do not use previous candidates as image references when testing prompt-only reproducibility.
@@ -91,7 +99,7 @@ Use when a user wants a mascot, IP character, brand character, or "cute logo" fo
 
 When proposing directions before generation, describe each in one compact line: `<IP subject> — <product connection> — <defining silhouette>`. End with a direct proposal to generate six images using the distribution above. Do not turn the discovery phase into a long branding workshop unless the user asks for one.
 
-## Complexity budget
+## Complexity budget {#complexity-budget}
 
 - Build one dominant continuous outer silhouette from roughly `4–7` large basic geometric shapes. Merge or delete any shape that does not carry identity, expression, or recognition.
 - Use at most one species-defining feature: for example, one large pouch beak, one pair of curled horns, or one broad visor. For limbless or featureless subjects (snakes, ghosts, blobs), the defining feature can be a silhouette gesture — one plump coil, one wavy hem — and the paired-features rule reduces to the two eyes.
@@ -100,7 +108,7 @@ When proposing directions before generation, describe each in one compact line: 
 - Make simplification, cuteness, and an endearing baby-like personality the decisive qualities. Favor a large head, compact proportions, soft cheeks, widely spaced simple eyes, and a calm friendly expression when appropriate to the subject.
 - Require a readable black silhouette and recognizability at `32 × 32`. If a feature disappears or becomes noise at that size, enlarge, merge, or remove it.
 
-## Shape language and composition
+## Shape language and composition {#shape-language-and-composition}
 
 - Use thick, rounded, weighty contours and broad color masses.
 - Forbid sharp corners, pointed ears or beaks, needle-like tails, thin antennae, thin smiles, narrow gaps, and acute flame or feather tips. Replace every necessary tip with a visibly blunt rounded end.
@@ -111,7 +119,7 @@ When proposing directions before generation, describe each in one compact line: 
 - Preserve both members of paired identifying features within the visible composition.
 - Keep the artwork upright; never rotate the canvas or tilt the main mark without an explicit request.
 
-## Simplicity and visual treatment
+## Simplicity and visual treatment {#simplicity-and-visual-treatment}
 
 - Start from large, clean semantic shapes and the strongest possible simple silhouette. The character should be understood immediately, before any internal feature is noticed.
 - Prefer fewer, larger, softer forms over extra definition. Do not add a feature merely to explain anatomy or material.
@@ -120,7 +128,7 @@ When proposing directions before generation, describe each in one compact line: 
 - Ask for the subtle dimensional effect only with the single sentence used in the Prompt skeleton. Do not expand it into numerical strength or instructions for gradients, highlights, or shadows. Incidental gradients, shading, or mild dimensionality returned by the generator are acceptable and must not trigger filtering or retrying.
 - Keep the requested visual direction graphic and simple rather than asking for clay, inflatable, plastic, plush, toy-like, or photorealistic rendering.
 
-## Color and canvas
+## Color and canvas {#color-and-canvas}
 
 - Default to exactly three semantic colors in the complete image: exactly two IP base colors plus exactly one background color.
 - Choose the two IP colors from the product context, subject identity, intended personality, and user request. Organize both into broad purposeful masses; reuse one for facial marks and keep the other in one continuous defining region rather than scattering decorative fragments.
@@ -132,7 +140,7 @@ When proposing directions before generation, describe each in one compact line: 
 - Name the intended solid background color directly. Ask for it to fill every open area and the unoccupied corners while the assigned emergence corner is occupied by the character. Do not use image-mode terms such as `opaque`, `alpha`, or `transparency` in the generation prompt.
 - Generate a direct `1:1` square with square outer corners (`aspect_ratio="square"` in `image_generate`). Accept the backend's native square resolution as-is; never resample merely to reach a specific pixel count.
 
-## Prompt skeleton
+## Prompt skeleton {#prompt-skeleton}
 
 Describe the requested visual as an image only. Never tell the image generator that the image is a `logo`, `brand mark`, `app icon`, `icon asset`, or intended for any of those uses. Do not prepend use-case or asset-type scaffolding that reveals such a use. This rule applies only to the generation prompt; the surrounding user conversation and skill name may still describe the broader project.
 
@@ -150,7 +158,7 @@ Finish: show only the character on the full-canvas background, with clean surfac
 Constraints: Use no text or watermark. Add no borders, frames, cards, or presentation masks. Include one character only, with no extra subjects or scenery. Use no fragile lines, sharp tips, unnecessary outlines, tiny details, or decorative marks. Add no photorealistic material, dramatic bevel, glossy hotspot, deep occlusion, extrusion, strong three-dimensional rendering, or external cast shadow. Keep the background solid and uniform, with no texture, vignette, or lighting variation.
 ```
 
-## Delivery behavior
+## Delivery behavior {#delivery-behavior}
 
 - Treat generation as a stochastic draw, not a conformance test.
 - Generate the requested number of independent candidates once and deliver every returned image.
@@ -158,14 +166,14 @@ Constraints: Use no text or watermark. Add no borders, frames, cards, or present
 - Do not block delivery, rank candidates as compliant or non-compliant, mark them as recommended or non-recommended, or automatically retry any result because of its background, colors, detail, composition, gradient, shading, or dimensionality.
 - Do not post-process a result to make it appear more compliant. If the user later requests another direction or replacement, generate a new independent candidate in response to that explicit request.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - The single biggest failure mode is detail creep: models add outlines, texture, extra colors, and scenery. The prompt skeleton's `Constraints:` line is load-bearing — never trim it.
 - Naming the asset a "logo" or "icon" in the generation prompt triggers presentation framing (badges, cards, mockups). Keep the prompt purely pictorial.
 - Asking one call for a grid/contact sheet of variants produces small, inconsistent characters. One candidate per call, always.
 - If two candidates in a batch come back nearly identical, that's normal stochastic behavior — deliver both; do not silently regenerate.
 
-## Verification
+## Verification {#verification}
 
 - Every delivered candidate has a label, direction rationale, assigned corner, prompt/color mapping, and file path or URL in the final report.
 - The batch count matches what the user approved; no candidate was withheld, retried, or post-processed.

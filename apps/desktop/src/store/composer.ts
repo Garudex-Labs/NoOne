@@ -1,7 +1,7 @@
-import { randomUuid } from '@hermes/shared'
+import { randomUuid } from '@noone/shared'
 import { atom } from 'nanostores'
 
-import type { HermesStagedUpload } from '@/global'
+import type { AgentStagedUpload } from '@/global'
 import { deriveDraftTitle } from '@/lib/draft-title'
 import { triggerHaptic } from '@/lib/haptics'
 import { persistString, storedString } from '@/lib/storage'
@@ -87,7 +87,7 @@ export interface ComposerAttachment {
   thumbnailUrl?: string
   path?: string
   /** Ownership of browser-staged bytes; survives failed uploads and draft clones. */
-  stagedUpload?: HermesStagedUpload
+  stagedUpload?: AgentStagedUpload
   /** Validated MIME returned by canonical owner staging. */
   mime?: string
   /** Bounded source text from a Hermes-generated large paste, sent only to the title path. */

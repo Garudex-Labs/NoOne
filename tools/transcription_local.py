@@ -7,7 +7,7 @@ stay in ``transcription_tools`` (module state) and are read from it lazily.
 """
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import logging
 import os
 import platform
@@ -106,11 +106,11 @@ def _try_lazy_install_stt() -> bool:
         logger.warning("faster-whisper was installed but importlib still cannot find it (may require Python restart)")
     except Exception as exc:
         logger.warning(
-            "Lazy install of faster-whisper failed: %s. "
+            app_text("Lazy install of faster-whisper failed: %s. "
             "When the message names a restart, this process selected its dependency generation at "
-            "boot and a new one cannot take effect in-flight; otherwise the Hermes process user "
-            "may not be able to write to the dependency environment. Run `hermes tools` as the "
-            "Hermes installation owner and select Local Whisper under Speech-to-Text.",
+            "boot and a new one cannot take effect in-flight; otherwise the {app_name} process user "
+            "may not be able to write to the dependency environment. Run `noone tools` as the "
+            "{app_name} installation owner and select Local Whisper under Speech-to-Text.", percent_format=True),
             exc)
     return False
 
@@ -324,8 +324,8 @@ def _transcribe_local_command(
             # Scrub Hermes secrets from the child env (same policy as _run_command_stt).
             # Scrub Hermes secrets from the child env (sibling path to #56332 / _run_command_stt — this
             # local-whisper path previously inherited the full process environment).
-            from tools.environments.local import hermes_subprocess_env
-            _run_quiet(shlex.split(command), timeout=300, env=hermes_subprocess_env(inherit_credentials=False))
+            from tools.environments.local import agent_subprocess_env
+            _run_quiet(shlex.split(command), timeout=300, env=agent_subprocess_env(inherit_credentials=False))
             txt_files = sorted(Path(output_dir).glob("*.txt"))
             if not txt_files:
                 return _error_result("Local STT command completed but did not produce a .txt transcript")

@@ -2,7 +2,7 @@
 
 Built on ``_helpers`` (bwrap sandbox, allowlisted env) and ``_install_helpers`` (local bare origin,
 HEAD's own ``scripts/install.sh``). Every cell starts from a real install and then drives the real
-user entry points (``hermes update``, ``hermes pm ...``, ``hermes doctor``, ``hermes gateway ...``).
+user entry points (``noone update``, ``noone pm ...``, ``noone doctor``, ``noone gateway ...``).
 
 What a PM install looks like on disk, and what the cells read back:
 
@@ -12,7 +12,7 @@ What a PM install looks like on disk, and what the cells read back:
 * ``$HERMES_HOME/installs/<key>/source-completion-pending`` is the owed update tail.
 
 A PM generation is keyed on the bytes of ``uv.lock`` (plus extras, Python, plugin members), so a
-release that changes ``uv.lock`` is what makes ``hermes update`` build a NEW generation.
+release that changes ``uv.lock`` is what makes ``noone update`` build a NEW generation.
 ``publish_dependency_release`` publishes exactly that: ``uv.lock`` plus a trailing TOML comment,
 which ``uv sync --locked`` accepts unchanged but which moves the generation key.
 """
@@ -54,7 +54,7 @@ def configure(sb: I.Sandbox, base_url: str, extra: str = "", env_extra: str = ""
     official-origin checkout on stable: an update check would then ask the live GitHub API for
     the latest release. Re-pin main, as a user who chose it at install keeps it."""
     ver = ok(sb.run([sb.python, "-c",
-                     "from hermes_cli.config_defaults import DEFAULT_CONFIG as D; print(D['_config_version'])"]))
+                     "from agent_cli.config_defaults import DEFAULT_CONFIG as D; print(D['_config_version'])"]))
     version = int(ver.stdout.strip().splitlines()[-1])
     (sb.hermes_home / "config.yaml").write_text(I.provider_config(base_url, version, extra), encoding="utf-8")
     (sb.hermes_home / ".env").write_text(f"OPENAI_API_KEY={I.FAKE_KEY}\n{env_extra}", encoding="utf-8")
@@ -162,7 +162,7 @@ def arm_pending_tail(sb: I.Sandbox) -> None:
 
 
 class Gateway:
-    """``hermes gateway run`` in the sandbox (the user's foreground/systemd ``ExecStart``)."""
+    """``noone gateway run`` in the sandbox (the user's foreground/systemd ``ExecStart``)."""
 
     def __init__(self, sb: I.Sandbox, env: dict[str, str], log: Path, argv0: list[str] | None = None):
         self.sb, self.log = sb, log

@@ -1,10 +1,10 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { AnimatePresence, motion } from 'motion/react'
 import { type CSSProperties, type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/context-menu'
 import { DiffCount } from '@/components/ui/diff-count'
 import { Tip } from '@/components/ui/tooltip'
-import type { HermesReviewFile } from '@/global'
+import type { AgentReviewFile } from '@/global'
 import { useI18n } from '@/i18n'
 import { isDesktopFsRemoteMode } from '@/lib/desktop-fs'
 import { displayPath } from '@/lib/display-path'
@@ -294,7 +294,7 @@ function ReviewDirRow({
         onClick={toggle}
         style={rowStyle(depth)}
       >
-        <Codicon
+        <AppIcon
           className="shrink-0 text-(--ui-text-tertiary)"
           name={open ? 'folder-opened' : 'folder'}
           size="0.8rem"
@@ -406,7 +406,7 @@ function ReviewFileRow({ node, depth }: { node: ReviewTreeNode; depth: number })
         style={rowStyle(depth)}
         title={displayPath(dragPath)}
       >
-        <Codicon className={cn('shrink-0', glyph.tone)} name={glyph.icon} size="0.8rem" />
+        <AppIcon className={cn('shrink-0', glyph.tone)} name={glyph.icon} size="0.8rem" />
         {/* Dir collapses first (huge shrink); the name only ellipsizes once the
             dir is gone — either way neither runs into the diff count. */}
         <span className="flex min-w-0 flex-1 items-baseline gap-1.5">
@@ -432,7 +432,7 @@ function ReviewFileRow({ node, depth }: { node: ReviewTreeNode; depth: number })
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name={file.staged ? 'remove' : 'add'} size="0.7rem" />
+              <AppIcon name={file.staged ? 'remove' : 'add'} size="0.7rem" />
             </Button>
           </Tip>
           <Tip label={c.revert}>
@@ -446,7 +446,7 @@ function ReviewFileRow({ node, depth }: { node: ReviewTreeNode; depth: number })
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name="discard" size="0.7rem" />
+              <AppIcon name="discard" size="0.7rem" />
             </Button>
           </Tip>
         </span>
@@ -479,7 +479,7 @@ function ReviewFileContextMenu({
   children: ReactNode
   cwd: null | string
   dragPath: string
-  file: HermesReviewFile
+  file: AgentReviewFile
   onOpenChanges: () => void
   onOpenFile: () => void
 }) {

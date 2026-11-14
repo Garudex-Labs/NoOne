@@ -7,9 +7,9 @@ import { $apiRequestScope, setApiRequestConnection, setApiRequestProfile } from 
 // request names. Every scope listener (the version poller among them) must only
 // ever observe pairs that exist, never the new gateway with the old profile.
 
-vi.mock(import('@/hermes'), async importOriginal => ({
+vi.mock(import('@/agent-client'), async importOriginal => ({
   ...(await importOriginal()),
-  HermesGateway: class {
+  AgentGateway: class {
     connectionState = 'closed'
     connect = async (): Promise<void> => {
       this.connectionState = 'open'

@@ -1,14 +1,13 @@
 ---
-sidebar_position: 3
 title: "Creating Skills"
-description: "How to create skills for Hermes Agent — SKILL.md format, guidelines, and publishing"
+description: "How to create skills for the agent — SKILL.md format, guidelines, and publishing"
 ---
 
-# Creating Skills
+# Creating Skills {#creating-skills}
 
-Skills are the preferred way to add new capabilities to Hermes Agent. They're easier to create than tools, require no code changes to the agent, and can be shared with the community.
+Skills are the preferred way to add new capabilities to {{app-name}}. They're easier to create than tools, require no code changes to the agent, and can be shared with the community.
 
-## Should it be a Skill or a Tool?
+## Should it be a Skill or a Tool? {#should-it-be-a-skill-or-a-tool}
 
 Make it a **Skill** when:
 - The capability can be expressed as instructions + shell commands + existing tools
@@ -22,7 +21,7 @@ Make it a **Tool** when:
 - It handles binary data, streaming, or real-time events
 - Examples: browser automation, TTS, vision analysis
 
-## Skill Directory Structure
+## Skill Directory Structure {#skill-directory-structure}
 
 Bundled skills live in `skills/` organized by category. Official optional skills use the same structure in `optional-skills/`:
 
@@ -41,7 +40,7 @@ skills/
 └── ...
 ```
 
-## SKILL.md Format
+## SKILL.md Format {#skillmd-format}
 
 ```markdown
 ---
@@ -98,7 +97,7 @@ Known failure modes and how to handle them.
 How the agent confirms it worked.
 ```
 
-### Platform-Specific Skills
+### Platform-Specific Skills {#platform-specific-skills}
 
 Skills can restrict themselves to specific operating systems using the `platforms` field:
 
@@ -110,7 +109,7 @@ platforms: [windows]          # Windows only
 
 When set, the skill is automatically hidden from the system prompt, `skills_list()`, and slash commands on incompatible platforms. If omitted or empty, the skill loads on all platforms (backward compatible).
 
-### Conditional Skill Activation
+### Conditional Skill Activation {#conditional-skill-activation}
 
 Skills can declare dependencies on specific tools or toolsets. This controls whether the skill appears in the system prompt for a given session.
 
@@ -134,7 +133,7 @@ metadata:
 
 **Use case for `requires_*`:** Create a skill that only makes sense when certain tools are present. For example, a web scraping workflow skill with `requires_toolsets: [web]` won't clutter the prompt when web tools are disabled.
 
-### Environment Variable Requirements
+### Environment Variable Requirements {#environment-variable-requirements}
 
 Skills can declare environment variables they need. When a skill is loaded via `skill_view`, its required vars are automatically registered for passthrough into sandboxed execution environments (terminal, execute_code).
 
@@ -163,9 +162,9 @@ terminal:
 
 See `skills/apple/` for examples of macOS-only skills.
 
-## Secure Setup on Load
+## Secure Setup on Load {#secure-setup-on-load}
 
-Use `required_environment_variables` when a skill needs an API key or token. Missing values do **not** hide the skill from discovery. Instead, Hermes prompts for them securely when the skill is loaded in the local CLI.
+Use `required_environment_variables` when a skill needs an API key or token. Missing values do **not** hide the skill from discovery. Instead, {{app-name}} prompts for them securely when the skill is loaded in the local CLI.
 
 ```yaml
 required_environment_variables:
@@ -175,15 +174,23 @@ required_environment_variables:
     required_for: full functionality
 ```
 
-The user can skip setup and keep loading the skill. Hermes never exposes the raw secret value to the model. Gateway and messaging sessions show local setup guidance instead of collecting secrets in-band.
+The user can skip setup and keep loading the skill. {{app-name}} never exposes the raw secret value to the model. Gateway and messaging sessions show local setup guidance instead of collecting secrets in-band.
 
-:::tip Sandbox Passthrough
+<Tip>
+
+<div className="doc-callout-title">
+
+Sandbox Passthrough
+
+</div>
+
 When your skill is loaded, any declared `required_environment_variables` that are set are **automatically passed through** to `execute_code` and `terminal` sandboxes — including remote backends like Docker and Modal. Your skill's scripts can access `$TENOR_API_KEY` (or `os.environ["TENOR_API_KEY"]` in Python) without the user needing to configure anything extra. See [Environment Variable Passthrough](../user-guide/security.md#environment-variable-passthrough) for details.
-:::
+
+</Tip>
 
 Legacy `prerequisites.env_vars` remains supported as a backward-compatible alias.
 
-### Config Settings (config.yaml)
+### Config Settings (config.yaml) {#config-settings-configyaml}
 
 Skills can declare non-secret settings that are stored in `config.yaml` under the `skills.config` namespace. Unlike environment variables (which are secrets stored in `.env`), config settings are for paths, preferences, and other non-sensitive values.
 
@@ -205,7 +212,7 @@ Each entry supports:
 - `key` (required) — dotpath for the setting (e.g., `myplugin.path`)
 - `description` (required) — explains what the setting controls
 - `default` (optional) — default value if the user doesn't configure it
-- `prompt` (optional) — prompt text shown during `hermes config migrate`; falls back to `description`
+- `prompt` (optional) — prompt text shown during `noone config migrate`; falls back to `description`
 
 **How it works:**
 
@@ -217,7 +224,7 @@ Each entry supports:
          path: ~/my-data
    ```
 
-2. **Discovery:** `hermes config migrate` scans all enabled skills, finds unconfigured settings, and prompts the user. Settings also appear in `hermes config show` under "Skill Settings."
+2. **Discovery:** `noone config migrate` scans all enabled skills, finds unconfigured settings, and prompts the user. Settings also appear in `noone config show` under "Skill Settings."
 
 3. **Runtime injection:** When a skill loads, its config values are resolved and appended to the skill message:
    ```
@@ -229,14 +236,22 @@ Each entry supports:
 
 4. **Manual setup:** Users can also set values directly:
    ```bash
-   hermes config set skills.config.myplugin.path ~/my-data
+   noone config set skills.config.myplugin.path ~/my-data
    ```
 
-:::tip When to use which
-Use `required_environment_variables` for API keys, tokens, and other **secrets** (stored in `~/.hermes/.env`, never shown to the model). Use `config` for **paths, preferences, and non-sensitive settings** (stored in `config.yaml`, visible in config show).
-:::
+<Tip>
 
-### Credential File Requirements (OAuth tokens, etc.)
+<div className="doc-callout-title">
+
+When to use which
+
+</div>
+
+Use `required_environment_variables` for API keys, tokens, and other **secrets** (stored in `~/.hermes/.env`, never shown to the model). Use `config` for **paths, preferences, and non-sensitive settings** (stored in `config.yaml`, visible in config show).
+
+</Tip>
+
+### Credential File Requirements (OAuth tokens, etc.) {#credential-file-requirements-oauth-tokens-etc}
 
 Skills that use OAuth or file-based credentials can declare files that need to be mounted into remote sandboxes. This is for credentials stored as **files** (not env vars) — typically OAuth token files produced by a setup script.
 
@@ -252,36 +267,44 @@ Each entry supports:
 - `path` (required) — file path relative to `~/.hermes/`
 - `description` (optional) — explains what the file is and how it's created
 
-When loaded, Hermes checks if these files exist. Missing files trigger `setup_needed`. Existing files are automatically:
+When loaded, {{app-name}} checks if these files exist. Missing files trigger `setup_needed`. Existing files are automatically:
 - **Mounted into Docker** containers as read-only bind mounts
 - **Synced into Modal** sandboxes (at creation + before each command, so mid-session OAuth works)
 - Available on **local** backend without any special handling
 
-:::tip When to use which
+<Tip>
+
+<div className="doc-callout-title">
+
+When to use which
+
+</div>
+
 Use `required_environment_variables` for simple API keys and tokens (strings stored in `~/.hermes/.env`). Use `required_credential_files` for OAuth token files, client secrets, service account JSON, certificates, or any credential that's a file on disk.
-:::
+
+</Tip>
 
 See the `skills/productivity/google-workspace/SKILL.md` for a complete example using both.
 
-## Skill Guidelines
+## Skill Guidelines {#skill-guidelines}
 
-### No External Dependencies
+### No External Dependencies {#no-external-dependencies}
 
-Prefer stdlib Python, curl, and existing Hermes tools (`web_extract`, `terminal`, `read_file`). If a dependency is needed, document installation steps in the skill.
+Prefer stdlib Python, curl, and existing {{app-name}} tools (`web_extract`, `terminal`, `read_file`). If a dependency is needed, document installation steps in the skill.
 
-### Progressive Disclosure
+### Progressive Disclosure {#progressive-disclosure}
 
 Put the most common workflow first. Edge cases and advanced usage go at the bottom. This keeps token usage low for common tasks.
 
-### Include Helper Scripts
+### Include Helper Scripts {#include-helper-scripts}
 
 For XML/JSON parsing or complex logic, include helper scripts in `scripts/` — don't expect the LLM to write parsers inline every time.
 
-### Deliver media as documents (`[[as_document]]`)
+### Deliver media as documents (`[[as_document]]`) {#deliver-media-as-documents-as_document}
 
 If your skill produces a high-resolution screenshot, chart, or any image where lossy preview compression would hurt — emit the literal directive `[[as_document]]` somewhere in the response (commonly the last line). The gateway strips the directive and delivers every extracted media path in that response as a downloadable file attachment instead of an inline image bubble. See [Skill output and media delivery](../user-guide/features/skills.md#skill-output-and-media-delivery) for the full semantics.
 
-#### Referencing bundled scripts from SKILL.md
+#### Referencing bundled scripts from SKILL.md {#referencing-bundled-scripts-from-skillmd}
 
 When a skill is loaded, the activation message exposes the absolute skill directory as `[Skill directory: /abs/path]` and also substitutes two template tokens anywhere in the SKILL.md body:
 
@@ -300,7 +323,7 @@ To analyse the input, run:
 
 The agent sees the substituted absolute path and invokes the `terminal` tool with a ready-to-run command — no path math, no extra `skill_view` round-trip. Disable substitution globally with `skills.template_vars: false` in `config.yaml`.
 
-#### Inline shell snippets (opt-in)
+#### Inline shell snippets (opt-in) {#inline-shell-snippets-opt-in}
 
 Skills can also embed inline shell snippets written as `` !`cmd` `` in the SKILL.md body. When enabled, each snippet's stdout is inlined into the message before the agent reads it, so skills can inject dynamic context:
 
@@ -322,26 +345,26 @@ Snippets run with the skill directory as their working directory, and output is 
 
 Trust scoping: community hub installs never auto-execute snippets, even with the flag on — the hub's install scan blocks a community skill carrying this DSL on a caution/dangerous verdict, and a `--force` install (or one from before the scanner caught the pattern) must not re-arm what the gate refused. That covers every `SKILL.md` nested inside a community install and another profile's install reached through `skills.external_dirs`; if a skills tree's hub lock (`.hub/lock.json`) is unreadable, nothing in that tree expands until it is repaired. Bundled, trusted, and your own skills expand as before.
 
-### Test It
+### Test It {#test-it}
 
 Run the skill and verify the agent follows the instructions correctly:
 
 ```bash
-hermes chat --toolsets skills -q "Use the X skill to do Y"
+noone chat --toolsets skills -q "Use the X skill to do Y"
 ```
 
-## Where Should the Skill Live?
+## Where Should the Skill Live? {#where-should-the-skill-live}
 
-Bundled skills (in `skills/`) ship with every Hermes install. They should be **broadly useful to most users**:
+Bundled skills (in `skills/`) ship with every {{app-name}} install. They should be **broadly useful to most users**:
 
 - Document handling, web research, common dev workflows, system administration
 - Used regularly by a wide range of people
 
-If your skill is official and useful but not universally needed (e.g., a paid service integration, a heavyweight dependency), put it in **`optional-skills/`** — it ships with the repo, is discoverable via `hermes skills browse` (labeled "official"), and installs with built-in trust.
+If your skill is official and useful but not universally needed (e.g., a paid service integration, a heavyweight dependency), put it in **`optional-skills/`** — it ships with the repo, is discoverable via `noone skills browse` (labeled "official"), and installs with built-in trust.
 
-If your skill is specialized, community-contributed, or niche, it's better suited for a **Skills Hub** — upload it to a registry and share it via `hermes skills install`.
+If your skill is specialized, community-contributed, or niche, it's better suited for a **Skills Hub** — upload it to a registry and share it via `noone skills install`.
 
-## Blueprints: skills that are also automations
+## Blueprints: skills that are also automations {#blueprints-skills-that-are-also-automations}
 
 A **blueprint** is an ordinary skill that additionally declares a schedule in its frontmatter. Add a `metadata.hermes.blueprint` block and the skill becomes a shareable, runnable automation:
 
@@ -356,12 +379,12 @@ metadata:
       no_agent: false            # optional
 ```
 
-Because a blueprint **is** a skill, it flows through the entire skills pipeline unchanged — search, inspect, install, security scan, provenance, taps, the centralized index, and `hermes skills publish` for sharing. Nothing new to learn.
+Because a blueprint **is** a skill, it flows through the entire skills pipeline unchanged — search, inspect, install, security scan, provenance, taps, the centralized index, and `noone skills publish` for sharing. Nothing new to learn.
 
-**Installing a blueprint.** When you install a skill that carries a `blueprint:` block, Hermes registers it as a **suggested cron job** rather than scheduling it. Scheduling is **opt-in** — installing never silently creates a recurring job. You review and accept it via `/suggestions`:
+**Installing a blueprint.** When you install a skill that carries a `blueprint:` block, {{app-name}} registers it as a **suggested cron job** rather than scheduling it. Scheduling is **opt-in** — installing never silently creates a recurring job. You review and accept it via `/suggestions`:
 
 ```bash
-hermes skills install owner/morning-brief
+noone skills install owner/morning-brief
 # → Blueprint: 'morning-brief' is an automation (schedule 0 8 * * *).
 #   Added to your suggestions — run /suggestions to schedule or dismiss it.
 
@@ -373,13 +396,13 @@ hermes skills install owner/morning-brief
 
 Blueprints are one **source** of the unified Suggested Cron Jobs surface — the same place curated starter automations and (later) usage-pattern and integration suggestions appear. See [Suggested Cron Jobs](#suggested-cron-jobs) below.
 
-**Sharing an automation you built.** A blueprint loaded by a cron job (`hermes cron create --skill <name> ...`) can be exported back to a SKILL.md and published like any other skill, so an automation you tuned for yourself becomes a one-command install for someone else.
+**Sharing an automation you built.** A blueprint loaded by a cron job (`noone cron create --skill <name> ...`) can be exported back to a SKILL.md and published like any other skill, so an automation you tuned for yourself becomes a one-command install for someone else.
 
 The blueprint layer adds no new object type, store, or transport — the blueprint is a skill, the schedule is a cron job, and sharing is the existing publish/tap/index path.
 
-## Suggested Cron Jobs
+## Suggested Cron Jobs {#suggested-cron-jobs}
 
-Hermes can *propose* automations and let you accept them with one tap, instead of making you assemble cron jobs by hand. Every proposal flows through one surface — the `/suggestions` command — regardless of where it came from:
+{{app-name}} can *propose* automations and let you accept them with one tap, instead of making you assemble cron jobs by hand. Every proposal flows through one surface — the `/suggestions` command — regardless of where it came from:
 
 | Source | Trigger |
 |--------|---------|
@@ -399,25 +422,25 @@ Accepting a suggestion calls the same `cron.jobs.create_job` the `cronjob_manage
 
 The **important-mail monitor** catalog entry is the poll→classify→surface pattern: it scores inbox items with a cheap classifier model (`auxiliary.monitor` in `config.yaml`) and delivers only the ones above an urgency threshold, staying silent otherwise.
 
-## Publishing Skills
+## Publishing Skills {#publishing-skills}
 
-### To the Skills Hub
+### To the Skills Hub {#to-the-skills-hub}
 
 ```bash
-hermes skills publish skills/my-skill --to github --repo owner/repo
+noone skills publish skills/my-skill --to github --repo owner/repo
 ```
 
-### To a Custom Repository
+### To a Custom Repository {#to-a-custom-repository}
 
 Add your repo as a tap:
 
 ```bash
-hermes skills tap add owner/repo
+noone skills tap add owner/repo
 ```
 
 Users can then search and install from your repository.
 
-## Security Scanning
+## Security Scanning {#security-scanning}
 
 All hub-installed skills go through a security scanner that checks for:
 
@@ -427,12 +450,12 @@ All hub-installed skills go through a security scanner that checks for:
 - Shell injection
 
 Trust levels:
-- `builtin` — ships with Hermes (always trusted)
+- `builtin` — ships with {{app-name}} (always trusted)
 - `official` — from `optional-skills/` in the repo (built-in trust, no third-party warning)
 - `trusted` — from openai/skills, anthropics/skills, huggingface/skills
 - `community` — non-dangerous findings can be overridden with `--force`; `dangerous` verdicts remain blocked
 
-Hermes can now consume third-party skills from multiple external discovery models:
+{{app-name}} can now consume third-party skills from multiple external discovery models:
 - direct GitHub identifiers (for example `openai/skills/k8s`)
 - `skills.sh` identifiers (for example `skills-sh/vercel-labs/json-render/json-render-react`)
 - well-known endpoints served from `/.well-known/skills/index.json`

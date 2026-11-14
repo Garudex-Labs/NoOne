@@ -6,7 +6,7 @@ import logging
 import os
 from contextlib import suppress
 
-from hermes_cli.gateway_client import GatewayClientError
+from agent_cli.gateway_client import GatewayClientError
 
 logger = logging.getLogger(__name__)
 
@@ -53,12 +53,12 @@ async def stage_user_content(content, home=None):
     if isinstance(content, str):
         return content, []
     if home is not None:
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
-        token = set_hermes_home_override(home)
+        from agent_constants import reset_agent_home_override, set_agent_home_override
+        token = set_agent_home_override(home)
         try:
             return await stage_user_content(content)
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
     import base64
     import binascii
     from gateway.platforms.base import cache_image_from_bytes

@@ -138,32 +138,6 @@ class TestAuthzAuthEnv:
 
 # ── Cluster B: matrix startup reads (Slack pattern) ────────────────────────
 
-class TestMatrixStartupSecret:
-    def _helper(self):
-        pytest.importorskip("plugins.platforms.matrix.adapter")
-        from gateway.platforms._shared import get_scoped_secret
-
-        return lambda name: (get_scoped_secret(name, "") or "").strip()
-
-    def test_scoped_value_wins(self, monkeypatch):
-        helper = self._helper()
-        monkeypatch.setenv("MATRIX_ACCESS_TOKEN", "env-token")
-        ss.set_multiplex_active(True)
-        with _Scope({"MATRIX_ACCESS_TOKEN": "scoped-token"}):
-            assert helper("MATRIX_ACCESS_TOKEN") == "scoped-token"
-
-    def test_scoped_miss_no_borrow(self, monkeypatch):
-        helper = self._helper()
-        monkeypatch.setenv("MATRIX_ACCESS_TOKEN", "other-profile")
-        ss.set_multiplex_active(True)
-        with _Scope({"UNRELATED": "x"}):
-            assert helper("MATRIX_ACCESS_TOKEN") == ""
-
-    def test_unscoped_multiplex_falls_back(self, monkeypatch):
-        helper = self._helper()
-        monkeypatch.setenv("MATRIX_PASSWORD", "own-env-pass")
-        ss.set_multiplex_active(True)
-        assert helper("MATRIX_PASSWORD") == "own-env-pass"
 
 # ── Cluster C: managed tool gateway token override ─────────────────────────
 
@@ -267,7 +241,7 @@ class TestAuxiliaryScopedKeyEnv:
                 _scoped_key_env("OPENAI_API_KEY")
 
 
-# ── Cluster F: hermes_cli config env readers ───────────────────────────────
+# ── Cluster F: agent_cli config env readers ───────────────────────────────
 
 class TestScopedEnvironGet:
     """``_scoped_environ_get`` (feeds ``get_env_value`` / ``get_env_value_prefer_dotenv``)
@@ -276,7 +250,7 @@ class TestScopedEnvironGet:
     failure."""
 
     def test_scope_failure_never_borrows_env(self, monkeypatch):
-        from hermes_cli.config import _scoped_environ_get
+        from agent_cli.config import _scoped_environ_get
 
         monkeypatch.setenv("SOME_PROFILE_KEY", "other-profile")
         ss.set_multiplex_active(True)
@@ -285,7 +259,7 @@ class TestScopedEnvironGet:
                 _scoped_environ_get("SOME_PROFILE_KEY")
 
     def test_unscoped_multiplex_propagates(self, monkeypatch):
-        from hermes_cli.config import _scoped_environ_get
+        from agent_cli.config import _scoped_environ_get
 
         monkeypatch.setenv("SOME_PROFILE_KEY", "launch-env")
         ss.set_multiplex_active(True)
@@ -293,7 +267,7 @@ class TestScopedEnvironGet:
             _scoped_environ_get("SOME_PROFILE_KEY")
 
     def test_single_profile_env_read(self, monkeypatch):
-        from hermes_cli.config import _scoped_environ_get
+        from agent_cli.config import _scoped_environ_get
 
         monkeypatch.setenv("SOME_PROFILE_KEY", "own-env")
         assert _scoped_environ_get("SOME_PROFILE_KEY") == "own-env"

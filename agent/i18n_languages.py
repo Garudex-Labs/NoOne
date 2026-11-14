@@ -21,23 +21,15 @@ class LanguageOption(TypedDict):
 
 # id -> (endonym, rtl). Keep sorted by id; ``en`` is listed first by ``language_options`` regardless.
 BUNDLED_LANGUAGE_INFO: dict[str, tuple[str, bool]] = {
-    "af": ("Afrikaans", False),
     "ar": ("العربية", True),
     "de": ("Deutsch", False),
     "en": ("English", False),
     "es": ("Español", False),
     "fr": ("Français", False),
-    "ga": ("Gaeilge", False),
-    "hu": ("Magyar", False),
-    "it": ("Italiano", False),
+    "hi": ("हिन्दी", False),
     "ja": ("日本語", False),
     "ko": ("한국어", False),
-    "pt": ("Português", False),
-    "ru": ("Русский", False),
-    "tr": ("Türkçe", False),
-    "uk": ("Українська", False),
     "zh": ("简体中文", False),
-    "zh-hant": ("繁體中文", False),
 }
 
 BUNDLED_SOURCE = "bundled"
@@ -65,9 +57,9 @@ def language_options() -> list[LanguageOption]:
     """``[{"id", "endonym", "rtl", "source", "surfaces"}, ...]`` for every supported language, ``en`` first then sorted
     by id — the list ``i18n.languages`` serves and every switcher renders (endonym only, no flags)."""
     from agent import i18n, i18n_layers
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
-    home = get_hermes_home()
+    home = get_agent_home()
     overlay_langs = i18n_layers.overlay_languages(home)
     surfaces = i18n.language_surfaces(str(home))
     return [

@@ -20,7 +20,7 @@ from gateway.media_repair import repair_explicit_computer_use_media_paths
 from gateway.platforms.base import BasePlatformAdapter
 from gateway.platforms.helpers import typing_metadata_for_turn
 from gateway.turn_context import TurnContext
-from hermes_cli.config import cfg_get
+from agent_cli.config import cfg_get
 from utils import is_truthy_value
 
 if TYPE_CHECKING:  # string annotations only; never imported at runtime (cycle)
@@ -118,7 +118,7 @@ def _tool_complete_payload(call_id, tool_name, args, result, *, is_error=None, v
     payload = {**_tool_lifecycle_payload(call_id, tool_name, args), "is_error": bool(is_error),
                "result": bounded_result(result, is_error)}
     if verbose:
-        from tui_gateway.tool_progress import _tool_result_text
+        from agent_backend.tool_progress import _tool_result_text
         payload["result_text"] = _tool_result_text(result)
     return payload
 
@@ -946,7 +946,7 @@ class GatewayTurnProgressMixin:
         if ctx._native_slack_task_cards and hasattr(adapter, "send_native_task_card_progress"):
             await self._send_native_task_card_progress(adapter)
             return
-        # Skip tool progress for platforms that can't edit messages (e.g. iMessage/BlueBubbles):
+        # Skip tool progress for platforms that can't edit messages (e.g. iMessage):
         # each update would be a separate bubble. getattr, not attribute access: duck-typed
         # adapters (test fakes, minimal plugins) may lack edit_message — treated as "can't edit".
         adapter_edit = getattr(type(adapter), "edit_message", None)

@@ -291,7 +291,7 @@ class TestChatCompletionsBuildKwargs:
 
 
     def test_nous_tags(self, transport):
-        from agent.portal_tags import nous_portal_tags
+        from agent.conversation_scope import nous_portal_tags
         from providers import get_provider_profile
         profile = get_provider_profile("nous")
         msgs = [{"role": "user", "content": "Hi"}]

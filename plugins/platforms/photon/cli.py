@@ -12,11 +12,11 @@ import subprocess
 import sys
 from typing import Optional
 
-from hermes_cli.colors import Colors, color
+from agent_cli.colors import Colors, color
 
 from . import auth as photon_auth
 from .adapter import sidecar_deps_installed
-from hermes_constants import find_node_executable, with_hermes_node_path
+from agent_constants import find_node_executable, with_agent_node_path
 from .sidecar_paths import _NPM_ERROR_LOG_MAX_CHARS, _npm_error_log, _sidecar_dir
 import contextlib
 
@@ -144,7 +144,7 @@ def _setup_credentials(token: str, dashboard_id: str, name: str) -> Optional[str
             print(f"  ✓ Spectrum ready (project id {dashboard_id}) — new secret saved")
             print("  ⚠ Project secret was regenerated. If the gateway is running, "
                   "restart it so the sidecar picks up the new secret:\n"
-                  "      hermes gateway restart")
+                  "      noone gateway restart")
     except Exception as e:
         print(f"spectrum provisioning failed: {e}", file=sys.stderr)
         return None
@@ -226,7 +226,7 @@ def _cmd_setup(args: argparse.Namespace) -> int:
             return rc
     # 7. Enable the platform in config.yaml, or the channel silently stays offline.
     try:
-        from hermes_cli.config import write_platform_config_field
+        from agent_cli.config import write_platform_config_field
         write_platform_config_field("photon", "enabled", True, raw=True)
         print("  ✓ photon platform enabled in config.yaml")
     except Exception as e:
@@ -239,7 +239,7 @@ def _cmd_setup(args: argparse.Namespace) -> int:
         print(f"\n⚠ Photon setup saved, but iMessage routing is NOT live: text {agent_number or 'your assigned line'} "
               f"once from {phone}.\n  Check with `hermes photon status`; start the gateway once it shows opted in.")
         return 0
-    print("\n✓ Photon setup complete.\n  Start the gateway:  hermes gateway start")
+    print("\n✓ Photon setup complete.\n  Start the gateway:  noone gateway start")
     return 0
 
 
@@ -292,7 +292,7 @@ def _autoconfigure_access(phone: str) -> None:
     """Set PHOTON_ALLOWED_USERS and PHOTON_HOME_CHANNEL to the operator's number, each only
     when unset so a hand-tuned value is never clobbered on re-run."""
     try:
-        from hermes_cli.config import get_env_value, save_env_value
+        from agent_cli.config import get_env_value, save_env_value
     except ImportError:
         return
     for key, label in (("PHOTON_ALLOWED_USERS", "allowlisted your number"),
@@ -330,7 +330,7 @@ def _cmd_status(_args: argparse.Namespace) -> int:
 def _telemetry_enabled() -> bool:
     """PHOTON_TELEMETRY from env / ~/.hermes/.env; truthy set mirrors the sidecar's."""
     try:
-        from hermes_cli.config import get_env_value
+        from agent_cli.config import get_env_value
         raw = get_env_value("PHOTON_TELEMETRY")
     except ImportError:
         raw = os.getenv("PHOTON_TELEMETRY")
@@ -344,13 +344,13 @@ def _cmd_telemetry(args: argparse.Namespace) -> int:
         print("  Toggle with `hermes photon telemetry on` / `hermes photon telemetry off`.")
         return 0
     try:
-        from hermes_cli.config import save_env_value
+        from agent_cli.config import save_env_value
         save_env_value("PHOTON_TELEMETRY", "true" if state == "on" else "false")
     except Exception as e:
         print(f"could not save PHOTON_TELEMETRY: {e}", file=sys.stderr)
         return 1
     print(f"✓ Spectrum telemetry turned {state} (PHOTON_TELEMETRY in ~/.hermes/.env)")
-    print("  Restart the gateway for the sidecar to pick it up:  hermes gateway restart")
+    print("  Restart the gateway for the sidecar to pick it up:  noone gateway restart")
     return 0
 
 
@@ -359,7 +359,7 @@ def _install_sidecar() -> int:
 
     try:
         npm = find_node_executable("npm")
-        env = with_hermes_node_path()
+        env = with_agent_node_path()
         if npm is None:
             env = pm.ensure("npm", explicit=True).env
             installed = pm.installed_package("npm")
@@ -403,7 +403,7 @@ _COMMANDS = {
 
 
 def gateway_setup() -> None:
-    """Run Photon first-time setup from the unified `hermes gateway setup` wizard (same flow
+    """Run Photon first-time setup from the unified `noone gateway setup` wizard (same flow
     as ``hermes photon setup``; phone is prompted when stdin is a TTY)."""
     _cmd_setup(argparse.Namespace(
         photon_command="setup", project_name=None, phone=None, first_name=None, last_name=None,

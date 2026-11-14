@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { SkillInfo } from '@/types/hermes'
+import type { SkillInfo } from '@/types/agent-client'
 
 import { catalogSourceFor, isEditableProvenance } from './skill-provenance'
 

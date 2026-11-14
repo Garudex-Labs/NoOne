@@ -1,40 +1,48 @@
 ---
 title: "Songwriting And Ai Music — Songwriting craft and Suno AI music prompts"
-sidebar_label: "Songwriting And Ai Music"
+sidebarTitle: "Songwriting And Ai Music"
 description: "Songwriting craft and Suno AI music prompts"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Songwriting And Ai Music
+# Songwriting And Ai Music {#songwriting-and-ai-music}
 
 Songwriting craft and Suno AI music prompts.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/creative/songwriting-and-ai-music` |
 | Version | `1.0.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Songwriting & AI Music Generation
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Songwriting & AI Music Generation {#songwriting--ai-music-generation}
 
 Everything here is a GUIDELINE, not a rule. Art breaks rules on purpose.
 Use what serves the song. Ignore what doesn't.
 
 ---
 
-## 1. Song Structure (Pick One or Invent Your Own)
+## 1. Song Structure (Pick One or Invent Your Own) {#1-song-structure-pick-one-or-invent-your-own}
 
 Common skeletons — mix, modify, or throw out as needed:
 
@@ -58,7 +66,7 @@ that evolves. Structure serves the emotion, not the other way around.
 
 ---
 
-## 2. Rhyme, Meter, and Sound
+## 2. Rhyme, Meter, and Sound {#2-rhyme-meter-and-sound}
 
 RHYME TYPES (from tight to loose):
 - Perfect: lean/mean
@@ -82,7 +90,7 @@ METER: The rhythm of stressed vs unstressed syllables.
 
 ---
 
-## 3. Emotional Arc and Dynamics
+## 3. Emotional Arc and Dynamics {#3-emotional-arc-and-dynamics}
 
 Think of a song as a journey, not a flat road.
 
@@ -101,7 +109,7 @@ strip back to vulnerability. Works for ballads, epics, anthems.
 
 ---
 
-## 4. Writing Lyrics That Work
+## 4. Writing Lyrics That Work {#4-writing-lyrics-that-work}
 
 SHOW, DON'T TELL (usually):
 - "I was sad" = flat
@@ -130,7 +138,7 @@ AVOID (unless you're doing it on purpose):
 
 ---
 
-## 5. Parody and Adaptation
+## 5. Parody and Adaptation {#5-parody-and-adaptation}
 
 When rewriting an existing song with new lyrics:
 
@@ -163,9 +171,9 @@ intact adds recognizability and lets the audience feel the connection.
 
 ---
 
-## 6. Suno AI Prompt Engineering
+## 6. Suno AI Prompt Engineering {#6-suno-ai-prompt-engineering}
 
-### Style/Genre Description Field
+### Style/Genre Description Field {#stylegenre-description-field}
 
 FORMULA (adapt as needed):
   Genre + Mood + Era + Instruments + Vocal Style + Production + Dynamics
@@ -199,7 +207,7 @@ TIPS:
   "A weathered torch singer with a smoky alto, slight rasp,
    who starts vulnerable and builds to devastating power"
 
-### Metatags (place in [brackets] inside lyrics field)
+### Metatags (place in [brackets] inside lyrics field) {#metatags-place-in-brackets-inside-lyrics-field}
 
 STRUCTURE:
   [Intro] [Verse] [Verse 1] [Pre-Chorus] [Chorus]
@@ -232,7 +240,7 @@ Put tags in BOTH style field AND lyrics for reinforcement.
 Keep to 5-8 tags per section max — too many confuses the AI.
 Don't contradict yourself ([Calm] + [Aggressive] in same section).
 
-### Custom Mode
+### Custom Mode {#custom-mode}
 - Always use Custom Mode for serious work (separate Style + Lyrics)
 - Lyrics field limit: ~3,000 chars (~40-60 lines)
 - Always add structural tags — without them Suno defaults to
@@ -240,7 +248,7 @@ Don't contradict yourself ([Calm] + [Aggressive] in same section).
 
 ---
 
-## 7. Phonetic Tricks for AI Singers
+## 7. Phonetic Tricks for AI Singers {#7-phonetic-tricks-for-ai-singers}
 
 AI vocalists don't read — they pronounce. Help them:
 
@@ -264,7 +272,7 @@ ALWAYS:
 
 ---
 
-## 8. Workflow
+## 8. Workflow {#8-workflow}
 
 1. Write the concept/hook first — what's the emotional core?
 2. If adapting, map the original structure (syllables, rhyme, stress)
@@ -282,7 +290,7 @@ Style can drift in extensions — restate genre/mood when extending.
 
 ---
 
-## 9. Lessons Learned
+## 9. Lessons Learned {#9-lessons-learned}
 
 - Describing the dynamic ARC in the style field matters way more
   than just listing genres. "Whisper to roar to whisper" gives
@@ -302,17 +310,17 @@ Style can drift in extensions — restate genre/mood when extending.
 
 ---
 
-## 10. Local / Open-Source Music Generation
+## 10. Local / Open-Source Music Generation {#10-local--open-source-music-generation}
 
 For local, GPU-based generation instead of Suno, two optional skills
 cover this (heavy dependencies, so not installed by default):
 
 - **heartmula** — full songs with vocals from lyrics + tags
   (open-source Suno alternative, 8-16GB VRAM):
-  `hermes skills install official/creative/heartmula`
+  `noone skills install official/creative/heartmula`
 - **audiocraft** — Meta's MusicGen (instrumental text-to-music) and
   AudioGen (sound effects):
-  `hermes skills install official/creative/audiocraft-audio-generation`
+  `noone skills install official/creative/audiocraft-audio-generation`
 
 The lyric-writing and prompting craft in this skill applies to
 heartmula too — its input format is lyrics with bracketed structure

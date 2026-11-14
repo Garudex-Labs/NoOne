@@ -192,7 +192,7 @@ class PluginEviction:
 
     def __init__(self, entries: list[Entry], reasons: dict[Path, str], rejoined: list[Entry] = (), *,
                  tried: dict[Path, str] | None = None, configs=None):
-        from hermes_yaml import roundtrip_yaml
+        from agent_yaml import roundtrip_yaml
         from pm.publication import selection_snapshot
 
         # The snapshot the update decided from: a user edit since then refuses publication.
@@ -407,7 +407,7 @@ def _outcome_notices(entries: list[Entry], recorded: dict[Entry, dict], reasons:
         key = plugin_dir.resolve()
         if key in reasons:
             notices.append(f"Disabled plugin '{name}' in {plugins_dir.parent}: {reasons[key]}; {_RETRY} and turns it "
-                           f"back on once it fits, or run `hermes plugins enable {name}` sooner")
+                           f"back on once it fits, or run `noone plugins enable {name}` sooner")
         elif key in waiting:
             notices.append(f"Left plugin '{name}' in {plugins_dir.parent} out of this update: {waiting[key]}; "
                            "it stays enabled and rejoins once Hermes reports a version it accepts")

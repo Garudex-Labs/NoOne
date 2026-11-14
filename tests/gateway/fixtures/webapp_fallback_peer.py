@@ -14,8 +14,8 @@ Run as ``python webapp_fallback_peer.py '<spec json>'`` with an isolated ``HERME
   and starts listening while the gateway mounts the dashboard (Linux only);
 - ``connect_during_mount``: a client connects to the Webapp's port while the dashboard mounts;
 - ``built``: whether the Webapp bundle has its ``index.html``;
-- ``update_fails``: before the gateway starts, ``hermes update``'s Webapp step runs for this home and its
-  build fails; once the gateway serves, ``hermes webapp``'s build succeeds;
+- ``update_fails``: before the gateway starts, ``noone update``'s Webapp step runs for this home and its
+  build fails; once the gateway serves, ``noone webapp``'s build succeeds;
 - ``probe_host``: a Host header to send (a public hostname), or null;
 - ``credential``: the stored browser credential this gateway finds: ``"folder-is-a-file"`` (a plain
   file where the ``webapp/`` folder goes), ``"token-is-a-folder"`` (a folder where
@@ -122,31 +122,31 @@ def _fail_startup_once():
 
 
 def _fail_webapp_update(home, checkout):
-    """``hermes update``'s Webapp step for an install whose only home is *home*, with a build that
+    """``noone update``'s Webapp step for an install whose only home is *home*, with a build that
     fails as a broken npm install would."""
-    import hermes_cli.webapp
-    from hermes_cli import source_build
+    import agent_cli.webapp
+    from agent_cli import source_build
     from pm import plugins_state
 
     def fail(_project_root, **_options):
-        raise hermes_cli.webapp.WebappBuildError("Browser-hosted Desktop build failed: npm ci exited 1")
+        raise agent_cli.webapp.WebappBuildError("Browser-hosted Desktop build failed: npm ci exited 1")
 
     plugins_state.dependency_homes = lambda: [home]
-    real, hermes_cli.webapp.prepare_webapp_renderer = hermes_cli.webapp.prepare_webapp_renderer, fail
+    real, agent_cli.webapp.prepare_webapp_renderer = agent_cli.webapp.prepare_webapp_renderer, fail
     try:
         source_build._rebuild_served_webapp(checkout, lambda _stage: None)
-    except hermes_cli.webapp.WebappBuildError:
+    except agent_cli.webapp.WebappBuildError:
         pass
     else:
         raise AssertionError("the update's failing Webapp build did not fail")
     finally:
-        hermes_cli.webapp.prepare_webapp_renderer = real
+        agent_cli.webapp.prepare_webapp_renderer = real
 
 
 def _rebuild_webapp(checkout, dist):
-    """``hermes webapp``'s build, with the compiler stood in by one that writes a new bundle."""
-    import hermes_cli.webapp
-    from hermes_cli import source_build
+    """``noone webapp``'s build, with the compiler stood in by one that writes a new bundle."""
+    import agent_cli.webapp
+    from agent_cli import source_build
 
     def compile_bundle(_root, *, env, explicit):
         (dist / "index.html").write_text(INDEX.replace("WEBAPP_BUNDLE", "WEBAPP_BUNDLE rebuilt"), encoding="utf-8")
@@ -154,7 +154,7 @@ def _rebuild_webapp(checkout, dist):
     source_build.source_product_current = lambda *_args: False
     source_build.source_build_env = lambda *, explicit=False: {}
     source_build.build_source_webapp = compile_bundle
-    hermes_cli.webapp.prepare_webapp_renderer(checkout, explicit=True)
+    agent_cli.webapp.prepare_webapp_renderer(checkout, explicit=True)
 
 
 async def _native_session_list(runner, origin) -> bool:
@@ -173,7 +173,7 @@ async def _native_session_list(runner, origin) -> bool:
 
 
 def _mounted_state(home):
-    web = sys.modules.get("hermes_cli.web_server")
+    web = sys.modules.get("agent_cli.web_server")
     if web is None:
         return {"mounted": False}
     state = web.app.state
@@ -192,8 +192,8 @@ def _redirect_uri(host_header: str):
     """The sign-in callback the listener's dashboard routes hand an identity provider."""
     from starlette.requests import Request
 
-    from hermes_cli import web_server
-    from hermes_cli.dashboard_auth.routes import _redirect_uri
+    from agent_cli import web_server
+    from agent_cli.dashboard_auth.routes import _redirect_uri
 
     scope = {"type": "http", "method": "GET", "path": "/auth/login", "raw_path": b"/auth/login",
              "query_string": b"", "headers": [(b"host", host_header.encode())], "scheme": "http",
@@ -210,7 +210,7 @@ async def probe(spec):
     from gateway.run_api import stop_gateway_api
     from gateway.run_runtime import start_gateway_runtime_api
     from gateway.session_authority import initialize_session_authority
-    import hermes_cli.webapp
+    import agent_cli.webapp
 
     home = Path(os.environ["HERMES_HOME"])
     (home / "config.yaml").write_text(_config(spec), encoding="utf-8")
@@ -220,7 +220,7 @@ async def probe(spec):
     dist.mkdir(exist_ok=True)
     if spec.get("built", True):
         (dist / "index.html").write_text(INDEX, encoding="utf-8")
-    hermes_cli.webapp.webapp_dist_dir = lambda _root: dist  # the bundle, without a build
+    agent_cli.webapp.webapp_dist_dir = lambda _root: dist  # the bundle, without a build
     checkout = home.parent / "checkout"
     if spec.get("update_fails"):
         _fail_webapp_update(home, checkout)

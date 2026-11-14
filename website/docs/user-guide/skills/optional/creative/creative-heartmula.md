@@ -1,72 +1,80 @@
 ---
 title: "Heartmula — HeartMuLa: Suno-like song generation from lyrics + tags"
-sidebar_label: "Heartmula"
+sidebarTitle: "Heartmula"
 description: "HeartMuLa: Suno-like song generation from lyrics + tags"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Heartmula
+# Heartmula {#heartmula}
 
 HeartMuLa: Suno-like song generation from lyrics + tags.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/heartmula` |
+| Source | Optional — install with `noone skills install official/creative/heartmula` |
 | Path | `optional-skills/creative/heartmula` |
 | Version | `1.0.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `music`, `audio`, `generation`, `ai`, `heartmula`, `heartcodec`, `lyrics`, `songs` |
 | Related skills | [`songwriting-and-ai-music`](../../bundled/creative/creative-songwriting-and-ai-music.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# HeartMuLa - Open-Source Music Generation
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# HeartMuLa - Open-Source Music Generation {#heartmula---open-source-music-generation}
+
+## Overview {#overview}
 HeartMuLa is a family of open-source music foundation models (Apache-2.0) that generates music conditioned on lyrics and tags, with multilingual support. Generates full songs from lyrics + tags. Comparable to Suno for open-source. Includes:
 - **HeartMuLa** - Music language model (3B/7B) for generation from lyrics + tags
 - **HeartCodec** - 12.5Hz music codec for high-fidelity audio reconstruction
 - **HeartTranscriptor** - Whisper-based lyrics transcription
 - **HeartCLAP** - Audio-text alignment model
 
-## When to Use
+## When to Use {#when-to-use}
 - User wants to generate music/songs from text descriptions
 - User wants an open-source Suno alternative
 - User wants local/offline music generation
 - User asks about HeartMuLa, heartlib, or AI music generation
 
-## Hardware Requirements
+## Hardware Requirements {#hardware-requirements}
 - **Minimum**: 8GB VRAM with `--lazy_load true` (loads/unloads models sequentially)
 - **Recommended**: 16GB+ VRAM for comfortable single-GPU usage
 - **Multi-GPU**: Use `--mula_device cuda:0 --codec_device cuda:1` to split across GPUs
 - 3B model with lazy_load peaks at ~6.2GB VRAM
 
-## Installation Steps
+## Installation Steps {#installation-steps}
 
-### 1. Clone Repository
+### 1. Clone Repository {#1-clone-repository}
 ```bash
 cd ~/  # or desired directory
 git clone https://github.com/HeartMuLa/heartlib.git
 cd heartlib
 ```
 
-### 2. Create Virtual Environment (Python 3.10 required)
+### 2. Create Virtual Environment (Python 3.10 required) {#2-create-virtual-environment-python-310-required}
 ```bash
 uv venv --python 3.10 .venv
 . .venv/bin/activate
 uv pip install -e .
 ```
 
-### 3. Fix Dependency Compatibility Issues
+### 3. Fix Dependency Compatibility Issues {#3-fix-dependency-compatibility-issues}
 
 **IMPORTANT**: As of Feb 2026, the pinned dependencies have conflicts with newer packages. Apply these fixes:
 
@@ -78,7 +86,7 @@ uv pip install --upgrade datasets
 uv pip install --upgrade transformers
 ```
 
-### 4. Patch Source Code (Required for transformers 5.x)
+### 4. Patch Source Code (Required for transformers 5.x) {#4-patch-source-code-required-for-transformers-5x}
 
 **Patch 1 - RoPE cache fix** in `src/heartlib/heartmula/modeling_heartmula.py`:
 
@@ -101,7 +109,7 @@ Add `ignore_mismatched_sizes=True` to ALL `HeartCodec.from_pretrained()` calls (
 
 **Why**: VQ codebook `initted` buffers have shape `[1]` in checkpoint vs `[]` in model. Same data, just scalar vs 0-d tensor. Safe to ignore.
 
-### 5. Download Model Checkpoints
+### 5. Download Model Checkpoints {#5-download-model-checkpoints}
 ```bash
 cd heartlib  # project root
 hf download --local-dir './ckpt' 'HeartMuLa/HeartMuLaGen'
@@ -111,7 +119,7 @@ hf download --local-dir './ckpt/HeartCodec-oss' 'HeartMuLa/HeartCodec-oss-202601
 
 All 3 can be downloaded in parallel. Total size is several GB.
 
-## GPU / CUDA
+## GPU / CUDA {#gpu--cuda}
 
 HeartMuLa uses CUDA by default (`--mula_device cuda --codec_device cuda`). No extra setup needed if the user has an NVIDIA GPU with PyTorch CUDA support installed.
 
@@ -120,9 +128,9 @@ HeartMuLa uses CUDA by default (`--mula_device cuda --codec_device cuda`). No ex
 - To verify GPU is being used, look for "CUDA memory" lines in the output (e.g. "CUDA memory before unloading: 6.20 GB")
 - **No GPU?** You can run on CPU with `--mula_device cpu --codec_device cpu`, but expect generation to be **extremely slow** (potentially 30-60+ minutes for a single song vs ~4 minutes on GPU). CPU mode also requires significant RAM (~12GB+ free). If the user has no NVIDIA GPU, recommend using a cloud GPU service (Google Colab free tier with T4, Lambda Labs, etc.) or the online demo at https://heartmula.github.io/ instead.
 
-## Usage
+## Usage {#usage}
 
-### Basic Generation
+### Basic Generation {#basic-generation}
 ```bash
 cd heartlib
 . .venv/bin/activate
@@ -135,7 +143,7 @@ python ./examples/run_music_generation.py \
   --lazy_load true
 ```
 
-### Input Formatting
+### Input Formatting {#input-formatting}
 
 **Tags** (comma-separated, no spaces):
 ```
@@ -162,7 +170,7 @@ Bridge lyrics...
 [Outro]
 ```
 
-### Key Parameters
+### Key Parameters {#key-parameters}
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `--max_audio_length_ms` | 240000 | Max length in ms (240s = 4 min) |
@@ -173,18 +181,18 @@ Bridge lyrics...
 | `--mula_dtype` | bfloat16 | Dtype for HeartMuLa (bf16 recommended) |
 | `--codec_dtype` | float32 | Dtype for HeartCodec (fp32 recommended for quality) |
 
-### Performance
+### Performance {#performance}
 - RTF (Real-Time Factor) ≈ 1.0 — a 4-minute song takes ~4 minutes to generate
 - Output: MP3, 48kHz stereo, 128kbps
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 1. **Do NOT use bf16 for HeartCodec** — degrades audio quality. Use fp32 (default).
 2. **Tags may be ignored** — known issue (#90). Lyrics tend to dominate; experiment with tag ordering.
 3. **Triton not available on macOS** — Linux/CUDA only for GPU acceleration.
 4. **RTX 5080 incompatibility** reported in upstream issues.
 5. The dependency pin conflicts require the manual upgrades and patches described above.
 
-## Links
+## Links {#links}
 - Repo: https://github.com/HeartMuLa/heartlib
 - Models: https://huggingface.co/HeartMuLa
 - Paper: https://arxiv.org/abs/2601.10547

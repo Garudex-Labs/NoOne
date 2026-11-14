@@ -1,6 +1,6 @@
 """Credential-pool disk-boundary sanitization: strip raw secrets from *borrowed*
 pool entries before they reach ``auth.json``. Deliberately free of
-``hermes_cli.auth`` imports so the pool model and the auth-store write boundary
+``agent_cli.auth`` imports so the pool model and the auth-store write boundary
 share one policy without import cycles."""
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from typing import Any, Dict, Mapping
 _PERSISTABLE_PROVIDER_SOURCES = frozenset({
     ("anthropic", "hermes_pkce"),
     ("minimax-oauth", "oauth"),
-    ("nous", "device_code"),
+    ( "device_code"),
     ("openai-codex", "device_code"),
     ("xai-oauth", "device_code"),
 })

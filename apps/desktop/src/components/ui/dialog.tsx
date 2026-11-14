@@ -1,10 +1,10 @@
+import { X } from '@noone/ui/icons'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { DialogPortalContainerContext } from '@/components/ui/dialog-portal-context'
 import { useI18n } from '@/i18n'
-import { X } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
@@ -284,7 +284,7 @@ function DialogTitle({
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Title> & {
-  // Pass an icon (from `@/lib/icons`) to get the canonical dialog-header glyph: a plain
+  // Pass an icon (from `@noone/ui/icons`) to get the canonical dialog-header glyph: a plain
   // primary-tinted icon inline with the title (no bg chip / ring). This is the
   // single source of truth for dialog header icons — don't hand-roll wrappers.
   icon?: React.ComponentType<{ className?: string }>

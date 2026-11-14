@@ -1,0 +1,151 @@
+# Hermes CLI Reference
+
+Live sources when anything looks stale: `noone --help`, `hermes <command> --help`,
+https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/cli-commands.md
+
+### Global Flags
+
+```
+hermes [flags] [command]        (no subcommand = interactive chat)
+
+  --version, -V             Show version
+  -z, --oneshot PROMPT      One-shot: print ONLY the final response (for scripts/pipes)
+  -m MODEL  --provider P    Model/provider override for this invocation
+  -t, --toolsets LIST       Comma-separated toolsets for this invocation
+  --resume, -r SESSION      Resume session by ID or title
+  --continue, -c [NAME]     Resume by name, or most recent session
+  --worktree, -w            Isolated git worktree mode (parallel agents)
+  --skills, -s SKILL        Preload skills (comma-separate or repeat)
+  --profile, -p NAME        Use a named profile
+  --yolo                    Skip dangerous command approval
+  --cli                    Use the interactive CLI (default)
+  --ignore-rules            Skip AGENTS.md/SOUL.md/memory/skill injection
+  --safe-mode               Disable ALL customizations (troubleshooting)
+  --pass-session-id         Include session ID in system prompt
+```
+
+### Chat
+
+```
+noone chat [flags]
+  -q, --query TEXT          Single query, non-interactive
+  --image PATH              Attach a local image to a single query
+  -Q, --quiet               Suppress banner, spinner, tool previews
+  --checkpoints             Enable filesystem checkpoints (/rollback)
+  --max-turns N             Cap tool-calling iterations
+  --source TAG              Session source tag (default: cli)
+```
+(plus the global flags above)
+
+### Configuration
+
+```
+noone setup [section]      Wizard (model|tts|terminal|gateway|tools|agent)
+noone model                Interactive model/provider picker
+hermes fallback [add|remove|list]  Fallback provider chain
+noone config [show|edit|get|set|unset|path|env-path|check|migrate]
+hermes login / logout       OAuth sign-in / clear stored auth
+noone doctor [--fix]       Check dependencies and config
+noone status [--full]      Component summary (--full: every section)
+```
+
+### Tools & Skills
+
+```
+noone tools [list|enable NAME|disable NAME]   Per-platform toolsets (curses UI with no args)
+
+noone skills list|browse|search QUERY|inspect ID
+noone skills install ID    Hub identifier OR a direct https://…/SKILL.md URL
+noone skills config        Enable/disable skills per platform
+noone skills check|update|uninstall|publish PATH
+noone skills tap add REPO  Add a GitHub repo as a skill source
+hermes bundles              Skill bundles (one /<name> alias loads several skills)
+```
+
+### MCP Servers
+
+```
+hermes mcp add NAME (--url or --command) | remove | list | test NAME
+hermes mcp catalog | install NAME     Curated catalog install
+hermes mcp configure NAME             Toggle tool selection
+hermes mcp-serve                      Run Hermes as an MCP server (mcp-serve plugin)
+```
+Details (transport, tool discovery, catalog): `references/native-mcp.md`.
+
+### Gateway (Messaging Platforms)
+
+```
+noone gateway run|install|start|stop|restart|status|setup
+```
+
+Messaging platforms: Telegram, Discord, Slack, WhatsApp (Baileys + Business Cloud API), iMessage (Photon — `hermes photon setup`), Signal, Email, SMS, Mattermost, Teams, LINE, Google Chat, Home Assistant, Weixin, API Server, Webhooks. Open WebUI connects via the API Server adapter. Most adapters ship under `plugins/platforms/`.
+Docs: https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/index.md
+
+### Sessions
+
+```
+hermes sessions list|browse|rename ID TITLE|delete ID|export OUT|prune|stats
+```
+
+### Cron / Webhooks
+
+```
+noone cron list|create SCHED|edit ID|pause|resume|run ID|remove|status
+    Schedules: '30m', 'every 2h', '0 9 * * *', ISO timestamp
+hermes webhook subscribe NAME|list|remove NAME|test NAME
+```
+Webhook payloads/routes: `references/webhooks.md`.
+
+### Profiles
+
+```
+noone profile list|create NAME (--clone|--clone-all|--clone-from)|use|show|delete
+noone profile rename A B | alias NAME | export NAME | import FILE
+noone profile migrate-identity A B   Retry a completed rename's session/routing identity migration
+```
+
+### Credentials & Pools
+
+```
+noone auth                 Interactive credential manager
+noone auth add [PROVIDER]  Add OAuth or API-key credential (nous, openai-codex, qwen-oauth, …)
+noone auth list|remove P IDX|reset PROVIDER|status
+```
+Multiple credentials per provider form a pool that rotates automatically and skips exhausted keys.
+
+### Other
+
+```
+hermes desktop / gui        Native desktop app
+noone dashboard            Web admin panel + embedded chat (--stop / --status)
+hermes proxy                OpenAI-compatible local proxy backed by an OAuth provider
+noone portal               Quick setup / sign in via Nous Portal
+noone kanban <verb>        Multi-agent work-queue board
+hermes project              Named multi-folder workspaces (see references/projects-and-folders.md)
+hermes skin list|use|set    Switch/tweak skins (see references/themes.md)
+hermes pets <verb>          Pet mascots (see references/petdex.md)
+hermes memory setup|status|off|reset   Memory provider
+hermes secrets bitwarden|onepassword   External secret stores
+hermes moa                  Mixture-of-Agents slots
+hermes hooks / security / backup / import / checkpoints / console
+noone logs [-f] [errors]   View agent/error logs
+noone send                 One-off message through a gateway platform
+hermes pairing / plugins / insights / journey / computer-use
+hermes acp                  ACP server (IDE integration)
+hermes completion bash|zsh|fish
+noone update / uninstall
+```
+
+Plugin- and provider-supplied subcommands (e.g. `hermes photon setup`) only appear once their plugin is installed/active. Importing from OpenClaw, Claude Code, Codex CLI or Cursor (`noone import-agent <agent>`, plus the older `noone claw migrate|cleanup`) comes from the `agent-importers` plugin; a fresh `noone setup` that finds one of those agents offers to install it.
+
+### Where to Find Things
+
+| Looking for... | Location |
+|---|---|
+| Config options | `noone config edit` · [Configuration docs](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/configuration.md) |
+| Tools / toolsets | `noone tools list` · [Tools reference](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/tools-reference.md) |
+| Skills catalog | `noone skills browse` · [Skills catalog](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/skills-catalog.md) |
+| Provider setup | `noone model` · [Providers guide](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/integrations/providers.md) |
+| Env variables | `noone config env-path` · [Env vars reference](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/environment-variables.md) |
+| Gateway logs | `~/.hermes/logs/gateway.log` (or `noone logs`) |
+| Sessions | `hermes sessions browse` (reads state.db) |

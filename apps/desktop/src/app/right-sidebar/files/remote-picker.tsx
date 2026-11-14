@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { FieldHint } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -216,7 +216,7 @@ export function RemoteFolderPicker() {
             {newFolderName !== null && (
               <div className="px-2 py-1">
                 <div className="flex items-center gap-2">
-                  <Codicon className="text-(--ui-text-secondary)" name="new-folder" size="0.875rem" />
+                  <AppIcon className="text-(--ui-text-secondary)" name="new-folder" size="0.875rem" />
                   <Input
                     aria-invalid={Boolean(newFolderError)}
                     aria-label={r.remotePickerFolderName}
@@ -243,7 +243,7 @@ export function RemoteFolderPicker() {
                     size="icon-xs"
                     variant="ghost"
                   >
-                    <Codicon name={creating ? 'loading' : 'check'} size="0.875rem" spinning={creating} />
+                    <AppIcon name={creating ? 'loading' : 'check'} size="0.875rem" spinning={creating} />
                   </Button>
                 </div>
                 {newFolderError && (
@@ -255,7 +255,7 @@ export function RemoteFolderPicker() {
             )}
             {loading ? (
               <div className="flex items-center gap-2 px-2 py-3 text-xs text-muted-foreground">
-                <Codicon name="loading" size="0.8rem" spinning />
+                <AppIcon name="loading" size="0.8rem" spinning />
                 {r.loadingFiles}
               </div>
             ) : error ? (
@@ -279,7 +279,7 @@ export function RemoteFolderPicker() {
               size="sm"
               variant="ghost"
             >
-              <Codicon name="new-folder" size="0.875rem" />
+              <AppIcon name="new-folder" size="0.875rem" />
               {r.remotePickerNewFolder}
             </Button>
             <Button onClick={() => close()} size="sm" variant="ghost">
@@ -303,7 +303,7 @@ function FolderRow({ disabled = false, name, onClick }: { disabled?: boolean; na
       onClick={onClick}
       type="button"
     >
-      <Codicon name="folder" size="0.875rem" />
+      <AppIcon name="folder" size="0.875rem" />
       <span className="min-w-0 truncate">{name}</span>
     </button>
   )

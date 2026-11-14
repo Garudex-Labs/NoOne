@@ -1,20 +1,20 @@
 ---
 title: "Canvas — Fetch Canvas LMS courses and assignments via API token"
-sidebar_label: "Canvas"
+sidebarTitle: "Canvas"
 description: "Fetch Canvas LMS courses and assignments via API token"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Canvas
+# Canvas {#canvas}
 
 Fetch Canvas LMS courses and assignments via API token.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/productivity/canvas` |
+| Source | Optional — install with `noone skills install official/productivity/canvas` |
 | Path | `optional-skills/productivity/canvas` |
 | Version | `1.0.0` |
 | Author | community |
@@ -22,26 +22,34 @@ Fetch Canvas LMS courses and assignments via API token.
 | Platforms | linux, macos, windows |
 | Tags | `Canvas`, `LMS`, `Education`, `Courses`, `Assignments` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Canvas LMS — Course & Assignment Access
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Canvas LMS — Course & Assignment Access {#canvas-lms--course--assignment-access}
 
 Read-only access to Canvas LMS for listing courses and assignments.
 
-## Scripts
+## Scripts {#scripts}
 
 - `scripts/canvas_api.py` — Python CLI for Canvas API calls
 
-## Setup
+## Setup {#setup}
 
 1. Log in to your Canvas instance in a browser
 2. Go to **Account → Settings** (click your profile icon, then Settings)
 3. Scroll to **Approved Integrations** and click **+ New Access Token**
-4. Name the token (e.g., "Hermes Agent"), set an optional expiry, and click **Generate Token**
+4. Name the token (e.g., "{{app-name}}"), set an optional expiry, and click **Generate Token**
 5. Copy the token and add to `${HERMES_HOME:-~/.hermes}/.env`:
 
 ```
@@ -51,7 +59,7 @@ CANVAS_BASE_URL=https://yourschool.instructure.com
 
 The base URL is whatever appears in your browser when you're logged into Canvas (no trailing slash).
 
-## Usage
+## Usage {#usage}
 
 ```bash
 CANVAS="python $HERMES_HOME/skills/productivity/canvas/scripts/canvas_api.py"
@@ -69,7 +77,7 @@ $CANVAS list_assignments 12345
 $CANVAS list_assignments 12345 --order-by due_at
 ```
 
-## Output Format
+## Output Format {#output-format}
 
 **list_courses** returns:
 ```json
@@ -83,7 +91,7 @@ $CANVAS list_assignments 12345 --order-by due_at
 
 Note: Assignment descriptions are truncated to 500 characters. The `html_url` field links to the full assignment page in Canvas.
 
-## API Reference (curl)
+## API Reference (curl) {#api-reference-curl}
 
 ```bash
 # List courses
@@ -97,13 +105,13 @@ curl -s -H "Authorization: Bearer $CANVAS_API_TOKEN" \
 
 Canvas uses `Link` headers for pagination. The Python script handles pagination automatically.
 
-## Rules
+## Rules {#rules}
 
 - This skill is **read-only** — it only fetches data, never modifies courses or assignments
 - On first use, verify auth by running `$CANVAS list_courses` — if it fails with 401, guide the user through setup
 - Canvas rate-limits to ~700 requests per 10 minutes; check `X-Rate-Limit-Remaining` header if hitting limits
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 | Problem | Fix |
 |---------|-----|

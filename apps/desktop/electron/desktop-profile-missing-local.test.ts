@@ -71,10 +71,10 @@ test('existing, default and explicitly launched profiles are kept', () => {
   assert.deepEqual(logs, [])
 })
 
-// hermes_constants.named_profile_is_live refuses both shapes, so `--profile`
+// agent_constants.named_profile_is_live refuses both shapes, so `--profile`
 // would fail every launch while the preference survived.
 test.each([
-  ['tombstoned by `hermes profile delete`', (home: string) => {
+  ['tombstoned by `noone profile delete`', (home: string) => {
     fs.writeFileSync(path.join(home, 'config.yaml'), '')
     fs.mkdirSync(path.join(profilesRoot, '.deleted'))
     fs.writeFileSync(path.join(profilesRoot, '.deleted', 'ghost'), 'deleted\n')

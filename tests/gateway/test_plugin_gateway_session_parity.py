@@ -27,7 +27,7 @@ async def test_keyless_injection_from_a_cli_session_turn_lands_in_that_session(t
     from gateway.session_contract import SessionActor
     from gateway.session_local import create_local_session
     from gateway.session_policy import _ACTIVE_POLICY
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
 
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
     monkeypatch.setattr(SessionAuthority, "_schedule", lambda self, ref: None)
@@ -72,8 +72,8 @@ async def test_keyed_local_injection_stays_inside_the_plugins_own_profile(tmp_pa
     from gateway.session_contract import SessionActor
     from gateway.session_local import create_local_session
     from gateway.session_policy import _ACTIVE_POLICY
-    from hermes_state import SessionDB
-    from hermes_state_runtime import begin_runtime_epoch
+    from agent_state import SessionDB
+    from agent_state_runtime import begin_runtime_epoch
 
     launch = tmp_path / ".hermes"
     beta = launch / "profiles" / "beta"
@@ -223,7 +223,7 @@ def test_gateway_approval_hooks_report_a_cli_sessions_surface(tmp_path, monkeypa
 
     seen = []
     approval_hooks = {"pre_approval_request", "post_approval_response"}
-    monkeypatch.setattr("hermes_cli.lifecycle.invoke_hook",
+    monkeypatch.setattr("agent_cli.lifecycle.invoke_hook",
                         lambda name, **kw: seen.append((name, kw)) if name in approval_hooks else None)
 
     def boom(_data):

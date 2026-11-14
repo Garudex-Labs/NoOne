@@ -9,6 +9,7 @@
 //   done      — the private view link (copyable) + where to pick up the
 //               discussion: GitHub Issues · Nous Portal Support · Discord.
 import { useStore } from '@nanostores/react'
+import { ExternalLink, Loader2Icon, Lock } from '@noone/ui/icons'
 
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
@@ -22,7 +23,6 @@ import {
 } from '@/components/ui/dialog'
 import { useI18n } from '@/i18n'
 import { ExternalLink as ExternalLinkAnchor, openExternalLink } from '@/lib/external-link'
-import { ExternalLink, Loader2Icon, Lock } from '@/lib/icons'
 import {
   $sendDiagnostics,
   confirmSendDiagnostics,
@@ -31,7 +31,7 @@ import {
 } from '@/store/send-diagnostics'
 
 const SUPPORT_LINKS = [
-  { key: 'github', url: 'https://github.com/NousResearch/hermes-agent/issues' },
+  { key: 'github', url: 'https://github.com/Garudex-Labs/NoOne/issues' },
   { key: 'portal', url: 'https://portal.nousresearch.com/help' },
   { key: 'discord', url: 'https://discord.gg/NousResearch' }
 ] as const

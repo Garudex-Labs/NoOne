@@ -1,34 +1,42 @@
 ---
 title: "Pixel Art — Pixel art w/ era palettes (NES, Game Boy, PICO-8)"
-sidebar_label: "Pixel Art"
+sidebarTitle: "Pixel Art"
 description: "Pixel art w/ era palettes (NES, Game Boy, PICO-8)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Pixel Art
+# Pixel Art {#pixel-art}
 
 Pixel art w/ era palettes (NES, Game Boy, PICO-8).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/pixel-art` |
+| Source | Optional — install with `noone skills install official/creative/pixel-art` |
 | Path | `optional-skills/creative/pixel-art` |
 | Version | `2.0.0` |
-| Author | dodo-reach |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `creative`, `pixel-art`, `arcade`, `snes`, `nes`, `gameboy`, `retro`, `image`, `video` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Pixel Art
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Pixel Art {#pixel-art-1}
 
 Convert any image into retro pixel art, then optionally animate it into a short
 MP4 or GIF with era-appropriate effects (rain, fireflies, snow, embers).
@@ -42,19 +50,19 @@ Each is importable or runnable directly. Presets snap to hardware palettes
 when you want era-accurate colors (NES, Game Boy, PICO-8, etc.), or use
 adaptive N-color quantization for arcade/SNES-style looks.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User wants retro pixel art from a source image
 - User asks for NES / Game Boy / PICO-8 / C64 / arcade / SNES styling
 - User wants a short looping animation (rain scene, night sky, snow, etc.)
 - Posters, album covers, social posts, sprites, characters, avatars
 
-## Workflow
+## Workflow {#workflow}
 
 Before generating, confirm the style with the user. Different presets produce
 very different outputs and regenerating is costly.
 
-### Step 1 — Offer a style
+### Step 1 — Offer a style {#step-1--offer-a-style}
 
 Call `clarify` with 4 representative presets. Pick the set based on what the
 user asked for — don't just dump all 14.
@@ -76,7 +84,7 @@ clarify(
 When the user already named an era (e.g. "80s arcade", "Gameboy"), skip
 `clarify` and use the matching preset directly.
 
-### Step 2 — Offer animation (optional)
+### Step 2 — Offer animation (optional) {#step-2--offer-animation-optional}
 
 If the user asked for a video/GIF, or the output might benefit from motion,
 ask which scene:
@@ -97,12 +105,12 @@ Do NOT call `clarify` more than twice in a row. One for style, one for scene if
 animation is on the table. If the user explicitly asked for a specific style
 and scene in their message, skip `clarify` entirely.
 
-### Step 3 — Generate
+### Step 3 — Generate {#step-3--generate}
 
 Run `pixel_art()` first; if animation was requested, chain into
 `pixel_art_video()` on the result.
 
-## Preset Catalog
+## Preset Catalog {#preset-catalog}
 
 | Preset | Era | Palette | Block | Best for |
 |--------|-----|---------|-------|----------|
@@ -128,7 +136,7 @@ the complete list — 28 named palettes total). Any preset can be overridden:
 pixel_art("in.png", "out.png", preset="snes", palette="PICO_8", block=6)
 ```
 
-## Scene Catalog (for video)
+## Scene Catalog (for video) {#scene-catalog-for-video}
 
 | Scene | Effects |
 |-------|---------|
@@ -145,9 +153,9 @@ pixel_art("in.png", "out.png", preset="snes", palette="PICO_8", block=6)
 | `snow` | Snowflakes + sparkles |
 | `desert` | Heat shimmer + dust |
 
-## Invocation Patterns
+## Invocation Patterns {#invocation-patterns}
 
-### Python (import)
+### Python (import) {#python-import}
 
 ```python
 import sys
@@ -172,7 +180,7 @@ pixel_art_video(
 )
 ```
 
-### CLI
+### CLI {#cli}
 
 ```bash
 cd ~/.hermes/skills/creative/pixel-art/scripts
@@ -183,7 +191,7 @@ python pixel_art.py in.jpg out.png --preset snes --palette PICO_8 --block 6
 python pixel_art_video.py out.png out.mp4 --scene night --duration 6 --gif
 ```
 
-## Pipeline Rationale
+## Pipeline Rationale {#pipeline-rationale}
 
 **Pixel conversion:**
 1. Boost contrast/color/sharpness (stronger for smaller palettes)
@@ -202,13 +210,13 @@ Quantizing before would waste error-diffusion on detail that disappears.
 - Encodes via ffmpeg `libx264 -pix_fmt yuv420p -crf 18`
 - Optional GIF via `palettegen` + `paletteuse`
 
-## Dependencies
+## Dependencies {#dependencies}
 
 - Python 3.9+
 - Pillow (`pip install Pillow`)
-- ffmpeg on PATH (only needed for video — Hermes installs package this)
+- ffmpeg on PATH (only needed for video — {{app-name}} installs package this)
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Pallet keys are case-sensitive (`"NES"`, `"PICO_8"`, `"GAMEBOY_ORIGINAL"`).
 - Very small sources (&lt;100px wide) collapse under 8-10px blocks. Upscale the
@@ -221,14 +229,14 @@ Quantizing before would waste error-diffusion on detail that disappears.
 - `clarify` loop: call it at most twice per turn (style, then scene). Don't
   pepper the user with more picks.
 
-## Verification
+## Verification {#verification}
 
 - PNG is created at the output path
 - Clear square pixel blocks visible at the preset's block size
 - Color count matches preset (eyeball the image or run `Image.open(p).getcolors()`)
 - Video is a valid MP4 (`ffprobe` can open it) with non-zero size
 
-## Attribution
+## Attribution {#attribution}
 
 Named hardware palettes and the procedural animation loops in `pixel_art_video.py`
 are ported from [pixel-art-studio](https://github.com/Synero/pixel-art-studio)

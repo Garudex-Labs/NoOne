@@ -1,4 +1,4 @@
-import { LOCALE_ENDONYMS, RTL_LOCALES } from '@hermes/shared/i18n'
+import { LOCALE_ENDONYMS, RTL_LOCALES } from '@noone/shared/i18n'
 
 import { normalize } from '@/lib/text'
 
@@ -28,10 +28,16 @@ export const LOCALE_OPTIONS = [
     configValue: 'zh'
   },
   {
-    id: 'zh-hant',
-    name: LOCALE_ENDONYMS['zh-hant'],
-    englishName: 'Traditional Chinese',
-    configValue: 'zh-hant'
+    id: 'hi',
+    name: LOCALE_ENDONYMS.hi,
+    englishName: 'Hindi',
+    configValue: 'hi'
+  },
+  {
+    id: 'ko',
+    name: LOCALE_ENDONYMS.ko,
+    englishName: 'Korean',
+    configValue: 'ko'
   },
   {
     id: 'ja',
@@ -44,12 +50,6 @@ export const LOCALE_OPTIONS = [
     name: LOCALE_ENDONYMS.ar,
     englishName: 'Arabic',
     configValue: 'ar'
-  },
-  {
-    id: 'ru',
-    name: LOCALE_ENDONYMS.ru,
-    englishName: 'Russian',
-    configValue: 'ru'
   },
   {
     id: 'fr',
@@ -110,7 +110,7 @@ export function isRtlLocale(locale: Locale): boolean {
 // The endonym (native name) is what the picker shows so users recognize their
 // language regardless of the current UI language. No country flags: languages
 // are not countries. `englishName` is search-only (not shown) so an English
-// speaker can type "japanese"/"traditional" to filter the list.
+// speaker can type "japanese"/"hindi" to filter the list.
 /** Every selectable language: bundled ∪ registered (plugin packs, backend
  *  `i18n.languages`). Bundled keep their curated picker order; registered-only
  *  ids follow, sorted. */
@@ -136,23 +136,24 @@ const LOCALE_ALIASES: Record<string, BundledLocale> = {
   en_us: 'en',
   zh: 'zh',
   'zh-cn': 'zh',
+  'zh-sg': 'zh',
+  zh_sg: 'zh',
   zh_cn: 'zh',
   'zh-hans': 'zh',
   zh_hans: 'zh',
   'zh-hans-cn': 'zh',
   zh_hans_cn: 'zh',
-  'zh-tw': 'zh-hant',
-  zh_tw: 'zh-hant',
-  'zh-hk': 'zh-hant',
-  zh_hk: 'zh-hant',
-  'zh-mo': 'zh-hant',
-  zh_mo: 'zh-hant',
-  'zh-hant': 'zh-hant',
-  zh_hant: 'zh-hant',
-  'zh-hant-tw': 'zh-hant',
-  zh_hant_tw: 'zh-hant',
-  'zh-hant-hk': 'zh-hant',
-  zh_hant_hk: 'zh-hant',
+  hi: 'hi',
+  'hi-in': 'hi',
+  hi_in: 'hi',
+  hindi: 'hi',
+  हिन्दी: 'hi',
+  हिंदी: 'hi',
+  ko: 'ko',
+  'ko-kr': 'ko',
+  ko_kr: 'ko',
+  korean: 'ko',
+  한국어: 'ko',
   ja: 'ja',
   'ja-jp': 'ja',
   ja_jp: 'ja',
@@ -165,15 +166,6 @@ const LOCALE_ALIASES: Record<string, BundledLocale> = {
   ar_eg: 'ar',
   arabic: 'ar',
   العربية: 'ar',
-  ru: 'ru',
-  'ru-ru': 'ru',
-  ru_ru: 'ru',
-  'ru-by': 'ru',
-  'ru-kz': 'ru',
-  russian: 'ru',
-  'russian-russian': 'ru',
-  русский: 'ru',
-  руский: 'ru',
   fr: 'fr',
   'fr-fr': 'fr',
   fr_fr: 'fr',
@@ -209,44 +201,60 @@ const LOCALE_ALIASES: Record<string, BundledLocale> = {
   espanol: 'es'
 }
 
+function localeAlias(value: string): Locale | undefined {
+  const direct = LOCALE_ALIASES[normalize(value)]
+
+  if (direct) {
+    return direct
+  }
+
+  const parts = normalizeLocaleId(value).split('-')
+
+  // A known Simplified prefix stays valid with a region or Unicode extension.
+  return parts[0] === 'zh' ? LOCALE_ALIASES[parts.slice(0, 2).join('-')] : undefined
+}
+
 /** A language the app can render right now: bundled or registered. Aliases
  *  (`zh-CN`) are not ids — see `isSupportedLocaleValue`. */
 export function isLocale(value: unknown): value is Locale {
   return isBundledLocale(value) || isRegisteredLocale(value)
 }
 
-/** Alias table first (`zh-TW` → `zh-hant`), then any registered id as-is
+/** Alias table first (`hi-IN` → `hi`), then any registered id as-is
  *  (lowercased, `_` → `-`), else English. */
 export function normalizeLocale(value: unknown): Locale {
   if (typeof value !== 'string') {
     return DEFAULT_LOCALE
   }
 
-  const alias = LOCALE_ALIASES[normalize(value)]
+  const id = normalizeLocaleId(value)
+  const direct = LOCALE_ALIASES[normalize(value)]
+  const alias = localeAlias(value)
 
-  if (alias) {
-    return alias
+  // Keep legacy aliases authoritative, but do not steal an existing pack id with a new alias.
+  const newAlias = !direct || alias === 'hi' || alias === 'ko' || id === 'zh-sg'
+
+  if (newAlias && registeredLocaleIds().includes(id)) {
+    return id
   }
 
-  const id = normalizeLocaleId(value)
-
-  return isRegisteredLocale(id) ? id : DEFAULT_LOCALE
+  return alias ?? (isRegisteredLocale(id) ? id : DEFAULT_LOCALE)
 }
 
 export function isSupportedLocaleValue(value: unknown): boolean {
   return (
     typeof value === 'string' &&
-    (LOCALE_ALIASES[normalize(value)] != null || isRegisteredLocale(normalizeLocaleId(value)))
+    (localeAlias(value) != null || isRegisteredLocale(normalizeLocaleId(value)))
   )
 }
 
-/** OS tags can include regions absent from the picker aliases, such as ru-UA. */
+/** OS tags can include regions absent from the picker aliases, such as fr-CH. */
 export function osPreferredLocale(tag: string | null | undefined): Locale | null {
   if (!tag) {
     return null
   }
 
-  const exact = LOCALE_ALIASES[normalize(tag)]
+  const exact = localeAlias(tag)
 
   if (exact) {
     return exact
@@ -254,7 +262,8 @@ export function osPreferredLocale(tag: string | null | undefined): Locale | null
 
   const base = tag.split(/[-_]/)[0]
 
-  return (base && LOCALE_ALIASES[normalize(base)]) || null
+  // Chinese scripts require an explicit alias; never substitute another script.
+  return (base && base.toLowerCase() !== 'zh' && LOCALE_ALIASES[normalize(base)]) || null
 }
 
 /** An explicit choice must win even when it differs from the OS language. */

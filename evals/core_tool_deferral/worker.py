@@ -27,7 +27,7 @@ if not os.environ.get("OPENROUTER_API_KEY"):
     print("ABORT: OPENROUTER_API_KEY missing", file=sys.stderr)
     sys.exit(3)
 
-# --- hermetic env BEFORE any hermes import -------------------------------
+# --- hermetic env BEFORE any noone import -------------------------------
 for var in list(os.environ):
     if var.endswith(("_API_KEY", "_TOKEN")) and var != "OPENROUTER_API_KEY":
         os.environ.pop(var, None)
@@ -56,7 +56,7 @@ TASK = taskmod.TASKS_BY_ID[TASK_ID]
 
 # --- seed session DB for recall tasks (both arms, always — cheap) ---------
 def seed_sessions():
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
     db = SessionDB()
     month_ago = time.time() - 30 * 86400
     def sess(sid, msgs, t0):

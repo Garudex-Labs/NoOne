@@ -15,7 +15,7 @@ import pytest
 from agent.agent_runtime_helpers import extract_api_error_context
 from agent.error_classifier import FailoverReason, classify_api_error
 from agent.turn_retry_state import TurnRetryState
-from tests.hermes_cli.anon_portal import make_jwt
+from tests.agent_cli.anon_portal import make_jwt
 
 WELCOME = "https://welcome-api.nousresearch.com/v1"
 PAID = "https://inference-api.nousresearch.com/v1"
@@ -185,7 +185,7 @@ class TestOutageCopy:
                                         FailoverReason.server_error])
     def test_a_spent_transport_failure_on_the_welcome_host_reads_as_one_sentence(self, reason):
         from agent.turn_recovery import _welcome_outage_copy
-        from hermes_cli.anon_auth import FREE_TIER_OUTAGE_COPY
+        from agent_cli.anon_auth import FREE_TIER_OUTAGE_COPY
         assert _welcome_outage_copy(_ANON, WELCOME, SimpleNamespace(reason=reason)) == FREE_TIER_OUTAGE_COPY
 
     def test_other_routes_and_other_reasons_keep_the_technical_summary(self):
@@ -306,7 +306,7 @@ class TestFreeTierCooldownCutoff:
             clear_session_vars(tokens)
 
     def test_a_gateway_admitted_finite_cli_turn_keeps_waiting(self):
-        """``hermes chat -q`` over the daemon carries its one-shot fact on the admission, not in env."""
+        """``noone chat -q`` over the daemon carries its one-shot fact on the admission, not in env."""
         from agent.turn_recovery import free_tier_cooldown_ends_turn
         from gateway.session_finite import finite_turn_scope
         with finite_turn_scope(True):

@@ -19,7 +19,7 @@ missed. Siblings late-import the facade (its ``_pid_alive`` / ``_start_time`` ar
 """
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import contextlib
 import errno
 import functools
@@ -207,5 +207,5 @@ def hand_over(record: Path, data: dict, holder: dict) -> None:
     from utils import atomic_json_write
     atomic_json_write(record, {**data, "owner_pid": holder["holder_pid"],
                                "owner_start_time": holder.get("holder_start_time")}, indent=None)
-    logger.info("browser: Chromium pid %s is still used by Hermes pid %s; handed it over instead of stopping it",
+    logger.info(app_text("browser: Chromium pid %s is still used by {app_name} pid %s; handed it over instead of stopping it", percent_format=True),
                 data.get("pid"), holder["holder_pid"])

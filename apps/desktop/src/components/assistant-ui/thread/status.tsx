@@ -1,17 +1,17 @@
 import { useAuiState } from '@assistant-ui/react'
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { type FC, type ReactNode, useEffect, useMemo, useState } from 'react'
 
+import { getLocalModelsStatus } from '@/agent-client'
 import { useSessionView } from '@/app/chat/session-view'
 import { activitySignature, toolNarratesWait, TURN_QUIET_S } from '@/components/assistant-ui/thread/turn-activity'
 import { toolPresentVerb } from '@/components/assistant-ui/tool/run-summary'
 import { useElapsedSeconds } from '@/components/chat/activity-timer'
 import { ActivityTimerText } from '@/components/chat/activity-timer-text'
 import { SCAFFOLD_LABEL_CLASS } from '@/components/chat/scaffold-row'
-import { Codicon } from '@/components/ui/codicon'
 import { Loader } from '@/components/ui/loader'
 import { StatusPulse } from '@/components/ui/status-pulse'
-import { getLocalModelsStatus } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { sessionBackgroundResume } from '@/store/background-delegation'
@@ -22,7 +22,7 @@ import { parseModelLoadWait, sessionProviderWait } from '@/store/provider-wait'
 import { $showReasoning } from '@/store/reasoning-disclosure'
 import { $currentModel, $currentProvider } from '@/store/session'
 import { type DraftingTool, sessionDraftingTool } from '@/store/tool-drafting'
-import type { LocalModelLoadProgress } from '@/types/hermes'
+import type { LocalModelLoadProgress } from '@/types/agent-client'
 
 // A status line is scaffolding like any other — "Editing" while the model
 // drafts a call is the same kind of line as "Explored 3 files" once it has run,
@@ -290,7 +290,7 @@ export const BackgroundResumeNotice: FC = () => {
 
   return (
     <StatusRow className="pl-(--message-text-indent)" data-slot="aui_background-resume" label={label}>
-      <Codicon name="sync" size="0.875rem" />
+      <AppIcon name="sync" size="0.875rem" />
       <span className={cn(SCAFFOLD_LABEL_CLASS, 'min-w-0 truncate')}>{label}</span>
     </StatusRow>
   )

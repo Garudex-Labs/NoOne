@@ -1,37 +1,45 @@
 ---
 title: "Test Driven Development — TDD: enforce RED-GREEN-REFACTOR, tests before code"
-sidebar_label: "Test Driven Development"
+sidebarTitle: "Test Driven Development"
 description: "TDD: enforce RED-GREEN-REFACTOR, tests before code"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Test Driven Development
+# Test Driven Development {#test-driven-development}
 
 TDD: enforce RED-GREEN-REFACTOR, tests before code.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/software-development/test-driven-development` |
 | Version | `1.1.0` |
-| Author | Hermes Agent (adapted from obra/superpowers) |
+| Author | {{app-name}} (adapted from obra/superpowers) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `testing`, `tdd`, `development`, `quality`, `red-green-refactor` |
 | Related skills | [`systematic-debugging`](../../bundled/software-development/software-development-systematic-debugging.md), [`subagent-driven-development`](../../optional/software-development/software-development-subagent-driven-development.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Test-Driven Development (TDD)
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Test-Driven Development (TDD) {#test-driven-development-tdd}
+
+## Overview {#overview}
 
 Write the test first. Watch it fail. Write minimal code to pass.
 
@@ -39,7 +47,7 @@ Write the test first. Watch it fail. Write minimal code to pass.
 
 **Violating the letter of the rules is violating the spirit of the rules.**
 
-## When to Use
+## When to Use {#when-to-use}
 
 **Always:**
 - New features
@@ -54,7 +62,7 @@ Write the test first. Watch it fail. Write minimal code to pass.
 
 Thinking "skip TDD just this once"? Stop. That's rationalization.
 
-## The Iron Law
+## The Iron Law {#the-iron-law}
 
 ```
 NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
@@ -70,9 +78,9 @@ Write code before the test? Delete it. Start over.
 
 Implement fresh from tests. Period.
 
-## Red-Green-Refactor Cycle
+## Red-Green-Refactor Cycle {#red-green-refactor-cycle}
 
-### RED — Write Failing Test
+### RED — Write Failing Test {#red--write-failing-test}
 
 Write one minimal test showing what should happen.
 
@@ -110,7 +118,7 @@ Vague name, tests mock not real code.
 - Real code, not mocks (unless truly unavoidable)
 - Name describes behavior, not implementation
 
-### Verify RED — Watch It Fail
+### Verify RED — Watch It Fail {#verify-red--watch-it-fail}
 
 **MANDATORY. Never skip.**
 
@@ -128,7 +136,7 @@ Confirm:
 
 **Test errors?** Fix the error, re-run until it fails correctly.
 
-### GREEN — Minimal Code
+### GREEN — Minimal Code {#green--minimal-code}
 
 Write the simplest code to pass the test. Nothing more.
 
@@ -156,7 +164,7 @@ Don't add features, refactor other code, or "improve" beyond the test.
 
 We'll fix it in REFACTOR.
 
-### Verify GREEN — Watch It Pass
+### Verify GREEN — Watch It Pass {#verify-green--watch-it-pass}
 
 **MANDATORY.**
 
@@ -177,7 +185,7 @@ Confirm:
 
 **Other tests fail?** Fix regressions now.
 
-### REFACTOR — Clean Up
+### REFACTOR — Clean Up {#refactor--clean-up}
 
 After green only:
 - Remove duplication
@@ -189,11 +197,11 @@ Keep tests green throughout. Don't add behavior.
 
 **If tests fail during refactor:** Undo immediately. Take smaller steps.
 
-### Repeat
+### Repeat {#repeat}
 
 Next failing test for next behavior. One cycle at a time.
 
-## Avoid Horizontal Slices
+## Avoid Horizontal Slices {#avoid-horizontal-slices}
 
 Do **not** write all tests first and then all implementation. That is horizontal slicing: RED becomes "write a pile of imagined tests" and GREEN becomes "make the pile pass." It produces brittle tests because the tests are designed before the implementation has taught you what behavior and interface actually matter.
 
@@ -212,7 +220,7 @@ RIGHT:
 
 A tracer bullet is one end-to-end behavior slice. It proves the path works, teaches you about the interface, and keeps each next test grounded in what you just learned.
 
-## Why Order Matters
+## Why Order Matters {#why-order-matters}
 
 **"I'll write tests after to verify it works"**
 
@@ -258,7 +266,7 @@ No. Tests-after answer "What does this do?" Tests-first answer "What should this
 
 Tests-after are biased by your implementation. You test what you built, not what's required. Tests-first force edge case discovery before implementing.
 
-## Common Rationalizations
+## Common Rationalizations {#common-rationalizations}
 
 | Excuse | Reality |
 |--------|---------|
@@ -274,7 +282,7 @@ Tests-after are biased by your implementation. You test what you built, not what
 | "Manual test faster" | Manual doesn't prove edge cases. You'll re-test every change. |
 | "Existing code has no tests" | You're improving it. Add tests for the code you touch. |
 
-## Red Flags — STOP and Start Over
+## Red Flags — STOP and Start Over {#red-flags--stop-and-start-over}
 
 If you catch yourself doing any of these, delete the code and restart with TDD:
 
@@ -293,7 +301,7 @@ If you catch yourself doing any of these, delete the code and restart with TDD:
 
 **All of these mean: Delete code. Start over with TDD.**
 
-## Verification Checklist
+## Verification Checklist {#verification-checklist}
 
 Before marking work complete:
 
@@ -308,7 +316,7 @@ Before marking work complete:
 
 Can't check all boxes? You skipped TDD. Start over.
 
-## When Stuck
+## When Stuck {#when-stuck}
 
 | Problem | Solution |
 |---------|----------|
@@ -317,9 +325,9 @@ Can't check all boxes? You skipped TDD. Start over.
 | Must mock everything | Code too coupled. Use dependency injection. |
 | Test setup huge | Extract helpers. Still complex? Simplify the design. |
 
-## Hermes Agent Integration
+## {{app-name}} Integration {#hermes-agent-integration}
 
-### Running Tests
+### Running Tests {#running-tests}
 
 Use the `terminal` tool to run tests at each step:
 
@@ -334,7 +342,7 @@ terminal("pytest tests/test_feature.py::test_name -v")
 terminal("pytest tests/ -q")
 ```
 
-### With delegate_task
+### With delegate_task {#with-delegate_task}
 
 When dispatching subagents for implementation, enforce TDD in the goal:
 
@@ -357,20 +365,20 @@ delegate_task(
 )
 ```
 
-### With systematic-debugging
+### With systematic-debugging {#with-systematic-debugging}
 
 Bug found? Write failing test reproducing it. Follow TDD cycle. The test proves the fix and prevents regression.
 
 Never fix bugs without a test.
 
-## Testing Anti-Patterns
+## Testing Anti-Patterns {#testing-anti-patterns}
 
 - **Testing mock behavior instead of real behavior** — mocks should verify interactions, not replace the system under test
 - **Testing implementation details** — test behavior/results, not internal method calls
 - **Happy path only** — always test edge cases, errors, and boundaries
 - **Brittle tests** — tests should verify behavior, not structure; refactoring shouldn't break them
 
-## Final Rule
+## Final Rule {#final-rule}
 
 ```
 Production code → test exists and failed first

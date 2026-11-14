@@ -1,8 +1,8 @@
 import { useStore } from '@nanostores/react'
 import { useEffect, useMemo, useState } from 'react'
 
-import type { HermesGitWorktree } from '@/global'
-import type { SessionInfo } from '@/hermes'
+import type { SessionInfo } from '@/agent-client'
+import type { AgentGitWorktree } from '@/global'
 import { desktopGit, desktopGitFor } from '@/lib/desktop-git'
 import { mapPool } from '@/lib/pool'
 import { $sidebarWorkspaceNodeOpen, toggleWorkspaceNodeCollapsed } from '@/store/layout'
@@ -155,8 +155,8 @@ export function useRepoWorktreeMap(
   enabled: boolean,
   /** The project the repos belong to: another gateway's are listed on that gateway. */
   project?: Pick<SidebarProjectTree, 'connectionId' | 'profile'>
-): [Record<string, HermesGitWorktree[]>, boolean] {
-  const [map, setMap] = useState<Record<string, HermesGitWorktree[]>>({})
+): [Record<string, AgentGitWorktree[]>, boolean] {
+  const [map, setMap] = useState<Record<string, AgentGitWorktree[]>>({})
   const [loading, setLoading] = useState(false)
   const key = useMemo(() => pathListKey(repoPaths), [repoPaths])
   // Refetch when a worktree is added/removed so a new lane shows immediately.

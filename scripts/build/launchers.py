@@ -61,7 +61,7 @@ root="$(cd "$(dirname "$self")/.." && pwd)"
 PYTHON={shell_path(python)}
 REPO={shell_path(repo)}
 SITE={shell_path(site)}
-[ -x "$PYTHON" ] || {{ printf '%s\\n' 'Bundled interpreter missing; reinstall Hermes.' >&2; exit 2; }}
+[ -x "$PYTHON" ] || {{ printf '%s\\n' 'Bundled interpreter missing; reinstall the agent.' >&2; exit 2; }}
 unset PYTHONPATH PYTHONHOME
 export PYTHONPATH="$REPO:$SITE"
 # PYTHONPATH cannot process .pth files (only site.addsitedir() can), and
@@ -71,7 +71,7 @@ export PYTHONPATH="$REPO:$SITE"
 export HERMES_SITE="$SITE"
 export PYTHONPYCACHEPREFIX="${{PYTHONPYCACHEPREFIX:-${{XDG_CACHE_HOME:-$HOME/.cache}}/hermes-pycache}}"
 {extra}if [ "${{1-}}" = --run-module ]; then
-    # The store launcher's switch (hermes_cli/_launchers.py): a macOS bundle's services run their
+    # The store launcher's switch (agent_cli/_launchers.py): a macOS bundle's services run their
     # other modules (the launchd stderr wrapper) through this launcher. The name is checked before
     # it is spliced into the source, which keeps it visible to the gateway's process matching.
     case "${{2-}}" in
@@ -94,7 +94,7 @@ def write_launchers(root: Path, entries: dict[str, str], *, python: str,
     windows = target.startswith("win32")
     for name, entry in entries.items():
         if windows:
-            with tempfile.TemporaryDirectory(prefix="hermes-mint-") as temp:
+            with tempfile.TemporaryDirectory(prefix="agent-mint-") as temp:
                 wrapper = Path(temp) / "wrapper.py"
                 wrapper.write_text(render_wrapper(entry, f"../{repo}", f"../{site}"), encoding="utf-8")
                 module, func = entry.split(":", 1)

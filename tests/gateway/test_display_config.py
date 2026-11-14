@@ -7,7 +7,7 @@
 class TestToolProgressProvenance:
     def test_winning_source_controls_mode_and_intent(self):
         from gateway.display_config import resolve_tool_progress
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
 
         discover_plugins()  # slack's "off" default ships on its PlatformEntry (display_overrides)
         cases = [
@@ -141,7 +141,7 @@ def assert_keeps_platform_display_defaults(cfg):
     platform tier, because the gateway loader merges no DEFAULT_CONFIG (#121230)."""
     from gateway.display_config import _PLATFORM_DEFAULTS, _platform_defaults, resolve_display_setting, resolve_tool_progress
     from gateway.platform_registry import platform_registry
-    from hermes_cli.plugins import discover_plugins
+    from agent_cli.plugins import discover_plugins
 
     # Core-only rows plus every plugin platform that declares display defaults on its PlatformEntry.
     discover_plugins()
@@ -156,7 +156,7 @@ def assert_keeps_platform_display_defaults(cfg):
 
 class TestInstallerSeededConfigThroughGatewayResolver:
     """Regression for #121230: a fresh install copies cli-config.yaml.example to config.yaml, and the
-    gateway then rendered reasoning into QQBot/Telegram/... because the template pinned a global
+    gateway then rendered reasoning into Telegram/... because the template pinned a global
     ``display.show_reasoning: true`` over every platform's ``False`` default.
     """
 
@@ -182,7 +182,7 @@ class TestInstallerSeededConfigThroughGatewayResolver:
         assert_keeps_platform_display_defaults(seeded)
         # ...and through the resolver the gateway turn actually calls (same arguments as gateway/run_turn.py).
         assert _resolve_gateway_display_bool(
-            seeded, "qqbot", "show_reasoning", default=False, platform=Platform.QQBOT,
+            seeded, "weixin", "show_reasoning", default=False, platform=Platform.WEIXIN,
             require_platform_override_for={Platform.MATTERMOST},
         ) is False
 
@@ -194,7 +194,7 @@ class TestInstallerSeededConfigThroughGatewayResolver:
         (tmp_path / "config.yaml").write_text("display:\n  show_reasoning: true\n")
         cfg = _load_gateway_config(tmp_path / "config.yaml")
         assert _resolve_gateway_display_bool(
-            cfg, "qqbot", "show_reasoning", default=False, platform=Platform.QQBOT,
+            cfg, "weixin", "show_reasoning", default=False, platform=Platform.WEIXIN,
             require_platform_override_for={Platform.MATTERMOST},
         ) is True
 
@@ -208,7 +208,7 @@ class TestConfigMigration:
 
     def test_migration_creates_platforms_entries(self, tmp_path, monkeypatch):
         """Old overrides are migrated into display.platforms.<plat>.tool_progress."""
-        import hermes_yaml as yaml
+        import agent_yaml as yaml
 
         config_path = tmp_path / "config.yaml"
         config = {
@@ -225,7 +225,7 @@ class TestConfigMigration:
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         # Re-import to pick up the new HERMES_HOME
         import importlib
-        import hermes_cli.config as cfg_mod
+        import agent_cli.config as cfg_mod
         importlib.reload(cfg_mod)
 
         cfg_mod.migrate_config(interactive=False, quiet=True)

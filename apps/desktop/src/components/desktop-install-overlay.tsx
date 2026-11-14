@@ -1,8 +1,9 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertCircle, ChevronDown, ChevronRight, Globe, iconSize, Loader2, Monitor } from '@noone/ui/icons'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ErrorIcon } from '@/components/ui/error-state'
 import { Loader } from '@/components/ui/loader'
 import { LogView } from '@/components/ui/log-view'
@@ -16,7 +17,6 @@ import type {
 } from '@/global'
 import { useI18n } from '@/i18n'
 import { writeClipboardText } from '@/lib/clipboard'
-import { AlertCircle, ChevronDown, ChevronRight, Globe, iconSize, Loader2, Monitor } from '@/lib/icons'
 import { capitalize } from '@/lib/text'
 import { cn } from '@/lib/utils'
 
@@ -122,7 +122,7 @@ function StageRow({ descriptor, result, now }: StageRowProps) {
       case 'succeeded':
 
       case 'skipped':
-        return <Codicon className="text-muted-foreground" name="check" size="0.8125rem" />
+        return <AppIcon className="text-muted-foreground" name="check" size="0.8125rem" />
 
       case 'failed':
         return <ErrorIcon size="1rem" />
@@ -385,7 +385,7 @@ export function DesktopInstallOverlay({ enabled = true }: DesktopInstallOverlayP
     window.addEventListener('keydown', onKeyDown)
 
     return () => window.removeEventListener('keydown', onKeyDown)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only the failed/not-failed transition matters, not error text changes
+     
   }, [Boolean(state.error)])
 
   // The choice remains mounted while main hands off to local bootstrap. Once

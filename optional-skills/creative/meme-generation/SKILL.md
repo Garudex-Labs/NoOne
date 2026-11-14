@@ -2,7 +2,7 @@
 name: meme-generation
 description: Create meme PNGs from templates with Pillow text overlay.
 version: 2.0.0
-author: adanaleycio
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

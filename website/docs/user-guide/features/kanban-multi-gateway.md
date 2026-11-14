@@ -3,9 +3,9 @@ title: "Kanban Multi-Gateway Deployment"
 description: "Running one kanban board across several per-profile gateways: single dispatcher, profile-owned delivery"
 ---
 
-# Multi-gateway deployment
+# Multi-gateway deployment {#multi-gateway-deployment}
 
-Hermes supports multiple gateway processes running concurrently — one per profile
+{{app-name}} supports multiple gateway processes running concurrently — one per profile
 (default, writer, admin, coder, researcher). Each gateway opens its own connection
 to platform APIs and delivers messages for its profile's subscribers.
 
@@ -16,7 +16,7 @@ so the controller inspects the existing card and current run; `notify` remains
 passive-only and `wake` remains wake-only. Review feedback never creates,
 unblocks, requeues, or otherwise mutates a task.
 
-## Single-dispatcher posture
+## Single-dispatcher posture {#single-dispatcher-posture}
 
 Only one gateway owns the kanban dispatcher. The owning gateway keeps
 `kanban.dispatch_in_gateway: true` (the default); every other gateway sets it
@@ -28,7 +28,7 @@ each gateway polls only subscriptions for profiles whose platform adapters it
 hosts. The atomic event claim prevents duplicate delivery across watcher
 processes.
 
-## Configuration
+## Configuration {#configuration}
 
 On the dispatch-owning gateway (typically the `default` profile), no change is
 needed. On every other profile gateway, add to `~/.hermes/config.yaml`:
@@ -40,7 +40,7 @@ kanban:
 
 Or set the env var: `HERMES_KANBAN_DISPATCH_IN_GATEWAY=false`
 
-## What each gateway does
+## What each gateway does {#what-each-gateway-does}
 
 | Gateway role | dispatch_in_gateway | Opens subscribed board DBs? | Dispatcher | Notifier |
 |---|---|---|---|---|

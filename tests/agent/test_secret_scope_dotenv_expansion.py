@@ -1,4 +1,4 @@
-"""A profile secret scope reads a ``.env`` the way ``load_hermes_dotenv`` publishes it (#137080).
+"""A profile secret scope reads a ``.env`` the way ``load_agent_dotenv`` publishes it (#137080).
 
 ``TELEGRAM_HOME_CHANNEL=${TELEGRAM_USER_ID}`` expanded in ``os.environ`` but reached the secret scope,
 and so cron home-channel delivery, as the literal template. Real files, real scope, real resolver.
@@ -19,7 +19,7 @@ def test_cron_home_target_resolves_a_dotenv_reference(tmp_path, monkeypatch):
         "DEFAULTED=${UNSET_IN_TEST:-fallback}\nPLAIN=lit$eral\n", encoding="utf-8")
     monkeypatch.setenv("HERMES_HOME", str(home))
     monkeypatch.delenv("UNSET_IN_TEST", raising=False)
-    from hermes_cli.plugins import discover_plugins
+    from agent_cli.plugins import discover_plugins
     discover_plugins()
     from cron.scheduler_delivery import _get_home_target_chat_id
 

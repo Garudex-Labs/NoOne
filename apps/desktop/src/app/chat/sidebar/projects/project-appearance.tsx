@@ -1,4 +1,5 @@
-import { Codicon } from '@/components/ui/codicon'
+import { AppIcon } from '@noone/ui/app-icon'
+
 import { ColorSwatches } from '@/components/ui/color-swatches'
 import { Tip } from '@/components/ui/tooltip'
 import { PROFILE_SWATCHES } from '@/lib/profile-color'
@@ -73,7 +74,7 @@ export function ProjectAppearancePicker({ color, icon, noColorLabel, onColor, on
               style={icon === name && color ? { color } : undefined}
               type="button"
             >
-              <Codicon name={name} size="0.8125rem" />
+              <AppIcon name={name} size="0.8125rem" />
             </button>
           </Tip>
         ))}

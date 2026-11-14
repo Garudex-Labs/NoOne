@@ -10,7 +10,7 @@ import pytest
 
 from agent import secret_scope
 from gateway.run import _profile_runtime_scope
-from hermes_constants import get_hermes_home, hermes_home_key
+from agent_constants import get_agent_home, agent_home_key
 from tools import browser_session_cdp as bs_cdp
 from tools import browser_harness_dirs as harness_dirs
 from tools.browser_harness_dirs import claim_private_dir as _REAL_CLAIM  # conftest stubs it per test
@@ -38,7 +38,7 @@ def _in_bare_thread(fn):
 def test_a_bare_thread_on_a_multiplexed_gateway_never_resolves_the_launch_profiles_override(profiles, monkeypatch):
     """No profile scope bound on a multiplexed gateway: the launch profile's live endpoint is NOT the
     answer (``get_secret`` fails closed the same way). A bound scope still sees its own."""
-    launch = get_hermes_home()
+    launch = get_agent_home()
     with _profile_runtime_scope(launch, hydrate_secrets=False):
         bs_cdp.set_live_cdp_override("http://127.0.0.1:9401")
     monkeypatch.setattr(secret_scope, "_MULTIPLEX_ACTIVE", True)
@@ -51,7 +51,7 @@ def test_a_bare_thread_on_a_multiplexed_gateway_never_resolves_the_launch_profil
 def test_single_profile_bare_thread_keeps_the_process_override(profiles):
     bs_cdp.set_live_cdp_override("http://127.0.0.1:9402")
     assert _in_bare_thread(bs_cdp.live_cdp_override) == "http://127.0.0.1:9402"
-    assert hermes_home_key() in bs_cdp._live_overrides
+    assert agent_home_key() in bs_cdp._live_overrides
 
 
 # --- macOS AF_UNIX budget for a served profile's harness sockets -------------------------------------
@@ -259,7 +259,7 @@ def test_an_unscoped_shutdown_reload_reaches_the_daemon_with_its_own_tmp_dir(pro
         env = {"HOME": "/home/u"}
         harness_dirs.namespace_harness_dirs(env, bu_cli._served_profile_tag())
     key = harness_dirs.daemon_identity({**env, "BU_NAME": "s1"})
-    monkeypatch.setattr(bu_cli, "_driven_daemons", {key: hermes_home_key(a)})
+    monkeypatch.setattr(bu_cli, "_driven_daemons", {key: agent_home_key(a)})
     monkeypatch.setattr(bu_cli, "_find_cli", lambda: ["browser-harness"])
     seen = []
     monkeypatch.setattr(bu_cli, "_run_cli_killing_process_group", lambda cmd, code, e, t: seen.append(e))
@@ -276,7 +276,7 @@ def test_a_session_that_resolved_the_old_endpoint_during_a_connect_is_closed_not
     resolved the OLD endpoint before the publish but inserted its session after the second reap kept
     driving the old browser. The real ``_browser_connect`` handler runs mid-creation here."""
     from tools import browser_session as bs, browser_session_lifecycle as lifecycle
-    from tui_gateway import server  # binds methods_browser helpers onto server globals
+    from agent_backend import server  # binds methods_browser helpers onto server globals
 
     a, _b = profiles
     sessions = {}
@@ -309,7 +309,7 @@ def test_a_stale_session_is_closed_without_ever_being_handed_to_a_concurrent_cal
     backend ``close`` runs, a concurrent ``get_session_info`` for the same key must not find it in
     ``_active_sessions`` (it would return a browser that is being closed underneath it)."""
     from tools import browser_session as bs, browser_session_lifecycle as lifecycle
-    from tui_gateway import server
+    from agent_backend import server
 
     a, _b = profiles
     sessions = {}
@@ -370,7 +370,7 @@ def test_a_browser_exec_that_routed_to_the_old_endpoint_during_a_connect_reloads
     nothing, and the harness daemon (which latches ``BU_CDP_*`` at spawn) kept the old browser for every
     later call. The real ``_browser_connect`` handler runs between routing and dispatch here."""
     from tools import browser_use_cli as bu_cli
-    from tui_gateway import server
+    from agent_backend import server
 
     a, _b = profiles
     monkeypatch.setattr(bu_cli, "_driven_daemons", {})
@@ -415,7 +415,7 @@ def test_a_connect_that_lands_while_browser_exec_spawns_its_daemon_reloads_it(pr
     import json
     import subprocess
     from tools import browser_use_cli as bu_cli
-    from tui_gateway import server
+    from agent_backend import server
 
     a, _b = profiles
     monkeypatch.setattr(bu_cli, "_driven_daemons", {})
@@ -453,7 +453,7 @@ def real_profile_launches(tmp_path, monkeypatch):
     from tools import browser_launcher as launcher, browser_lightpanda, browser_session as bs
     from tools import browser_session_lifecycle as lifecycle
     from tools.bot_desktop import placement, runtime
-    import hermes_cli.browser_connect as bc
+    import agent_cli.browser_connect as bc
     for name in ("_active_sessions", "_session_last_activity", "_session_owner_homes", "_cleanup_failures"):
         monkeypatch.setattr(bs, name, {})
     monkeypatch.setattr(lifecycle, "start_cleanup_thread", lambda: None)
@@ -463,7 +463,7 @@ def real_profile_launches(tmp_path, monkeypatch):
     monkeypatch.setattr(browser_lightpanda, "using_lightpanda_engine", lambda: False)
     monkeypatch.setattr(bc, "detect_default_chromium", lambda system=None: "chrome")
     monkeypatch.setattr(bc, "chromium_executable", lambda name, system=None: "/usr/bin/chrome")
-    monkeypatch.setattr(bc, "snapshot_real_profile", lambda name: (str(get_hermes_home() / "rp-copy"), None))
+    monkeypatch.setattr(bc, "snapshot_real_profile", lambda name: (str(get_agent_home() / "rp-copy"), None))
     stopped = []
     monkeypatch.setattr(launcher, "_terminate", lambda pid, start_time, proc: stopped.append(pid))
 
@@ -472,7 +472,7 @@ def real_profile_launches(tmp_path, monkeypatch):
         browser = launcher.LaunchedBrowser(
             key=key, pid=os.getpid(), start_time=None, cdp_url=f"ws://127.0.0.1:{port}/devtools/browser/{port}",
             http_url=f"http://127.0.0.1:{port}", user_data_dir=kw.get("user_data_dir") or str(tmp_path / key),
-            owned=True, ephemeral=False, home_key=hermes_home_key())
+            owned=True, ephemeral=False, home_key=agent_home_key())
         launcher._browsers[key] = browser
         return browser, None
     monkeypatch.setattr(launcher, "launch_chromium", launch)

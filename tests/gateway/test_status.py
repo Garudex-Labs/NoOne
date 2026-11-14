@@ -74,7 +74,7 @@ class TestGatewayPidState:
             record = {
                 "pid": pid,
                 "kind": "hermes-gateway",
-                "argv": ["python", "-m", "hermes_cli.main", "gateway"],
+                "argv": ["python", "-m", "agent_cli.main", "gateway"],
                 "start_time": start_time,
             }
             pid_path.write_text(json.dumps(record))
@@ -107,7 +107,7 @@ class TestGatewayPidState:
         pid_path.write_text(json.dumps({
             "pid": 99999,
             "kind": "hermes-gateway",
-            "argv": ["python", "-m", "hermes_cli.main", "gateway"],
+            "argv": ["python", "-m", "agent_cli.main", "gateway"],
             "start_time": 123,
         }))
 
@@ -119,7 +119,7 @@ class TestGatewayPidState:
             lambda: {
                 "pid": os.getpid(),
                 "kind": "hermes-gateway",
-                "argv": ["python", "-m", "hermes_cli.main", "gateway"],
+                "argv": ["python", "-m", "agent_cli.main", "gateway"],
                 "start_time": 123,
             },
         )
@@ -145,7 +145,7 @@ class TestGatewayPidState:
         for a named profile), gateway identity files should still be written to
         the process-level HERMES_HOME, not the profile's directory.  See #56986.
         """
-        from hermes_constants import set_hermes_home_override, reset_hermes_home_override
+        from agent_constants import set_agent_home_override, reset_agent_home_override
 
         process_home = tmp_path / "default"
         process_home.mkdir()
@@ -154,11 +154,11 @@ class TestGatewayPidState:
         monkeypatch.setenv("HERMES_HOME", str(process_home))
 
         # Simulate a profile context override being active during write.
-        token = set_hermes_home_override(str(profile_home))
+        token = set_agent_home_override(str(profile_home))
         try:
             status.write_pid_file()
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
 
         # PID file must land in the process-level home, not the profile home.
         assert (process_home / "gateway.pid").exists()
@@ -180,7 +180,7 @@ class TestGatewayPidState:
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         record = {
             "pid": 4242, "kind": "hermes-gateway", "start_time": 123,
-            "argv": ["python", "-m", "hermes_cli.main", "gateway", "run"],
+            "argv": ["python", "-m", "agent_cli.main", "gateway", "run"],
             "hermes_home": str(tmp_path.resolve()),
         }
         pid_path = tmp_path / "gateway.pid"
@@ -190,7 +190,7 @@ class TestGatewayPidState:
         monkeypatch.setattr(status, "is_gateway_runtime_lock_active", lambda _path=None: True)
         monkeypatch.setattr(status, "_pid_exists", lambda _pid: True)
         monkeypatch.setattr(status, "_get_process_start_time", lambda _pid: 123)
-        monkeypatch.setattr(status, "_read_process_cmdline", lambda _pid: "python -m hermes_cli.main chat")
+        monkeypatch.setattr(status, "_read_process_cmdline", lambda _pid: "python -m agent_cli.main chat")
         monkeypatch.setattr(status, "get_runtime_status_running_pid", lambda: None)
 
         assert status.get_running_pid() is None
@@ -204,7 +204,7 @@ class TestGatewayPidState:
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         record = {
             "pid": 4242, "kind": "hermes-gateway", "start_time": 123,
-            "argv": ["python", "-m", "hermes_cli.main", "gateway", "run"],
+            "argv": ["python", "-m", "agent_cli.main", "gateway", "run"],
             "hermes_home": str((tmp_path / "other-home").resolve()),
         }
         pid_path = tmp_path / "gateway.pid"
@@ -214,7 +214,7 @@ class TestGatewayPidState:
         monkeypatch.setattr(status, "is_gateway_runtime_lock_active", lambda _path=None: True)
         monkeypatch.setattr(status, "_pid_exists", lambda _pid: True)
         monkeypatch.setattr(status, "_get_process_start_time", lambda _pid: 123)
-        monkeypatch.setattr(status, "_read_process_cmdline", lambda _pid: "python -m hermes_cli.main gateway run")
+        monkeypatch.setattr(status, "_read_process_cmdline", lambda _pid: "python -m agent_cli.main gateway run")
         monkeypatch.setattr(status, "get_runtime_status_running_pid", lambda: None)
 
         assert status.get_running_pid() is None
@@ -234,7 +234,7 @@ class TestScopedGatewayPidQuery:
         record = {
             "pid": 4242,
             "kind": "hermes-gateway",
-            "argv": ["python", "-m", "hermes_cli.main", "gateway", "--profile", "wiki"],
+            "argv": ["python", "-m", "agent_cli.main", "gateway", "--profile", "wiki"],
             "start_time": 123,
             "hermes_home": str(profile_dir.resolve()),
         }
@@ -252,7 +252,7 @@ class TestScopedGatewayPidQuery:
         monkeypatch.setattr(status, "_get_process_start_time", lambda pid: 123)
         monkeypatch.setattr(
             status, "_read_process_cmdline",
-            lambda pid: "python -m hermes_cli.main gateway --profile wiki",
+            lambda pid: "python -m agent_cli.main gateway --profile wiki",
         )
         assert status.get_running_pid(pid_path) == 4242
         assert pid_path.exists()
@@ -379,7 +379,7 @@ class TestGatewayRuntimeStatus:
 
         Per-profile Docker supervision: ``coder``'s gateway died leaving a
         ``gateway_state=running`` record at PID 139.  The OS then recycled 139
-        onto the live *default* gateway (``hermes gateway run``).  The recorded
+        onto the live *default* gateway (``noone gateway run``).  The recorded
         ``start_time`` is absent (older state file), so the start-time PID-reuse
         guard does not catch it.  Without the profile scope the live command
         line still ``looks_like_gateway`` and ``coder`` is wrongly reported up.
@@ -396,7 +396,7 @@ class TestGatewayRuntimeStatus:
         monkeypatch.setattr(status, "_get_process_start_time", lambda pid: None)
         # PID 139 is now the live DEFAULT gateway (bare, no -p coder).
         monkeypatch.setattr(
-            status, "_read_process_cmdline", lambda pid: "hermes gateway run --replace"
+            status, "_read_process_cmdline", lambda pid: "noone gateway run --replace"
         )
 
         assert (
@@ -420,8 +420,8 @@ class TestGatewayRuntimeStatus:
         monkeypatch.setattr(status, "_get_process_start_time", lambda pid: 1000)
         for cmdline in (
             "hermes -p coder gateway run --replace",
-            "/opt/hermes/.venv/bin/hermes --profile coder gateway run --replace",
-            "hermes_home=/opt/data/profiles/coder hermes gateway run --replace",
+            "/opt/hermes/.venv/bin/noone --profile coder gateway run --replace",
+            "hermes_home=/opt/data/profiles/coder noone gateway run --replace",
         ):
             monkeypatch.setattr(status, "_read_process_cmdline", lambda pid, c=cmdline: c)
             assert (
@@ -436,7 +436,7 @@ class TestGatewayRuntimeStatus:
         (#100817), while a foreign ``-p coder`` keeps being rejected."""
         default_home = Path("/opt/hermes-data")
         for cmdline in (
-            "hermes --profile default gateway run --replace --external-supervisor",
+            "noone --profile default gateway run --replace --external-supervisor",
             "/opt/hermes/.venv/bin/hermes -p default gateway run",
         ):
             assert status._command_line_belongs_to_profile(cmdline, default_home) is True, cmdline
@@ -447,7 +447,7 @@ class TestGatewayRuntimeStatus:
         profile's Path may carry forward slashes (and, on Windows, vice
         versa).  The separator difference must not defeat the match."""
         home = Path("c:/opt/data/profiles/coder")
-        cmdline = r"hermes_home=c:\opt\data\profiles\coder hermes gateway run --replace"
+        cmdline = r"hermes_home=c:\opt\data\profiles\coder noone gateway run --replace"
         assert status._command_line_belongs_to_profile(cmdline, home) is True
 
     def test_command_line_belongs_to_profile_rejects_sibling_homes(self):
@@ -457,15 +457,15 @@ class TestGatewayRuntimeStatus:
         (#115031). An exact or absent assignment still matches."""
         home = Path("/fixture/profiles/ops")
         for cmdline in (
-            "HERMES_HOME=/fixture/profiles/ops2 hermes gateway run",
-            "HERMES_HOME=/fixture/profiles/ops-backup hermes gateway run",
-            "HERMES_HOME=/fixture/profiles/ops/2 hermes gateway run",
+            "HERMES_HOME=/fixture/profiles/ops2 noone gateway run",
+            "HERMES_HOME=/fixture/profiles/ops-backup noone gateway run",
+            "HERMES_HOME=/fixture/profiles/ops/2 noone gateway run",
         ):
             assert not status._command_line_belongs_to_profile(cmdline, home), cmdline
         default_home = Path("/opt/hermes-data")
-        assert not status._command_line_belongs_to_profile("HERMES_HOME=/opt/hermes-data2 hermes gateway run", default_home)
-        assert status._command_line_belongs_to_profile("HERMES_HOME=/opt/hermes-data hermes gateway run", default_home)
-        assert status._command_line_belongs_to_profile("hermes gateway run", default_home)
+        assert not status._command_line_belongs_to_profile("HERMES_HOME=/opt/hermes-data2 noone gateway run", default_home)
+        assert status._command_line_belongs_to_profile("HERMES_HOME=/opt/hermes-data noone gateway run", default_home)
+        assert status._command_line_belongs_to_profile("noone gateway run", default_home)
 
     def test_command_line_belongs_to_profile_matches_own_home_spellings_only(self):
         """Token-bounded value AND name: quoted values (ps/wmic re-quoting) and a trailing separator
@@ -473,19 +473,19 @@ class TestGatewayRuntimeStatus:
         embeds the name inside another token and is not an assignment."""
         home = Path("/opt/data/profiles/coder with space")
         assert status._command_line_belongs_to_profile(
-            'hermes_home="/opt/data/profiles/coder with space" hermes gateway run', home)
+            'hermes_home="/opt/data/profiles/coder with space" noone gateway run', home)
         # /proc and psutil hand argv back space-joined, so an unquoted value with a space is cut at
         # the space by the token parser; the whole-home literal match must still claim it.
         assert status._command_line_belongs_to_profile(
-            "HERMES_HOME=/opt/data/profiles/coder with space hermes gateway run", home)
+            "HERMES_HOME=/opt/data/profiles/coder with space noone gateway run", home)
         assert status._command_line_belongs_to_profile(
-            r"HERMES_HOME=C:\Users\John Doe\.hermes hermes gateway run", Path(r"C:\Users\John Doe\.hermes"))
+            r"HERMES_HOME=C:\Users\John Doe\.hermes noone gateway run", Path(r"C:\Users\John Doe\.hermes"))
         assert not status._command_line_belongs_to_profile(
-            "HERMES_HOME=/opt/data/profiles/coder with spaces hermes gateway run", home)
+            "HERMES_HOME=/opt/data/profiles/coder with spaces noone gateway run", home)
         home = Path("/fixture/profiles/ops")
-        assert status._command_line_belongs_to_profile("HERMES_HOME=/fixture/profiles/ops/ hermes gateway run", home)
-        assert status._command_line_belongs_to_profile("HERMES_HOME=/opt/hermes-data/ hermes gateway run", Path("/opt/hermes-data"))
-        assert not status._command_line_belongs_to_profile("FOO=hermes_home=/fixture/profiles/ops hermes gateway run", home)
+        assert status._command_line_belongs_to_profile("HERMES_HOME=/fixture/profiles/ops/ noone gateway run", home)
+        assert status._command_line_belongs_to_profile("HERMES_HOME=/opt/hermes-data/ noone gateway run", Path("/opt/hermes-data"))
+        assert not status._command_line_belongs_to_profile("FOO=hermes_home=/fixture/profiles/ops noone gateway run", home)
 
 
     def test_write_runtime_status_explicit_none_clears_stale_fields(self, tmp_path, monkeypatch):
@@ -688,7 +688,7 @@ class TestTerminatePid:
 
         # taskkill is spawned with the no-window flag so the windowless
         # pythonw.exe backend doesn't flash a conhost window on force-kill.
-        from hermes_cli._subprocess_compat import windows_hide_flags
+        from agent_cli._subprocess_compat import windows_hide_flags
 
         assert calls == [
             (["taskkill", "/PID", "123", "/T", "/F"], True, True, 10, windows_hide_flags())
@@ -839,7 +839,7 @@ class TestScopedLocks:
             "pid": 873,
             "start_time": None,
             "kind": "hermes-gateway",
-            "argv": ["/Users/user/.hermes/hermes-agent/hermes_cli/main.py", "gateway", "run", "--replace"],
+            "argv": ["/Users/user/.hermes/hermes-agent/agent_cli/main.py", "gateway", "run", "--replace"],
         }))
 
         # Post-#21561 the liveness probe routes through
@@ -876,7 +876,7 @@ class TestScopedLocks:
             "pid": os.getpid(),
             "start_time": None,
             "kind": "hermes-gateway",
-            "argv": ["hermes_cli/main.py", "--profile", "milena", "gateway", "run", "--replace"],
+            "argv": ["agent_cli/main.py", "--profile", "milena", "gateway", "run", "--replace"],
             "scope": "discord-bot-token",
         }))
 
@@ -931,7 +931,7 @@ class TestScopedLocks:
             "pid": os.getpid(),
             "start_time": 111,
             "kind": "hermes-gateway",
-            "argv": ["hermes_cli/main.py", "gateway", "run", "--replace"],
+            "argv": ["agent_cli/main.py", "gateway", "run", "--replace"],
             "scope": "discord-bot-token",
         }))
 
@@ -1249,7 +1249,7 @@ class TestScopedLockTakeover:
         record = {
             "pid": pid,
             "kind": "hermes-gateway",
-            "argv": ["python", "-m", "hermes_cli.main", "gateway", "run"],
+            "argv": ["python", "-m", "agent_cli.main", "gateway", "run"],
             "start_time": start_time,
             "hermes_home": str(target_home),
         }
@@ -1271,7 +1271,7 @@ class TestScopedLockTakeover:
         monkeypatch.setattr(
             status,
             "_read_process_cmdline",
-            lambda _pid: "python -m hermes_cli.main gateway run",
+            lambda _pid: "python -m agent_cli.main gateway run",
         )
         # Fake PID 4242 can be a live ancestor of this worker on CI; a real
         # psutil snapshot of its descendants would include pytest itself and
@@ -1311,7 +1311,7 @@ class TestScopedLockTakeover:
         monkeypatch.setattr(
             status,
             "_read_process_cmdline",
-            lambda _pid: "python -m hermes_cli.main gateway run",
+            lambda _pid: "python -m agent_cli.main gateway run",
         )
         calls = []
         monkeypatch.setattr(
@@ -1351,7 +1351,7 @@ class TestPlannedStopMarker:
         ``_get_process_start_time`` returns None on macOS / native Windows
         (no ``/proc/<pid>/stat``). The planned-stop watcher only runs there,
         so if the authoritative consume required a non-None start_time match
-        it would always return False — and ``hermes gateway stop`` would be
+        it would always return False — and ``noone gateway stop`` would be
         misclassified as an unexpected ``UNKNOWN`` exit, exit 1, and revived
         by the service manager (the very crash loop #34597 set out to fix).
         With start_time unavailable on BOTH sides we fall back to PID
@@ -1418,11 +1418,11 @@ class TestReadProcessCmdlinePsFallback:
 
         def fake_read_bytes(self):
             calls.append("proc")
-            return b"python\x00hermes_cli/main.py\x00gateway\x00"
+            return b"python\x00agent_cli/main.py\x00gateway\x00"
 
         monkeypatch.setattr(status.Path, "read_bytes", fake_read_bytes)
         result = status._read_process_cmdline(12345)
-        assert "hermes_cli/main.py" in result
+        assert "agent_cli/main.py" in result
         assert calls == ["proc"]
 
 
@@ -1517,7 +1517,7 @@ class TestRespawnStormBreaker:
 class TestLaunchdPlistRespawnGovernance:
     def test_plist_has_throttle_interval(self, tmp_path, monkeypatch):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        from hermes_cli.gateway import generate_launchd_plist
+        from agent_cli.gateway import generate_launchd_plist
 
         plist = generate_launchd_plist()
         assert "<key>ThrottleInterval</key>" in plist
@@ -1533,7 +1533,7 @@ class TestLaunchdPlistRespawnGovernance:
         import re
 
         from gateway.restart import LAUNCHD_GUI_EXIT_TIMEOUT_CLAMP_S, LAUNCHD_STOP_CLEANUP_RESERVE_S
-        from hermes_cli.gateway import generate_launchd_plist
+        from agent_cli.gateway import generate_launchd_plist
 
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         plist = generate_launchd_plist()
@@ -1786,17 +1786,17 @@ def test_strict_gateway_identity_rejects_reused_pid(tmp_path, monkeypatch):
 def test_strict_gateway_identity_adopts_held_lock_when_pid_file_is_gone(tmp_path, monkeypatch):
     """A held lock whose record validates against the live process IS the gateway's identity: a
     --replace relaunch (or a launch-service gateway, #110166) leaves gateway.lock without
-    gateway.pid, and raising there aborted every following `hermes update` (#123430)."""
+    gateway.pid, and raising there aborted every following `noone update` (#123430)."""
     pid_path = tmp_path / "gateway.pid"
     lock_path = tmp_path / "gateway.lock"
     record = {"pid": 123, "start_time": 10.0, "kind": "hermes-gateway",
-              "argv": ["python", "-m", "hermes_cli.main", "gateway", "run", "--replace"]}
+              "argv": ["python", "-m", "agent_cli.main", "gateway", "run", "--replace"]}
     lock_path.write_text(json.dumps(record), encoding="utf-8")
     monkeypatch.setattr(status, "_get_gateway_lock_path", lambda _path=None: lock_path)
     monkeypatch.setattr(status, "_is_gateway_runtime_lock_active_strict", lambda _path=None: True)
     monkeypatch.setattr(status, "_pid_exists", lambda _pid: True)
     monkeypatch.setattr(status, "_get_process_start_time", lambda _pid: 10.0)
-    monkeypatch.setattr(status, "_read_process_cmdline", lambda _pid: "python -m hermes_cli.main gateway run --replace")
+    monkeypatch.setattr(status, "_read_process_cmdline", lambda _pid: "python -m agent_cli.main gateway run --replace")
     monkeypatch.setattr(status, "_IS_WINDOWS", False)
 
     assert status.get_running_pid_identity_strict(pid_path) == (123, 10.0)
@@ -1812,8 +1812,8 @@ def test_pid_record_names_the_entry_point_under_an_inline_launcher(tmp_path, mon
     (#124029, #123151)."""
     import types
 
-    entry = types.SimpleNamespace(__file__="/opt/Hermes Agent/hermes-agent/hermes_cli/main.py")
-    monkeypatch.setitem(status.sys.modules, "hermes_cli.main", entry)
+    entry = types.SimpleNamespace(__file__="/opt/Hermes Agent/hermes-agent/agent_cli/main.py")
+    monkeypatch.setitem(status.sys.modules, "agent_cli.main", entry)
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
     monkeypatch.setattr(status.sys, "argv", ["-c", "gateway", "run"])
     record = status._build_pid_record()
@@ -1824,7 +1824,7 @@ def test_pid_record_names_the_entry_point_under_an_inline_launcher(tmp_path, mon
 def test_retained_gateway_state_keeps_watchdog_degraded_like_startup_failed():
     """A watchdog-stamped ``degraded`` of a dead process is a current failure under the same rule as
     ``startup_failed`` (#113372): kept while the operator wants the gateway running, ``stopped`` once
-    ``hermes gateway stop`` records the intent. The startup-time ``degraded`` (retryable platforms, no
+    ``noone gateway stop`` records the intent. The startup-time ``degraded`` (retryable platforms, no
     watchdog exit_reason) of a dead process is just ``stopped``."""
     watchdog = {"gateway_state": "degraded", "exit_reason": "loop_liveness_watchdog"}
     assert status.retained_gateway_state(watchdog) == "degraded"

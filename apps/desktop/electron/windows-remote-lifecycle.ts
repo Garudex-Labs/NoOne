@@ -1,6 +1,8 @@
 import crypto from 'node:crypto'
 import zlib from 'node:zlib'
 
+import { appText } from '@noone/shared/application-identity'
+
 import { lockServesConnect, resolveReadyTimeoutMs } from './remote-lifecycle'
 import { WINDOWS_CHECKOUT_LOCK_PS, WINDOWS_MARKER_JUDGE_PS } from './remote-update-marker-programs'
 import { assertBootstrapNotSuperseded, redactSecrets, SSH_ERROR } from './ssh-connection'
@@ -220,7 +222,7 @@ async function resolveWindowsLauncher(ssh: any, runtime: any) {
     }
   } catch (cause: any) {
     if (TRANSPORT_KINDS.has(cause?.kind)) {throw cause}
-    const error: any = new Error('Refresh the remote Windows Hermes launcher: its boot-selecting runtime could not be resolved.')
+    const error: any = new Error(appText('Refresh the remote Windows {app_name} launcher: its boot-selecting runtime could not be resolved.'))
     error.kind = 'update-required'
     error.cause = cause
     throw error
@@ -252,7 +254,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
-public static class HermesMarkerNoFollow {
+public static class AgentMarkerNoFollow {
   [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
   private static extern SafeFileHandle CreateFile(string name, uint access, uint share, IntPtr security, uint creation, uint flags, IntPtr template);
   public static FileStream OpenRead(string name) {
@@ -284,7 +286,7 @@ public static class HermesMarkerNoFollow {
     '$stream=$null;$memory=$null',
     'try{',
     'Assert-NoReparse $marker $true',
-    'if(-not (Test-Path -LiteralPath $marker -PathType Leaf)){$result="CLEAR"}else{$stream=[HermesMarkerNoFollow]::OpenRead($marker)',
+    'if(-not (Test-Path -LiteralPath $marker -PathType Leaf)){$result="CLEAR"}else{$stream=[AgentMarkerNoFollow]::OpenRead($marker)',
     'Assert-NoReparse $marker $false',
     '$memory=New-Object IO.MemoryStream;$stream.CopyTo($memory);$bytes=$memory.ToArray()',
     'if($bytes.Length -le 4096){',
@@ -317,7 +319,7 @@ async function assertWindowsRemoteInstallUpdateClear(ssh, hermesHome, python = '
         await ssh.exec(compressedPowerShellCommand(windowsUpdateMarkerProbeScript(hermesHome, python)))
       ).pop() || ''
   } catch (cause) {
-    const error: any = new Error('Could not prove that the remote Hermes install is clear for SSH startup.')
+    const error: any = new Error(appText('Could not prove that the remote {app_name} install is clear for SSH startup.'))
     error.kind = 'update-in-progress'
     error.cause = cause
     throw error
@@ -331,10 +333,10 @@ async function assertWindowsRemoteInstallUpdateClear(ssh, hermesHome, python = '
 
   const error: any = new Error(
     live
-      ? `Remote Hermes update process ${live[1]} is still running; SSH startup is paused.`
+      ? appText(`Remote {app_name} update process ${live[1]} is still running; SSH startup is paused.`)
       : observation === 'HELD'
-        ? 'A process the remote Hermes update started still holds the install; SSH startup is paused.'
-        : 'The remote Hermes update marker is unreadable or malformed; refusing SSH startup.'
+        ? appText('A process the remote {app_name} update started still holds the install; SSH startup is paused.')
+        : appText('The remote {app_name} update marker is unreadable or malformed; refusing SSH startup.')
   )
 
   error.kind = 'update-in-progress'
@@ -779,7 +781,7 @@ async function connectWindowsRemote(deps) {
   }
 
   if (!inspection.supported) {
-    const error: any = new Error('Update Hermes on the remote Windows host before connecting with Desktop SSH.')
+    const error: any = new Error(appText('Update {app_name} on the remote Windows host before connecting with Desktop SSH.'))
     error.kind = 'update-required'
     throw error
   }

@@ -1,6 +1,6 @@
-import { externalUrlTarget, LOCAL_CONNECTION_ID } from '@hermes/shared'
+import { externalUrlTarget, LOCAL_CONNECTION_ID } from '@noone/shared'
 
-import type { HermesApiRequest } from '@/global'
+import type { AgentApiRequest } from '@/global'
 import { BROWSER_BRIDGE_STUBS } from '@/lib/browser-bridge-stubs'
 import { createBrowserClipboardBridge } from '@/lib/browser-clipboard'
 import { createBrowserConnectionBridge } from '@/lib/browser-connection'
@@ -55,7 +55,7 @@ export function installBrowserDesktopBridge(): boolean {
     announceWebappWindow()
   }
 
-  const api = <T>(request: HermesApiRequest) => browserApi<T>(bootstrap, request)
+  const api = <T>(request: AgentApiRequest) => browserApi<T>(bootstrap, request)
 
   // This machine's saved gateway connections (the list native Desktop keeps): each other gateway's
   // requests ride `/api/relay/<id>` on this origin (browser-saved-connections.ts). A host that does
@@ -65,7 +65,7 @@ export function installBrowserDesktopBridge(): boolean {
   const activeConnectionId = () => $connection.get()?.connectionId ?? LOCAL_CONNECTION_ID
 
   // A request names its connection; untagged, it goes to the one this window is on.
-  const activeApi = <T>(request: HermesApiRequest) =>
+  const activeApi = <T>(request: AgentApiRequest) =>
     browserApi<T>(bootstrapFor(request.connectionId ?? activeConnectionId()), request)
 
   // Members with no connection of their own (host files, uploads) follow the window's connection.
@@ -89,7 +89,7 @@ export function installBrowserDesktopBridge(): boolean {
   // already name (`local` for the one serving this page). An untagged listed row beside a `local`
   // new chat read as two owners, which split one gateway's sessions into an unowned group and a
   // `local` gateway group.
-  const rendererApi = async <T>(request: HermesApiRequest): Promise<T> => {
+  const rendererApi = async <T>(request: AgentApiRequest): Promise<T> => {
     const owner = request.connectionId || LOCAL_CONNECTION_ID
     const response = await browserApi<T>(bootstrapFor(owner), request)
 

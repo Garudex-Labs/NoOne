@@ -1,42 +1,50 @@
 ---
 title: "Requesting Code Review — Pre-commit review: security scan, quality gates, auto-fix"
-sidebar_label: "Requesting Code Review"
+sidebarTitle: "Requesting Code Review"
 description: "Pre-commit review: security scan, quality gates, auto-fix"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Requesting Code Review
+# Requesting Code Review {#requesting-code-review}
 
 Pre-commit review: security scan, quality gates, auto-fix.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/software-development/requesting-code-review` |
 | Version | `2.1.0` |
-| Author | Hermes Agent (adapted from obra/superpowers + MorAlekss) |
+| Author | {{app-name}} (adapted from obra/superpowers + MorAlekss) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `code-review`, `security`, `verification`, `quality`, `pre-commit`, `auto-fix` |
 | Related skills | [`subagent-driven-development`](../../optional/software-development/software-development-subagent-driven-development.md), [`test-driven-development`](../../bundled/software-development/software-development-test-driven-development.md), [`github`](../../bundled/software-development/software-development-github.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Pre-Commit Code Verification
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Pre-Commit Code Verification {#pre-commit-code-verification}
 
 Automated verification pipeline before code lands. Static scans, baseline-aware
 quality gates, an independent reviewer subagent, and an auto-fix loop.
 
 **Core principle:** No agent should verify its own work. Fresh context finds what you miss.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - After implementing a feature or bug fix, before `git commit` or `git push`
 - When user says "commit", "push", "ship", "done", "verify", or "review before merge"
@@ -48,7 +56,7 @@ quality gates, an independent reviewer subagent, and an auto-fix loop.
 **This skill vs github:** This skill verifies YOUR changes before committing.
 `github` reviews OTHER people's PRs on GitHub with inline comments.
 
-## Step 1 — Get the diff
+## Step 1 — Get the diff {#step-1--get-the-diff}
 
 ```bash
 git diff --cached
@@ -65,7 +73,7 @@ git diff --name-only
 git diff HEAD -- specific_file.py
 ```
 
-## Step 2 — Static security scan
+## Step 2 — Static security scan {#step-2--static-security-scan}
 
 Scan added lines only. Any match is a security concern fed into Step 5.
 
@@ -86,7 +94,7 @@ git diff --cached | grep "^+" | grep -E "pickle\.loads?\("
 git diff --cached | grep "^+" | grep -E "execute\(f\"|\.format\(.*SELECT|\.format\(.*INSERT"
 ```
 
-## Step 3 — Baseline tests and linting
+## Step 3 — Baseline tests and linting {#step-3--baseline-tests-and-linting}
 
 Detect the project language and run the appropriate tools. Capture the failure
 count BEFORE your changes as **baseline_failures** (stash changes, run, pop).
@@ -127,7 +135,7 @@ which go && go vet ./... 2>&1 | tail -10
 **Baseline comparison:** If baseline was clean and your changes introduce failures,
 that's a regression. If baseline already had failures, only count NEW ones.
 
-## Step 4 — Self-review checklist
+## Step 4 — Self-review checklist {#step-4--self-review-checklist}
 
 Quick scan before dispatching the reviewer:
 
@@ -140,9 +148,9 @@ Quick scan before dispatching the reviewer:
 - [ ] No commented-out code
 - [ ] New code has tests (if test suite exists)
 
-## Step 5 — Independent reviewer subagent
+## Step 5 — Independent reviewer subagent {#step-5--independent-reviewer-subagent}
 
-**Interactive sessions only.** In a one-shot run (`hermes chat -q`, `--oneshot`, a
+**Interactive sessions only.** In a one-shot run (`noone chat -q`, `--oneshot`, a
 benchmark harness) there is no one to hand the verdict to and a fresh subagent re-pays
 the whole system prompt plus a repo re-read: skip Steps 5 and 7, apply the Step 4
 checklist to the diff yourself, run the tests, and go to Step 8.
@@ -196,7 +204,7 @@ Return ONLY this JSON:
 )
 ```
 
-## Step 6 — Evaluate results
+## Step 6 — Evaluate results {#step-6--evaluate-results}
 
 Combine results from Steps 2, 3, and 5.
 
@@ -214,7 +222,7 @@ New lint errors: [details]
 Suggestions (non-blocking): [list]
 ```
 
-## Step 7 — Auto-fix loop
+## Step 7 — Auto-fix loop {#step-7--auto-fix-loop}
 
 **Maximum 2 fix-and-reverify cycles. Interactive sessions only (see Step 5).**
 
@@ -248,7 +256,7 @@ After the fix agent completes, re-run Steps 1-6 (full verification cycle).
 - Failed after 2 attempts: escalate to user with the remaining issues and
   suggest `git stash` or `git reset` to undo
 
-## Step 8 — Commit
+## Step 8 — Commit {#step-8--commit}
 
 If verification passed:
 
@@ -258,9 +266,9 @@ git add -A && git commit -m "[verified] <description>"
 
 The `[verified]` prefix indicates an independent reviewer approved this change.
 
-## Reference: Common Patterns to Flag
+## Reference: Common Patterns to Flag {#reference-common-patterns-to-flag}
 
-### Python
+### Python {#python}
 ```python
 # Bad: SQL injection
 cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
@@ -273,7 +281,7 @@ os.system(f"ls {user_input}")
 subprocess.run(["ls", user_input], check=True)
 ```
 
-### JavaScript
+### JavaScript {#javascript}
 ```javascript
 // Bad: XSS
 element.innerHTML = userInput;
@@ -281,7 +289,7 @@ element.innerHTML = userInput;
 element.textContent = userInput;
 ```
 
-## Integration with Other Skills
+## Integration with Other Skills {#integration-with-other-skills}
 
 **subagent-driven-development:** Run this after EACH task as the quality gate.
 The two-stage review (spec compliance + code quality) uses this pipeline.
@@ -291,7 +299,7 @@ tests exist, tests pass, no regressions.
 
 **plan:** Validates implementation matches the plan requirements.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Empty diff** — check `git status`, tell user nothing to verify
 - **Not a git repo** — skip and tell user

@@ -1,20 +1,13 @@
-"""Small shared size-formatting helpers for CLI/agent output (sibling of ``hermes_cli.timefmt``:
-a tiny purpose-named module lightweight consumers can import without the CLI surface)."""
+"""Legacy import boundary; implementation lives in agent_cli.sizefmt.
 
-from __future__ import annotations
+Retained for shipped updater/plugin compatibility, sharing the canonical module.
+"""
+from importlib import import_module
+import sys
 
+from agent_cli.sizefmt import (
+    format_bytes,
+)
 
-def format_bytes(n) -> str:
-    """1234567 -> '1.2 MB' (B/KB/MB/GB/TB; integer bytes, one decimal above). Returns ``"?"`` for
-    None or unparseable input so display call sites never raise."""
-    try:
-        size = float(n)
-    except (TypeError, ValueError):
-        return "?"
-    if size < 1024:
-        return f"{int(size)} B"
-    for unit in ("KB", "MB", "GB"):
-        size /= 1024.0
-        if size < 1024:
-            return f"{size:.1f} {unit}"
-    return f"{size / 1024.0:.1f} TB"
+_current = import_module('agent_cli.sizefmt')
+sys.modules[__name__] = _current

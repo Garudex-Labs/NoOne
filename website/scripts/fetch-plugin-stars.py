@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Refresh GitHub star counts for plugin-catalog repos, at most once a day.
 
-Writes ``website/static/api/plugin-stars.json``::
+Writes ``website/docs/api/plugin-stars.json``::
 
     {"fetched_at": "<ISO-8601 UTC>", "stars": {"owner/repo": 123, ...}}
 
@@ -33,12 +33,12 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 # Run as `python website/scripts/fetch-plugin-stars.py`, so sys.path[0] is this directory and the
-# repo-root `hermes_yaml` shim is not importable without this (broke every scheduled probe).
+# repo-root `agent_yaml` shim is not importable without this (broke every scheduled probe).
 sys.path.insert(0, str(REPO_ROOT))
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 DEFAULT_CATALOG_DIR = REPO_ROOT / "plugin-catalog"
-DEFAULT_OUTPUT = REPO_ROOT / "website" / "static" / "api" / "plugin-stars.json"
+DEFAULT_OUTPUT = REPO_ROOT / "website" / "docs" / "api" / "plugin-stars.json"
 LIVE_URL = "https://hermes-agent.nousresearch.com/docs/api/plugin-stars.json"
 _GITHUB_REPO_RE = re.compile(r"^https://github\.com/([^/\s]+)/([^/\s#?]+?)(?:\.git)?/?$")
 

@@ -18,7 +18,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Optional
 
-from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
+from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ def update_session_activity(cache_key: str) -> None:
     bs = _bs()
     with bs._cleanup_lock:
         bs._session_last_activity[cache_key] = time.time()
-        bs._session_owner_homes.setdefault(cache_key, str(get_hermes_home()))
+        bs._session_owner_homes.setdefault(cache_key, str(get_agent_home()))
 
 
 @contextlib.contextmanager
@@ -79,8 +79,8 @@ def _session_owner_scope(cache_key: str):
         yield
         return
     from agent.secret_scope import build_profile_secret_scope, reset_secret_scope, set_secret_scope
-    from hermes_cli.env_loader import hydrate_profile_secret_sources
-    home_token = set_hermes_home_override(owner_home)
+    from agent_cli.env_loader import hydrate_profile_secret_sources
+    home_token = set_agent_home_override(owner_home)
     try:
         hydrate_profile_secret_sources(Path(owner_home))
         secret_token = set_secret_scope(build_profile_secret_scope(Path(owner_home)), profile_home=owner_home)
@@ -89,7 +89,7 @@ def _session_owner_scope(cache_key: str):
         finally:
             reset_secret_scope(secret_token)
     finally:
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
 
 
 def _forget_session_tracking(cache_key: str, *, activity: bool = True, session: bool = False) -> None:

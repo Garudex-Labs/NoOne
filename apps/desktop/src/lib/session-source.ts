@@ -3,7 +3,6 @@ import { normalize } from '@/lib/text'
 const SOURCE_LABELS: Record<string, string> = {
   acp: 'ACP',
   api_server: 'API',
-  bluebubbles: 'iMessage',
   cli: 'CLI',
   codex: 'Codex',
   desktop: 'Desktop',
@@ -12,16 +11,14 @@ const SOURCE_LABELS: Record<string, string> = {
   gateway: 'Gateway',
   kanban: 'Kanban',
   local: 'Local',
-  matrix: 'Matrix',
   mattermost: 'Mattermost',
   oneshot: 'One-shot',
   photon: 'Photon',
-  qqbot: 'QQ',
   signal: 'Signal',
   slack: 'Slack',
   sms: 'SMS',
   telegram: 'Telegram',
-  tui: 'TUI',
+  tui: 'Terminal history',
   webhook: 'Webhook',
   weixin: 'WeChat',
   whatsapp: 'WhatsApp',
@@ -29,12 +26,10 @@ const SOURCE_LABELS: Record<string, string> = {
 }
 
 const SOURCE_ALIASES: Record<string, string[]> = {
-  bluebubbles: ['apple messages', 'imessage'],
   photon: ['imessage', 'messages'],
   cli: ['terminal'],
   desktop: ['app', 'gui'],
   local: ['machine'],
-  qqbot: ['qq'],
   telegram: ['tg'],
   tui: ['terminal'],
   weixin: ['wechat'],
@@ -67,10 +62,8 @@ export const MESSAGING_SESSION_SOURCE_IDS = [
   'discord',
   'slack',
   'mattermost',
-  'matrix',
   'signal',
   'whatsapp',
-  'bluebubbles',
   'photon',
   'homeassistant',
   'email',
@@ -78,11 +71,7 @@ export const MESSAGING_SESSION_SOURCE_IDS = [
   'webhook',
   'api_server',
   'weixin',
-  'wecom',
-  'qqbot',
   'yuanbao',
-  'dingtalk',
-  'feishu'
 ]
 const MESSAGING_SOURCE_IDS = new Set(MESSAGING_SESSION_SOURCE_IDS)
 

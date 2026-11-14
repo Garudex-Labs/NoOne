@@ -1,20 +1,20 @@
 ---
 title: "Serving Llms Vllm — vLLM: high-throughput LLM serving, OpenAI API, quantization"
-sidebar_label: "Serving Llms Vllm"
+sidebarTitle: "Serving Llms Vllm"
 description: "vLLM: high-throughput LLM serving, OpenAI API, quantization"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Serving Llms Vllm
+# Serving Llms Vllm {#serving-llms-vllm}
 
 vLLM: high-throughput LLM serving, OpenAI API, quantization.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/serving-llms-vllm` |
+| Source | Optional — install with `noone skills install official/mlops/serving-llms-vllm` |
 | Path | `optional-skills/mlops/inference/serving-llms-vllm` |
 | Version | `1.0.1` |
 | Author | Orchestra Research |
@@ -23,19 +23,27 @@ vLLM: high-throughput LLM serving, OpenAI API, quantization.
 | Platforms | linux, macos |
 | Tags | `vLLM`, `Inference Serving`, `PagedAttention`, `Continuous Batching`, `High Throughput`, `Production`, `OpenAI API`, `Quantization`, `Tensor Parallelism` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# vLLM - High-Performance LLM Serving
+<div className="doc-callout-title">
 
-## When to use
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# vLLM - High-Performance LLM Serving {#vllm---high-performance-llm-serving}
+
+## When to use {#when-to-use}
 
 Use when deploying production LLM APIs, optimizing inference latency/throughput, or serving models with limited GPU memory. Supports OpenAI-compatible endpoints, quantization (GPTQ/AWQ/FP8), and tensor parallelism.
 
-## Quick start
+## Quick start {#quick-start}
 
 vLLM achieves 24x higher throughput than standard transformers through PagedAttention (block-based KV cache) and continuous batching (mixing prefill/decode requests).
 
@@ -70,9 +78,9 @@ print(client.chat.completions.create(
 "
 ```
 
-## Common workflows
+## Common workflows {#common-workflows}
 
-### Workflow 1: Production API deployment
+### Workflow 1: Production API deployment {#workflow-1-production-api-deployment}
 
 Copy this checklist and track progress:
 
@@ -160,7 +168,7 @@ Check that deployment meets targets:
 - GPU utilization > 80%
 - No OOM errors in logs
 
-### Workflow 2: Offline batch inference
+### Workflow 2: Offline batch inference {#workflow-2-offline-batch-inference}
 
 For processing large datasets without server overhead.
 
@@ -240,7 +248,7 @@ with open("results.jsonl", "w") as f:
 print(f"Processed {len(results)} prompts")
 ```
 
-### Workflow 3: Quantized model serving
+### Workflow 3: Quantized model serving {#workflow-3-quantized-model-serving}
 
 Fit large models in limited GPU memory.
 
@@ -288,7 +296,7 @@ Test outputs match expected quality:
 # Verify task-specific performance unchanged
 ```
 
-## When to use vs alternatives
+## When to use vs alternatives {#when-to-use-vs-alternatives}
 
 **Use vLLM when:**
 - Deploying production LLM APIs (100+ req/sec)
@@ -303,7 +311,7 @@ Test outputs match expected quality:
 - **TensorRT-LLM**: NVIDIA-only, need absolute maximum performance
 - **Text-Generation-Inference**: Already in HuggingFace ecosystem
 
-## Common issues
+## Common issues {#common-issues}
 
 **Issue: Out of memory during model loading**
 
@@ -361,17 +369,17 @@ vllm serve MODEL \
   --speculative-config '{"model": "DRAFT_MODEL", "num_speculative_tokens": 5, "method": "draft_model"}'
 ```
 
-## Advanced topics
+## Advanced topics {#advanced-topics}
 
-**Server deployment patterns**: See [references/server-deployment.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/serving-llms-vllm/references/server-deployment.md) for Docker, Kubernetes, and load balancing configurations.
+**Server deployment patterns**: See [references/server-deployment.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/serving-llms-vllm/references/server-deployment.md) for Docker, Kubernetes, and load balancing configurations.
 
-**Performance optimization**: See [references/optimization.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/serving-llms-vllm/references/optimization.md) for PagedAttention tuning, continuous batching details, and benchmark results.
+**Performance optimization**: See [references/optimization.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/serving-llms-vllm/references/optimization.md) for PagedAttention tuning, continuous batching details, and benchmark results.
 
-**Quantization guide**: See [references/quantization.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/serving-llms-vllm/references/quantization.md) for AWQ/GPTQ/FP8 setup, model preparation, and accuracy comparisons.
+**Quantization guide**: See [references/quantization.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/serving-llms-vllm/references/quantization.md) for AWQ/GPTQ/FP8 setup, model preparation, and accuracy comparisons.
 
-**Troubleshooting**: See [references/troubleshooting.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/inference/serving-llms-vllm/references/troubleshooting.md) for detailed error messages, debugging steps, and performance diagnostics.
+**Troubleshooting**: See [references/troubleshooting.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/inference/serving-llms-vllm/references/troubleshooting.md) for detailed error messages, debugging steps, and performance diagnostics.
 
-## Hardware requirements
+## Hardware requirements {#hardware-requirements}
 
 - **Small models (7B-13B)**: 1x A10 (24GB) or A100 (40GB)
 - **Medium models (30B-40B)**: 2x A100 (40GB) with tensor parallelism
@@ -379,7 +387,7 @@ vllm serve MODEL \
 
 Supported platforms: NVIDIA (primary), AMD ROCm, Intel GPUs, TPUs
 
-## Resources
+## Resources {#resources}
 
 - Official docs: https://docs.vllm.ai
 - GitHub: https://github.com/vllm-project/vllm

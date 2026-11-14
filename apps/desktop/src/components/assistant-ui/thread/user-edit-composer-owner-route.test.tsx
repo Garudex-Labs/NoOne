@@ -8,7 +8,7 @@ import { AssistantRuntimeProvider } from '@assistant-ui/react'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesGateway } from '@/hermes'
+import type { AgentGateway } from '@/agent-client'
 import { useIncrementalExternalStoreRuntime } from '@/lib/incremental-external-store-runtime'
 import { queryClient } from '@/lib/query-client'
 import type * as GatewayStore from '@/store/gateway'
@@ -37,7 +37,7 @@ const CATALOG = {
   pairs: [['/new', 'Start a new session']]
 }
 
-function Harness({ gateway }: { gateway: HermesGateway }) {
+function Harness({ gateway }: { gateway: AgentGateway }) {
   const runtime = useIncrementalExternalStoreRuntime<ThreadMessage>({
     messageRepository: ExportedMessageRepository.fromArray([userMessage(), assistantMessage()]),
     isRunning: false,
@@ -71,7 +71,7 @@ afterEach(() => {
 
 describe('message-edit composer completions', () => {
   it('fetch the `/` catalog from the edited session’s owner, not the ambient socket', async () => {
-    const gateway = { request: vi.fn(async () => CATALOG) } as unknown as HermesGateway & {
+    const gateway = { request: vi.fn(async () => CATALOG) } as unknown as AgentGateway & {
       request: ReturnType<typeof vi.fn>
     }
 
@@ -103,7 +103,7 @@ describe('message-edit composer attachment drops', () => {
       value: { ...previous, getPathForFile: () => '/Users/me/shot.png' }
     })
 
-    const gateway = { request: vi.fn(async () => CATALOG) } as unknown as HermesGateway & {
+    const gateway = { request: vi.fn(async () => CATALOG) } as unknown as AgentGateway & {
       request: ReturnType<typeof vi.fn>
     }
 

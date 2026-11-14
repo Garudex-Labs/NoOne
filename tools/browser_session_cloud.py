@@ -2,7 +2,7 @@
 auto-detect, per-profile cache).
 
 Every config read is profile-scoped: under a routed profile (multiplexed gateway, HERMES_HOME override)
-the cached slots are bypassed or keyed by ``hermes_home_key()``, so one profile's engine / headed /
+the cached slots are bypassed or keyed by ``agent_home_key()``, so one profile's engine / headed /
 private-URL policy never reaches another.
 """
 
@@ -13,7 +13,7 @@ import threading
 from typing import Any, Callable, Optional
 
 from agent.browser_provider import BrowserProvider
-from hermes_constants import get_hermes_home_override, hermes_home_key
+from agent_constants import get_agent_home_override, agent_home_key
 from tools.tool_backend_helpers import normalize_browser_cloud_provider
 from utils import is_truthy_value
 
@@ -35,7 +35,7 @@ _provider_lock = threading.RLock()
 def browser_section() -> dict:
     """The active profile's ``browser:`` section as every runtime reader sees it: the user file, the managed
     overlay winning, ``${VAR}`` expanded, no defaults (``load_user_config_effective``); ``{}`` when absent."""
-    from hermes_cli.config_effective import load_user_config_effective
+    from agent_cli.config_effective import load_user_config_effective
     section = load_user_config_effective().get("browser")
     return section if isinstance(section, dict) else {}
 
@@ -53,9 +53,9 @@ def browser_cfg(key: str, default, parse: Callable[[Any], Any] = lambda v: v):
 
 def _memo(name: str, compute: Callable[[], Any]):
     """Process cache, one slot per profile home; a routed profile always recomputes."""
-    if get_hermes_home_override() is not None:
+    if get_agent_home_override() is not None:
         return compute()
-    home = hermes_home_key()
+    home = agent_home_key()
     with _memo_lock:
         slot = _memo_slots.setdefault(name, {})
         if home in slot:
@@ -119,8 +119,8 @@ def user_data_dir() -> str:
     raw = os.path.expanduser(raw)
     if os.path.isabs(raw):
         return raw
-    from hermes_constants import get_hermes_home
-    return str(get_hermes_home() / raw)
+    from agent_constants import get_agent_home
+    return str(get_agent_home() / raw)
 
 
 def get_browser_engine() -> str:
@@ -171,7 +171,7 @@ def _registry_generation(scope: str):
 def _ensure_browser_plugins_loaded() -> None:
     """Idempotent plugin discovery (standalone scripts/tests may never import ``model_tools``)."""
     try:
-        from hermes_cli.plugins import _ensure_plugins_discovered
+        from agent_cli.plugins import _ensure_plugins_discovered
         _ensure_plugins_discovered()
     except Exception as exc:  # health: allow BLE001 -- plugin discovery failure must never break browsing
         logger.debug("Browser plugin discovery failed (non-fatal): %s", exc)
@@ -224,8 +224,6 @@ def _resolve_provider_uncached() -> tuple[Optional[BrowserProvider], bool]:
         logger.debug("Could not read cloud_provider from config: %s", exc)
     if provider_key in ("local", "camofox"):
         return None, True  # camofox is a plugin with its own tool surface, not a CDP provider
-    if provider_key == "nous":
-        provider_key = "browser-use"  # the managed Nous subscription is served by the Browser Use provider
     if provider_key:
         resolved = _instantiate_explicit_provider(provider_key)
         return resolved, resolved is not None
@@ -237,7 +235,7 @@ def _resolve_provider_uncached() -> tuple[Optional[BrowserProvider], bool]:
 
 def get_cloud_provider() -> Optional[BrowserProvider]:
     """The cloud provider for the active profile, or None for local browsing."""
-    scope = hermes_home_key()
+    scope = agent_home_key()
     with _provider_lock:
         while True:
             before = _registry_generation(scope)

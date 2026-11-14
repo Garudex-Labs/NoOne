@@ -3,16 +3,16 @@ title: "Streaming TTS Internals"
 description: "Sentence chunker, streaming provider ABC, capability matrix and how to add a streaming TTS provider"
 ---
 
-# Streaming TTS
+# Streaming TTS {#streaming-tts}
 
-Hermes can stream TTS audio as it arrives from the provider, instead of waiting
-for the full audio before playing. This is used by voice mode (CLI/TUI live
+{{app-name}} can stream TTS audio as it arrives from the provider, instead of waiting
+for the full audio before playing. This is used by voice mode (CLI live
 conversation), the dashboard speak-stream WebSocket, and — via the gateway
 `StreamingTTSConsumer` — any platform adapter that opts into streaming audio.
 Voice replies start speaking after the first clause instead of after full
 generation + synthesis.
 
-## Architecture
+## Architecture {#architecture}
 
 The streaming pipeline has four parts:
 
@@ -31,7 +31,7 @@ sync `text_to_speech_tool` path, so edge (the default) is conversational too.
 All spoken text is cleaned by `tools.tts_text_normalize.prepare_spoken_text`
 (one cleaner, all paths).
 
-## How to pick a provider
+## How to pick a provider {#how-to-pick-a-provider}
 
 By default the dispatcher streams with the provider you already configured
 (`tts.provider`) when that provider has a chunked API — it never silently
@@ -55,7 +55,7 @@ tts:
     voice: Kore
 ```
 
-## Capability matrix
+## Capability matrix {#capability-matrix}
 
 | Provider    | Transport                             | Chunked PCM | Credentials |
 |-------------|---------------------------------------|-------------|-------------|
@@ -71,7 +71,7 @@ All credential lookups go through `resolve_provider_secret()`
 are capped at 16 MiB per sentence, mirroring the sync providers' bounded
 upstream-body invariant.
 
-## Adding a new streaming provider
+## Adding a new streaming provider {#adding-a-new-streaming-provider}
 
 1. Subclass `StreamingTTSProvider` in `tools/tts_streaming.py`
 2. Set `sample_rate` (and `channels` / `sample_width` if not int16 mono)
@@ -84,7 +84,7 @@ The ABC enforces the contract; the registry makes the provider discoverable;
 the dispatcher (`stream_tts_to_speaker`) and the gateway consumer handle the
 sentence buffer, stop events, and audio sink for free.
 
-## Plugin providers
+## Plugin providers {#plugin-providers}
 
 A plugin `TTSProvider` (registered with `ctx.register_tts_provider()`) joins this
 path without core changes. It sets `streams_pcm = True` and a positive
@@ -97,12 +97,12 @@ same `tts.voice` / `tts.model` / `tts.speed` as `synthesize()`. A configured
 plugin streams first. Under `tts.streaming.provider: auto` it is tried only after
 the built-in priority list. `streams_pcm`, `stream_sample_rate` and
 `is_available()` are read every time a streamer is resolved. If the rate is
-missing or the provider reports unavailable, Hermes keeps per-sentence synthesis.
+missing or the provider reports unavailable, {{app-name}} keeps per-sentence synthesis.
 As with the built-in streamers, the speaker pipeline prefetches up to three
 sentences, so a plugin's `stream()` must tolerate concurrent calls (the sync
 path serializes `synthesize()`; this path does not).
 
-## Gateway streaming (platform adapters)
+## Gateway streaming (platform adapters) {#gateway-streaming-platform-adapters}
 
 `gateway/streaming_tts_consumer.py` bridges agent deltas to an adapter's
 streaming-audio seam. Adapters opt in by overriding, on

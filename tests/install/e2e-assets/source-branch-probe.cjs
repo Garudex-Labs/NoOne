@@ -11,8 +11,8 @@ function sourceProbeGit(userData, realGit, stagedUrl, platform = process.platfor
   if (!/^file:\/\/[^\s]+$/.test(stagedUrl)) throw new Error('source check must use a staged file:// Git origin')
   const file = path.join(userData, platform === 'win32' ? 'source-probe-git.cmd' : 'source-probe-git.sh')
   const args = [
-    `url.${stagedUrl}.insteadOf=https://github.com/NousResearch/hermes-agent.git`,
-    `url.${stagedUrl}.insteadOf=git@github.com:NousResearch/hermes-agent.git`,
+    `url.${stagedUrl}.insteadOf=https://github.com/Garudex-Labs/NoOne.git`,
+    `url.${stagedUrl}.insteadOf=git@github.com:Garudex-Labs/NoOne.git`,
   ]
   if (platform === 'win32') {
     const quote = value => `"${value.replace(/"/g, '""')}"`
@@ -72,7 +72,7 @@ check_root() {
   done
   return 1
 }
-if [ "$1" = '--run-module' ] && [ "$2" = 'hermes_cli.source_check' ] && check_root "$@"; then
+if [ "$1" = '--run-module' ] && [ "$2" = 'agent_cli.source_check' ] && check_root "$@"; then
   exec ${quote(original)} "$@" --git ${quote(launchEnv.HERMES_E2E_SOURCE_GIT)} --branch main
 fi
 exec ${quote(original)} "$@"
@@ -99,7 +99,7 @@ function branchProbeArgs(args, root, realGit) {
     if (
       typeof command !== 'string' ||
       /["%&|<>^\r\n]/.test(realGit) ||
-      !/^""[^"\r\n]+\.cmd" "--run-module" "hermes_cli\.source_check" /i.test(command) ||
+      !/^""[^"\r\n]+\.cmd" "--run-module" "agent_cli\.source_check" /i.test(command) ||
       !command.includes(`"--install-root" "${root}"`) ||
       command.includes('"--branch"') ||
       !command.endsWith('"') ||
@@ -109,8 +109,8 @@ function branchProbeArgs(args, root, realGit) {
     return [...args.slice(0, 4), selected]
   }
   const legacy = args[0] === '-c' && args[1]?.includes('runpy.run_path(str(p))')
-    && args[1]?.includes('hermes_cli/source_check.py')
-  const managed = args[0] === '--run-module' && args[1] === 'hermes_cli.source_check'
+    && args[1]?.includes('agent_cli/source_check.py')
+  const managed = args[0] === '--run-module' && args[1] === 'agent_cli.source_check'
   if (!(legacy || managed)
       || args[args.indexOf('--install-root') + 1] !== root
       || !args.includes('--git') || args.includes('--branch')) return args
@@ -160,8 +160,8 @@ if (process.env.HERMES_E2E_SOURCE_ROOT && process.env.HERMES_E2E_SOURCE_GIT) {
         // The driver shadows git with a fork-detection shim that always
         // reports the official URL for remote get-url, even with -c flags.
         return spawn.call(this, process.env.HERMES_E2E_SOURCE_REAL_GIT, [
-          '-c', `url.${staged}.insteadOf=https://github.com/NousResearch/hermes-agent.git`,
-          '-c', `url.${staged}.insteadOf=git@github.com:NousResearch/hermes-agent.git`,
+          '-c', `url.${staged}.insteadOf=https://github.com/Garudex-Labs/NoOne.git`,
+          '-c', `url.${staged}.insteadOf=git@github.com:Garudex-Labs/NoOne.git`,
           ...args,
         ], options)
       }

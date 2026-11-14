@@ -8,16 +8,16 @@ here too, so the installer's PATH launcher behaves the same way.
 """
 
 from __future__ import annotations
-
-# hermes_bootstrap first (UTF-8 stdio on Windows; no-op on POSIX), like every other entry point.
+from agent_cli.application_identity import app_text
+# agent_bootstrap first (UTF-8 stdio on Windows; no-op on POSIX), like every other entry point.
 try:
-    import hermes_bootstrap
+    import agent_bootstrap
 except ModuleNotFoundError:
-    pass  # partial `hermes update` — only skips the Windows UTF-8 stdio setup
+    pass  # partial `noone update` — only skips the Windows UTF-8 stdio setup
 
-# The `hermes-agent` console script lands here without hermes_cli.main: repair a `hermes update` killed
+# The `hermes-agent` console script lands here without agent_cli.main: repair a `noone update` killed
 # while git wrote the new tree before importing anything else from the checkout.
-from hermes_cli import _early_recovery
+from agent_cli import _early_recovery
 
 if _early_recovery.restore_interrupted_pull():
     _early_recovery.relaunch_after_restore()
@@ -27,11 +27,11 @@ from typing import Callable, List, Optional
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    from hermes_cli import __release_date__, __version__
+    from agent_cli import __release_date__, __version__
 
     parser = argparse.ArgumentParser(
         prog="hermes-agent",
-        description="Legacy single-query Hermes Agent runner. For the full CLI use `hermes`.",
+        description=app_text("Legacy single-query {app_name} runner. For the full CLI use `hermes`.", argparse_text=True),
     )
     parser.add_argument("--version", action="version", version=f"Hermes Agent v{__version__} ({__release_date__})")
     parser.add_argument("prompt", nargs="*", help="query to run (same as --query)")

@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 interface ResolvedPrimaryRemote {
   authMode?: 'oauth' | 'token'
   baseUrl: string
@@ -144,7 +145,7 @@ export async function connectPrimaryRemote<State extends object>(
 ) {
   options.signal?.throwIfAborted()
   options.assertCurrentAttempt()
-  await options.advanceBootProgress('backend.remote', `Connecting to remote Hermes backend at ${remote.baseUrl}`, 24)
+  await options.advanceBootProgress('backend.remote', appText(`Connecting to remote {app_name} backend at ${remote.baseUrl}`), 24)
   await options.waitForRemote(remote)
   options.signal?.throwIfAborted()
   options.assertCurrentAttempt()
@@ -185,7 +186,7 @@ export async function connectPrimaryRemote<State extends object>(
 
   options.updateBootProgress({
     phase: 'backend.ready',
-    message: 'Remote Hermes backend is ready',
+    message: appText('Remote {app_name} backend is ready'),
     progress: 94,
     running: true,
     error: null

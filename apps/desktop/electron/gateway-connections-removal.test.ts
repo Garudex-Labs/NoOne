@@ -91,7 +91,7 @@ test('a gateway the Webapp removed stays removed for Desktop, and its stale rout
   m.launch().read()
 
   const env = { HERMES_HOME: m.root, HOME: m.dir, PATH: process.env.PATH, PYTHONPATH: repo }
-  const script = 'from hermes_cli import gateway_connections as g\ng.remove_connection("old-http")'
+  const script = 'from agent_cli import gateway_connections as g\ng.remove_connection("old-http")'
   await promisify(execFile)(python, ['-c', script], { env })
 
   const registry = m.launch().read()

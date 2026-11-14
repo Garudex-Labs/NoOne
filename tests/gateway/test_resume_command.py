@@ -42,7 +42,7 @@ def _make_runner(session_db=None, current_session_id="current_session_001",
     runner._voice_mode = {}
     # Gateway holds the async facade; the slash handlers await it.
     if session_db is not None:
-        from hermes_state import AsyncSessionDB
+        from agent_state import AsyncSessionDB
         session_db = AsyncSessionDB(session_db)
     runner._session_db = session_db
     runner._running_agents = {}
@@ -76,7 +76,7 @@ class TestHandleResumeCommand:
     @pytest.mark.asyncio
     async def test_list_named_sessions_when_no_arg(self, tmp_path):
         """With no argument, lists recently titled sessions."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/resume")
         lane_key = _session_key_for_event(event)
@@ -106,7 +106,7 @@ class TestHandleResumeCommand:
     @pytest.mark.asyncio
     async def test_resume_other_session_notices_paused_messages_left_behind(self, tmp_path, monkeypatch):
         """A /resume route switch must tell the chat about queued messages left behind (#145177)."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         db.create_session("saved_session", "telegram", user_id="12345", chat_id="67890")
@@ -133,7 +133,7 @@ class TestHandleResumeCommand:
     async def test_resume_clears_session_model_overrides(self, tmp_path):
         """Resume must not carry a previous session's /model override into the
         restored conversation, while leaving other chats' overrides intact (#10702)."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(db_path=tmp_path / "state.db")
         db.create_session("old_session_abc", "telegram", user_id="12345", chat_id="67890")
         db.set_session_title("old_session_abc", "My Project")
@@ -169,7 +169,7 @@ class TestHandleResumeCommand:
         instead of a value cached before the switch (mirrors /new and the
         compression-exhausted auto-reset, #58403), while leaving other
         chats' cache entries intact."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(db_path=tmp_path / "state.db")
         db.create_session("old_session_abc", "telegram", user_id="12345", chat_id="67890")
         db.set_session_title("old_session_abc", "My Project")
@@ -191,7 +191,7 @@ class TestHandleResumeCommand:
     @pytest.mark.asyncio
     async def test_resume_follows_compression_continuation(self, tmp_path):
         """Gateway /resume should reopen the live descendant after compression."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         db.create_session("compressed_root", "telegram", user_id="12345", chat_id="67890")
@@ -229,7 +229,7 @@ class TestHandleResumeCommand:
         writing into the wrong session. See #6672.
         """
         import threading
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(db_path=tmp_path / "state.db")
         db.create_session("old_session", "telegram", user_id="12345", chat_id="67890")
         db.set_session_title("old_session", "Old Work")
@@ -251,7 +251,7 @@ class TestHandleResumeCommand:
 
     @pytest.mark.asyncio
     async def test_bare_resume_lists_exact_lane_before_limit(self, tmp_path):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/resume")
@@ -285,7 +285,7 @@ class TestHandleResumeCommand:
     async def test_bare_resume_ranks_lineages_by_last_activity(self, tmp_path):
         """A lineage whose root started days ago but was touched last must lead the list: the
         picker ranks by lineage activity, not root ``started_at`` (#114271)."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/resume")
@@ -308,7 +308,7 @@ class TestHandleResumeCommand:
 
     @pytest.mark.asyncio
     async def test_bare_resume_admin_all_preserves_same_platform_widening(self, tmp_path):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/resume --all")
@@ -328,7 +328,7 @@ class TestHandleResumeCommand:
 
     @pytest.mark.asyncio
     async def test_numeric_resume_fallback_uses_exact_lane_candidates(self, tmp_path):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/resume 2")
@@ -368,7 +368,7 @@ class TestHandleResumeCommand:
     async def test_bare_resume_normalizes_telegram_lobby_source_to_bound_topic(
         self, tmp_path
     ):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/resume")
@@ -420,7 +420,7 @@ class TestHandleSessionsCommand:
 
         from gateway.config import GatewayConfig
         from gateway.session import AsyncSessionStore, SessionStore
-        from hermes_state import AsyncSessionDB
+        from agent_state import AsyncSessionDB
 
         event = _make_event(text="/sessions full")
         store = SessionStore(
@@ -473,7 +473,7 @@ class TestHandleSessionsCommand:
 
         from gateway.config import GatewayConfig
         from gateway.session import AsyncSessionStore, SessionStore
-        from hermes_state import AsyncSessionDB
+        from agent_state import AsyncSessionDB
 
         event = _make_event(text="/sessions full")
         store = SessionStore(
@@ -537,7 +537,7 @@ class TestHandleSessionsCommand:
     async def test_sessions_busy_platform_lists_exact_lane_and_excludes_current_tip(
         self, tmp_path
     ):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/sessions")
@@ -591,7 +591,7 @@ class TestHandleSessionsCommand:
 
     @pytest.mark.asyncio
     async def test_sessions_admin_all_preserves_cross_origin_widening(self, tmp_path):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/sessions all")
@@ -618,7 +618,7 @@ class TestHandleSessionsCommand:
 
     @pytest.mark.asyncio
     async def test_sessions_normalizes_telegram_lobby_source_to_bound_topic(self, tmp_path):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/sessions")
@@ -667,7 +667,7 @@ class TestHandleSessionsCommand:
         (the enumeration half of the /resume IDOR). Cross-origin listing is
         gated behind an explicitly-configured admin, which the default test
         config is not."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/sessions all full")
         lane_key = _session_key_for_event(event)
@@ -694,7 +694,7 @@ class TestHandleSessionsCommand:
     async def test_sessions_search_finds_older_titled_session(self, tmp_path):
         """`/sessions search <query>` matches titles beyond the recent-10 list
         and orders by activity, keeping the caller's own scope."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/sessions search an94")
         lane_key = _session_key_for_event(event)
@@ -725,7 +725,7 @@ class TestHandleSessionsCommand:
     async def test_sessions_search_does_not_leak_other_users_sessions(self, tmp_path):
         """Search results honor the same owner-scoping guard as listing —
         a matching title owned by a different user/chat must not surface."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(db_path=tmp_path / "state.db")
         event = _make_event(text="/sessions search an94")
         lane_key = _session_key_for_event(event)
@@ -752,7 +752,7 @@ class TestHandleSessionsCommand:
 
     @pytest.mark.asyncio
     async def test_resume_persisted_fallback_fails_closed_on_user_id_alt(self, tmp_path):
-        """egilewski/CodeRabbit probe: Signal/Feishu key the session participant
+        """egilewski/CodeRabbit probe: Signal keys the session participant
         on ``user_id_alt or user_id`` (build_session_key), but the sessions table
         stores only user_id. So a persisted per-user row that a caller shares the
         user_id of — but NOT the user_id_alt — maps to a DIFFERENT live session
@@ -761,7 +761,7 @@ class TestHandleSessionsCommand:
         The live-origin guard already compares user_id_alt correctly; here the
         target is persisted-only, so the fallback fails closed whenever the
         caller keys on user_id_alt and the row can't prove that participant."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(db_path=tmp_path / "state.db")
         # Persisted rows carry only user_id (no user_id_alt column).
         db.create_session("victim_alt_group", "signal", user_id="+15550001111",
@@ -806,7 +806,7 @@ class TestHandleSessionsCommand:
 
     @pytest.mark.asyncio
     async def test_gateway_dispatches_sessions_command(self, tmp_path):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(db_path=tmp_path / "state.db")
         db.create_session("tg_session", "telegram", user_id="12345", chat_id="67890")
         db.set_session_title("tg_session", "Telegram Work")
@@ -881,54 +881,8 @@ class TestSameOriginChatGroupScoping:
         assert runner._same_origin_chat(threaded, parent) is False
 
 
-class TestResumeRowVisibleMatrixAllScoping:
-    """Non-admin Matrix `/resume --all` must NOT enumerate every Matrix titled
-    session: the cross-room listing short-circuit is admin-only, mirroring the
-    non-Matrix branch. A non-admin `--all` falls back to same-room scoping."""
-
-    @staticmethod
-    def _matrix_src(chat_id="!room-a:hs", user_id="@alice:hs"):
-        return SessionSource(platform=Platform.MATRIX, chat_id=chat_id,
-                             chat_type="group", user_id=user_id)
-
-    @pytest.mark.asyncio
-    async def test_non_admin_all_does_not_expose_other_room(self):
-        runner = _make_runner()
-        runner._resume_caller_is_admin = lambda src: False
-        # Titled row whose live origin is a DIFFERENT Matrix room.
-        other_room = SessionSource(platform=Platform.MATRIX, chat_id="!room-b:hs",
-                                   chat_type="group", user_id="@bob:hs")
-        runner._gateway_session_origin_for_id = lambda sid: other_room
-        row = {"id": "sid_other_room"}
-        assert await runner._resume_row_visible(self._matrix_src(), row, allow_all=True) is False
 
 
-class TestSameMatrixRoomThreadScoping:
-    """Matrix `/resume` (direct and listing) scopes by room AND thread: a live
-    session in another thread of the same room is a different session
-    (build_session_key appends thread_id), so a caller in thread A must not
-    resume/enumerate a target whose origin is in thread B. Non-threaded rooms
-    keep room-level sharing unchanged."""
-
-    @staticmethod
-    def _msrc(chat_id="!room-a:hs", user_id="@alice:hs", thread_id=None):
-        return SessionSource(platform=Platform.MATRIX, chat_id=chat_id,
-                             chat_type="group", user_id=user_id, thread_id=thread_id)
-
-    def test_same_room_no_thread_still_shared(self):
-        runner = _make_runner()
-        a = self._msrc(user_id="@alice:hs")
-        b = self._msrc(user_id="@bob:hs")
-        assert runner._same_matrix_room(a, b) is True
-
-
-    def test_cross_thread_same_room_blocked(self):
-        """The reviewer's probe: caller in thread-a, target origin in thread-b
-        of the same room → must not match."""
-        runner = _make_runner()
-        caller = self._msrc(thread_id="thread-a")
-        victim_origin = self._msrc(thread_id="thread-b")
-        assert runner._same_matrix_room(caller, victim_origin) is False
 
 
 class TestResumeCallerAdminAmbiguousScope:

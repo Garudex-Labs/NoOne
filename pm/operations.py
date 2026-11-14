@@ -120,8 +120,8 @@ def _environment_root(name: str, root: Path | None) -> Path:
         raise ValueError("environment name must be a simple package name")
     if root is not None:
         return Path(root).absolute()
-    from hermes_constants import get_hermes_home
-    return get_hermes_home() / "environments" / name
+    from agent_constants import get_agent_home
+    return get_agent_home() / "environments" / name
 
 
 def _python(environment: Path) -> Path:

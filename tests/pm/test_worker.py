@@ -33,7 +33,7 @@ def test_isolated_worker_preserves_install_error(client, monkeypatch):
         client.ensure("node", explicit=True)
     assert caught.value.package == "node"
     assert caught.value.cause == "not in the lockfile"
-    assert caught.value.remedy == "add it with `hermes pm lock --bump`"
+    assert caught.value.remedy == "add it with `noone pm lock --bump`"
     assert not paths.facts_path().exists()
 
 
@@ -173,7 +173,7 @@ def _assert_worker_holds_lock(repo):
 def test_sync_discovers_profile_members_after_worker_acquires_lock(client, tmp_path, monkeypatch, isolated_python, explicit):
     from concurrent.futures import ThreadPoolExecutor
     import time
-    from hermes_cli.runtime_state import runtime_lock
+    from agent_cli.runtime_state import runtime_lock
     from tests.pm._fixtures import worker_toolchain
 
     sibling = tmp_path / "home/profiles/sibling/plugins/dependency"
@@ -182,7 +182,7 @@ def test_sync_discovers_profile_members_after_worker_acquires_lock(client, tmp_p
     repo = _current_environment(tmp_path, monkeypatch, [sibling])
     ready = tmp_path / "waiting-for-lock"
     worker_toolchain(client, monkeypatch, isolated_python,
-        "from contextlib import contextmanager\nimport hermes_cli.runtime_state as state\n"
+        "from contextlib import contextmanager\nimport agent_cli.runtime_state as state\n"
         "original = state.runtime_lock\n@contextmanager\ndef lock(project, **kwargs):\n"
         f"    Path({str(ready)!r}).touch()\n"
         "    with original(project, **kwargs) as held:\n        yield held\nstate.runtime_lock = lock\n")

@@ -10,7 +10,7 @@ requires_hermes: ">=0.23.0"
 version: "0.1.0"
 readme: true
 screenshots:
-  - https://raw.githubusercontent.com/SilentKnight87/hermes-doom/5f9faadd1ba346c52d79bfd9c07c7f3c1908ff38/docs/doom-in-hermes.png
+  - https://raw.githubusercontent.com/SilentKnight87/hermes-doom/5f9faadd1ba346c52d79bfd9c07c7f3c1908ff38/docs/doom-in-agent.png
 platforms: []
 known_issues:
   - No sound yet, and saved games last only until the tab is reloaded.

@@ -342,8 +342,8 @@ class ThreadParticipationTracker:
         self._threads: dict[str, None] = dict.fromkeys(str(t) for t in self._load())
 
     def _state_path(self) -> Path:
-        from hermes_constants import get_hermes_home
-        return get_hermes_home() / f"{self._platform}_threads.json"
+        from agent_constants import get_agent_home
+        return get_agent_home() / f"{self._platform}_threads.json"
 
     def _load(self) -> list[str]:
         try:
@@ -388,7 +388,7 @@ class ThreadParticipationTracker:
 
         ``_save`` ends in ``atomic_json_write`` -> ``os.replace``, whose
         duration is unbounded under filesystem pressure.  Every caller of this
-        tracker sits on an inbound-message coroutine in the Discord and Matrix
+        tracker sits on an inbound-message coroutine in the Discord
         adapters, so the rename must not be paid inline on the event loop -- it
         stalls every other adapter's polling and every in-flight turn for as
         long as it runs.
@@ -467,10 +467,10 @@ def _create_log_hash_salt_exclusive(path: Path, data: bytes) -> bytes:
 
 
 def _log_hash_salt() -> bytes:
-    from hermes_constants import get_hermes_home, hermes_home_key
+    from agent_constants import get_agent_home, agent_home_key
     try:
-        home = get_hermes_home()
-        key = hermes_home_key(home)
+        home = get_agent_home()
+        key = agent_home_key(home)
     except (OSError, ValueError):
         return _PROCESS_LOG_HASH_SALT
     if (cached := _LOG_HASH_SALTS.get(key)) is None:
@@ -602,7 +602,7 @@ def bypasses_chat_order(text: Any) -> bool:
     flight, so it skips :class:`ChatOrderedWork`'s per-chat wait and never waits on an earlier voice
     note's gate STT. Every other command (``/new``, ``/undo``, ``/status``) keeps its place behind it."""
     from gateway.session_commands import _ESCAPE_HATCHES
-    from hermes_cli.commands import resolve_command
+    from agent_cli.commands import resolve_command
     head = str(text or "").lstrip().split(maxsplit=1)
     if not head or not head[0].startswith("/"):
         return False
@@ -692,9 +692,9 @@ def compile_mention_patterns(raw, *, log_prefix: str, platform_label: str | None
                              logger_: logging.Logger | None = None) -> list[re.Pattern]:
     """Compile regex wake-word/mention patterns from config or env values.
 
-    * **Config-style** (dingtalk, telegram): pass ``platform_label``. ``raw`` must be a
+    * **Config-style** (telegram): pass ``platform_label``. ``raw`` must be a
       list or string (else warn + ``[]``); non-string entries skipped; info log on load.
-    * **Wakeword-style** (photon, bluebubbles): pass ``defaults``. ``raw`` may be None
+    * **Wakeword-style** (photon): pass ``defaults``. ``raw`` may be None
       (defaults), a string (JSON list or comma/newline separated), a list, or a scalar.
     ``log_prefix`` is interpolated into every log line so per-adapter output stays
     byte-identical to the historical inline implementations.

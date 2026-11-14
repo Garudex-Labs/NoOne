@@ -1,6 +1,8 @@
+import { appText } from '@noone/shared/application-identity'
 import { replaceEqualDeep } from '@tanstack/react-query'
 import { atom, computed } from 'nanostores'
 
+import { type AgentGateway, getHermesConfig, hermesApi, type SessionInfo } from '@/agent-client'
 import type { NewSessionPlacement } from '@/app/chat/new-session-drag'
 import {
   excludeProjectSessions,
@@ -9,8 +11,7 @@ import {
   projectOwnerBySessionId,
   type SidebarProjectTree
 } from '@/app/chat/sidebar/projects/workspace-groups'
-import type { HermesGitBaseBranch, HermesGitBranch } from '@/global'
-import { getHermesConfig, hermesApi, type HermesGateway, type SessionInfo } from '@/hermes'
+import type { AgentGitBaseBranch, AgentGitBranch } from '@/global'
 import { translateNow } from '@/i18n'
 import { desktopDefaultCwd, isDesktopFsRemoteMode, selectDesktopPaths, writeDesktopFileText } from '@/lib/desktop-fs'
 import { desktopGit, desktopGitFor, type GitOwnerRoute } from '@/lib/desktop-git'
@@ -55,7 +56,7 @@ import {
   type SessionTombstoneGenerationSnapshot,
   tombstoneRowIds
 } from '@/store/session-removal'
-import type { ProjectInfo, ProjectsPayload } from '@/types/hermes'
+import type { ProjectInfo, ProjectsPayload } from '@/types/agent-client'
 
 import { recordFeatureUse } from './desktop-metrics'
 
@@ -309,7 +310,7 @@ async function gatewayRequest<T>(method: string, params: Record<string, unknown>
   }
 
   if (!gateway) {
-    throw new Error('Hermes gateway is not connected')
+    throw new Error(appText('{app_name} gateway is not connected'))
   }
 
   return gateway.request<T>(method, params)
@@ -348,7 +349,7 @@ function projectParams(
 }
 
 async function gatewayRequestOn<T>(
-  gateway: HermesGateway,
+  gateway: AgentGateway,
   method: string,
   params: Record<string, unknown> = {}
 ): Promise<T> {
@@ -369,7 +370,7 @@ interface ProjectRowOwner {
 }
 
 interface ActiveProjectsContext extends ProjectRowOwner {
-  gateway: HermesGateway
+  gateway: AgentGateway
   profile: string
 }
 
@@ -407,7 +408,7 @@ async function activeProjectsContext(profile = projectProfile()): Promise<Active
   }
 
   if (!gateway || !stillOnWritableProjectOwner({ connectionId, gateway, profile })) {
-    throw new Error('Active Hermes profile changed while connecting')
+    throw new Error(appText('Active {app_name} profile changed while connecting'))
   }
 
   return { connectionId, gateway, profile, stampLocal }
@@ -866,8 +867,8 @@ interface RepoScanState {
   runningSignature?: string
 }
 
-const repoScanStates = new WeakMap<HermesGateway, RepoScanState>()
-const scanningGatewayGenerations = new WeakMap<HermesGateway, number>()
+const repoScanStates = new WeakMap<AgentGateway, RepoScanState>()
+const scanningGatewayGenerations = new WeakMap<AgentGateway, number>()
 
 function syncReposScanning(): void {
   const gateway = activeGateway()
@@ -1507,7 +1508,7 @@ export async function startWorkInRepo(
 // by hand first.
 // Empty on a non-repo. On a remote gateway the list comes from the backend's
 // /api/git/branches mirror, so it acts on the repo where sessions actually run.
-export async function listRepoBranches(repoPath: string, owner?: GitOwnerRoute): Promise<HermesGitBranch[]> {
+export async function listRepoBranches(repoPath: string, owner?: GitOwnerRoute): Promise<AgentGitBranch[]> {
   const git = gitFor(owner)
 
   if (!git?.branchList || !repoPath) {
@@ -1521,7 +1522,7 @@ export async function listRepoBranches(repoPath: string, owner?: GitOwnerRoute):
 // new-worktree dialog. The remote default (origin/HEAD) is flagged so the
 // UI can preselect it. Empty on a non-repo; remote gateways serve it from the
 // backend's /api/git/base-branches mirror.
-export async function listBaseBranches(repoPath: string, owner?: GitOwnerRoute): Promise<HermesGitBaseBranch[]> {
+export async function listBaseBranches(repoPath: string, owner?: GitOwnerRoute): Promise<AgentGitBaseBranch[]> {
   const git = gitFor(owner)
 
   if (!git?.baseBranchList || !repoPath) {

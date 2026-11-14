@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesConnection } from '@/global'
+import type { AgentConnection } from '@/global'
 
 // pluginSocket must dial the ACTIVE gateway's backend — resolved through the
 // same (connectionId, profile) source of truth ensureGatewayProfile /
@@ -11,13 +11,13 @@ import type { HermesConnection } from '@/global'
 //  2. A registry-agent activation routes it to the agent's SOURCE connection
 //     (getConnectionFor), not the local pool — the post-#87600 shape.
 
-vi.mock('@/hermes', async importOriginal => {
+vi.mock('@/agent-client', async importOriginal => {
   const actual = await importOriginal<Record<string, unknown>>()
 
   return {
     ...actual,
     // Stub only the socket class so gateway activations don't dial real WS.
-    HermesGateway: class {
+    AgentGateway: class {
       connectionState = 'closed'
       connect = async (_wsUrl: string): Promise<void> => {
         this.connectionState = 'open'
@@ -33,13 +33,13 @@ vi.mock('@/hermes', async importOriginal => {
 vi.mock('@/lib/query-client', () => ({ invalidateProfileScopedQueries: vi.fn() }))
 vi.mock('@/store/starmap', () => ({ reloadOpenStarmapGraph: vi.fn(), resetStarmapGraph: vi.fn() }))
 
-const { pluginSocket, setApiRequestConnection, setApiRequestProfile } = await import('@/hermes')
+const { pluginSocket, setApiRequestConnection, setApiRequestProfile } = await import('@/agent-client')
 const { closeSecondaryGateways, configureGatewayRegistry, setPrimaryGateway } = await import('@/store/gateway')
 const { $activeGatewayProfile, ensureGatewayAgent, ensureGatewayProfile } = await import('@/store/profile')
 
 // authMode 'oauth' makes pluginSocket stop after resolving the connection
 // (polling fallback), so the assertions cover resolution without a WS dial.
-const conn = (over: Partial<HermesConnection> = {}): HermesConnection =>
+const conn = (over: Partial<AgentConnection> = {}): AgentConnection =>
   ({
     authMode: 'oauth',
     baseUrl: 'https://pool.invalid',
@@ -47,7 +47,7 @@ const conn = (over: Partial<HermesConnection> = {}): HermesConnection =>
     token: 'fake-test-token',
     wsUrl: 'wss://pool.invalid/api/ws?token=fake-test-token',
     ...over
-  }) as HermesConnection
+  }) as AgentConnection
 
 let getConnection: ReturnType<typeof vi.fn>
 let getConnectionFor: ReturnType<typeof vi.fn>

@@ -28,7 +28,7 @@ from agent.prompt_builder import (
 )
 from agent import prompt_builder as _pb
 from agent.runtime_cwd import resolve_agent_cwd, resolve_context_cwd
-from hermes_constants import get_default_hermes_root, get_hermes_home
+from agent_constants import get_default_agent_root, get_agent_home
 from utils import is_truthy_value
 
 logger = logging.getLogger(__name__)
@@ -94,14 +94,14 @@ def _plugin_session_info(agent: Any) -> dict[str, str]:
     info.update(profile_name=_active_profile_name(agent, _ambient_plugin_profile_name), cwd=cwd,
                 conversation_id=conversation_id(agent))
     # The creating client's self-declared label ("" when none): plugin data only, never prompt text.
-    from hermes_cli.plugin_session import session_client
+    from agent_cli.plugin_session import session_client
     client = session_client() or {}
     info.update(client=client.get("name", ""), client_version=client.get("version", ""))
     return info
 
 
 def _ambient_plugin_profile_name() -> str:
-    from hermes_cli.profiles import get_active_profile_name
+    from agent_cli.profiles import get_active_profile_name
     return str(get_active_profile_name() or "default")
 
 
@@ -128,7 +128,7 @@ def _frozen_plugin_prompt_sections(agent: Any) -> tuple:
         rendered = _restore_plugin_prompt_sections(stored_prompt)
     else:
         try:
-            from hermes_cli.plugins import render_system_prompt_sections
+            from agent_cli.plugins import render_system_prompt_sections
             rendered = tuple(render_system_prompt_sections(_plugin_session_info(agent)))
         except Exception as exc:
             rendered = getattr(agent, "_plugin_system_prompt_sections_previous", None)
@@ -145,7 +145,7 @@ def _restore_plugin_prompt_sections(prompt: str) -> tuple:
     """Recover frozen section bytes from the persisted full prompt.  Only the
     exact canonical container emitted by core is accepted — user/project text
     may resemble a frame."""
-    from hermes_cli.plugins import (
+    from agent_cli.plugins import (
         MAX_SYSTEM_PROMPT_SECTION_CHARS, PLUGIN_SECTIONS_END, PLUGIN_SECTIONS_START,
         RenderedPluginSystemPromptSection, format_system_prompt_sections,
     )
@@ -174,7 +174,7 @@ def restore_plugin_prompt_sections(agent: Any, prompt: str) -> None:
 
 
 def _plugin_section_blocks(sections: tuple, position: str) -> list[str]:
-    from hermes_cli.plugins import format_system_prompt_sections
+    from agent_cli.plugins import format_system_prompt_sections
     block = format_system_prompt_sections([s for s in sections if s.position == position])
     return [block] if block else []
 
@@ -238,15 +238,15 @@ def _agent_home(agent: Any) -> Optional[Path]:
     1. Surfaces that multiplex several profiles over ONE shared session DB (the messaging gateway:
     ``gateway/run.py`` hands every agent the launch-home ``state.db`` and binds the profile home per turn
     via ``_profile_runtime_scope`` + ``copy_context``) would otherwise have the db-derived launch home STOMP
-    the correctly-bound profile — inverting the leak this helper exists to fix (found by @kshitijk4poor's
+    the correctly-bound profile — inverting the leak this helper exists to fix (found by the
     post-merge probe on #86313). 2. Fallback: the home containing the agent's ``_session_db.db_path``
     (``<home>/state.db``) — ground truth on threads that lost the ContextVar (ContextVars don't propagate
     into ``threading.Thread``), where the unbound build previously fell back to the launch home and leaked
     the default profile's skills/identity into a bot prompt.
     """
     try:
-        from hermes_constants import get_hermes_home_override
-        override = get_hermes_home_override()
+        from agent_constants import get_agent_home_override
+        override = get_agent_home_override()
         if override:
             return Path(override)
     except Exception:
@@ -266,12 +266,12 @@ def _agent_skills_dir(agent: Any) -> Optional[Path]:
 
 def _profile_name_for_home(home: Path) -> str:
     """``<root>/profiles/X`` -> ``"X"``; anything else -> ``"default"``.
-    Uses ``get_default_hermes_root()`` (NOT ``get_hermes_home()``): on a bound
+    Uses ``get_default_agent_root()`` (NOT ``get_agent_home()``): on a bound
     profile session the ambient home IS the profile dir, so every profile
     would misreport as "default"."""
     try:
-        from hermes_constants import get_default_hermes_root
-        rel = home.resolve().relative_to((get_default_hermes_root() / "profiles").resolve())
+        from agent_constants import get_default_agent_root
+        rel = home.resolve().relative_to((get_default_agent_root() / "profiles").resolve())
         return rel.parts[0] if rel.parts else "default"
     except (ValueError, OSError):
         return "default"
@@ -385,9 +385,9 @@ def _active_profile_line(agent: Any) -> str:
     active_profile = _active_profile_name(agent, _ambient_file_safety_profile_name)
     if active_profile == "default":
         # With an explicit agent home, the default profile's data lives at the
-        # ROOT (get_hermes_home() on a bound profile session is the PROFILE dir).
+        # ROOT (get_agent_home() on a bound profile session is the PROFILE dir).
         # Without one, keep the ambient (patchable) resolution byte-identical.
-        _root_str = str(get_default_hermes_root() if _agent_home_path is not None else get_hermes_home())
+        _root_str = str(get_default_agent_root() if _agent_home_path is not None else get_agent_home())
         return (
             "Active Hermes profile: default. Other profiles (if any) live "
             "under " + _root_str + "/profiles/<name>/. Each profile has its own "
@@ -398,13 +398,13 @@ def _active_profile_line(agent: Any) -> str:
         )
     # A non-default name is only returned when the resolved home is ALREADY
     # <root>/profiles/<name>, so the profile home is the session home itself.
-    profile_home = str(_agent_home_path) if _agent_home_path is not None else str(get_hermes_home())
+    profile_home = str(_agent_home_path) if _agent_home_path is not None else str(get_agent_home())
     # A non-default name is only ever returned when the resolved home is ALREADY <root>/profiles/<name> —
     # that is exactly how both _profile_name_for_home() and _resolve_active_profile_name() derive it. So the
     # profile home is the session home itself; appending /profiles/<name> again doubled it (#72894). The
-    # default profile's data sits at the ROOT (get_default_hermes_root()), which in ambient profile mode is
-    # NOT get_hermes_home().
-    default_root = get_default_hermes_root()
+    # default profile's data sits at the ROOT (get_default_agent_root()), which in ambient profile mode is
+    # NOT get_agent_home().
+    default_root = get_default_agent_root()
     return (
         f"Active Hermes profile: {active_profile}. This session reads "
         f"and writes {profile_home}/. The default "
@@ -427,7 +427,7 @@ def _default_platform_hint(platform_key: str, tool_names: Any = ()) -> str:
             if _entry is None:
                 # A prompt can be built before anything ran plugin discovery (direct builders,
                 # one-shot callers); the hint lives on the plugin's entry, so discover (idempotent).
-                from hermes_cli.plugins import discover_plugins
+                from agent_cli.plugins import discover_plugins
                 discover_plugins()
                 _entry = platform_registry.get(platform_key)
             hint = (_entry and _entry.platform_hint) or ""
@@ -480,7 +480,7 @@ def _telegram_rich_messages_enabled() -> bool:
     adapter uses (top-level ``platforms.telegram.extra`` overrides
     ``gateway.platforms.telegram.extra`` at the leaf). False on any read failure."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
         _cfg = load_config_readonly()
         _gw = (((_cfg.get("gateway") or {}).get("platforms") or {}).get("telegram") or {}).get("extra")
         _top = ((_cfg.get("platforms") or {}).get("telegram") or {}).get("extra")
@@ -494,7 +494,7 @@ def _zone_bits(now: Any, tz: Any) -> list[str]:
     """IANA key, abbreviation (if different) and UTC offset — all constant for
     the day, so the byte-stable date line stays cacheable."""
     _iana = getattr(tz, "key", None)
-    from hermes_time import safe_strftime
+    from agent_time import safe_strftime
     _abbrev = safe_strftime(now, "%Z")
     _offset = safe_strftime(now, "%z")  # '-0400' -> 'UTC-04:00'
     bits = [_iana] if _iana else []
@@ -509,7 +509,7 @@ def _timestamp_line(agent: Any) -> str:
     """Date-only so the prompt is byte-stable for the day; zone + offset so
     tools needn't guess EST vs EDT. Long-lived sessions get an "as of" line on
     rebuild days (the cache prefix is already invalidated at that boundary)."""
-    from hermes_time import get_timezone as _hermes_tz, now as _hermes_now, safe_strftime
+    from agent_time import get_timezone as _hermes_tz, now as _hermes_now, safe_strftime
     now = _hermes_now()
     _bits = _zone_bits(now, _hermes_tz())
     _zone_suffix = f" ({', '.join(_bits)})" if _bits else ""
@@ -560,13 +560,19 @@ def _memory_parts(agent: Any) -> list[str]:
     return parts
 
 
-def _identity_parts(agent: Any, ctx_len: Optional[int]) -> tuple[list[str], bool]:
+def _identity_parts(agent: Any, ctx_len: Optional[int], identity_config: Optional[dict] = None) -> tuple[list[str], bool]:
     """SOUL.md (primary identity; cron keeps the persona while skipping cwd
     instructions, scoped to the agent's OWN home) or the default identity.
     Returns ``(parts, soul_loaded)``."""
     wants_soul = agent.load_soul_identity or not agent.skip_context_files
     _soul_content = _pb.load_soul_md(ctx_len, home_override=_agent_home(agent)) if wants_soul else None
-    return ([_soul_content], True) if _soul_content else ([DEFAULT_AGENT_IDENTITY], False)
+    from agent_cli.application_identity import app_text, get_app_name
+    if identity_config is None:
+        identity_config = {"display": {"app_name": get_app_name(home=_agent_home(agent))}}
+    legacy_identity = DEFAULT_AGENT_IDENTITY.replace("{app_name}", "Hermes Agent, built by Nous Research")
+    if _soul_content in (DEFAULT_AGENT_IDENTITY, legacy_identity):
+        _soul_content = app_text(DEFAULT_AGENT_IDENTITY, identity_config)
+    return ([_soul_content], True) if _soul_content else ([app_text(DEFAULT_AGENT_IDENTITY, identity_config)], False)
 
 
 def _guidance_parts(agent: Any) -> list[str]:
@@ -760,18 +766,20 @@ def build_system_prompt_parts(agent: Any, system_message: Optional[str] = None) 
     _cc_len = getattr(getattr(agent, "context_compressor", None), "context_length", None)
     _ctx_len = _cc_len if isinstance(_cc_len, int) and _cc_len > 0 else None
     # ── Stable tier ────────────────────────────────────────────────
-    stable_parts, _soul_loaded = _identity_parts(agent, _ctx_len)
+    from agent_cli.application_identity import app_text, get_app_name
+    identity_config = {"display": {"app_name": get_app_name(home=_agent_home(agent))}}
+    stable_parts, _soul_loaded = _identity_parts(agent, _ctx_len, identity_config)
     # The skill_view() pointer dangles without skill tools OR without the
     # hermes-agent skill installed, so the variant is chosen after the skills
     # index is built; this slot holds its position.
     _help_guidance_slot = len(stable_parts)
-    stable_parts.append(HERMES_AGENT_HELP_GUIDANCE_NO_SKILLS)
+    stable_parts.append(app_text(HERMES_AGENT_HELP_GUIDANCE_NO_SKILLS, identity_config))
     stable_parts.extend(_guidance_parts(agent))
     skills_prompt = _skills_prompt(agent)
     # Skill-pointer variant requires BOTH skill_view AND the hermes-agent skill
     # in the rendered index (pure string check — inherits the index's stability).
     if "skill_view" in (agent.valid_tool_names or set()) and "- hermes-agent:" in skills_prompt:
-        stable_parts[_help_guidance_slot] = HERMES_AGENT_HELP_GUIDANCE
+        stable_parts[_help_guidance_slot] = app_text(HERMES_AGENT_HELP_GUIDANCE, identity_config)
     stable_parts.extend(_alibaba_identity_part(agent))
     # Pinned skills are per-agent constants (resolved once), so they live in the stable prefix.
     stable_parts.extend(_auto_load_parts(agent))

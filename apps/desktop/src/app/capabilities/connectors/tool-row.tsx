@@ -1,10 +1,10 @@
+import { Lock } from '@noone/ui/icons'
 import type { ReactNode } from 'react'
 
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { Switch } from '@/components/ui/switch'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { Lock } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { describesNothingNew } from './derive-tools'

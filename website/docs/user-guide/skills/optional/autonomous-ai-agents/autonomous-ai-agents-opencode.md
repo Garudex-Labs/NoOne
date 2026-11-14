@@ -1,48 +1,54 @@
 ---
 title: "Opencode — Delegate coding to OpenCode CLI (features, PR review)"
-sidebar_label: "Opencode"
+sidebarTitle: "Opencode"
 description: "Delegate coding to OpenCode CLI (features, PR review)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Opencode
+# Opencode {#opencode}
 
 Delegate coding to OpenCode CLI (features, PR review).
 
-Want the full side-by-side? Read [Hermes Agent vs OpenCode](https://hermes-agent.nousresearch.com/compare/opencode).
-
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/autonomous-ai-agents/opencode` |
+| Source | Optional — install with `noone skills install official/autonomous-ai-agents/opencode` |
 | Path | `optional-skills/autonomous-ai-agents/opencode` |
 | Version | `1.2.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Coding-Agent`, `OpenCode`, `Autonomous`, `Refactoring`, `Code-Review` |
 | Related skills | [`claude-code`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code.md), [`codex`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-codex.md), [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# OpenCode CLI
+<div className="doc-callout-title">
 
-Use [OpenCode](https://opencode.ai) as an autonomous coding worker orchestrated by Hermes terminal/process tools. OpenCode is a provider-agnostic, open-source AI coding agent with a TUI and CLI.
+INFO
 
-## When to Use
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# OpenCode CLI {#opencode-cli}
+
+Use [OpenCode](https://opencode.ai) as an autonomous coding worker orchestrated by {{app-name}} terminal/process tools. OpenCode is a provider-agnostic, open-source AI coding agent with a TUI and CLI.
+
+## When to Use {#when-to-use}
 
 - User explicitly asks to use OpenCode
 - You want an external coding agent to implement/refactor/review code
 - You need long-running coding sessions with progress checks
 - You want parallel task execution in isolated workdirs/worktrees
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - OpenCode installed: `npm i -g opencode-ai@latest` or `brew install anomalyco/tap/opencode`
 - Auth configured: `opencode auth login` or set provider env vars (OPENROUTER_API_KEY, etc.)
@@ -50,9 +56,9 @@ Use [OpenCode](https://opencode.ai) as an autonomous coding worker orchestrated 
 - Git repository for code tasks (recommended)
 - `pty=true` for interactive TUI sessions
 
-## Binary Resolution (Important)
+## Binary Resolution (Important) {#binary-resolution-important}
 
-Shell environments may resolve different OpenCode binaries. If behavior differs between your terminal and Hermes, check:
+Shell environments may resolve different OpenCode binaries. If behavior differs between your terminal and {{app-name}}, check:
 
 ```
 terminal(command="which -a opencode")
@@ -65,7 +71,7 @@ If needed, pin an explicit binary path:
 terminal(command="$HOME/.opencode/bin/opencode run '...'", workdir="~/project", pty=true)
 ```
 
-## One-Shot Tasks
+## One-Shot Tasks {#one-shot-tasks}
 
 Use `opencode run` for bounded, non-interactive tasks:
 
@@ -91,7 +97,7 @@ Force a specific model:
 terminal(command="opencode run 'Refactor auth module' --model openrouter/anthropic/claude-sonnet-4", workdir="~/project")
 ```
 
-## Interactive Sessions (Background)
+## Interactive Sessions (Background) {#interactive-sessions-background}
 
 For iterative work requiring multiple exchanges, start the TUI in background:
 
@@ -117,7 +123,7 @@ process(action="kill", session_id="<id>")
 
 **Important:** Do NOT use `/exit` — it is not a valid OpenCode command and will open an agent selector dialog instead. Use Ctrl+C (`\x03`) or `process(action="kill")` to exit.
 
-### TUI Keybindings
+### TUI Keybindings {#tui-keybindings}
 
 | Key | Action |
 |-----|--------|
@@ -130,7 +136,7 @@ process(action="kill", session_id="<id>")
 | `Ctrl+X E` | Open editor |
 | `Ctrl+C` | Exit OpenCode |
 
-### Resuming Sessions
+### Resuming Sessions {#resuming-sessions}
 
 After exiting, OpenCode prints a session ID. Resume with:
 
@@ -139,7 +145,7 @@ terminal(command="opencode -c", workdir="~/project", background=true, pty=true) 
 terminal(command="opencode -s ses_abc123", workdir="~/project", background=true, pty=true)  # Specific session
 ```
 
-## Common Flags
+## Common Flags {#common-flags}
 
 | Flag | Use |
 |------|-----|
@@ -155,7 +161,7 @@ terminal(command="opencode -s ses_abc123", workdir="~/project", background=true,
 | `--title <name>` | Name the session |
 | `--attach <url>` | Connect to a running opencode server |
 
-## Procedure
+## Procedure {#procedure}
 
 1. Verify tool readiness:
    - `terminal(command="opencode --version")`
@@ -167,7 +173,7 @@ terminal(command="opencode -s ses_abc123", workdir="~/project", background=true,
 6. Exit with `process(action="write", data="\x03")` or `process(action="kill")`.
 7. Summarize file changes, test results, and next steps back to user.
 
-## PR Review Workflow
+## PR Review Workflow {#pr-review-workflow}
 
 OpenCode has a built-in PR command:
 
@@ -181,7 +187,7 @@ Or review in a temporary clone for isolation:
 terminal(command="REVIEW=$(mktemp -d) && git clone https://github.com/user/repo.git $REVIEW && cd $REVIEW && opencode run 'Review this PR vs main. Report bugs, security risks, test gaps, and style issues.' -f $(git diff origin/main --name-only | head -20 | tr '\n' ' ')", pty=true)
 ```
 
-## Parallel Work Pattern
+## Parallel Work Pattern {#parallel-work-pattern}
 
 Use separate workdirs/worktrees to avoid collisions:
 
@@ -191,7 +197,7 @@ terminal(command="opencode run 'Add parser regression tests and commit'", workdi
 process(action="list")
 ```
 
-## Session & Cost Management
+## Session & Cost Management {#session--cost-management}
 
 List past sessions:
 
@@ -206,7 +212,7 @@ terminal(command="opencode stats")
 terminal(command="opencode stats --days 7 --models anthropic/claude-sonnet-4")
 ```
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Interactive `opencode` (TUI) sessions require `pty=true`. The `opencode run` command does NOT need pty.
 - `/exit` is NOT a valid command — it opens an agent selector. Use Ctrl+C to exit the TUI.
@@ -216,7 +222,7 @@ terminal(command="opencode stats --days 7 --models anthropic/claude-sonnet-4")
 - Avoid sharing one working directory across parallel OpenCode sessions.
 - Enter may need to be pressed twice to submit in the TUI (once to finalize text, once to send).
 
-## Verification
+## Verification {#verification}
 
 Smoke test:
 
@@ -229,7 +235,7 @@ Success criteria:
 - Command exits without provider/model errors
 - For code tasks: expected files changed and tests pass
 
-## Rules
+## Rules {#rules}
 
 1. Prefer `opencode run` for one-shot automation — it's simpler and doesn't need pty.
 2. Use interactive background mode only when iteration is needed.

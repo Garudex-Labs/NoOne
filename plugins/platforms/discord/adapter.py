@@ -431,7 +431,7 @@ def _format_privileged_intents_guidance(*, needs_members: bool) -> str:
             "Fix: https://discord.com/developers/applications → your application "
             "→ Bot → Privileged Gateway Intents → enable the intent(s) listed "
             "above → Save Changes, then restart the gateway.",
-            "Docs: https://hermes-agent.nousresearch.com/docs/user-guide/messaging/discord",
+            "Docs: https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/discord.md",
         ]
     )
     return "\n".join(lines)
@@ -451,9 +451,9 @@ class _DiscordNonConversationalMessageTracker:
         self._persist_lock = asyncio.Lock()
 
     def _state_path(self) -> _Path:
-        from hermes_constants import get_hermes_home
+        from agent_constants import get_agent_home
         return (
-            get_hermes_home()
+            get_agent_home()
             / _DISCORD_COMMAND_SYNC_STATE_SUBDIR
             / _DISCORD_NONCONVERSATIONAL_STATE_FILENAME
         )
@@ -1139,7 +1139,7 @@ class VoiceReceiver:
     def pcm_to_wav(pcm_data: bytes, output_path: str, src_rate: int = 48000, src_channels: int = 2):
         """Convert raw PCM to 16kHz mono WAV via ffmpeg into *output_path* (not stdout: ffmpeg
         can't seek a pipe, so piped WAV carries placeholder RIFF sizes strict readers misreport)."""
-        from hermes_cli._subprocess_compat import windows_hide_flags
+        from agent_cli._subprocess_compat import windows_hide_flags
         subprocess.run(
             [
                 resolve_ffmpeg_executable(), "-y", "-loglevel", "error", "-f", "s16le",
@@ -1283,9 +1283,9 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
         # connection, which is not silence.
         self._last_dispatched_event_monotonic: Optional[float] = None
         self._missed_message_backfill_task: Optional[asyncio.Task] = None
-        from hermes_constants import get_hermes_home
+        from agent_constants import get_agent_home
         from plugins.platforms.discord.recovery import DiscordRecoveryStore
-        self._discord_recovery_store = DiscordRecoveryStore(get_hermes_home())
+        self._discord_recovery_store = DiscordRecoveryStore(get_agent_home())
         # Dedup cache: Discord RESUME replays events after reconnects.
         self._dedup = MessageDeduplicator()
         # Reply threading mode: "off", "first" (default; first chunk only), "all" (every chunk).
@@ -1757,7 +1757,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
     def _platform_events_subscribed() -> bool:
         """has_hook fast-path shared by every Discord fire-site."""
         try:
-            from hermes_cli.lifecycle import has_hook
+            from agent_cli.lifecycle import has_hook
             return has_hook("gateway_platform_event")
         except Exception:
             return False
@@ -2143,8 +2143,8 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
         logger.info("[%s] Disconnected", self.name)
 
     def _command_sync_state_path(self) -> _Path:
-        from hermes_constants import get_hermes_home
-        directory = get_hermes_home() / _DISCORD_COMMAND_SYNC_STATE_SUBDIR
+        from agent_constants import get_agent_home
+        directory = get_agent_home() / _DISCORD_COMMAND_SYNC_STATE_SUBDIR
         try:
             directory.mkdir(parents=True, exist_ok=True)
         except Exception:
@@ -3491,7 +3491,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
             "ack_phrases": None,     # None = the localized defaults (``_default_voice_ack_phrases``)
         }
         try:
-            from hermes_cli.config import read_raw_config
+            from agent_cli.config import read_raw_config
             cfg = read_raw_config() or {}
             fx = ((cfg.get("discord") or {}).get("voice_fx") or {})
             if isinstance(fx, dict):
@@ -3505,7 +3505,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
     def _load_discord_int_config(self, key: str, default: int, *, minimum: int = 0) -> int:
         """Read a non-secret integer from the top-level ``discord`` config."""
         try:
-            from hermes_cli.config import read_raw_config
+            from agent_cli.config import read_raw_config
             cfg = read_raw_config() or {}
             raw = (cfg.get("discord") or {}).get(key, default)
             value = int(raw)
@@ -4143,7 +4143,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
             return adapters, runner.config
         from gateway.config import load_gateway_config
         from gateway.run import _async_profile_runtime_scope
-        from hermes_cli.profiles import get_profile_dir
+        from agent_cli.profiles import get_profile_dir
         async with _async_profile_runtime_scope(get_profile_dir(profile)):
             return adapters, load_gateway_config()
 
@@ -4162,7 +4162,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
         try:
             if profile:
                 from gateway.run import _async_profile_runtime_scope
-                from hermes_cli.profiles import get_profile_dir
+                from agent_cli.profiles import get_profile_dir
                 async with _async_profile_runtime_scope(get_profile_dir(profile)):
                     await self._deliver_unauthorized_slash_alert(
                         runner, profile, user_name, user_id, chan_id, guild_id, command_text, reason)
@@ -4497,7 +4497,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
                 # e.g. name conflict with a subcommand group.
                 pass
         try:
-            from hermes_cli.commands import COMMAND_REGISTRY, _is_gateway_available, _resolve_config_gates
+            from agent_cli.commands import COMMAND_REGISTRY, _is_gateway_available, _resolve_config_gates
             try:
                 already_registered = {cmd.name for cmd in tree.get_commands()}
             except Exception:
@@ -4511,7 +4511,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
             logger.warning("Discord auto-register from COMMAND_REGISTRY failed: %s", e)
         # Mirror PluginContext.register_command() commands into the native slash picker.
         try:
-            from hermes_cli.commands import _iter_plugin_command_entries
+            from agent_cli.commands import _iter_plugin_command_entries
             for plugin_name, plugin_desc, plugin_args_hint in _iter_plugin_command_entries():
                 _auto_register(plugin_name, plugin_desc, plugin_args_hint)
         except Exception as e:
@@ -4644,7 +4644,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
     def _refresh_skill_catalog_state(self) -> None:
         """Re-scan disk and repopulate ``self._skill_entries``/``_skill_lookup`` in place.
         No Discord API calls: autocomplete and handler read these attributes directly."""
-        from hermes_cli.commands_platforms import discord_skill_commands_by_category
+        from agent_cli.commands_platforms import discord_skill_commands_by_category
         reserved = getattr(self, "_skill_group_reserved_names", set())
         categories, uncategorized, hidden = discord_skill_commands_by_category(
             reserved_names=set(reserved),
@@ -5717,7 +5717,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
         self, chat_id: str, prompt: str, default: str = "", session_key: str = "",
         metadata: Optional[dict[str, Any]] = None,
     ) -> SendResult:
-        """Yes/No prompt for the gateway ``/update`` watcher when ``hermes update --gateway`` needs input."""
+        """Yes/No prompt for the gateway ``/update`` watcher when ``noone update --gateway`` needs input."""
         def _build(_channel):
             default_hint = t("platform.discord.prompt.default_hint", default=default) if default else ""
             update_title = t("platform.discord.prompt.update_title")
@@ -5743,7 +5743,7 @@ class DiscordAdapter(DiscordAuthorizationMixin, DiscordMediaMixin, DiscordThread
         """Two-step select-menu model picker (provider → model) via ``ModelPickerView``."""
         def _build(_channel):
             try:
-                from hermes_cli.providers import get_label
+                from agent_cli.providers import get_label
                 provider_label = get_label(current_provider)
             except Exception:
                 provider_label = current_provider
@@ -6393,7 +6393,7 @@ def _define_discord_view_classes() -> None:
             await self._resolve(interaction, "cancel", discord.Color.greyple(), "platform.discord.slash_confirm.resolved_cancel")
 
     class UpdatePromptView(_HermesView):
-        """Yes/No buttons for ``hermes update`` prompts; the answer is written to
+        """Yes/No buttons for ``noone update`` prompts; the answer is written to
         ``.update_response`` for the detached update process to pick up."""
 
         is_update_prompt = True  # opener_refusal binds it to the /update sender
@@ -6410,8 +6410,8 @@ def _define_discord_view_classes() -> None:
                 interaction, color,
                 t("platform.discord.approval.by_user", label=t(label_key), user=interaction.user.display_name))
             try:
-                from hermes_constants import get_hermes_home
-                response_path = get_hermes_home() / ".update_response"
+                from agent_constants import get_agent_home
+                response_path = get_agent_home() / ".update_response"
                 tmp = response_path.with_suffix(".tmp")
                 tmp.write_text(answer, encoding="utf-8")
                 tmp.replace(response_path)
@@ -6496,7 +6496,7 @@ def _define_discord_view_classes() -> None:
                 for i in range(0, len(models), _DISCORD_SELECT_MAX_OPTIONS)
             ][: _DISCORD_SELECT_MAX_ROWS - 2]
             placeholder_base = t("platform.discord.picker.model_placeholder", provider=provider.get("name", provider_slug))
-            from hermes_cli.model_picker_usage import picker_row_suffix
+            from agent_cli.model_picker_usage import picker_row_suffix
             for idx, chunk in enumerate(chunks):
                 options = [
                     discord.SelectOption(
@@ -6524,7 +6524,7 @@ def _define_discord_view_classes() -> None:
 
         async def _expensive_warning_for(self, model_id: str):
             try:
-                from hermes_cli.model_selection_guards import combined_selection_warning
+                from agent_cli.model_selection_guards import combined_selection_warning
                 # Pricing lookup can hit models.dev on a cache miss — keep it off the event loop.
                 return await asyncio.to_thread(combined_selection_warning, model_id, provider=self._selected_provider)
             except Exception:
@@ -6594,7 +6594,7 @@ def _define_discord_view_classes() -> None:
                 return
             self._build_provider_select()
             try:
-                from hermes_cli.providers import get_label
+                from agent_cli.providers import get_label
                 provider_label = get_label(self.current_provider)
             except Exception:
                 provider_label = self.current_provider
@@ -6801,7 +6801,7 @@ if DISCORD_AVAILABLE:
 
 # ── Standalone (out-of-process) sender ────────────────────────────────────────
 # Used by ``tools/send_message_tool._send_via_adapter`` when no live DiscordAdapter is in this
-# process (e.g. standalone ``hermes cron``); same forum/thread/multipart logic via Discord REST.
+# process (e.g. standalone ``noone cron``); same forum/thread/multipart logic via Discord REST.
 
 # Process-local channel-type probe cache: avoids re-probing every send when the directory cache misses.
 _DISCORD_CHANNEL_TYPE_PROBE_CACHE: dict[str, bool] = {}
@@ -7218,7 +7218,7 @@ def register(ctx) -> None:
         ensure_deps_fn=check_discord_requirements,
         is_connected=_is_connected,
         required_env=["DISCORD_BOT_TOKEN"],
-        install_hint="Run `hermes setup` to install Discord support.",
+        install_hint="Run `noone setup` to install Discord support.",
         setup_fn=interactive_setup,
         # YAML→env config bridge — owns the translation of ``config.yaml`` ``discord:`` keys
         # (require_mention, free_response_channels, auto_thread, free_response_auto_thread,

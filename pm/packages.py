@@ -256,7 +256,7 @@ class Python(_BionicDebArm, BinaryPackage, DebPackage):
         super().stage(store, staged, version, target)
         binary = self.binary(staged, target)
         if binary is not None and sys.platform == "darwin":
-            from hermes_cli.macos_signing import sign_managed_python
+            from agent_cli.macos_signing import sign_managed_python
 
             sign_managed_python(binary)
         # python-build-standalone ships the x64 VC runtime (vcruntime140_1.dll)
@@ -412,9 +412,9 @@ def _seed_tree(src: Path, dst: Path, root: Path) -> None:
 
 def uv_cache_path() -> Path:
     """Where the hermes-owned uv cache lives; unlike uv_cache_dir(), never seeds or writes."""
-    from hermes_constants import get_default_hermes_root
+    from agent_constants import get_default_agent_root
 
-    return get_default_hermes_root() / "cache" / "uv"
+    return get_default_agent_root() / "cache" / "uv"
 
 
 def uv_cache_dir() -> Path:
@@ -685,10 +685,10 @@ def npm_env(cache_dir: Path, base_env: Optional[dict] = None) -> dict[str, str]:
 def pnpm_env(base_env: Optional[dict] = None) -> dict[str, str]:
     """pnpm's store, metadata cache and state default to the user's XDG dirs. Keep them
     Hermes-owned beside the uv cache: shared by every profile, gone with the Hermes root."""
-    from hermes_constants import get_default_hermes_root
+    from agent_constants import get_default_agent_root
 
     env = dict(os.environ if base_env is None else base_env)
-    root = get_default_hermes_root() / "cache" / "pnpm"
+    root = get_default_agent_root() / "cache" / "pnpm"
     for name in ("store", "cache", "state"):
         key = f"pnpm_config_{name}_dir"
         # Windows env names are case-insensitive and Python upper-cases inherited ones:
@@ -804,7 +804,7 @@ class Pnpm(BinaryPackage):
     flatten = False
     # pnpm names its Termux build after the OS, not the libc: a bionic-linked executable.
     exe_platforms = {"linux-arm64-bionic": "android-arm64"}
-    on_demand = {"linux-arm64-bionic": "the Termux .deb ships a prebuilt TUI; `hermes dashboard` fetches pnpm to build the web UI"}
+    on_demand = {"linux-arm64-bionic": "the Termux .deb ships a prebuilt TUI; `noone dashboard` fetches pnpm to build the web UI"}
 
     def fetch_urls(self, version: str, target: str) -> list[str]:
         exe = self.exe_platforms.get(target, target)
@@ -947,7 +947,7 @@ class Gh(BinaryPackage):
 class Ffmpeg(_BionicDebArm, BinaryPackage, DebPackage):
     """FFmpeg builds for supported targets; BtbN Linux archives require glibc.
     optional=False: ffmpeg is a required runtime tool where supported. Sealed bundles ship
-    it baked into the payload; every `hermes update` and `hermes pm install`
+    it baked into the payload; every `noone update` and `noone pm install`
     re-ensures it from the new lockfile before the venv sync
     (pm.client.ensure_tools_for_sync), so a pin bump lands. Windows + Linux:
     BtbN/FFmpeg-Builds (month-end autobuild tag, kept two years; ships ffprobe too).
@@ -1218,7 +1218,7 @@ class Chromium(Package):
         # Playwright launches without an executable_path (e.g. the
         # har-derived-api-client skill's `chromium.launch(channel="chromium")`)
         # find this build through the root; Hermes's own launcher asks
-        # hermes_cli.browser_runtime.chromium_executable() instead.
+        # agent_cli.browser_runtime.chromium_executable() instead.
         return {"PLAYWRIGHT_BROWSERS_PATH": str(entry.parent)}
 
 

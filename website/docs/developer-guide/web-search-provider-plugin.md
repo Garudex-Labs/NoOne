@@ -1,23 +1,30 @@
 ---
-sidebar_position: 12
 title: "Web Search Provider Plugins"
-description: "How to build a web-search/extract/crawl backend plugin for Hermes Agent"
+description: "How to build a web-search/extract/crawl backend plugin for the agent"
 ---
 
-# Building a Web Search Provider Plugin
+# Building a Web Search Provider Plugin {#building-a-web-search-provider-plugin}
 
 Web-search provider plugins register a backend that services `web_search`, `web_extract`, and (optionally) deep-crawl tool calls. Built-in providers — Firecrawl, SearXNG, Tavily, Perplexity, Exa, Parallel, Keenable, Brave Search (free tier), xAI, and DDGS — all ship as plugins under `plugins/web/<name>/`. You can add a new one, or override a bundled one, by dropping a directory next to them.
 
-:::tip
-Web search is one of several **backend plugins** Hermes supports. The others (with their own ABCs) are [Image Generation Provider Plugins](./image-gen-provider-plugin.md), [Video Generation Provider Plugins](./video-gen-provider-plugin.md), [Memory Provider Plugins](./memory-provider-plugin.md), [Context Engine Plugins](./context-engine-plugin.md), and [Model Provider Plugins](./model-provider-plugin.md). General tool/hook/CLI plugins live in [Build a Hermes Plugin](./plugins/index.md).
-:::
+<Tip>
 
-## How discovery works
+<div className="doc-callout-title">
 
-Hermes scans for web-search backends in three places:
+TIP
+
+</div>
+
+Web search is one of several **backend plugins** {{app-name}} supports. The others (with their own ABCs) are [Image Generation Provider Plugins](./image-gen-provider-plugin.md), [Video Generation Provider Plugins](./video-gen-provider-plugin.md), [Memory Provider Plugins](./memory-provider-plugin.md), [Context Engine Plugins](./context-engine-plugin.md), and [Model Provider Plugins](./model-provider-plugin.md). General tool/hook/CLI plugins live in [Build a {{app-name}} Plugin](./plugins/index.md).
+
+</Tip>
+
+## How discovery works {#how-discovery-works}
+
+{{app-name}} scans for web-search backends in three places:
 
 1. **Bundled** — `<repo>/plugins/web/<name>/` (auto-loaded with `kind: backend`, always available)
-2. **User** — `~/.hermes/plugins/web/<name>/` (opt-in via `plugins.enabled` or `hermes plugins enable <name>`)
+2. **User** — `~/.hermes/plugins/web/<name>/` (opt-in via `plugins.enabled` or `noone plugins enable <name>`)
 3. **Pip** — packages declaring a `hermes_agent.plugins` entry point
 
 Each plugin's `register(ctx)` function calls `ctx.register_web_search_provider(...)` — that puts the instance into the registry in `agent/web_search_registry.py`. The active provider for each capability is picked by config:
@@ -28,9 +35,9 @@ Each plugin's `register(ctx)` function calls `ctx.register_web_search_provider(.
 | `web_extract` | `web.extract_backend` | `web.backend` |
 | Deep crawl modes inside `web_extract` | `web.extract_backend` | `web.backend` |
 
-When neither key is set, Hermes auto-detects the backend from whichever API key/URL is present in the environment. `hermes tools` walks users through selection.
+When neither key is set, {{app-name}} auto-detects the backend from whichever API key/URL is present in the environment. `noone tools` walks users through selection.
 
-## Directory structure
+## Directory structure {#directory-structure}
 
 ```
 plugins/web/my-backend/
@@ -41,7 +48,7 @@ plugins/web/my-backend/
 
 `brave_free/` and `ddgs/` are the smallest in-tree references — `brave_free` for an API-key-gated search-only provider, `ddgs` for a no-key provider that lazy-installs its SDK.
 
-## The WebSearchProvider ABC
+## The WebSearchProvider ABC {#the-websearchprovider-abc}
 
 Subclass `agent.web_search_provider.WebSearchProvider`. The only required members are `name`, `is_available()`, and whichever of `search()` / `extract()` you implement. (Deep crawling is not a separate method — it's a mode of `extract()`.)
 
@@ -66,12 +73,12 @@ class MyBackendWebSearchProvider(WebSearchProvider):
 
     @property
     def display_name(self) -> str:
-        # Human label shown in `hermes tools`. Defaults to `name`.
+        # Human label shown in `noone tools`. Defaults to `name`.
         return "My Backend"
 
     def is_available(self) -> bool:
         # Cheap check — env var present, optional dep importable, etc.
-        # MUST NOT make network calls (runs on every `hermes tools` paint).
+        # MUST NOT make network calls (runs on every `noone tools` paint).
         return bool(os.getenv("MY_BACKEND_API_KEY", "").strip())
 
     def supports_search(self) -> bool:
@@ -123,7 +130,7 @@ def register(ctx) -> None:
     ctx.register_web_search_provider(MyBackendWebSearchProvider())
 ```
 
-## plugin.yaml
+## plugin.yaml {#pluginyaml}
 
 ```yaml
 name: web-my-backend
@@ -140,17 +147,17 @@ requires_env:
 | Key | Purpose |
 |---|---|
 | `kind: backend` | Routes the plugin through the backend-loading path |
-| `provides_web_providers` | List of provider `name`s this plugin registers — used by the loader to advertise the plugin in `hermes tools` even before `register()` runs |
-| `requires_env` | Interactive credential prompt during `hermes plugins install` (see [Build a Hermes Plugin](./plugins/index.md#gate-on-environment-variables) for the rich format) |
+| `provides_web_providers` | List of provider `name`s this plugin registers — used by the loader to advertise the plugin in `noone tools` even before `register()` runs |
+| `requires_env` | Interactive credential prompt during `noone plugins install` (see [Build a {{app-name}} Plugin](./plugins/index.md#gate-on-environment-variables) for the rich format) |
 
-## ABC reference
+## ABC reference {#abc-reference}
 
 Full contract in `agent/web_search_provider.py`. Methods you may override:
 
 | Member | Required | Default | Purpose |
 |---|---|---|---|
 | `name` | ✅ | — | Stable id used in `web.*_backend` config |
-| `display_name` | — | `name` | Label shown in `hermes tools` |
+| `display_name` | — | `name` | Label shown in `noone tools` |
 | `is_available()` | ✅ | — | Cheap availability gate — env vars, optional deps |
 | `supports_search()` | — | `True` | Capability flag for `web_search` routing |
 | `supports_extract()` | — | `False` | Capability flag for `web_extract` routing |
@@ -159,7 +166,7 @@ Full contract in `agent/web_search_provider.py`. Methods you may override:
 
 Providers can advertise multiple capabilities from a single class — Firecrawl, Tavily, Perplexity, Keenable, Exa, and Parallel all implement both search and extract. Brave Search and DDGS are search-only; SearXNG is search-only with a documented "pair me with an extract provider" workflow.
 
-## Response shape
+## Response shape {#response-shape}
 
 The tool wrapper expects a fixed envelope so it doesn't have to translate between backends.
 
@@ -204,9 +211,9 @@ The tool wrapper expects a fixed envelope so it doesn't have to translate betwee
 
 Both `search()` and `extract()` may be `async def` — the dispatcher detects coroutine functions via `inspect.iscoroutinefunction` and awaits accordingly. Sync implementations that do blocking I/O (HTTP, SDK calls) are fine for small backends; the dispatcher handles threading.
 
-## Capability flags
+## Capability flags {#capability-flags}
 
-Hermes routes calls to the right provider based on the `supports_*` flags. A common multi-provider setup:
+{{app-name}} routes calls to the right provider based on the `supports_*` flags. A common multi-provider setup:
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -215,11 +222,11 @@ web:
   extract_backend: "firecrawl"     # extract + crawl, paid quota
 ```
 
-When `web.search_backend` or `web.extract_backend` aren't set, both fall through to `web.backend`. When that's also unset, Hermes picks the first available provider that supports the requested capability based on env-var presence.
+When `web.search_backend` or `web.extract_backend` aren't set, both fall through to `web.backend`. When that's also unset, {{app-name}} picks the first available provider that supports the requested capability based on env-var presence.
 
 If your provider only supports one capability, leave the other flags at their default (`False`) and the registry will skip it for that tool — users won't see misleading "provider X failed" errors when they're using X only for search and asking the agent to extract.
 
-## How Hermes wires it into the tools
+## How {{app-name}} wires it into the tools {#how-hermes-wires-it-into-the-tools}
 
 The `web_search` and `web_extract` tools live in `tools/web_tools.py`. At call time they:
 
@@ -229,20 +236,20 @@ The `web_search` and `web_extract` tools live in `tools/web_tools.py`. At call t
 4. Dispatch to `search()` / `extract()` (deep crawl runs as a mode inside `extract()`), awaiting if the method is a coroutine
 5. JSON-serialize the response envelope and hand it back to the LLM
 
-Errors surface as the tool result; the LLM decides how to explain them. If no provider is registered (or every available one fails the capability gate), the tool returns a helpful error pointing at `hermes tools`.
+Errors surface as the tool result; the LLM decides how to explain them. If no provider is registered (or every available one fails the capability gate), the tool returns a helpful error pointing at `noone tools`.
 
-## Lazy-installing optional dependencies
+## Lazy-installing optional dependencies {#lazy-installing-optional-dependencies}
 
-Keep availability checks read-only. For an SDK covered by a Hermes extra,
+Keep availability checks read-only. For an SDK covered by a {{app-name}} extra,
 use `pm.available("extra-name")` in `is_available()`. Request
 `pm.ensure_import("extra-name")` from the operation that needs it. Report
 `InstallError`, including a required restart, to the caller.
 
 Declare a third-party plugin's own dependencies in its manifest or
-`pyproject.toml` rather than inventing a Hermes extra. See
-[Build a Hermes Plugin → Lazy-install](./plugins/index.md#lazy-install-optional-python-dependencies).
+`pyproject.toml` rather than inventing a {{app-name}} extra. See
+[Build a {{app-name}} Plugin → Lazy-install](./plugins/index.md#lazy-install-optional-python-dependencies).
 
-## Reference implementations
+## Reference implementations {#reference-implementations}
 
 - **`plugins/web/brave_free/`** — small, API-key-gated, search-only HTTP provider. Good starting template.
 - **`plugins/web/ddgs/`** — no-key provider that lazy-installs its SDK. Useful pattern for backends that wrap a Python package.
@@ -250,7 +257,7 @@ Declare a third-party plugin's own dependencies in its manifest or
 - **`plugins/web/searxng/`** — self-hosted, URL-configured backend with no auth.
 - **`plugins/web/xai/`** — LLM-backed search via Grok's server-side `web_search` tool. Shows how to reuse an existing OAuth/env-var credential surface (`tools/xai_http.py`) without adding new env vars, and how to write a cheap `is_available()` that honors the no-network contract.
 
-## Distribute via pip
+## Distribute via pip {#distribute-via-pip}
 
 ```toml
 # pyproject.toml
@@ -260,8 +267,8 @@ my-backend-web = "my_backend_web_package"
 
 `my_backend_web_package` must expose a top-level `register` function. See [Distribute via pip](./plugins/index.md#distribute-via-pip) in the general plugin guide for the full setup.
 
-## Related pages
+## Related pages {#related-pages}
 
 - [Web Search](../user-guide/features/web-search.md) — user-facing feature documentation and per-backend configuration
 - [Plugins overview](../user-guide/features/plugins.md) — all plugin types at a glance
-- [Build a Hermes Plugin](./plugins/index.md) — general tools/hooks/slash commands guide
+- [Build a {{app-name}} Plugin](./plugins/index.md) — general tools/hooks/slash commands guide

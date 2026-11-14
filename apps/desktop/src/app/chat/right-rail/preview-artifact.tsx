@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { ChevronLeft, ChevronRight, Download, ExternalLink } from '@noone/ui/icons'
 import DOMPurify from 'dompurify'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -8,7 +9,6 @@ import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { artifactDownloadName, type ArtifactKind } from '@/lib/artifact-detect'
 import { downloadTextFile } from '@/lib/download-text'
-import { ChevronLeft, ChevronRight, Download, ExternalLink } from '@/lib/icons'
 import { pathToFileUrl } from '@/lib/local-preview'
 import { $artifactRegistry, $artifactVersionSelection, findArtifact, selectArtifactVersion } from '@/store/artifacts'
 import { notifyError } from '@/store/notifications'

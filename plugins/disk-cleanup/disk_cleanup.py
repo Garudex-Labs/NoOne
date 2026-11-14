@@ -17,7 +17,7 @@ from datetime import datetime, timezone, UTC
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ _LARGE_FILE_BYTES = 500 * 1024 * 1024
 
 def _state_file(name: str) -> Path:
     """``$HERMES_HOME/disk-cleanup/<name>`` — deliberately outside ``$HERMES_HOME/logs/``."""
-    return get_hermes_home() / "disk-cleanup" / name
+    return get_agent_home() / "disk-cleanup" / name
 
 
 def is_safe_path(path: Path) -> bool:
@@ -34,7 +34,7 @@ def is_safe_path(path: Path) -> bool:
 
     Rejects Windows mounts (``/mnt/c`` etc.) and any system directory.
     """
-    hermes_home = get_hermes_home()
+    hermes_home = get_agent_home()
     try:
         resolved = path.resolve()
     except (OSError, RuntimeError):
@@ -139,7 +139,7 @@ def _is_protected_dir(p: Path) -> bool:
     if not p.is_dir():
         return False
     with contextlib.suppress(ValueError, OSError):
-        rel = p.resolve().relative_to(get_hermes_home())
+        rel = p.resolve().relative_to(get_agent_home())
         return not rel.parts or rel.parts[0] in _EMPTY_DIR_PROTECTED_TOP_LEVEL
     return False
 
@@ -156,7 +156,7 @@ def _protected_cron_paths(home: Path) -> frozenset:
 # Paths under $HERMES_HOME that must NEVER be deleted by quick(), regardless of what the stored category
 # says. This is a defense-in-depth guard against stale tracked.json entries from before #34840.
 def _is_protected_cron_path(p: Path) -> bool:
-    return str(p.resolve()) in _protected_cron_paths(get_hermes_home())
+    return str(p.resolve()) in _protected_cron_paths(get_agent_home())
 
 
 def fmt_size(n: float) -> str:
@@ -297,7 +297,7 @@ def quick() -> dict[str, Any]:
         else:
             errors.append(err)
             new_tracked.append(item)
-    empty_removed = _sweep_empty_dirs(get_hermes_home())
+    empty_removed = _sweep_empty_dirs(get_agent_home())
     save_tracked(new_tracked)
     _log(f"QUICK_SUMMARY: {deleted} files, {empty_removed} dirs, {fmt_size(freed)}")
     return {"deleted": deleted, "empty_dirs": empty_removed, "freed": freed, "errors": errors}
@@ -376,7 +376,7 @@ def _git_tracks(path: Path) -> bool:
     ``:(literal)`` stops git globbing the name (``test_[1].py`` must not match ``test_1.py``).
     Git missing / not a repo / file untracked all mean "not tracked".
     """
-    from hermes_cli.source_check import _git_ok
+    from agent_cli.source_check import _git_ok
 
     return _git_ok(["-C", str(path.parent), "ls-files", "--error-unmatch", "--",
                     ":(literal)" + path.name], timeout=5)
@@ -399,7 +399,7 @@ def _inside_git_worktree(path: Path) -> bool:
     parents = list(resolved.parents)
     above: list[Path] = []
     with contextlib.suppress(ValueError):
-        i = parents.index(get_hermes_home())
+        i = parents.index(get_agent_home())
         parents, above = parents[:i], parents[i:]
     if any((parent / ".git").exists() for parent in parents):
         return True
@@ -411,7 +411,7 @@ def guess_category(path: Path) -> Optional[str]:
     if not is_safe_path(path):
         return None
     with contextlib.suppress(ValueError):  # not under HERMES_HOME (/tmp/hermes-*) — name rules only
-        rel = path.resolve().relative_to(get_hermes_home())
+        rel = path.resolve().relative_to(get_agent_home())
         top = rel.parts[0] if rel.parts else ""
         if top in _NEVER_TRACK_TOP_LEVEL or _is_protected_dir(path):
             return None

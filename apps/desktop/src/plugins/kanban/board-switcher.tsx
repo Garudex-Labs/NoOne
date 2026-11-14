@@ -6,8 +6,8 @@
  */
 
 import {
+  AppIcon,
   Button,
-  Codicon,
   ConfirmDialog,
   Dialog,
   DialogContent,
@@ -33,7 +33,7 @@ import {
   useQuery,
   useQueryClient,
   useValue
-} from '@hermes/plugin-sdk'
+} from '@noone/plugin-sdk'
 import { type ReactNode, useEffect, useState } from 'react'
 
 import {
@@ -355,13 +355,13 @@ export function BoardSwitcher() {
               size="sm"
               variant="ghost"
             >
-              <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="project" size="0.8125rem" />
+              <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="project" size="0.8125rem" />
               <span className="shrink-0 text-[0.6875rem] font-medium text-(--ui-text-tertiary)">{k.board}</span>
               <span className="min-w-0 flex-1 truncate text-[0.75rem] font-medium leading-none">{label}</span>
               {typeof current?.total === 'number' && (
                 <span className="text-[0.6875rem] tabular-nums text-(--ui-text-quaternary)">{current.total}</span>
               )}
-              <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.8125rem" />
+              <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.8125rem" />
             </Button>
           </DropdownMenuTrigger>
         </Tip>
@@ -375,39 +375,39 @@ export function BoardSwitcher() {
               {typeof meta.total === 'number' && (
                 <span className="text-[0.625rem] tabular-nums text-(--ui-text-quaternary)">{meta.total}</span>
               )}
-              {meta.slug === currentSlug && <Codicon className="ml-auto" name="check" size="0.8rem" />}
+              {meta.slug === currentSlug && <AppIcon className="ml-auto" name="check" size="0.8rem" />}
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
           {current && (
             <>
               <DropdownMenuItem onSelect={() => setRenameFor(current)}>
-                <Codicon name="edit" size="0.8rem" />
+                <AppIcon name="edit" size="0.8rem" />
                 {k.renameDots}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setSettingsFor(current)}>
-                <Codicon name="settings-gear" size="0.8rem" />
+                <AppIcon name="settings-gear" size="0.8rem" />
                 {k.settingsDots}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setBoardPinned(current.slug, !isPinned)}>
-                <Codicon name={isPinned ? 'pinned' : 'pin'} size="0.8rem" />
+                <AppIcon name={isPinned ? 'pinned' : 'pin'} size="0.8rem" />
                 {isPinned ? k.unpinBoard : k.pinBoard}
               </DropdownMenuItem>
             </>
           )}
           <DropdownMenuItem onSelect={() => setAdding(true)}>
-            <Codicon name="add" size="0.8rem" />
+            <AppIcon name="add" size="0.8rem" />
             {k.newBoardDots}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           {current && (
             <DropdownMenuItem onSelect={() => void runExport(current.slug)}>
-              <Codicon name="package" size="0.8rem" />
+              <AppIcon name="package" size="0.8rem" />
               {k.exportDots}
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onSelect={() => void runImport()}>
-            <Codicon name="cloud-download" size="0.8rem" />
+            <AppIcon name="cloud-download" size="0.8rem" />
             {k.importDots}
           </DropdownMenuItem>
           {/* `default` is the fallback every board reverts to — the backend
@@ -416,7 +416,7 @@ export function BoardSwitcher() {
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => setDeleteFor(current)} variant="destructive">
-                <Codicon name="trash" size="0.8rem" />
+                <AppIcon name="trash" size="0.8rem" />
                 {t.common.delete}
               </DropdownMenuItem>
             </>

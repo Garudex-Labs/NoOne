@@ -87,7 +87,7 @@ def test_two_homes_pinning_one_profile_share_its_browser_until_the_last_one_leav
 
 
 def test_shared_profile_state_lives_in_a_private_per_user_dir_outside_every_home(tmp_path):
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     script = write_fake_chromium(tmp_path / "chromium")
     udd = tmp_path / "pinned-profile"
     browser, err = launcher.launch_chromium(f"profile:{udd}", executable=str(script), user_data_dir=str(udd),
@@ -97,7 +97,7 @@ def test_shared_profile_state_lives_in_a_private_per_user_dir_outside_every_home
         record = launcher._record_path(browser)
         root = launcher._shared_profiles_root()
         assert record.exists() and record.parent.parent == root
-        assert Path(get_hermes_home()) not in record.parents
+        assert Path(get_agent_home()) not in record.parents
         for state in (root, record.parent):
             assert stat.S_IMODE(state.lstat().st_mode) == 0o700 and not state.is_symlink()
     finally:

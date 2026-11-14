@@ -1,40 +1,48 @@
 ---
 title: "Manim Video — Manim CE animations: 3Blue1Brown math/algo videos"
-sidebar_label: "Manim Video"
+sidebarTitle: "Manim Video"
 description: "Manim CE animations: 3Blue1Brown math/algo videos"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Manim Video
+# Manim Video {#manim-video}
 
 Manim CE animations: 3Blue1Brown math/algo videos.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/creative/manim-video` |
 | Version | `1.0.0` |
-| Author | SHL0MS, Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Manim`, `Animation`, `Math`, `Video` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Manim Video Production Pipeline
+<div className="doc-callout-title">
 
-## When to use
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Manim Video Production Pipeline {#manim-video-production-pipeline}
+
+## When to use {#when-to-use}
 
 Use when users request: animated explanations, math animations, concept visualizations, algorithm walkthroughs, technical explainers, 3Blue1Brown style videos, or any programmatic animation with geometric/mathematical content. Creates 3Blue1Brown-style explainer videos, algorithm visualizations, equation derivations, architecture diagrams, and data stories using Manim Community Edition.
 
-## Creative Standard
+## Creative Standard {#creative-standard}
 
 This is educational cinema. Every frame teaches. Every animation reveals structure.
 
@@ -50,11 +58,11 @@ This is educational cinema. Every frame teaches. Every animation reveals structu
 
 **Cohesive visual language.** All scenes share a color palette, consistent typography sizing, matching animation speeds. A technically correct video where every scene uses random different colors is an aesthetic failure.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 Run `scripts/setup.sh` to verify all dependencies. Requires: Python 3.10+, Manim Community Edition v0.20+ (`pip install manim`), LaTeX (`texlive-full` on Linux, `mactex` on macOS), and ffmpeg. Reference docs tested against Manim CE v0.20.1.
 
-## Modes
+## Modes {#modes}
 
 | Mode | Input | Output | Reference |
 |------|-------|--------|-----------|
@@ -66,7 +74,7 @@ Run `scripts/setup.sh` to verify all dependencies. Requires: Python 3.10+, Manim
 | **Paper explainer** | Research paper | Key findings and methods animated | `references/scene-planning.md` |
 | **3D visualization** | 3D concept | Rotating surfaces, parametric curves, spatial geometry | `references/camera-and-3d.md` |
 
-## Stack
+## Stack {#stack}
 
 Single Python script per project. No browser, no Node.js, no GPU required.
 
@@ -77,7 +85,7 @@ Single Python script per project. No browser, no Node.js, no GPU required.
 | Video I/O | ffmpeg | Scene stitching, format conversion, audio muxing |
 | TTS | ElevenLabs / Qwen3-TTS (optional) | Narration voiceover |
 
-## Pipeline
+## Pipeline {#pipeline}
 
 ```
 PLAN --> CODE --> RENDER --> STITCH --> AUDIO (optional) --> REVIEW
@@ -90,7 +98,7 @@ PLAN --> CODE --> RENDER --> STITCH --> AUDIO (optional) --> REVIEW
 5. **AUDIO** (optional) — Add voiceover and/or background music via ffmpeg. See `references/rendering.md`
 6. **REVIEW** — Render preview stills, verify against plan, adjust
 
-## Project Structure
+## Project Structure {#project-structure}
 
 ```
 project-name/
@@ -102,9 +110,9 @@ project-name/
     videos/script/480p15/
 ```
 
-## Creative Direction
+## Creative Direction {#creative-direction}
 
-### Color Palettes
+### Color Palettes {#color-palettes}
 
 | Palette | Background | Primary | Secondary | Accent | Use case |
 |---------|-----------|---------|-----------|--------|----------|
@@ -113,7 +121,7 @@ project-name/
 | **Neon tech** | `#0A0A0A` | `#00F5FF` | `#FF00FF` | `#39FF14` | Systems, architecture |
 | **Monochrome** | `#1A1A2E` | `#EAEAEA` | `#888888` | `#FFFFFF` | Minimalist |
 
-### Animation Speed
+### Animation Speed {#animation-speed}
 
 | Context | run_time | self.wait() after |
 |---------|----------|-------------------|
@@ -124,7 +132,7 @@ project-name/
 | FadeOut cleanup | 0.5s | 0.3s |
 | "Aha moment" reveal | 2.5s | 3.0s |
 
-### Typography Scale
+### Typography Scale {#typography-scale}
 
 | Role | Font size | Usage |
 |------|-----------|-------|
@@ -134,7 +142,7 @@ project-name/
 | Label | 24 | Annotations, axis labels |
 | Caption | 20 | Subtitles, fine print |
 
-### Fonts
+### Fonts {#fonts}
 
 **Use monospace fonts for all text.** Manim's Pango renderer produces broken kerning with proportional fonts at all sizes. See `references/visual-design.md` for full recommendations.
 
@@ -148,7 +156,7 @@ MathTex(r"\nabla L")                                            # math (uses LaT
 
 Minimum `font_size=18` for readability.
 
-### Per-Scene Variation
+### Per-Scene Variation {#per-scene-variation}
 
 Never use identical config for all scenes. For each scene:
 - **Different dominant color** from the palette
@@ -156,13 +164,13 @@ Never use identical config for all scenes. For each scene:
 - **Different animation entry** — vary between Write, FadeIn, GrowFromCenter, Create
 - **Different visual weight** — some scenes dense, others sparse
 
-## Workflow
+## Workflow {#workflow}
 
-### Step 1: Plan (plan.md)
+### Step 1: Plan (plan.md) {#step-1-plan-planmd}
 
 Before any code, write `plan.md`. See `references/scene-planning.md` for the comprehensive template.
 
-### Step 2: Code (script.py)
+### Step 2: Code (script.py) {#step-2-code-scriptpy}
 
 One class per scene. Every scene is independently renderable.
 
@@ -191,14 +199,14 @@ Key patterns:
 - **`self.camera.background_color`** set in every scene
 - **Clean exits** — FadeOut all mobjects at scene end: `self.play(FadeOut(Group(*self.mobjects)))`
 
-### Step 3: Render
+### Step 3: Render {#step-3-render}
 
 ```bash
 manim -ql script.py Scene1_Introduction Scene2_CoreConcept  # draft
 manim -qh script.py Scene1_Introduction Scene2_CoreConcept  # production
 ```
 
-### Step 4: Stitch
+### Step 4: Stitch {#step-4-stitch}
 
 ```bash
 cat > concat.txt << 'EOF'
@@ -208,38 +216,38 @@ EOF
 ffmpeg -y -f concat -safe 0 -i concat.txt -c copy final.mp4
 ```
 
-### Step 5: Review
+### Step 5: Review {#step-5-review}
 
 ```bash
 manim -ql --format=png -s script.py Scene2_CoreConcept  # preview still
 ```
 
-## Critical Implementation Notes
+## Critical Implementation Notes {#critical-implementation-notes}
 
-### Raw Strings for LaTeX
+### Raw Strings for LaTeX {#raw-strings-for-latex}
 ```python
 # WRONG: MathTex("\frac{1}{2}")
 # RIGHT:
 MathTex(r"\frac{1}{2}")
 ```
 
-### buff >= 0.5 for Edge Text
+### buff >= 0.5 for Edge Text {#buff--05-for-edge-text}
 ```python
 label.to_edge(DOWN, buff=0.5)  # never < 0.5
 ```
 
-### FadeOut Before Replacing Text
+### FadeOut Before Replacing Text {#fadeout-before-replacing-text}
 ```python
 self.play(ReplacementTransform(note1, note2))  # not Write(note2) on top
 ```
 
-### Never Animate Non-Added Mobjects
+### Never Animate Non-Added Mobjects {#never-animate-non-added-mobjects}
 ```python
 self.play(Create(circle))  # must add first
 self.play(circle.animate.set_color(RED))  # then animate
 ```
 
-## Performance Targets
+## Performance Targets {#performance-targets}
 
 | Quality | Resolution | FPS | Speed |
 |---------|-----------|-----|-------|
@@ -249,7 +257,7 @@ self.play(circle.animate.set_color(RED))  # then animate
 
 Always iterate at `-ql`. Only render `-qh` for final output.
 
-## References
+## References {#references}
 
 | File | Contents |
 |------|----------|
@@ -270,14 +278,14 @@ Always iterate at `-ql`. Only render `-qh` for final output.
 
 ---
 
-## Creative Divergence (use only when user requests experimental/creative/unique output)
+## Creative Divergence (use only when user requests experimental/creative/unique output) {#creative-divergence-use-only-when-user-requests-experimentalcreativeunique-output}
 
 If the user asks for creative, experimental, or unconventional explanatory approaches, select a strategy and reason through it BEFORE designing the animation.
 
 - **SCAMPER** — when the user wants a fresh take on a standard explanation
 - **Assumption Reversal** — when the user wants to challenge how something is typically taught
 
-### SCAMPER Transformation
+### SCAMPER Transformation {#scamper-transformation}
 Take a standard mathematical/technical visualization and transform it:
 - **Substitute**: replace the standard visual metaphor (number line → winding path, matrix → city grid)
 - **Combine**: merge two explanation approaches (algebraic + geometric simultaneously)
@@ -285,7 +293,7 @@ Take a standard mathematical/technical visualization and transform it:
 - **Modify**: exaggerate a parameter to show why it matters (10x the learning rate, 1000x the sample size)
 - **Eliminate**: remove all notation — explain purely through animation and spatial relationships
 
-### Assumption Reversal
+### Assumption Reversal {#assumption-reversal}
 1. List what's "standard" about how this topic is visualized (left-to-right, 2D, discrete steps, formal notation)
 2. Pick the most fundamental assumption
 3. Reverse it (right-to-left derivation, 3D embedding of a 2D concept, continuous morphing instead of steps, zero notation)

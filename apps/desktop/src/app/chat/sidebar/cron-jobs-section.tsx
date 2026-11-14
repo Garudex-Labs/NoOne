@@ -1,15 +1,15 @@
-import { createCronTriggerController, type CronTriggerController } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { createCronTriggerController, type CronTriggerController } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { deleteCronJob, getCronJobRuns, pauseCronJob, resumeCronJob, type SessionInfo } from '@/agent-client'
 import { usePaneVisible } from '@/components/pane-shell/pane-visibility'
 import { ActionsContextMenu, type MenuKit, renderActionItem } from '@/components/ui/actions-menu'
-import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar'
 import { Tip } from '@/components/ui/tooltip'
-import { deleteCronJob, getCronJobRuns, pauseCronJob, resumeCronJob, type SessionInfo } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { fmtDayTime, relativeTime } from '@/lib/time'
 import { cn } from '@/lib/utils'
@@ -18,7 +18,7 @@ import { updateCronJobs } from '@/store/cron'
 import { $changeEventsAvailable, $cronChangeTick } from '@/store/live-sync'
 import { notify, notifyError } from '@/store/notifications'
 import { $selectedStoredSessionId } from '@/store/session'
-import type { CronJob } from '@/types/hermes'
+import type { CronJob } from '@/types/agent-client'
 
 import { jobState, jobTitle, nextRunOverdueMs, STATE_DOT } from '../../cron/job-state'
 import { isCronRunRow, openCronRun, reconcileCronRunVerdicts } from '../../cron/open-cron-run'
@@ -337,7 +337,7 @@ function CronJobSidebarRow({
                     {busy ? (
                       <GlyphSpinner ariaLabel={c.triggerNow} className="text-[0.75rem]" />
                     ) : (
-                      <Codicon name="zap" size="0.75rem" />
+                      <AppIcon name="zap" size="0.75rem" />
                     )}
                   </button>
                 </Tip>
@@ -348,7 +348,7 @@ function CronJobSidebarRow({
                     onClick={onManage}
                     type="button"
                   >
-                    <Codicon name="watch" size="0.75rem" />
+                    <AppIcon name="watch" size="0.75rem" />
                   </button>
                 </Tip>
               </div>

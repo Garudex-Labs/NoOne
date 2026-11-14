@@ -1,38 +1,46 @@
 ---
 title: "Grok — Delegate coding to xAI Grok Build CLI (features, PRs)"
-sidebar_label: "Grok"
+sidebarTitle: "Grok"
 description: "Delegate coding to xAI Grok Build CLI (features, PRs)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Grok
+# Grok {#grok}
 
 Delegate coding to xAI Grok Build CLI (features, PRs).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/autonomous-ai-agents/grok` |
+| Source | Optional — install with `noone skills install official/autonomous-ai-agents/grok` |
 | Path | `optional-skills/autonomous-ai-agents/grok` |
 | Version | `0.1.1` |
-| Author | Matt Maximo (MattMaximo), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Coding-Agent`, `Grok`, `xAI`, `Code-Review`, `Refactoring`, `Automation` |
 | Related skills | [`codex`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-codex.md), [`claude-code`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-claude-code.md), [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Grok Build CLI — Hermes Orchestration Guide
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Grok Build CLI — {{app-name}} Orchestration Guide {#grok-build-cli--hermes-orchestration-guide}
 
 Delegate coding tasks to [Grok Build](https://docs.x.ai/build/overview) (xAI's
-autonomous coding agent CLI, the `grok` command) via the Hermes terminal. Grok
+autonomous coding agent CLI, the `grok` command) via the {{app-name}} terminal. Grok
 can read files, write code, run shell commands, spawn subagents, and manage git
 workflows. It runs three ways: an interactive TUI, **headless** (`-p`), and as
 an **ACP agent** over JSON-RPC.
@@ -41,7 +49,7 @@ This is the third sibling to `codex` and `claude-code`. The orchestration
 pattern is nearly identical — **prefer headless `-p` for one-shots**, use a PTY
 for interactive sessions.
 
-## When to use
+## When to use {#when-to-use}
 
 - Building features
 - Refactoring
@@ -49,7 +57,7 @@ for interactive sessions.
 - Batch issue fixing
 - Any task where you'd otherwise reach for Codex / Claude Code but want Grok
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **Install (preferred):** `npm install -g @xai-official/grok`
   - The official installer `curl -fsSL https://x.ai/cli/install.sh | bash` also
@@ -74,9 +82,9 @@ for interactive sessions.
 > this if `grok login` / SuperGrok auth is unavailable. The subscription path
 > (`grok login`) is the intended setup here.
 
-## Two Orchestration Modes
+## Two Orchestration Modes {#two-orchestration-modes}
 
-### Mode 1: Headless (`-p`) — Non-Interactive (PREFERRED)
+### Mode 1: Headless (`-p`) — Non-Interactive (PREFERRED) {#mode-1-headless--p--non-interactive-preferred}
 
 Runs a one-shot task, prints the result, and exits. No PTY, no interactive
 dialogs to navigate. This is the cleanest integration path — the analog of
@@ -94,7 +102,7 @@ Always pass `--no-auto-update` in automation to skip background update checks.
 - Structured output parsing with `--output-format json`
 - Any task that doesn't need multi-turn conversation
 
-### Mode 2: Interactive PTY — Multi-Turn TUI Sessions
+### Mode 2: Interactive PTY — Multi-Turn TUI Sessions {#mode-2-interactive-pty--multi-turn-tui-sessions}
 
 The TUI is a fullscreen, mouse-interactive app. Drive it with `pty=true`. For
 robust monitoring/input use tmux (same pattern as the `claude-code` skill).
@@ -118,9 +126,9 @@ terminal(command="tmux send-keys -t grok-work '/quit' Enter && sleep 1 && tmux k
 fullscreen alt-screen takeover (e.g. for cleaner logs), add `--no-alt-screen`.
 For pure automation, headless `-p` is still cleaner than the TUI.
 
-## Headless Deep Dive
+## Headless Deep Dive {#headless-deep-dive}
 
-### Common Flags
+### Common Flags {#common-flags}
 
 | Flag | Effect |
 |------|--------|
@@ -137,7 +145,7 @@ For pure automation, headless `-p` is still cleaner than the TUI.
 | `--no-alt-screen` | Run inline, no fullscreen TUI takeover |
 | `--no-auto-update` | Skip background update checks (use in all automation; hidden from `--help` but still works) |
 
-### Output Formats
+### Output Formats {#output-formats}
 
 - `plain` — human-readable text (default)
 - `json` — one JSON object at the end of the run (parse the result cleanly)
@@ -151,7 +159,7 @@ terminal(command="grok --no-auto-update -p 'List all TODO comments in src/' --ou
 terminal(command="grok --no-auto-update --always-approve -p 'Refactor the database layer and run the tests'", workdir="/project", timeout=300)
 ```
 
-### Background Mode (Long Tasks)
+### Background Mode (Long Tasks) {#background-mode-long-tasks}
 
 ```
 # Start headless in background
@@ -169,7 +177,7 @@ process(action="kill", session_id="<id>")
 For an interactive (TUI) background session, use `pty=true` + tmux and monitor
 with `tmux capture-pane`, exactly like the `claude-code` / `codex` skills.
 
-### Session Continuation
+### Session Continuation {#session-continuation}
 
 Sessions are keyed by **UUID**, not by name. `--session-id` assigns a *new* UUID
 to a fresh run (it does **not** resume); `--resume` takes an existing session's
@@ -187,12 +195,12 @@ terminal(command="grok --no-auto-update -r $SID -p 'Now add connection pooling' 
 terminal(command="grok --no-auto-update -c -p 'What did you change last time?'", workdir="/project", timeout=60)
 ```
 
-## Read-Only Audit → Markdown Note Pattern
+## Read-Only Audit → Markdown Note Pattern {#read-only-audit--markdown-note-pattern}
 
 To have Grok review local artifacts and return a clean markdown note (for
 Obsidian or a repo) without mutating anything:
 
-1. Prepare stable input files first with Hermes tools (`read_file`,
+1. Prepare stable input files first with {{app-name}} tools (`read_file`,
    `write_file`). Snapshot only the relevant context into a temp file rather
    than dumping raw paths.
 2. Run Grok headless **without** `--always-approve` so it cannot auto-write, and
@@ -209,27 +217,27 @@ file in, and demand `Return ONLY the full revised markdown document. No intro,
 no explanation, no code fences. Start immediately with '# Title'.` Verify the
 first lines with `read_file()` before overwriting the destination.
 
-## PR Review Patterns
+## PR Review Patterns {#pr-review-patterns}
 
-### Quick Review (Headless)
+### Quick Review (Headless) {#quick-review-headless}
 
 ```
 terminal(command="cd /path/to/repo && git diff main...feature-branch | grok --no-auto-update -p 'Review this diff for bugs, security issues, and style problems. Be thorough.'", timeout=120)
 ```
 
-### Clone-to-temp Review (safe, no repo mutation)
+### Clone-to-temp Review (safe, no repo mutation) {#clone-to-temp-review-safe-no-repo-mutation}
 
 ```
 terminal(command="REVIEW=$(mktemp -d) && git clone https://github.com/user/repo.git $REVIEW && cd $REVIEW && gh pr checkout 42 && grok --no-auto-update -p 'Review the changes vs origin/main. Check bugs, security, race conditions, missing tests.'", pty=true, timeout=300)
 ```
 
-### Post the review
+### Post the review {#post-the-review}
 
 ```
 terminal(command="gh pr comment 42 --body '<review text>'", workdir="/path/to/repo")
 ```
 
-## Parallel Issue Fixing with Worktrees
+## Parallel Issue Fixing with Worktrees {#parallel-issue-fixing-with-worktrees}
 
 ```
 # Create worktrees
@@ -251,7 +259,7 @@ terminal(command="gh pr create --repo user/repo --head fix/issue-78 --title 'fix
 terminal(command="git worktree remove ~/.hermes/cache/scratch/issue-78", workdir="~/project")
 ```
 
-## Useful Subcommands & TUI Commands
+## Useful Subcommands & TUI Commands {#useful-subcommands--tui-commands}
 
 | Command | Purpose |
 |---------|---------|
@@ -267,7 +275,7 @@ TUI slash commands (interactive only): `/model <name>`, `/always-approve`,
 `/quit`. `Shift+Tab` cycles session modes (including Plan mode, which blocks
 write tools except the session plan file).
 
-## Config (`~/.grok/config.toml`)
+## Config (`~/.grok/config.toml`) {#config-grokconfigtoml}
 
 ```toml
 [cli]
@@ -284,12 +292,12 @@ Put global preferences in `~/.grok/config.toml` (not project-scoped
 `.grok/config.toml`). `permission_mode` supersedes the legacy `approval_mode` /
 `yolo = true` keys.
 
-## Pitfalls & Gotchas
+## Pitfalls & Gotchas {#pitfalls--gotchas}
 
 1. **Auth is subscription-gated.** `grok login` requires a SuperGrok or X
    Premium+ subscription. If login fails or there's no `~/.grok/auth.json`,
    confirm the subscription is active before falling back to `XAI_API_KEY`.
-2. **Don't conflate Hermes' xAI auth with the `grok` CLI's auth.** Hermes'
+2. **Don't conflate {{app-name}}' xAI auth with the `grok` CLI's auth.** {{app-name}}'
    `x_search` runs on its own xAI OAuth; the standalone `grok` CLI has a
    separate token in `~/.grok/auth.json`. A working `x_search` does NOT mean
    `grok` is logged in.
@@ -308,7 +316,7 @@ Put global preferences in `~/.grok/config.toml` (not project-scoped
    `mktemp -d && git init` for scratch commit tasks.
 9. **Clean up tmux sessions** with `tmux kill-session -t <name>` when done.
 
-## Rules for Hermes Agents
+## Rules for {{app-name}} Agents {#rules-for-hermes-agents}
 
 1. **Prefer headless `-p`** for single tasks — cleanest integration, structured
    output via `--output-format json`.
@@ -321,6 +329,6 @@ Put global preferences in `~/.grok/config.toml` (not project-scoped
 6. **Use tmux for multi-turn interactive work** and monitor with
    `tmux capture-pane -t <session> -p -S -50`.
 7. **Verify auth before relying on it** — check `~/.grok/auth.json` or run a
-   cheap `grok -p "Say ok."` smoke test; don't assume Hermes' xAI auth carries
+   cheap `grok -p "Say ok."` smoke test; don't assume {{app-name}}' xAI auth carries
    over.
 8. **Report results to the user** — summarize what Grok changed and what's left.

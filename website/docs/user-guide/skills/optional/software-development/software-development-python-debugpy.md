@@ -1,37 +1,45 @@
 ---
 title: "Python Debugpy — Debug Python: pdb REPL + debugpy remote (DAP)"
-sidebar_label: "Python Debugpy"
+sidebarTitle: "Python Debugpy"
 description: "Debug Python: pdb REPL + debugpy remote (DAP)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Python Debugpy
+# Python Debugpy {#python-debugpy}
 
 Debug Python: pdb REPL + debugpy remote (DAP).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/software-development/python-debugpy` |
+| Source | Optional — install with `noone skills install official/software-development/python-debugpy` |
 | Path | `optional-skills/software-development/python-debugpy` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `debugging`, `python`, `pdb`, `debugpy`, `breakpoints`, `dap`, `post-mortem` |
 | Related skills | [`systematic-debugging`](../../bundled/software-development/software-development-systematic-debugging.md), [`node-inspect-debugger`](../../optional/software-development/software-development-node-inspect-debugger.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Python Debugger (pdb + debugpy)
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Python Debugger (pdb + debugpy) {#python-debugger-pdb--debugpy}
+
+## Overview {#overview}
 
 Three tools, picked by situation:
 
@@ -43,17 +51,17 @@ Three tools, picked by situation:
 
 **Start with `breakpoint()`.** It's the cheapest thing that works.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - A test fails and the traceback doesn't reveal why a value is wrong
 - You need to step through a function and watch a collection mutate
-- A long-running process (hermes gateway, tui_gateway) misbehaves and you can't restart it
+- A long-running process (noone gateway, agent_backend) misbehaves and you can't restart it
 - Post-mortem: an exception fired in prod-ish code and you want to inspect locals at the crash site
 - A subprocess / child (Python `_SlashWorker`, PTY bridge worker) is the actual bug site
 
 **Don't use for:** things `print()` / `logging.debug` solve in under a minute, or things `pytest -vv --tb=long --showlocals` already reveals.
 
-## pdb Quick Reference
+## pdb Quick Reference {#pdb-quick-reference}
 
 Inside any pdb prompt (`(Pdb)`):
 
@@ -83,7 +91,7 @@ Inside any pdb prompt (`(Pdb)`):
 
 The `interact` command is the most powerful — you can import anything, inspect complex objects, even call methods that mutate state. Locals are read-only by default; use `!x = 42` from the `(Pdb)` prompt to mutate.
 
-## Recipe 1: Local breakpoint
+## Recipe 1: Local breakpoint {#recipe-1-local-breakpoint}
 
 Easiest. Edit the file:
 
@@ -101,7 +109,7 @@ Run the code normally. You land at the `breakpoint()` line with full access to l
 rg -n 'breakpoint\(\)' --type py
 ```
 
-## Recipe 2: Launch a script under pdb (no source edits)
+## Recipe 2: Launch a script under pdb (no source edits) {#recipe-2-launch-a-script-under-pdb-no-source-edits}
 
 ```bash
 python -m pdb path/to/script.py arg1 arg2
@@ -110,7 +118,7 @@ python -m pdb path/to/script.py arg1 arg2
 (Pdb) c
 ```
 
-## Recipe 3: Debug a pytest test
+## Recipe 3: Debug a pytest test {#recipe-3-debug-a-pytest-test}
 
 Use `terminal` and the canonical runner for noninteractive diagnostics:
 
@@ -130,7 +138,7 @@ Recipe 5 (never a production generation):
 
 This bypasses the hermetic-env guarantees — fine for debugging, but re-run under the wrapper to confirm before pushing.
 
-## Recipe 4: Post-mortem on any exception
+## Recipe 4: Post-mortem on any exception {#recipe-4-post-mortem-on-any-exception}
 
 ```python
 import pdb, sys
@@ -156,15 +164,15 @@ def excepthook(etype, value, tb):
 sys.excepthook = excepthook
 ```
 
-## Recipe 5: Remote debug with debugpy (attach to running process)
+## Recipe 5: Remote debug with debugpy (attach to running process) {#recipe-5-remote-debug-with-debugpy-attach-to-running-process}
 
-For long-lived processes: Hermes gateway, tui_gateway, a daemon, a process that's already misbehaving and can't be restarted clean.
+For long-lived processes: {{app-name}} gateway, agent_backend, a daemon, a process that's already misbehaving and can't be restarted clean.
 
-### Setup
+### Setup {#setup}
 
-For Hermes, use a separate development checkout and data home, not a live
+For {{app-name}}, use a separate development checkout and data home, not a live
 production generation. Follow the
-[PM developer workflow](https://hermes-agent.nousresearch.com/docs/reference/package-management#developer-workflow)
+[PM developer workflow](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/package-management.md#developer-workflow)
 and activate that checkout — PowerShell: `. .\activate.ps1`. The declared `dev`
 extra includes debugpy, which PM activation does not sync (`all` excludes it).
 Through `terminal`, build a fresh, caller-owned debug/test environment with the
@@ -184,7 +192,7 @@ through it. Do not add debugpy to a running production environment; reproduce
 there only with an already-prepared debug target or arrange a restart in the
 development environment.
 
-### Pattern A: Source-edit — process waits for debugger at launch
+### Pattern A: Source-edit — process waits for debugger at launch {#pattern-a-source-edit--process-waits-for-debugger-at-launch}
 
 Add near the top of the entry point (or inside the function you want to debug):
 
@@ -198,7 +206,7 @@ debugpy.breakpoint()       # optional: pause immediately once attached
 
 Start the process; it blocks on `wait_for_client()`.
 
-### Pattern B: No source edit — launch with `-m debugpy`
+### Pattern B: No source edit — launch with `-m debugpy` {#pattern-b-no-source-edit--launch-with--m-debugpy}
 
 ```bash
 .venv/bin/python -m debugpy --listen 127.0.0.1:5678 --wait-for-client your_script.py arg1
@@ -210,7 +218,7 @@ Equivalent for module entry:
 .venv/bin/python -m debugpy --listen 127.0.0.1:5678 --wait-for-client -m your.module
 ```
 
-### Pattern C: Attach to an already-running process
+### Pattern C: Attach to an already-running process {#pattern-c-attach-to-an-already-running-process}
 
 Needs the PID and debugpy preinstalled in the target's environment:
 
@@ -224,9 +232,9 @@ Some kernels/security configs block the ptrace-based injection (`/proc/sys/kerne
 echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
 ```
 
-### Connecting a client from the terminal
+### Connecting a client from the terminal {#connecting-a-client-from-the-terminal}
 
-The easiest terminal-side DAP client is VS Code CLI or a small script. From inside Hermes you have two practical options:
+The easiest terminal-side DAP client is VS Code CLI or a small script. From inside {{app-name}} you have two practical options:
 
 **Option 1: `debugpy`'s own CLI REPL** — not an official feature, but a tiny DAP client script:
 
@@ -286,8 +294,8 @@ This is fine for one-off automation but painful as an interactive UX.
 
 For an independently owned Python project, declare `remote-pdb` in that
 project's development dependencies and prepare its debug environment through
-the project's package manager. This is not a Hermes SDK install recipe. For
-Hermes, prefer the declared debugpy dependency; the remote-pdb examples below
+the project's package manager. This is not a Cosmos SDK install recipe. For
+{{app-name}}, prefer the declared debugpy dependency; the remote-pdb examples below
 require a separately declared, freshly built debug environment, never an
 in-place pip install into the selected application generation.
 
@@ -305,26 +313,26 @@ nc 127.0.0.1 4444
 
 `remote-pdb` is the cleanest agent-friendly choice when `debugpy`'s DAP protocol is overkill. Use `debugpy` only when you actually need IDE integration.
 
-## Debugging Hermes-specific Processes
+## Debugging Hermes-specific Processes {#debugging-hermes-specific-processes}
 
-### Tests
+### Tests {#tests}
 See Recipe 3. The wrapper captures subprocess output, so run pytest directly for interactive pdb.
 
-### `run_agent.py` / CLI — one-shot
+### `run_agent.py` / CLI — one-shot {#run_agentpy--cli--one-shot}
 In the prepared debug checkout, add `breakpoint()` near the suspect line, then
 run `python hermes`. Control returns to your terminal at the pause point.
 
-### `tui_gateway` subprocess (spawned by `hermes --tui`)
+### `agent_backend` subprocess (spawned by `noone --cli`) {#agent_backend-subprocess-spawned-by-hermes---tui}
 The gateway runs as a child of the Node TUI. Options:
 
 **A. Source-edit the gateway:**
 ```python
-# tui_gateway/server.py near the top of serve()
+# agent_backend/server.py near the top of serve()
 import debugpy
 debugpy.listen(("127.0.0.1", 5678))
 debugpy.wait_for_client()
 ```
-Start `python hermes --tui` from the prepared debug checkout. The TUI will appear frozen (its backend is waiting). Attach a client; execution resumes when you `continue`. Check the child's interpreter and imports before assuming it inherited the debug environment.
+Start `python noone --cli` from the prepared debug checkout. The TUI will appear frozen (its backend is waiting). Attach a client; execution resumes when you `continue`. Check the child's interpreter and imports before assuming it inherited the debug environment.
 
 **B. Use `remote-pdb` at a specific handler:**
 ```python
@@ -333,13 +341,13 @@ set_trace(host="127.0.0.1", port=4444)   # in the RPC handler you want to trap
 ```
 Trigger the matching slash command from the TUI, then `nc 127.0.0.1 4444` in another terminal.
 
-### `_SlashWorker` subprocess
+### `_SlashWorker` subprocess {#_slashworker-subprocess}
 Same pattern — `remote-pdb` with `set_trace()` inside the worker's `exec` path. The worker is persistent across slash commands, so the first trigger blocks until you connect; subsequent slash commands pass through normally unless you re-arm.
 
-### Gateway (`gateway/run.py`)
+### Gateway (`gateway/run.py`) {#gateway-gatewayrunpy}
 Long-lived. Use `remote-pdb` at a handler, or `debugpy` with `--wait-for-client` if you're restarting the gateway anyway.
 
-## Common Pitfalls
+## Common Pitfalls {#common-pitfalls}
 
 1. **pdb under a parallel/output-capturing runner silently does nothing.** You won't see the prompt, the test just hangs (true of pytest-xdist and of `scripts/run_tests.sh`'s captured per-file subprocesses). Run pytest directly on a single file for interactive debugging.
 
@@ -360,9 +368,9 @@ Long-lived. Use `remote-pdb` at a handler, or `debugpy` with `--wait-for-client`
 
 8. **`scripts/run_tests.sh` strips credentials and sets `HOME=<tmpdir>`.** If your bug depends on user config or real API keys, it won't reproduce under the wrapper. Debug with raw `pytest` first to repro, then re-confirm under the wrapper.
 
-9. **Forking / multiprocessing.** pdb does not follow forks. Each child needs its own `breakpoint()` or `set_trace()`. For Hermes subagents, debug one process at a time.
+9. **Forking / multiprocessing.** pdb does not follow forks. Each child needs its own `breakpoint()` or `set_trace()`. For {{app-name}} subagents, debug one process at a time.
 
-## Verification Checklist
+## Verification Checklist {#verification-checklist}
 
 - [ ] In the independently built debug environment, confirm: `.venv/bin/python -c "import debugpy; print(debugpy.__version__); print(debugpy.__file__)"`
 - [ ] For remote debug, confirm the port is actually listening: `ss -tlnp | grep 5678`
@@ -373,7 +381,7 @@ Long-lived. Use `remote-pdb` at a handler, or `debugpy` with `--wait-for-client`
   rg -n 'breakpoint\(\)|set_trace\(|debugpy\.listen' --type py
   ```
 
-## One-Shot Recipes
+## One-Shot Recipes {#one-shot-recipes}
 
 **"Why is this dict missing a key?"**
 ```python

@@ -22,7 +22,7 @@ import time
 import uuid
 from pathlib import Path
 from typing import Any, Dict, Optional
-from hermes_dir_acl import make_user_dir
+from agent_dir_acl import make_user_dir
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +43,9 @@ _REPLAYED_UNREMOVABLE: set[Path] = set()
 
 def _get_flush_dir():
     """Return the pending-messages flush directory under the active HERMES_HOME."""
-    from hermes_constants import get_hermes_home
-    flush_dir = get_hermes_home() / "pending_messages"
-    from hermes_constants import assert_named_profile_home_live
+    from agent_constants import get_agent_home
+    flush_dir = get_agent_home() / "pending_messages"
+    from agent_constants import assert_named_profile_home_live
     assert_named_profile_home_live(flush_dir)
     make_user_dir(flush_dir, parents=True, exist_ok=True, mode=0o700)
     if os.name == "posix":
@@ -337,7 +337,7 @@ def recover_pending_spool(session_db=None, *, session_resolver=None) -> tuple[in
         return 0, set()
     own_db = session_db is None
     if own_db:
-        from hermes_state_registry import acquire
+        from agent_state_registry import acquire
         session_db = acquire()
     recovered = 0
     # Sessions whose spool replay already failed this pass -> files held back for them. Ordering is a
@@ -367,7 +367,7 @@ def recover_pending_spool(session_db=None, *, session_resolver=None) -> tuple[in
     finally:
         if own_db:  # shutdown cancellation/interrupt must not strand an owned DB
             with contextlib.suppress(Exception):
-                from hermes_state_registry import release_or_close
+                from agent_state_registry import release_or_close
                 release_or_close(session_db)
     if recovered:
         logger.info("Recovered %d pending message(s) from shutdown flush", recovered)
@@ -450,25 +450,25 @@ def recover_gateway_pending(runner) -> int:
     holds back are marked on the session store, so their next live row drains the spool first.
     """
     from gateway.run import _multiplex_profile_homes
-    from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
 
     store = runner.session_store
     recovered, held_back = recover_pending_spool(session_resolver=store.resolve_session_id_for_key)
     store.mark_spooled_drop_sessions(held_back)
     if not getattr(runner.config, "multiplex_profiles", False):
         return recovered
-    launch_home = Path(get_hermes_home()).resolve()
+    launch_home = Path(get_agent_home()).resolve()
     for name, home in _multiplex_profile_homes(runner.config):
         if Path(home).resolve() == launch_home or not (Path(home) / "pending_messages").is_dir():
             continue
-        token = set_hermes_home_override(str(home))
+        token = set_agent_home_override(str(home))
         try:
             count, held_back = recover_pending_spool(session_resolver=store.resolve_session_id_for_key)
         except Exception:  # one profile's unreadable spool must not strand the others'
             logger.warning("Pending-message recovery failed for profile %s", name, exc_info=True)
             continue
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         recovered += count
         store.mark_spooled_drop_sessions(held_back)
     return recovered

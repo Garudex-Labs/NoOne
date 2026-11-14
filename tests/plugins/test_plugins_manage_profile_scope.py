@@ -2,12 +2,12 @@
 
 Mirrors ``cron.manage`` / ``mcp.servers.*``: when a ``profile`` is passed the
 handler resolves ``get_profile_dir(profile)`` and wraps the action dispatch in
-``set_hermes_home_override`` / ``reset_hermes_home_override``. Because
-``_plugins_dir()`` keys off ``get_hermes_home()``, the list action must then
+``set_agent_home_override`` / ``reset_agent_home_override``. Because
+``_plugins_dir()`` keys off ``get_agent_home()``, the list action must then
 scan THAT profile's ``plugins/`` dir, not the launch profile's.
 """
 
-from tui_gateway import server
+from agent_backend import server
 
 
 def test_plugins_manage_profile_reads_that_profiles_dir(tmp_path, monkeypatch):
@@ -21,7 +21,7 @@ def test_plugins_manage_profile_reads_that_profiles_dir(tmp_path, monkeypatch):
     )
 
     # Route the profile name the handler resolves to our temp home.
-    from hermes_cli import profiles
+    from agent_cli import profiles
 
     monkeypatch.setattr(profiles, "get_profile_dir", lambda name: profile_home)
 
@@ -41,13 +41,13 @@ def test_plugins_manage_profile_reads_that_profiles_dir(tmp_path, monkeypatch):
 
     # The override must not leak: an unscoped call after this one resolves the
     # launch profile again.
-    from hermes_constants import get_hermes_home_override
+    from agent_constants import get_agent_home_override
 
-    assert get_hermes_home_override() is None
+    assert get_agent_home_override() is None
 
 
 def test_plugins_manage_unknown_profile_errors(tmp_path, monkeypatch):
-    from hermes_cli import profiles
+    from agent_cli import profiles
 
     missing = tmp_path / "profiles" / "ghost"
     monkeypatch.setattr(profiles, "get_profile_dir", lambda name: missing)

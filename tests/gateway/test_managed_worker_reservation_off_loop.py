@@ -18,7 +18,7 @@ from tests.waiting import wait_until
 pytestmark = pytest.mark.usefixtures("authority_cwd_in_tmp")  # symbolic profile ids are relative homes
 
 CHILD = """import json, os, sys, time, psutil
-from hermes_cli.process_identity import worker_birth
+from agent_cli.process_identity import worker_birth
 me = psutil.Process()
 out = os.fdopen(os.dup(sys.stdout.fileno()), 'wb', buffering=0)
 def send(frame):
@@ -43,8 +43,8 @@ def test_reservation_and_loss_writes_never_block_the_loop(tmp_path, monkeypatch,
     from gateway.session_authority import LiveSession, SessionAuthority
     from gateway.session_contract import Submission
     from gateway.session_policy import build_policy
-    from hermes_state import SessionDB
-    from hermes_state_runtime import begin_runtime_epoch, claim_session_input
+    from agent_state import SessionDB
+    from agent_state_runtime import begin_runtime_epoch, claim_session_input
 
     monkeypatch.setenv('HERMES_HOME', str(tmp_path))
     db = SessionDB(db_path=tmp_path / 'state.db')

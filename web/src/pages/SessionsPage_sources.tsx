@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity';
 import {
   Clock,
   Database,
@@ -7,7 +8,7 @@ import {
   MessageSquare,
   Play,
   Terminal,
-} from "lucide-react";
+} from "@noone/ui/icons";
 
 export const SOURCE_CONFIG: Record<string, { icon: typeof Terminal; color: string }> =
   {
@@ -19,7 +20,6 @@ export const SOURCE_CONFIG: Record<string, { icon: typeof Terminal; color: strin
     whatsapp: { icon: Globe, color: "text-success" },
     whatsapp_cloud: { icon: Globe, color: "text-success" },
     signal: { icon: MessageCircle, color: "text-success" },
-    matrix: { icon: MessageCircle, color: "text-[oklch(0.65_0.15_250)]" },
     email: { icon: MessageSquare, color: "text-[oklch(0.7_0.15_155)]" },
     sms: { icon: MessageCircle, color: "text-success" },
     cron: { icon: Clock, color: "text-warning" },
@@ -88,7 +88,7 @@ export function sourceLabel(source: string): string {
     case "tool":
       return "Tool";
     case "hermes_flow":
-      return "Hermes Flow";
+      return appText("{app_name} Flow");
     case "vulcan_delegate":
       return "Vulcan delegate";
     case "webhook":

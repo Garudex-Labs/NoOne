@@ -1,4 +1,4 @@
-"""Tests for acp_adapter.server — HermesACPAgent ACP server."""
+"""Tests for acp_adapter.server — ACPAgent ACP server."""
 
 import asyncio
 from pathlib import Path
@@ -26,7 +26,7 @@ from acp.schema import (
 )
 from acp_adapter.auth import TERMINAL_SETUP_AUTH_METHOD_ID
 from acp_adapter.server import (
-    HermesACPAgent,
+    ACPAgent,
 )
 from acp_adapter.session import SessionManager
 
@@ -39,8 +39,8 @@ def mock_manager():
 
 @pytest.fixture()
 def agent(mock_manager):
-    """HermesACPAgent backed by a mock session manager."""
-    return HermesACPAgent(session_manager=mock_manager)
+    """ACPAgent backed by a mock session manager."""
+    return ACPAgent(session_manager=mock_manager)
 
 
 @pytest.mark.asyncio
@@ -171,7 +171,7 @@ class TestSessionOps:
                 base_url="https://api.openai.com/v1",
             )
         )
-        acp_agent = HermesACPAgent(session_manager=manager)
+        acp_agent = ACPAgent(session_manager=manager)
         picker_context = MagicMock()
         picker_context.with_overrides.return_value = picker_context
         payload = {
@@ -193,8 +193,8 @@ class TestSessionOps:
         }
 
         with (
-            patch("hermes_cli.inventory.load_picker_context", return_value=picker_context),
-            patch("hermes_cli.inventory.build_models_payload", return_value=payload),
+            patch("agent_cli.inventory.load_picker_context", return_value=picker_context),
+            patch("agent_cli.inventory.build_models_payload", return_value=payload),
         ):
             resp = await acp_agent.new_session(cwd="/tmp")
 
@@ -467,7 +467,7 @@ class TestPrompt:
                 raise RuntimeError("executor blew up")
             return {"final_response": "ok", "messages": []}
 
-        with patch.object(HermesACPAgent, "_run_agent_turn", side_effect=_turn):
+        with patch.object(ACPAgent, "_run_agent_turn", side_effect=_turn):
             started = asyncio.get_running_loop().time()
             response = await asyncio.wait_for(
                 agent.prompt(prompt=[TextContentBlock(type="text", text="hi")], session_id=resp.session_id),

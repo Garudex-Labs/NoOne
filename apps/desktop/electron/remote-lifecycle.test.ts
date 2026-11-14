@@ -589,7 +589,7 @@ test('metadata and process proof transport failures remain indeterminate', async
 })
 
 test('pidIsOurDashboard requires the exact serve ownership nonce', async () => {
-  const ours = `/x/hermes serve --isolated --ssh-owner-nonce ${SPAWN_NONCE}`
+  const ours = `/x/noone serve --isolated --ssh-owner-nonce ${SPAWN_NONCE}`
   assert.equal(await pidIsOurDashboard(fakeSsh([[/print\("OWNED"/, 'OWNED\n']]), 5, SPAWN_NONCE, '/x/hermes'), true)
   assert.equal(
     await pidIsOurDashboard(
@@ -1600,7 +1600,7 @@ test('validateRemotePath accepts paths with spaces and quotes', () => {
 
 test('validateRemotePath rejects relative paths', () => {
   assert.throws(() => validateRemotePath('hermes'), /absolute|relative/i)
-  assert.throws(() => validateRemotePath('./bin/hermes'), /absolute|relative/i)
+  assert.throws(() => validateRemotePath('./bin/agent-client'), /absolute|relative/i)
   assert.throws(() => validateRemotePath('../etc/passwd'), /absolute|relative/i)
 })
 
@@ -1829,8 +1829,8 @@ test('cleanupStale never deletes a lock-supplied unexpected log path', async () 
 })
 
 test('pidIsOurDashboard requires an exact nonce option value', async () => {
-  const prefix = `/x/hermes serve --isolated --ssh-owner-nonce ${SPAWN_NONCE}ff`
-  const suffix = `/x/hermes serve --isolated --ssh-owner-nonce xx${SPAWN_NONCE}`
+  const prefix = `/x/noone serve --isolated --ssh-owner-nonce ${SPAWN_NONCE}ff`
+  const suffix = `/x/noone serve --isolated --ssh-owner-nonce xx${SPAWN_NONCE}`
   assert.equal(await pidIsOurDashboard(fakeSsh([[/print\("OWNED"/, 'FOREIGN\n']]), 5, SPAWN_NONCE, '/x/hermes'), false)
   assert.equal(await pidIsOurDashboard(fakeSsh([[/print\("OWNED"/, 'FOREIGN\n']]), 5, SPAWN_NONCE, '/x/hermes'), false)
 })

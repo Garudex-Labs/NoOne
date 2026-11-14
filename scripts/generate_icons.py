@@ -6,8 +6,8 @@ Usage (from repo root):
     node scripts/generate-icons.mjs --check   # verify structure
 
 Sources of truth — two axes, composed per target:
-  Girl art (vector):  assets/nous-girl-black.svg  (black positive space)
-                      assets/nous-girl-white.svg  (white positive space)
+  Girl art (vector):  assets/icon.png  (black positive space)
+                      assets/icon.png  (white positive space)
                       straight from the Nous brand kit (Inkscape exports,
                       5487^2 viewBox, one path each).
 
@@ -17,7 +17,7 @@ Sources of truth — two axes, composed per target:
                       assets/backgrounds/squircle-mac-light.svg   mac HIG grid
                       assets/backgrounds/squircle-mac-dark.svg    mac HIG grid
 
-  The master SVGs (assets/icon-master.svg light, assets/icon-master-dark.svg
+  The master SVGs (assets/icon.png light, assets/icon.png
   dark) are GENERATED artifacts — squircle background + scaled girl artwork.
   The light master drives every squircle target;
   the dark master drives the dark-appearance targets. macOS is the exception:
@@ -53,8 +53,8 @@ Dependencies:
     Hermes runtime interpreter (scripts/generate-icons.mjs uses HERMES_PYTHON).
 
 Outputs (99 files):
-  assets/icon-master.svg                              generated light master
-  assets/icon-master-dark.svg                         generated dark master
+  assets/icon.png                              generated light master
+  assets/icon.png                         generated dark master
   apps/desktop/assets/icon.png                        1024x1024 squircle (light)
   apps/desktop/assets/icon.ico                        16,24,32,48,64,128,256
   apps/desktop/assets/icon.icns                       16..1024 (real ICNS)
@@ -78,15 +78,15 @@ Outputs (99 files):
   apps/bootstrap-installer/src-tauri/icons/icon.ico        16,32,64,128,256
   apps/bootstrap-installer/src-tauri/icons/icon.icns       16..1024
   apps/bootstrap-installer/public/nous-girl.png   256x256 squircle mark (light)
-  website/static/img/logo.png                     1772x1799 girl alone, transparent (light)
-  website/static/img/logo-dark.png                1772x1799 girl alone, transparent (dark)
-  website/static/img/nous-logo.png                150x150 on white (opaque)
-  website/static/img/nous-logo-dark.png           150x150 on #0d1117 (opaque)
-  website/static/img/favicon-16x16.png            16x16
-  website/static/img/favicon-32x32.png            32x32
-  website/static/img/apple-touch-icon.png         180x180
-  website/static/img/favicon.ico                  16,32,48
-  website/static/img/favicon.svg                  copy of the light master
+  website/docs/img/logo.png                     1772x1799 girl alone, transparent (light)
+  website/docs/img/logo-dark.png                1772x1799 girl alone, transparent (dark)
+  website/docs/img/nous-logo.png                150x150 on white (opaque)
+  website/docs/img/nous-logo-dark.png           150x150 on #0d1117 (opaque)
+  website/docs/img/favicon-16x16.png            16x16
+  website/docs/img/favicon-32x32.png            32x32
+  website/docs/img/apple-touch-icon.png         180x180
+  website/docs/img/favicon.ico                  16,32,48
+  website/docs/img/favicon.svg                  copy of the light master
   web/public/favicon.ico                          16,32,48
 """
 
@@ -112,7 +112,7 @@ except ImportError:
         "  (HERMES_PYTHON=<hermes venv python> node scripts/generate-icons.mjs)"
     )
 
-# Copy of hermes_cli.update_channel._CANARY_TAG_RE: builders run this renderer
+# Copy of agent_cli.update_channel._CANARY_TAG_RE: builders run this renderer
 # on the runtime dependencies without the application package installed
 # (Docker, bundles). tests/scripts/test_icon_flavors.py pins it to the canonical one.
 _CANARY_TAG_RE = re.compile(
@@ -233,19 +233,19 @@ CHECK_SIZES: dict[str, tuple[str, tuple[int, int]]] = {
     "apps/bootstrap-installer/src-tauri/icons/128x128.png": ("PNG", (128, 128)),
     "apps/bootstrap-installer/src-tauri/icons/128x128@2x.png": ("PNG", (256, 256)),
     "apps/bootstrap-installer/public/nous-girl.png": ("PNG", (256, 256)),
-    "website/static/img/logo.png": ("PNG", (1772, 1799)),
-    "website/static/img/logo-dark.png": ("PNG", (1772, 1799)),
-    "website/static/img/nous-logo.png": ("PNG", (150, 150)),
-    "website/static/img/nous-logo-dark.png": ("PNG", (150, 150)),
-    "website/static/img/favicon-16x16.png": ("PNG", (16, 16)),
-    "website/static/img/favicon-32x32.png": ("PNG", (32, 32)),
-    "website/static/img/apple-touch-icon.png": ("PNG", (180, 180)),
+    "website/docs/img/logo.png": ("PNG", (1772, 1799)),
+    "website/docs/img/logo-dark.png": ("PNG", (1772, 1799)),
+    "website/docs/img/nous-logo.png": ("PNG", (150, 150)),
+    "website/docs/img/nous-logo-dark.png": ("PNG", (150, 150)),
+    "website/docs/img/favicon-16x16.png": ("PNG", (16, 16)),
+    "website/docs/img/favicon-32x32.png": ("PNG", (32, 32)),
+    "website/docs/img/apple-touch-icon.png": ("PNG", (180, 180)),
 }
 
 # (relpath, kind, arg)
 TARGETS: list[tuple[str, str, object]] = [
-    ("assets/icon-master.svg", "svg", None),
-    ("assets/icon-master-dark.svg", "svg_dark", None),
+    ("assets/icon.png", "svg", None),
+    ("assets/icon.png", "svg_dark", None),
     ("apps/desktop/assets/icon.png", "png", 1024),
     ("apps/desktop/assets/icon.ico", "ico", [16, 24, 32, 48, 64, 128, 256]),
     ("apps/desktop/assets/icon.icns", "icns", None),
@@ -279,15 +279,15 @@ TARGETS: list[tuple[str, str, object]] = [
     ("apps/bootstrap-installer/src-tauri/icons/icon.icon/Assets/art-dark.png", "icon_art", "white"),
     ("apps/bootstrap-installer/src-tauri/icons/icon.icon/Assets/mono.png", "icon_mono", None),
     ("apps/bootstrap-installer/public/nous-girl.png", "girl_light", 256),
-    ("website/static/img/logo.png", "logo", None),
-    ("website/static/img/logo-dark.png", "logo_dark", None),
-    ("website/static/img/nous-logo.png", "png_white", 150),
-    ("website/static/img/nous-logo-dark.png", "png_dark_white", 150),
-    ("website/static/img/favicon-16x16.png", "png", 16),
-    ("website/static/img/favicon-32x32.png", "png", 32),
-    ("website/static/img/apple-touch-icon.png", "png", 180),
-    ("website/static/img/favicon.ico", "ico", [16, 32, 48]),
-    ("website/static/img/favicon.svg", "svg_copy", None),
+    ("website/docs/img/logo.png", "logo", None),
+    ("website/docs/img/logo-dark.png", "logo_dark", None),
+    ("website/docs/img/nous-logo.png", "png_white", 150),
+    ("website/docs/img/nous-logo-dark.png", "png_dark_white", 150),
+    ("website/docs/img/favicon-16x16.png", "png", 16),
+    ("website/docs/img/favicon-32x32.png", "png", 32),
+    ("website/docs/img/apple-touch-icon.png", "png", 180),
+    ("website/docs/img/favicon.ico", "ico", [16, 32, 48]),
+    ("website/docs/img/favicon.svg", "svg_copy", None),
     ("web/public/favicon.ico", "ico", [16, 32, 48]),
 ]
 

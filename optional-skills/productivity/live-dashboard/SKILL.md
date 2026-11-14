@@ -2,7 +2,7 @@
 name: live-dashboard
 description: "Build self-updating dashboards from live sources."
 version: 0.2.0
-author: Teknium (teknium1), Hermes Agent
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

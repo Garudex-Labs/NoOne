@@ -8,10 +8,10 @@ import json
 from pathlib import Path
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from agent.secret_scope import build_profile_secret_scope, reset_secret_scope, set_secret_scope
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 
 # Whether the main model sees images natively is a models.dev catalog verdict. A fresh home has no
@@ -35,12 +35,12 @@ class _scoped:
         self.home = home
 
     def __enter__(self):
-        self._t1 = set_hermes_home_override(str(self.home))
+        self._t1 = set_agent_home_override(str(self.home))
         self._t2 = set_secret_scope(build_profile_secret_scope(self.home))
 
     def __exit__(self, *_):
         reset_secret_scope(self._t2)
-        reset_hermes_home_override(self._t1)
+        reset_agent_home_override(self._t1)
 
 
 @pytest.fixture

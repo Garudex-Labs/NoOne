@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { fieldCopyForSchemaKey } from '@/app/settings/field-copy'
@@ -18,14 +19,14 @@ describe('desktop i18n runtime translator', () => {
   it('translates string paths for the active runtime locale', () => {
     setRuntimeI18nLocale('zh')
 
-    expect(translateNow('boot.ready')).toBe(zh.boot.ready)
+    expect(translateNow('boot.ready')).toBe(appText(zh.boot.ready))
     expect(translateNow('assistant.tool.statusRecovered')).toBe(zh.assistant.tool.statusRecovered)
-    expect(translateNow('boot.ready')).not.toBe(TRANSLATIONS.en.boot.ready)
+    expect(translateNow('boot.ready')).not.toBe(appText(TRANSLATIONS.en.boot.ready))
   })
 
   it('passes arguments to function translations', () => {
     expect(translateNow('notifications.updateReadyMessage', 2)).toBe(
-      TRANSLATIONS.en.notifications.updateReadyMessage(2)
+      appText(TRANSLATIONS.en.notifications.updateReadyMessage(2))
     )
     expect(translateNow('notifications.updateReadyMessage', 2)).toContain('2')
   })
@@ -45,7 +46,7 @@ describe('desktop i18n runtime translator', () => {
       boot.ready = undefined
       setRuntimeI18nLocale('ja')
 
-      expect(translateNow('boot.ready')).toBe(TRANSLATIONS.en.boot.ready)
+      expect(translateNow('boot.ready')).toBe(appText(TRANSLATIONS.en.boot.ready))
     } finally {
       boot.ready = originalReady
     }

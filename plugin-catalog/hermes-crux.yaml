@@ -11,7 +11,7 @@ version: "0.1.0"
 docs_url: https://github.com/tony-simons-aiowa/hermes-crux/blob/2249e11a820678aee446141d4c4d9e2d432b7a5f/README.md
 screenshots:
   - https://raw.githubusercontent.com/tony-simons-aiowa/hermes-crux/2249e11a820678aee446141d4c4d9e2d432b7a5f/docs/screenshots/atlas.png
-  - https://raw.githubusercontent.com/tony-simons-aiowa/hermes-crux/2249e11a820678aee446141d4c4d9e2d432b7a5f/docs/screenshots/native-hermes.png
+  - https://raw.githubusercontent.com/tony-simons-aiowa/hermes-crux/2249e11a820678aee446141d4c4d9e2d432b7a5f/docs/screenshots/native-agent.png
   - https://raw.githubusercontent.com/tony-simons-aiowa/hermes-crux/2249e11a820678aee446141d4c4d9e2d432b7a5f/docs/screenshots/mobile.png
 readme: true
 capabilities:

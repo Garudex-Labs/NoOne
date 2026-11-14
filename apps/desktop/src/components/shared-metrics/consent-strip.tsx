@@ -1,10 +1,10 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useMemo, useState } from 'react'
 
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { StatusRow } from '@/components/chat/status-row'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 import { notifyError } from '@/store/notifications'
 import { $activeGatewayProfile, normalizeProfileKey } from '@/store/profile'
@@ -48,7 +48,7 @@ export function SharedMetricsConsentStrip() {
 
   return (
     <StatusRow
-      leading={<Codicon aria-hidden className="text-(--ui-text-tertiary)" name="graph" size="0.8rem" />}
+      leading={<AppIcon aria-hidden className="text-(--ui-text-tertiary)" name="graph" size="0.8rem" />}
       trailing={
         <>
           {CHOICES.map(choice => (

@@ -39,9 +39,9 @@ MUSL_TARGETS = frozenset({"linux-x64-musl", "linux-arm64-musl"})
 def _native_machine() -> str:
     """Native host arch; PM also runs alone before the app is importable."""
     try:
-        from hermes_platform.host.facts import native_arch
+        from agent_platform.host.facts import native_arch
     except ModuleNotFoundError as exc:
-        if exc.name != "hermes_platform" and not "hermes_platform".startswith(f"{exc.name}."):
+        if exc.name != "agent_platform" and not "agent_platform".startswith(f"{exc.name}."):
             raise
     else:
         return native_arch()
@@ -499,7 +499,7 @@ class Store:
         lock = self.root / ".install.lock"
         fd = os.open(lock, os.O_CREAT | os.O_RDWR, 0o600)
         try:
-            # A second `hermes pm install` behind an sdist build otherwise sits
+            # A second `noone pm install` behind an sdist build otherwise sits
             # silent for minutes; say what it is waiting on.
             if not lock_fd(fd, wait=True, timeout=2):
                 print(f"waiting for {lock} (another PM operation holds it)", file=sys.stderr, flush=True)

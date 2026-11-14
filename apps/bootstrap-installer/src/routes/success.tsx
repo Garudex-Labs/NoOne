@@ -1,13 +1,14 @@
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle } from '@noone/ui/icons'
 import { useState } from 'react'
 import { type CSSProperties } from 'react'
 
+import { appText } from '../application-identity'
 import { HackeryButton } from '../components/hackery-button'
 import { launchHermesDesktop } from '../store'
 
 /*
  * Success screen. HERMES AGENT wordmark stays as the visual anchor
- * (same Collapse Bold treatment as Welcome + the desktop chat intro),
+ * (same shared UI bold face as Welcome + the desktop chat intro),
  * with a status line below.
  *
  * Launching the desktop can fail (e.g. Stage-Desktop was skipped and
@@ -38,7 +39,7 @@ export default function Success() {
     <div className="hermes-fade-in flex h-full flex-col items-center justify-center gap-8 px-12 py-10">
       <div className="w-full max-w-2xl min-w-0 text-center">
         <p
-          className="fit-text mx-auto mb-4 w-full font-['Collapse'] font-bold uppercase leading-[0.9] tracking-[0.08em] text-midground mix-blend-plus-lighter dark:text-foreground/90"
+          className="fit-text mx-auto mb-4 w-full font-sans font-bold uppercase leading-[0.9] tracking-[0.08em] text-midground mix-blend-plus-lighter dark:text-foreground/90"
           style={
             {
               '--fit-text-line-height': '0.9',
@@ -48,9 +49,9 @@ export default function Success() {
           }
         >
           <span>
-            <span>Hermes is ready</span>
+            <span>{appText('{app_name} is ready')}</span>
           </span>
-          <span aria-hidden="true">Hermes is ready</span>
+          <span aria-hidden="true">{appText('{app_name} is ready')}</span>
         </p>
 
         <p className="m-0 text-center text-base leading-normal tracking-tight text-muted-foreground">

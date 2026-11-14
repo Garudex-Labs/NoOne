@@ -1,9 +1,10 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { PawPrint } from '@noone/ui/icons'
+
 import { PixelEggSprite } from '@/components/pet/pixel-egg-sprite'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { PawPrint } from '@/lib/icons'
 import { selectableCardClass } from '@/lib/selectable-card'
 import { cn } from '@/lib/utils'
 
@@ -100,7 +101,7 @@ export function DraftGrid({
                     type="button"
                     variant="ghost"
                   >
-                    <Codicon name="git-branch" size={12} />
+                    <AppIcon name="git-branch" size={12} />
                   </Button>
                 </Tip>
               )}

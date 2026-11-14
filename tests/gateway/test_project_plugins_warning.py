@@ -22,7 +22,7 @@ async def _owner(home, monkeypatch):
     owner = await initialize_session_authority(runner, profile_id=str(home), instance_id='fixture')
     # This fixture's runner has no adapter table: hand session.info the session's frozen policy.
     from gateway import session_policy
-    from hermes_state_local import local_receipt
+    from agent_state_local import local_receipt
     monkeypatch.setattr(session_policy, 'policy_for_source', lambda runner, source: session_policy.restore_policy(
         local_receipt(owner.db, source.chat_id)['policy']))
     return owner, AuthorityConnection(owner, object(), {'user_id': 'owner'})
@@ -65,7 +65,7 @@ async def test_an_opted_in_session_is_told_project_plugins_do_not_load(tmp_path,
 async def test_session_create_carries_the_notice_through_its_strict_wire_contract(tmp_path, monkeypatch):
     """The notice also rides the snapshot ``session.create`` returns: it must pass that method's declared
     result contract (strict here, as under ``HERMES_TEST_ISOLATION``), for both session-start notices."""
-    from tui_gateway.contracts import registry
+    from agent_backend.contracts import registry
     monkeypatch.setattr(registry, 'STRICT', True)
     home, repo = tmp_path / 'home', tmp_path / 'repo'
     home.mkdir()
@@ -124,7 +124,7 @@ async def test_an_unlistable_plugins_folder_never_blocks_the_session(tmp_path, m
 
 
 def test_classic_cli_prints_the_sessions_config_warning(capsys):
-    from hermes_cli.gateway_session_store import GatewaySessionStore
+    from agent_cli.gateway_session_store import GatewaySessionStore
 
     class Connection:
         final = False

@@ -1,60 +1,68 @@
 ---
 title: "Apple Notes — Manage Apple Notes via memo CLI: create, search, edit"
-sidebar_label: "Apple Notes"
+sidebarTitle: "Apple Notes"
 description: "Manage Apple Notes via memo CLI: create, search, edit"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Apple Notes
+# Apple Notes {#apple-notes}
 
 Manage Apple Notes via memo CLI: create, search, edit.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/apple/apple-notes` |
 | Version | `1.0.1` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | macos |
 | Tags | `Notes`, `Apple`, `macOS`, `note-taking` |
 | Related skills | [`obsidian`](../../bundled/note-taking/note-taking-obsidian.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Apple Notes
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Apple Notes {#apple-notes-1}
 
 Use `memo` to manage Apple Notes directly from the terminal. Notes sync across all Apple devices via iCloud.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **macOS** with Notes.app
 - Install: `brew tap antoniorodr/memo && brew install antoniorodr/memo/memo`
 - Grant Automation access to Notes.app when prompted (System Settings → Privacy → Automation)
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks to create, view, or search Apple Notes
 - Saving information to Notes.app for cross-device access
 - Organizing notes into folders
 - Exporting notes to Markdown/HTML
 
-## When NOT to Use
+## When NOT to Use {#when-not-to-use}
 
 - Obsidian vault management → use the `obsidian` skill
 - Bear Notes → separate app (not supported here)
 - Quick agent-only notes → use the `memory` tool instead
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
-### View Notes
+### View Notes {#view-notes}
 
 ```bash
 memo notes                        # List all notes
@@ -62,7 +70,7 @@ memo notes -f "Folder Name"       # Filter by folder
 memo notes -s "query"             # Search notes (fuzzy)
 ```
 
-### Create Notes
+### Create Notes {#create-notes}
 
 ```bash
 memo notes -a                     # Add a note (opens your $EDITOR)
@@ -73,37 +81,37 @@ memo notes -a -f "Folder Name"    # Add a note into a specific folder
 not take a title argument. Use `-f/--folder` to target a folder. Set `$EDITOR`
 first (e.g. `export EDITOR=vim`).
 
-### Edit Notes
+### Edit Notes {#edit-notes}
 
 ```bash
 memo notes -e                     # Interactive selection to edit
 ```
 
-### Delete Notes
+### Delete Notes {#delete-notes}
 
 ```bash
 memo notes -d                     # Interactive selection to delete
 ```
 
-### Move Notes
+### Move Notes {#move-notes}
 
 ```bash
 memo notes -m                     # Move note to folder (interactive)
 ```
 
-### Export Notes
+### Export Notes {#export-notes}
 
 ```bash
 memo notes -ex                    # Export to HTML/Markdown
 ```
 
-## Limitations
+## Limitations {#limitations}
 
 - Cannot edit notes containing images or attachments
 - Interactive prompts require terminal access (use pty=true if needed)
 - macOS only — requires Apple Notes.app
 
-## Rules
+## Rules {#rules}
 
 1. Prefer Apple Notes when user wants cross-device sync (iPhone/iPad/Mac)
 2. Use the `memory` tool for agent-internal notes that don't need to sync

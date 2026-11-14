@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 /**
  * Join a Hermes backend base URL with a renderer-supplied API path.
  *
@@ -10,18 +11,18 @@
 
 export function joinBackendApiUrl(baseUrl: string, path: unknown): string {
   if (typeof path !== 'string' || path.length === 0) {
-    throw new Error('Hermes API path must be a non-empty string.')
+    throw new Error(appText('{app_name} API path must be a non-empty string.'))
   }
 
   // Single leading slash only: `@evil/` and `//evil/` must not retarget the host.
   if (!path.startsWith('/') || path.startsWith('//')) {
-    throw new Error('Hermes API path must be a relative path starting with a single "/".')
+    throw new Error(appText('{app_name} API path must be a relative path starting with a single "/".'))
   }
 
   const baseRaw = String(baseUrl || '').replace(/\/+$/, '')
 
   if (!baseRaw) {
-    throw new Error('Hermes backend base URL is required.')
+    throw new Error(appText('{app_name} backend base URL is required.'))
   }
 
   let base: URL
@@ -31,19 +32,19 @@ export function joinBackendApiUrl(baseUrl: string, path: unknown): string {
     base = new URL(baseRaw)
     joined = new URL(`${baseRaw}${path}`)
   } catch (error: any) {
-    throw new Error(`Invalid Hermes backend API URL: ${error?.message || error}`)
+    throw new Error(appText(`Invalid {app_name} backend API URL: ${error?.message || error}`))
   }
 
   if (joined.protocol !== 'http:' && joined.protocol !== 'https:') {
-    throw new Error(`Unsupported Hermes backend URL protocol: ${joined.protocol}`)
+    throw new Error(appText(`Unsupported {app_name} backend URL protocol: ${joined.protocol}`))
   }
 
   if (joined.origin !== base.origin) {
-    throw new Error('Hermes API path must not change the backend origin.')
+    throw new Error(appText('{app_name} API path must not change the backend origin.'))
   }
 
   if (joined.username || joined.password) {
-    throw new Error('Hermes API URL must not include userinfo.')
+    throw new Error(appText('{app_name} API URL must not include userinfo.'))
   }
 
   return `${baseRaw}${path}`

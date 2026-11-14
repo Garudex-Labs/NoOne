@@ -9,7 +9,7 @@ import type { Translations } from './types'
  *  Bundled panes (the Sessions sidebar, Bot Mode's roster) register during
  *  module import — BEFORE `I18nProvider` has fetched `display.language` from
  *  the backend — so a `translateNow(...)` there resolves English and the strip
- *  keeps reading SESSIONS / BOTS on a Russian install. Hand this to
+ *  keeps reading SESSIONS / BOTS on a localized install. Hand this to
  *  `data.tabTitle` instead: it subscribes to the live locale like any component
  *  and re-renders the tab when the language loads or the user switches it.
  *  `title` stays as the string fallback for the non-React readers. */

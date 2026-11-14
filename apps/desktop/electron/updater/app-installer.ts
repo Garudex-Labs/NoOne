@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 // updater/app-installer.ts — the win32 out-of-store MSIX strategy.
 //
 // The OS App Installer owns the apply. The package was installed from an
@@ -156,7 +157,7 @@ export class AppInstallerStrategy {
 
     this.deps.emitUpdateProgress({
       stage: 'restart',
-      message: 'Applying the Hermes update — the window will close and the App Installer will finish.',
+      message: appText('Applying the {app_name} update — the window will close and the App Installer will finish.'),
       percent: 100
     })
 
@@ -171,7 +172,7 @@ export class AppInstallerStrategy {
             this.deps.emitUpdateProgress({
               stage: 'restart',
               percent: 100,
-              message: 'Automatic relaunch could not be registered. Reopen Hermes after App Installer finishes.'
+              message: appText('Automatic relaunch could not be registered. Reopen {app_name} after App Installer finishes.')
             })
         }
       },

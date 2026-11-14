@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { AlertCircle, Check, Copy, ExternalLink, Terminal } from '@noone/ui/icons'
 import { useEffect, useState } from 'react'
 
 import { SETTINGS_ROUTE } from '@/app/routes'
@@ -30,7 +31,6 @@ import type {
 import { useI18n } from '@/i18n'
 import { writeClipboardText } from '@/lib/clipboard'
 import { buildCommitChangelog, type CommitGroup, formatFullChangelogText } from '@/lib/commit-changelog'
-import { AlertCircle, Check, Copy, ExternalLink, Terminal } from '@/lib/icons'
 import { resolveUpdateCopy, rollbackRelease, type UpdateTarget } from '@/lib/update-copy'
 import { fetchUpdateNoteItems, updateNotesSource, updateNotesUrl, updateReleaseTag } from '@/lib/update-notes'
 import { cn } from '@/lib/utils'

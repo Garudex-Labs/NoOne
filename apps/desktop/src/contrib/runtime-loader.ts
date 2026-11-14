@@ -2,9 +2,9 @@
  * Runtime plugin loader — plugins as CODE, not registry edits, loaded after
  * build time. The pipeline every non-bundled plugin takes:
  *
- *   source (plain ESM js) -> import allowlist (`@hermes/plugin-sdk` / `react*`
+ *   source (plain ESM js) -> import allowlist (`@noone/plugin-sdk` / `react*`
  *   only) -> bare-specifier rewrite to live shim blobs (see sdk/runtime.ts)
- *   -> blob `import()` -> validate default HermesPlugin -> register(ctx)
+ *   -> blob `import()` -> validate default AgentPlugin -> register(ctx)
  *
  * Loading the same plugin id again disposes the previous registrations first
  * (agent rewrites a plugin file -> clean reload) — everything taken out
@@ -25,7 +25,7 @@
  * listeners) — a plugin can't crash the app, but it can do anything the app
  * can. That's acceptable for local sources (disk files can already run code),
  * and for catalog installs the trust comes from admission (human review of
- * an exact pinned SHA + the static lint in hermes_cli/plugin_validate_desktop.py),
+ * an exact pinned SHA + the static lint in agent_cli/plugin_validate_desktop.py),
  * not from this loader. The import allowlist below is the one runtime tripwire:
  * a plugin cannot pull a second stage from a URL. The Webapp's HTTP door
  * (`/api/desktop-plugins/*`, browser-desktop-plugins.ts) counts as local: it is
@@ -35,7 +35,7 @@
  * (iframe/worker + CSP + capability gating) before it can land.
  */
 
-import { INSTALL_ORIGIN, PACKAGE_MARKER } from '@hermes/shared'
+import { INSTALL_ORIGIN, PACKAGE_MARKER } from '@noone/shared'
 import { atom } from 'nanostores'
 
 import { isReadFileErrorResult } from '@/lib/desktop-fs'
@@ -44,7 +44,7 @@ import { notifyError } from '@/store/notifications'
 import { forgetPluginPreviewAccess } from '@/store/plugin-preview-grants'
 
 import { trackGatewayEventDisposers } from './events'
-import { createPluginContext, declaredCapabilities, type HermesPlugin } from './plugin'
+import { type AgentPlugin, createPluginContext, declaredCapabilities } from './plugin'
 import {
   $pluginRecords,
   dropPlugin,
@@ -330,7 +330,7 @@ function inCode(ranges: Array<[number, number]>, at: number): boolean {
   return false
 }
 
-/** Rewrite ONLY mapped import specifiers (@hermes/plugin-sdk, react*) to their
+/** Rewrite ONLY mapped import specifiers (@noone/plugin-sdk, react*) to their
  *  live shim blob URLs — never occurrences inside strings/comments. */
 function rewriteSpecifiers(source: string): string {
   const map = sdkImportMap()
@@ -342,7 +342,7 @@ function rewriteSpecifiers(source: string): string {
 }
 
 /** Import specifiers outside the SDK map. Everything that is not
- *  `@hermes/plugin-sdk` / `react*` is refused up-front: a bare package would
+ *  `@noone/plugin-sdk` / `react*` is refused up-front: a bare package would
  *  only fail later as a cryptic native "Failed to resolve module specifier",
  *  a relative path cannot resolve against the blob: base the module is
  *  evaluated from, and a URL scheme (`import 'https://…'`) is a second stage
@@ -403,18 +403,18 @@ export async function loadRuntimePlugin(
     if (unsupported.length > 0) {
       throw new Error(
         `unsupported import${unsupported.length > 1 ? 's' : ''}: ${unsupported.join(', ')} — ` +
-          `runtime plugins may only import @hermes/plugin-sdk and react`
+          `runtime plugins may only import @noone/plugin-sdk and react`
       )
     }
 
     const url = URL.createObjectURL(new Blob([rewriteSpecifiers(source)], { type: 'text/javascript' }))
 
-    let mod: { default?: HermesPlugin }
+    let mod: { default?: AgentPlugin }
     let deadline: ReturnType<typeof setTimeout> | undefined
 
     try {
       mod = await Promise.race([
-        import(/* @vite-ignore */ url) as Promise<{ default?: HermesPlugin }>,
+        import(/* @vite-ignore */ url) as Promise<{ default?: AgentPlugin }>,
         new Promise<never>((_, reject) => {
           deadline = setTimeout(
             () =>
@@ -433,7 +433,7 @@ export async function loadRuntimePlugin(
     const plugin = mod.default
 
     if (!plugin?.id || typeof plugin.register !== 'function') {
-      throw new Error(`${origin} has no valid default HermesPlugin export`)
+      throw new Error(`${origin} has no valid default AgentPlugin export`)
     }
 
     // A disk/runtime copy of a plugin that now ships BUNDLED (e.g. a

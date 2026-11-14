@@ -21,13 +21,13 @@ describe('hub-iframe-policy predicates', () => {
     expect(isHermesHubOrigin('')).toBe(false)
     expect(isHermesHubOrigin(null)).toBe(false)
     expect(isHermesHubOrigin(undefined)).toBe(false)
-    expect(isHermesHubOrigin('https://hermes-agent.nousresearch.com.evil.example')).toBe(false)
+    expect(isHermesHubOrigin('https://github.com/Garudex-Labs/NoOne/tree/main/website/docs.evil.example')).toBe(false)
     expect(isHermesHubOrigin('https://evil.example')).toBe(false)
     expect(isHermesHubOrigin('file://')).toBe(false)
   })
 
   it('delegates only http/https/mailto external URLs', () => {
-    expect(isHermesHubExternalUrl('https://github.com/NousResearch/hermes-agent')).toBe(true)
+    expect(isHermesHubExternalUrl('https://github.com/Garudex-Labs/NoOne')).toBe(true)
     expect(isHermesHubExternalUrl('http://example.com/docs')).toBe(true)
     expect(isHermesHubExternalUrl('mailto:support@example.com')).toBe(true)
 
@@ -47,7 +47,7 @@ describe('hub-iframe-policy predicates', () => {
 })
 
 describe('createWindowOpenHandler trusted-hub delegation', () => {
-  const baseDetails = { url: 'https://github.com/NousResearch/hermes-agent' }
+  const baseDetails = { url: 'https://github.com/Garudex-Labs/NoOne' }
 
   it('still denies artifact frames (opaque origin) with NO external open', () => {
     const openExternalUrl = vi.fn()
@@ -70,7 +70,7 @@ describe('createWindowOpenHandler trusted-hub delegation', () => {
     })
 
     expect(handler(baseDetails)).toEqual({ action: 'deny' })
-    expect(openExternalUrl).toHaveBeenCalledExactlyOnceWith('https://github.com/NousResearch/hermes-agent')
+    expect(openExternalUrl).toHaveBeenCalledExactlyOnceWith('https://github.com/Garudex-Labs/NoOne')
   })
 
   it('delegates from the fallback (GitHub Pages) hub origin too', () => {
@@ -103,7 +103,7 @@ describe('createWindowOpenHandler trusted-hub delegation', () => {
     const openExternalUrl = vi.fn()
 
     const handler = createWindowOpenHandler(undefined, {
-      getOpenerOrigin: () => 'https://hermes-agent.nousresearch.com.evil.example',
+      getOpenerOrigin: () => 'https://github.com/Garudex-Labs/NoOne/tree/main/website/docs.evil.example',
       openExternalUrl
     })
 

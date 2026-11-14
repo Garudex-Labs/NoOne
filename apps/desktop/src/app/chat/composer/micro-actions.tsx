@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo, useState } from 'react'
 
 import { composerFloatingPill } from '@/components/chat/composer-dock'
-import { Codicon } from '@/components/ui/codicon'
 import { useSessionSlice } from '@/lib/use-session-slice'
 import { cn } from '@/lib/utils'
 import { $composerActionsBySession, type ComposerAction } from '@/store/composer-actions'
@@ -63,7 +63,7 @@ export const ActionBadges = memo(function ActionBadges({ sessionId }: { sessionI
         onClick={() => void run(action)}
         type="button"
       >
-        {glyph && <Codicon className="shrink-0 opacity-70" name={glyph} size="0.75rem" spinning={running} />}
+        {glyph && <AppIcon className="shrink-0 opacity-70" name={glyph} size="0.75rem" spinning={running} />}
         <span className="truncate">{action.label}</span>
       </button>
     )

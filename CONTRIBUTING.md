@@ -1,6 +1,6 @@
-# Contributing to Hermes Agent
+# Contributing to NoOne
 
-Thank you for contributing to Hermes Agent! This guide covers everything you need: setting up your dev environment, understanding the architecture, deciding what to build, and getting your PR merged.
+Thank you for contributing to NoOne! This guide covers everything you need: setting up your dev environment, understanding the architecture, deciding what to build, and getting your PR merged.
 
 ---
 
@@ -9,7 +9,7 @@ Thank you for contributing to Hermes Agent! This guide covers everything you nee
 We value contributions in this order:
 
 1. **Bug fixes** — crashes, incorrect behavior, data loss. Always top priority.
-2. **Cross-platform compatibility** — macOS, different Linux distros, and WSL2 on Windows. We want Hermes to work everywhere.
+2. **Cross-platform compatibility** — macOS, different Linux distros, and WSL2 on Windows. We want NoOne to work everywhere.
 3. **Security hardening** — shell injection, prompt injection, path traversal, privilege escalation. See [Security](#security-considerations).
 4. **Performance and robustness** — retry logic, error handling, graceful degradation.
 5. **New skills** — but only broadly useful ones. See [Should it be a Skill or a Tool?](#should-it-be-a-skill-or-a-tool)
@@ -24,15 +24,15 @@ A quick search before you build saves your time and keeps the PR queue clean —
 
 - **Search both open *and* merged PRs and issues** for your topic or error symptom — the duplicate-check in the PR template fires at review time, after you've already done the work:
   ```bash
-  gh search issues --repo NousResearch/hermes-agent "<your terms>"
-  gh search prs --repo NousResearch/hermes-agent --state all "<your terms>"
+  gh search issues --repo Garudex-Labs/NoOne "<your terms>"
+  gh search prs --repo Garudex-Labs/NoOne --state all "<your terms>"
   ```
-  Or use the web UI: [issues](https://github.com/NousResearch/hermes-agent/issues?q=) · [PRs (all states)](https://github.com/NousResearch/hermes-agent/pulls?q=is%3Apr).
+  Or use the web UI: [issues](https://github.com/Garudex-Labs/NoOne/issues?q=) · [PRs (all states)](https://github.com/Garudex-Labs/NoOne/pulls?q=is%3Apr).
 - **The issue tracker can lag the code.** Many requested features are already implemented in-tree, so also search the source (`search_files`, or your editor's grep) for the capability before proposing it.
 - **If an open PR already addresses it**, consider reviewing or improving that one instead of opening a competing duplicate.
 - **For larger work**, comment on the issue to signal you're working on it, so others don't start the same thing.
 
-Related: #38284 covers the agent-side analog — Hermes itself checking existing issues and PRs before deep self-troubleshooting. This section is the human-contributor complement.
+Related: #38284 covers the agent-side analog — NoOne itself checking existing issues and PRs before deep self-troubleshooting. This section is the human-contributor complement.
 
 ---
 
@@ -56,14 +56,14 @@ This is the most common question for new contributors. The answer is almost alwa
 
 ### Should the Skill be bundled?
 
-Bundled skills (in `skills/`) ship with every Hermes install. They should be **broadly useful to most users**:
+Bundled skills (in `skills/`) ship with every NoOne install. They should be **broadly useful to most users**:
 
 - Document handling, web research, common dev workflows, system administration
 - Used regularly by a wide range of people
 
-If your skill is official and useful but not universally needed (e.g., a paid service integration, a heavyweight dependency), put it in **`optional-skills/`** — it ships with the repo but isn't activated by default. Users can discover it via `hermes skills browse` (labeled "official") and install it with `hermes skills install` (no third-party warning, built-in trust).
+If your skill is official and useful but not universally needed (e.g., a paid service integration, a heavyweight dependency), put it in **`optional-skills/`** — it ships with the repo but isn't activated by default. Users can discover it via `noone skills browse` (labeled "official") and install it with `noone skills install` (no third-party warning, built-in trust).
 
-If your skill is specialized, community-contributed, or niche, it's better suited for a **Skills Hub** — upload it to a skills registry and share it in the [Nous Research Discord](https://discord.gg/NousResearch). Users can install it with `hermes skills install`.
+If your skill is specialized, community-contributed, or niche, it's better suited for a **Skills Hub** — upload it to a skills registry and share it in the [project issues](https://github.com/Garudex-Labs/NoOne/issues). Users can install it with `noone skills install`.
 
 ---
 
@@ -89,14 +89,14 @@ This isn't a quality bar — it's a coupling-and-maintenance decision. Memory pr
 
 The same rule extends to **any plugin that integrates someone else's product or project** — observability/metrics backends, vendor SaaS connectors, analytics dashboards, paid-service tie-ins, and similar third-party integrations. **These do not land in this repo.**
 
-The reason is maintenance load, not quality. Every external product absorbed into the core tree becomes ours to keep working against a fast-moving codebase, for a backend we don't own and can't control. Hermes ships a lot and the core moves quickly; coupling third-party products into it creates an open-ended burden on the maintainers.
+The reason is maintenance load, not quality. Every external product absorbed into the core tree becomes ours to keep working against a fast-moving codebase, for a backend we don't own and can't control. NoOne ships a lot and the core moves quickly; coupling third-party products into it creates an open-ended burden on the maintainers.
 
 Publish these as a **standalone plugin repo** instead:
 
-- Implement the relevant ABC and use the existing plugin discovery path (`~/.hermes/plugins/`, project `.hermes/plugins/`, or a pip entry point) — see [Build a Hermes Plugin](https://hermes-agent.nousresearch.com/docs/guides/build-a-hermes-plugin)
+- Implement the relevant ABC and use the existing plugin discovery path (`~/.hermes/plugins/`, project `.hermes/plugins/`, or a pip entry point) — see [Build a plugin](website/docs/developer-guide/plugins/index.md)
 - Register lifecycle hooks (`pre_tool_call`, `post_tool_call`, `pre_llm_call`, `post_llm_call`, `on_session_start`, `on_session_end`), tools (`ctx.register_tool`), and CLI subcommands (`ctx.register_cli_command`) through the surface we already expose — no core changes needed
 - If your plugin needs a capability the framework doesn't expose, that's a feature request to **widen the generic plugin surface** (a new hook or `ctx` method) — never special-case your plugin in core
-- Promote it in the [Nous Research Discord](https://discord.gg/NousResearch) `#plugins-skills-and-skins` channel so users can find and install it
+- Promote it in the [project issues](https://github.com/Garudex-Labs/NoOne/issues) so users can find and install it
 
 A well-built third-party-product plugin can clear automated review and still be closed for this reason — it's a placement decision, not a verdict on the code. PRs that add such a directory under `plugins/` will be closed with a pointer to publish it as its own repo.
 
@@ -104,9 +104,9 @@ A well-built third-party-product plugin can clear automated review and still be 
 
 ## Submitting a Plugin to the Catalog
 
-A standalone plugin reaches users through the [plugin catalog](https://hermes-agent.nousresearch.com/docs/plugins): a PR to this repo adding one `plugin-catalog/<name>.yaml` file that pins your repo at an exact commit. Read **[Submitting to the plugin catalog](https://hermes-agent.nousresearch.com/docs/developer-guide/plugins/catalog-submission)** before opening one. It covers what to check first (`hermes plugins validate --install-deps`), how review works, and every admission rule. The canonical rules live in [`plugin-catalog/README.md`](plugin-catalog/README.md); if you change them, change the mirrored block in the docs page in the same PR (a test keeps the two identical).
+A standalone plugin reaches users through the [plugin catalog](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/plugins.mdx): a PR to this repo adding one `plugin-catalog/<name>.yaml` file that pins your repo at an exact commit. Read **[Submitting to the plugin catalog](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/developer-guide/plugins/catalog-submission.md)** before opening one. It covers what to check first (`noone plugins validate --install-deps`), how review works, and every admission rule. The canonical rules live in [`plugin-catalog/README.md`](plugin-catalog/README.md); if you change them, change the mirrored block in the docs page in the same PR (a test keeps the two identical).
 
-The rules that most often send a submission back: the plugin must extend Hermes only through public hooks, `ctx.register_*` APIs and the Desktop SDK (no patching core code or Desktop markup at runtime), must not update itself, must declare the capabilities it registers, and must disclose risky behaviour.
+The rules that most often send a submission back: the plugin must extend NoOne only through public hooks, `ctx.register_*` APIs and the Desktop SDK (no patching core code or Desktop markup at runtime), must not update itself, must declare the capabilities it registers, and must disclose risky behaviour.
 
 ---
 
@@ -134,21 +134,21 @@ Bash:
 
 ```bash
 source ./activate
-hermes --version
+noone --version
 ```
 
 fish:
 
 ```fish
 source ./activate.fish
-hermes --version
+noone --version
 ```
 
 PowerShell:
 
 ```powershell
 . .\activate.ps1
-hermes --version
+noone --version
 ```
 
 Run `hermes` for this checkout. Activation defines it as a function for this
@@ -159,7 +159,7 @@ install JS workspaces or rewrite launchers and shell configuration. `deactivate`
 restores the prior shell environment and removes the function.
 
 To run one command in the environment without activating a shell, use
-`scripts/run-in-hermes-env CMD...`.
+`scripts/run-in-agent-env CMD...`.
 
 ### Developer commands (`just`)
 
@@ -169,12 +169,12 @@ script or tool in this repository, so the commands below also work without
 
 | Recipe | Runs |
 |---|---|
-| `just setup` | `setup-hermes.sh --runtime-only --test-environment` (PowerShell: `setup-hermes.ps1 -RuntimeOnly`) |
+| `just setup` | `setup-agent.sh --runtime-only --test-environment` (PowerShell: `setup-agent.ps1 -RuntimeOnly`) |
 | `just check` | `scripts/check`, every blocking lint check; `just check --only health` selects checks |
 | `just fix` | the pinned ruff with `--fix`, then `pnpm -r fix` |
 | `just test <paths>` | `scripts/run_tests.sh <paths>`; refuses to start without a path, even with flags |
 | `just test-all` | the full Python suite |
-| `just js-install`, `just check-js`, `just test-js` | `pnpm install --frozen-lockfile`, `pnpm -r check`, `pnpm -r test` (after building `@hermes/ink`) |
+| `just js-install`, `just check-js`, `just test-js` | `pnpm install --frozen-lockfile`, `pnpm -r check`, `pnpm -r test` |
 | `just desktop`, `just tui` | the desktop and TUI dev servers |
 | `just docs-install`, `just docs-build` | the website's `npm ci` and `build:fast` |
 | `just docs-generate`, `just docs-check` | regenerate the skill docs pages; then every docs check CI runs (committed pages match, links, diagrams) |
@@ -183,7 +183,7 @@ script or tool in this repository, so the commands below also work without
 | `just check-icons`, `just lint-docker`, `just check-plugin-catalog`, `just check-nix` | the committed-icons check, hadolint and shellcheck on the container inputs, the catalog validator, `nix flake check` |
 | `just test-catalog`, `just test-whatsapp-bridge`, `just test-rust` | the plugin-catalog tests, the WhatsApp bridge's node tests (after `just js-install-whatsapp-bridge`), the bootstrap installer's `cargo test --lib` |
 
-Recipes that run Python go through `scripts/run-in-hermes-env`, so they work in
+Recipes that run Python go through `scripts/run-in-agent-env`, so they work in
 a shell that was never activated. A new developer command is a script under
 `scripts/` plus a recipe that calls it; the recipe holds no logic.
 
@@ -223,7 +223,7 @@ This test environment does not replace PM's application selection or tool
 store. Do not point a bundled app at it or install into an MSIX payload.
 
 For an isolated development instance, select a disposable `HERMES_HOME` before
-starting the source command. Use `hermes setup` to configure it rather
+starting the source command. Use `noone setup` to configure it rather
 than copying production credentials into the checkout.
 
 ### JavaScript workspaces and website
@@ -265,7 +265,7 @@ Native desktop dependencies can also require the platform build toolchain.
 
 Logos and icons are generated from `assets/nous-girl-*.svg` and
 `assets/backgrounds/`. `node scripts/generate-icons.mjs` (`just icons`) renders them with the
-Hermes runtime Python (`HERMES_PYTHON`, else `python` on PATH): Pillow and
+NoOne runtime Python (`HERMES_PYTHON`, else `python` on PATH): Pillow and
 resvg-py are core dependencies. Generated outputs are committed and CI fails if
 they are stale; rerun the generator and commit after changing any source SVG.
 
@@ -297,10 +297,10 @@ See [Package management](website/docs/reference/package-management.md) for PM co
 ```
 hermes-agent/
 ├── run_agent.py              # AIAgent facade (~1.5k LOC) — the turn loop lives in agent/conversation_loop.py + agent/turn_*.py
-├── cli.py                    # HermesCLI class — interactive CLI orchestrator (~4.6k LOC + hermes_cli/cli_*_mixin.py)
+├── cli.py                    # AgentCLI class — interactive CLI orchestrator (~4.6k LOC + agent_cli/cli_*_mixin.py)
 ├── model_tools.py            # Tool orchestration (thin layer over tools/registry.py)
 ├── toolsets.py               # Tool groupings and presets (hermes-cli, hermes-telegram, etc.)
-├── hermes_state.py           # SessionDB facade (~1.4k LOC); implementation in hermes_state_*.py (21 siblings) — FTS5 search, session titles
+├── agent_state.py           # SessionDB facade (~1.4k LOC); implementation in agent_state_*.py (21 siblings) — FTS5 search, session titles
 ├── batch_runner.py           # Parallel batch processing for trajectory generation
 │
 ├── agent/                    # Agent internals (extracted modules)
@@ -314,9 +314,9 @@ hermes-agent/
 │   ├── model_metadata.py         # Model context lengths, token estimation
 │   └── trajectory.py             # Trajectory saving helpers
 │
-├── hermes_cli/               # CLI command implementations
+├── agent_cli/               # CLI command implementations
 │   ├── main.py                   # Entry point, argument parsing, command dispatch
-│   ├── cli_*_mixin.py            # HermesCLI mixins (slash commands, display, session, ...)
+│   ├── cli_*_mixin.py            # AgentCLI mixins (slash commands, display, session, ...)
 │   ├── config.py                 # Config management, migration, env var definitions
 │   ├── setup.py                  # Interactive setup wizard
 │   ├── auth.py                   # Provider resolution, OAuth, Nous Portal (facade + auth_*.py siblings)
@@ -364,7 +364,7 @@ hermes-agent/
 ├── skills/                   # Bundled skills (copied to ~/.hermes/skills/ on install)
 ├── optional-skills/          # Official optional skills (discoverable via hub, not activated by default)
 ├── tests/                    # Test suite
-├── website/                  # Documentation site (hermes-agent.nousresearch.com)
+├── website/                  # Documentation source (website/docs)
 │
 ├── cli-config.yaml.example   # Example configuration (copied to ~/.hermes/config.yaml)
 └── AGENTS.md                 # Development guide for AI coding assistants
@@ -409,7 +409,7 @@ User message → AIAgent._run_agent_loop()
 
 - **Self-registering tools**: Each tool file calls `registry.register()` at import time. `model_tools.py` triggers discovery by importing all tool modules.
 - **Toolset grouping**: Tools are grouped into toolsets (`web`, `terminal`, `file`, `browser`, etc.) that can be enabled/disabled per platform.
-- **Session persistence**: All conversations are stored in SQLite (`hermes_state.py`) with full-text search and unique session titles. Automatic per-session JSON snapshots have been removed. Existing files are left untouched; use `/save json` or `hermes sessions export` for an explicit export.
+- **Session persistence**: All conversations are stored in SQLite (`agent_state.py`) with full-text search and unique session titles. Automatic per-session JSON snapshots have been removed. Existing files are left untouched; use `/save json` or `noone sessions export` for an explicit export.
 - **Ephemeral injection**: System prompts and prefill messages are injected at API call time, never persisted to the database or logs.
 - **Provider abstraction**: The agent works with any OpenAI-compatible API. Provider resolution happens at init time (Nous Portal OAuth, OpenRouter API key, or custom endpoint).
 - **Provider routing**: When using OpenRouter, `provider_routing` in config.yaml controls provider selection (sort by throughput/latency/price, allow/ignore specific providers, data retention policies). These are injected as `extra_body.provider` in API requests.
@@ -487,7 +487,7 @@ imported by `discover_builtin_tools()` in `tools/registry.py` when `model_tools`
 loads. There is **no** manual import list in `model_tools.py` to maintain.
 
 You must still add the tool name to the appropriate list in `toolsets.py`
-(for example `_HERMES_CORE_TOOLS` or a dedicated toolset); otherwise the tool
+(for example `_CORE_AGENT_TOOLS` or a dedicated toolset); otherwise the tool
 registers but is never exposed to the agent. If you introduce a new toolset,
 add it in `toolsets.py` and wire it into the relevant platform presets.
 
@@ -635,7 +635,7 @@ required_environment_variables:
     required_for: full functionality
 ```
 
-The user may skip setup and keep loading the skill. Hermes only exposes metadata (`stored_as`, `skipped`, `validated`) to the model — never the secret value.
+The user may skip setup and keep loading the skill. NoOne only exposes metadata (`stored_as`, `skipped`, `validated`) to the model — never the secret value.
 
 Legacy `prerequisites.env_vars` remains supported and is normalized into the new representation.
 
@@ -645,7 +645,7 @@ prerequisites:
   commands: [curl, jq]            # Advisory CLI checks
 ```
 
-Gateway and messaging sessions never collect secrets in-band; they instruct the user to run `hermes setup` or update `~/.hermes/.env` locally.
+Gateway and messaging sessions never collect secrets in-band; they instruct the user to run `noone setup` or update `~/.hermes/.env` locally.
 
 **When to declare required environment variables:**
 - The skill uses an API key or token that should be collected securely at load time
@@ -673,7 +673,7 @@ Every new or modernized skill — bundled, optional, or contributed — must mee
    Good: `Search arXiv papers by keyword, author, category, or ID.`
    Bad: `A powerful and comprehensive skill that allows the agent to search arXiv for relevant academic papers using various criteria including keywords, authors, and categories.`
 
-2. **Tools referenced in SKILL.md prose must be native Hermes tools or MCP servers the skill explicitly expects.** When the skill needs a capability, point at the proper tool by name in backticks: `` `terminal` ``, `` `web_extract` ``, `` `web_search` ``, `` `read_file` ``, `` `write_file` ``, `` `patch` ``, `` `search_files` ``, `` `vision_analyze` ``, `` `browser_exec` ``, `` `delegate_task` ``, `` `image_generate` ``, `` `text_to_speech` ``, `` `cronjob` ``, `` `memory` ``, `` `skill_view` ``, `` `todo` ``, `` `execute_code` ``.
+2. **Tools referenced in SKILL.md prose must be native NoOne tools or MCP servers the skill explicitly expects.** When the skill needs a capability, point at the proper tool by name in backticks: `` `terminal` ``, `` `web_extract` ``, `` `web_search` ``, `` `read_file` ``, `` `write_file` ``, `` `patch` ``, `` `search_files` ``, `` `vision_analyze` ``, `` `browser_exec` ``, `` `delegate_task` ``, `` `image_generate` ``, `` `text_to_speech` ``, `` `cronjob` ``, `` `memory` ``, `` `skill_view` ``, `` `todo` ``, `` `execute_code` ``.
 
    Do NOT name shell utilities the agent already has wrapped:
 
@@ -690,7 +690,7 @@ Every new or modernized skill — bundled, optional, or contributed — must mee
 
 3. **`platforms:` gating audited against actual script imports.** Skills that use POSIX-only primitives (`fcntl`, `termios`, `os.setsid`, `os.kill(pid, 0)` for liveness, `/proc`, hardcoded `/tmp` paths, `signal.SIGKILL`, bash heredocs, `osascript`, `apt`, `systemctl`) must declare their supported platforms via the `platforms:` frontmatter. Default posture is to fix it cross-platform first — `tempfile.gettempdir()`, `pathlib.Path`, `psutil.pid_exists()`, Python-level filtering instead of `grep`. Gate to a narrower set only when the dependency is genuinely platform-bound (e.g. `osascript` is macOS-only, `/proc` is Linux-only). <!-- no-tmp: ok — names the POSIX-only anti-pattern reviewers look for -->
 
-4. **`author` credits the human contributor first.** For external contributions, the contributor's real name + GitHub handle goes first (`Jane Doe (jane-doe)`); "Hermes Agent" is the secondary collaborator. If the contributor's commit shows "Hermes Agent" as author because they used Hermes to draft the skill, replace it with their actual name — credit the human, not the tool.
+4. **`author` credits the human contributor first.** For external contributions, the contributor's real name + GitHub handle goes first (`Jane Doe (jane-doe)`); "NoOne" is the secondary collaborator. If the contributor's commit shows "NoOne" as author because they used NoOne to draft the skill, replace it with their actual name — credit the human, not the tool.
 
 5. **SKILL.md body uses the modern section order.** `# <Skill> Skill` title, 2-3 sentence intro stating what it does and what it doesn't do, then:
    - `## When to Use` — trigger conditions
@@ -711,16 +711,16 @@ Every new or modernized skill — bundled, optional, or contributed — must mee
 
 ### Skill guidelines
 
-- **No external dependencies unless absolutely necessary.** Prefer stdlib Python, curl, and existing Hermes tools (`web_extract`, `terminal`, `read_file`).
+- **No external dependencies unless absolutely necessary.** Prefer stdlib Python, curl, and existing NoOne tools (`web_extract`, `terminal`, `read_file`).
 - **Progressive disclosure.** Put the most common workflow first. Edge cases and advanced usage go at the bottom.
 - **Include helper scripts** for XML/JSON parsing or complex logic — don't expect the LLM to write parsers inline every time.
-- **Test it.** Run `hermes --toolsets skills -q "Use the X skill to do Y"` and verify the agent follows the instructions correctly.
+- **Test it.** Run `noone --toolsets skills -q "Use the X skill to do Y"` and verify the agent follows the instructions correctly.
 
 ---
 
 ## Adding a Skin / Theme
 
-Hermes uses a data-driven skin system — no code changes needed to add a new skin.
+NoOne uses a data-driven skin system — no code changes needed to add a new skin.
 
 **Option A: User skin (YAML file)**
 
@@ -758,19 +758,19 @@ All fields are optional — missing values inherit from the default skin.
 
 **Option B: Built-in skin**
 
-Add to `_BUILTIN_SKINS` dict in `hermes_cli/skin_engine.py`. Use the same schema as above but as a Python dict. Built-in skins ship with the package and are always available.
+Add to `_BUILTIN_SKINS` dict in `agent_cli/skin_engine.py`. Use the same schema as above but as a Python dict. Built-in skins ship with the package and are always available.
 
 **Activating:**
 - CLI: `/skin mytheme` or set `display.skin: mytheme` in config.yaml
 - Config: `display: { skin: mytheme }`
 
-See `hermes_cli/skin_engine.py` for the full schema and existing skins as examples.
+See `agent_cli/skin_engine.py` for the full schema and existing skins as examples.
 
 ---
 
 ## Cross-Platform Compatibility
 
-Hermes runs on Linux, macOS, and native Windows (plus WSL2). When writing code
+NoOne runs on Linux, macOS, and native Windows (plus WSL2). When writing code
 that touches the OS, assume *any* platform can hit your code path.
 
 > **Before you PR:** run `scripts/check-windows-footguns.py` to catch the
@@ -817,7 +817,7 @@ that touches the OS, assume *any* platform can hit your code path.
 
    For process enumeration: PowerShell's `Get-CimInstance Win32_Process` is
    the modern replacement for `wmic process`. See
-   `hermes_cli/gateway.py::_scan_gateway_pids` for the pattern.
+   `agent_cli/gateway.py::_scan_gateway_pids` for the pattern.
    ```
 
 3. **File encoding.** Windows may save `.env` files in `cp1252`. Always
@@ -884,7 +884,7 @@ that touches the OS, assume *any* platform can hit your code path.
     process. `pythonw.exe` is the no-console variant. Combine with
     `CREATE_NO_WINDOW | DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP |
     CREATE_BREAKAWAY_FROM_JOB` in `subprocess.Popen(creationflags=...)`.
-    See `hermes_cli/gateway_windows.py::_spawn_detached` for the reference
+    See `agent_cli/gateway_windows.py::_spawn_detached` for the reference
     implementation.
 
 10. **`subprocess.Popen` with `.cmd` or `.bat` shims needs `shutil.which`
@@ -922,7 +922,7 @@ that touches the OS, assume *any* platform can hit your code path.
     (["schtasks", "/TR", some_cmd])` → schtasks itself parses `/TR`, AND
     the `some_cmd` string is re-parsed by `cmd.exe` when the task fires.
     Different parsers, different escape rules. Use two separate quoting
-    helpers and never cross them. See `hermes_cli/gateway_windows.py::
+    helpers and never cross them. See `agent_cli/gateway_windows.py::
     _quote_cmd_script_arg` and `_quote_schtasks_arg` for the reference
     pair.
 
@@ -1072,8 +1072,8 @@ test(tools): add unit tests for file_operations
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/NousResearch/hermes-agent/issues)
-- Include: OS, Python version, Hermes version (`hermes --version`), full error traceback
+- Use [GitHub Issues](https://github.com/Garudex-Labs/NoOne/issues)
+- Include: OS, Python version, Hermes version (`noone --version`), full error traceback
 - Include steps to reproduce
 - Check existing issues before creating duplicates
 - For security vulnerabilities, please report privately
@@ -1082,7 +1082,7 @@ test(tools): add unit tests for file_operations
 
 ## Community
 
-- **Discord**: [discord.gg/NousResearch](https://discord.gg/NousResearch) — for questions, showcasing projects, and sharing skills
+- **Questions and feedback**: [project issues](https://github.com/Garudex-Labs/NoOne/issues) — for questions, showcasing projects, and sharing skills
 - **GitHub Discussions**: For design proposals and architecture discussions
 - **Skills Hub**: Upload specialized skills to a registry and share them with the community
 

@@ -20,15 +20,15 @@ from dataclasses import dataclass
 from datetime import datetime, timezone, UTC
 from pathlib import Path
 from typing import Any, Callable, Iterable, NamedTuple, Optional
-from hermes_dir_acl import make_user_dir
+from agent_dir_acl import make_user_dir
 
 from gateway.status_inline_source import (
     command_line_runs_inline_source,
     inline_bootstrap_argv,
     inline_source_flag_index,
 )
-from hermes_constants import _get_platform_default_hermes_home, get_hermes_home, get_process_hermes_home
-from hermes_cli._subprocess_compat import pid_exists_stdlib
+from agent_constants import _get_platform_default_hermes_home, get_agent_home, get_process_agent_home
+from agent_cli._subprocess_compat import pid_exists_stdlib
 from gateway.status_lock_dir import unusable_lock_dir, unusable_lock_dir_recovered
 from utils import atomic_json_write
 
@@ -208,7 +208,7 @@ def record_start_and_check_storm(
     """Record this start; :class:`StormInfo` when > ``max_starts`` landed in ``window_s``.
     Best-effort: a broken ``gateway-starts.log`` ledger is logged and swallowed, never fatal."""
     try:
-        path = get_hermes_home() / "gateway-starts.log"
+        path = get_agent_home() / "gateway-starts.log"
         make_user_dir(path.parent, parents=True, exist_ok=True)
         now = datetime.now(UTC).timestamp()
         existing: list[float] = []
@@ -239,9 +239,9 @@ def record_start_and_check_storm(
 
 def _get_process_hermes_home() -> Path:
     """Launch-home HERMES_HOME for identity files (PID, lock, status, markers):
-    ``get_hermes_home()`` honors the per-session ``_HERMES_HOME_OVERRIDE`` and would misroute
+    ``get_agent_home()`` honors the per-session ``_HERMES_HOME_OVERRIDE`` and would misroute
     them."""
-    return get_process_hermes_home()
+    return get_process_agent_home()
 
 
 def _canonical_hermes_home(path: Path | str) -> Path:
@@ -272,8 +272,8 @@ def recorded_gateway_home_conflicts(
         return True
 
 
-# Mirrors hermes_cli.profiles._PROFILE_ID_RE -- duplicated so gateway identity code
-# stays import-light (hermes_constants + stdlib only).
+# Mirrors agent_cli.profiles._PROFILE_ID_RE -- duplicated so gateway identity code
+# stays import-light (agent_constants + stdlib only).
 _PROFILE_LABEL_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
 
 
@@ -285,8 +285,8 @@ def _profile_label_for_home(home: Path | str) -> Optional[str]:
         return None
     if canonical.parent.name == "profiles" and _PROFILE_LABEL_RE.match(canonical.name):
         return canonical.name
-    import hermes_constants
-    default_homes = (hermes_constants.get_default_hermes_root, _get_platform_default_hermes_home)
+    import agent_constants
+    default_homes = (agent_constants.get_default_agent_root, _get_platform_default_hermes_home)
     for default_home in default_homes:
         with contextlib.suppress(Exception):
             if _same_hermes_home(canonical, default_home()):
@@ -382,11 +382,11 @@ def retained_gateway_state(runtime: Any) -> str:
     ``"startup_failed"`` (or a watchdog-stamped ``"degraded"``) only while the operator still
     wants it running, else ``"stopped"``.
 
-    ``hermes gateway stop`` keeps the last ``startup_failed`` + ``exit_reason`` on disk for
+    ``noone gateway stop`` keeps the last ``startup_failed`` + ``exit_reason`` on disk for
     diagnostics and records the durable stop intent as ``desired_state``; a profile the operator
     stopped is "stopped", not a current failure. A watchdog exit (``degraded`` + an exit_reason in
     ``WATCHDOG_EXIT_REASONS``) is the same kind of current failure as ``startup_failed`` and is kept
-    under the same rule, so the dashboard agrees with ``hermes gateway status``. Any other retained
+    under the same rule, so the dashboard agrees with ``noone gateway status``. Any other retained
     state of a dead process (``running``, ``starting``, missing) is just "stopped". Shared by
     ``/api/status`` and ``/api/messaging/platforms`` so the sidebar strip and the Channels page
     cannot disagree."""
@@ -425,7 +425,7 @@ def terminate_pid(
         os.kill(pid, signal.SIGTERM if not force else getattr(signal, "SIGKILL", signal.SIGTERM))
         return
     # Hide flags: a bare taskkill spawn from windowless pythonw.exe would flash a conhost window.
-    from hermes_cli._subprocess_compat import windows_hide_flags
+    from agent_cli._subprocess_compat import windows_hide_flags
 
     try:
         result = subprocess.run(
@@ -498,7 +498,7 @@ def _get_process_start_time(pid: int) -> Optional[int]:
     # process_birth: macOS's clock-step-stable kernel start (#140580); unchanged with no step.
     try:
         import psutil  # type: ignore
-        from hermes_cli.process_identity import process_birth
+        from agent_cli.process_identity import process_birth
         return round(process_birth(psutil.Process(pid)) * 100)
     except Exception:
         return None
@@ -540,7 +540,7 @@ def _read_process_cmdline(pid: int) -> Optional[str]:
 
 def _gateway_command_subcommand(command: str | None) -> str | None:
     """Hermes gateway lifecycle subcommand from a command line, or None. No loose substring matches
-    (``"gateway" in cmdline`` also matched ``gateway status`` / ``python -m tui_gateway``): needs a
+    (``"gateway" in cmdline`` also matched ``gateway status`` / ``python -m agent_backend``): needs a
     Hermes entrypoint plus the ``gateway`` subcommand, or a gateway-dedicated entrypoint. Tokenizes
     quote-aware (Windows paths with spaces); ``--profile``/``-p`` selectors are stripped anywhere in
     argv since ``_apply_profile_override`` removes them before argparse."""
@@ -556,7 +556,7 @@ def _gateway_command_subcommand(command: str | None) -> str | None:
     if not tokens:
         return None
     basenames = [t.rsplit("/", 1)[-1] for t in tokens]
-    # ``python -c <src> … -m hermes_cli.main gateway run``: the trailing argv belongs to the program
+    # ``python -c <src> … -m agent_cli.main gateway run``: the trailing argv belongs to the program
     # the inline source will spawn later, not to this process (#107002). Case-preserving tokens:
     # the operand-taking ``-X``/``-W``/``-Q`` must not be conflated with ``-q``/``-b``.
     if command_line_runs_inline_source(cased_tokens):
@@ -585,11 +585,11 @@ def _gateway_command_subcommand(command: str | None) -> str | None:
     # (e.g. the Discord bot-token lock). See #22418.
     if any(b == "desktop-gateway.py" for b in basenames):
         return "run"
-    if any(b in ("hermes-gateway", "hermes-gateway.exe") for b in basenames):
+    if any(b in ("agent-gateway", "agent-gateway.exe", "hermes-gateway", "hermes-gateway.exe") for b in basenames):
         return "run"
     joined = " ".join(tokens)
-    if "hermes_cli.main" not in joined and "hermes_cli/main.py" not in joined and not any(
-        b in ("hermes", "hermes.exe") for b in basenames
+    if not any(entry in joined for entry in ("agent_cli.main", "agent_cli/main.py", "hermes_cli.main", "hermes_cli/main.py")) and not any(
+        b in ("noone", "noone.exe", "hermes", "hermes.exe") for b in basenames
     ):
         return None
     # Drop --profile X / -p X / --profile=X / -p=X (consumes a VALUE of "gateway" too).
@@ -604,7 +604,7 @@ def _gateway_command_subcommand(command: str | None) -> str | None:
             filtered.append(token)
     for i, token in enumerate(filtered):
         if token == "gateway":
-            # Bare `hermes gateway` defaults to `run`.
+            # Bare `noone gateway` defaults to `run`.
             return filtered[i + 1] if i + 1 < len(filtered) else "run"
     return None
 
@@ -616,7 +616,7 @@ def gateway_spawn_intent_subcommand(command: str | None) -> str | None:
     …``: the trailing argv is the inline program's data, not that process's own identity (#107002).
     Callers that inspect a command line as SPAWN INTENT — "if I launch this, does a gateway runtime
     eventually appear?" — need the opposite answer, because
-    ``gateway._spawn_gateway_restart_watcher`` hides a real ``… -m hermes_cli.main gateway run``
+    ``gateway._spawn_gateway_restart_watcher`` hides a real ``… -m agent_cli.main gateway run``
     behind exactly that wrapper. ``tests/_fixtures/live_system_guard.py`` is the canonical caller.
 
     Still no substring matching: the wrapper is peeled token-wise and each remaining suffix is
@@ -715,7 +715,7 @@ def command_line_names_hermes_home(command_lc: str, home_lc: str) -> bool:
 
 def _command_line_belongs_to_profile(command: str, profile_home: Path) -> bool:
     """True when a gateway command line belongs to ``profile_home`` (mirrors
-    ``hermes_cli.gateway._matches_current_profile``): a stale state file can record a PID recycled
+    ``agent_cli.gateway._matches_current_profile``): a stale state file can record a PID recycled
     onto ANOTHER profile's live gateway. Named profiles carry ``-p``/``--profile <name>`` or
     ``HERMES_HOME=`` on argv; the default gateway runs bare. Separators normalized."""
     command_lc = command.lower().replace("\\", "/")
@@ -774,20 +774,20 @@ def _record_argv() -> list[str]:
     """``sys.argv`` with the inline-source placeholder replaced by the entry point this process runs.
 
     The published launcher script (``_launchers._launcher_script``: the POSIX ``bin/hermes`` shell
-    launcher and the Windows ``.cmd``) imports ``hermes_cli.main`` inside ``python -I -c <script>``,
+    launcher and the Windows ``.cmd``) imports ``agent_cli.main`` inside ``python -I -c <script>``,
     so ``sys.argv`` is ``["-c", "gateway", "run"]`` — a record the argv matcher can never accept
     once the live command line is unreadable (Windows/EACCES fallback in
     ``_record_matches_live_gateway_pid``). Recording the module path follows runpy's ``alter_sys``
     convention, which is what the ``--run-module`` and store-launcher forms already persist."""
     argv = list(sys.argv)
-    entry = sys.modules.get("hermes_cli.main")
+    entry = sys.modules.get("agent_cli.main")
     if argv[:1] == ["-c"] and getattr(entry, "__file__", None):
         argv[0] = entry.__file__
     return argv
 
 
 def _build_pid_record() -> dict:
-    from hermes_state_pidns import pid_namespace_id  # ``pid`` is relative to its PID namespace (#123081)
+    from agent_state_pidns import pid_namespace_id  # ``pid`` is relative to its PID namespace (#123081)
     return {
         "pid": os.getpid(), "kind": _GATEWAY_KIND, "argv": _record_argv(),
         "start_time": _get_process_start_time(os.getpid()),
@@ -799,15 +799,15 @@ def _build_pid_record() -> dict:
 
 def _get_code_identity_fields() -> dict[str, Any]:
     """Code identity of THIS process for ``gateway_state.json`` (restart picked up new code?).
-    Lazy import keeps ``gateway.status`` free of ``hermes_cli`` at import time. Never raises.
+    Lazy import keeps ``gateway.status`` free of ``agent_cli`` at import time. Never raises.
 
     A gateway keeps serving the module versions it imported at startup, so stamping the identity into
-    ``gateway_state.json`` lets `hermes update` (and the dashboard) prove whether a running gateway actually
+    ``gateway_state.json`` lets `noone update` (and the dashboard) prove whether a running gateway actually
     picked up new code after the restart phase — instead of assuming it did (#88654, #69754). Never raises;
     degrades to absent fields.
     """
     try:
-        from hermes_cli.version_info import get_code_identity
+        from agent_cli.version_info import get_code_identity
 
         identity = get_code_identity()
         return {"code_sha": identity.get("sha"), "code_version": identity.get("version")}
@@ -1283,8 +1283,8 @@ def profile_name_for_home(profile_home: Path) -> Optional[str]:
     if named:
         return named
     try:
-        from hermes_constants import get_default_hermes_root
-        if home.resolve() == Path(get_default_hermes_root()).resolve():
+        from agent_constants import get_default_agent_root
+        if home.resolve() == Path(get_default_agent_root()).resolve():
             return "default"
     except Exception:
         return None
@@ -1305,18 +1305,18 @@ def multiplexer_liveness_for_profile(profile_dir: Path) -> Optional[tuple[int, d
     if not name:
         return None
     from gateway.host_topology import host_gateway_topology
-    from hermes_cli.gateway import named_profile_served_by_running_multiplexer
-    from hermes_cli.gateway_multiplex_served import live_default_gateway_pid
-    from hermes_constants import get_default_hermes_root
+    from agent_cli.gateway import named_profile_served_by_running_multiplexer
+    from agent_cli.gateway_multiplex_served import live_default_gateway_pid
+    from agent_constants import get_default_agent_root
     # The roster is matched by NAME, and the multiplexer only serves ``<default root>/profiles/<name>``:
     # a profile directory copied to another root (sandbox, restore-from-backup) keeps the name but is
     # not the home being served, so it must not borrow the multiplexer's PID.
-    if name != "default" and not _same_hermes_home(profile_dir, get_default_hermes_root() / "profiles" / name):
+    if name != "default" and not _same_hermes_home(profile_dir, get_default_agent_root() / "profiles" / name):
         return None
     topology = host_gateway_topology()
     # The multiplexer's record lives in the home that LAUNCHED it; a named-hosted multiplexer leaves
     # a possibly stale standalone record at the default root, which must not be projected.
-    launch_home = get_default_hermes_root()
+    launch_home = get_default_agent_root()
     if topology is not None and topology.serves(name):
         pid: Optional[int] = topology.pid
         launch_home = topology.home or launch_home
@@ -1423,7 +1423,7 @@ def resolve_gateway_liveness(
     # (4) A named profile served by the live default multiplexer: no identity files of its own, but
     # the multiplexer IS its gateway (mirrors `hermes -p X status` / `gateway list`). Unscoped, the
     # question is about the process's OWN home — which is a named profile inside a pooled
-    # `hermes --profile X serve` (the Desktop's per-profile backend answers its REST without
+    # `noone --profile X serve` (the Desktop's per-profile backend answers its REST without
     # `?profile=`), so it takes the same rung instead of reporting the served profile stopped.
     own_home = profile_dir if scoped else _get_process_hermes_home()
     served = guarded(multiplexer_liveness_for_profile, own_home)
@@ -1625,7 +1625,7 @@ def _pid_marker_names_self(target_pid: int, target_start_time: Any) -> bool:
     times known -> must match; either unknown -> PID equality decides (bounded by the marker TTL):
     ``_get_process_start_time`` is None without /proc (macOS, native Windows -- where the
     planned-stop watcher matters most) and requiring a match there would misclassify a legitimate
-    ``hermes gateway stop`` as an unexpected exit revived by the service manager."""
+    ``noone gateway stop`` as an unexpected exit revived by the service manager."""
     if target_pid != os.getpid():
         return False
     our_start_time = _get_process_start_time(target_pid)
@@ -1898,7 +1898,7 @@ def _update_pause_on_disk() -> bool:
     record directory cannot be listed. Only then does a consume need the pause lock and a checkpoint,
     and only then can accepted-stop evidence beside a request still be owed: with none, every pause
     was settled by recovery or the updater (or never made: every non-Windows host)."""
-    from hermes_cli import update_pause_record
+    from agent_cli import update_pause_record
     record = update_pause_record.record_path()
     try:
         with os.scandir(record.parent) as entries:
@@ -1913,7 +1913,7 @@ def _update_pause_on_disk() -> bool:
 def _checkpoint_planned_stop(path: Path, record: dict[str, Any]) -> None:
     """``on_consume``, decided after the request was read: an update writes its record before its
     request, so a pause that appeared since the consumer first looked is checkpointed too."""
-    from hermes_cli import update_pause_record
+    from agent_cli import update_pause_record
     if _update_pause_on_disk():
         with update_pause_record._mutex(_PLANNED_STOP_MUTEX_WAIT_S):
             update_pause_record.mark_stop_consumed(path, record)
@@ -1921,7 +1921,7 @@ def _checkpoint_planned_stop(path: Path, record: dict[str, Any]) -> None:
 
 def consume_planned_stop_marker_for_self() -> bool:
     """Return True when the current process is being intentionally stopped."""
-    from hermes_cli import update_pause_record
+    from agent_cli import update_pause_record
     path = _get_planned_stop_marker_path()
     try:
         paused = _update_pause_on_disk()

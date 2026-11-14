@@ -19,7 +19,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Iterable
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from tools.interrupt import consume_yield, is_interrupted, is_thread_interrupted
 from tools.environments.base_output import (
     ProcessHandle, _finalize_wait_result, _new_output_collector, _start_drain_thread,
@@ -190,7 +190,7 @@ def get_sandbox_dir() -> Path:
     """Host-side root for all sandbox storage (Docker workspaces, plugin backends'
     host-side state). ``TERMINAL_SANDBOX_DIR`` overrides ``{HERMES_HOME}/sandboxes``."""
     custom = os.getenv("TERMINAL_SANDBOX_DIR")
-    p = Path(custom) if custom else get_hermes_home() / "sandboxes"
+    p = Path(custom) if custom else get_agent_home() / "sandboxes"
     p.mkdir(parents=True, exist_ok=True)
     return p
 
@@ -222,7 +222,7 @@ def _update_json_store(path: Path, update: Callable[[dict], None]) -> None:
     update: a sandbox lifecycle step (modal's restore fallback included) must not abort on it."""
     from contextlib import ExitStack
 
-    from hermes_cli.auth import _file_lock
+    from agent_cli.auth import _file_lock
 
     lock_path = path.with_name(f"{path.name}.lock")
     with ExitStack() as stack:

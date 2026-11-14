@@ -1,4 +1,4 @@
-import { LOCAL_CONNECTION_ID } from '@hermes/shared'
+import { LOCAL_CONNECTION_ID } from '@noone/shared'
 
 import type { DesktopConnectionsRegistry, DesktopRegistryConnection } from '@/global'
 import { localBootstrapNeeded } from '@/lib/local-backend-probe'

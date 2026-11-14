@@ -12,7 +12,7 @@ export function preUpdateBackupEnabled(value: unknown): boolean {
   return typeof value !== 'string' || !DISABLED_BACKUP_MODES.has(value.trim().toLowerCase())
 }
 
-export interface HermesConfigRuntime {
+export interface AgentConfigRuntime {
   command?: string | null
   args?: string[]
   env?: NodeJS.ProcessEnv
@@ -20,7 +20,7 @@ export interface HermesConfigRuntime {
 }
 
 export async function readPreUpdateBackupEnabled(
-  runtime: HermesConfigRuntime | Promise<HermesConfigRuntime>,
+  runtime: AgentConfigRuntime | Promise<AgentConfigRuntime>,
   hermesHome: string,
   run = execFileAsync
 ): Promise<boolean> {

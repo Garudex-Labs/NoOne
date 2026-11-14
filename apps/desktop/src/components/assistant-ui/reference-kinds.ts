@@ -33,7 +33,7 @@ export type ReferenceKind =
   | 'other'
 
 interface ReferenceStyle {
-  /** Codicon name — the popover row's leading glyph. */
+  /** AppIcon name — the popover row's leading glyph. */
   codicon: string
   /** Tabler outline path data — the inline SVG a rendered reference uses. */
   paths: string[]

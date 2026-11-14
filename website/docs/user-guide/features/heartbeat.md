@@ -1,10 +1,9 @@
 ---
-sidebar_position: 17
 title: "Session Heartbeats"
 description: "A recurring prompt that re-enters your current session whenever it's idle — /heartbeat every 10m Check the deployment."
 ---
 
-# Session Heartbeats (`/heartbeat`)
+# Session Heartbeats (`/heartbeat`) {#session-heartbeats-heartbeat}
 
 `/heartbeat` gives the **current session** one recurring instruction. Whenever the session is idle and the interval has elapsed, the prompt fires as a normal user turn — same conversation, same context, same prompt cache.
 
@@ -12,13 +11,13 @@ description: "A recurring prompt that re-enters your current session whenever it
 /heartbeat every 10m Check the deployment and report meaningful changes
 ```
 
-Inspired by Prime-Agent's `/heartbeat`. The Hermes adaptation keeps the strict message-flow invariants: the heartbeat is injected only between turns (never mid-run), as a plain user-role message.
+Inspired by Prime-Agent's `/heartbeat`. The {{app-name}} adaptation keeps the strict message-flow invariants: the heartbeat is injected only between turns (never mid-run), as a plain user-role message.
 
-## Heartbeat vs cron: which one do I want?
+## Heartbeat vs cron: which one do I want? {#heartbeat-vs-cron-which-one-do-i-want}
 
 They look similar but serve different jobs:
 
-| | `/heartbeat` | [`hermes cron`](./cron) |
+| | `/heartbeat` | [`noone cron`](./cron) |
 |---|---|---|
 | Runs in | **This conversation** — full context, memory of the discussion | A fresh isolated session per tick |
 | Survives process restart | State survives (SessionDB); gateway watches resume automatically after restart | Yes — fully durable scheduler |
@@ -27,7 +26,7 @@ They look similar but serve different jobs:
 
 Rule of thumb: if the recurring prompt needs the conversation's context, use `/heartbeat`. If it's a self-contained job, use cron.
 
-## Commands
+## Commands {#commands}
 
 | Command | What it does |
 |---|---|
@@ -39,7 +38,7 @@ Rule of thumb: if the recurring prompt needs the conversation's context, use `/h
 
 `/hb` is an alias. Works on the CLI, the TUI / Desktop app, and gateway platforms (on Slack, use `/hermes heartbeat …`).
 
-## Behavior details
+## Behavior details {#behavior-details}
 
 - **Idle-only.** A heartbeat never interrupts a running turn. If the agent is busy when the tick comes due, it fires at the next idle poll. In the gateway, an idle watched session wakes proactively; no new inbound message is needed.
 - **Missed ticks coalesce.** If the session was busy (or the process wasn't running) through several intervals, you get **one** heartbeat turn, not a backlog. The timer re-anchors on every fire.
@@ -52,7 +51,7 @@ Rule of thumb: if the recurring prompt needs the conversation's context, use `/h
 - **Quiet when there is nothing to say (gateway).** A scheduled heartbeat turn may end with a bare silence marker (`NO_REPLY` / `[SILENT]`): the gateway sends nothing, unlike a human message that returns only a marker (that still gets the visible "try again" notice). While the heartbeat works, no typing indicator, tool-progress, streamed draft or "still working" bubble is posted, and a result it does deliver is routed to the chat/topic without quoting the message that set the heartbeat. Approval prompts and failures stay visible.
 - **Don't-invent-work guard.** The injected prompt tells the agent to reply briefly and stop when nothing meaningful changed, so an idle heartbeat doesn't generate busywork.
 
-## Example
+## Example {#example}
 
 ```
 You: /heartbeat every 15m Check whether the CI run for PR #1234 finished; summarize the result when it does

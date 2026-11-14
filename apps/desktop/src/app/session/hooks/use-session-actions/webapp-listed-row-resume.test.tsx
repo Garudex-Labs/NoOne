@@ -2,7 +2,7 @@ import { act, cleanup, render } from '@testing-library/react'
 import { useEffect, useRef } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getLatestSessionMessages, type SessionInfo } from '@/hermes'
+import { getLatestSessionMessages, type SessionInfo } from '@/agent-client'
 import { installBrowserDesktopBridge } from '@/lib/browser-desktop-bridge'
 import { createClientSessionState } from '@/lib/chat-runtime'
 import * as gateways from '@/store/gateway'
@@ -19,10 +19,10 @@ import { useSessionActions } from './index'
 const sockets: unknown[] = []
 
 vi.mock('@/app/contrib/hooks/use-background-sync', () => ({ resetLiveRuntimeTracking: vi.fn() }))
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   getLatestSessionMessages: vi.fn(async () => ({ messages: [], session_id: 'work-chat' })),
-  HermesGateway: class {
+  AgentGateway: class {
     connectionState = 'closed'
     connect = vi.fn(async () => {
       this.connectionState = 'open'

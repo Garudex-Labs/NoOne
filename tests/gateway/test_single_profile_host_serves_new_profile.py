@@ -1,5 +1,5 @@
 """A host gateway that booted with ONE profile comes up standalone (``SINGLE_PROFILE_REASON``), and
-multiplexing is settled once per boot. A profile created afterwards (Desktop's New Agent, ``hermes
+multiplexing is settled once per boot. A profile created afterwards (Desktop's New Agent, ``noone
 profile create``) was then never served: every ticket the Desktop minted for it through the host's
 control socket was refused, so its sessions, chat and Delete all failed with "Invalid gateway ticket
 response" (#141623). The creator's ``rescan-profiles`` signal (and the 30 s watcher) must start serving
@@ -12,13 +12,13 @@ from types import SimpleNamespace
 
 import pytest
 
-import hermes_constants
+import agent_constants
 from agent.secret_scope import is_multiplex_active
 from gateway.config import GatewayConfig
 from gateway.run import GatewayRunner
 from gateway.status import flush_runtime_status, write_runtime_status
-from hermes_cli import gateway_migrate as gm
-from hermes_cli.gateway_multiplex_mode import SINGLE_PROFILE_REASON
+from agent_cli import gateway_migrate as gm
+from agent_cli.gateway_multiplex_mode import SINGLE_PROFILE_REASON
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def standalone_host(tmp_path, monkeypatch):
     (home / "config.yaml").write_text("model: {default: m}\n", encoding="utf-8")
     monkeypatch.setenv("HERMES_HOME", str(home))
     monkeypatch.delenv("GATEWAY_MULTIPLEX_PROFILES", raising=False)
-    monkeypatch.setattr(hermes_constants, "_default_hermes_root_memo", None)
+    monkeypatch.setattr(agent_constants, "_default_hermes_root_memo", None)
     # The migration preflight's service-manager probes: nothing else on this host runs a gateway.
     monkeypatch.setattr(gm, "_installed_services", lambda _home: [])
     monkeypatch.setattr(gm, "_live_gateway_pid", lambda _home: None)
@@ -113,7 +113,7 @@ async def test_a_blocked_new_profile_is_served_once_the_blocker_clears(standalon
     _mkprofile(home, "coder")
     own = {"coder": True}
     monkeypatch.setattr(gm, "_live_gateway_pid", lambda h: os.getpid() if own.get(
-        hermes_constants.profile_name_for_home(h)) else None)
+        agent_constants.profile_name_for_home(h)) else None)
     result = await runner.reconcile_served_profiles(reason="watcher")
     assert result["multiplex"] is False and not is_multiplex_active()
 
@@ -149,7 +149,7 @@ def test_launch_profile_work_on_a_standalone_host_binds_its_scope_once_a_second_
 
     from agent.secret_scope import get_secret
     from gateway.session_authorities import owner_scope
-    from tui_gateway.launch_profile_policy import activate_multi_profile_hosting
+    from agent_backend.launch_profile_policy import activate_multi_profile_hosting
 
     runner, home, _restarts = standalone_host
     activate_multi_profile_hosting()

@@ -89,7 +89,7 @@ class TestNousParity:
     """Nous: product tags, reasoning passthrough (disable included)."""
 
     def test_tags(self, transport):
-        from agent.portal_tags import nous_portal_tags
+        from agent.conversation_scope import nous_portal_tags
         kw = transport.build_kwargs(
             model="hermes-3-llama-3.1-405b",
             messages=_simple_messages(),

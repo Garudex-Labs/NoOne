@@ -320,7 +320,7 @@ def test_thread_qualified_session_id_attests_the_bare_chat():
         # (`_session_entry_id` builds f"{chat_id}:{thread_id}"), and the parent
         # is now recovered from that field rather than by splitting on ":" —
         # splitting invented attestations for ids whose colon is part of the
-        # address (Matrix). The PROPERTY below is unchanged.
+        # opaque address. The PROPERTY below is unchanged.
         cd._build_from_sessions = lambda _p: [{"id": "-100999:77", "thread_id": "77"}]
         ids = eg._session_ids("telegram")
     finally:
@@ -411,11 +411,11 @@ def test_numeric_telegram_target_is_still_guarded(monkeypatch):
 def test_carve_out_is_telegram_only(monkeypatch):
     """Another platform's `@` form is NOT a Telegram handle.
 
-    Matrix targets `@user:server.org`; Slack has `@handle` pseudo-ids. Neither
-    is resolved by the Telegram Bot API, so neither may ride this exemption.
+    Other platforms' `@handle` pseudo-ids are not resolved by the Telegram
+    Bot API, so they may not ride this exemption.
     """
-    eg = _relay_env(monkeypatch, platform="matrix")
-    denial = eg.authorize_relay_target("matrix", "@someone:server.org")
+    eg = _relay_env(monkeypatch, platform="mattermost")
+    denial = eg.authorize_relay_target("mattermost", "@someone:server.org")
     assert denial is not None, "the carve-out widened beyond telegram"
 
 

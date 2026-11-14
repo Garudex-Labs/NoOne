@@ -1,4 +1,4 @@
-import { LOCAL_CONNECTION_ID } from '@hermes/shared'
+import { LOCAL_CONNECTION_ID } from '@noone/shared'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { setApiRequestConnection, setApiRequestProfile } from '@/api/client'
@@ -11,7 +11,7 @@ import { resolveMediaDisplaySrc, resolveMediaPlaybackSrc } from './media'
 
 // The Webapp asks its gateway for a Windows drive-letter or UNC file in the forms the gateway
 // resolves: reads by the native path, streams by the file: URL itself. The gateway half,
-// tests/hermes_cli/test_webapp_file_urls.py, answers these exact requests.
+// tests/agent_cli/test_webapp_file_urls.py, answers these exact requests.
 const FILES = [
   { dir: 'file:///C:/Users/me/renders', native: 'C:\\Users\\me\\renders' },
   { dir: 'file://nas/share/renders', native: '\\\\nas\\share\\renders' }

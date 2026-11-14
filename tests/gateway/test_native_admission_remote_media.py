@@ -1,4 +1,4 @@
-"""An attachment an adapter could not cache locally (a remote URL left in ``media_urls``, as DingTalk
+"""An attachment an adapter could not cache locally (a remote URL left in ``media_urls``, as an adapter
 always does) is dropped with a note; the message and its other media are still admitted."""
 import pytest
 
@@ -23,7 +23,7 @@ async def test_remote_media_url_is_dropped_with_a_note_instead_of_refusing_the_m
     local.write_bytes(b'video-bytes')
     event = MessageEvent(text='see these', message_type=MessageType.PHOTO, message_id='m1',
                          source=adapter.build_source(chat_id=CHAT, user_id=CHAT, chat_type='dm'),
-                         media_urls=['https://static.dingtalk.com/media/abc.png', str(local)],
+                         media_urls=['https://media.example.org/abc.png', str(local)],
                          media_types=['image/png', 'video/mp4'])
     try:
         payload = await prepare_native(runner, event)
@@ -45,7 +45,7 @@ async def test_an_attachment_only_message_stores_just_the_note(tmp_path, monkeyp
     authority = await initialize_session_authority(runner, profile_id='default', instance_id='remote-media-only')
     event = MessageEvent(text='', message_type=MessageType.PHOTO, message_id='m2',
                          source=adapter.build_source(chat_id=CHAT, user_id=CHAT, chat_type='dm'),
-                         media_urls=['https://static.dingtalk.com/media/abc.png'], media_types=['image/png'])
+                         media_urls=['https://media.example.org/abc.png'], media_types=['image/png'])
     try:
         payload = await prepare_native(runner, event)
         assert payload['text'] == '[The user sent an attachment (image/png) that could not be retrieved.]'

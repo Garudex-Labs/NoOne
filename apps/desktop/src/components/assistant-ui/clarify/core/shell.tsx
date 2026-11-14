@@ -1,9 +1,9 @@
 'use client'
 
+import type { MessageQuestion } from '@noone/ui/icons'
 import type { ComponentProps } from 'react'
 
 import { WIDGET_SHELL_CLASS } from '@/components/chat/widget-shell'
-import type { MessageQuestion } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 // field-sizing on top of Textarea's shared chrome; kill min-h-16 for one-liners.

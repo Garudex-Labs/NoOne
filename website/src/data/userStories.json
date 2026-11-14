@@ -550,17 +550,6 @@
     "size": "md"
   },
   {
-    "id": "x-martybent-tftc-company-brain",
-    "source": "x",
-    "author": "@MartyBent",
-    "url": "https://x.com/MartyBent/status/2082473345983955212",
-    "date": "2026-07-29",
-    "category": "business-ops",
-    "headline": "Media company agent brings 7 months of company memory into a shared team workspace",
-    "quote": "Our agent (Martin) has 7 months of built up company knowledge and memory that he’s been able to bring to the other agents running in Buzz. … Task delegation is much easier now that we can have the TFTC team and a swarm of agents in the same workspace with Martin bringing our company brain knowledge to the mix.",
-    "size": "md"
-  },
-  {
     "id": "reddit-nkb82-sme-consultancy",
     "source": "reddit",
     "author": "u/NKB82",
@@ -1954,7 +1943,7 @@
     "date": "",
     "category": "personal-assistant",
     "headline": "Two-tier email pipeline so the LLM only fires when needed",
-    "quote": "Two-tier email processing system for my agent (I gave it Spacemail IMAP via himalaya). Tier 1 (Dumb): Pure Python script, no LLM. Detects new email, manages state. Tier 2 (Smart): LLM session via hermes chat -q. Only invoked when new email detected. Key goal: Zero LLM calls when inbox is idle.",
+    "quote": "Two-tier email processing system for my agent (I gave it Spacemail IMAP via himalaya). Tier 1 (Dumb): Pure Python script, no LLM. Detects new email, manages state. Tier 2 (Smart): LLM session via noone chat -q. Only invoked when new email detected. Key goal: Zero LLM calls when inbox is idle.",
     "size": "md"
   },
   {
@@ -1988,17 +1977,6 @@
     "category": "integrations",
     "headline": "Vercel Sandbox as a Hermes backend",
     "quote": "Adds Vercel Sandbox as a supported Hermes terminal backend alongside Local/Docker/Modal/SSH/Daytona/Singularity. Creates/manages cloud microVMs with snapshot-based filesystem persistence.",
-    "size": "sm"
-  },
-  {
-    "id": "gh-haoqi-feishu",
-    "source": "github",
-    "author": "@haoqimeng1992",
-    "url": "https://github.com/NousResearch/hermes-agent/issues/10356",
-    "date": "2026",
-    "category": "messaging",
-    "headline": "Give Hermes hands inside Feishu (Lark)",
-    "quote": "Extending Hermes to full Feishu ecosystem coverage: Documents, Sheets, Bitable, Calendar, Tasks, Wiki, Contacts, Drive, Email. Giving Hermes hands to operate the entire Feishu workspace.",
     "size": "sm"
   },
   {
@@ -2459,7 +2437,7 @@
     "date": "2026-04-04",
     "category": "privacy",
     "headline": "I'm using Hermes — same applies to all agents, sandbox it",
-    "quote": "I'm using Hermes. The same applies to all agents, don't give it free reign over all your stuff. Run it within a sandbox. https://github.com/nousresearch/hermes-agent",
+    "quote": "I'm using Hermes. The same applies to all agents, don't give it free reign over all your stuff. Run it within a sandbox. https://github.com/Garudex-Labs/NoOne",
     "size": "sm",
     "id": "hn-flere-imsaho-im-using-hermes"
   },
@@ -3608,17 +3586,6 @@
     "size": "sm"
   },
   {
-    "id": "discord-ones07389-4-agents-on-laptop",
-    "source": "discord",
-    "author": "@ones_07389",
-    "url": "https://github.com/teknium1/nous-discord-archive/blob/main/archives/community-projects-showcase/1499716570878840882-Hermes-Multi-Agent-Setup---4-Agents-on-a-Laptop.txt",
-    "date": "",
-    "category": "meta",
-    "headline": "Running 4 Hermes agents 24/7 on a 32GB Ubuntu laptop",
-    "quote": "Running a 4-agent Hermes system 24/7 on a 32GB Ubuntu laptop, managed by systemd + custom watchdog. default (PM) — Feishu WebSocket; dev (Developer) — ACP delegated; devops (Ops) — ACP delegated; ip-agent (Content) — Cron scheduled. 5 MCP Servers, 34 tools total. Self-learning ACP v1.5 with auto distillation cron at 04:30 daily.",
-    "size": "lg"
-  },
-  {
     "id": "discord-l-acie-skill-md-tool-calls",
     "source": "discord",
     "author": "@l_acie",
@@ -4022,7 +3989,7 @@
     "date": "",
     "category": "creative",
     "headline": "Chatting with Hermes on a 1969 Teletype Model 33 at 110 baud",
-    "quote": "I made a minimal login shell that talks to Hermes Agent via the gateway web service, or by running `hermes chat`. Hooked the shell up to an autologin getty on a serial port. Connected the serial port via 20mA current loop at 110 baud, to a 1969 Teletype Model 33. Chatting away!",
+    "quote": "I made a minimal login shell that talks to Hermes Agent via the gateway web service, or by running `noone chat`. Hooked the shell up to an autologin getty on a serial port. Connected the serial port via 20mA current loop at 110 baud, to a 1969 Teletype Model 33. Chatting away!",
     "size": "lg"
   },
   {

@@ -41,10 +41,10 @@ def _chain(rel: str, sizes: dict[str, int]) -> list[str]:
 def main(repo: Path) -> int:
     hint_cap = _int_constant(repo / "agent" / "subdirectory_hints.py", "_MAX_HINT_CHARS")
     tracked = subprocess.run(
-        ["git", "ls-files", "-z", "--", "AGENTS.md", "*/AGENTS.md"], cwd=repo, capture_output=True,
+        ["git", "ls-files", "-co", "--exclude-standard", "-z", "--", "AGENTS.md", "*/AGENTS.md"], cwd=repo, capture_output=True,
         check=True, stdin=subprocess.DEVNULL, timeout=60,
     ).stdout.decode("utf-8").split("\0")
-    sizes = {rel: len((repo / rel).read_text(encoding="utf-8-sig")) for rel in filter(None, tracked)}
+    sizes = {rel: len((repo / rel).read_text(encoding="utf-8-sig")) for rel in set(filter(None, tracked)) if (repo / rel).is_file()}
     over = []
     for rel, size in sorted(sizes.items()):
         cap = ROOT_MAX_CHARS if rel == "AGENTS.md" else hint_cap

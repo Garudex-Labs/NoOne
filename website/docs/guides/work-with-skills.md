@@ -1,27 +1,26 @@
 ---
-sidebar_position: 12
 title: "Working with Skills"
-description: "Find, install, use, and create skills — on-demand knowledge that teaches Hermes new workflows"
+description: "Find, install, use, and create skills — on-demand knowledge that teaches the agent new workflows"
 ---
 
-# Working with Skills
+# Working with Skills {#working-with-skills}
 
-Skills are on-demand knowledge documents that teach Hermes how to handle specific tasks — from generating ASCII art to managing GitHub PRs. This guide walks you through using them day to day.
+Skills are on-demand knowledge documents that teach {{app-name}} how to handle specific tasks — from generating ASCII art to managing GitHub PRs. This guide walks you through using them day to day.
 
 For the full technical reference, see [Skills System](../user-guide/features/skills.md).
 
 ---
 
-## Finding Skills
+## Finding Skills {#finding-skills}
 
-Every Hermes installation ships with bundled skills. See what's available:
+Every {{app-name}} installation ships with bundled skills. See what's available:
 
 ```bash
 # In any chat session:
 /skills
 
 # Or from the CLI:
-hermes skills list
+noone skills list
 ```
 
 This shows a compact list with names and descriptions:
@@ -34,7 +33,7 @@ plan              Plan mode — inspect context, write a markdown...
 excalidraw        Create hand-drawn style diagrams using Excalidraw...
 ```
 
-### Searching for a Skill
+### Searching for a Skill {#searching-for-a-skill}
 
 ```bash
 # Search by keyword
@@ -42,7 +41,7 @@ excalidraw        Create hand-drawn style diagrams using Excalidraw...
 /skills search music
 ```
 
-### The Skills Hub
+### The Skills Hub {#the-skills-hub}
 
 Official optional skills (heavier or niche skills not active by default) are available via the Hub:
 
@@ -56,7 +55,7 @@ Official optional skills (heavier or niche skills not active by default) are ava
 
 ---
 
-## Using a Skill
+## Using a Skill {#using-a-skill}
 
 Every installed skill is automatically a slash command. Just type its name:
 
@@ -70,9 +69,9 @@ Every installed skill is automatically a slash command. Just type its name:
 /excalidraw
 ```
 
-You can also trigger skills through natural conversation — ask Hermes to use a specific skill, and it will load it via the `skill_view` tool.
+You can also trigger skills through natural conversation — ask {{app-name}} to use a specific skill, and it will load it via the `skill_view` tool.
 
-### Progressive Disclosure
+### Progressive Disclosure {#progressive-disclosure}
 
 Skills use a token-efficient loading pattern. The agent doesn't load everything at once:
 
@@ -84,19 +83,19 @@ This means skills don't cost tokens until they're actually used.
 
 ---
 
-## Installing from the Hub
+## Installing from the Hub {#installing-from-the-hub}
 
-Official optional skills ship with Hermes but aren't active by default. Install them explicitly:
+Official optional skills ship with {{app-name}} but aren't active by default. Install them explicitly:
 
 ```bash
 # Install an official optional skill
-hermes skills install official/research/arxiv
+noone skills install official/research/arxiv
 
 # Install from the hub in a chat session
 /skills install official/creative/songwriting-and-ai-music
 
 # Install SKILL.md and its referenced support files from an HTTP(S) URL
-hermes skills install https://sharethis.chat/SKILL.md
+noone skills install https://sharethis.chat/SKILL.md
 /skills install https://example.com/SKILL.md --name my-skill
 ```
 
@@ -105,15 +104,23 @@ What happens:
 2. It appears in your `skills_list` output
 3. It becomes available as a slash command
 
-:::tip
-Installed skills take effect in new sessions. If you want it available in the current session, use `/reset` to start fresh, or add `--now` to invalidate the prompt cache immediately (costs more tokens on the next turn).
-:::
+<Tip>
 
-### Verifying Installation
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+Installed skills take effect in new sessions. If you want it available in the current session, use `/reset` to start fresh, or add `--now` to invalidate the prompt cache immediately (costs more tokens on the next turn).
+
+</Tip>
+
+### Verifying Installation {#verifying-installation}
 
 ```bash
 # Check it's there
-hermes skills list | grep arxiv
+noone skills list | grep arxiv
 
 # Or in chat
 /skills search arxiv
@@ -121,7 +128,7 @@ hermes skills list | grep arxiv
 
 ---
 
-## Plugin-Provided Skills
+## Plugin-Provided Skills {#plugin-provided-skills}
 
 Plugins can bundle their own skills using namespaced names (`plugin:skill`). This prevents name collisions with built-in skills.
 
@@ -135,11 +142,11 @@ skill_view("writing-plans")
 
 Plugin skills are **not** listed in the system prompt and don't appear in `skills_list`. They're opt-in — load them explicitly when you know a plugin provides one. When loaded, the agent sees a banner listing sibling skills from the same plugin.
 
-For how to ship skills in your own plugin, see [Build a Hermes Plugin → Bundle skills](../developer-guide/plugins/index.md#bundle-skills).
+For how to ship skills in your own plugin, see [Build a {{app-name}} Plugin → Bundle skills](../developer-guide/plugins/index.md#bundle-skills).
 
 ---
 
-## Configuring Skill Settings
+## Configuring Skill Settings {#configuring-skill-settings}
 
 Some skills declare configuration they need in their frontmatter:
 
@@ -153,31 +160,31 @@ metadata:
         url: "https://developers.google.com/tenor/guides/quickstart"
 ```
 
-When a skill with config is first loaded, Hermes prompts you for the values. They're stored in `config.yaml` under `skills.config.*`.
+When a skill with config is first loaded, {{app-name}} prompts you for the values. They're stored in `config.yaml` under `skills.config.*`.
 
 Manage skill config from the CLI:
 
 ```bash
 # Interactive config for a specific skill
-hermes skills config gif-search
+noone skills config gif-search
 
 # View all skill config
-hermes config get skills.config --json
+noone config get skills.config --json
 ```
 
 ---
 
-## Creating Your Own Skill
+## Creating Your Own Skill {#creating-your-own-skill}
 
 Skills are just markdown files with YAML frontmatter. Creating one takes under five minutes.
 
-### 1. Create the Directory
+### 1. Create the Directory {#1-create-the-directory}
 
 ```bash
 mkdir -p ~/.hermes/skills/my-category/my-skill
 ```
 
-### 2. Write SKILL.md
+### 2. Write SKILL.md {#2-write-skillmd}
 
 ```markdown title="~/.hermes/skills/my-category/my-skill/SKILL.md"
 ---
@@ -208,7 +215,7 @@ Use this skill when the user asks about [specific topic] or needs to [specific t
 Run `check-command` to confirm the result is correct.
 ```
 
-### 3. Add Reference Files (Optional)
+### 3. Add Reference Files (Optional) {#3-add-reference-files-optional}
 
 Skills can include supporting files the agent loads on demand:
 
@@ -230,35 +237,43 @@ Reference these in your SKILL.md:
 For API details, load the reference: `skill_view("my-skill", "references/api-docs.md")`
 ```
 
-### 4. Test It
+### 4. Test It {#4-test-it}
 
 Start a new session and try your skill:
 
 ```bash
-hermes chat -q "/my-skill help me with the thing"
+noone chat -q "/my-skill help me with the thing"
 ```
 
 The skill appears automatically — no registration needed. Drop it in `~/.hermes/skills/` and it's live.
 
-:::info
-The agent can also create and update skills itself using `skill_manage`. After solving a complex problem, Hermes may offer to save the approach as a skill for next time.
-:::
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The agent can also create and update skills itself using `skill_manage`. After solving a complex problem, {{app-name}} may offer to save the approach as a skill for next time.
+
+</Info>
 
 ---
 
-## Per-Platform Skill Management
+## Per-Platform Skill Management {#per-platform-skill-management}
 
 Control which skills are available on which platforms:
 
 ```bash
-hermes skills
+noone skills
 ```
 
 This opens an interactive TUI where you can enable or disable skills per platform (CLI, Telegram, Discord, etc.). Useful when you want certain skills only available in specific contexts — for example, keeping development skills off Telegram.
 
 ---
 
-## Skills vs Memory
+## Skills vs Memory {#skills-vs-memory}
 
 Both are persistent across sessions, but they serve different purposes:
 
@@ -275,15 +290,15 @@ Both are persistent across sessions, but they serve different purposes:
 
 ---
 
-## Tips
+## Tips {#tips}
 
 **Keep skills focused.** A skill that tries to cover "all of DevOps" will be too long and too vague. A skill that covers "deploy a Python app to Fly.io" is specific enough to be genuinely useful.
 
-**Let the agent create skills.** After a complex multi-step task, Hermes will often offer to save the approach as a skill. Say yes — these agent-authored skills capture the exact workflow including pitfalls that were discovered along the way.
+**Let the agent create skills.** After a complex multi-step task, {{app-name}} will often offer to save the approach as a skill. Say yes — these agent-authored skills capture the exact workflow including pitfalls that were discovered along the way.
 
 **Use categories.** Organize skills into subdirectories (`~/.hermes/skills/devops/`, `~/.hermes/skills/research/`, etc.). This keeps the list manageable and helps the agent find relevant skills faster.
 
-**Update skills when they go stale.** If you use a skill and hit issues not covered by it, tell Hermes to update the skill with what you learned. Skills that aren't maintained become liabilities.
+**Update skills when they go stale.** If you use a skill and hit issues not covered by it, tell {{app-name}} to update the skill with what you learned. Skills that aren't maintained become liabilities.
 
 ---
 

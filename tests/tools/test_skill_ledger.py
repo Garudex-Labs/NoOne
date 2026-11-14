@@ -38,8 +38,8 @@ def ledger_env(tmp_path, monkeypatch):
     skills_dir = home / "skills"
     skills_dir.mkdir(parents=True)
 
-    monkeypatch.setattr(skill_ledger, "get_hermes_home", lambda: home)
-    monkeypatch.setattr(skill_usage, "get_hermes_home", lambda: home)
+    monkeypatch.setattr(skill_ledger, "get_agent_home", lambda: home)
+    monkeypatch.setattr(skill_usage, "get_agent_home", lambda: home)
     monkeypatch.setattr(skill_manager_tool, "SKILLS_DIR", skills_dir)
     monkeypatch.setattr(skill_utils, "get_all_skills_dirs", lambda: [skills_dir])
     return {"home": home, "skills": skills_dir}
@@ -348,7 +348,7 @@ def test_config_gate_off_no_ledger_writes(ledger_env, monkeypatch):
     from tools import skill_ledger
     from tools.skill_manager_tool import skill_manage
 
-    import hermes_cli.config as _cfg
+    import agent_cli.config as _cfg
 
     off = {"skills": {"ledger": False}}
     monkeypatch.setattr(_cfg, "load_config", lambda *a, **k: off)
@@ -622,7 +622,7 @@ def test_auto_compact_triggers_at_threshold(ledger_env, monkeypatch):
 
     from tools import skill_ledger
 
-    import hermes_cli.config as _cfg
+    import agent_cli.config as _cfg
 
     cap = {"skills": {"ledger_max_bytes": 8192}}
     monkeypatch.setattr(_cfg, "load_config", lambda *a, **k: cap)
@@ -659,7 +659,7 @@ def test_trim_oldest_when_still_over_cap(ledger_env, monkeypatch):
     survives verbatim."""
     from tools import skill_ledger
 
-    import hermes_cli.config as _cfg
+    import agent_cli.config as _cfg
 
     cap = {"skills": {"ledger_max_bytes": 0}}  # no sweeps while seeding
     monkeypatch.setattr(_cfg, "load_config", lambda *a, **k: cap)
@@ -720,7 +720,7 @@ def test_concurrent_appends_never_lose_a_middle_row(ledger_env, monkeypatch):
 
     from tools import skill_ledger
 
-    import hermes_cli.config as _cfg
+    import agent_cli.config as _cfg
 
     cap = {"skills": {"ledger_max_bytes": 4096}}  # padded rows ~600 B: a trim on nearly every append
     monkeypatch.setattr(_cfg, "load_config", lambda *a, **k: cap)

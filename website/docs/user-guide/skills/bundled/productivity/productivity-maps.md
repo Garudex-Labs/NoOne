@@ -1,34 +1,42 @@
 ---
 title: "Maps — Geocode, POIs, routes, timezones via OpenStreetMap/OSRM"
-sidebar_label: "Maps"
+sidebarTitle: "Maps"
 description: "Geocode, POIs, routes, timezones via OpenStreetMap/OSRM"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Maps
+# Maps {#maps}
 
 Geocode, POIs, routes, timezones via OpenStreetMap/OSRM.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/productivity/maps` |
 | Version | `1.2.0` |
-| Author | Mibayy |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `maps`, `geocoding`, `places`, `routing`, `distance`, `directions`, `nearby`, `location`, `openstreetmap`, `nominatim`, `overpass`, `osrm` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Maps Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Maps Skill {#maps-skill}
 
 Location intelligence using free, open data sources. 8 commands, 44 POI
 categories, zero dependencies (Python stdlib only), no API key required.
@@ -39,7 +47,7 @@ This skill supersedes the old `find-nearby` skill — all of find-nearby's
 functionality is covered by the `nearby` command below, with the same
 `--near "<place>"` shortcut and multi-category support.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User sends a Telegram location pin (latitude/longitude in the message) → `nearby`
 - User wants coordinates for a place name → `search`
@@ -50,19 +58,19 @@ functionality is covered by the `nearby` command below, with the same
 - User wants timezone information for a location → `timezone`
 - User wants to search for POIs within a geographic area → `area` + `bbox`
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 Python 3.8+ (stdlib only — no pip installs needed).
 
 Script path: `~/.hermes/skills/maps/scripts/maps_client.py`
 
-## Commands
+## Commands {#commands}
 
 ```bash
 MAPS=~/.hermes/skills/maps/scripts/maps_client.py
 ```
 
-### search — Geocode a place name
+### search — Geocode a place name {#search--geocode-a-place-name}
 
 ```bash
 python $MAPS search "Eiffel Tower"
@@ -71,7 +79,7 @@ python $MAPS search "1600 Pennsylvania Ave, Washington DC"
 
 Returns: lat, lon, display name, type, bounding box, importance score.
 
-### reverse — Coordinates to address
+### reverse — Coordinates to address {#reverse--coordinates-to-address}
 
 ```bash
 python $MAPS reverse 48.8584 2.2945
@@ -79,7 +87,7 @@ python $MAPS reverse 48.8584 2.2945
 
 Returns: full address breakdown (street, city, state, country, postcode).
 
-### nearby — Find places by category
+### nearby — Find places by category {#nearby--find-places-by-category}
 
 ```bash
 # By coordinates (from a Telegram location pin, for example)
@@ -107,7 +115,7 @@ Each result includes: `name`, `address`, `lat`/`lon`, `distance_m`,
 directions from the search point), and promoted tags when available —
 `cuisine`, `hours` (opening_hours), `phone`, `website`.
 
-### distance — Travel distance and time
+### distance — Travel distance and time {#distance--travel-distance-and-time}
 
 ```bash
 python $MAPS distance "Paris" --to "Lyon"
@@ -118,7 +126,7 @@ python $MAPS distance "Big Ben" --to "Tower Bridge" --mode walking
 Modes: driving (default), walking, cycling. Returns road distance, duration,
 and straight-line distance for comparison.
 
-### directions — Turn-by-turn navigation
+### directions — Turn-by-turn navigation {#directions--turn-by-turn-navigation}
 
 ```bash
 python $MAPS directions "Eiffel Tower" --to "Louvre Museum" --mode walking
@@ -128,7 +136,7 @@ python $MAPS directions "JFK Airport" --to "Times Square" --mode driving
 Returns numbered steps with instruction, distance, duration, road name, and
 maneuver type (turn, depart, arrive, etc.).
 
-### timezone — Timezone for coordinates
+### timezone — Timezone for coordinates {#timezone--timezone-for-coordinates}
 
 ```bash
 python $MAPS timezone 48.8584 2.2945
@@ -137,7 +145,7 @@ python $MAPS timezone 35.6762 139.6503
 
 Returns timezone name, UTC offset, and current local time.
 
-### area — Bounding box and area for a place
+### area — Bounding box and area for a place {#area--bounding-box-and-area-for-a-place}
 
 ```bash
 python $MAPS area "Manhattan, New York"
@@ -147,7 +155,7 @@ python $MAPS area "London"
 Returns bounding box coordinates, width/height in km, and approximate area.
 Useful as input for the bbox command.
 
-### bbox — Search within a bounding box
+### bbox — Search within a bounding box {#bbox--search-within-a-bounding-box}
 
 ```bash
 python $MAPS bbox 40.75 -74.00 40.77 -73.98 restaurant --limit 20
@@ -156,7 +164,7 @@ python $MAPS bbox 40.75 -74.00 40.77 -73.98 restaurant --limit 20
 Finds POIs within a geographic rectangle. Use `area` first to get the
 bounding box coordinates for a named place.
 
-## Working With Telegram Location Pins
+## Working With Telegram Location Pins {#working-with-telegram-location-pins}
 
 When a user sends a location pin, the message contains `latitude:` and
 `longitude:` fields. Extract those and pass them straight to `nearby`:
@@ -172,7 +180,7 @@ now?" questions, check the `hours` field; if missing or unclear, verify
 with `web_search` since OSM hours are community-maintained and not always
 current.
 
-## Workflow Examples
+## Workflow Examples {#workflow-examples}
 
 **"Find Italian restaurants near the Colosseum":**
 1. `nearby --near "Colosseum Rome" --category restaurant --radius 500`
@@ -189,7 +197,7 @@ current.
 1. `area "Downtown Seattle"` → get bounding box
 2. `bbox S W N E restaurant --limit 30`
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Nominatim ToS: max 1 req/s (handled automatically by the script)
 - `nearby` requires lat/lon OR `--near "<address>"` — one of the two is needed
@@ -199,7 +207,7 @@ current.
 - `distance` and `directions` use `--to` flag for the destination (not positional)
 - If a zip code alone gives ambiguous results globally, include country/state
 
-## Verification
+## Verification {#verification}
 
 ```bash
 python ~/.hermes/skills/maps/scripts/maps_client.py search "Statue of Liberty"

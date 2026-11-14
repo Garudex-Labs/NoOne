@@ -1,6 +1,5 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
-
-import { Codicon } from '@/components/ui/codicon'
 
 import type { TimeAxis } from './time-axis'
 
@@ -188,7 +187,7 @@ export const Timeline = memo(function Timeline({
         onClick={onTogglePlay}
         type="button"
       >
-        <Codicon name={playing ? 'debug-pause' : 'triangle-right'} size={playing ? '0.8rem' : '0.95rem'} />
+        <AppIcon name={playing ? 'debug-pause' : 'triangle-right'} size={playing ? '0.8rem' : '0.95rem'} />
       </button>
 
       <div

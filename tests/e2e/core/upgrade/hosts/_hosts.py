@@ -3,7 +3,7 @@
 Everything runs through ``tests/e2e/core/upgrade/_helpers.py`` (bwrap sandbox, allowlisted env)
 and ``_install_helpers.py`` (local bare origin + URL rewrite, git wrapper). This module only adds
 what a host shape needs on top: a sandbox rooted at an arbitrary path, the configured fake
-provider, a one-shot turn, a background ``hermes gateway run`` and a login-shell probe.
+provider, a one-shot turn, a background ``noone gateway run`` and a login-shell probe.
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ def ok(cp: subprocess.CompletedProcess) -> subprocess.CompletedProcess:
 
 def configure(sb: I.Sandbox, provider: FakeLLMServer) -> None:
     """Point the install at the fake provider with a current-version config."""
-    ver = ok(sb.run([sb.python, "-c", "from hermes_cli.config_defaults import DEFAULT_CONFIG as D; print(D['_config_version'])"]))
+    ver = ok(sb.run([sb.python, "-c", "from agent_cli.config_defaults import DEFAULT_CONFIG as D; print(D['_config_version'])"]))
     version = int(ver.stdout.strip().splitlines()[-1])
     (sb.hermes_home / "config.yaml").write_text(I.provider_config(provider.base_url, version), encoding="utf-8")
     (sb.hermes_home / ".env").write_text(f"OPENAI_API_KEY={I.FAKE_KEY}\n", encoding="utf-8")
@@ -104,7 +104,7 @@ def missing_entries(entries: list[str]) -> list[str]:
 
 
 class Gateway:
-    """``hermes gateway run`` in the foreground of its own sandbox, as a user starts it by hand."""
+    """``noone gateway run`` in the foreground of its own sandbox, as a user starts it by hand."""
 
     def __init__(self, sb: I.Sandbox):
         self.sb = sb

@@ -1,21 +1,21 @@
-# A2A (Agent-to-Agent)
+# A2A (Agent-to-Agent) {#a2a-agent-to-agent}
 
-[A2A](https://a2a-protocol.org) is the open Agent2Agent protocol (v1.0, stewarded by the Linux Foundation) for communication between independent AI agents. The Hermes A2A plugin works in **both directions**: your agent can call other A2A agents as tools, and other agents can send tasks to your Hermes over HTTP.
+[A2A](https://a2a-protocol.org) is the open Agent2Agent protocol (v1.0, stewarded by the Linux Foundation) for communication between independent AI agents. The {{app-name}} A2A plugin works in **both directions**: your agent can call other A2A agents as tools, and other agents can send tasks to your {{app-name}} over HTTP.
 
-It interoperates with any A2A-compliant peer — another Hermes, LangChain, CrewAI, Google ADK agents, or anything built on the official `a2a-sdk`.
+It interoperates with any A2A-compliant peer — another {{app-name}}, LangChain, CrewAI, Google ADK agents, or anything built on the official `a2a-sdk`.
 
-## When to use A2A
+## When to use A2A {#when-to-use-a2a}
 
-- **Hermes ↔ Hermes across machines** — let your desktop agent hand tasks to a Hermes on a server, or vice versa, each with its own memory, tools, and credentials.
+- **{{app-name}} ↔ {{app-name}} across machines** — let your desktop agent hand tasks to a {{app-name}} on a server, or vice versa, each with its own memory, tools, and credentials.
 - **Delegating to specialist agents** — a peer that advertises `web_search`/`research`/`coding` skills on its Agent Card can be discovered and called mid-conversation.
-- **Being a callable service** — expose your Hermes so other frameworks' agents can send it tasks.
+- **Being a callable service** — expose your {{app-name}} so other frameworks' agents can send it tasks.
 
 When you want multiple agents on the **same machine**, prefer [delegation](../features/delegation.md) (in-process subagents) or the [kanban board](../features/kanban.md) (durable multi-profile work queue) — A2A is for crossing process/machine/framework boundaries.
 
-## Enable
+## Enable {#enable}
 
 ```bash
-hermes gateway setup      # pick A2A
+noone gateway setup      # pick A2A
 ```
 
 Or in `~/.hermes/config.yaml`:
@@ -32,14 +32,14 @@ gateway:
 The outbound client tools ship as the `a2a` toolset, **off by default** — enable it per platform:
 
 ```bash
-hermes tools enable a2a --platform cli        # CLI/TUI sessions
-hermes tools enable a2a --platform telegram   # or any messaging platform
-hermes tools enable a2a --platform a2a        # let inbound A2A tasks call peers (agent chaining)
+noone tools enable a2a --platform cli        # CLI sessions
+noone tools enable a2a --platform telegram   # or any messaging platform
+noone tools enable a2a --platform a2a        # let inbound A2A tasks call peers (agent chaining)
 ```
 
-The tools are available in every process type — CLI, TUI, gateway, and cron — without the inbound platform needing to be enabled.
+The tools are available in every process type — CLI, gateway, and cron — without the inbound platform needing to be enabled.
 
-## Outbound: calling other agents
+## Outbound: calling other agents {#outbound-calling-other-agents}
 
 With the `a2a` toolset enabled, the agent gets:
 
@@ -64,9 +64,9 @@ a2a_agents:
 
 Then just ask: *"Ask the researcher agent to summarize today's arXiv postings."* Direct URLs work too — `a2a_call` accepts any A2A endpoint.
 
-## Inbound: being callable
+## Inbound: being callable {#inbound-being-callable}
 
-With the platform enabled, Hermes serves:
+With the platform enabled, {{app-name}} serves:
 
 - **Agent Card** at `GET /.well-known/agent-card.json` (canonical v1.0 path; the legacy `agent.json` also answers) — advertises your agent's name, skills (derived from enabled toolsets), and auth requirements.
 - **JSON-RPC 2.0** at `POST /` — canonical v1.0 methods (`SendMessage`, `SendStreamingMessage`, `GetTask`, `ListTasks`, `CancelTask`, `SubscribeToTask`, push-notification config CRUD) plus the pre-1.0 path-style aliases (`message/send`, …).
@@ -77,10 +77,10 @@ Inbound tasks are injected into a **live gateway session** — the same agent, m
 
 Interoperability is verified against the official Python `a2a-sdk` (card resolution, `SendMessage`, streaming).
 
-## Forwarded profile sessions after the ownership cutover
+## Forwarded profile sessions after the ownership cutover {#forwarded-profile-sessions-after-the-ownership-cutover}
 
 Forwarding to another local profile now submits to that profile's gateway owner;
-there is no fallback `hermes chat` process writing its session database. New
+there is no fallback `noone chat` process writing its session database. New
 forwarded conversations retain the exact agent, tenant, authenticated peer and
 context ID in their owner binding.
 
@@ -106,7 +106,7 @@ configuration cannot recover information the old writer never stored. There is
 currently no supported migration command; do not retitle or edit database rows
 to bypass the ownership check.
 
-## Security model
+## Security model {#security-model}
 
 Secure by default; every widening step is explicit:
 
@@ -117,7 +117,7 @@ Secure by default; every widening step is explicit:
 - **Audit log** — every exchange appends to `~/.hermes/a2a_audit.jsonl`.
 - **Anti-loop** — per-context turn caps stop two agents ping-ponging forever.
 
-## Configuration reference
+## Configuration reference {#configuration-reference}
 
 | Env var | Default | Meaning |
 |---|---|---|
@@ -137,7 +137,7 @@ Secure by default; every widening step is explicit:
 
 Behind a reverse proxy or Kubernetes Service, set `A2A_PUBLIC_URL` (or rely on `X-Forwarded-Host`/`X-Forwarded-Proto`) so the Agent Card advertises a URL peers can actually call back.
 
-## Quick test
+## Quick test {#quick-test}
 
 ```bash
 # From another machine / agent:
@@ -151,7 +151,7 @@ curl -X POST http://your-host:9900/ \
                  "parts":[{"text":"What tools do you have?"}]}}}'
 ```
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 - **Peers can't reach the card URL** — the card was advertising your bind address; set `A2A_PUBLIC_URL` to the externally routable URL.
 - **`401 Unauthorized`** — token mismatch; check `A2A_PEER_TOKENS`/`A2A_BEARER_TOKEN` on the server and the peer's `auth:` block.

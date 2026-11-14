@@ -1,22 +1,21 @@
 ---
-sidebar_position: 9
 title: "Optional Skills Catalog"
-description: "Official optional skills shipped with hermes-agent — install via hermes skills install official/<category>/<skill>"
+description: "Official optional skills shipped with hermes-agent — install via noone skills install official/<category>/<skill>"
 ---
 
-# Optional Skills Catalog
+# Optional Skills Catalog {#optional-skills-catalog}
 
 Optional skills ship with hermes-agent under `optional-skills/` but are **not active by default**. Install them explicitly:
 
 ```bash
-hermes skills install official/<category>/<skill>
+noone skills install official/<category>/<skill>
 ```
 
 For example:
 
 ```bash
-hermes skills install official/blockchain/solana
-hermes skills install official/mlops/flash-attention
+noone skills install official/blockchain/solana
+noone skills install official/mlops/flash-attention
 ```
 
 Each skill below links to a dedicated page with its full definition, setup, and usage.
@@ -24,10 +23,10 @@ Each skill below links to a dedicated page with its full definition, setup, and 
 To uninstall:
 
 ```bash
-hermes skills uninstall <skill-name>
+noone skills uninstall <skill-name>
 ```
 
-## autonomous-ai-agents
+## autonomous-ai-agents {#autonomous-ai-agents}
 
 | Skill | Description |
 |-------|-------------|
@@ -39,7 +38,7 @@ hermes skills uninstall <skill-name>
 | [**opencode**](../user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-opencode.md) | Delegate coding to OpenCode CLI (features, PR review). |
 | [**openhands**](../user-guide/skills/optional/autonomous-ai-agents/autonomous-ai-agents-openhands.md) | Delegate coding to OpenHands CLI (model-agnostic, LiteLLM). |
 
-## blockchain
+## blockchain {#blockchain}
 
 | Skill | Description |
 |-------|-------------|
@@ -47,13 +46,13 @@ hermes skills uninstall <skill-name>
 | [**hyperliquid**](../user-guide/skills/optional/blockchain/blockchain-hyperliquid.md) | Hyperliquid market data, account history, trade review. |
 | [**solana**](../user-guide/skills/optional/blockchain/blockchain-solana.md) | Query Solana wallets, tokens, txs, and NFTs in USD. |
 
-## communication
+## communication {#communication}
 
 | Skill | Description |
 |-------|-------------|
 | [**one-three-one-rule**](../user-guide/skills/optional/communication/communication-one-three-one-rule.md) | 1-3-1 decision briefs: problem, three options, one pick. |
 
-## creative
+## creative {#creative}
 
 | Skill | Description |
 |-------|-------------|
@@ -89,37 +88,37 @@ hermes skills uninstall <skill-name>
 | [**tldraw-offline**](../user-guide/skills/optional/creative/creative-tldraw-offline.md) | Drive and script tldraw offline canvases with an agent. |
 | [**unreal-mcp**](../user-guide/skills/optional/creative/creative-unreal-mcp.md) | Automate Unreal Engine editor scenes, actors, and renders. |
 
-## data-science
+## data-science {#data-science}
 
 | Skill | Description |
 |-------|-------------|
 | [**jupyter-notebook**](../user-guide/skills/optional/data-science/data-science-jupyter-notebook.md) | Iterative Python via live Jupyter kernel (hamelnb). |
 
-## devops
+## devops {#devops}
 
 | Skill | Description |
 |-------|-------------|
-| [**actual-setup**](../user-guide/skills/optional/devops/devops-actual-setup.md) | Set up Actual Computer (actual.inc) inference in Hermes. |
+| [**actual-setup**](../user-guide/skills/optional/devops/devops-actual-setup.md) | Set up Actual Computer (actual.inc) inference in {{app-name}}. |
 | [**docker-management**](../user-guide/skills/optional/devops/devops-docker-management.md) | Manage Docker containers, images, volumes, and Compose. |
-| [**hermes-s6-container-supervision**](../user-guide/skills/optional/devops/devops-hermes-s6-container-supervision.md) | Modify or debug s6 services in the Hermes Docker image. |
+| [**hermes-s6-container-supervision**](../user-guide/skills/optional/devops/devops-hermes-s6-container-supervision.md) | Modify or debug s6 services in the {{app-name}} Docker image. |
 | [**inference-sh-cli**](../user-guide/skills/optional/devops/devops-inference-sh-cli.md) | Run 150+ AI apps (image, video, LLM) via inference.sh CLI. |
 | [**pinggy-tunnel**](../user-guide/skills/optional/devops/devops-pinggy-tunnel.md) | Zero-install localhost tunnels over SSH via Pinggy. |
 | [**setup-wizard-generator**](../user-guide/skills/optional/devops/devops-setup-wizard-generator.md) | Generate a bash wizard guiding a human through manual setup. |
 | [**watchers**](../user-guide/skills/optional/devops/devops-watchers.md) | Poll RSS, JSON APIs, and GitHub with watermark dedup. |
 
-## dogfood
+## dogfood {#dogfood}
 
 | Skill | Description |
 |-------|-------------|
 | [**adversarial-ux-test**](../user-guide/skills/optional/dogfood/dogfood-adversarial-ux-test.md) | Roleplay a hostile user to find and triage UX pain points. |
 
-## email
+## email {#email}
 
 | Skill | Description |
 |-------|-------------|
 | [**agentmail**](../user-guide/skills/optional/email/email-agentmail.md) | Use when an agent needs AgentMail CLI email inboxes. |
 
-## finance
+## finance {#finance}
 
 | Skill | Description |
 |-------|-------------|
@@ -133,21 +132,21 @@ hermes skills uninstall <skill-name>
 | [**pptx-author**](../user-guide/skills/optional/finance/finance-pptx-author.md) | Build PowerPoint decks headless with python-pptx. |
 | [**stocks**](../user-guide/skills/optional/finance/finance-stocks.md) | Stock quotes, history, search, compare, crypto via Yahoo. |
 
-## gaming
+## gaming {#gaming}
 
 | Skill | Description |
 |-------|-------------|
 | [**minecraft-modpack-server**](../user-guide/skills/optional/gaming/gaming-minecraft-modpack-server.md) | Host modded Minecraft servers (CurseForge, Modrinth). |
 | [**pokemon-player**](../user-guide/skills/optional/gaming/gaming-pokemon-player.md) | Play Pokemon via headless emulator + RAM reads. |
 
-## health
+## health {#health}
 
 | Skill | Description |
 |-------|-------------|
 | [**fitness-nutrition**](../user-guide/skills/optional/health/health-fitness-nutrition.md) | Workout planning, macros, and body metrics via wger/USDA. |
 | [**neuroskill-bci**](../user-guide/skills/optional/health/health-neuroskill-bci.md) | Use live BCI cognitive and mood state from NeuroSkill. |
 
-## mcp
+## mcp {#mcp}
 
 | Skill | Description |
 |-------|-------------|
@@ -155,14 +154,14 @@ hermes skills uninstall <skill-name>
 | [**mcp-oauth-remote-gateway**](../user-guide/skills/optional/mcp/mcp-mcp-oauth-remote-gateway.md) | Manual OAuth for remote MCP servers on headless gateways. |
 | [**mcporter**](../user-guide/skills/optional/mcp/mcp-mcporter.md) | List, auth, and call MCP servers/tools from the terminal. |
 
-## media
+## media {#media}
 
 | Skill | Description |
 |-------|-------------|
 | [**gif-search**](../user-guide/skills/optional/media/media-gif-search.md) | Search/download GIFs from Tenor via curl + jq. |
 | [**songsee**](../user-guide/skills/optional/media/media-songsee.md) | Audio spectrograms/features (mel, chroma, MFCC) via CLI. |
 
-## mlops
+## mlops {#mlops}
 
 | Skill | Description |
 |-------|-------------|
@@ -190,14 +189,14 @@ hermes skills uninstall <skill-name>
 | [**torchtitan**](../user-guide/skills/optional/mlops/mlops-torchtitan.md) | Pretrain LLMs at scale with PyTorch 4D parallelism. |
 | [**unsloth**](../user-guide/skills/optional/mlops/mlops-training-unsloth.md) | Unsloth: 2-5x faster LoRA/QLoRA fine-tuning, less VRAM. |
 
-## payments
+## payments {#payments}
 
 | Skill | Description |
 |-------|-------------|
 | [**stripe-link-cli**](../user-guide/skills/optional/payments/payments-stripe-link-cli.md) | Agent payments via Stripe Link — cards, SPT, approvals. |
 | [**stripe-projects**](../user-guide/skills/optional/payments/payments-stripe-projects.md) | Provision SaaS services + sync creds via Stripe Projects. |
 
-## productivity
+## productivity {#productivity}
 
 | Skill | Description |
 |-------|-------------|
@@ -212,7 +211,7 @@ hermes skills uninstall <skill-name>
 | [**siyuan**](../user-guide/skills/optional/productivity/productivity-siyuan.md) | Query and edit a SiYuan knowledge base via its API. |
 | [**telephony**](../user-guide/skills/optional/productivity/productivity-telephony.md) | Provision Twilio numbers, SMS/MMS, and AI outbound calls. |
 
-## research
+## research {#research}
 
 | Skill | Description |
 |-------|-------------|
@@ -230,7 +229,7 @@ hermes skills uninstall <skill-name>
 | [**rss-feeds**](../user-guide/skills/optional/research/research-rss-feeds.md) | Read RSS, Atom, JSON feeds; discover feeds behind a page. |
 | [**scrapling**](../user-guide/skills/optional/research/research-scrapling.md) | Scrape sites with stealth browsing and Cloudflare bypass. |
 
-## security
+## security {#security}
 
 | Skill | Description |
 |-------|-------------|
@@ -241,19 +240,19 @@ hermes skills uninstall <skill-name>
 | [**unbroker**](../user-guide/skills/optional/security/security-unbroker.md) | Remove your info from data-broker sites, by name or phone. |
 | [**web-pentest**](../user-guide/skills/optional/security/security-web-pentest.md) | Authorized web pentest: recon, proof-based exploits, report. |
 
-## smart-home
+## smart-home {#smart-home}
 
 | Skill | Description |
 |-------|-------------|
 | [**openhue**](../user-guide/skills/optional/smart-home/smart-home-openhue.md) | Control Philips Hue lights, scenes, rooms via OpenHue CLI. |
 
-## social-media
+## social-media {#social-media}
 
 | Skill | Description |
 |-------|-------------|
 | [**reddit-reading**](../user-guide/skills/optional/social-media/social-media-reddit-reading.md) | Read Reddit: subreddits, search, threads, users. No browser. |
 
-## software-development
+## software-development {#software-development}
 
 | Skill | Description |
 |-------|-------------|
@@ -261,14 +260,14 @@ hermes skills uninstall <skill-name>
 | [**code-wiki**](../user-guide/skills/optional/software-development/software-development-code-wiki.md) | Generate wiki docs + Mermaid diagrams for any codebase. |
 | [**grill-me**](../user-guide/skills/optional/software-development/software-development-grill-me.md) | Adversarial plan interview before implementation. |
 | [**hermes-agent-skill-authoring**](../user-guide/skills/optional/software-development/software-development-hermes-agent-skill-authoring.md) | Author in-repo SKILL.md files: frontmatter and structure. |
-| [**inspecting-hermes-desktop-dom**](../user-guide/skills/optional/software-development/software-development-inspecting-hermes-desktop-dom.md) | Read the live Hermes desktop DOM/CSS over CDP. |
+| [**inspecting-hermes-desktop-dom**](../user-guide/skills/optional/software-development/software-development-inspecting-hermes-desktop-dom.md) | Read the live {{app-name}} desktop DOM/CSS over CDP. |
 | [**node-inspect-debugger**](../user-guide/skills/optional/software-development/software-development-node-inspect-debugger.md) | Debug Node.js via --inspect + Chrome DevTools Protocol CLI. |
 | [**pr-lens**](../user-guide/skills/optional/software-development/software-development-pr-lens.md) | Draw code changes as animated architecture/data-flow SVGs. |
 | [**python-debugpy**](../user-guide/skills/optional/software-development/software-development-python-debugpy.md) | Debug Python: pdb REPL + debugpy remote (DAP). |
 | [**rest-graphql-debug**](../user-guide/skills/optional/software-development/software-development-rest-graphql-debug.md) | Debug REST/GraphQL APIs: status codes, auth, schemas, repro. |
 | [**subagent-driven-development**](../user-guide/skills/optional/software-development/software-development-subagent-driven-development.md) | Execute plans via delegate_task subagents (2-stage review). |
 
-## web-development
+## web-development {#web-development}
 
 | Skill | Description |
 |-------|-------------|
@@ -280,7 +279,7 @@ hermes skills uninstall <skill-name>
 
 ---
 
-## Contributing Optional Skills
+## Contributing Optional Skills {#contributing-optional-skills}
 
 To add a new optional skill to the repository:
 

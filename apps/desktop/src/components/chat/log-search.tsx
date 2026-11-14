@@ -1,3 +1,4 @@
+import { ChevronDown, ChevronUp } from '@noone/ui/icons'
 import { type KeyboardEvent, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -5,7 +6,6 @@ import { SearchField } from '@/components/ui/search-field'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { findBarKeyAction, formatMatchLabel } from '@/lib/find-in-page'
-import { ChevronDown, ChevronUp } from '@/lib/icons'
 import { findLogSearchHits, type LogSearchHit } from '@/lib/log-search'
 import { cn } from '@/lib/utils'
 

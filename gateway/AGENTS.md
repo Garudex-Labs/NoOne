@@ -10,11 +10,11 @@ goals, notifications, shutdown, ...), sessions in `session*.py`, slash handlers 
 `slash_commands_*.py` mixins, authorization in `authz_mixin.py`, adapters in `platforms/<name>.py`
 over `platforms/base.py`. The gateway reads user YAML **raw** (`run.py` + `config.py`), not through
 `DEFAULT_CONFIG` — a key the CLI sees but the gateway doesn't means you're on the wrong loader
-(`hermes_cli/AGENTS.md`). Each adapter picks a base toolset (Telegram → `"messaging"`).
+(`agent_cli/AGENTS.md`). Each adapter picks a base toolset (Telegram → `"messaging"`).
 
 Slash commands: handlers are looked up by name through `_command_handler_table`; a command is
 listed in `_IDLE_COMMANDS` or `_PLAIN_COMMANDS` (works mid-run) in `run_busy.py`. No
-`if canonical == ...` chains. Registry + adding a command: `hermes_cli/AGENTS.md`.
+`if canonical == ...` chains. Registry + adding a command: `agent_cli/AGENTS.md`.
 
 ## The gateway has TWO message guards — both must bypass approval/control commands
 
@@ -57,7 +57,7 @@ MagicMock adapters in older tests auto-create truthy attributes.
 
 ## No user content in INFO+ logs
 
-Logs reach `hermes debug share` uploads: never log bodies, subjects, display names, addresses or
+Logs reach `noone debug share` uploads: never log bodies, subjects, display names, addresses or
 phones at INFO+. Log `len(text)`, an id, `hash_for_log(chat_id)` or `redact_phone(...)`; the raw
 value goes to DEBUG (HX017).
 
@@ -70,13 +70,13 @@ value goes to DEBUG (HX017).
 without spending an attempt. Long form: `website/docs/developer-guide/gateway-internals.md`
 § Background process notifications.
 
-Canonical local CLI/TUI/Desktop sessions admit completion and watch events into the same durable
+Canonical local CLI/Desktop sessions admit completion and watch events into the same durable
 FIFO as human input (private launch policy, `internal_notification` display kind); observers never
 own or consume those turns, and an interrupted started turn stays unknown and pauses its followers.
 
 ## `/login` (off-turn, paired DM only)
 
-`GatewayLoginCommandsMixin` refuses outside a real paired DM (ntfy, raft and a2a report `dm` for
+`GatewayLoginCommandsMixin` refuses outside a real paired DM (a2a report `dm` for
 broadcast surfaces) and binds the WHOLE install's `providers.nous`, so shared gateways must set
 `allow_admin_from`. It drains `anon_auth.run_sign_in` on its private single-worker `_login_executor`
 (never the shared pool), allows one attempt per process, and on completion evicts agents still on
@@ -84,7 +84,7 @@ broadcast surfaces) and binds the WHOLE install's `providers.nous`, so shared ga
 
 ## Gateway lifecycle vs. the Desktop app
 
-`hermes serve` (control plane, desktop-spawned child) dies with the app — by design. The messaging
+`noone serve` (control plane, desktop-spawned child) dies with the app — by design. The messaging
 gateway (`gateway run`) SURVIVES the app: the serve backend's `/api/gateway/*` endpoints spawn it
 detached (`_spawn_hermes_action` — `start_new_session` / `DETACHED_PROCESS`), so `before-quit`'s
 SIGTERM never reaches it and bots keep running. The known breach is the Windows shim-unlock
@@ -149,13 +149,13 @@ gateway under the backend, and do NOT "fix" update locks by widening the tree-ki
 - **Token locks.** An adapter that connects with a unique credential (bot token, API key) calls
   `acquire_scoped_lock()` from `gateway.status` in `connect()`/`start()` and `release_scoped_lock()`
   in `disconnect()`/`stop()`, so two profiles cannot share one credential. Canonical:
-  `plugins/platforms/irc/adapter.py`.
+  `plugins/platforms/line/adapter.py`.
 - **Multiplex profile-scoped env reads MUST fail closed — never borrow from `os.environ`**
   (`agent/secret_scope.py`; #72348, #86905). Under `gateway.multiplex_profiles`, `os.environ` holds
   the DEFAULT profile's values; a secondary profile's `.env` exists only in its secret scope,
   bound per profile *activity* by `_profile_runtime_scope` (turn, callback, eviction, tick — never
   only "per turn"). All profile-level env config — credentials
-  (`app_secret`, tokens) AND authorization (`FEISHU_ALLOWED_USERS`, `{PLATFORM}_ALLOW_ALL_USERS`,
+  (`app_secret`, tokens) AND authorization (`LINE_ALLOWED_USERS`, `{PLATFORM}_ALLOW_ALL_USERS`,
   `GATEWAY_ALLOW_ALL_USERS`, `group_policy`, `allow_bots`) — is read scope-aware: adapters via
   `gateway.platforms._shared.get_scoped_secret` (the ONE implementation; adapters import it as
   `_get_scoped_secret`; `extra_or_secret` / `seed_extra_from_env` / `env_is_connected` build on it),
@@ -186,7 +186,7 @@ gateway under the backend, and do NOT "fix" update locks by widening the tree-ki
   `AIAgent(memory_manager=...)` adopts it without a second provider init. Without it the previous
   turn's queued recall never reaches the next request (#120116).
 - **`multiplex_profiles: false` is not "no scope ever".** A native hosted room serving a second
-  profile flips the process-wide guard (`tui_gateway/launch_profile_policy.py::
+  profile flips the process-wide guard (`agent_backend/launch_profile_policy.py::
   activate_multi_profile_hosting`) inside the gateway process, after the adapters were wired; every
   standalone entry point (`run_turn.py::_profile_scope_for_source`, the primary adapter's message /
   busy / platform-event handlers via `run_adapters.py::_standalone_scoped`) then binds the launch
@@ -212,13 +212,13 @@ gateway under the backend, and do NOT "fix" update locks by widening the tree-ki
   bridge its own pidfile (pid + start time + port) does not identify. `needs_attention` is
   set and cleared at the single writer (`_update_platform_runtime_status`) on the connect path.
 - **One launch-home identity.** "Does this task serve a routed profile?" compares the override
-  with `hermes_constants.get_routing_process_hermes_home()` (`agent/secret_scope.py::
+  with `agent_constants.get_routing_process_agent_home()` (`agent/secret_scope.py::
   serves_routed_profile` and `_is_process_home`, `tools/environments/local.py::_is_routed_home`,
-  `hermes_cli/env_loader.py::_process_hermes_home`), never with `os.environ["HERMES_HOME"]` read
-  live: an embedding host that mirrors the served profile into the env var per turn (Hermes
+  `agent_cli/env_loader.py::_process_hermes_home`), never with `os.environ["HERMES_HOME"]` read
+  live: an embedding host that mirrors the served profile into the env var per turn (NoOne
   WebUI) pins its own home with `pin_process_hermes_home()`, and without a pin the resolver is
-  `get_process_hermes_home()` unchanged. Do not add another routing decision that compares
-  against `get_process_hermes_home()` directly; that resolver is for process-level assets.
+  `get_process_agent_home()` unchanged. Do not add another routing decision that compares
+  against `get_process_agent_home()` directly; that resolver is for process-level assets.
 
 ## Tests
 

@@ -129,7 +129,7 @@ export const SIDEBAR_NAV_AREA = 'sidebar.nav'
 
 /** Payload of a `sidebar.nav` data contribution. */
 export interface SidebarNavContribution {
-  /** Codicon name, e.g. `'project'`. */
+  /** AppIcon name, e.g. `'project'`. */
   codicon: string
   label: string
   /** Route to navigate to (usually a contributed page's path). */

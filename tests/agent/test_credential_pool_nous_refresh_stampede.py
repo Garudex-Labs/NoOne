@@ -19,11 +19,11 @@ Two invariants pinned here:
 import json
 import logging
 
-import hermes_cli.auth as auth_mod
-from hermes_cli import auth_nous
+import agent_cli.auth as auth_mod
+from agent_cli import auth_nous
 from agent.credential_pool import CredentialPool, PooledCredential
 
-from tests.hermes_cli.test_auth_nous_provider import _invoke_jwt, _setup_nous_auth
+from tests.agent_cli.test_auth_nous_provider import _invoke_jwt, _setup_nous_auth
 
 
 def test_forced_refresh_adopts_peer_rotation_instead_of_reposting(tmp_path, monkeypatch):

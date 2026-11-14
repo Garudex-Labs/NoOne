@@ -4,7 +4,7 @@ Adapters (built-in and plugin) self-register here so the gateway can discover an
 instantiate them without hardcoded if/elif chains. Plugins register via
 ``PluginContext.register_platform()``; ``GatewayRunner._create_adapter()`` consults the
 registry first, then the legacy built-in path. Plugin side: ``platform_registry
-.register(PlatformEntry(...))``; gateway side: ``create_adapter("irc", platform_config)``.
+.register(PlatformEntry(...))``; gateway side: ``create_adapter("line", platform_config)``.
 """
 
 import contextlib
@@ -15,7 +15,7 @@ import threading
 from dataclasses import dataclass, field
 from typing import Any, Awaitable, Callable, Optional
 
-from hermes_constants import hermes_home_key
+from agent_constants import agent_home_key
 
 logger = logging.getLogger(__name__)
 # The verdict of an ``ensure_deps`` an async gateway caller already ran in an executor (#125607).
@@ -47,7 +47,7 @@ def _caller_plugin_scope() -> Optional[str]:
 class PlatformEntry:
     """Metadata and factory for a single platform adapter."""
 
-    name: str  # config.yaml identifier (e.g. "irc")
+    name: str  # config.yaml identifier (e.g. "line")
     label: str  # human-readable
     adapter_factory: Callable[[Any], Any]  # PlatformConfig -> adapter (factory allows custom init)
     # PASSIVE dependency probe (deps importable RIGHT NOW); must be side-effect free since it
@@ -78,11 +78,11 @@ class PlatformEntry:
     # Connected/configured for this PlatformConfig (``get_connected_platforms``, setup UI);
     # None falls back to ``validate_config`` or ``check_fn``.
     is_connected: Optional[Callable[[Any], bool]] = None
-    required_env: list = field(default_factory=list)  # ``hermes setup`` display
+    required_env: list = field(default_factory=list)  # ``noone setup`` display
     install_hint: str = ""  # shown when check_fn is False
     setup_fn: Optional[Callable[[], None]] = None  # None = _setup_standard_platform / env display
     source: str = "plugin"  # "builtin" or "plugin"
-    plugin_name: str = ""  # owning manifest so ``hermes gateway setup`` can auto-enable it
+    plugin_name: str = ""  # owning manifest so ``noone gateway setup`` can auto-enable it
     allowed_users_env: str = ""  # comma-separated allowed user IDs (_is_user_authorized)
     allow_all_env: str = ""  # truthy "allow everyone" switch
     max_message_length: int = 0  # smart-chunking cap; 0 = no limit
@@ -143,10 +143,10 @@ class PlatformEntry:
     allow_bots_env: str = ""
     # (dm_policy_env, group_policy_env) of a platform with its own dm/group policy: when enabled and
     # either resolves "open" without ``allow_all_env`` / GATEWAY_ALLOW_ALL_USERS, startup is refused.
-    # A "" member = that policy is YAML-only (QQ Bot). None = no own policy, never checked.
+    # A "" member = that policy is YAML-only (declared without an env name). None = no own policy, never checked.
     own_policy_env: Optional[tuple] = None
     # Env var listing group/forum CHAT ids whose traffic is authorized by chat (any sender, user_id
-    # optional): Telegram ``TELEGRAM_GROUP_ALLOWED_CHATS``, QQ ``QQ_GROUP_ALLOWED_USERS``. "" = none.
+    # optional): Telegram ``TELEGRAM_GROUP_ALLOWED_CHATS``. "" = none.
     group_allowed_chats_env: str = ""
     # True: a configured env allowlist turns the unauthorized-DM default from "pair" into "ignore"
     # (the owner restricted access; unknown senders get no pairing code).
@@ -160,7 +160,7 @@ class PlatformEntry:
     # ``gateway.platforms.send_targets.StandaloneSendPolicy`` or None (generic send routing).
     standalone_send: Optional[Any] = None
     # --- dashboard ---
-    # Channels-page card metadata (hermes_cli/web_server_messaging.py, Desktop + web dashboard).
+    # Channels-page card metadata (agent_cli/web_server_messaging.py, Desktop + web dashboard).
     # Every field defaults to "not declared": the card then falls back to ``label`` / ``install_hint``
     # / ``required_env`` + prefix-discovered env vars.
     dashboard_label: str = ""  # card title when it differs from ``label`` (status/CLI keep ``label``)
@@ -168,7 +168,7 @@ class PlatformEntry:
     docs_url: str = ""  # setup guide linked from the card
     dashboard_env_vars: tuple = ()  # card fields shown first, in this order, before discovered vars
     # Credentials the card treats as "configured"; None = ``required_env`` (which also drives
-    # ``hermes setup`` and the child-env scrub, so the card may legitimately ask for a different set).
+    # ``noone setup`` and the child-env scrub, so the card may legitimately ask for a different set).
     dashboard_required_env: Optional[tuple] = None
     # ``{ENV_KEY: (accepts(value) -> bool, 400 detail)}``: the dashboard PUT rejects a non-empty value
     # the predicate refuses, catching credentials pasted into the wrong field.
@@ -180,7 +180,7 @@ class PlatformEntry:
     # importable and may set token / home channel / reply mode or force-disable.
     env_overrides: tuple = ()
     # Env names whose presence drives that enable, cited by the explicit-disable WARNING and used by
-    # ``hermes_cli.profile_channels`` as the platform's credential set; () = none declared.
+    # ``agent_cli.profile_channels`` as the platform's credential set; () = none declared.
     env_enable_credentials: tuple = ()
 
 
@@ -227,7 +227,7 @@ class PlatformRegistry:
 
     @staticmethod
     def current_scope_key() -> str:
-        return hermes_home_key()
+        return agent_home_key()
 
     def _scope_maps(
         self, scope: Optional[str], *, create: bool = False
@@ -317,7 +317,7 @@ class PlatformRegistry:
             event = self._inflight.get(scoped_key)
             load_key = scoped_key
             if event is None and name not in entries and self._loading.get():
-                from hermes_cli.plugins_loader import in_plugin_load_worker
+                from agent_cli.plugins_loader import in_plugin_load_worker
                 if in_plugin_load_worker():
                     return  # on a deadline worker: never block on a sibling load the parent may hold the lock for; caller sees it unloaded
             if event is None and name not in entries:

@@ -1,9 +1,9 @@
+import { getLatestSessionMessages, type ProfileScope } from '@/agent-client'
 import {
   extendRefreshPageToOverlap,
   graftRefreshedTailOntoBackfill,
   olderPageReader
 } from '@/app/chat/transcript-backfill'
-import { getLatestSessionMessages, type ProfileScope } from '@/hermes'
 import { type ChatMessage, toChatMessages } from '@/lib/chat-messages'
 import {
   type InFlightRecoveryResult,
@@ -12,7 +12,7 @@ import {
   ownerPendingTurns,
   runningAdmission
 } from '@/lib/inflight-turn-journal'
-import type { SessionMessage, SessionMessagesResponse, SessionResumeResult } from '@/types/hermes'
+import type { SessionMessage, SessionMessagesResponse, SessionResumeResult } from '@/types/agent-client'
 
 import type { ClientSessionState } from '../../../types'
 

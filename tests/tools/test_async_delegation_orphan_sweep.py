@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
+from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
 from tools import async_delegation as ad
 from tests.waiting import wait_until
 from tools.process_registry import process_registry
@@ -86,11 +86,11 @@ class _Home:
         self.home = home
 
     def __enter__(self):
-        self._token = set_hermes_home_override(str(self.home))
+        self._token = set_agent_home_override(str(self.home))
         return self
 
     def __exit__(self, *exc):
-        reset_hermes_home_override(self._token)
+        reset_agent_home_override(self._token)
 
 
 def _drain(q) -> list:
@@ -278,14 +278,14 @@ def test_gateway_watcher_sweeps_each_served_ledger_in_its_own_scope(tmp_path, mo
     monkeypatch.setattr(process_registry, "completion_queue", isolated)
     runner = object.__new__(GatewayRunner)
     runner._primary_profile_name = "default"
-    runner._served_profile_homes = {"default": get_hermes_home(), "b": home_b}
+    runner._served_profile_homes = {"default": get_agent_home(), "b": home_b}
     runner._sweep_orphaned_completion_ledgers()
     assert [e["delegation_id"] for e in _drain(isolated)] == [delegation_id]
 
 
 def test_tui_notification_poller_sweeps_under_its_session_profile(tmp_path, monkeypatch):
     """The desktop/TUI delivery loop runs the (throttled) sweep in the session's own profile scope."""
-    from tui_gateway import server
+    from agent_backend import server
 
     home_b = tmp_path / "b"
     home_b.mkdir()
@@ -293,7 +293,7 @@ def test_tui_notification_poller_sweeps_under_its_session_profile(tmp_path, monk
     seen = []
 
     def fake_sweep(target_queue):
-        seen.append((str(get_hermes_home()), target_queue))
+        seen.append((str(get_agent_home()), target_queue))
         stop.set()
         return 0
 
@@ -315,7 +315,7 @@ def test_offer_dropped_by_a_session_that_cannot_own_it_is_re_offered_to_the_owne
     async delegation drops its copy while the durable row stays pending, so the offer must not
     suppress the next sweep: the owning session, live later, still gets the row without a restart."""
     from tools.process_registry_notifications import format_process_notification
-    from tui_gateway import server
+    from agent_backend import server
 
     home = tmp_path / "home"
     delegation_id = _orphan(home)
@@ -351,7 +351,7 @@ def test_offer_dropped_by_a_session_that_cannot_own_it_is_re_offered_to_the_owne
 def test_offer_released_after_a_failed_tui_turn_is_re_offered(tmp_path, monkeypatch):
     """The TUI poller releases its claim and discards its copy when the turn cannot start; the row is
     pending again with one attempt spent, so the sweep offers it again instead of skipping it."""
-    from tui_gateway import server
+    from agent_backend import server
 
     home = tmp_path / "home"
     delegation_id = _orphan(home)
@@ -374,7 +374,7 @@ def test_offer_released_after_a_failed_tui_turn_is_re_offered(tmp_path, monkeypa
 
 def test_throttle_runs_at_most_one_sweep_per_home_per_interval(tmp_path, monkeypatch):
     calls = []
-    monkeypatch.setattr(ad, "sweep_orphaned_completions", lambda q, **kw: calls.append(str(get_hermes_home())) or 0)
+    monkeypatch.setattr(ad, "sweep_orphaned_completions", lambda q, **kw: calls.append(str(get_agent_home())) or 0)
     q = queue.Queue()
     with _Home(tmp_path / "a"):
         ad.maybe_sweep_orphaned_completions(q, now=100.0)

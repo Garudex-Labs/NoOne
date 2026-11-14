@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 /**
  * Desktop-managed SSH update transaction.
  *
@@ -5,7 +6,7 @@
  * maps, while this file owns the security-sensitive ordering and the remote
  * wire protocol:
  *
- *   gate dials -> drain every captured scope -> detached `hermes update`
+ *   gate dials -> drain every captured scope -> detached `noone update`
  *   -> correlated terminal marker + durable receipt -> restore every scope
  *   -> lift the gate
  *
@@ -536,7 +537,7 @@ function managedUpdateMessage(
     // Only follow-ups are finished by a rerun; a user action (e.g. a parked
     // stash) is the producer's exact manual instruction, shown verbatim.
     (followups.length
-      ? ` Re-run \`hermes update\` on the remote to finish ${followups.map(step => step.step).join(', ')}.`
+      ? ` Re-run \`noone update\` on the remote to finish ${followups.map(step => step.step).join(', ')}.`
       : '') +
     (userAction?.reason ? ` ${userAction.reason}` : '')
 
@@ -1043,8 +1044,8 @@ function managedSshDrainBlocker(
   return {
     reason: DARWIN_DRAIN_UNSUPPORTED,
     message:
-      `Skipped: Desktop cannot safely stop its running Hermes serve on this macOS remote (${blocked.join(', ')}). ` +
-      'Disconnect it, or run `hermes update` on the remote, then retry.'
+      appText(`Skipped: Desktop cannot safely stop its running {app_name} serve on this macOS remote (${blocked.join(', ')}). `) +
+      'Disconnect it, or run `noone update` on the remote, then retry.'
   }
 }
 

@@ -74,10 +74,10 @@ def _resolve_gateway_exit_verdict(runner, signal_initiated_shutdown: bool) -> bo
     return True
 
 # Windows has no bash/setsid chain: a tiny detached Python watcher waits for the gateway PID to
-# exit (bounded), then spawns ``hermes gateway restart``.
+# exit (bounded), then spawns ``noone gateway restart``.
 _WINDOWS_RESTART_WATCHER = """
 import os, subprocess, sys, time
-from hermes_cli._subprocess_compat import windows_detach_flags_without_breakaway
+from agent_cli._subprocess_compat import windows_detach_flags_without_breakaway
 pid = int(sys.argv[1])
 restart_after_s = float(sys.argv[2])
 cmd = sys.argv[3:]
@@ -789,7 +789,7 @@ class GatewayShutdownMixin(GatewaySessionEndMixin, GatewayHomeShutdownNoticeMixi
         )
         logger.warning(
             "%s paused after %d consecutive failures (%s) — fix the underlying issue then run `/platform "
-            "resume %s` to retry, or `hermes gateway restart` to restart the gateway.",
+            "resume %s` to retry, or `noone gateway restart` to restart the gateway.",
             platform.value, info.get("attempts", 0), info["pause_reason"], platform.value,
         )
 
@@ -1340,12 +1340,12 @@ class GatewayShutdownMixin(GatewaySessionEndMixin, GatewayHomeShutdownNoticeMixi
         already on the default root, is the host.
         """
         from gateway.config_loader import drop_bridged_env
-        from hermes_constants import get_default_hermes_root, get_hermes_home
+        from agent_constants import get_default_agent_root, get_agent_home
         from tools.environments.local import host_gateway_child_env, served_profile_child_env
 
-        home = get_hermes_home()
+        home = get_agent_home()
         try:
-            on_default = home.resolve() == get_default_hermes_root().resolve()
+            on_default = home.resolve() == get_default_agent_root().resolve()
         except Exception:
             on_default = False
         # ``resolve_multiplex_mode`` settles the default-on/unset decision before
@@ -1386,7 +1386,7 @@ class GatewayShutdownMixin(GatewaySessionEndMixin, GatewayHomeShutdownNoticeMixi
     def _spawn_windows_restart_watcher(hermes_cmd: list, current_pid: int, restart_after_s: float) -> None:
         """Spawn the detached Windows watcher (``python -c``), retrying once without job breakaway."""
         import subprocess
-        from hermes_cli._subprocess_compat import (
+        from agent_cli._subprocess_compat import (
             windows_detach_flags_without_breakaway, windows_detach_popen_kwargs
         )
         watcher_env = GatewayShutdownMixin._restart_watcher_env()
@@ -1401,9 +1401,9 @@ class GatewayShutdownMixin(GatewaySessionEndMixin, GatewayHomeShutdownNoticeMixi
         # Console python under CREATE_NO_WINDOW: nothing flashes. NOT pythonw.exe — a console-less
         # watcher makes every console-subsystem descendant allocate a visible conhost (#54220/#56747).
         # The watcher runs sys.executable (console python) under the CREATE_NO_WINDOW detach kwargs below:
-        # it owns one hidden console, inherited by the `hermes gateway restart` child, so nothing flashes.
+        # it owns one hidden console, inherited by the `noone gateway restart` child, so nothing flashes.
         # See #54220, #56747.
-        from hermes_cli._launchers import runtime_command
+        from agent_cli._launchers import runtime_command
         watcher_argv = runtime_command(project_root,
             [str(current_pid), str(restart_after_s), *hermes_cmd, "gateway", "restart"],
             code=_WINDOWS_RESTART_WATCHER)
@@ -1545,7 +1545,7 @@ class GatewayShutdownMixin(GatewaySessionEndMixin, GatewayHomeShutdownNoticeMixi
 
     def _describe_active_work(self) -> list:
         """One dict per in-flight work unit the restart wait is holding for, so an observer
-        (``hermes update``, ``hermes gateway status``) can name it instead of printing a bare count.
+        (``noone update``, ``noone gateway status``) can name it instead of printing a bare count.
 
         ``kind`` ∈ ``chat`` (session turn), ``cron`` (job id + external worker pid when the run was handed to a
         restart-safe scope), ``managed`` (session + worker pid when a worker holds it), ``api`` / ``deferred``
@@ -2078,7 +2078,7 @@ class GatewayShutdownMixin(GatewaySessionEndMixin, GatewayHomeShutdownNoticeMixi
             # Shared SessionDB instances still held by the process-wide registry (tools, cron, mirror).
             # This is the safety net that guarantees no WAL write lock survives past gateway shutdown
             # (#90837).
-            from hermes_state_registry import close_all
+            from agent_state_registry import close_all
             closed = close_all()
             if closed:
                 logger.debug("Closed %d shared SessionDB instance(s) at shutdown", closed)

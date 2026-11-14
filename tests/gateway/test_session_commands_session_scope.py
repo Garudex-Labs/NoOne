@@ -8,7 +8,7 @@ import pytest
 
 from tests.gateway.fixtures.local_recovery_probe import rpc, websocket
 from tests.gateway.test_session_busy_controls import owner
-from tests.gateway.test_session_tui_ops import _checkpoint, _git_rpc
+from tests.gateway.test_session_display_ops import _checkpoint, _git_rpc
 
 
 def _repo_with_skill(path):

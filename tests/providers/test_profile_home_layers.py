@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 _PLUGIN = textwrap.dedent(
     """
@@ -52,16 +52,16 @@ def homes(tmp_path, monkeypatch):
 
 
 def _bound(home: Path, fn):
-    token = set_hermes_home_override(home)
+    token = set_agent_home_override(home)
     try:
         return fn()
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def test_secondary_profile_plugin_resolves_for_its_home_only(homes):
     import providers
-    from hermes_cli.auth import resolve_provider
+    from agent_cli.auth import resolve_provider
 
     _launch, secondary = homes
     _install(secondary, "scaleup-only")

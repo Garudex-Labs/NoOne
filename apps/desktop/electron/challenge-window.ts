@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 import type { BrowserWindow, BrowserWindowConstructorOptions, Session } from 'electron'
 
 import { createWindowOpenHandler } from './window-open-policy'
@@ -6,7 +7,7 @@ import { createWindowOpenHandler } from './window-open-policy'
  * The free tier's browser challenge, desktop half.
  *
  * The Nous account service can ask an anonymous install to clear a challenge
- * before it mints a token (`hermes_cli/anon_challenge.py`). The challenge is a
+ * before it mints a token (`agent_cli/anon_challenge.py`). The challenge is a
  * portal page; everything it does (bot detection, an in-browser proof of work,
  * an interactive fallback) belongs to the portal and changes without a Desktop
  * release. Desktop's whole job is this file: load that page in a HIDDEN
@@ -115,7 +116,7 @@ export function challengeWindowOptions(session: Session): BrowserWindowConstruct
     width: 520,
     height: 720,
     show: false,
-    title: 'Hermes — quick check',
+    title: appText('{app_name} — quick check'),
     autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,

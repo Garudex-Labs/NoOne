@@ -1,8 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useEffect } from 'react'
 
 import { SETTINGS_ROUTE } from '@/app/routes'
-import { Codicon } from '@/components/ui/codicon'
 import { DropdownMenuItem, dropdownMenuRow, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
@@ -33,7 +33,7 @@ export function LocalSetupMenuRow() {
         data-slot="model-menu-local-setup"
         onSelect={() => requestRoute(`${SETTINGS_ROUTE}?tab=providers&pview=local`)}
       >
-        <Codicon className="mt-0.5 shrink-0 text-(--ui-accent)" name="chip" size="0.8rem" />
+        <AppIcon className="mt-0.5 shrink-0 text-(--ui-accent)" name="chip" size="0.8rem" />
         <span className="min-w-0 flex-1 leading-snug">
           <span className="block font-medium text-foreground">{copy.title}</span>
           <span className="block truncate text-(--ui-text-tertiary)">

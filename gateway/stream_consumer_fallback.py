@@ -105,7 +105,7 @@ class StreamFallbackMixin:
                 if resume <= lead:
                     # The whole answer replaces the fragment only when the fragment can be deleted:
                     # a preview whose send timed out has no id, an adapter without a real
-                    # ``delete_message`` (Discord, Matrix, Mattermost, WhatsApp) cannot remove it,
+                    # ``delete_message`` (Discord, Mattermost, WhatsApp) cannot remove it,
                     # and a preserved partial is kept on purpose. Each of those keeps the
                     # fragment on screen, so only the tail may follow it.
                     if self._fragment_can_be_replaced():
@@ -547,7 +547,7 @@ class StreamFallbackMixin:
             # thread_id metadata and reply_to on every commentary is spam.
             _plat = getattr(getattr(self.adapter, "platform", None), "value", None)
             _platform_name = str(_plat or getattr(self.adapter, "name", "")).lower()
-            _needs_reply_anchor = _platform_name in ("buzz", "slack", "mattermost", "feishu")
+            _needs_reply_anchor = _platform_name in ( "slack", "mattermost")
             with reply_file_off(False):  # a complete message: past the cap it goes out as one file (#152012)
                 result = await self.adapter.send(
                     chat_id=self.chat_id, content=text,

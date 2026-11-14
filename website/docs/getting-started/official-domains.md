@@ -1,61 +1,56 @@
 ---
-title: Official Domains & Phishing Safety
-description: How to verify you are using genuine Hermes Agent resources, and how to spot impersonation scams.
+title: Official Sources & Phishing Safety
+description: Verify project resources and distinguish them from third-party providers.
 ---
 
-# Official Domains & Phishing Safety
+# Official Sources & Phishing Safety {#official-domains--phishing-safety}
 
-Hermes Agent's popularity has attracted impersonation campaigns: fake "Hermes" websites, GitHub accounts that mass-mention contributors with shortlinks, and cold emails offering "credits" on lookalike products. This page lists the official sources so you can check anything that claims to be Hermes Agent.
+Use the canonical repository to verify anything that claims to be NoOne. A copied logo, a shortened link, or a familiar name is not proof of ownership.
 
-## Official sources
+## Official sources {#official-sources}
 
-Nous Research operates `nousresearch.com` and its subdomains. The ones Hermes Agent uses:
+Garudex Labs maintains [NoOne](https://github.com/Garudex-Labs/NoOne). The maintainer is RAWx18; private security reports go to `rawx18.dev@gmail.com` as described in the repository's security policy.
 
 | Address | What it is |
 |---|---|
-| [hermes-agent.nousresearch.com](https://hermes-agent.nousresearch.com/) | Documentation, Desktop downloads, and the `install.sh` / `install.ps1` installers |
-| `hermes-assets.nousresearch.com` | Release artifacts: Desktop packages and updates, the Termux APT repository, installer mirrors |
-| [portal.nousresearch.com](https://portal.nousresearch.com/) | Nous Portal: account sign-in, subscriptions, billing |
-| `inference-api.nousresearch.com` | The Nous inference API Hermes calls when you use the Nous provider (no web page) |
-| [nousresearch.com](https://nousresearch.com/) | Nous Research website |
+| [Source repository](https://github.com/Garudex-Labs/NoOne) | Source, installer scripts, and the Nix flake |
+| [Repository documentation](https://github.com/Garudex-Labs/NoOne/tree/main/website/docs) | The maintained documentation source |
+| [Releases](https://github.com/Garudex-Labs/NoOne/releases) | Published release assets, when available |
+| [Issues](https://github.com/Garudex-Labs/NoOne/issues) | Public bug reports and project questions |
 
-Outside `nousresearch.com`:
+No dedicated NoOne documentation host, download domain, or community account is declared here. Do not treat an upstream service as a NoOne-owned deployment.
 
-- **GitHub:** the [NousResearch organization](https://github.com/NousResearch) and its [hermes-agent repository](https://github.com/NousResearch/hermes-agent) (source, releases, the Nix flake). Raw files from that repository are served from `raw.githubusercontent.com/NousResearch/hermes-agent/...`; that is the same repository, not a separate source. Any other account or repository is not ours.
-- **Docker Hub:** the [`nousresearch/hermes-agent`](https://hub.docker.com/r/nousresearch/hermes-agent) image, published by the repository's release workflow (see [Docker](../user-guide/docker.md)). Only the `nousresearch` namespace is official; images under other names or registries are not.
-- **X (Twitter):** [@NousResearch](https://x.com/NousResearch)
-- **Discord:** [discord.gg/NousResearch](https://discord.gg/NousResearch)
+## Installing from an official source {#installing-from-an-official-source}
 
-## Installing from an official source
-
-The script installers are served from `hermes-agent.nousresearch.com`:
+Read the scripts in the repository before running them. Raw files served from `raw.githubusercontent.com/Garudex-Labs/NoOne/...` belong to the same repository.
 
 ```bash
 # Linux / macOS / WSL2
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Garudex-Labs/NoOne/main/scripts/install.sh | bash
 ```
 
 ```powershell
 # Windows (native)
-iex (irm https://hermes-agent.nousresearch.com/install.ps1)
+iex (irm https://raw.githubusercontent.com/Garudex-Labs/NoOne/main/scripts/install.ps1)
 ```
 
-The other supported routes also stay on official sources: Desktop packages download from the [Hermes website](https://hermes-agent.nousresearch.com/), Termux uses the signed APT repository on `hermes-assets.nousresearch.com` (see the [Termux guide](./termux.md), not the script above), Nix builds from the GitHub repository (see [Nix & NixOS](./nix-setup.md)), and Docker pulls `nousresearch/hermes-agent` from Docker Hub. Some guides fetch `install.ps1` straight from the repository at `raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.ps1`; it is the same script.
+See [Installation](./installation.md), [Platform Support](./platform-support.md), [Termux](./termux.md), [Nix & NixOS](./nix-setup.md), and [Docker](../user-guide/docker.md) for the retained installation routes. Verify release availability and signing/update ownership before installing a native package.
 
-If an installer, download, image, or "portal" is hosted anywhere other than the sources listed on this page, treat it as untrusted.
+## Third-party providers and compatibility {#third-party-providers-and-compatibility}
 
-## Not official
+Nous Research operates `nousresearch.com` and its subdomains. [Nous Portal](https://portal.nousresearch.com/) and `inference-api.nousresearch.com` are third-party sign-in, billing, and inference services used by the optional Nous integration; they are not operated by Garudex Labs. The inherited `hermes-assets.nousresearch.com` Termux repository and signed package identities remain compatibility boundaries, not a claim of NoOne ownership. Verify the publisher and trust requirements in the relevant installation guide.
 
-- **Any domain that is not `nousresearch.com` or one of its subdomains** (apart from the accounts listed above), even when it contains "hermes" or "hermes-agent" (`.icu`, `.org`, `.ai` and other variants), copies the branding, or says it "points to official docs". Read the whole host name: `hermes-agent.nousresearch.com.example.net` is not a Nous Research subdomain.
-- **Cryptocurrency tokens.** There is **no Hermes Agent or Nous Research token**. Any account or site promoting one is a scam.
-- **GitHub accounts that mass-mention users** in discussions or issues with "community notice" posts and URL-shortener links (`goo.su`, `bit.ly`, etc.). Genuine project announcements never arrive as mass @-mentions with shortlinks.
-- **Unsolicited emails** offering credits, hosted "multiplayer Hermes" products, or partnership deals that name-drop the project to build trust.
+## Not official {#not-official}
 
-## If you receive a suspicious message
+- Unlisted accounts or domains claiming to be NoOne, even if their name or artwork resembles this project. Read the whole hostname: a trusted domain followed by `.example.net` is not that trusted domain.
+- Cryptocurrency promotions. No NoOne token is declared by this project.
+- Accounts that mass-mention users with shortened links or unsolicited offers of credits, alternate downloads, or partnerships.
 
-1. **Don't click** shortened or off-domain links; don't enter credentials or connect wallets.
-2. **Report the account** to GitHub (`Report abuse` on the profile) or the relevant platform.
-3. **Check the host name** against the rule above: if it is not `nousresearch.com` or a subdomain of it, and not one of the accounts listed here, it isn't ours.
-4. Optionally flag it in the [Nous Research Discord](https://discord.gg/NousResearch) or an issue so others see it, but note that impersonation campaigns are external abuse: they're handled by platform reports, not code changes.
+## If you receive a suspicious message {#if-you-receive-a-suspicious-message}
 
-Hermes Agent is MIT-licensed and free to self-host. Nobody legitimate will ever ask you to pay for the open-source agent itself, claim "your account has credits waiting", or DM you an alternate download link.
+1. Do not click shortened links, enter credentials, or connect wallets.
+2. Report the account to its platform.
+3. Compare the repository owner and full hostname with the sources above.
+4. Report public impersonation concerns in [project issues](https://github.com/Garudex-Labs/NoOne/issues); report private security vulnerabilities through the repository's security policy, not a public issue.
+
+NoOne is MIT-licensed and free to self-host. Third-party subscriptions are separate products.

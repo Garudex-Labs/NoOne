@@ -59,7 +59,7 @@ _PROMPT_PREAMBLE = (
 _INITIALIZE_PARAMS = {
     "protocolVersion": 1,
     "clientCapabilities": {"fs": {"readTextFile": True, "writeTextFile": True}},
-    "clientInfo": {"name": "hermes-agent", "title": "Hermes Agent", "version": "0.0.0"},
+    "clientInfo": {"name": "hermes-agent", "title": "Hermes Agent"},
 }
 def _acp_supported(command: str, args: list[str]) -> bool | None:
     """Tri-state ``--acp`` probe (a CLI without the flag exits 1 and the parent would wait the
@@ -105,15 +105,15 @@ def _resolve_home_dir() -> str:
 
 
 def _build_subprocess_env() -> dict[str, str]:
-    # Lazy: the env policy imports hermes_cli.config, and provider plugins import this module
-    # while hermes_cli.config is still initializing (discovery runs from it).
-    from hermes_constants import apply_subprocess_home_env
-    from tools.environments.local import hermes_subprocess_env
+    # Lazy: the env policy imports agent_cli.config, and provider plugins import this module
+    # while agent_cli.config is still initializing (discovery runs from it).
+    from agent_constants import apply_subprocess_home_env
+    from tools.environments.local import agent_subprocess_env
 
     # An ACP agent drives a model and needs LLM provider credentials; the central helper still
     # strips Tier-1 secrets (bot tokens, GitHub auth, infra).
     # See #29157.
-    env = hermes_subprocess_env(inherit_credentials=True)
+    env = agent_subprocess_env(inherit_credentials=True)
     env["HOME"] = _resolve_home_dir()
     apply_subprocess_home_env(env)
     return env
@@ -401,7 +401,7 @@ class ACPClient:
                 + self.unsupported_transport_hint
             )
         try:
-            from hermes_cli._subprocess_compat import windows_hide_flags  # hide the Windows console flash (#56747); pipes intact for the ACP wire
+            from agent_cli._subprocess_compat import windows_hide_flags  # hide the Windows console flash (#56747); pipes intact for the ACP wire
 
             # Hide the console the CLI child would otherwise flash on Windows (#56747). Hide-only — stdio
             # pipes stay intact for the ACP wire.
@@ -487,7 +487,12 @@ class ACPClient:
             raise TimeoutError(f"Timed out waiting for {self.label} response to {method}.")
 
         try:
-            _request("initialize", _INITIALIZE_PARAMS)
+            from agent_cli.version_info import project_version
+
+            initialize = {**_INITIALIZE_PARAMS, "clientInfo": {
+                **_INITIALIZE_PARAMS["clientInfo"], "version": project_version(),
+            }}
+            _request("initialize", initialize)
             session = _request("session/new", {"cwd": self._acp_cwd, "mcpServers": []}) or {}
             if not str(session.get("sessionId") or "").strip():
                 raise RuntimeError(f"{self.label} did not return a sessionId.")

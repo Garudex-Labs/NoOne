@@ -1,8 +1,8 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import type { ReactNode } from 'react'
 
 import { ActionsContextMenu, ActionsMenu, type MenuKit, renderActionItem } from '@/components/ui/actions-menu'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { RowButton } from '@/components/ui/row-button'
 import { SearchField } from '@/components/ui/search-field'
 import { Tip } from '@/components/ui/tooltip'
@@ -196,7 +196,7 @@ export function PanelListRow({
           (dotClassName ? (
             <span aria-hidden="true" className={cn('size-1.5 shrink-0 rounded-full', dotClassName)} />
           ) : icon ? (
-            <Codicon className="shrink-0 text-muted-foreground/55" name={icon} size="0.85rem" />
+            <AppIcon className="shrink-0 text-muted-foreground/55" name={icon} size="0.85rem" />
           ) : null)}
         <span className="min-w-0 flex-1 truncate font-medium text-foreground/85">{title}</span>
       </RowButton>
@@ -268,7 +268,7 @@ export function PanelRowMenu({ items, label = 'Actions' }: { items: PanelMenuIte
         size="icon"
         variant="ghost"
       >
-        <Codicon name="kebab-vertical" size="0.875rem" />
+        <AppIcon name="kebab-vertical" size="0.875rem" />
       </Button>
     </ActionsMenu>
   )
@@ -287,7 +287,7 @@ export function PanelDetail({ children, className }: { children: ReactNode; clas
 interface PanelEmptyProps {
   action?: ReactNode
   description?: ReactNode
-  // Codicon glyph name (e.g. 'hubot', 'warning', 'loading~spin').
+  // AppIcon glyph name (e.g. 'hubot', 'warning', 'loading~spin').
   icon?: string
   title?: ReactNode
 }
@@ -296,7 +296,7 @@ export function PanelEmpty({ action, description, icon = 'inbox', title }: Panel
   return (
     <div className="grid flex-1 place-items-center px-6 py-10 text-center">
       <div className="flex flex-col items-center gap-2">
-        <Codicon className="text-muted-foreground/50" name={icon} size="1.25rem" />
+        <AppIcon className="text-muted-foreground/50" name={icon} size="1.25rem" />
         {title ? <p className="text-sm font-medium text-foreground/90">{title}</p> : null}
         {description ? (
           <p className="max-w-sm text-xs leading-relaxed text-muted-foreground/70">{description}</p>
@@ -391,7 +391,7 @@ export function PanelAddButton({
         size="sm"
         variant="ghost"
       >
-        <Codicon name={icon} size="0.875rem" />
+        <AppIcon name={icon} size="0.875rem" />
       </Button>
     </Tip>
   )
@@ -426,7 +426,7 @@ export function PanelAction({
       size="sm"
       variant={primary ? 'default' : 'ghost'}
     >
-      <Codicon name={icon} size="0.875rem" spinning={spinning} />
+      <AppIcon name={icon} size="0.875rem" spinning={spinning} />
       {children}
     </Button>
   )

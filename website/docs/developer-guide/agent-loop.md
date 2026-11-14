@@ -1,14 +1,13 @@
 ---
-sidebar_position: 3
 title: "Agent Loop Internals"
 description: "Detailed walkthrough of AIAgent execution, API modes, tools, callbacks, and fallback behavior"
 ---
 
-# Agent Loop Internals
+# Agent Loop Internals {#agent-loop-internals}
 
 The core orchestration engine is the `AIAgent` class. `run_agent.py` is now a thin facade: the loop itself lives in `agent/conversation_loop.py`, each turn phase in `agent/turn_*.py` (iteration prep, API call, API error, overflow, truncation, recovery), constructor wiring in `agent/agent_init.py`, and everything from prompt assembly to tool dispatch to provider failover in focused `agent/*.py` modules mixed into `AIAgent`.
 
-## Core Responsibilities
+## Core Responsibilities {#core-responsibilities}
 
 `AIAgent` is responsible for:
 
@@ -21,7 +20,7 @@ The core orchestration engine is the `AIAgent` class. `run_agent.py` is now a th
 - Tracking iteration budgets across parent and child agents
 - Flushing persistent memory before context is lost
 
-## Two Entry Points
+## Two Entry Points {#two-entry-points}
 
 ```python
 # Simple interface — returns final response string
@@ -38,9 +37,9 @@ result = agent.run_conversation(
 
 `chat()` is a thin wrapper around `run_conversation()` that extracts the `final_response` field from the result dict.
 
-## API Modes
+## API Modes {#api-modes}
 
-Hermes supports three API execution modes, resolved from provider selection, explicit args, and base URL heuristics:
+{{app-name}} supports three API execution modes, resolved from provider selection, explicit args, and base URL heuristics:
 
 | API mode | Used for | Client type |
 |----------|----------|-------------|
@@ -56,7 +55,7 @@ The mode determines how messages are formatted, how tool calls are structured, h
 3. Base URL heuristics (e.g., `api.anthropic.com` → `anthropic_messages`)
 4. Default: `chat_completions`
 
-## Turn Lifecycle
+## Turn Lifecycle {#turn-lifecycle}
 
 Each iteration of the agent loop follows this sequence:
 
@@ -78,7 +77,7 @@ run_conversation()
      - If text response: persist session, flush memory if needed, return
 ```
 
-### Message Format
+### Message Format {#message-format}
 
 All messages use OpenAI-compatible format internally:
 
@@ -91,7 +90,7 @@ All messages use OpenAI-compatible format internally:
 
 Reasoning content (from models that support extended thinking) is stored in `assistant_msg["reasoning"]` and optionally displayed via the `reasoning_callback`.
 
-### Message Alternation Rules
+### Message Alternation Rules {#message-alternation-rules}
 
 The agent loop enforces strict message role alternation:
 
@@ -103,7 +102,7 @@ The agent loop enforces strict message role alternation:
 
 Providers validate these sequences and will reject malformed histories.
 
-## Interruptible API Calls
+## Interruptible API Calls {#interruptible-api-calls}
 
 API requests are wrapped in `_interruptible_api_call()` which runs the actual HTTP call in a background thread while monitoring an interrupt event:
 
@@ -123,9 +122,9 @@ When interrupted (user sends new message, `/stop` command, or signal):
 - The agent can process the new input or shut down cleanly
 - No partial response is injected into conversation history
 
-## Tool Execution
+## Tool Execution {#tool-execution}
 
-### Sequential vs Concurrent
+### Sequential vs Concurrent {#sequential-vs-concurrent}
 
 When the model returns tool calls:
 
@@ -134,7 +133,7 @@ When the model returns tool calls:
   - Exception: tools marked as interactive (e.g., `clarify`) force sequential execution
   - Results are reinserted in the original tool call order regardless of completion order
 
-### Execution Flow
+### Execution Flow {#execution-flow}
 
 ```text
 for each tool_call in response.tool_calls:
@@ -147,7 +146,7 @@ for each tool_call in response.tool_calls:
     6. Append {"role": "tool", "content": result} to history
 ```
 
-### Agent-Level Tools
+### Agent-Level Tools {#agent-level-tools}
 
 Some tools are intercepted by `agent/tool_executor.py` (called from `agent/conversation_loop.py`) *before* reaching `handle_function_call()`:
 
@@ -160,7 +159,7 @@ Some tools are intercepted by `agent/tool_executor.py` (called from `agent/conve
 
 These tools modify agent state directly and return synthetic tool results without going through the registry.
 
-## Callback Surfaces
+## Callback Surfaces {#callback-surfaces}
 
 `AIAgent` supports platform-specific callbacks that enable real-time progress in the CLI, gateway, and ACP integrations:
 
@@ -175,9 +174,9 @@ These tools modify agent state directly and return synthetic tool results withou
 | `tool_gen_callback` | When tool call is parsed from stream | CLI tool preview in spinner |
 | `status_callback` | State changes (thinking, executing, etc.) | ACP status updates |
 
-## Budget and Fallback Behavior
+## Budget and Fallback Behavior {#budget-and-fallback-behavior}
 
-### Iteration Budget
+### Iteration Budget {#iteration-budget}
 
 The agent tracks iterations via `IterationBudget`:
 
@@ -185,7 +184,7 @@ The agent tracks iterations via `IterationBudget`:
 - Each agent gets its own budget. Subagents get independent budgets capped at `delegation.max_iterations` (default 50) — total iterations across parent + subagents can exceed the parent's cap
 - At 100%, the agent stops and returns a summary of work done
 
-### Fallback Model
+### Fallback Model {#fallback-model}
 
 When the primary model fails (429 rate limit, 5xx server error, 401/403 auth error):
 
@@ -197,14 +196,14 @@ When the primary model fails (429 rate limit, 5xx server error, 401/403 auth err
 
 The fallback system also covers auxiliary tasks independently — vision, compression, and title generation each have their own fallback chain configurable via the `auxiliary.*` config section.
 
-## Compression and Persistence
+## Compression and Persistence {#compression-and-persistence}
 
-### When Compression Triggers
+### When Compression Triggers {#when-compression-triggers}
 
 - **Preflight** (before API call): If conversation exceeds 50% of model's context window
 - **Gateway auto-compression**: If conversation exceeds 85% (more aggressive, runs between turns)
 
-### What Happens During Compression
+### What Happens During Compression {#what-happens-during-compression}
 
 1. Memory is flushed to disk first (preventing data loss)
 2. Middle conversation turns are summarized into a compact summary
@@ -212,14 +211,14 @@ The fallback system also covers auxiliary tasks independently — vision, compre
 4. Tool call/result message pairs are kept together (never split)
 5. A new session lineage ID is generated (compression creates a "child" session)
 
-### Session Persistence
+### Session Persistence {#session-persistence}
 
 After each turn:
-- Messages are saved to the session store (SQLite via `hermes_state.py`)
+- Messages are saved to the session store (SQLite via `agent_state.py`)
 - Memory changes are flushed to `MEMORY.md` / `USER.md`
-- The session can be resumed later via `/resume` or `hermes chat --resume`
+- The session can be resumed later via `/resume` or `noone chat --resume`
 
-## Key Source Files
+## Key Source Files {#key-source-files}
 
 | File | Purpose |
 |------|---------|
@@ -234,7 +233,7 @@ After each turn:
 | `agent/auxiliary_client.py` | Auxiliary LLM client for side tasks (vision, summarization) |
 | `model_tools.py` | Tool schema collection, `handle_function_call()` dispatch |
 
-## Related Docs
+## Related Docs {#related-docs}
 
 - [Provider Runtime Resolution](./provider-runtime.md)
 - [Prompt Assembly](./prompt-assembly.md)

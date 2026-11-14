@@ -1,20 +1,20 @@
 ---
 title: "Unsloth — Unsloth: 2-5x faster LoRA/QLoRA fine-tuning, less VRAM"
-sidebar_label: "Unsloth"
+sidebarTitle: "Unsloth"
 description: "Unsloth: 2-5x faster LoRA/QLoRA fine-tuning, less VRAM"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Unsloth
+# Unsloth {#unsloth}
 
 Unsloth: 2-5x faster LoRA/QLoRA fine-tuning, less VRAM.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/unsloth` |
+| Source | Optional — install with `noone skills install official/mlops/unsloth` |
 | Path | `optional-skills/mlops/training/unsloth` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ Unsloth: 2-5x faster LoRA/QLoRA fine-tuning, less VRAM.
 | Platforms | linux, macos |
 | Tags | `Fine-Tuning`, `Unsloth`, `Fast Training`, `LoRA`, `QLoRA`, `Memory-Efficient`, `Optimization`, `Llama`, `Mistral`, `Gemma`, `Qwen` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Unsloth Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Unsloth Skill {#unsloth-skill}
 
 Assistance with unsloth development, generated from official documentation.
 
-## When to Use This Skill
+## When to Use This Skill {#when-to-use-this-skill}
 
 This skill should be triggered when:
 - Working with unsloth
@@ -42,13 +50,13 @@ This skill should be triggered when:
 - Debugging unsloth code
 - Learning unsloth best practices
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
-### Common Patterns
+### Common Patterns {#common-patterns}
 
 *Quick reference patterns will be added as you use the skill.*
 
-## Reference Files
+## Reference Files {#reference-files}
 
 This skill includes full documentation in `references/`:
 
@@ -56,43 +64,43 @@ This skill includes full documentation in `references/`:
 
 Use `view` to read specific reference files when detailed information is needed.
 
-## Working with This Skill
+## Working with This Skill {#working-with-this-skill}
 
-### For Beginners
+### For Beginners {#for-beginners}
 Start with the getting_started or tutorials reference files for foundational concepts.
 
-### For Specific Features
+### For Specific Features {#for-specific-features}
 Use the appropriate category reference file (api, guides, etc.) for detailed information.
 
-### For Code Examples
+### For Code Examples {#for-code-examples}
 The quick reference section above contains common patterns extracted from the official docs.
 
-## Resources
+## Resources {#resources}
 
-### references/
+### references/ {#references}
 Organized documentation extracted from official sources. These files contain:
 - Detailed explanations
 - Code examples with language annotations
 - Links to original documentation
 - Table of contents for quick navigation
 
-### scripts/
+### scripts/ {#scripts}
 Add helper scripts here for common automation tasks.
 
-### assets/
+### assets/ {#assets}
 Add templates, boilerplate, or example projects here.
 
-## Notes
+## Notes {#notes}
 
 - This skill was automatically generated from official documentation
 - Reference files preserve the structure and examples from source docs
 - Code examples include language detection for better syntax highlighting
 - Quick reference patterns are extracted from common usage examples in the docs
 
-## Updating
+## Updating {#updating}
 
 To refresh this skill with updated documentation:
 1. Re-run the scraper with the same configuration
 2. The skill will be rebuilt with the latest information
 
-<!-- Trigger re-upload 1763621536 -->
+{/* Trigger re-upload 1763621536 */}

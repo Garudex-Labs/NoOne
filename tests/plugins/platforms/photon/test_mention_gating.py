@@ -1,6 +1,6 @@
 """Group-chat mention-gating tests for PhotonAdapter.
 
-Parity with the BlueBubbles iMessage channel: when ``require_mention`` is
+When ``require_mention`` is
 enabled, group messages are dropped unless they hit a wake-word pattern,
 and the leading wake word is stripped from the ones that pass. DMs are
 never gated.
@@ -87,7 +87,7 @@ def test_custom_mention_patterns_from_config(monkeypatch: pytest.MonkeyPatch) ->
     assert adapter.require_mention is True
     assert len(adapter._mention_patterns) == 1
     assert adapter._message_matches_mention_patterns("amos help me") is True
-    assert adapter._message_matches_mention_patterns("hermes help me") is False
+    assert adapter._message_matches_mention_patterns("noone help me") is False
 
 
 def test_mention_patterns_env_comma_separated(monkeypatch: pytest.MonkeyPatch) -> None:

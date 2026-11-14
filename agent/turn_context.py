@@ -916,7 +916,7 @@ def _collect_pre_llm_call_context(
     if getattr(agent, "_persist_disabled", False):
         return ""
     try:
-        from hermes_cli.lifecycle import invoke_hook as _invoke_hook
+        from agent_cli.lifecycle import invoke_hook as _invoke_hook
         _pre_results = _invoke_hook(
             "pre_llm_call",
             session_id=agent.session_id,
@@ -1225,7 +1225,7 @@ def build_turn_context(
     from agent.bot_chain import on_turn_start as _bot_chain_turn_start
     _bot_chain_turn_start(agent, turn_author, persist_user_display_kind, persist_user_message or user_message)
 
-    # Tag log records on this thread with the session ID for ``hermes logs``; bind the
+    # Tag log records on this thread with the session ID for ``noone logs``; bind the
     # skill write-origin ContextVar; restore the primary runtime after a fallback turn.
     # NOTE: the DB session row is created later, AFTER the system prompt is restored/built (see
     # _ensure_db_session() below the system-prompt block). Creating it here — before _cached_system_prompt

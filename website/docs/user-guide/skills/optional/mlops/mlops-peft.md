@@ -1,20 +1,20 @@
 ---
 title: "Peft — Fine-tune large LLMs with LoRA on limited GPU memory"
-sidebar_label: "Peft"
+sidebarTitle: "Peft"
 description: "Fine-tune large LLMs with LoRA on limited GPU memory"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Peft
+# Peft {#peft}
 
 Fine-tune large LLMs with LoRA on limited GPU memory.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/peft` |
+| Source | Optional — install with `noone skills install official/mlops/peft` |
 | Path | `optional-skills/mlops/peft` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ Fine-tune large LLMs with LoRA on limited GPU memory.
 | Platforms | linux, macos, windows |
 | Tags | `Fine-Tuning`, `PEFT`, `LoRA`, `QLoRA`, `Parameter-Efficient`, `Adapters`, `Low-Rank`, `Memory Optimization`, `Multi-Adapter` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# PEFT (Parameter-Efficient Fine-Tuning)
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# PEFT (Parameter-Efficient Fine-Tuning) {#peft-parameter-efficient-fine-tuning}
 
 Fine-tune LLMs by training &lt;1% of parameters using LoRA, QLoRA, and 25+ adapter methods.
 
-## When to use PEFT
+## When to use PEFT {#when-to-use-peft}
 
 **Use PEFT/LoRA when:**
 - Fine-tuning 7B-70B models on consumer GPUs (RTX 4090, A100)
@@ -51,9 +59,9 @@ Fine-tune LLMs by training &lt;1% of parameters using LoRA, QLoRA, and 25+ adapt
 - Need maximum quality and have compute budget
 - Significant domain shift requires updating all weights
 
-## Quick start
+## Quick start {#quick-start}
 
-### Installation
+### Installation {#installation}
 
 ```bash
 # Basic installation
@@ -66,7 +74,7 @@ pip install peft bitsandbytes
 pip install peft transformers accelerate bitsandbytes datasets
 ```
 
-### LoRA fine-tuning (standard)
+### LoRA fine-tuning (standard) {#lora-fine-tuning-standard}
 
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer
@@ -130,7 +138,7 @@ trainer.train()
 model.save_pretrained("./lora-llama-adapter")
 ```
 
-### QLoRA fine-tuning (memory-efficient)
+### QLoRA fine-tuning (memory-efficient) {#qlora-fine-tuning-memory-efficient}
 
 ```python
 from transformers import AutoModelForCausalLM, BitsAndBytesConfig
@@ -168,9 +176,9 @@ model = get_peft_model(model, lora_config)
 # 70B model now fits on single 24GB GPU!
 ```
 
-## LoRA parameter selection
+## LoRA parameter selection {#lora-parameter-selection}
 
-### Rank (r) - capacity vs efficiency
+### Rank (r) - capacity vs efficiency {#rank-r---capacity-vs-efficiency}
 
 | Rank | Trainable Params | Memory | Quality | Use Case |
 |------|-----------------|--------|---------|----------|
@@ -180,7 +188,7 @@ model = get_peft_model(model, lora_config)
 | 32 | ~27M | Higher | High | Complex tasks |
 | 64 | ~54M | High | Highest | Domain adaptation, 70B models |
 
-### Alpha (lora_alpha) - scaling factor
+### Alpha (lora_alpha) - scaling factor {#alpha-lora_alpha---scaling-factor}
 
 ```python
 # Rule of thumb: alpha = 2 * rank
@@ -189,7 +197,7 @@ LoraConfig(r=16, lora_alpha=16)  # Conservative (lower learning rate effect)
 LoraConfig(r=16, lora_alpha=64)  # Aggressive (higher learning rate effect)
 ```
 
-### Target modules by architecture
+### Target modules by architecture {#target-modules-by-architecture}
 
 ```python
 # Llama / Mistral / Qwen
@@ -208,9 +216,9 @@ target_modules = ["query_key_value", "dense", "dense_h_to_4h", "dense_4h_to_h"]
 target_modules = "all-linear"  # PEFT 0.6.0+
 ```
 
-## Loading and merging adapters
+## Loading and merging adapters {#loading-and-merging-adapters}
 
-### Load trained adapter
+### Load trained adapter {#load-trained-adapter}
 
 ```python
 from peft import PeftModel, AutoPeftModelForCausalLM
@@ -227,7 +235,7 @@ model = AutoPeftModelForCausalLM.from_pretrained(
 )
 ```
 
-### Merge adapter into base model
+### Merge adapter into base model {#merge-adapter-into-base-model}
 
 ```python
 # Merge for deployment (no adapter overhead)
@@ -241,7 +249,7 @@ tokenizer.save_pretrained("./llama-merged")
 merged_model.push_to_hub("username/llama-finetuned")
 ```
 
-### Multi-adapter serving
+### Multi-adapter serving {#multi-adapter-serving}
 
 ```python
 from peft import PeftModel
@@ -265,7 +273,7 @@ with model.disable_adapter():
     base_output = model.generate(**inputs)
 ```
 
-## PEFT methods comparison
+## PEFT methods comparison {#peft-methods-comparison}
 
 | Method | Trainable % | Memory | Speed | Best For |
 |--------|------------|--------|-------|----------|
@@ -277,7 +285,7 @@ with model.disable_adapter():
 | Prompt Tuning | 0.001% | Minimal | Fast | Simple task adaptation |
 | P-Tuning v2 | 0.1% | Low | Medium | NLU tasks |
 
-### IA3 (minimal parameters)
+### IA3 (minimal parameters) {#ia3-minimal-parameters}
 
 ```python
 from peft import IA3Config
@@ -290,7 +298,7 @@ model = get_peft_model(model, ia3_config)
 # Trains only 0.01% of parameters!
 ```
 
-### Prefix Tuning
+### Prefix Tuning {#prefix-tuning}
 
 ```python
 from peft import PrefixTuningConfig
@@ -303,9 +311,9 @@ prefix_config = PrefixTuningConfig(
 model = get_peft_model(model, prefix_config)
 ```
 
-## Integration patterns
+## Integration patterns {#integration-patterns}
 
-### With TRL (SFTTrainer)
+### With TRL (SFTTrainer) {#with-trl-sfttrainer}
 
 ```python
 from trl import SFTTrainer, SFTConfig
@@ -322,7 +330,7 @@ trainer = SFTTrainer(
 trainer.train()
 ```
 
-### With Axolotl (YAML config)
+### With Axolotl (YAML config) {#with-axolotl-yaml-config}
 
 ```yaml
 # axolotl config.yaml
@@ -338,7 +346,7 @@ lora_target_modules:
 lora_target_linear: true  # Target all linear layers
 ```
 
-### With vLLM (inference)
+### With vLLM (inference) {#with-vllm-inference}
 
 ```python
 from vllm import LLM
@@ -354,9 +362,9 @@ outputs = llm.generate(
 )
 ```
 
-## Performance benchmarks
+## Performance benchmarks {#performance-benchmarks}
 
-### Memory usage (Llama 3.1 8B)
+### Memory usage (Llama 3.1 8B) {#memory-usage-llama-31-8b}
 
 | Method | GPU Memory | Trainable Params |
 |--------|-----------|------------------|
@@ -365,7 +373,7 @@ outputs = llm.generate(
 | QLoRA r=16 | 6 GB | 14M (0.17%) |
 | IA3 | 16 GB | 800K (0.01%) |
 
-### Training speed (A100 80GB)
+### Training speed (A100 80GB) {#training-speed-a100-80gb}
 
 | Method | Tokens/sec | vs Full FT |
 |--------|-----------|------------|
@@ -373,16 +381,16 @@ outputs = llm.generate(
 | LoRA | 3,200 | 1.3x |
 | QLoRA | 2,100 | 0.84x |
 
-### Quality (MMLU benchmark)
+### Quality (MMLU benchmark) {#quality-mmlu-benchmark}
 
 | Model | Full FT | LoRA | QLoRA |
 |-------|---------|------|-------|
 | Llama 2-7B | 45.3 | 44.8 | 44.1 |
 | Llama 2-13B | 54.8 | 54.2 | 53.5 |
 
-## Common issues
+## Common issues {#common-issues}
 
-### CUDA OOM during training
+### CUDA OOM during training {#cuda-oom-during-training}
 
 ```python
 # Solution 1: Enable gradient checkpointing
@@ -399,7 +407,7 @@ from transformers import BitsAndBytesConfig
 bnb_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4")
 ```
 
-### Adapter not applying
+### Adapter not applying {#adapter-not-applying}
 
 ```python
 # Verify adapter is active
@@ -412,7 +420,7 @@ model.print_trainable_parameters()
 model.train()
 ```
 
-### Quality degradation
+### Quality degradation {#quality-degradation}
 
 ```python
 # Increase rank
@@ -428,7 +436,7 @@ TrainingArguments(num_train_epochs=5)
 TrainingArguments(learning_rate=1e-4)
 ```
 
-## Best practices
+## Best practices {#best-practices}
 
 1. **Start with r=8-16**, increase if quality insufficient
 2. **Use alpha = 2 * rank** as starting point
@@ -438,12 +446,12 @@ TrainingArguments(learning_rate=1e-4)
 6. **Evaluate on held-out data** before merging
 7. **Use QLoRA for 70B+ models** on consumer hardware
 
-## References
+## References {#references}
 
-- **[Advanced Usage](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/peft/references/advanced-usage.md)** - DoRA, LoftQ, rank stabilization, custom modules
-- **[Troubleshooting](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/peft/references/troubleshooting.md)** - Common errors, debugging, optimization
+- **[Advanced Usage](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/peft/references/advanced-usage.md)** - DoRA, LoftQ, rank stabilization, custom modules
+- **[Troubleshooting](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/peft/references/troubleshooting.md)** - Common errors, debugging, optimization
 
-## Resources
+## Resources {#resources}
 
 - **GitHub**: https://github.com/huggingface/peft
 - **Docs**: https://huggingface.co/docs/peft

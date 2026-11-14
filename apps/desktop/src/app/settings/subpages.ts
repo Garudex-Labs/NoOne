@@ -28,7 +28,7 @@ import {
   Users,
   Volume2,
   Wrench
-} from '@/lib/icons'
+} from '@noone/ui/icons'
 
 import { APPEARANCE_SUBPAGES } from './appearance-subpages'
 import { CONFIG_SUBPAGES, configSubpageForField } from './config-subpages'

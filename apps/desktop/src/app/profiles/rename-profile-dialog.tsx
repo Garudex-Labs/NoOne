@@ -1,5 +1,7 @@
+import { AlertTriangle } from '@noone/ui/icons'
 import { useEffect, useState } from 'react'
 
+import { renameProfile } from '@/agent-client'
 import type { ProfileScope } from '@/api/client'
 import { ActionStatus } from '@/components/ui/action-status'
 import { Button } from '@/components/ui/button'
@@ -13,9 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { Field, FieldHint } from '@/components/ui/field'
 import { SanitizedInput } from '@/components/ui/sanitized-input'
-import { renameProfile } from '@/hermes'
 import { useI18n } from '@/i18n'
-import { AlertTriangle } from '@/lib/icons'
 import { slug } from '@/lib/sanitize'
 import { retireLocalProfileGateways } from '@/store/gateway'
 import { migrateTilesForProfile } from '@/store/session-states'

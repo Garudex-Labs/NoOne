@@ -9,7 +9,7 @@ ride the ``codex_reasoning_items`` sidecar. No transport imports (shared gate, n
 """
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import logging
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlsplit
@@ -100,9 +100,9 @@ def _warn_native_compaction_suppressed_by_checkpoint_gate() -> None:
     if not _checkpoint_suppression_logged:
         _checkpoint_suppression_logged = True
         logger.warning(
-            "compression.checkpoint_required is enabled: server-side native "
+            app_text("compression.checkpoint_required is enabled: server-side native "
             "compaction (context_management) is disabled for this agent so the "
-            "checkpoint-aware Hermes compressor stays authoritative."
+            "checkpoint-aware {app_name} compressor stays authoritative.")
         )
 
 

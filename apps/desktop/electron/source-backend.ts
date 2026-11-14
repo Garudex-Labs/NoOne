@@ -1,6 +1,8 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
+import { appText } from '@noone/shared/application-identity'
+
 import { buildDesktopBackendEnv } from './backend-env'
 import { execProbe, PROBE_TIMEOUT_MS } from './backend-probes'
 import { resolveInstallationLauncher } from './updater-process'
@@ -28,7 +30,7 @@ export async function resolveSourceInstallationBackend(
   args: string[],
   options: SourceOptions & { hermesHome?: string } = {}
 ): Promise<SourceBackend | null> {
-  if (!existsSync(path.join(root, 'hermes_cli', 'main.py'))) {
+  if (!existsSync(path.join(root, 'agent_cli', 'main.py'))) {
     return null
   }
 
@@ -58,7 +60,7 @@ export async function resolveSourceInstallationBackend(
 
   return {
     kind: 'command',
-    label: `Hermes at ${root}`,
+    label: appText(`{app_name} at ${root}`),
     command,
     args: [...args],
     env,
@@ -93,9 +95,9 @@ export function createSourcePythonBackend(
 
   return {
     kind: 'python',
-    label: `Hermes source at ${root}`,
+    label: appText(`{app_name} source at ${root}`),
     command,
-    args: ['-m', 'hermes_cli.main', ...args],
+    args: ['-m', 'agent_cli.main', ...args],
     // The backend runs in the user's workspace cwd, and the selected
     // interpreter need not have this checkout installed: name it explicitly.
     // (The scrubbed inherited value could point at another checkout.)

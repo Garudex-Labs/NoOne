@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 _PLUGIN = textwrap.dedent(
     """
@@ -35,8 +35,8 @@ def _install(home: Path) -> None:
 @pytest.fixture
 def homes(tmp_path, monkeypatch):
     import providers
-    from hermes_cli import auth_plugin_providers as app
-    from hermes_cli.auth import PROVIDER_REGISTRY
+    from agent_cli import auth_plugin_providers as app
+    from agent_cli.auth import PROVIDER_REGISTRY
 
     plugin_home, bare_home = tmp_path / "with_plugin", tmp_path / "bare"
     plugin_home.mkdir()
@@ -59,11 +59,11 @@ def homes(tmp_path, monkeypatch):
 def _normalize_in(home: Path, name: str) -> str:
     from agent.auxiliary_client import _normalize_aux_provider
 
-    token = set_hermes_home_override(home)
+    token = set_agent_home_override(home)
     try:
         return _normalize_aux_provider(name)
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def test_alias_table_is_per_home_in_either_order(homes):

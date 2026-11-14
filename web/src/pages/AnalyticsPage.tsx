@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -8,23 +7,25 @@ import {
   Cpu,
   RefreshCw,
   TrendingUp,
-} from "lucide-react";
-import { api } from "@/lib/api";
-import type {
-  AnalyticsResponse,
-  AnalyticsDailyEntry,
-  AnalyticsModelEntry,
-  AnalyticsSkillEntry,
-} from "@/lib/api";
-import { timeAgo } from "@/lib/utils";
+} from "@noone/ui/icons";
 import { Button } from "@nous-research/ui/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Stats } from "@nous-research/ui/ui/components/stats";
-import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { useI18n } from "@/i18n";
-import { PluginSlot } from "@/plugins";
+import { api } from "@/lib/api";
+import type {
+  AnalyticsDailyEntry,
+  AnalyticsModelEntry,
+  AnalyticsResponse,
+  AnalyticsSkillEntry,
+} from "@/lib/api";
 import { errorMessage } from "@/lib/api-error";
+import { timeAgo } from "@/lib/utils";
+import { PluginSlot } from "@/plugins";
 
 const PERIODS = [
   { label: "7d", days: 7 },

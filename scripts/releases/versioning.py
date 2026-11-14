@@ -12,18 +12,19 @@ import subprocess
 from functools import cmp_to_key
 from typing import Any
 
-from hermes_cli.update_channel import STABLE_TAG_RE
+from agent_cli.update_channel import STABLE_TAG_RE
+from agent_cli.version_info import is_project_release_commit
 from scripts.releases.semver import compare
 
-# The legacy CalVer line published up to 0.21.5 (v2026.9.24); the pipeline continues it.
-SEED = "0.21.5"
+# A new publication history starts here; upstream tags do not spend a version.
+SEED = "0.1.0"
 BUMPS = ("major", "minor", "patch")
 
 
 def published_channel_identity(repository: str, channel: str, *, base_url: str | None = None,
                                reader_type=None) -> tuple[str, str] | None:
     """Resolve one validated protected channel's payload version and commit."""
-    from hermes_cli.release_channels import ChannelNotFound, ChannelReader
+    from agent_cli.release_channels import ChannelNotFound, ChannelReader
     from scripts.releases.r2 import public_base_url
 
     if channel not in {"stable", "canary"}:
@@ -41,7 +42,7 @@ def published_channel_identity(repository: str, channel: str, *, base_url: str |
     version, commit = request.get("version"), request.get("commit")
     if not isinstance(version, str) or not isinstance(commit, str) or not re.fullmatch(r"[a-f0-9]{40}", commit):
         raise ValueError(f"{channel.title()} channel has an invalid published identity")
-    return version, commit
+    return (version, commit) if is_project_release_commit(commit) else None
 
 
 def published_release_identity(repository: str, run=None) -> tuple[str, str] | None:
@@ -61,11 +62,13 @@ def published_release_identity(repository: str, run=None) -> tuple[str, str] | N
                 and (version := version_from_tag(row.get("tag_name")))]
     if not versions:
         return None
-    newest = max(versions, key=cmp_to_key(compare))
-    commit = run(["gh", "api", f"repos/{repository}/commits/v{newest}", "--jq", ".sha"]).strip()
-    if not re.fullmatch(r"[a-f0-9]{40}", commit):
-        raise ValueError(f"v{newest} has no valid release commit")
-    return newest, commit
+    for candidate in sorted(set(versions), key=cmp_to_key(compare), reverse=True):
+        commit = run(["gh", "api", f"repos/{repository}/commits/v{candidate}", "--jq", ".sha"]).strip()
+        if not re.fullmatch(r"[a-f0-9]{40}", commit):
+            raise ValueError(f"v{candidate} has no valid release commit")
+        if is_project_release_commit(commit):
+            return candidate, commit
+    return None
 
 
 def published_stable_identity(repository: str, *, base_url: str | None = None,
@@ -175,7 +178,9 @@ def derive_next_version(*, published: str | None, bump: str) -> str:
     Attempts do not move the line. A version is spent by publication, so an
     abandoned attempt leaves its version free for the next cut.
     """
-    return _bump(published or SEED, bump)
+    if bump not in BUMPS:
+        raise ValueError(f"unknown bump {bump!r}")
+    return _bump(published, bump) if published else SEED
 
 
 def next_attempt(version: str, refs: list[str]) -> int:

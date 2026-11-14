@@ -50,7 +50,7 @@ from gateway.platforms.whatsapp_common import WhatsAppBehaviorMixin, _get_wsecre
 from gateway.platforms.access_policy_mixin import OPTIN_TRUTHY as _OPTIN_TRUTHY
 from gateway.platforms.media_cache import ext_for_mime
 from gateway import rich_sent_store
-from hermes_constants import get_hermes_dir
+from agent_constants import get_agent_dir
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +157,7 @@ def _optional_module(name: str, unavailable_log: str) -> Any:
 
 
 # Under the hermes dir so it survives restarts/reloads — same as the Baileys bridge.
-_INBOUND_MEDIA_CACHE = Path(get_hermes_dir("platforms/whatsapp_cloud/media", "whatsapp_cloud/media"))
+_INBOUND_MEDIA_CACHE = Path(get_agent_dir("platforms/whatsapp_cloud/media", "whatsapp_cloud/media"))
 
 
 def check_whatsapp_cloud_requirements() -> bool:
@@ -1121,17 +1121,17 @@ class WhatsAppCloudAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
 
 def _is_connected(config) -> bool:
     """Phone-number id + access token, from ``PlatformConfig.extra`` (YAML / env seeding) or the
-    scope-aware env reader (``hermes_cli.gateway.get_env_value`` so setup-status patches see it)."""
+    scope-aware env reader (``agent_cli.gateway.get_env_value`` so setup-status patches see it)."""
     extra = (getattr(config, "extra", None) or {}) if config is not None else {}
     if extra.get("phone_number_id") and extra.get("access_token"):
         return True
-    import hermes_cli.gateway as gateway_mod
+    import agent_cli.gateway as gateway_mod
     return all((gateway_mod.get_env_value(name) or "").strip()
                for name in ("WHATSAPP_CLOUD_PHONE_NUMBER_ID", "WHATSAPP_CLOUD_ACCESS_TOKEN"))
 
 
 def _interactive_setup() -> None:
-    """``hermes gateway setup`` entry: the same wizard ``hermes whatsapp-cloud`` runs."""
+    """``noone gateway setup`` entry: the same wizard ``hermes whatsapp-cloud`` runs."""
     from .setup_wizard import run_whatsapp_cloud_setup
     run_whatsapp_cloud_setup()
 
@@ -1159,7 +1159,7 @@ def register(ctx) -> None:
         name="whatsapp_cloud", label="WhatsApp Business (Cloud)", adapter_factory=WhatsAppCloudAdapter,
         dashboard_label="WhatsApp Cloud API",
         dashboard_description="Use Hermes via Meta's hosted WhatsApp Cloud API (no local bridge).",
-        docs_url="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/whatsapp-cloud",
+        docs_url="https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/whatsapp-cloud.md",
         check_fn=check_whatsapp_cloud_requirements, is_connected=_is_connected,
         config_connected_fn=config_connected_extra("phone_number_id", "access_token"),
         required_env=["WHATSAPP_CLOUD_PHONE_NUMBER_ID", "WHATSAPP_CLOUD_ACCESS_TOKEN"],

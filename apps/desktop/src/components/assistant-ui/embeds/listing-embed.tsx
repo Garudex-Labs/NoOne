@@ -1,10 +1,10 @@
 'use client'
 
+import { AppIcon } from '@noone/ui/app-icon'
 import { useEffect, useState } from 'react'
 
 import { WIDGET_SHELL_CLASS } from '@/components/chat/widget-shell'
 import { ImageLightbox } from '@/components/chat/zoomable-image'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { useImageDownload } from '@/hooks/use-image-download'
 import { useI18n } from '@/i18n'
@@ -95,7 +95,7 @@ function ListingCard({ listing }: { listing: Listing }) {
 
         {listing.catches.length > 0 && (
           <span className={cn(META_CLASS, 'mt-2 flex gap-1.5 text-muted-foreground')}>
-            <Codicon className="mt-px shrink-0 text-amber-500" name="warning" size="0.75rem" />
+            <AppIcon className="mt-px shrink-0 text-amber-500" name="warning" size="0.75rem" />
             <span className="min-w-0">{listing.catches.join(' · ')}</span>
           </span>
         )}

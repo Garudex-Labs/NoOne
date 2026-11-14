@@ -14,7 +14,8 @@ import { prepareNodeDependencies } from '../../../scripts/build/node-deps.mjs'
 import { buildWebapp } from '../../../scripts/build/webapp.mjs'
 
 /** Make the workspace hash exactly like the checkout for the Webapp product. The filtered
- *  frozen install needs no other workspace's manifest, so none is copied. */
+ *  frozen install needs no other workspace's manifest, so none is copied. The
+ *  shared identity JSON and HTML helper are loose inputs, not workspace files. */
 export function mirrorWebappInputs(source, workspace) {
   const wanted = new Map(sourceEntries(source, 'webapp').map(({ name, kind }) => [name, kind]))
   // Children before parents. Generated trees (node_modules) are never listed, so never removed.

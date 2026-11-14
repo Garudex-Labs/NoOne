@@ -11,7 +11,7 @@ import threading
 import pytest
 
 from agent import learning_mutations as lm
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 _SKILL = """---
 name: my-skill
@@ -26,7 +26,7 @@ Body.
 
 @pytest.fixture
 def home():
-    base = get_hermes_home()
+    base = get_agent_home()
     (base / "memories").mkdir(parents=True, exist_ok=True)
     (base / "memories" / "MEMORY.md").write_text("alpha note\nline two\n§\nbeta note", encoding="utf-8")
     (base / "memories" / "USER.md").write_text("user profile note", encoding="utf-8")

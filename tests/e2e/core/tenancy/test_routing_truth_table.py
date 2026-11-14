@@ -14,7 +14,7 @@ OPENROUTER_BASE_URL/OPENROUTER_API_KEY and ``vendor`` = ANTHROPIC_API_KEY). Each
 own random key. A loopback CONNECT trap (HTTPS_PROXY) records any egress to a real inference API. EVERY scenario
 configures ALL identities (the full config a real user accumulates) and differs only in the
 selection, so a misroute always has somewhere to land and be caught. Hermes runs for real in a
-child process (``hermes chat -q``, ``hermes -z``, the stdio ``tui_gateway`` the TUI/Desktop
+child process (``noone chat -q``, ``hermes -z``, the stdio ``agent_backend`` the TUI/Desktop
 drive) with a tmp HOME/HERMES_HOME and every credential env var stripped.
 
 One invariant (``check_routing``) after every leg: requests exist only on the selected hosts,
@@ -135,7 +135,7 @@ def _main_api_key_literal(c: dict[str, Any], e: dict[str, str], f: Fleet) -> Non
 def _bare_custom(c: dict[str, Any], e: dict[str, str], _f: Fleet) -> None:
     c["model"] = {"provider": "custom", "default": "model-main", "context_length": 128000}
     # Bare custom + an OpenRouter key/mirror is a deliberate contract (it resolves to OpenRouter,
-    # tests/hermes_cli/test_runtime_provider_resolution.py); with neither, nothing may be reached
+    # tests/agent_cli/test_runtime_provider_resolution.py); with neither, nothing may be reached
     # -- not the env OPENAI_BASE_URL decoy, not the real OpenRouter API (egress trap).
     e.pop("OPENROUTER_BASE_URL")
     e.pop("OPENROUTER_API_KEY")
@@ -330,7 +330,7 @@ def test_cli_routing_truth_table(case: Case, cli_outcomes: dict[str, Any]) -> No
             f"{host} main-request keys in order: {seen}")
 
 
-# Mid-session /model switches through the real tui_gateway (TUI / Desktop backend) -------------
+# Mid-session /model switches through the real agent_backend (TUI / Desktop backend) -------------
 
 
 @dataclass

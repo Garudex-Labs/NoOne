@@ -1,3 +1,4 @@
+import { Globe } from '@noone/ui/icons'
 import type * as React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -11,7 +12,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { useI18n } from '@/i18n'
-import { Globe } from '@/lib/icons'
 
 const URL_HINT = /^https?:\/\//i
 

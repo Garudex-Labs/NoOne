@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { ChevronLeft, ExternalLink, FileText, Loader2, LogIn, RefreshCw, SlidersHorizontal, Wrench } from '@noone/ui/icons'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import { type ComponentProps, lazy, type ReactNode, Suspense, useEffect, useState } from 'react'
 
@@ -14,7 +15,6 @@ import { WEBAPP_LAUNCH_REQUIRED } from '@/lib/browser-launch-session'
 import { reestablishCloudAgentSession } from '@/lib/cloud-agent-session'
 import { DESKTOP_DOCS_URL } from '@/lib/docs'
 import { openExternalLink } from '@/lib/external-link'
-import { ChevronLeft, ExternalLink, FileText, Loader2, LogIn, RefreshCw, SlidersHorizontal, Wrench } from '@/lib/icons'
 import { $desktopBoot } from '@/store/boot'
 import { notify, notifyError } from '@/store/notifications'
 import { $desktopOnboarding } from '@/store/onboarding'
@@ -98,7 +98,7 @@ export function StartupOverlay() {
 }
 
 /** A Webapp tab without a valid sign-in. The service is running, so there is nothing to recover or
- * dismiss: only hermes webapp signs the tab in. */
+ * dismiss: only noone webapp signs the tab in. */
 function WebappSignInOverlay() {
   const copy = useI18n().t.boot.failure
 

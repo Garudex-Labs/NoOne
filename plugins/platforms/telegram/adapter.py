@@ -16,7 +16,7 @@ from contextvars import ContextVar
 from datetime import datetime, timezone, UTC
 from weakref import WeakValueDictionary
 from typing import Any, Awaitable, Callable, Dict, Iterator, List, Optional, Set
-from hermes_cli import setup_platforms
+from agent_cli import setup_platforms
 
 logger = logging.getLogger(__name__)
 
@@ -321,7 +321,7 @@ _UPDATER_START_TIMEOUT = 30.0  # start_polling() can hang on a degraded pool aft
 # start_polling() can also hang when the connection pool is in a degraded state after
 # _drain_polling_connections(), particularly when both primary and fallback Telegram endpoints are
 # unreachable. Bounding start_polling() prevents the reconnect ladder from stalling indefinitely and allows
-# the heartbeat loop to trigger its own recovery path. Refs: NousResearch/hermes-agent#59614
+# the heartbeat loop to trigger its own recovery path. Refs: Garudex-Labs/NoOne#59614
 _INITIAL_POLLING_PROGRESS_TIMEOUT = 60.0
 # Bounded drain (shutdown()/initialize() of the getUpdates request) so a wedged socket can't freeze
 # _polling_error_task and gate every escalation path behind its in-flight guard.
@@ -330,7 +330,7 @@ _INITIAL_POLLING_PROGRESS_TIMEOUT = 60.0
 # _drain_polling_connections() and freezing the whole reconnect ladder (the tracked _polling_error_task
 # never completes, so every escalation path stays gated behind its in-flight guard). Bound the drain so the
 # ladder always advances toward the fatal-restart escalation. Matches _UPDATER_STOP_TIMEOUT. Refs:
-# NousResearch/hermes-agent#66377
+# Garudex-Labs/NoOne#66377
 _DRAIN_TIMEOUT = 15.0
 # Wedged-recovery watchdog: healthy worst case is stop + 2x drain + start + 60s backoff ≈ 135s, so
 # 300s in flight is unambiguously stuck and the heartbeat force-escalates.
@@ -474,8 +474,8 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
         self._update_admission = None
         # Completed update IDs survive adapter replacement and restarts (update_admission.py).
         # Resolved now: secondary profiles construct adapters inside their own home scope.
-        from hermes_constants import get_hermes_home
-        self._update_receipt_dir = get_hermes_home()
+        from agent_constants import get_agent_home
+        self._update_receipt_dir = get_agent_home()
         self._update_receipts_loaded: set = set()
         self._update_receipts_dirty: set = set()
         self._update_receipt_flush: Optional[asyncio.Task] = None
@@ -2385,9 +2385,9 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
     def _persist_dm_topic_thread_id(self, chat_id: int, topic_name: str, thread_id: int, replace_existing: bool = False) -> None:
         """Save a newly created thread_id back into config.yaml so it survives restarts."""
         try:
-            from hermes_constants import get_hermes_home
-            from hermes_cli.config import atomic_config_write, config_exists, read_user_config_raw
-            config_path = get_hermes_home() / "config.yaml"
+            from agent_constants import get_agent_home
+            from agent_cli.config import atomic_config_write, config_exists, read_user_config_raw
+            config_path = get_agent_home() / "config.yaml"
             if not config_exists(config_path):
                 logger.warning("[%s] Config file not found at %s, cannot persist thread_id", self.name, config_path)
                 return
@@ -2481,7 +2481,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
         """Register the command menu (from COMMAND_REGISTRY) in every scope — Telegram picks the
         narrowest matching one per chat type; forum topics are handled lazily by _ensure_forum_commands."""
         from telegram import BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats, BotCommandScopeDefault
-        from hermes_cli.commands_platforms import telegram_menu_commands, telegram_menu_max_commands
+        from agent_cli.commands_platforms import telegram_menu_commands, telegram_menu_max_commands
         if not self._bot:
             return
         # Telegram allows 100 commands but has an undocumented ~4KB payload limit; default cap 60.
@@ -2556,7 +2556,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
         if handler is None:
             return
         try:
-            from hermes_cli.lifecycle import has_hook
+            from agent_cli.lifecycle import has_hook
             if not has_hook("gateway_platform_event"):
                 return
             event = self._normalize_platform_event(update)
@@ -2860,7 +2860,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
             raise RuntimeError(
                 "TELEGRAM_WEBHOOK_SECRET is required when TELEGRAM_WEBHOOK_URL is set. Without it, the "
                 "webhook endpoint accepts forged updates from anyone who can reach it — see "
-                "https://github.com/NousResearch/hermes-agent/security/advisories/GHSA-3vpc-7q5r-276h.\n\n"
+                "https://github.com/Garudex-Labs/NoOne/security/advisories/GHSA-3vpc-7q5r-276h.\n\n"
                 "Generate a secret and set it in your .env:\n  export TELEGRAM_WEBHOOK_SECRET=\"$(openssl rand -hex 32)\"\n\n"
                 "Then register it with Telegram when setting the webhook via setWebhook's secret_token parameter.")
         from urllib.parse import urlparse
@@ -3043,7 +3043,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
             current_task)
         awaitable_tasks = [t for t in pending_tasks if asyncio.isfuture(t) or asyncio.iscoroutine(t)]
         # Hold-queue redispatch must be cancellable+awaitable on teardown so it cannot dispatch
-        # handle_message into a torn-down session (same lifecycle rule teknium called out on #72037 for
+        # handle_message into a torn-down session (same lifecycle rule as #72037 for
         # shielded flush dispatch).
         for task in pending_tasks:
             task.cancel()
@@ -3953,7 +3953,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
     @staticmethod
     def _provider_get_label():
         try:
-            from hermes_cli.providers import get_label
+            from agent_cli.providers import get_label
         except ImportError:
             def get_label(slug):
                 return slug
@@ -4072,7 +4072,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
         """Paginated top-level provider keyboard folding provider families (Kimi/Moonshot, MiniMax, xAI…)
         into one ``mpg:<gid>`` button via the shared ``group_providers`` fold; singles are ``mp:<slug>``."""
         try:
-            from hermes_cli.models_catalog_static import group_providers
+            from agent_cli.models_catalog_static import group_providers
         except Exception:
             group_providers = None
         by_slug = {str(p.get("slug") or "").lower(): p for p in providers}  # group_providers lowercases (#149672)
@@ -4098,7 +4098,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
     def _build_model_keyboard(self, models: list, page: int, provider: Optional[dict] = None) -> tuple:
         """Build paginated model buttons. Returns (keyboard, page_info_text). Window plans: each button
         carries the plan word (``model-b · Large``) from the provider row; other accounts are unchanged."""
-        from hermes_cli.model_picker_usage import picker_row_suffix
+        from agent_cli.model_picker_usage import picker_row_suffix
         page_models, page_meta = self._format_choice_page(models, page, self._MODEL_PAGE_SIZE)
         labels = model_button_labels([str(m) for m in models], lambda m: picker_row_suffix(provider, m))
         buttons = [InlineKeyboardButton(labels[page_meta["start"] + i], callback_data=f"mm:{page_meta['start'] + i}") for i in range(len(page_models))]
@@ -4224,7 +4224,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
                 return
             idx, model_id, provider_slug, callback = sel
             try:
-                from hermes_cli.model_selection_guards import combined_selection_warning
+                from agent_cli.model_selection_guards import combined_selection_warning
                 # Pricing lookup may hit models.dev on a cache miss — keep it off the event loop.
                 warning = await asyncio.to_thread(combined_selection_warning, model_id, provider=provider_slug)
             except Exception:
@@ -4239,7 +4239,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
         elif data.startswith("mpg:"):  # provider group selected: show member providers
             group_id = data[4:]
             try:
-                from hermes_cli.models_catalog_static import PROVIDER_GROUPS
+                from agent_cli.models_catalog_static import PROVIDER_GROUPS
                 _label, _desc, member_slugs = PROVIDER_GROUPS.get(group_id, ("", "", []))
             except Exception:
                 _label, member_slugs = "", []
@@ -4570,8 +4570,8 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
             await answer_callback(query, _toast("platform.telegram.slash_confirm.already_resolved"))
             return
         try:  # the answer reaches the updater first: a failed write leaves the card answerable
-            from hermes_constants import get_hermes_home
-            response_path = get_hermes_home() / ".update_response"
+            from agent_constants import get_agent_home
+            response_path = get_agent_home() / ".update_response"
             tmp = response_path.with_suffix(".tmp")
             tmp.write_text(answer, encoding="utf-8")
             tmp.replace(response_path)
@@ -4614,8 +4614,8 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
             await answer_callback(query, _toast("platform.telegram.gmail_triage.unknown_verb", verb=verb))
             return
         script_name, extra_args, success_key, is_state_verb = entry
-        from hermes_constants import get_hermes_home
-        script_path = get_hermes_home() / "scripts" / "gmail-triage" / script_name
+        from agent_constants import get_agent_home
+        script_path = get_agent_home() / "scripts" / "gmail-triage" / script_name
         if not script_path.exists():
             await answer_callback(query, _toast("platform.telegram.gmail_triage.script_missing", script=script_name))
             logger.error("[%s] gmail-triage script missing: %s", self.name, script_path)
@@ -5885,7 +5885,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
                 if chat_id in self._forum_command_registered:
                     return
                 from telegram import BotCommandScopeChat
-                from hermes_cli.commands_platforms import telegram_menu_commands, telegram_menu_max_commands
+                from agent_cli.commands_platforms import telegram_menu_commands, telegram_menu_max_commands
                 menu_commands, _ = await asyncio.to_thread(
                     telegram_menu_commands, max_commands=telegram_menu_max_commands())
                 bot_commands = self._bot_commands(menu_commands)
@@ -6338,7 +6338,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
     def _reload_dm_topics_from_config(self) -> None:
         """Re-read dm_topics from config.yaml so externally created topics work without restart."""
         try:
-            from hermes_cli.config import load_config  # deep-copied: _setup_dm_topics writes thread_ids into it
+            from agent_cli.config import load_config  # deep-copied: _setup_dm_topics writes thread_ids into it
             dm_topics = load_config().get("platforms", {}).get("telegram", {}).get("extra", {}).get("dm_topics", [])
             if not dm_topics:
                 self._dm_topics_config = []
@@ -6580,7 +6580,7 @@ class TelegramAdapter(TelegramContactMixin, TelegramHeldInboundMixin, TelegramRe
 # into this bundled plugin. Mirrors the Discord (#24356) / Slack migrations: a register(ctx) entry point
 # plus hook implementations that replace the per-platform core touchpoints (the Platform.TELEGRAM branch in
 # gateway/run.py, the telegram_cfg YAML→env/extra block in gateway/config.py, the _setup_telegram wizard +
-# _PLATFORMS["telegram"] static dict in hermes_cli/{setup,gateway}.py; the out-of-process sender lives in
+# _PLATFORMS["telegram"] static dict in agent_cli/{setup,gateway}.py; the out-of-process sender lives in
 # standalone.py as standalone_sender_fn). Telegram uses the generic token connected check, so no is_connected override
 # is needed. ──────────────────────────────────────────────────────────────────────────
 def _build_adapter(config):
@@ -6598,7 +6598,7 @@ def _is_connected(config) -> bool:
     not enough or the plugin-enable pass would enable Telegram on any machine with it installed."""
     token = getattr(config, "token", None)
     if not token:
-        import hermes_cli.gateway as gateway_mod
+        import agent_cli.gateway as gateway_mod
         token = gateway_mod.get_env_value("TELEGRAM_BOT_TOKEN") or ""
     return bool(str(token).strip())
 

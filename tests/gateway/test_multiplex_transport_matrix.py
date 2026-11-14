@@ -70,10 +70,10 @@ def mux(tmp_path, monkeypatch):
          "bot_profile": "team_b"},
     ])
     rig.home = home
-    with patch("hermes_cli.profiles.profiles_to_serve", return_value=served), \
-            patch("hermes_cli.profiles.get_profile_dir",
+    with patch("agent_cli.profiles.profiles_to_serve", return_value=served), \
+            patch("agent_cli.profiles.get_profile_dir",
                   side_effect=lambda n: home if n == "default" else home / "profiles" / n), \
-            patch("hermes_cli.profiles.profile_exists", return_value=True):
+            patch("agent_cli.profiles.profile_exists", return_value=True):
         yield rig
 
 
@@ -203,13 +203,13 @@ async def test_secondary_bot_route_runs_in_the_routed_runtime_scope(mux):
     does: that runtime's authority admits the turn, so a later completion wake finds the committed
     turn on the same ledger (#139726). The bot's own traffic keeps the bot profile's scope."""
     from gateway.platforms.event import MessageEvent
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
     r = mux.runner
     scopes = []
 
     async def _handle_message(event):
-        scopes.append(get_hermes_home())
+        scopes.append(get_agent_home())
 
     r._handle_message = _handle_message
     handler = r._make_profile_message_handler("team_b")

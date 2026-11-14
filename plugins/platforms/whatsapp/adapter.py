@@ -18,9 +18,9 @@ from gateway.platforms._shared import (
     apply_yaml_bridge as _apply_yaml_bridge, extra_or_secret as _extra_or_secret, get_scoped_secret, send_error
 )
 from gateway.platforms.send_targets import StandaloneSendPolicy, regex_stripped_parser
-from hermes_cli._subprocess_compat import windows_detach_flags
-from hermes_cli.process_identity import release_process_group_once_empty, spawn_owned
-from hermes_constants import (ensure_private_store, find_node_executable, get_hermes_dir, with_hermes_node_path)
+from agent_cli._subprocess_compat import windows_detach_flags
+from agent_cli.process_identity import release_process_group_once_empty, spawn_owned
+from agent_constants import (ensure_private_store, find_node_executable, get_agent_dir, with_agent_node_path)
 
 _IS_WINDOWS = platform.system() == "Windows"
 
@@ -71,12 +71,12 @@ def _session_dir(extra) -> Path:
     """Absolute session dir: --session, bridge.pid and every /health ``session`` comparison (gateway and standalone
     sends) share this one string, or a gateway restarted from another cwd would see its own bridge as foreign."""
     return Path(os.path.abspath(os.path.expanduser(str((extra or {}).get(
-        "session_path", get_hermes_dir("platforms/whatsapp/session", "whatsapp/session"))))))
+        "session_path", get_agent_dir("platforms/whatsapp/session", "whatsapp/session"))))))
 
 
 def _windows_listener_pids(port: int) -> list:
     """PIDs in LISTENING state on ``port`` via netstat (Windows)."""
-    from hermes_cli._subprocess_compat import windows_hide_flags
+    from agent_cli._subprocess_compat import windows_hide_flags
     result = subprocess.run(["netstat", "-ano", "-p", "TCP"], timeout=5, creationflags=windows_hide_flags(), **_RUN_TEXT, check=False)
     rows = (line.split() for line in result.stdout.splitlines())
     return _safe_ints(p[4] for p in rows if len(p) >= 5 and p[3] == "LISTENING" and p[1].endswith(f":{port}"))
@@ -143,7 +143,7 @@ def _kill_port_process(port: int) -> None:
                 logger.warning("[whatsapp] Not killing PID %s on port %d: process is not a node bridge (or identity unverifiable)", pid, port)
                 continue
             if _IS_WINDOWS:
-                from hermes_cli._subprocess_compat import windows_hide_flags
+                from agent_cli._subprocess_compat import windows_hide_flags
                 # Only SubprocessError is swallowed per-PID; an OSError (e.g. taskkill missing) aborts the scan.
                 with suppress(subprocess.SubprocessError):
                     subprocess.run(["taskkill", "/PID", str(pid), "/F"], capture_output=True, stdin=subprocess.DEVNULL, timeout=5, creationflags=windows_hide_flags(), check=False)
@@ -538,7 +538,7 @@ def check_whatsapp_requirements() -> bool:
         # Let connect prepare a missing runtime, but never install during discovery.
         return lazy_installs_allowed()
     try:
-        return subprocess.run([_node, "--version"], timeout=5, env=with_hermes_node_path(), **_RUN_TEXT, check=False).returncode == 0
+        return subprocess.run([_node, "--version"], timeout=5, env=with_agent_node_path(), **_RUN_TEXT, check=False).returncode == 0
     except Exception:
         return False
 
@@ -643,8 +643,8 @@ class WhatsAppAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
             from gateway.platforms.whatsapp_common import resolve_whatsapp_bridge_dir
             WhatsAppAdapter._DEFAULT_BRIDGE_DIR = resolve_whatsapp_bridge_dir()
         extra = config.extra
-        from hermes_constants import get_hermes_home
-        self._profile_home = get_hermes_home()
+        from agent_constants import get_agent_home
+        self._profile_home = get_agent_home()
         self._bridge_process: Optional[subprocess.Popen] = None
         self._foreign_bridge_session: Optional[str] = None  # set by _reuse_running_bridge when /health names another profile's session
         self._bridge_probe_timed_out = False  # set by _reuse_running_bridge when the port's holder gave no /health answer
@@ -712,7 +712,7 @@ class WhatsAppAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
             import pm
 
             _npm_bin = find_node_executable("npm")
-            env = with_hermes_node_path()
+            env = with_agent_node_path()
             if _npm_bin is None:
                 env = pm.ensure("npm").env
                 installed = pm.installed_package("npm")
@@ -733,7 +733,7 @@ class WhatsAppAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
             print(f"[{self.name}] Failed to install dependencies: {e}")
             detail = f" ({e})"
         self._set_fatal_error("whatsapp_npm_install_failed", f"WhatsApp bridge npm install failed{detail}. "
-                              "Run `hermes whatsapp`, then restart `hermes gateway`.", retryable=False)
+                              "Run `hermes whatsapp`, then restart `noone gateway`.", retryable=False)
         return False
 
     def _attach_to_bridge(self, managed_process) -> None:
@@ -818,8 +818,8 @@ class WhatsAppAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
         # child env, never Hermes' credentials. Under a multiplexed secondary the launch env carries the
         # DEFAULT profile's WHATSAPP_* values, so every bridge-consumed key is re-resolved from this
         # profile (dropped on a scoped miss), never inherited from the launch env.
-        from tools.environments.local import hermes_subprocess_env
-        bridge_env = with_hermes_node_path(hermes_subprocess_env())
+        from tools.environments.local import agent_subprocess_env
+        bridge_env = with_agent_node_path(agent_subprocess_env())
         reply_prefix = _wenv("WHATSAPP_REPLY_PREFIX")
         if reply_prefix:
             bridge_env["WHATSAPP_REPLY_PREFIX"] = reply_prefix
@@ -909,7 +909,7 @@ class WhatsAppAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
         creds_path = self._session_path / "creds.json"
         checks = (
             (check_whatsapp_requirements, ("[%s] Node.js not found. WhatsApp requires Node.js.", self.name),
-             "whatsapp_node_missing", "Node.js is not installed — install Node.js and re-run `hermes gateway`."),
+             "whatsapp_node_missing", "Node.js is not installed — install Node.js and re-run `noone gateway`."),
             (bridge_path.exists, ("[%s] Bridge script not found: %s", self.name, bridge_path),
              "whatsapp_bridge_missing", f"WhatsApp bridge script missing at {bridge_path}."),
             (creds_path.exists, ("[%s] WhatsApp is enabled but not paired (no creds.json at %s). Pair from the dashboard or run "
@@ -924,8 +924,8 @@ class WhatsAppAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
         if (missing := ensure_aiohttp()) is not None:  # may install it: connect runs this off the event loop
             why, retryable = missing
             message = (f"aiohttp is unavailable ({why}); the WhatsApp bridge client needs it. "
-                       "Run `hermes pm install --extra sms` (it ships aiohttp; `hermes pm repair` for a damaged install), "
-                       "then restart `hermes gateway`.")
+                       "Run `noone pm install --extra sms` (it ships aiohttp; `noone pm repair` for a damaged install), "
+                       "then restart `noone gateway`.")
             logger.warning("[%s] %s", self.name, message)
             self._set_fatal_error("whatsapp_aiohttp_missing", message, retryable=retryable)
             return False
@@ -1024,7 +1024,7 @@ class WhatsAppAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
             self._bridge_log_fh = bridge_log_fh = _open_bridge_log(self._bridge_log, private=store_umask >= 0)
             node = find_node_executable("node")
             if node is None:
-                raise RuntimeError("Node.js is no longer available; run `hermes pm install`")
+                raise RuntimeError("Node.js is no longer available; run `noone pm install`")
             bridge_env = self._bridge_env()
             self._bridge_process = _spawn_bridge_process(
                 [node, str(bridge_path), "--port", str(self._bridge_port), "--session", str(self._session_path),
@@ -1528,7 +1528,7 @@ class WhatsAppAdapter(WhatsAppBehaviorMixin, BasePlatformAdapter):
             return None
 
 
-# ── Plugin glue: register(ctx) plus the hooks for gateway/run.py, gateway/config.py, hermes_cli/gateway.py, send_message_tool.py.
+# ── Plugin glue: register(ctx) plus the hooks for gateway/run.py, gateway/config.py, agent_cli/gateway.py, send_message_tool.py.
 
 _WA_EXT_MEDIA_TYPE = {
     **dict.fromkeys((".jpg", ".jpeg", ".png", ".webp", ".gif"), "image"),
@@ -1555,10 +1555,10 @@ async def _standalone_send(pconfig, chat_id, message, *, thread_id=None, media_f
     except ImportError:
         return send_error("aiohttp not installed. Run: pip install aiohttp")
     try:
-        from hermes_constants import get_hermes_home
+        from agent_constants import get_agent_home
         from .bridge_ownership import standalone_bridge_port
         bridge_port = standalone_bridge_port(
-            get_hermes_home(), (getattr(pconfig, "extra", {}) or {}).get("bridge_port")
+            get_agent_home(), (getattr(pconfig, "extra", {}) or {}).get("bridge_port")
         )
         own_session_path = _session_dir(getattr(pconfig, "extra", {}) or {})
         own_session = str(own_session_path)
@@ -1648,8 +1648,8 @@ async def _standalone_send(pconfig, chat_id, message, *, thread_id=None, media_f
 
 def interactive_setup() -> None:
     """Guide the user through WhatsApp setup (CLI helpers lazy-imported)."""
-    from hermes_cli.config import get_env_value, remove_env_value, save_env_value
-    from hermes_cli.cli_output import prompt, prompt_yes_no, print_header, print_info, print_success
+    from agent_cli.config import get_env_value, remove_env_value, save_env_value
+    from agent_cli.cli_output import prompt, prompt_yes_no, print_header, print_info, print_success
     print_header("WhatsApp")
     print_info("WhatsApp uses a local Node.js bridge (WhatsApp Web client).")
     print_info("Start the bridge separately; the gateway connects to it over HTTP.")
@@ -1694,8 +1694,8 @@ def _is_connected(config) -> bool:
     """Connected == WHATSAPP_ENABLED opt-in (or an enabled PlatformConfig with extras); auth lives in the bridge."""
     if config is not None and getattr(config, "enabled", False) and (getattr(config, "extra", {}) or {}):
         return True
-    # Via hermes_cli.gateway.get_env_value (not os.getenv) so setup-status callers that patch it observe the same value.
-    import hermes_cli.gateway as gateway_mod
+    # Via agent_cli.gateway.get_env_value (not os.getenv) so setup-status callers that patch it observe the same value.
+    import agent_cli.gateway as gateway_mod
     return (gateway_mod.get_env_value("WHATSAPP_ENABLED") or "").strip().lower() in {"true", "1", "yes"}
 
 

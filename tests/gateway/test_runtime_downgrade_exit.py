@@ -70,19 +70,21 @@ def test_the_tree_probe_reads_the_checkout_on_disk(tmp_path):
     git("init", "-b", "main")
     git("config", "user.email", "t@example.invalid")
     git("config", "user.name", "T")
-    (tmp_path / "hermes_state_common.py").write_text("SCHEMA = 'CREATE TABLE IF NOT EXISTS sessions'\n")
+    migrations = tmp_path / "agent_cli" / "database_migrations.py"
+    migrations.parent.mkdir()
+    migrations.write_text("SCHEMA = 'CREATE TABLE IF NOT EXISTS sessions'\n")
     git("add", ".")
     git("commit", "-m", "old release")
     git("tag", "old")
-    (tmp_path / "hermes_state_common.py").write_text("SCHEMA = 'CREATE TABLE IF NOT EXISTS session_admissions'\n")
+    migrations.write_text("SCHEMA = 'CREATE TABLE schema_migrations (component TEXT PRIMARY KEY, version INTEGER)'\n")
     git("commit", "-am", "runtime")
     assert rde.tree_predates_runtime(tmp_path) is False
     git("checkout", "-q", "--detach", "old")
     assert rde.tree_predates_runtime(tmp_path) is True
-    nested = tmp_path / "src" / "hermes_agent" / "hermes_state"
+    nested = tmp_path / "agent_cli" / "data" / "migrations" / "0001_base"
     nested.mkdir(parents=True)
-    (nested / "common.py").write_text("SCHEMA = 'CREATE TABLE IF NOT EXISTS session_admissions'\n")
-    assert rde.tree_predates_runtime(tmp_path) is False  # the store moved into the package still counts
+    (nested / "state.sql").write_text("CREATE TABLE schema_migrations (component TEXT PRIMARY KEY, version INTEGER);\n")
+    assert rde.tree_predates_runtime(tmp_path) is False  # packaged migration SQL still declares the current authority
     assert rde.tree_predates_runtime(tmp_path / "missing") is False  # nothing readable proves nothing
 
 

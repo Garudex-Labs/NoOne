@@ -11,6 +11,8 @@ interface ProductIdentity {
   appNamePascal: string
   /** Artifact prefix stays compatible with release archive consumers. */
   artifactNamePascal: string
+  /** Stable state selection is independent of the display/artifact spelling. */
+  stableState?: boolean
   /** Windows GUI executable stem; not the payload CLI launcher path. */
   windowsExecutableName: string
   /** Exposed payload CLI command. */

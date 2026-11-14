@@ -1,4 +1,4 @@
-from hermes_state import AsyncSessionDB, SessionDB
+from agent_state import AsyncSessionDB, SessionDB
 """Tests for gateway /status behavior and token persistence."""
 
 from datetime import datetime
@@ -629,13 +629,13 @@ async def test_profile_command_reports_source_stamped_profile(monkeypatch, tmp_p
     result = await runner._handle_profile_command(event)
 
     assert "**Profile:** `milo`" in result
-    # The reply renders display_hermes_home() for the routed profile, which abbreviates a home
+    # The reply renders display_agent_home() for the routed profile, which abbreviates a home
     # under $HOME to ``~/…``; compare against the same rendering rather than the raw path.
     from gateway.run import _profile_runtime_scope
-    from hermes_constants import display_hermes_home
+    from agent_constants import display_agent_home
 
     with _profile_runtime_scope(profile_home):
-        expected_home = display_hermes_home()
+        expected_home = display_agent_home()
     assert f"**Home:** `{expected_home}`" in result
 
 
@@ -681,7 +681,7 @@ async def test_context_command_keeps_configured_window_without_resident_agent():
     with patch("gateway.run._load_gateway_config", return_value=config), patch(
         "gateway.run._resolve_runtime_agent_kwargs", return_value=runtime
     ), patch(
-        "hermes_cli.config.get_compatible_custom_providers",
+        "agent_cli.config.get_compatible_custom_providers",
         return_value=config["custom_providers"],
     ), patch(
         "agent.model_metadata.get_model_context_length",

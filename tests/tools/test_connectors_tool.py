@@ -147,7 +147,7 @@ def _session_tool_names(enabled_toolsets, *, connectors, disabled_toolsets=None)
 
 def test_cli_session_gets_the_tool_outside_a_code_workspace(tmp_path, monkeypatch):
     """The path a plain `hermes` run takes: _get_platform_tools, no git cwd."""
-    from hermes_cli.tools_config import _get_platform_tools
+    from agent_cli.tools_config import _get_platform_tools
 
     monkeypatch.chdir(tmp_path)
     enabled = sorted(_get_platform_tools({}, "cli", include_default_mcp_servers=True))
@@ -160,7 +160,7 @@ def test_cli_session_gets_the_tool_outside_a_code_workspace(tmp_path, monkeypatc
 
 def test_tui_and_desktop_sessions_get_the_tool(monkeypatch):
     """The path the TUI/desktop gateway takes to build its selection."""
-    from tui_gateway.server import _load_enabled_toolsets
+    from agent_backend.server import _load_enabled_toolsets
 
     monkeypatch.delenv("HERMES_TUI_TOOLSETS", raising=False)
     for platform in ("tui", "desktop"):
@@ -189,9 +189,9 @@ def test_session_the_portal_has_not_enabled_never_receives_the_tool(tmp_path, mo
     for connectors does not get ``manage_connections`` in its schema on any surface, so the
     model cannot call it and read the gateway's 404 back to the user. The handler keeps the same
     gate for the direct RPC path."""
-    from hermes_cli.tools_config import _get_platform_tools
+    from agent_cli.tools_config import _get_platform_tools
     from tools.registry import registry
-    from tui_gateway.server import _load_enabled_toolsets
+    from agent_backend.server import _load_enabled_toolsets
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("HERMES_TUI_TOOLSETS", raising=False)
@@ -216,7 +216,7 @@ def test_operator_can_still_turn_it_off(tmp_path, monkeypatch):
     like any other. Naming a platform composite instead must NOT strip it —
     that branch preserves core tools on purpose (#33924).
     """
-    from hermes_cli.tools_config import _get_platform_tools
+    from agent_cli.tools_config import _get_platform_tools
 
     monkeypatch.chdir(tmp_path)
     enabled = sorted(_get_platform_tools({}, "cli", include_default_mcp_servers=True))

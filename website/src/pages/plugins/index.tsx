@@ -1,21 +1,21 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import Layout from "@theme/Layout";
-import Link from "@docusaurus/Link";
-import { useHistory } from "@docusaurus/router";
-import RouteLink, { useKnownRoute } from "../../components/RouteLink";
-import useBaseUrl from "@docusaurus/useBaseUrl";
-import styles from "./styles.module.css";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { groupCatalogPlugins, sortCatalogPlugins } from "../../../../apps/shared/src/catalog-browse";
+import { pickFeatured } from "../../../../apps/shared/src/catalog-featured";
+import { appText } from '../../application-identity';
+import CatalogFeatured from "../../components/CatalogFeatured";
+import Layout from "../../components/DocLayout";
+import { DocLink as Link } from "../../components/DocLink";
+import { docUrl, DocLink as RouteLink } from "../../components/DocLink";
+import Icon from "../../components/Icon";
 import {
-  type CatalogPlugin,
-  type CatalogMeta,
-  CATEGORY_CONFIG,
-  CATEGORY_ORDER,
-  SUBMIT_PLUGIN_URL,
-  TIER_CONFIG,
   authorPagePath,
   capToolChips,
   cardSummary,
+  type CatalogMeta,
+  type CatalogPlugin,
+  CATEGORY_CONFIG,
+  CATEGORY_ORDER,
   categoryOf,
   desktopInstallLink,
   docsHref,
@@ -25,14 +25,15 @@ import {
   pinUrl,
   pluginPagePath,
   repoUrl,
+  SUBMIT_PLUGIN_URL,
+  TIER_CONFIG,
   tierOf,
 } from "../../components/PluginCatalog/catalog";
 import CopyButton from "../../components/PluginCatalog/CopyButton";
-import CatalogFeatured from "../../components/CatalogFeatured";
-import { groupCatalogPlugins, sortCatalogPlugins } from "../../../../apps/shared/src/catalog-browse";
-import { pickFeatured } from "../../../../apps/shared/src/catalog-featured";
 
-// Routes Docusaurus serves the static API JSON from. `baseUrl` is `/docs/`,
+import styles from "./styles.module.css";
+
+// Routes the documentation site serves the static API JSON from. `baseUrl` is `/docs/`,
 // `static/api/` ends up at `/docs/api/` — same pattern as the Skills Hub.
 const PLUGINS_URL = "/docs/api/plugins.json";
 const META_URL = "/docs/api/plugins-meta.json";
@@ -97,17 +98,13 @@ function PluginCard({
   const showImage = Boolean(plugin.image) && !imageBroken;
   const pagePath = pluginPagePath(plugin.name);
   const docs = docsHref(plugin);
-  const history = useHistory();
-  const pageHref = useBaseUrl(pagePath); // <Link> adds baseUrl itself; history.push does not
-  const routed = useKnownRoute(pagePath);
+  const pageHref = docUrl(pagePath);
   // A card IS the link to the plugin's own page: nothing expands or collapses in place. Inside
   // the Desktop picker iframe an in-frame navigation would leave the host's embed, so the page
   // opens in a new tab there instead.
   const onCardClick = onPick
     ? () => window.open(new URL(pageHref, window.location.href).toString(), "_blank", "noopener,noreferrer")
-    : routed
-      ? () => history.push(pageHref)
-      : () => window.location.assign(pageHref);
+    : () => window.location.assign(pageHref);
 
   return (
     <div
@@ -138,13 +135,13 @@ function PluginCard({
           aria-hidden="true"
           style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${tier.color} 12%, transparent), transparent 70%)` }}
         >
-          <span className={styles.cardImagePlaceholderIcon}>{category.icon}</span>
+          <span className={styles.cardImagePlaceholderIcon}><Icon name={category.icon} /></span>
         </div>
       )}
 
       <div className={styles.cardInner}>
         <div className={styles.cardTop}>
-          <span className={styles.cardIcon} title={category.label}>{category.icon}</span>
+          <span className={styles.cardIcon} title={category.label}><Icon name={category.icon} /></span>
           <div className={styles.cardTitleGroup}>
             <h3 className={styles.cardTitle} title={plugin.name}>
               <RouteLink className={styles.cardTitleLink} to={pagePath} onClick={(e) => e.stopPropagation()}>
@@ -179,7 +176,7 @@ function PluginCard({
               borderColor: tier.border,
             }}
           >
-            {tier.icon} {tier.label}
+            <Icon name={tier.icon} /> {tier.label}
           </span>
           {plugin.version && (
             <span className={styles.versionPill} title={`Version ${plugin.version} at ${plugin.sha}`}>
@@ -255,11 +252,10 @@ function PluginCard({
           <a
             className={styles.pickBtn}
             href={desktopInstallLink(plugin.name)}
-            title="Opens the Install Plugin dialog in Hermes Desktop at the reviewed version. No app? Use the install command below."
+            title={appText("Opens the Install Plugin dialog in {app_name} Desktop at the reviewed version. No app? Use the install command below.")}
             onClick={(e) => e.stopPropagation()}
           >
-            Open in Hermes Desktop
-          </a>
+            {appText("Open in {app_name} Desktop\n          ")}</a>
         )}
 
         {
@@ -282,7 +278,7 @@ function PluginCard({
               <span className={styles.metaLabel}>Pinned</span>
               <span
                 className={styles.metaValue}
-                title={plugin.requiresHermes ? `${plugin.sha} · requires hermes ${plugin.requiresHermes}` : plugin.sha}
+                title={plugin.requiresHermes ? `${plugin.sha} · requires plugin API ${plugin.requiresHermes}` : plugin.sha}
               >
                 <a
                   href={pinUrl(plugin)}
@@ -296,7 +292,7 @@ function PluginCard({
                 {plugin.requiresHermes && (
                   <>
                     <span aria-hidden="true" className={styles.cardDatesSep}> · </span>
-                    <code>hermes {plugin.requiresHermes}</code>
+                    <code>plugin API {plugin.requiresHermes}</code>
                   </>
                 )}
               </span>
@@ -369,7 +365,7 @@ function buildSearchHaystack(p: CatalogPlugin): string {
 
 export default function PluginCatalogPage() {
   // Picker embed mode (?embed=picker): the page is iframed by a host app
-  // (Hermes desktop's Capabilities > Plugins tab) as a one-click catalog
+  // (the desktop's Capabilities > Plugins tab) as a one-click catalog
   // picker. Site chrome is hidden via CSS and every card gains an
   // "+ Add to this Agent" button that posts
   //   { type: 'hermes-plugin-pick', name, repo, sha, subdir, tier,
@@ -391,7 +387,7 @@ export default function PluginCatalogPage() {
         sha: plugin.sha,
         subdir: plugin.subdir || "",
         tier: plugin.tier,
-        installCmd: plugin.installCommand || `hermes plugins install ${plugin.name}`,
+        installCmd: plugin.installCommand || `noone plugins install ${plugin.name}`,
       },
       "*"
     );
@@ -415,11 +411,11 @@ export default function PluginCatalogPage() {
     (async () => {
       try {
         const [pl, mt] = await Promise.all([
-          fetch(PLUGINS_URL).then((r) => {
+          fetch(docUrl(PLUGINS_URL)).then((r) => {
             if (!r.ok) throw new Error(`plugins.json HTTP ${r.status}`);
             return r.json();
           }),
-          fetch(META_URL).then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
+          fetch(docUrl(META_URL)).then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
         ]);
         if (cancelled) return;
         const arr = Array.isArray(pl) ? (pl as CatalogPlugin[]) : [];
@@ -554,13 +550,13 @@ export default function PluginCatalogPage() {
   return (
     <Layout
       title="Plugin Catalog"
-      description="Give Hermes new powers: reviewed plugins you can install in one click"
+      description={appText("Give {app_name} new powers: reviewed plugins you can install in one click")}
     >
       <div className={`${styles.page} ${pickerMode ? styles.pickerMode : ""}`}>
         <header className={styles.hero}>
           <div className={styles.heroGlow} />
           <div className={styles.heroContent}>
-            <p className={styles.heroEyebrow}>Hermes Agent</p>
+            <p className={styles.heroEyebrow}>{appText("{app_name}")}</p>
             <h1 className={styles.heroTitle}>Plugin Catalog</h1>
             <nav className={styles.crossNav} aria-label="Catalog pages">
               <Link className={styles.crossNavLink} to="/skills">
@@ -571,9 +567,7 @@ export default function PluginCatalogPage() {
               </span>
             </nav>
             <p className={styles.heroSub}>
-              Give Hermes new powers. Memory, voice, messaging, browsing, Desktop panes and more,
-              built by the community.
-              {loadError && (
+              {appText("Give {app_name} new powers. Memory, voice, messaging, browsing, Desktop panes and more,\n              built by the community.\n              ")}{loadError && (
                 <span style={{ color: "#f87171", marginLeft: 8 }}>
                   · failed to load catalog ({loadError})
                 </span>
@@ -614,19 +608,7 @@ export default function PluginCatalogPage() {
           <div className={styles.controlsBar}>
             <div className={styles.controlsTopRow}>
             <div className={styles.searchWrap}>
-              <svg
-                className={styles.searchIcon}
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                width="18"
-                height="18"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <Icon className={styles.searchIcon} name="search" size={18} />
               <input
                 ref={searchRef}
                 type="text"
@@ -638,13 +620,7 @@ export default function PluginCatalogPage() {
               />
               {search && (
                 <button className={styles.clearBtn} onClick={() => setSearch("")}>
-                  <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <Icon name="x" size={16} />
                 </button>
               )}
             </div>
@@ -763,7 +739,7 @@ export default function PluginCatalogPage() {
                     aria-selected={active}
                     title={conf.blurb}
                   >
-                    <span aria-hidden="true">{conf.icon}</span> {conf.label}
+                    <span aria-hidden="true"><Icon name={conf.icon} /></span> {conf.label}
                     <span className={styles.tierCount}>{categoryCounts[c]}</span>
                   </button>
                 );
@@ -784,10 +760,7 @@ export default function PluginCatalogPage() {
               <div className={styles.emptyIcon}>{"\u{1F331}"}</div>
               <h3 className={styles.emptyTitle}>The catalog is just getting started</h3>
               <p className={styles.emptyDesc}>
-                The plugin catalog is a curated, human-reviewed list of Hermes
-                plugins — each entry pinned to an exact commit. Want yours listed?
-                Submissions are open.
-              </p>
+                {appText("The plugin catalog is a curated, human-reviewed list of {app_name}\n                plugins — each entry pinned to an exact commit. Want yours listed?\n                Submissions are open.\n              ")}</p>
               <div className={styles.emptyActions}>
                 <Link className={styles.emptyCta} to={SUBMIT_PLUGIN_URL}>
                   How to submit a plugin
@@ -820,7 +793,7 @@ export default function PluginCatalogPage() {
                 <section key={cat} className={styles.categorySection} aria-labelledby={`cat-${cat}`}>
                   <header className={styles.categoryHeader}>
                     <h2 id={`cat-${cat}`} className={styles.categoryTitle}>
-                      <span aria-hidden="true">{conf.icon}</span> {conf.label}
+                      <span aria-hidden="true"><Icon name={conf.icon} /></span> {conf.label}
                       <span className={styles.tierCount}>{plugins.length}</span>
                     </h2>
                     <p className={styles.categoryBlurb}>{conf.blurb}</p>
@@ -840,7 +813,7 @@ export default function PluginCatalogPage() {
               <div className={styles.resultsBar} role="status">
                 {categoryFilter !== "all" && CATEGORY_CONFIG[categoryFilter] && (
                   <span>
-                    <span aria-hidden="true">{CATEGORY_CONFIG[categoryFilter].icon}</span>{" "}
+                    <span aria-hidden="true"><Icon name={CATEGORY_CONFIG[categoryFilter].icon} /></span>{" "}
                     <strong>{CATEGORY_CONFIG[categoryFilter].label}</strong>
                     <span style={{ opacity: 0.7 }}> · {CATEGORY_CONFIG[categoryFilter].blurb}</span>
                   </span>

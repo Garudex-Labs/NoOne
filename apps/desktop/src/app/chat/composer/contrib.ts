@@ -125,7 +125,7 @@ export interface ComposerAttachmentContext {
  *  composer's "+" attach menu. */
 export interface ComposerAttachmentProvider {
   label: string
-  /** Codicon name for the menu row. Defaults to `plug`. */
+  /** AppIcon name for the menu row. Defaults to `plug`. */
   icon?: string
   run: (ctx: ComposerAttachmentContext) => void | Promise<void>
 }

@@ -18,8 +18,8 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 from agent.deadline import kill_process_tree
-from agent.transports.hermes_tools_mcp_server import HERMES_TOOLS_MCP_SERVER_NAME
-from tools.environments.local import hermes_subprocess_env
+from agent.transports.agent_tools_mcp_server import HERMES_TOOLS_MCP_SERVER_NAME
+from tools.environments.local import agent_subprocess_env
 
 MIN_CODEX_VERSION = (0, 125, 0)
 
@@ -102,7 +102,7 @@ class CodexAppServerClient:
         # GATEWAY_RELAY_* auth — none of which a coding subprocess has any use for. Route through the
         # centralized helper so Tier-1 + dynamic-internal secrets are always stripped while provider creds
         # still flow, matching the ACP client (#29157 sibling spawn-site gap).
-        spawn_env = hermes_subprocess_env(inherit_credentials=True)
+        spawn_env = agent_subprocess_env(inherit_credentials=True)
         if env:
             spawn_env.update(env)
         if codex_home:
@@ -141,7 +141,7 @@ class CodexAppServerClient:
         # Hide the console the codex child would otherwise flash on Windows (#56747).
         # Hide-only — stdio pipes stay intact for the app-server wire.
         # See #56747.
-        from hermes_cli._subprocess_compat import windows_hide_flags
+        from agent_cli._subprocess_compat import windows_hide_flags
 
         self._proc = subprocess.Popen(
             cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,

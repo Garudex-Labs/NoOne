@@ -1,4 +1,5 @@
 import { MessagePrimitive, useAuiState } from '@assistant-ui/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { type FC, useState } from 'react'
 
 import { MarkdownTextContent } from '@/components/assistant-ui/markdown-text'
@@ -6,7 +7,6 @@ import { messageContentText } from '@/components/assistant-ui/thread/content'
 import { MessageTimelineTimestamp } from '@/components/assistant-ui/thread/timeline-timestamp'
 import { UserMessageText } from '@/components/assistant-ui/thread/user-message-text'
 import { SCAFFOLD_GLYPH_CLASS, SCAFFOLD_LABEL_CLASS, ScaffoldRow } from '@/components/chat/scaffold-row'
-import { Codicon } from '@/components/ui/codicon'
 import { LogView } from '@/components/ui/log-view'
 import { ToolIcon } from '@/components/ui/tool-icon'
 import { useI18n } from '@/i18n'
@@ -78,7 +78,7 @@ const ContentRefusedNote: FC<{ notice: string; userText: string }> = ({ notice, 
     <div className="ml-auto flex min-w-0 max-w-full flex-col gap-1.5 rounded-xl border border-dashed border-(--ui-stroke-tertiary) px-3 py-2 text-left opacity-70">
       {userText && <UserMessageText className="wrap-anywhere text-(--ui-text-tertiary)" text={userText} />}
       <span className="flex items-center gap-1.5 text-[0.6875rem] leading-5 text-muted-foreground/70">
-        <Codicon className="shrink-0 text-muted-foreground/60" name="shield" size="0.75rem" />
+        <AppIcon className="shrink-0 text-muted-foreground/60" name="shield" size="0.75rem" />
         <span className="wrap-anywhere">{notice}</span>
       </span>
     </div>
@@ -159,7 +159,7 @@ export const SystemMessage: FC = () => {
         data-role="system"
         data-slot="aui_system-message-root"
       >
-        <Codicon className="text-muted-foreground/55" name="compass" size="0.75rem" />
+        <AppIcon className="text-muted-foreground/55" name="compass" size="0.75rem" />
         <span className="text-muted-foreground/55">steered</span>
         <span className="text-muted-foreground/35">·</span>
         <span className="whitespace-pre-wrap">{steerNote.groups.text.trim()}</span> <MessageTimelineTimestamp />

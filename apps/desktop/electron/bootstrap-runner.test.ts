@@ -22,7 +22,7 @@ const SCRIPT_NAME = process.platform === 'win32' ? 'install.ps1' : 'install.sh'
 const ZERO_COMMIT = '0000000000000000000000000000000000000000'
 
 function mkTmpHome() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'hermes-bootstrap-test-'))
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'agent-bootstrap-test-'))
 }
 
 test('runBootstrap bails immediately when the signal is already aborted', async () => {

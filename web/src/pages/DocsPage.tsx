@@ -1,11 +1,12 @@
+import { ExternalLink } from "@noone/ui/icons";
 import { useLayoutEffect } from "react";
-import { ExternalLink } from "lucide-react";
-import { useI18n } from "@/i18n";
+
 import { usePageHeader } from "@/contexts/usePageHeader";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { PluginSlot } from "@/plugins";
 
-export const HERMES_DOCS_URL = "https://hermes-agent.nousresearch.com/docs/";
+export const HERMES_DOCS_URL = "https://github.com/Garudex-Labs/NoOne/tree/main/website/docs";
 
 const DS_BUTTON_OUTLINED_LINK_CN = cn(
   "group relative inline-grid grid-cols-[auto_1fr_auto] items-center",

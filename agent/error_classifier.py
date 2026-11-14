@@ -154,7 +154,6 @@ _XAI_SPENDING_LIMIT_ERROR_CODE = "personal-team-blocked:spending-limit"
 # owns; the message names the reset, so it must never read as transient. Honoured
 # only on a Nous 402 (``_classify_402`` behind ``_is_nous_route``), never via
 # _BILLING_ERROR_CODES, so any other status or upstream keeps main's rules.
-_NOUS_USAGE_WINDOW_402_CODE = "usage_window_and_credits_exhausted"
 
 # Structured codes meaning the account cannot serve paid traffic.
 _BILLING_ERROR_CODES = frozenset({
@@ -821,7 +820,7 @@ def _plugin_verdict(c: _Ctx) -> Optional[Verdict]:
     provider plugin can add or correct verdicts). invoke_hook isolates callback
     failures; this guard only covers import/dispatch failure."""
     try:
-        from hermes_cli.plugins import get_plugin_error_classification
+        from agent_cli.plugins import get_plugin_error_classification
         verdict = get_plugin_error_classification(
             provider=c.provider, model=c.model, status_code=c.status_code, error_type=c.error_type,
             error_code=c.error_code, error_message=c.msg, error_body=c.body, error=c.error,
@@ -897,55 +896,6 @@ _WELCOME_403_NAMED_PATTERNS = _CONTENT_POLICY_BLOCKED_PATTERNS + tuple(
     p for p in _BILLING_PATTERNS if p not in _FREE_TIER_REFUSAL_PATTERNS)
 
 
-def _nous_welcome_tier(c: _Ctx) -> Optional[Verdict]:
-    """The Nous inference gateway's welcome-tier (free tier) refusals, read from the structured body.
-
-    A 429 carrying a fairshare ``reason`` is either a tier gate (``model_not_free`` /
-    ``feature_not_free``: the model or feature is never served on the free tier, so retrying is
-    pointless — abort this route and fall back) or capacity (``at_capacity`` / ``admission_closed``
-    / ``rate_limited``: honour ``retry_after``, never rotate the free tier's only credential). A
-    400/403 whose message names the wrong host or a dark tier is deterministic for the request.
-    The parsed refusal rides ``error_context`` so the terminal copy can say what happened.
-    """
-    from hermes_cli.anon_auth import (
-        WELCOME_TIER_GATE_REASONS, parse_welcome_refusal, route_is_welcome_host, welcome_route_refusal)
-    status = c.status_code
-    if not c.anonymous:
-        # A named credential's fairshare 429 is an ordinary rate limit, whatever its body says. The
-        # one welcome refusal it does receive is the gateway's mirror 400 on the welcome host; its
-        # reconnect copy stands, only the sign-in card is withheld (``_welcome_surface_kind``).
-        if c.provider == "nous" and status == 400 and welcome_route_refusal(status, c.msg) == "named_on_welcome_host":
-            return _v(_R.format_error, retryable=False, should_fallback=True,
-                      error_context={"welcome_route": "named_on_welcome_host"})
-        return None
-    if status == 402 and route_is_welcome_host(c.base_url):
-        # The free tier has no credits to top up: a payment wall on it is the tier refusing. Off the welcome
-        # host a free-tier JWT keeps the ordinary 402 handling (the route heal, billing copy).
-        refusal = {"reason": "refused", "retry_after": 0, "alternates": [], "upgrade_url": ""}
-        return _v(_R.auth_permanent, retryable=False, should_fallback=True,
-                  error_context={"welcome_refusal": refusal})
-    if status == 429:
-        # Every free-tier 429 is the allowance talking, so even one without a ``reason`` (header-only,
-        # quota words) is a refusal; otherwise it would fall to billing or the generic rate-limit copy.
-        from agent.nous_rate_guard import welcome_refusal_from_headers
-        refusal = parse_welcome_refusal(c.body) or welcome_refusal_from_headers(
-            c.headers, body_wait=_rate_limit_reset_seconds(c.msg, c.body, c.headers))
-        ctx = {"welcome_refusal": refusal}
-        if refusal["reason"] in WELCOME_TIER_GATE_REASONS:
-            return _v(_R.model_not_found, retryable=False, should_fallback=True, error_context=ctx)
-        if refusal["retry_after"] > 0:
-            ctx["reset_at"] = time.time() + refusal["retry_after"]
-        return _v(_R.rate_limit, should_fallback=True, error_context=ctx)
-    # The route-keyed dark-tier 403 applies only to a 403 that says nothing else: a safety refusal
-    # or a billing wall on the welcome host keeps its own classification (and its own recovery).
-    plain_403 = not any(p in c.msg for p in _WELCOME_403_NAMED_PATTERNS)
-    kind = welcome_route_refusal(status, c.msg, c.base_url if plain_403 else None)
-    if kind is None:
-        return None
-    ctx = {"welcome_route": kind}
-    if status == 403:
-        return _v(_R.auth_permanent, retryable=False, should_fallback=True, error_context=ctx)
-    return _v(_R.format_error, retryable=False, should_fallback=True, error_context=ctx)
 
 
 def _is_gemini_prompt_block(error: Exception) -> bool:
@@ -965,9 +915,6 @@ def _provider_special_cases(c: _Ctx) -> Optional[Verdict]:
     # Deterministic for this context: another provider would receive the same connector result.
     if c.code == "data_policy_denied":
         return _v(_R.data_policy_denied, retryable=False, should_fallback=False)
-    welcome = _nous_welcome_tier(c)
-    if welcome is not None:
-        return welcome
     # Safety refusal before status classification so a 400 block isn't downgraded
     # to format_error and a status-less block isn't left retryable (#18028).
     if any(p in msg for p in _CONTENT_POLICY_BLOCKED_PATTERNS) or _is_gemini_prompt_block(c.error):
@@ -1127,7 +1074,6 @@ def classify_api_error(
     dark-tier 403 on it because that refusal carries no distinguishing message.
     ``api_key`` identifies an anonymous request; a host or fairshare reason alone does not.
     The credential is never included in the returned context."""
-    from hermes_cli.anon_auth import is_anonymous_request
     status_code = _extract_status_code(error)
     # Some SDK RateLimitError / AuthenticationError classes set no .status_code; the class names it.
     if status_code is None:
@@ -1137,7 +1083,6 @@ def classify_api_error(
     c = _Ctx(
         error, status_code, body, _build_error_msg(error, body), provider, model,
         approx_tokens, context_length, num_messages, str(base_url or ""),
-        anonymous=is_anonymous_request(provider, api_key),
     )
     stage, verdict = next(((s, v) for s in _STAGES if (v := s(c)) is not None), (None, _V_UNKNOWN))
     extra = _shape_context(c, verdict, hooked=stage in (_plugin_verdict, _profile_verdict))
@@ -1196,7 +1141,7 @@ def _account_gates_model(msg: str) -> bool:
 
 def _off_route_host(c: _Ctx) -> str:
     """The contacted host when ``base_url`` is set and is not the provider's own endpoint; ``""`` otherwise."""
-    from hermes_cli.route_identity import provider_owns_route
+    from agent_cli.route_identity import provider_owns_route
     from utils import base_url_hostname
     host = base_url_hostname(c.base_url)
     if not host or provider_owns_route(c.provider_slug, c.base_url) is True:
@@ -1286,12 +1231,6 @@ def _status_5xx(c: _Ctx) -> Verdict:
     return _first_match(c.msg, _OVERFLOW_AS_5XX_RULES) or _V_SERVER_ERROR
 
 
-def _is_nous_route(c: _Ctx) -> bool:
-    """The usage-window 402 code is Nous's: any other upstream sending it keeps main's text rules."""
-    if (c.provider or "").strip().lower() == "nous":
-        return True
-    from utils import base_url_host_matches
-    return bool(c.base_url) and base_url_host_matches(c.base_url, "nousresearch.com")
 
 
 def _classify_402(error_msg: str, result_fn: Callable[..., Any], code: str = "", body: Any = None) -> Any:
@@ -1299,13 +1238,6 @@ def _classify_402(error_msg: str, result_fn: Callable[..., Any], code: str = "",
     The Nous usage-window code is decisive (its prose names the reset time, which must not
     demote it to a transient rate limit); every other 402 keeps the text rules. A usage-window 402's
     optional ``display_message`` (server-set wording) rides in ``error_context`` for the refusal line."""
-    if code == _NOUS_USAGE_WINDOW_402_CODE:
-        # Tagged so recovery skips the paid-entitlement refresh (none restores included usage before the reset).
-        context: dict[str, Any] = {"usage_window": True}
-        if display := _usage_window_display_message(body):
-            context["display_message"] = display
-        # No fallback: another model is the user's call (the limit card offers it), never automatic.
-        return result_fn(**{**_V_BILLING, "should_fallback": False}, error_context=context)
     transient = any(p in error_msg for p in _USAGE_LIMIT_PATTERNS) and any(
         p in error_msg for p in _USAGE_LIMIT_TRANSIENT_SIGNALS
     )
@@ -1455,7 +1387,7 @@ def _classify_image_tool_422(c: _Ctx) -> Verdict:
 # read window). Unlisted 4xx → format_error, 5xx → server_error.
 _STATUS_HANDLERS: dict[int, Callable[[_Ctx], Verdict]] = {
     400: _classify_400, 401: lambda c: _V_AUTH_ROTATE,
-    402: lambda c: _classify_402(c.msg, dict, c.code if _is_nous_route(c) else "", c.body),
+    402: lambda c: _classify_402(c.msg, dict, "", c.body),
     403: _status_403, 404: _status_404, 408: lambda c: _V_TIMEOUT, 413: lambda c: _V_PAYLOAD_TOO_LARGE,
     422: lambda c: _classify_image_tool_422(c),
     429: _status_429, 500: _status_5xx, 502: _status_5xx,
@@ -1510,7 +1442,7 @@ def _model_id_missing_known_prefix(model: str, provider: str) -> bool:
     if not name or "/" in name:
         return False
     try:
-        from hermes_cli.model_normalize import suggest_prefixed_model_id
+        from agent_cli.model_normalize import suggest_prefixed_model_id
         return bool(suggest_prefixed_model_id((provider or "").strip(), name))
     except Exception:
         return False

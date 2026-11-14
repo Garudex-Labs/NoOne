@@ -1,4 +1,4 @@
-#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-hermes-env" python3 "$0" "$@"'
+#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-agent-env" python3 "$0" "$@"'
 """Hermes Agent release entrypoint.
 
 Stable releases use the ``release``, ``publish``, and ``abandon`` subcommands.
@@ -18,15 +18,15 @@ from datetime import datetime, timedelta, timezone, UTC
 from pathlib import Path
 
 # Bootstrap the repo root onto sys.path so this script can import the
-# canary-tag authority from hermes_cli.update_channel (hermes_cli/__init__.py
+# canary-tag authority from agent_cli.update_channel (agent_cli/__init__.py
 # is import-light: only os/sys + version constants).
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from hermes_cli.update_channel import (
+from agent_cli.update_channel import (
     _CANARY_TAG_RE, STABLE_TAG_RE, canary_tag_for_date, canary_timestamp,
     is_canary_tag,
 )
-from scripts.releases.authors import resolve_author
+from scripts.releases.authors import declared_contributors, resolve_author
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -160,7 +160,7 @@ def remote_github_repo(remote: str) -> str | None:
 
 
 # Stable tags are matched with STABLE_TAG_RE and canary tags
-# with _CANARY_TAG_RE, both imported from hermes_cli.update_channel — the
+# with _CANARY_TAG_RE, both imported from agent_cli.update_channel — the
 # single authority for both tag shapes (the stable major is capped at three
 # digits so historical CalVer tags like v2026.7.20 never match; the canary
 # identity is the exact stable core plus full UTC build metadata.
@@ -170,8 +170,11 @@ def remote_github_repo(remote: str) -> str | None:
 
 def get_last_canary_tag():
     """The newest canonical canary receipt, by embedded build time."""
+    from agent_cli.version_info import is_project_release_commit
+
     raw = git("tag", "--list", "v*+canary.*")
-    tags = [tag for tag in (raw.split("\n") if raw else []) if is_canary_tag(tag)]
+    tags = [tag for tag in (raw.split("\n") if raw else []) if is_canary_tag(tag)
+            and is_project_release_commit(git("rev-parse", f"{tag}^{{commit}}"))]
     return max(tags, key=lambda tag: canary_timestamp(tag) or "", default=None)
 
 
@@ -304,7 +307,7 @@ def get_pr_number(subject: str) -> str | None:
     return None
 
 
-def generate_changelog(commits, tag_name, semver, repo_url="https://github.com/NousResearch/hermes-agent",
+def generate_changelog(commits, tag_name, semver, repo_url="https://github.com/Garudex-Labs/NoOne",
                        prev_tag=None, first_release=False, no_changelog=False):
     """Generate markdown changelog from categorized commits."""
     lines = []
@@ -332,7 +335,6 @@ def generate_changelog(commits, tag_name, semver, repo_url="https://github.com/N
         lines.append("> for Hermes Agent. See below for everything included in this initial release.")
         lines.append("")
 
-    all_authors = set()
     teknium_aliases = {"@teknium1"}
     if not no_changelog:
         # Group commits by category
@@ -340,12 +342,6 @@ def generate_changelog(commits, tag_name, semver, repo_url="https://github.com/N
 
         for commit in commits:
             categories[commit["category"]].append(commit)
-            author = commit["github_author"]
-            if author not in teknium_aliases:
-                all_authors.add(author)
-            for coauthor in commit.get("coauthors", []):
-                if coauthor not in teknium_aliases:
-                    all_authors.add(coauthor)
 
         # Category display order and emoji
         category_order = [
@@ -379,35 +375,22 @@ def generate_changelog(commits, tag_name, semver, repo_url="https://github.com/N
                 else:
                     parts.append(f"([`{commit['short_sha']}`]({repo_url}/commit/{commit['sha']}))")
 
-                if author not in teknium_aliases:
-                    parts.append(f"— {author}")
+                credited = [person for person in [author, *commit.get("coauthors", [])]
+                            if person not in teknium_aliases]
+                if credited:
+                    parts.append(f"— {', '.join(dict.fromkeys(credited))}")
 
                 lines.append(" ".join(parts))
 
             lines.append("")
 
-    # Contributors section
-    if all_authors:
-        # Sort contributors by commit count
-        author_counts = defaultdict(int)
-        for commit in commits:
-            author = commit["github_author"]
-            if author not in teknium_aliases:
-                author_counts[author] += 1
-            for coauthor in commit.get("coauthors", []):
-                if coauthor not in teknium_aliases:
-                    author_counts[coauthor] += 1
-
-        sorted_authors = sorted(author_counts.items(), key=lambda x: -x[1])
-
-        lines.append("## 👥 Contributors")
-        lines.append("")
-        lines.append("Thank you to everyone who contributed to this release!")
-        lines.append("")
-        for author, count in sorted_authors:
-            commit_word = "commit" if count == 1 else "commits"
-            lines.append(f"- {author} ({count} {commit_word})")
-        lines.append("")
+    # The current roster is not a claim about who authored historical commits.
+    if not no_changelog:
+        contributors = declared_contributors()
+        if contributors:
+            lines.extend(["## 👥 Contributors", "", "Current project maintainer/contributor:", ""])
+            lines.extend(f"- {login} (<{email}>)" for email, login in sorted(contributors.items()))
+            lines.append("")
 
     # Full changelog link
     if prev_tag:
@@ -531,7 +514,9 @@ def cmd_canary(args) -> None:
     stable_version, stable_commit = published_stable_identity(gh_repo)
     tag_name = canary_tag_for_date(stable_version, date_utc)
 
-    since = prev_canary or stable_commit
+    from agent_cli.version_info import release_history_start
+
+    since = prev_canary or stable_commit or release_history_start(REPO_ROOT)
 
     if git_result("rev-parse", "--verify", "--quiet", f"refs/tags/{tag_name}").returncode == 0:
         if git("rev-parse", f"{tag_name}^{{commit}}") != git("rev-parse", "HEAD"):

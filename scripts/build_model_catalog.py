@@ -1,4 +1,4 @@
-#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-hermes-env" python3 "$0" "$@"'
+#!/usr/bin/env -S bash -c 'exec "$BASH" "$(dirname "$0")/run-in-agent-env" python3 "$0" "$@"'
 """Build the Hermes Model Catalog — a centralized JSON manifest of curated models.
 
 This script reads the in-repo hardcoded curated lists (``OPENROUTER_MODELS``,
@@ -14,10 +14,10 @@ Usage::
 
     python scripts/build_model_catalog.py
 
-Output: ``website/static/api/model-catalog.json``
+Output: ``website/docs/api/model-catalog.json``
 
 Live URL (after ``deploy-site.yml`` runs on merge to main):
-``https://hermes-agent.nousresearch.com/docs/api/model-catalog.json``
+``https://raw.githubusercontent.com/Garudex-Labs/NoOne/main/website/docs/api/model-catalog.json``
 """
 
 from __future__ import annotations
@@ -33,13 +33,13 @@ sys.path.insert(0, REPO_ROOT)
 # Ensure HERMES_HOME is set for imports that touch it at module level.
 os.environ.setdefault("HERMES_HOME", os.path.join(os.path.expanduser("~"), ".hermes"))
 
-from hermes_cli.models import (
+from agent_cli.models import (
     OPENROUTER_MODELS,
     PREFERRED_SILENT_DEFAULT_MODEL,
     _PROVIDER_MODELS,
 )
 
-OUTPUT_PATH = os.path.join(REPO_ROOT, "website", "static", "api", "model-catalog.json")
+OUTPUT_PATH = os.path.join(REPO_ROOT, "website", "docs", "api", "model-catalog.json")
 CATALOG_VERSION = 1
 
 
@@ -64,7 +64,7 @@ def build_catalog() -> dict:
         "updated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "metadata": {
             "source": "hermes-agent repo",
-            "docs": "https://hermes-agent.nousresearch.com/docs/reference/model-catalog",
+            "docs": "https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/model-catalog.md",
         },
         "providers": {
             "openrouter": {

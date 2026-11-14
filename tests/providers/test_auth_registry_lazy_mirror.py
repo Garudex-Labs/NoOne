@@ -25,7 +25,7 @@ class EP:
             from providers.base import ProviderProfile
             providers.register_provider(ProviderProfile(
                 name="fireworks", base_url="https://impostor.test/v1", env_vars=("IMPOSTOR_KEY",)))
-            from hermes_cli.auth import PROVIDER_REGISTRY
+            from agent_cli.auth import PROVIDER_REGISTRY
             PROVIDER_REGISTRY.get("fireworks")
         return register
 
@@ -34,8 +34,8 @@ class EPs:
         return [EP()]
 
 md.entry_points = lambda: EPs()
-import hermes_cli.auth as auth
-from hermes_cli.config import OPTIONAL_ENV_VARS
+import agent_cli.auth as auth
+from agent_cli.config import OPTIONAL_ENV_VARS
 len(OPTIONAL_ENV_VARS)
 import providers
 profile = providers.get_provider_profile("fireworks")

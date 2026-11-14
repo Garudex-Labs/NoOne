@@ -6,7 +6,7 @@ import {
   saveHermesConfig,
   setApiRequestConnection,
   setApiRequestProfile
-} from '@/hermes'
+} from '@/agent-client'
 
 describe('config read/write route binding', () => {
   let api: ReturnType<typeof vi.fn>

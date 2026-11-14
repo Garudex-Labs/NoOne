@@ -49,12 +49,12 @@ async def _publish_line(adapter, runner) -> list[tuple[str, Path]]:
     """Wire the LINE webhook app the way ``connect()`` does, without the LINE API or a bind, and
     record the HERMES_HOME the handler ran under."""
     from gateway.platforms.shared_ingress import bind_listener
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     seen: list[tuple[str, Path]] = []
     adapter.gateway_runner = runner
 
     async def dispatch(event):
-        seen.append((event.get("type"), Path(get_hermes_home())))
+        seen.append((event.get("type"), Path(get_agent_home())))
 
     adapter._dispatch_event = dispatch
     app = web.Application(client_max_size=1024)
@@ -71,13 +71,13 @@ def mux_home(tmp_path, monkeypatch):
         (root / "profiles" / name).mkdir(parents=True)
         (root / "profiles" / name / ".env").write_text(f"LINE_CHANNEL_SECRET=secret-{name}\n")
     monkeypatch.setenv("HERMES_HOME", str(root))
-    import hermes_constants
-    monkeypatch.setattr(hermes_constants, "_default_hermes_root_memo", None)
+    import agent_constants
+    monkeypatch.setattr(agent_constants, "_default_hermes_root_memo", None)
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
     from agent import secret_scope
     monkeypatch.setattr(secret_scope, "_MULTIPLEX_ACTIVE", True)
     monkeypatch.setattr(
-        "hermes_cli.profiles.profiles_to_serve",
+        "agent_cli.profiles.profiles_to_serve",
         lambda multiplex: [("default", root), ("coder", root / "profiles" / "coder"), ("ops", root / "profiles" / "ops")])
     return root
 

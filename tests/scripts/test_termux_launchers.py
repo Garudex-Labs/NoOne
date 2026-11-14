@@ -65,7 +65,7 @@ def test_postinst_refuses_foreign_path_and_prerm_preserves_it(tmp_path):
     env = {**os.environ, "PREFIX": str(prefix)}
     command = [shutil.which("sh"), str(control / "postinst"), "configure"]
     subprocess.run(command, check=True, env=env)
-    assert os.readlink(link) == "../lib/hermes-agent/bin/hermes"
+    assert os.readlink(link) == "../lib/hermes-agent/bin/agent-client"
     subprocess.run(command, check=True, env=env)
     link.unlink()
     link.write_text("foreign launcher", encoding="utf-8")

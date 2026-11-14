@@ -1,28 +1,28 @@
-# 1Password
+# 1Password {#1password}
 
 Resolve provider API keys from [1Password](https://1password.com/) at process startup instead of storing them in plaintext inside `~/.hermes/.env`. You keep your keys as 1Password items and reference them by `op://vault/item/field`; rotating a credential becomes a single change in 1Password.
 
-## How it works
+## How it works {#how-it-works}
 
 1. You install the official [1Password CLI](https://developer.1password.com/docs/cli/get-started/) (`op`) and authenticate it — either with a **service-account token** (headless servers) or an **interactive/desktop session** (your laptop).
 2. You map environment-variable names to `op://` references in `~/.hermes/config.yaml`.
-3. Every time `hermes` (or the gateway, or a cron job) starts, after `~/.hermes/.env` has loaded, Hermes runs `op read` for each reference and sets the resolved values into `os.environ`.
-4. By default Hermes **overrides** values already in your environment, so 1Password is the source of truth — rotate a credential once and every Hermes process picks it up on next start. Flip `override_existing: false` if you want `.env` to win instead.
+3. Every time `hermes` (or the gateway, or a cron job) starts, after `~/.hermes/.env` has loaded, {{app-name}} runs `op read` for each reference and sets the resolved values into `os.environ`.
+4. By default {{app-name}} **overrides** values already in your environment, so 1Password is the source of truth — rotate a credential once and every {{app-name}} process picks it up on next start. Flip `override_existing: false` if you want `.env` to win instead.
 
-Hermes never authenticates on your behalf and never downloads `op`: it shells out to your already-installed, already-trusted CLI. If `op` is missing, your session is locked, or a reference is wrong, Hermes prints a one-line warning and continues with whatever credentials `.env` already had — it never blocks startup.
+{{app-name}} never authenticates on your behalf and never downloads `op`: it shells out to your already-installed, already-trusted CLI. If `op` is missing, your session is locked, or a reference is wrong, {{app-name}} prints a one-line warning and continues with whatever credentials `.env` already had — it never blocks startup.
 
-## Authentication
+## Authentication {#authentication}
 
-`op` supports two non-interactive-friendly modes; Hermes works with either:
+`op` supports two non-interactive-friendly modes; {{app-name}} works with either:
 
 - **Service accounts** (recommended for servers/CI): create a service account in 1Password, grant it read access to the relevant vault, and export its token as `OP_SERVICE_ACCOUNT_TOKEN` in `~/.hermes/.env`. The token is the credential — treat it like any other bearer token.
-- **Desktop / interactive sessions** (laptops): run `op signin` (or enable CLI integration in the 1Password app). Hermes passes your `OP_SESSION_*` variables through to the `op` child process. The 1Password cache key includes those session variables, so signing into a different account never serves a value cached under the previous identity.
+- **Desktop / interactive sessions** (laptops): run `op signin` (or enable CLI integration in the 1Password app). {{app-name}} passes your `OP_SESSION_*` variables through to the `op` child process. The 1Password cache key includes those session variables, so signing into a different account never serves a value cached under the previous identity.
 
-## Bootstrap token
+## Bootstrap token {#bootstrap-token}
 
-When you authenticate with a **service-account token**, that token is itself the bootstrap credential Hermes needs *before* it can resolve any `op://` reference. It must be present in `os.environ` of every process that resolves secrets — including cron jobs (`kanban.dispatch_in_gateway: false`), subprocess invocations, CLI runs, macOS launchd agents, and Docker containers — not just the interactive gateway. There are three ways to make it available, in order of precedence:
+When you authenticate with a **service-account token**, that token is itself the bootstrap credential {{app-name}} needs *before* it can resolve any `op://` reference. It must be present in `os.environ` of every process that resolves secrets — including cron jobs (`kanban.dispatch_in_gateway: false`), subprocess invocations, CLI runs, macOS launchd agents, and Docker containers — not just the interactive gateway. There are three ways to make it available, in order of precedence:
 
-1. **In `~/.hermes/.env` (recommended).** `hermes secrets onepassword setup --token <token>` writes the token to `~/.hermes/.env`, exactly like Bitwarden's `BWS_ACCESS_TOKEN`. Because `load_hermes_dotenv()` always loads `.env`, the token is available everywhere with zero extra setup. This is the simplest reliable option.
+1. **In `~/.hermes/.env` (recommended).** `hermes secrets onepassword setup --token <token>` writes the token to `~/.hermes/.env`, exactly like Bitwarden's `BWS_ACCESS_TOKEN`. Because `load_agent_dotenv()` always loads `.env`, the token is available everywhere with zero extra setup. This is the simplest reliable option.
 
 2. **In `~/.hermes/.op.env` (gitignored).** If you'd rather keep the service-account token out of `.env` — for example so `.env` can be checked into a private dotfiles repo while the token stays out of version control — place it in `~/.hermes/.op.env`:
 
@@ -31,7 +31,7 @@ When you authenticate with a **service-account token**, that token is itself the
    chmod 600 ~/.hermes/.op.env
    ```
 
-   Hermes auto-loads `.op.env` at startup, **after** `.env`, and **never** overrides a token already present in the environment. `.op.env` is gitignored so the token never enters a committed file.
+   {{app-name}} auto-loads `.op.env` at startup, **after** `.env`, and **never** overrides a token already present in the environment. `.op.env` is gitignored so the token never enters a committed file.
 
 3. **Via systemd `EnvironmentFile` (Linux gateway).** If you run the gateway under systemd, you can inject the token directly into the service environment:
 
@@ -40,13 +40,13 @@ When you authenticate with a **service-account token**, that token is itself the
    EnvironmentFile=-/home/youruser/.hermes/.op.env
    ```
 
-   A token injected this way takes precedence — Hermes detects that `OP_SERVICE_ACCOUNT_TOKEN` is already set and skips loading `.op.env` entirely.
+   A token injected this way takes precedence — {{app-name}} detects that `OP_SERVICE_ACCOUNT_TOKEN` is already set and skips loading `.op.env` entirely.
 
 If the token is reachable only through an interactive shell (`op signin`, `OP_SESSION_*` exports in `.bashrc`, etc.), it will **not** be inherited by cron jobs or freshly spawned subprocesses, and those contexts will log a warning and fall back to whatever credentials `.env` already held. Use one of the three options above for any non-interactive workload.
 
-## Setup
+## Setup {#setup}
 
-### 1. Install and sign in to `op`
+### 1. Install and sign in to `op` {#1-install-and-sign-in-to-op}
 
 Follow the [1Password CLI getting-started guide](https://developer.1password.com/docs/cli/get-started/). Verify it works:
 
@@ -54,7 +54,7 @@ Follow the [1Password CLI getting-started guide](https://developer.1password.com
 op whoami
 ```
 
-### 2. Enable the integration
+### 2. Enable the integration {#2-enable-the-integration}
 
 ```bash
 hermes secrets onepassword setup
@@ -69,7 +69,7 @@ hermes secrets onepassword setup \
   --token "$OP_SERVICE_ACCOUNT_TOKEN"
 ```
 
-### 3. Map your credentials
+### 3. Map your credentials {#3-map-your-credentials}
 
 The reference format is `op://<vault>/<item>/<field>`:
 
@@ -78,7 +78,7 @@ hermes secrets onepassword set OPENAI_API_KEY    "op://Private/OpenAI/api key"
 hermes secrets onepassword set ANTHROPIC_API_KEY "op://Private/Anthropic/credential"
 ```
 
-### 4. Preview and confirm
+### 4. Preview and confirm {#4-preview-and-confirm}
 
 ```bash
 hermes secrets onepassword sync     # dry-run: resolve now, show what would apply
@@ -87,7 +87,7 @@ hermes secrets onepassword status   # config + binary + references + auth
 
 From now on, every `hermes` invocation resolves the references at startup. You'll see a one-line summary in stderr the first time secrets are applied in a process.
 
-## CLI
+## CLI {#cli}
 
 | Command | What it does |
 |---|---|
@@ -102,7 +102,7 @@ From now on, every `hermes` invocation resolves the references at startup. You'l
 
 `op` and `1password` are accepted as aliases for `onepassword`.
 
-## Configuration
+## Configuration {#configuration}
 
 Defaults in `~/.hermes/config.yaml`:
 
@@ -125,14 +125,14 @@ secrets:
 | `enabled` | `false` | Master switch. When false, `op` is never invoked. |
 | `env` | `{}` | Mapping of env-var name → `op://vault/item/field` reference. Entries whose name isn't a valid env-var name, or whose value isn't an `op://` reference, are skipped with a warning. |
 | `account` | `""` | Account shorthand / sign-in address passed as `op read --account`. Empty uses `op`'s default account. |
-| `service_account_token_env` | `OP_SERVICE_ACCOUNT_TOKEN` | Env var Hermes reads the service-account token from. Its value is exported to the `op` child as `OP_SERVICE_ACCOUNT_TOKEN` (the name `op` expects). Leave the var unset to use a desktop/interactive session. |
+| `service_account_token_env` | `OP_SERVICE_ACCOUNT_TOKEN` | Env var {{app-name}} reads the service-account token from. Its value is exported to the `op` child as `OP_SERVICE_ACCOUNT_TOKEN` (the name `op` expects). Leave the var unset to use a desktop/interactive session. |
 | `binary_path` | `""` | Absolute path to `op`. When set, it is used verbatim and `PATH` is **not** consulted — pin this to avoid trusting whatever `op` appears first on `PATH`. |
 | `cache_ttl_seconds` | `300` | How long resolved values are reused (in-process and on disk). Set to `0` to disable **both** cache layers — no values are written to disk at all. |
 | `override_existing` | `true` | When true, resolved values overwrite anything already in env (so rotation takes effect). Flip to `false` to let `.env` / shell exports win; those references are then skipped *before* `op` is invoked. |
 
-## Failure modes
+## Failure modes {#failure-modes}
 
-1Password never blocks Hermes startup. If anything goes wrong you'll see a one-line warning in stderr and Hermes continues:
+1Password never blocks {{app-name}} startup. If anything goes wrong you'll see a one-line warning in stderr and {{app-name}} continues:
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -144,7 +144,7 @@ secrets:
 
 Startup warnings now include a `→` remediation line telling you exactly which command fixes the failure.
 
-## Caching
+## Caching {#caching}
 
 Successful, complete pulls are cached in-process and on disk at `<hermes_home>/op_cache.json` (written atomically, mode `0600`), so back-to-back short-lived `hermes` invocations don't re-shell `op` for every reference. The cache:
 
@@ -153,18 +153,18 @@ Successful, complete pulls are cached in-process and on disk at `<hermes_home>/o
 - is **not** written when a pull had any per-reference error, so a transient auth failure isn't frozen in for the TTL;
 - is fully disabled — reads *and* writes — when `cache_ttl_seconds: 0`.
 
-## Security notes
+## Security notes {#security-notes}
 
 - A 1Password service-account token can read every secret the account has access to. Store it in `~/.hermes/.env` (not `config.yaml`), and revoke + regenerate from 1Password if it leaks.
-- Hermes refuses to let a resolved value overwrite the token env var itself, even with `override_existing: true`.
-- `OP_SERVICE_ACCOUNT_TOKEN` is stripped from the processes the agent and its tools spawn (terminal, `execute_code`, background processes, cron scripts, CLI helpers). `terminal.env_passthrough` and skill `required_environment_variables` cannot re-allow it, so `op` run by the agent never sees the token. Hermes's own processes for the same profile still get it: its `op` child, a gateway it starts or restarts, and `key_cmd` helpers such as `op read`. To run `op` with the service account yourself, use your own shell; for `op` in the agent's terminal, use the desktop app integration or a Connect server.
-- The `op` child process gets a minimal allowlisted environment (auth/session vars + `PATH`/`HOME` and the `op` config-location vars `OP_CONFIG_DIR`/`XDG_CONFIG_HOME`), not a copy of the full `os.environ`, so post-dotenv provider credentials aren't all inherited by the child. Set `OP_CONFIG_DIR` when `~/.config` is not writable by the Hermes user (common in containers).
+- {{app-name}} refuses to let a resolved value overwrite the token env var itself, even with `override_existing: true`.
+- `OP_SERVICE_ACCOUNT_TOKEN` is stripped from the processes the agent and its tools spawn (terminal, `execute_code`, background processes, cron scripts, CLI helpers). `terminal.env_passthrough` and skill `required_environment_variables` cannot re-allow it, so `op` run by the agent never sees the token. {{app-name}}'s own processes for the same profile still get it: its `op` child, a gateway it starts or restarts, and `key_cmd` helpers such as `op read`. To run `op` with the service account yourself, use your own shell; for `op` in the agent's terminal, use the desktop app integration or a Connect server.
+- The `op` child process gets a minimal allowlisted environment (auth/session vars + `PATH`/`HOME` and the `op` config-location vars `OP_CONFIG_DIR`/`XDG_CONFIG_HOME`), not a copy of the full `os.environ`, so post-dotenv provider credentials aren't all inherited by the child. Set `OP_CONFIG_DIR` when `~/.config` is not writable by the {{app-name}} user (common in containers).
 - References are validated to start with `op://`, and the reference is passed after a `--` option terminator so a crafted value can't be parsed as an `op` flag.
 
-## When NOT to use this
+## When NOT to use this {#when-not-to-use-this}
 
 - **Single-machine personal setups** where `~/.hermes/.env` is fine.
 - **Air-gapped environments** that can't reach 1Password.
 - **CI/CD** where an existing secrets-injection mechanism is already wired up — pick one path, not two.
 
-The good case for this is multi-machine fleets, shared dev boxes, gateway VPSes, or anywhere you want centralized rotation and revocation across multiple Hermes installations.
+The good case for this is multi-machine fleets, shared dev boxes, gateway VPSes, or anywhere you want centralized rotation and revocation across multiple {{app-name}} installations.

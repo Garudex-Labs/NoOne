@@ -149,31 +149,6 @@ class MetadataEditProgressCaptureAdapter(ProgressCaptureAdapter):
         return SendResult(success=True, message_id=message_id)
 
 
-class MatrixStreamingProgressCaptureAdapter(ProgressCaptureAdapter):
-    """Records whether Matrix edits are progressive or finalizing."""
-
-    initial_send_seen = threading.Event()
-    progressive_edit_seen = threading.Event()
-
-    async def send(self, chat_id, content, reply_to=None, metadata=None) -> SendResult:
-        result = await super().send(chat_id, content, reply_to=reply_to, metadata=metadata)
-        self.initial_send_seen.set()
-        return result
-
-    async def edit_message(
-        self, chat_id, message_id, content, *, finalize: bool = False, metadata=None
-    ) -> SendResult:
-        self.edits.append(
-            {
-                "chat_id": chat_id,
-                "message_id": message_id,
-                "content": content,
-                "finalize": finalize,
-            }
-        )
-        if not finalize:
-            self.progressive_edit_seen.set()
-        return SendResult(success=True, message_id=message_id)
 
 
 class UnsupportedEditProgressCaptureAdapter(MetadataEditProgressCaptureAdapter):
@@ -513,7 +488,7 @@ def test_tool_progress_mode_follows_profile_through_the_real_scoping_seam(monkey
     (root / ".env").write_text("HERMES_TOOL_PROGRESS_MODE=log\n")
     (beta / ".env").write_text("HERMES_TOOL_PROGRESS_MODE=verbose\n")
     monkeypatch.setenv("HERMES_HOME", str(root))
-    monkeypatch.setattr("hermes_constants.get_default_hermes_root", lambda: root)
+    monkeypatch.setattr("agent_constants.get_default_agent_root", lambda: root)
 
     prev_multiplex = secret_scope.is_multiplex_active()
     secret_scope.set_multiplex_active(True)
@@ -543,7 +518,7 @@ async def test_run_agent_progress_uses_event_message_id_for_slack_dm(monkeypatch
     # Since PR #8006, Slack's built-in display tier sets tool_progress="off"
     # by default. Override via config so this test still exercises the
     # progress-callback path the Slack DM event_message_id threading depends on.
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
     (tmp_path / "config.yaml").write_text(
         yaml.safe_dump({"display": {"platforms": {"slack": {"tool_progress": "all"}}}}),
         encoding="utf-8",
@@ -635,7 +610,7 @@ async def test_progress_carries_anchor_for_relay_discord_auto_thread(monkeypatch
     SAME auto-thread as the final reply — otherwise the search-status updates
     leak into the parent channel (staging repro 2026-08-02)."""
     monkeypatch.setenv("HERMES_TOOL_PROGRESS_MODE", "all")
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
     (tmp_path / "config.yaml").write_text(
         yaml.safe_dump({"display": {"platforms": {"discord": {"tool_progress": "all"}}}}),
         encoding="utf-8",
@@ -694,7 +669,7 @@ async def test_progress_no_anchor_for_native_discord_thread_event(monkeypatch, t
     auto-thread lane) must NOT get the synthetic prospective anchor — it already
     routes by its real thread. Guards against over-broadening the relay fix."""
     monkeypatch.setenv("HERMES_TOOL_PROGRESS_MODE", "all")
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
     (tmp_path / "config.yaml").write_text(
         yaml.safe_dump({"display": {"platforms": {"discord": {"tool_progress": "all"}}}}),
         encoding="utf-8",
@@ -777,7 +752,7 @@ def _run_long_preview_helper(monkeypatch, tmp_path, preview_length=0):
     that _run_agent reads — so the gateway picks it up the same way production does.
     """
     import asyncio
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
 
     monkeypatch.setenv("HERMES_TOOL_PROGRESS_MODE", "all")
 
@@ -836,7 +811,7 @@ def test_all_mode_respects_custom_preview_length(monkeypatch, tmp_path):
 
 def test_discord_truncated_tool_url_links_to_full_destination(monkeypatch, tmp_path):
     """The real gateway path must retain the URL beyond its visible cap."""
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
 
     monkeypatch.setenv("HERMES_TOOL_PROGRESS_MODE", "all")
 
@@ -926,24 +901,6 @@ class FinalAsInterimAgent:
         }
 
 
-class StreamingRefineAgent:
-    def __init__(self, **kwargs):
-        self.stream_delta_callback = kwargs.get("stream_delta_callback")
-        self.tools = []
-
-    def run_conversation(self, message, conversation_history=None, task_id=None, **kwargs):
-        if self.stream_delta_callback:
-            self.stream_delta_callback("Continuing to refine:")
-        MatrixStreamingProgressCaptureAdapter.initial_send_seen.wait(timeout=2.0)
-        if self.stream_delta_callback:
-            self.stream_delta_callback(" Final answer.")
-        MatrixStreamingProgressCaptureAdapter.progressive_edit_seen.wait(timeout=2.0)
-        return {
-            "final_response": "Continuing to refine: Final answer.",
-            "response_previewed": True,
-            "messages": [],
-            "api_calls": 1,
-        }
 
 
 class QueuedCommentaryAgent:
@@ -1086,7 +1043,7 @@ async def _run_with_agent(
     scope_id=None,
 ):
     if config_data:
-        import hermes_yaml as yaml
+        import agent_yaml as yaml
 
         (tmp_path / "config.yaml").write_text(yaml.safe_dump(config_data), encoding="utf-8")
 
@@ -1440,34 +1397,6 @@ async def test_non_editable_interim_final_is_recorded_for_final_send_dedup(monke
     assert adapter.edits == []
 
 
-@pytest.mark.asyncio
-async def test_run_agent_matrix_streaming_omits_cursor(monkeypatch, tmp_path):
-    MatrixStreamingProgressCaptureAdapter.initial_send_seen.clear()
-    MatrixStreamingProgressCaptureAdapter.progressive_edit_seen.clear()
-    adapter, result = await _run_with_agent(
-        monkeypatch,
-        tmp_path,
-        StreamingRefineAgent,
-        session_id="sess-matrix-streaming",
-        config_data={
-            "display": {"tool_progress": "off", "interim_assistant_messages": False},
-            "streaming": {"enabled": True, "edit_interval": 0.01, "buffer_threshold": 1},
-        },
-        platform=Platform.MATRIX,
-        chat_id="!room:matrix.example.org",
-        chat_type="group",
-        thread_id="$thread",
-        adapter_cls=MatrixStreamingProgressCaptureAdapter,
-    )
-
-    assert result.get("already_sent") is True
-    all_text = [call["content"] for call in adapter.sent] + [call["content"] for call in adapter.edits]
-    assert all_text, "expected streamed Matrix content to be sent or edited"
-    assert any(not call["finalize"] for call in adapter.edits), (
-        "Matrix should progressively edit the active message before finalization"
-    )
-    assert all("▉" not in text for text in all_text)
-    assert any("Continuing to refine:" in text for text in all_text)
 
 
 class TransformedStreamAgent:
@@ -1509,8 +1438,8 @@ async def test_transformed_response_edits_streamed_message_in_place(monkeypatch,
             "display": {"tool_progress": "off", "interim_assistant_messages": False},
             "streaming": {"enabled": True, "edit_interval": 0.01, "buffer_threshold": 1},
         },
-        platform=Platform.MATRIX,
-        chat_id="!room:matrix.example.org",
+        platform=Platform.MATTERMOST,
+        chat_id="!room:chat.example.org",
         chat_type="group",
         thread_id="$thread",
         adapter_cls=MetadataEditProgressCaptureAdapter,
@@ -1812,7 +1741,7 @@ async def test_base_processing_stops_typing_before_hung_post_delivery_callback(
 
 @pytest.mark.asyncio
 async def test_run_agent_drops_tool_progress_after_generation_invalidation(monkeypatch, tmp_path):
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
 
     (tmp_path / "config.yaml").write_text(
         yaml.safe_dump({"display": {"tool_progress": "all"}}),
@@ -1874,7 +1803,7 @@ async def test_run_agent_drops_tool_progress_after_generation_invalidation(monke
 
 @pytest.mark.asyncio
 async def test_run_agent_drops_interim_commentary_after_generation_invalidation(monkeypatch, tmp_path):
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
 
     (tmp_path / "config.yaml").write_text(
         yaml.safe_dump({"display": {"tool_progress": "off", "interim_assistant_messages": True}}),
@@ -2165,14 +2094,3 @@ class TestSlackReplyInThreadProgressRouting:
             event_message_id="1700000000.000100",
             reply_in_thread=False,
         ) is None
-
-    def test_buzz_uses_event_message_id_as_progress_thread(self):
-        """Buzz has no native thread_id; progress must reply-to the trigger."""
-        from gateway.run import _resolve_progress_thread_id
-
-        assert _resolve_progress_thread_id(
-            "buzz",
-            source_thread_id=None,
-            event_message_id="evt-trigger-001",
-            reply_in_thread=True,
-        ) == "evt-trigger-001"

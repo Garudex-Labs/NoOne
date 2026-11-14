@@ -8,7 +8,7 @@ The guard exists to protect the developer's live ``hermes-gateway`` process
 from being SIGTERMed by tests, and every live Hermes systemd unit
 (``hermes-gateway*``, ``hermes-dashboard*``, ``hermes-serve*``) from being
 restarted or stopped by them. See PR #23397 for the original incident
-(5+ live gateway kills in 3 days). Per Teknium 2026-05-10:
+(5+ live gateway kills in 3 days). Safety rule (2026-05-10):
 
   > "You better do such a deep scan and scrub of the tests that this
   >  never is possible ever again for all eternity."
@@ -222,9 +222,9 @@ def test_subprocess_run_setsid_systemctl_blocked():
 
 
 def test_host_gateway_start_blocked_but_container_exec_allowed():
-    """A host-side ``hermes gateway start`` spawns a real runtime; the same words addressed to
+    """A host-side ``noone gateway start`` spawns a real runtime; the same words addressed to
     a container via ``docker exec`` stay inside it and are the Docker harness's business."""
-    with pytest.raises(RuntimeError, match="REAL hermes gateway runtime"):
+    with pytest.raises(RuntimeError, match="REAL noone gateway runtime"):
         subprocess.run(["hermes", "-p", "p", "gateway", "start"], check=False)
     argv = ["docker", "exec", "-u", "hermes", "hermes-test-x", "sh", "-c", "hermes -p p gateway start"]
     # Past the guard the call reaches the real subprocess.run; a missing binary is fine here.
@@ -332,7 +332,7 @@ def test_subprocess_pkill_hermes_blocked():
 
 
 def test_subprocess_pkill_python_dash_f_blocked():
-    """``pkill -f python`` matches the gateway's "python -m hermes_cli.main"."""
+    """``pkill -f python`` matches the gateway's "python -m agent_cli.main"."""
     with pytest.raises(RuntimeError, match="live-system guard"):
         subprocess.run(["pkill", "-f", "python"], check=False)
 
@@ -363,13 +363,13 @@ def test_subprocess_killall_hermes_blocked():
 
 
 def test_subprocess_popen_real_gateway_restart_blocked():
-    """``python -m hermes_cli.main gateway restart`` is a detached child that
+    """``python -m agent_cli.main gateway restart`` is a detached child that
     inherits the pytest-tmp HERMES_HOME, resolves the developer's real
     ``hermes-gateway`` unit, and outlives the test (39 six-day orphans squatted
     the webhook port, 2026-09-03). Blocked at the spawn primitive."""
     with pytest.raises(RuntimeError, match="live-system guard"):
         subprocess.Popen(
-            [sys.executable, "-m", "hermes_cli.main", "gateway", "restart"],
+            [sys.executable, "-m", "agent_cli.main", "gateway", "restart"],
             start_new_session=True,
         )
 
@@ -382,7 +382,7 @@ def test_subprocess_popen_inline_source_restart_watcher_blocked():
     with pytest.raises(RuntimeError, match="live-system guard"):
         subprocess.Popen(
             [sys.executable, "-c", "import time; time.sleep(1)", "4242",
-             sys.executable, "-m", "hermes_cli.main", "gateway", "run"],
+             sys.executable, "-m", "agent_cli.main", "gateway", "run"],
             start_new_session=True,
         )
 
@@ -392,7 +392,7 @@ def test_subprocess_run_gateway_status_passes_through():
     read-only subcommand) must still spawn — via the canonical matcher, not an
     argv substring."""
     result = subprocess.run(
-        [sys.executable, "-c", "import sys; print(sys.argv[1:])", "-m", "hermes_cli.main", "gateway", "status"],
+        [sys.executable, "-c", "import sys; print(sys.argv[1:])", "-m", "agent_cli.main", "gateway", "status"],
         capture_output=True, text=True,
         check=False,
     )

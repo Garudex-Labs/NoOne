@@ -41,14 +41,14 @@ def live_transcript_root(home: Optional[Path] = None) -> Path:
     """Root directory for live transcripts (profile-safe, never ~/.hermes).
 
     Pass ``home`` when the caller holds stable parent-owned profile state
-    (e.g. the parent agent's SessionDB path). Ambient ``get_hermes_home()``
+    (e.g. the parent agent's SessionDB path). Ambient ``get_agent_home()``
     consults a ContextVar that raw ``threading.Thread`` boundaries drop, so
     in a multi-profile process an ambient resolve can land transcripts under
     whatever profile the process-wide ``HERMES_HOME`` names at that moment
     (#91996).
     """
-    from hermes_constants import get_hermes_dir
-    return get_hermes_dir("cache/delegation", "delegation_cache", home=home) / "live"
+    from agent_constants import get_agent_dir
+    return get_agent_dir("cache/delegation", "delegation_cache", home=home) / "live"
 
 
 @contextmanager

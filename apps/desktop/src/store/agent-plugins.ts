@@ -1,4 +1,4 @@
-import { jsonRpcErrorReason, JsonRpcGatewayError, type PluginsManageParams } from '@hermes/shared'
+import { jsonRpcErrorReason, JsonRpcGatewayError, type PluginsManageParams } from '@noone/shared'
 import { atom } from 'nanostores'
 
 import { notifyError } from '@/store/notifications'
@@ -11,7 +11,7 @@ import { notifyError } from '@/store/notifications'
  * it runs in.
  *
  * Backed by the gateway's `plugins.manage` RPC — the same list/toggle
- * primitives `hermes plugins` and the dashboard use, so all surfaces agree on
+ * primitives `noone plugins` and the dashboard use, so all surfaces agree on
  * what's installed and what's enabled. Works against every backend topology
  * (local spawn, SSH, URL+token) because it rides the session's own transport.
  */
@@ -307,7 +307,7 @@ interface InstallReply {
   error?: string
 }
 
-/** The message `tui_gateway/contracts/registry.py::validate_params` opens its admission refusal with. */
+/** The message `agent_backend/contracts/registry.py::validate_params` opens its admission refusal with. */
 const INSPECTED_SHA_ADMISSION_REFUSAL = 'invalid params for plugins.manage: inspected_sha: '
 
 /** A backend predating `inspected_sha` (native Desktop on an older SSH/URL/Cloud runtime) refuses the
@@ -325,7 +325,7 @@ function backendPredatesInspectedSha(params: Record<string, unknown>, error: unk
   )
 }
 
-/** Why the backend refused an install (`tui_gateway/methods_tools.py::_refusal_data`): the source is no
+/** Why the backend refused an install (`agent_backend/methods_tools.py::_refusal_data`): the source is no
  *  longer at the commit the dialog reviewed (read it again, never resend that commit), or a plugin of that
  *  name is installed (Force replaces it). */
 type RefusalReason = 'exists' | 'source_moved'

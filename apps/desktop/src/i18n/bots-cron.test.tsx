@@ -1,4 +1,4 @@
-import type * as HermesSdk from '@hermes/plugin-sdk'
+import type * as AgentSdk from '@noone/plugin-sdk'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeAll, expect, it, vi } from 'vitest'
@@ -6,21 +6,21 @@ import { afterEach, beforeAll, expect, it, vi } from 'vitest'
 import { I18nProvider, useI18n } from '@/i18n'
 import type { I18nContextValue } from '@/i18n'
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
-import { CreateRoutineDialog, RoutineDetailDialog } from '@/plugins/hermes-bots/cron'
-import { BOTS_LOCALES } from '@/plugins/hermes-bots/i18n'
-import { translateBotsIn } from '@/plugins/hermes-bots/i18n-test-helper'
+import { CreateRoutineDialog, RoutineDetailDialog } from '@/plugins/bot-mode/cron'
+import { BOTS_LOCALES } from '@/plugins/bot-mode/i18n'
+import { translateBotsIn } from '@/plugins/bot-mode/i18n-test-helper'
 
 const { request } = vi.hoisted(() => ({
   request: vi.fn(async (_method: string, _params?: Record<string, unknown>) => ({}))
 }))
 
-vi.mock('@hermes/plugin-sdk', async importOriginal => {
-  const sdk = await importOriginal<typeof HermesSdk>()
+vi.mock('@noone/plugin-sdk', async importOriginal => {
+  const sdk = await importOriginal<typeof AgentSdk>()
 
   return { ...sdk, host: { ...sdk.host, request, notify: vi.fn() } }
 })
 // The bot desktop preview is outside the scheduling dialog under test.
-vi.mock('@/plugins/hermes-bots/screen-hero', () => ({ ScreenHero: () => null }))
+vi.mock('@/plugins/bot-mode/screen-hero', () => ({ ScreenHero: () => null }))
 let i18n: I18nContextValue
 let dispose: () => void
 
@@ -117,8 +117,8 @@ it('localizes inspector chrome and known states while preserving job data and un
   const zh = translateBotsIn('zh')
   expect(screen.getByText(zh('cron.detailDescription'))).toBeTruthy()
   expect(screen.getByText(zh('cron.deliveryFailed'))).toBeTruthy()
-  await act(() => i18n.setLocale('zh-hant'))
-  expect(screen.getByText(translateBotsIn('zh-hant')('cron.deliveryFailed'))).toBeTruthy()
+  await act(() => i18n.setLocale('hi'))
+  expect(screen.getByText(translateBotsIn('hi')('cron.deliveryFailed'))).toBeTruthy()
 
   for (const value of ['User title', 'User instruction', '0 9 * * 1-5', 'bot-chat', 'provider/model', '/my/work']) {
     expect(screen.getByText(value)).toBeTruthy()

@@ -23,8 +23,8 @@
 
 import { atom } from 'nanostores'
 
+import { setSessionPinnedRemote } from '@/agent-client'
 import { ambientOwnerConnectionId } from '@/api/client'
-import { setSessionPinnedRemote } from '@/hermes'
 import { onConnectionScopeChange } from '@/lib/connection-scoped'
 import { $primaryGatewayRoute } from '@/store/gateway-primary-route'
 import { $pinnedSessionIds, pinSession, unpinSession } from '@/store/layout'
@@ -41,7 +41,7 @@ import {
   setSessions
 } from '@/store/session'
 import { isSessionRemovalPending } from '@/store/session-removal'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 // pin ids we've successfully PATCHed pinned=true this session.
 const mirrored = new Set<string>()

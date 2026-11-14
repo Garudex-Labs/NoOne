@@ -1,85 +1,93 @@
 ---
 title: "Mcp Oauth Remote Gateway — Manual OAuth for remote MCP servers on headless gateways"
-sidebar_label: "Mcp Oauth Remote Gateway"
+sidebarTitle: "Mcp Oauth Remote Gateway"
 description: "Manual OAuth for remote MCP servers on headless gateways"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Mcp Oauth Remote Gateway
+# Mcp Oauth Remote Gateway {#mcp-oauth-remote-gateway}
 
 Manual OAuth for remote MCP servers on headless gateways.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mcp/mcp-oauth-remote-gateway` |
+| Source | Optional — install with `noone skills install official/mcp/mcp-oauth-remote-gateway` |
 | Path | `optional-skills/mcp/mcp-oauth-remote-gateway` |
 | Version | `1.0.0` |
-| Author | Ben Barclay (benbarclay), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `MCP`, `OAuth`, `PKCE`, `Remote-Deployment` |
 | Related skills | [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md), [`mcporter`](../../optional/mcp/mcp-mcporter.md), [`fastmcp`](../../optional/mcp/mcp-fastmcp.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# MCP OAuth on a Remote Hermes Gateway
+<div className="doc-callout-title">
 
-## Overview
+INFO
 
-Hermes' built-in MCP OAuth client runs a one-shot HTTP listener on `127.0.0.1:<port>`
-inside the Hermes process and registers that loopback address as the OAuth
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# MCP OAuth on a Remote {{app-name}} Gateway {#mcp-oauth-on-a-remote-hermes-gateway}
+
+## Overview {#overview}
+
+{{app-name}}' built-in MCP OAuth client runs a one-shot HTTP listener on `127.0.0.1:<port>`
+inside the {{app-name}} process and registers that loopback address as the OAuth
 `redirect_uri`. That works perfectly for a local CLI on the user's own machine.
-It breaks completely when Hermes runs as a remote gateway (container, VPS,
+It breaks completely when {{app-name}} runs as a remote gateway (container, VPS,
 messaging bot), because the user's browser resolves `127.0.0.1` to the user's own
-laptop, not the remote container — so the authorization code never reaches Hermes.
+laptop, not the remote container — so the authorization code never reaches {{app-name}}.
 
 This skill does the OAuth dance by hand and writes the resulting tokens into the
-exact files Hermes' token storage expects, so a subsequent `/reload-mcp` finds
+exact files {{app-name}}' token storage expects, so a subsequent `/reload-mcp` finds
 cached tokens and skips the browser flow entirely.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use this skill when **all** of the following are true:
 
 1. The user wants to add a remote HTTP MCP server that requires OAuth (not a static Bearer token).
-2. Hermes is running as a **remote gateway** (container, VPS, Docker, managed service) — NOT a local CLI on the user's laptop.
+2. {{app-name}} is running as a **remote gateway** (container, VPS, Docker, managed service) — NOT a local CLI on the user's laptop.
 3. The server supports OAuth 2.1 with PKCE and RFC 7591 Dynamic Client Registration (most modern MCP servers do — Better Stack, Linear, Cloudflare, Datadog, etc.). If it doesn't support DCR (GitHub is the notable exception), this skill does not apply — use a pre-registered OAuth App or a Personal Access Token instead.
 
 Do NOT use this for:
-- **Local CLI Hermes** — just set `auth: oauth` in `mcp_servers.<name>` and `/reload-mcp`. The built-in flow opens a browser and captures the callback on localhost. Works perfectly.
+- **Local CLI {{app-name}}** — just set `auth: oauth` in `mcp_servers.<name>` and `/reload-mcp`. The built-in flow opens a browser and captures the callback on localhost. Works perfectly.
 - **Servers that accept a static Bearer token (API key)** — always prefer `headers.Authorization: "Bearer <token>"` when the user is willing. Simpler, no refresh dance.
 - **GitHub Copilot MCP** (`api.githubcopilot.com/mcp/`) — GitHub does not expose DCR. Use a PAT or a pre-registered OAuth App (see pitfall 12).
 
-## Why the Built-in OAuth Flow Fails on a Remote Gateway
+## Why the Built-in OAuth Flow Fails on a Remote Gateway {#why-the-built-in-oauth-flow-fails-on-a-remote-gateway}
 
-Hermes' native MCP OAuth client (`tools/mcp_oauth.py`):
+{{app-name}}' native MCP OAuth client (`tools/mcp_oauth.py`):
 
 1. Picks a free local port `P`.
 2. Registers a dynamic OAuth client with the AS, sending `redirect_uri = http://127.0.0.1:P/callback`.
-3. Starts an HTTP server on `127.0.0.1:P` **inside the Hermes process**.
+3. Starts an HTTP server on `127.0.0.1:P` **inside the {{app-name}} process**.
 4. Prints the authorize URL and waits for the code at its local endpoint.
 
-When Hermes runs remotely, the `127.0.0.1` in the `redirect_uri` is the remote
+When {{app-name}} runs remotely, the `127.0.0.1` in the `redirect_uri` is the remote
 container's loopback, not the user's. After authorizing, the user's browser 302s
 to `http://127.0.0.1:P/callback?code=...`, which resolves to the user's own
-laptop and fails to connect. The callback never reaches the Hermes process, the
+laptop and fails to connect. The callback never reaches the {{app-name}} process, the
 flow times out, and `/reload-mcp` returns "No MCP tools available" with no detail.
 
 Symptoms to recognize: `[xdg-open] <defunct>` processes under the hermes user, an
 empty or missing tokens directory (`$HERMES_HOME/mcp-tokens/`), and a reload that
 responds without any "Added/Reconnected: X" line in `change_detail`.
 
-## Cheap First Fallbacks: the Built-in Flow's Own Escape Hatches
+## Cheap First Fallbacks: the Built-in Flow's Own Escape Hatches {#cheap-first-fallbacks-the-built-in-flows-own-escape-hatches}
 
 Before any manual token surgery, check whether the built-in flow's fallbacks
-already cover the deployment. When Hermes detects a remote session it prints two
+already cover the deployment. When {{app-name}} detects a remote session it prints two
 options alongside the authorize URL (`tools/mcp_oauth.py`):
 
 1. **Paste-back** — on an interactive TTY, a stdin reader races the HTTP
@@ -89,15 +97,15 @@ options alongside the authorize URL (`tools/mcp_oauth.py`):
 2. **SSH port-forward** — `ssh -N -L <port>:127.0.0.1:<port> <user>@<host>`
    makes the redirect reach the remote listener normally.
 
-Both require an interactive terminal to the Hermes host. The rest of this skill
-is for when there is NO interactive TTY — Hermes running purely as a messaging
+Both require an interactive terminal to the {{app-name}} host. The rest of this skill
+is for when there is NO interactive TTY — {{app-name}} running purely as a messaging
 gateway/bot where `/reload-mcp` triggers the flow with nobody at a prompt.
 
-## Preferred Front Door: the Hermes Dashboard (try this BEFORE manual token surgery)
+## Preferred Front Door: the {{app-name}} Dashboard (try this BEFORE manual token surgery) {#preferred-front-door-the-hermes-dashboard-try-this-before-manual-token-surgery}
 
-A remote Hermes gateway often also runs the **dashboard** web UI as a SEPARATE
-process (e.g. `hermes dashboard --host 0.0.0.0 --port <port>`; check with
-`ps aux | grep 'hermes dashboard'`). It exposes a connector/MCP console —
+A remote {{app-name}} gateway often also runs the **dashboard** web UI as a SEPARATE
+process (e.g. `noone dashboard --host 0.0.0.0 --port <port>`; check with
+`ps aux | grep 'noone dashboard'`). It exposes a connector/MCP console —
 endpoints like `/api/mcp/servers`, `/api/mcp/status`, and `/connectors` (all
 login-gated; a cookieless curl returning 401/302 confirms they exist).
 
@@ -132,10 +140,10 @@ need shell auth state (a CLI `login` command whose credentials may not persist
 across restarts) and anything reading credentials from `$HERMES_HOME/.env`. Those
 are out of the dashboard's scope regardless.
 
-## The Workaround
+## The Workaround {#the-workaround}
 
 Do the OAuth dance manually, then write the resulting tokens into the exact files
-Hermes' `HermesTokenStorage` would have written, so on `/reload-mcp` Hermes finds
+{{app-name}}' `AgentTokenStorage` would have written, so on `/reload-mcp` {{app-name}} finds
 cached tokens and skips the browser flow entirely.
 
 Run the shell commands below through the `terminal` tool on the gateway host and
@@ -143,7 +151,7 @@ do the Python steps (PKCE generation, token exchange, file writes) via
 `execute_code` or a `terminal` python3 invocation — file writes must happen in
 the SAME code block as the token exchange (see pitfall 16).
 
-### 1. Confirm it's a remote gateway
+### 1. Confirm it's a remote gateway {#1-confirm-its-a-remote-gateway}
 
 ```bash
 env | grep -iE "HERMES|RAILWAY|CONTAINER"
@@ -151,18 +159,18 @@ echo "$DISPLAY $WAYLAND_DISPLAY $SSH_CLIENT"
 ```
 
 No display + a remote indicator = remote gateway. `tools/mcp_oauth.py::_can_open_browser()`
-uses these same env vars, so if Hermes' own auto-detect says "headless", the
+uses these same env vars, so if {{app-name}}' own auto-detect says "headless", the
 built-in flow won't work.
 
-### 2. Find HERMES_HOME and the config path
+### 2. Find HERMES_HOME and the config path {#2-find-hermes_home-and-the-config-path}
 
 ```bash
-HERMES_HOME=$(python3 -c 'from hermes_constants import get_hermes_home; print(get_hermes_home())')
+HERMES_HOME=$(python3 -c 'from agent_constants import get_agent_home; print(get_agent_home())')
 echo "config: $HERMES_HOME/config.yaml"
 echo "tokens: $HERMES_HOME/mcp-tokens/"
 ```
 
-### 3. Discover OAuth metadata from the MCP server
+### 3. Discover OAuth metadata from the MCP server {#3-discover-oauth-metadata-from-the-mcp-server}
 
 MCP servers advertise their OAuth setup via RFC 9728 (OAuth 2.0 Protected
 Resource Metadata). The `WWW-Authenticate` header on a 401 tells you where to look:
@@ -193,13 +201,13 @@ Fetch the resource metadata to get `authorization_servers`, then fetch the AS's
 Pitfall: many servers sit behind Cloudflare and 403 bare `urllib` user agents.
 Always set `User-Agent: python-httpx/0.27` (or similar) on requests in this flow.
 
-### 4. Dynamic Client Registration (RFC 7591)
+### 4. Dynamic Client Registration (RFC 7591) {#4-dynamic-client-registration-rfc-7591}
 
 POST to the `registration_endpoint` with:
 
 ```json
 {
-  "client_name": "Hermes Agent (manual OAuth)",
+  "client_name": "NoOne (manual OAuth)",
   "redirect_uris": ["http://127.0.0.1:8765/callback"],
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
@@ -213,7 +221,7 @@ pitfall. Use port `8765` (or any port — nothing will listen).
 `token_endpoint_auth_method: none` marks this as a public PKCE client. Save the
 returned `client_id`.
 
-### 5. Build the authorize URL with PKCE
+### 5. Build the authorize URL with PKCE {#5-build-the-authorize-url-with-pkce}
 
 Generate:
 - `code_verifier`: `secrets.token_urlsafe(64)[:128]`
@@ -232,7 +240,7 @@ default set on its own. Fabricating scope strings against an empty
 **Stash `code_verifier` and `state` to disk** (e.g. `~/.hermes/cache/scratch/.mcp-oauth-work/<server>.json`,
 0600 perms). You need them for step 7, possibly across multiple chat turns.
 
-### 6. Give the user the authorize URL
+### 6. Give the user the authorize URL {#6-give-the-user-the-authorize-url}
 
 ```
 Open this URL in your browser:
@@ -243,7 +251,7 @@ and fail to connect — THAT'S EXPECTED. Just copy the entire URL from the
 address bar (it will contain ?code=...&state=...) and paste it back here.
 ```
 
-### 7. Exchange the code for tokens
+### 7. Exchange the code for tokens {#7-exchange-the-code-for-tokens}
 
 When the user pastes the callback URL:
 
@@ -258,9 +266,9 @@ When the user pastes the callback URL:
    - `resource=<mcp_server_url>` (if the AS required it in step 5, include here too)
 4. Response contains `access_token`, `refresh_token`, `token_type`, `expires_in`, `scope`.
 
-### 8. Write tokens in Hermes' exact schema
+### 8. Write tokens in {{app-name}}' exact schema {#8-write-tokens-in-hermes-exact-schema}
 
-`tools/mcp_oauth.py::HermesTokenStorage` expects two files under
+`tools/mcp_oauth.py::AgentTokenStorage` expects two files under
 `$HERMES_HOME/mcp-tokens/` (create dir with `0o700`, files with `0o600`):
 
 **`<server_name>.json`** — the `OAuthToken` pydantic model:
@@ -289,9 +297,9 @@ When the user pastes the callback URL:
 
 Write each file via `json.dumps(..., indent=2)`. Sanitize the filename with
 `re.sub(r'[^\w\-]', '_', server_name)[:128]` — this matches `_safe_filename()` in
-Hermes' token storage.
+{{app-name}}' token storage.
 
-### 9. Add the server to config.yaml
+### 9. Add the server to config.yaml {#9-add-the-server-to-configyaml}
 
 ```yaml
 mcp_servers:
@@ -302,7 +310,7 @@ mcp_servers:
     connect_timeout: 60
 ```
 
-### 10. Smoke-test the token BEFORE asking the user to reload
+### 10. Smoke-test the token BEFORE asking the user to reload {#10-smoke-test-the-token-before-asking-the-user-to-reload}
 
 Manually POST an MCP `initialize` request to confirm the token works end-to-end —
 this catches scope misconfigurations, wrong `resource` values, and CF blocks
@@ -327,22 +335,22 @@ body = json.dumps({
 
 Expect HTTP 200 with `Content-Type: text/event-stream` and a JSON-RPC result
 containing `serverInfo` and `capabilities`. **Do not use `urllib` with its default
-UA** — Cloudflare will 403 you even though Hermes (which uses httpx) will succeed.
+UA** — Cloudflare will 403 you even though {{app-name}} (which uses httpx) will succeed.
 `scripts/diagnose-oauth-mcp.py` automates this smoke test.
 
-### 11. Tell the user to run `/reload-mcp`
+### 11. Tell the user to run `/reload-mcp` {#11-tell-the-user-to-run-reload-mcp}
 
-On reload, Hermes sees `auth: oauth`, calls `HermesTokenStorage.get_tokens()`,
+On reload, {{app-name}} sees `auth: oauth`, calls `AgentTokenStorage.get_tokens()`,
 finds your cached tokens, skips the browser flow, and registers `mcp_<name>_*`
 tools. Refresh happens automatically before `expires_in` elapses.
 
-## Pitfalls & Lessons Learned
+## Pitfalls & Lessons Learned {#pitfalls--lessons-learned}
 
-1. **Do not assume "headless" means "OAuth impossible."** The built-in flow works fine for local CLI; the issue is strictly remote deployments where the user's browser and the Hermes process are on different machines. Check the execution environment before claiming OAuth isn't an option.
+1. **Do not assume "headless" means "OAuth impossible."** The built-in flow works fine for local CLI; the issue is strictly remote deployments where the user's browser and the {{app-name}} process are on different machines. Check the execution environment before claiming OAuth isn't an option.
 
 2. **Read the source, not just the skill docs.** `tools/mcp_oauth.py` and the MCP config reference in `website/docs/` are the authoritative references. Grep the tree before telling the user a feature "doesn't exist."
 
-3. **Cloudflare UA filter.** Many MCP/OAuth providers front their infra with Cloudflare, which 403s `python-urllib/*` user agents on metadata endpoints even though those endpoints are public. Set `User-Agent: python-httpx/0.27` (or any browser-like string) on every request in this flow. Hermes itself uses httpx, so this is never a problem in the real connection path.
+3. **Cloudflare UA filter.** Many MCP/OAuth providers front their infra with Cloudflare, which 403s `python-urllib/*` user agents on metadata endpoints even though those endpoints are public. Set `User-Agent: python-httpx/0.27` (or any browser-like string) on every request in this flow. {{app-name}} itself uses httpx, so this is never a problem in the real connection path.
 
 4. **Include `resource` in both authorize and token requests.** RFC 8707 resource indicators are not optional for most modern MCP servers — they bind the issued token to the specific MCP resource URL. Leaving it out sometimes still works but may yield a token that later fails at the MCP server with a scope/audience error.
 
@@ -358,7 +366,7 @@ tools. Refresh happens automatically before `expires_in` elapses.
 
 10. **A successful refresh that STILL yields a rejected token = server-side SESSION revocation; only a fresh authorization_code flow fixes it.** Distinct from pitfall 9. The stored token file can look healthy (`expires_at` well out, refresh_token present), yet a live `initialize` POST returns `401 invalid_token` with a JSON-RPC body like `{"error":{"code":-32002,"message":"Session expired. Please re-authenticate."}}`. The `grant_type=refresh_token` POST may **succeed** (HTTP 200, new access_token) — yet the brand-new token gets the SAME `-32002`. The provider revoked the underlying MCP *session* server-side; the OAuth refresh chain re-mints credentials but cannot re-establish a revoked session. Decision rule when an OAuth MCP reports "not connected": (1) smoke-test the stored access_token with a manual `initialize` POST; (2) if `401 invalid_token`, attempt a refresh and smoke-test the NEW token; (3a) new token works → write it + restart to clear the breaker; (3b) new token STILL gets `-32002`/"Session expired" → stop, this is session revocation, hand the user the authorize URL for a full re-auth. `scripts/diagnose-oauth-mcp.py` automates steps 1–2 and prints which branch you're in. For an unattended gateway whose session keeps getting revoked, prefer a static Personal API key. See `references/stripe-mcp-oauth-revocation.md` for a worked example of a provider that revokes weekly.
 
-11. **Client info file is NOT optional.** Hermes needs `<server>.client.json` to know the `client_id` for refresh grants. Skipping it means the first refresh fails and the user has to re-auth — writing both files is the whole point of this skill.
+11. **Client info file is NOT optional.** {{app-name}} needs `<server>.client.json` to know the `client_id` for refresh grants. Skipping it means the first refresh fails and the user has to re-auth — writing both files is the whole point of this skill.
 
 12. **Never hand-type the redirect URL for the user to open.** Generate the authorize URL programmatically with `urllib.parse.urlencode()`. Spaces in scopes and special chars in `state` break string-concatenated URLs.
 
@@ -372,18 +380,18 @@ tools. Refresh happens automatically before `expires_in` elapses.
 
 17. **GitHub MCP (`api.githubcopilot.com/mcp/`) uses a pre-registered confidential OAuth App, not DCR + PKCE-public.** Its client info ships with a real `client_secret` and `token_endpoint_auth_method: client_secret_post`. The token-exchange POST to `https://github.com/login/oauth/access_token` must include `client_secret` as a form field alongside `client_id`, `code`, `code_verifier`, and `redirect_uri` (PKCE is still honored on top of the secret). The redirect URI is **fixed** in the OAuth App config — you cannot change it, so the manual listener-port trick doesn't apply; the user just lets the browser fail to connect on that port and pastes the address-bar URL back.
 
-## What NOT to do
+## What NOT to do {#what-not-to-do}
 
-- **Don't use `mcp-remote` as a fallback.** It runs an npx subprocess whose OAuth callback server ALSO sits on the remote container's localhost — same problem. `mcp-remote` only helps when the MCP client doesn't speak remote HTTP at all (Hermes does natively).
+- **Don't use `mcp-remote` as a fallback.** It runs an npx subprocess whose OAuth callback server ALSO sits on the remote container's localhost — same problem. `mcp-remote` only helps when the MCP client doesn't speak remote HTTP at all ({{app-name}} does natively).
 - **Don't push "paste your API token and I'll add headers"** if the user explicitly asked for OAuth. Offer the static-token shortcut only after explaining why the native OAuth flow fails in remote deployments. Respect the user's choice to do the extra legwork for rotation-free, scope-limited access.
-- **Don't claim Hermes doesn't support a feature without reading the source.** Grep the source tree before making capability claims.
+- **Don't claim {{app-name}} doesn't support a feature without reading the source.** Grep the source tree before making capability claims.
 
-## Quick Reference Files
+## Quick Reference Files {#quick-reference-files}
 
 - `scripts/diagnose-oauth-mcp.py` — re-runnable, read-only-by-default diagnostic. Given a server name, it smoke-tests the stored access_token, attempts a refresh, smoke-tests the new token, and prints exactly which recovery branch you're in (`TOKEN_OK` = breaker/restart, `REFRESH_FIXED` = persist+restart, `SESSION_REVOKED` = full re-auth, `REFRESH_DEAD` = full re-auth/API key). Pass `--write` to persist a working refreshed token atomically. Never prints secret values. **Run this FIRST when an OAuth MCP server reports "not connected"** — it encodes the pitfall 7/9/10 decision tree.
 - `references/stripe-mcp-oauth-revocation.md` — a worked example (Stripe) of a provider that revokes its OAuth session on a recurring basis, and the durable fix: switch to a static restricted API key.
 
-## Related
+## Related {#related}
 
-- `native-mcp` — general guide to configuring MCP in Hermes. Authoritative config reference lives there.
-- `mcporter` — the external CLI bridge, for ad-hoc MCP calls outside of Hermes' config.
+- `native-mcp` — general guide to configuring MCP in {{app-name}}. Authoritative config reference lives there.
+- `mcporter` — the external CLI bridge, for ad-hoc MCP calls outside of {{app-name}}' config.

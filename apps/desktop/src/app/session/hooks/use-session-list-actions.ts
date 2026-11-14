@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 
-import { getApiRequestConnection, listAllProfileSessions, listSidebarSessions, type SessionInfo } from '@/hermes'
+import { getApiRequestConnection, listAllProfileSessions, listSidebarSessions, type SessionInfo } from '@/agent-client'
 import { sameCronSignature } from '@/lib/session-signatures'
 import {
   isMessagingSource,

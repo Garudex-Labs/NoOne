@@ -1,8 +1,6 @@
+import { AlertCircle } from '@noone/ui/icons'
 import { useCallback, useEffect, useState } from 'react'
 
-import { PageLoader } from '@/components/page-loader'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   type ActionResponse,
   type CuratorStatusResponse,
@@ -19,14 +17,16 @@ import {
   runDoctor,
   runSecurityAudit,
   setCuratorPaused
-} from '@/hermes'
+} from '@/agent-client'
+import { PageLoader } from '@/components/page-loader'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
-import { AlertCircle } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { upsertDesktopActionTask } from '@/store/activity'
 import { confirm } from '@/store/confirm'
 import { notify, notifyError } from '@/store/notifications'
-import type { ActionStatusResponse } from '@/types/hermes'
+import type { ActionStatusResponse } from '@/types/agent-client'
 
 import { MemoryLayersSummary } from '../settings/memory/memory-layers'
 
@@ -49,7 +49,7 @@ function formatBytes(size: number): string {
   return `${size} B`
 }
 
-/** Maintenance panel — desktop parity for `hermes doctor` / `security audit` /
+/** Maintenance panel — desktop parity for `noone doctor` / `security audit` /
  *  `backup` / `debug share` / `curator` / `memory` (the dashboard System page's
  *  ops section). Spawn-based actions tail their logs inline via the shared
  *  /api/actions status endpoint. */

@@ -30,7 +30,7 @@ test('Windows path prefix match is ordinal case-insensitive', () => {
 
 test('excludes external venv holders that are not the hindsight daemon', () => {
   // a user terminal running the hermes CLI from the venv — must NOT be killed
-  assert.equal(isHermesOwnedVenvDaemon('C:\\Hermes\\venv\\Scripts\\hermes.exe', 'hermes chat -q "hi"', SCRIPTS), false)
+  assert.equal(isHermesOwnedVenvDaemon('C:\\Hermes\\venv\\Scripts\\hermes.exe', 'noone chat -q "hi"', SCRIPTS), false)
   // an unrelated python script using the venv interpreter
   assert.equal(
     isHermesOwnedVenvDaemon('C:\\Hermes\\venv\\Scripts\\python.exe', 'python C:\\tools\\import.py', SCRIPTS),
@@ -69,17 +69,17 @@ test('matches the autostart gateway shim (hermes.exe under venv Scripts)', () =>
   )
 })
 
-test('matches the dashboard scheduled task (python -m hermes_cli / -m hermes)', () => {
+test('matches the dashboard scheduled task (python -m agent_cli / -m hermes)', () => {
   assert.equal(
     isExternalVenvHolder(
       'C:\\Hermes\\venv\\Scripts\\python.exe',
-      '"C:\\Hermes\\venv\\Scripts\\python.exe" -m hermes_cli.main dashboard',
+      '"C:\\Hermes\\venv\\Scripts\\python.exe" -m agent_cli.main dashboard',
       SCRIPTS
     ),
     true
   )
   assert.equal(
-    isExternalVenvHolder('C:\\Hermes\\venv\\Scripts\\pythonw.exe', 'pythonw.exe -m hermes serve', SCRIPTS),
+    isExternalVenvHolder('C:\\Hermes\\venv\\Scripts\\pythonw.exe', 'pythonw.exe -m noone serve', SCRIPTS),
     true
   )
 })
@@ -103,11 +103,11 @@ test('never matches a process outside the venv, even with hermes in the cmdline'
     isExternalVenvHolder('C:\\Windows\\System32\\cmd.exe', 'cmd /c cd C:\\Hermes\\venv\\Scripts && dir', SCRIPTS),
     false
   )
-  assert.equal(isExternalVenvHolder('C:\\Other\\hermes.exe', 'hermes gateway run', SCRIPTS), false)
+  assert.equal(isExternalVenvHolder('C:\\Other\\hermes.exe', 'noone gateway run', SCRIPTS), false)
 })
 
 test('sibling-dir and boundary safety for the external selector', () => {
-  assert.equal(isExternalVenvHolder('C:\\Hermes\\venv\\ScriptsX\\hermes.exe', 'hermes gateway run', SCRIPTS), false)
-  assert.equal(isExternalVenvHolder(null, 'hermes gateway run', SCRIPTS), false)
+  assert.equal(isExternalVenvHolder('C:\\Hermes\\venv\\ScriptsX\\hermes.exe', 'noone gateway run', SCRIPTS), false)
+  assert.equal(isExternalVenvHolder(null, 'noone gateway run', SCRIPTS), false)
   assert.equal(isExternalVenvHolder('C:\\Hermes\\venv\\Scripts\\hermes.exe', null, SCRIPTS), false)
 })

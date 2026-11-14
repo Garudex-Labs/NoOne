@@ -1,7 +1,9 @@
 import { useStore } from '@nanostores/react'
+import { Check, ChevronDown, ChevronRight, KeyRound, Loader2, Terminal, Trash2 } from '@noone/ui/icons'
 import type { ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { disconnectOAuthProvider, listOAuthProviders } from '@/agent-client'
 import { runInTerminal } from '@/app/right-sidebar/store'
 import {
   FEATURED_ID,
@@ -17,9 +19,7 @@ import { Button } from '@/components/ui/button'
 import { RowButton } from '@/components/ui/row-button'
 import { SearchField } from '@/components/ui/search-field'
 import { Tip } from '@/components/ui/tooltip'
-import { disconnectOAuthProvider, listOAuthProviders } from '@/hermes'
 import { useI18n } from '@/i18n'
-import { Check, ChevronDown, ChevronRight, KeyRound, Loader2, Terminal, Trash2 } from '@/lib/icons'
 import { normalize } from '@/lib/text'
 import { cn } from '@/lib/utils'
 import { confirm } from '@/store/confirm'
@@ -27,7 +27,7 @@ import { $localModelsEnabled } from '@/store/local-models-flag'
 import { notify, notifyError } from '@/store/notifications'
 import { $desktopOnboarding, startManualLocalEndpoint, startManualProviderOAuth } from '@/store/onboarding'
 import { $settingsRequestProfile } from '@/store/settings-scope'
-import type { EnvVarInfo, OAuthProvider } from '@/types/hermes'
+import type { EnvVarInfo, OAuthProvider } from '@/types/agent-client'
 
 import { isKeyVar, ProviderKeyRows } from './credential-key-ui'
 import { CustomEndpointsSettings } from './custom-endpoints-settings'
@@ -63,8 +63,8 @@ export type ProviderView = (typeof PROVIDER_VIEWS)[number]
 //
 // Grouping key precedence:
 //   1. Backend `provider_label` / `provider` (from the unified provider catalog
-//      in hermes_cli/provider_catalog.py) — the SAME provider identity
-//      `hermes model` uses. This is authoritative: a provider tagged by the
+//      in agent_cli/provider_catalog.py) — the SAME provider identity
+//      `noone model` uses. This is authoritative: a provider tagged by the
 //      backend always renders a card, even with no PROVIDER_GROUPS row.
 //   2. Desktop prefix match (`providerGroup`) — legacy fallback for provider
 //      env vars that predate the backend tagging.

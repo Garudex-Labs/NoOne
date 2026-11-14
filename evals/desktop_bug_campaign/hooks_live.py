@@ -11,7 +11,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-import hermes_yaml as yaml
+import agent_yaml as yaml
 from websockets.sync.client import connect
 
 p = argparse.ArgumentParser()
@@ -76,7 +76,7 @@ for label in ['default', 'alpha', 'beta', 'unapproved']:
     (h / '.env').write_text('OPENAI_API_KEY=fixture-key\nOPENAI_BASE_URL=http://127.0.0.1:' + str(a.port+1) + '/v1\n')
 env = {k: v for k, v in os.environ.items() if not (k.startswith('HERMES_') or k.endswith(('_API_KEY', '_TOKEN')))}
 env.update(HOME=str(out / 'os-home'), HERMES_HOME=str(home), HERMES_DASHBOARD_SESSION_TOKEN='hooks-fixture-token', HERMES_IGNORE_RULES='1', PYTHONPATH=str(a.repo))
-cmd = [sys.executable, '-m', 'hermes_cli.main', 'serve', '--host', '127.0.0.1', '--port', str(a.port), '--skip-build']
+cmd = [sys.executable, '-m', 'agent_cli.main', 'serve', '--host', '127.0.0.1', '--port', str(a.port), '--skip-build']
 log = (out / 'serve.log').open('w')
 proc = subprocess.Popen(cmd, cwd=a.repo, env=env, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT)
 events = []
@@ -135,6 +135,6 @@ finally:
     provider.shutdown()
     (out / 'events.json').write_text(json.dumps(events, indent=2))
     (out / 'requests.json').write_text(json.dumps(requests, indent=2))
-    receipt = {'sha': subprocess.check_output(['git', '-C', str(a.repo), 'rev-parse', 'HEAD'], stdin=subprocess.DEVNULL, text=True).strip(), 'source_blob': subprocess.check_output(['git', '-C', str(a.repo), 'hash-object', 'tui_gateway/server.py'], stdin=subprocess.DEVNULL, text=True).strip(), 'tool': a.tool, 'process_exit': proc.returncode, 'command': cmd, 'results': results, 'provider_requests': len(requests)}
+    receipt = {'sha': subprocess.check_output(['git', '-C', str(a.repo), 'rev-parse', 'HEAD'], stdin=subprocess.DEVNULL, text=True, timeout=10).strip(), 'source_blob': subprocess.check_output(['git', '-C', str(a.repo), 'hash-object', 'agent_backend/server.py'], stdin=subprocess.DEVNULL, text=True, timeout=10).strip(), 'tool': a.tool, 'process_exit': proc.returncode, 'command': cmd, 'results': results, 'provider_requests': len(requests)}
     (out / 'receipt.json').write_text(json.dumps(receipt, indent=2))
     print(json.dumps(receipt, indent=2))

@@ -1,6 +1,6 @@
 """Shared harness for the classic-CLI tmux suites (``display.interface: cli``).
 
-A real ``python -m hermes_cli.main`` runs in a private tmux server (own ``-L`` socket) with a
+A real ``python -m agent_cli.main`` runs in a private tmux server (own ``-L`` socket) with a
 hermetic fake HOME / HERMES_HOME and a config that routes the model to a loopback
 ``FakeLLMServer``. The CLI is a thin client of the profile's gateway daemon, which it spawns on
 first connect; cleanup stops that daemon and then kills anything left whose environ carries this
@@ -49,12 +49,12 @@ def require_tmux() -> None:
     """Skip without tmux, except in the CI E2E lane, where a skip is green over zero coverage.
 
     The release/dispatch ``e2e`` job (``.github/workflows/tests.yml``) sets
-    ``HERMES_E2E_REQUIRE_TUI=1`` and GitHub sets ``CI``; under both, a missing tmux fails.
+    ``AGENT_E2E_REQUIRE_TOOLS=1`` and GitHub sets ``CI``; under both, a missing tmux fails.
     """
     if shutil.which("tmux") is not None:
         return
-    if os.environ.get("CI") and os.environ.get("HERMES_E2E_REQUIRE_TUI") == "1":
-        pytest.fail("tmux missing in the CI e2e lane (HERMES_E2E_REQUIRE_TUI=1): install it in the e2e job")
+    if os.environ.get("CI") and os.environ.get("AGENT_E2E_REQUIRE_TOOLS") == "1":
+        pytest.fail("tmux missing in the CI e2e lane (AGENT_E2E_REQUIRE_TOOLS=1): install it in the e2e job")
     pytest.skip("needs tmux")
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -183,7 +183,7 @@ class ClassicHome:
         return env
 
     def argv(self, *args: str) -> list[str]:
-        return [sys.executable, "-m", "hermes_cli.main", *args]
+        return [sys.executable, "-m", "agent_cli.main", *args]
 
     def run(self, *args: str, timeout: float = 180.0) -> subprocess.CompletedProcess:
         """A non-TTY run (stdout piped): ``chat -q`` one-shots, ``gateway stop``."""

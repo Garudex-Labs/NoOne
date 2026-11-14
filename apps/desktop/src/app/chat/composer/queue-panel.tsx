@@ -1,12 +1,12 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { CornerDownLeft, iconSize, Pencil, SteeringWheel } from '@noone/ui/icons'
 import { useState } from 'react'
 
 import { StatusRow } from '@/components/chat/status-row'
 import { StatusSection } from '@/components/chat/status-section'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { type Translations, useI18n } from '@/i18n'
-import { CornerDownLeft, iconSize, Pencil, SteeringWheel } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { isSteerableEntry, type QueuedPromptEntry } from '@/store/composer-queue'
 
@@ -99,7 +99,7 @@ export function QueuePanel({
         )}
         dismiss={{ label: c.queueDelete, onDismiss: () => onDelete(entry.id) }}
         key={entry.id}
-        leading={<Codicon className="text-muted-foreground/70" name="comment" size="0.8rem" />}
+        leading={<AppIcon className="text-muted-foreground/70" name="comment" size="0.8rem" />}
         trailing={
           <>
             {canExpand && (
@@ -113,7 +113,7 @@ export function QueuePanel({
                   type="button"
                   variant="ghost"
                 >
-                  <Codicon
+                  <AppIcon
                     className={cn('transition-transform', isExpanded && 'rotate-180')}
                     name="chevron-down"
                     size={iconSize.xs}
@@ -185,7 +185,7 @@ export function QueuePanel({
           </Tip>
         ) : undefined
       }
-      icon={<Codicon className="text-muted-foreground/70" name={paused ? 'debug-pause' : 'layers'} size="0.8rem" />}
+      icon={<AppIcon className="text-muted-foreground/70" name={paused ? 'debug-pause' : 'layers'} size="0.8rem" />}
       label={paused ? c.queuedPaused(entries.length) : c.queued(entries.length)}
       preview={lostEntries.length > 0 ? lostEntries.map(renderRow) : undefined}
     >

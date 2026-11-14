@@ -13,8 +13,8 @@ import json
 
 import pytest
 
-from hermes_cli import anon_auth
-from tests.hermes_cli.anon_portal import install_portal
+from agent_cli import anon_auth
+from tests.agent_cli.anon_portal import install_portal
 
 
 @pytest.fixture
@@ -53,8 +53,8 @@ def test_first_hosted_action_creates_one_connectors_only_guest(nas, monkeypatch)
     assert bearers and all(anon_auth.is_connectors_only(b) for b in bearers)
 
     # The free model and its surfaces stay off; the identity survives for connectors.
-    from hermes_cli.auth_constants import AuthError
-    from hermes_cli.auth_nous import get_nous_auth_status_local, resolve_nous_runtime_credentials
+    from agent_cli.auth_constants import AuthError
+    from agent_cli.auth_nous import get_nous_auth_status_local, resolve_nous_runtime_credentials
 
     with pytest.raises(AuthError) as refused:
         resolve_nous_runtime_credentials()
@@ -83,10 +83,10 @@ def test_tool_search_without_an_identity_sends_nothing(nas, monkeypatch):
 
 
 def test_guest_opt_out_keeps_connectors_closed(nas):
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     from tools.connectors.gateway.config import connectors_available, ensure_guest_identity
 
-    (get_hermes_home() / "config.yaml").write_text("nous:\n  guest: false\n", encoding="utf-8")
+    (get_agent_home() / "config.yaml").write_text("nous:\n  guest: false\n", encoding="utf-8")
 
     assert not connectors_available()
     assert ensure_guest_identity() is None

@@ -1,7 +1,7 @@
 """Core NeMo Relay adapter for Hermes tool execution."""
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import contextvars
 import json
 import logging
@@ -57,7 +57,7 @@ def execute(
             raise callback_error
         if isinstance(exc, Exception) and callback_error is None and "value" in raw_result:
             logger.warning(
-                "NeMo Relay tool post-processing failed after dispatch success; returning the Hermes tool result",
+                app_text("NeMo Relay tool post-processing failed after dispatch success; returning the {app_name} tool result"),
                 exc_info=True,
             )
             return raw_result["value"], observed_args

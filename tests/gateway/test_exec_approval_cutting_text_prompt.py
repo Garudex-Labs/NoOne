@@ -1,5 +1,4 @@
-"""The plain-text approval prompt on adapters whose ``send`` cuts long text (ntfy, DingTalk webhook,
-Photon, LINE): the answer instructions and the deadline survive the cut, and a command that cannot
+"""The plain-text approval prompt on adapters whose ``send`` cuts long text (Photon, LINE): the answer instructions and the deadline survive the cut, and a command that cannot
 be shown whole leaves only Deny, the same rule the button cards follow (#62359)."""
 from __future__ import annotations
 
@@ -18,27 +17,8 @@ SESSION = "agent:main:x:dm:chat"
 TAIL = "&& rm -rf ~ # TAIL_MARKER"
 
 
-def _ntfy():
-    a = load_plugin_adapter("ntfy").NtfyAdapter(PlatformConfig(enabled=True, extra={"topic": "t"}))
-    wire = []
-
-    async def post(url, content=None, headers=None, timeout=None):
-        wire.append(content.decode())
-        return SimpleNamespace(status_code=200, headers={}, json=lambda: {"id": "x"}, text="")
-    a._http_client = SimpleNamespace(post=post)
-    return a, wire
 
 
-def _dingtalk():
-    a = load_plugin_adapter("dingtalk").DingTalkAdapter(PlatformConfig(enabled=True, extra={}))
-    wire = []
-
-    async def post(url, json=None, timeout=None, **_k):
-        wire.append(json["markdown"]["text"])
-        return SimpleNamespace(status_code=200, text="{}", json=lambda: {"errcode": 0})
-    a._http_client = SimpleNamespace(post=post)
-    a._get_valid_webhook = lambda _chat: ("https://oapi.dingtalk.com/hook",)
-    return a, wire
 
 
 def _photon():
@@ -88,7 +68,7 @@ def pending():
         approval._gateway_queues.clear()
 
 
-@pytest.mark.parametrize("make", [_ntfy, _dingtalk, _photon, _line], ids=["ntfy", "dingtalk", "photon", "line"])
+@pytest.mark.parametrize("make", [_photon, _line], ids=["photon", "line"])
 def test_long_command_keeps_instructions_and_offers_only_deny(make, pending):
     adapter, wire = make()
     adapter.pause_typing_for_chat = lambda _c: None
@@ -101,7 +81,7 @@ def test_long_command_keeps_instructions_and_offers_only_deny(make, pending):
     assert approval.resolve_gateway_approval_card(SESSION, "once", "r1") == 0  # a crafted approve resolves nothing
 
 
-@pytest.mark.parametrize("make", [_ntfy, _dingtalk, _photon, _line], ids=["ntfy", "dingtalk", "photon", "line"])
+@pytest.mark.parametrize("make", [_photon, _line], ids=["photon", "line"])
 def test_short_command_is_shown_whole_with_every_choice(make, pending):
     adapter, wire = make()
     adapter.pause_typing_for_chat = lambda _c: None
@@ -117,7 +97,23 @@ def test_a_long_backtick_run_never_leaves_the_fence_open_past_the_cut(command, p
     """The fence is sized from the shortened command, so the cut can never drop the closing fence."""
     import re
 
-    adapter, wire = _ntfy()
+    from gateway.config import Platform
+    from gateway.platforms.base import BasePlatformAdapter
+
+    TextAdapter = type("TextAdapter", (BasePlatformAdapter,), {
+        "MAX_MESSAGE_LENGTH": 1024,
+        "SUPPORTS_MESSAGE_EDITING": False,
+        "splits_long_messages": False,
+    })
+    TextAdapter.__abstractmethods__ = frozenset()
+    adapter = TextAdapter(PlatformConfig(enabled=True), Platform.LOCAL)
+    wire = []
+
+    async def send(chat_id, content, **kwargs):
+        wire.append(content)
+        return SimpleNamespace(success=True, message_id="captured")
+
+    adapter.send = send
     adapter.pause_typing_for_chat = lambda _c: None
     _render(adapter, command)
     delivered = wire[-1]
@@ -129,7 +125,7 @@ def test_a_long_backtick_run_never_leaves_the_fence_open_past_the_cut(command, p
     assert pending.card_deny_only is True
 
 
-@pytest.mark.parametrize("make", [_photon, _ntfy, _line], ids=["photon", "ntfy", "line"])
+@pytest.mark.parametrize("make", [_photon, _line], ids=["photon", "line"])
 def test_command_that_fits_only_beside_deny_is_shown_whole_and_not_called_shortened(make, pending):
     """One character too long for every choice, short enough for Deny alone: the whole command is
     shown, only Deny is offered, and the notice says why instead of claiming a shortened preview."""

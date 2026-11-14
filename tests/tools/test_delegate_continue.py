@@ -11,10 +11,10 @@ import weakref
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import MagicMock, patch
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 import pytest
 
-from hermes_state import SessionDB
+from agent_state import SessionDB
 from tests.waiting import wait_until
 from tools.process_registry import process_registry
 
@@ -37,7 +37,7 @@ class _ScriptedModel:
         self.builds, self.turns = [], []
 
     def __call__(self, **kw):
-        from hermes_constants import get_hermes_home
+        from agent_constants import get_agent_home
 
         child = MagicMock()
         child.session_id = kw.get("session_id") or f"child-sess-{len(self.builds)}"
@@ -48,7 +48,7 @@ class _ScriptedModel:
 
         def run_conversation(user_message, conversation_history=None, **_):
             self.turns.append({"session_id": child.session_id, "message": user_message,
-                               "history": conversation_history, "home": str(get_hermes_home())})
+                               "history": conversation_history, "home": str(get_agent_home())})
             db.create_session(child.session_id, "subagent", parent_session_id=kw.get("parent_session_id"))
             reply = f"done: {user_message}"
             db.append_message(child.session_id, "user", user_message)
@@ -56,7 +56,7 @@ class _ScriptedModel:
             return {"final_response": reply, "completed": True, "api_calls": 1}
 
         child.run_conversation.side_effect = run_conversation
-        self.builds.append({**kw, "home": str(get_hermes_home())})
+        self.builds.append({**kw, "home": str(get_agent_home())})
         return child
 
 

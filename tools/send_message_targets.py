@@ -19,7 +19,7 @@ def _target_syntax_fn(platform_name: str):
     unknown (idempotent manifest scan; only this platform's adapter is materialized)."""
     from gateway.platform_registry import platform_registry
     if not platform_registry.is_registered(platform_name):
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
         discover_plugins()
     entry = platform_registry.get(platform_name)
     return entry.target_ref_syntax_fn if entry is not None else None
@@ -27,7 +27,7 @@ def _target_syntax_fn(platform_name: str):
 
 def _parse_target_ref(platform_name: str, target_ref: str):
     """(chat_id, thread_id, explicit): the plugin's ``target_ref_syntax_fn`` first, then in order
-    E.164 phone numbers (keeping the '+'), bare numeric ids, Matrix ``!room``/``@user``, XMPP JIDs.
+    E.164 phone numbers (keeping the '+'), bare numeric ids, XMPP JIDs.
     Anything else goes to channel-directory resolution."""
     from gateway.platforms.send_targets import NOT_EXPLICIT
     parser = _target_syntax_fn(platform_name)
@@ -39,14 +39,14 @@ def _parse_target_ref(platform_name: str, target_ref: str):
             return parsed[0], parsed[1], True
     if platform_name in _PHONE_PLATFORMS and _E164_TARGET_RE.fullmatch(target_ref):
         return target_ref.strip(), None, True
-    if (target_ref.lstrip("-").isdigit() or (platform_name == "matrix" and target_ref.startswith(("!", "@")))
+    if (target_ref.lstrip("-").isdigit()
             or (platform_name == "xmpp" and "@" in target_ref)):
         return target_ref, None, True
     return None, None, False
 
 
 def unknown_platform_error(platform_name: str) -> str:
-    from hermes_cli.left_core_migration import platform_install_hint
+    from agent_cli.left_core_migration import platform_install_hint
     return f"Unknown or unregistered plugin platform: {platform_name}{platform_install_hint(platform_name)}"
 
 

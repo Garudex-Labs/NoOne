@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { compactNumber } from "@noone/shared";
 import {
   Brain,
   ChevronDown,
@@ -12,9 +11,23 @@ import {
   Wrench,
   X,
   Zap,
-} from "lucide-react";
+} from "@noone/ui/icons";
+import { Badge } from "@nous-research/ui/ui/components/badge";
+import { Button } from "@nous-research/ui/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Stats } from "@nous-research/ui/ui/components/stats";
+import { Switch } from "@nous-research/ui/ui/components/switch";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { createPortal } from "react-dom";
+
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ModelPickerDialog } from "@/components/ModelPickerDialog";
+import { ModelReloadConfirm } from "@/components/ModelReloadConfirm";
+import { usePageHeader } from "@/contexts/usePageHeader";
+import { useModalBehavior } from "@/hooks/useModalBehavior";
+import { useI18n } from "@/i18n";
 import { api } from "@/lib/api";
-import { auxTaskLabel, auxTaskRows } from "@/lib/aux-tasks";
 import type {
   AuxiliaryModelsResponse,
   AuxiliaryTaskAssignment,
@@ -23,28 +36,16 @@ import type {
   ModelsAnalyticsModelEntry,
   ModelsAnalyticsResponse,
 } from "@/lib/api";
-import { timeAgo, cn, themedBody } from "@/lib/utils";
+import { errorMessage } from "@/lib/api-error";
+import { auxTaskLabel, auxTaskRows } from "@/lib/aux-tasks";
 import {
   DASHBOARD_MODAL_BACKDROP,
   DASHBOARD_MODAL_PANEL,
   shouldCloseOuterModalOnEscape,
 } from "@/lib/dashboard-modal-shell";
-import { compactNumber } from "@hermes/shared";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { Stats } from "@nous-research/ui/ui/components/stats";
-import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Switch } from "@nous-research/ui/ui/components/switch";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { useModalBehavior } from "@/hooks/useModalBehavior";
-import { usePageHeader } from "@/contexts/usePageHeader";
-import { useI18n } from "@/i18n";
-import { PluginSlot } from "@/plugins";
-import { ModelPickerDialog } from "@/components/ModelPickerDialog";
-import { ModelReloadConfirm } from "@/components/ModelReloadConfirm";
-import { errorMessage } from "@/lib/api-error";
 import { assignmentToPickerCurrent } from "@/lib/model-picker-current";
+import { cn, themedBody, timeAgo } from "@/lib/utils";
+import { PluginSlot } from "@/plugins";
 
 const PERIODS = [
   { label: "7d", days: 7 },
@@ -1158,7 +1159,7 @@ export default function ModelsPage() {
   const [error, setError] = useState<string | null>(null);
   const [saveKey, setSaveKey] = useState(0);
   // Gate the token/cost UI on `dashboard.show_token_analytics`.  See
-  // hermes_cli/config.py for the rationale: the numbers exclude auxiliary
+  // agent_cli/config.py for the rationale: the numbers exclude auxiliary
   // calls and retries, so they're misleading next to provider billing.
   const [showTokens, setShowTokens] = useState(false);
   const { t } = useI18n();

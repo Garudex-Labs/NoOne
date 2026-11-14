@@ -17,7 +17,7 @@ already-running real-profile browser (``tools.browser_real_profile_logins``):
   resolved server-side only, never listed, never logged; the fill tool registers it with the
   redaction boundary like every other vault fill.
 
-Read-only: no ``add``/``remove``. Per Teknium's ruling this adds NO restriction on the agent's own
+Read-only: no ``add``/``remove``. This adds NO restriction on the agent's own
 browser — it only makes the saved logins visible and fillable.
 """
 
@@ -47,7 +47,7 @@ class BrowserProfileLoginBackend(LoginBackend):
     # ── detection / snapshot location ─────────────────────────────────────────────────────────────
 
     def _browser_name(self) -> Optional[str]:
-        from hermes_cli.browser_connect import detect_default_chromium
+        from agent_cli.browser_connect import detect_default_chromium
         return detect_default_chromium()
 
     def _browser_label(self) -> str:
@@ -59,7 +59,7 @@ class BrowserProfileLoginBackend(LoginBackend):
         browser = self._browser_name()
         if not browser:
             return None
-        from hermes_cli.browser_connect import real_profile_copy_dir
+        from agent_cli.browser_connect import real_profile_copy_dir
         return real_profile_copy_dir(browser)
 
     def _ensure_snapshot(self) -> Optional[str]:
@@ -125,7 +125,7 @@ class BrowserProfileLoginBackend(LoginBackend):
         if not browser:
             return True
         try:
-            from hermes_cli.browser_connect import (
+            from agent_cli.browser_connect import (
                 _SNAPSHOT_DONE_MARKER, _resolve_source_profile, _snapshot_source,
                 real_profile_data_dir)
             snap_source = _snapshot_source(os.path.join(copy_dir, _SNAPSHOT_DONE_MARKER))
@@ -220,5 +220,5 @@ class BrowserProfileLoginBackend(LoginBackend):
             raise RuntimeError(
                 "The browser did not autofill a saved password for this login. It may have been "
                 "removed, need a chooser (several accounts on this site), redirect off its origin, or "
-                "be unavailable in this session. Save it to the Hermes vault, or sign in in the browser.")
+                "be unavailable in this session. Save it to the agent vault, or sign in in the browser.")
         return password

@@ -1,19 +1,19 @@
 import type {
+  AgentConfig,
+  AgentConfigRecord,
   AppHandoffStatus,
   ConfigSchemaResponse,
   CustomEndpointsResponse,
   CustomEndpointUpdate,
   CustomEndpointValidationResponse,
   EnvVarInfo,
-  HermesConfig,
-  HermesConfigRecord,
   LogsResponse,
   OAuthPollResponse,
   OAuthProvidersResponse,
   OAuthStartResponse,
   OAuthSubmitResponse,
   StatusResponse
-} from '@/types/hermes'
+} from '@/types/agent-client'
 
 import { capabilityScoped, hermesApi, type ProfileScope, profileScoped, STARTUP_REQUEST_TIMEOUT_MS } from './client'
 
@@ -129,8 +129,8 @@ export function getLogs(params: {
   })
 }
 
-export function getHermesConfig(profile?: string): Promise<HermesConfig> {
-  return hermesApi<HermesConfig>({
+export function getHermesConfig(profile?: string): Promise<AgentConfig> {
+  return hermesApi<AgentConfig>({
     ...profileScoped(profile),
     path: '/api/config',
     timeoutMs: STARTUP_REQUEST_TIMEOUT_MS
@@ -142,10 +142,10 @@ export function getHermesConfig(profile?: string): Promise<HermesConfig> {
 async function fetchBoundConfigRecord(
   profile: ProfileScope,
   request: { path: string; timeoutMs?: number }
-): Promise<HermesConfigRecord> {
+): Promise<AgentConfigRecord> {
   const origin = capabilityScoped(profile ?? undefined)
 
-  const record = await window.hermesDesktop.api<HermesConfigRecord>({ ...origin, ...request })
+  const record = await window.hermesDesktop.api<AgentConfigRecord>({ ...origin, ...request })
 
   if (record && typeof record === 'object') {
     bindConfigReadOrigin(record, origin)
@@ -157,13 +157,13 @@ async function fetchBoundConfigRecord(
 export function getHermesConfigRecord(
   profile?: ProfileScope,
   { includeDefaults = true }: { includeDefaults?: boolean } = {}
-): Promise<HermesConfigRecord> {
+): Promise<AgentConfigRecord> {
   return fetchBoundConfigRecord(profile, {
     path: includeDefaults ? '/api/config' : '/api/config?include_defaults=false'
   })
 }
 
-export function getHermesConfigDefaults(): Promise<HermesConfigRecord> {
+export function getHermesConfigDefaults(): Promise<AgentConfigRecord> {
   return fetchBoundConfigRecord(undefined, {
     path: '/api/config/defaults',
     timeoutMs: STARTUP_REQUEST_TIMEOUT_MS
@@ -178,7 +178,7 @@ export function getHermesConfigSchema(profile?: null | string): Promise<ConfigSc
 }
 
 export function saveHermesConfig(
-  config: HermesConfigRecord,
+  config: AgentConfigRecord,
   profile?: ProfileScope,
   { preserveLanguage = false }: { preserveLanguage?: boolean } = {}
 ): Promise<{ ok: boolean }> {
@@ -193,7 +193,7 @@ export function saveHermesConfig(
 /** Capability-scoped counterpart of saveHermesConfig — writes the config of
  *  the profile/connection the Capabilities scope selector points at (possibly
  *  on another registered gateway), mirroring getHermesConfigRecord. */
-export function saveHermesConfigRecord(config: HermesConfigRecord, profile?: ProfileScope): Promise<{ ok: boolean }> {
+export function saveHermesConfigRecord(config: AgentConfigRecord, profile?: ProfileScope): Promise<{ ok: boolean }> {
   return window.hermesDesktop.api<{ ok: boolean }>({
     ...resolveConfigWriteScope(config, profile),
     path: '/api/config',

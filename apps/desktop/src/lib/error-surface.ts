@@ -367,8 +367,8 @@ export interface ErrorCardActions {
 }
 
 export const ERROR_SETUP_GUIDE_URLS = {
-  tls: 'https://hermes-agent.nousresearch.com/docs/user-guide/security#tls-certificate-trust',
-  local: 'https://hermes-agent.nousresearch.com/docs/user-guide/local-models#using-your-own-llama-server'
+  tls: 'https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/security.md#tls-certificate-trust',
+  local: 'https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/local-models.md#using-your-own-llama-server'
 } as const
 
 /** Provider pages where the user fixes an account-level routing/privacy block. */

@@ -531,9 +531,9 @@ class MCPServerRunMixin:
         refresh token, so a backend building agents (each one re-runs discovery while no server is
         connected) hit the authorization server once per session, enough for a rate-limit ban."""
         if self._auth_type == "oauth" and _errors._is_auth_error(root):
-            from hermes_constants import get_hermes_home
-            from tools.mcp_oauth import HermesTokenStorage
-            storage = HermesTokenStorage(self.name, hermes_home=get_hermes_home())
+            from agent_constants import get_agent_home
+            from tools.mcp_oauth import AgentTokenStorage
+            storage = AgentTokenStorage(self.name, hermes_home=get_agent_home())
             self._auth_park = (storage, storage.credential_stamp())
 
     async def start(self, config: dict):

@@ -153,6 +153,107 @@ def test_untracked_copy_of_base_content_adds_no_bytes(repo):
     assert _offenders(repo, base, None) == [("copies/icon-edited.icns", "binary", "A")]
 
 
+def test_unstaged_copy_of_known_binary_has_the_same_verdict_as_staged(repo):
+    base = _git(repo, "rev-parse", "HEAD")
+    (repo / "assets/small.png").write_bytes((repo / "assets/icon.icns").read_bytes())
+    original_index = (repo / ".git/index").read_bytes()
+    assert _offenders(repo, base, None) == []
+    assert (repo / ".git/index").read_bytes() == original_index
+    _git(repo, "add", "assets/small.png")
+    assert _offenders(repo, base, None) == []
+
+
+@pytest.mark.parametrize("binary_diff", [False, True])
+def test_line_ending_cleanup_uses_blob_size_before_and_after_staging(repo, binary_diff):
+    attributes = "*.txt text" + (" -diff" if binary_diff else "") + "\n"
+    base = _commit(repo, {".gitattributes": attributes.encode()})
+    (repo / "crlf.txt").write_bytes(b"x\r\n" * 2000)  # 6000 on disk, 4000 in Git (< LIMIT)
+    original_index = (repo / ".git/index").read_bytes()
+    assert _offenders(repo, base, None) == []
+    assert (repo / ".git/index").read_bytes() == original_index
+    _git(repo, "add", "crlf.txt")
+    assert _offenders(repo, base, None) == []
+
+
+@pytest.mark.parametrize("destination", ["moved/big.lock", "moved/雪\tfile.lock"])
+def test_untracked_text_move_with_edits_matches_staging_without_touching_index(repo, destination):
+    base = _git(repo, "rev-parse", "HEAD")
+    original = repo / "big.lock"
+    moved = repo / destination
+    moved.parent.mkdir()
+    moved.write_bytes(original.read_bytes() + b"renamed with a small edit\n")
+    original.unlink()
+    index = repo / ".git/index"
+    before = index.read_bytes()
+
+    unstaged = _offenders(repo, base, None)
+    assert unstaged == []
+    assert index.read_bytes() == before
+    assert _git(repo, "diff", "--cached", "--name-only") == ""
+
+    # Staging is confined to this disposable repo; it supplies Git's real verdict.
+    _git(repo, "add", "-A")
+    raw = cbs._parse_raw(_git(repo, "diff", "--raw", "-z", "-M", "--no-abbrev", base))
+    assert [(change.status, change.old_path, change.path) for change in raw] == [
+        ("R", "big.lock", destination)
+    ]
+    assert _offenders(repo, base, None) == unstaged
+
+
+def test_untracked_rename_detection_keeps_copies_new_text_and_binaries_subject_to_limit(repo):
+    base = _git(repo, "rev-parse", "HEAD")
+    original = repo / "big.lock"
+    content = original.read_bytes()
+    copies = repo / "copies"
+    copies.mkdir()
+    # An edited copy of a still-present tracked file is not a move.
+    (copies / "edited.lock").write_bytes(content + b"not a move\n")
+    (copies / "unrelated.txt").write_bytes(_text(LIMIT * 2, "unrelated"))
+    expected = [("copies/edited.lock", "new file"), ("copies/unrelated.txt", "new file")]
+    assert sorted((path, kind) for path, kind, _ in _offenders(repo, base, None)) == expected
+
+    # A byte-identical move consumes the deleted source. The edited copy must
+    # not borrow that source merely because only oversized new blobs are judged.
+    (copies / "exact.lock").write_bytes(content)
+    original.unlink()
+    binary = repo / "assets/icon.icns"
+    (copies / "edited.icns").write_bytes(binary.read_bytes() + b"edit")
+    binary.unlink()
+    expected = [("copies/edited.icns", "binary"), *expected]
+    index = repo / ".git/index"
+    before = index.read_bytes()
+    assert sorted((path, kind) for path, kind, _ in _offenders(repo, base, None)) == expected
+    assert index.read_bytes() == before
+    _git(repo, "add", "-A")
+    assert sorted((path, kind) for path, kind, _ in _offenders(repo, base, None)) == expected
+
+
+@pytest.mark.parametrize("attribute", ["binary", "diff=opaque"])
+def test_untracked_rename_cannot_bypass_explicit_binary_diff_attributes(repo, attribute):
+    base = _commit(repo, {".gitattributes": f"*.lock {attribute}\n".encode()})
+    _git(repo, "config", "diff.opaque.binary", "true")
+    original = repo / "big.lock"
+    (repo / "moved.lock").write_bytes(original.read_bytes() + b"edit\n")
+    original.unlink()
+    assert _offenders(repo, base, None) == [("moved.lock", "binary", "A")]
+    _git(repo, "add", "-A")
+    assert _offenders(repo, base, None) == [("moved.lock", "binary", "R")]
+
+
+def test_untracked_copy_cannot_reuse_the_source_of_an_already_staged_move(repo):
+    base = _git(repo, "rev-parse", "HEAD")
+    content = (repo / "big.lock").read_bytes()
+    _git(repo, "mv", "big.lock", "moved.lock")
+    (repo / "copied.lock").write_bytes(content + b"edited copy\n")
+    index = repo / ".git/index"
+    before = index.read_bytes()
+    expected = [("copied.lock", "new file", "A")]
+    assert _offenders(repo, base, None) == expected
+    assert index.read_bytes() == before
+    _git(repo, "add", "copied.lock")
+    assert _offenders(repo, base, None) == expected
+
+
 def test_cli_with_head_reads_the_allowlist_from_head_not_the_checkout(repo):
     base = _git(repo, "rev-parse", "HEAD")
     head = _commit(repo, {".github/blob-size-allowlist.txt": b"pr-assets/kept.png\n",

@@ -1,13 +1,14 @@
 import type { useSensors } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
 
+import type { SessionInfo } from '@/agent-client'
 import { type NewSessionSplitHandler, startNewSessionDrag } from '@/app/chat/new-session-drag'
 import { type ProfileGroupHeaderContribution, SIDEBAR_PROFILE_GROUP_HEADER_AREA } from '@/app/routes'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   Dialog,
   DialogContent,
@@ -21,7 +22,6 @@ import { Input } from '@/components/ui/input'
 import { ProfileGlyph } from '@/components/ui/profile-glyph'
 import { useContributions } from '@/contrib'
 import { ContribBoundary, ContribRender } from '@/contrib/react/boundary'
-import type { SessionInfo } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { useStoreSelector } from '@/lib/use-session-slice'
 import { cn } from '@/lib/utils'
@@ -272,7 +272,7 @@ function GatewayProfileGroup({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button aria-label={`${copy.actions}: ${label}`} size="icon-xs" variant="ghost">
-                  <Codicon name="ellipsis" />
+                  <AppIcon name="ellipsis" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -318,7 +318,7 @@ function GatewayProfileGroup({
                 name={group.profile}
               />
             ) : (
-              <Codicon name="remote" />
+              <AppIcon name="remote" />
             )}
           </SidebarRowGrab>
         }

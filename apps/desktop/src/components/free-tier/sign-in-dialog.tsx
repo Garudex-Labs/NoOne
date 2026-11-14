@@ -1,7 +1,9 @@
 import { useStore } from '@nanostores/react'
+import { CheckCircle2, Loader2 } from '@noone/ui/icons'
 import { useQueryClient } from '@tanstack/react-query'
 import { type ReactNode, useEffect, useId } from 'react'
 
+import { getGlobalModelOptions } from '@/agent-client'
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { CAPABILITIES_ROUTE } from '@/app/routes'
 import type { ModelSelection } from '@/app/shell/model-menu-panel'
@@ -14,9 +16,7 @@ import {
   DialogTitle,
   preventCloseButtonAutoFocus
 } from '@/components/ui/dialog'
-import { getGlobalModelOptions } from '@/hermes'
 import { type Translations, useI18n } from '@/i18n'
-import { CheckCircle2, Loader2 } from '@/lib/icons'
 import {
   $freeTierStatus,
   FREE_TIER_MODEL,
@@ -45,7 +45,7 @@ import { $localModelOfferPending } from '@/store/local-model-offer'
 import { refreshOnboardingProviders } from '@/store/onboarding'
 import { $onboardingSurfaceClear } from '@/store/onboarding-presence'
 import { $currentModel, setModelPickerOpen } from '@/store/session'
-import type { AppHandoffStatus } from '@/types/hermes'
+import type { AppHandoffStatus } from '@/types/agent-client'
 
 interface FreeTierSignInDialogProps {
   /** The app's model-assignment path. Used only to re-home a live session that

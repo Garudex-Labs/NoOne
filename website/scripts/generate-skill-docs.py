@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate per-skill Docusaurus pages from skills/ and optional-skills/ SKILL.md files.
+"""Generate per-skill documentation pages from skills/ and optional-skills/ SKILL.md files.
 
 Each skill gets website/docs/user-guide/skills/<source>/<category>/<skill-name>.md
 where <source> is "bundled" or "optional".
@@ -14,6 +14,7 @@ Sidebar is updated to nest all per-skill pages under Skills → Bundled / Option
 
 from __future__ import annotations
 import re
+import json
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -21,11 +22,12 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO))
-import hermes_yaml as yaml
+import agent_yaml as yaml
+from website.scripts.doc_format import convert_document
 
 DOCS = REPO / "website" / "docs"
 SKILLS_PAGES = DOCS / "user-guide" / "skills"
-ZH_HANS_DOCS = REPO / "website" / "i18n" / "zh-Hans" / "docusaurus-plugin-content-docs" / "current"
+ZH_HANS_DOCS = DOCS / "zh-Hans"
 
 SKILL_SOURCES = [
     ("bundled", REPO / "skills"),
@@ -76,7 +78,7 @@ def mdx_escape_body(body: str) -> str:
     Inside fenced code blocks: untouched.
 
     We also preserve `<br>`, `<br/>`, `<img ...>`, `<a ...>`, and a handful of
-    other markup-safe tags because Docusaurus/MDX accepts them as HTML.
+    other markup-safe tags because documentation/MDX accepts them as HTML.
     """
     # Split the body into segments by fenced code blocks, alternating
     # (text, code, text, code, ...). A line like ``` or ~~~ opens a fence;
@@ -235,7 +237,7 @@ def rewrite_relative_links(body: str, meta: dict[str, Any]) -> str:
     pointing to the file in the repo.
     """
     source_dir = "skills" if meta["source_kind"] == "bundled" else "optional-skills"
-    base = f"https://github.com/NousResearch/hermes-agent/blob/main/{source_dir}/{meta['rel_path']}"
+    base = f"https://github.com/Garudex-Labs/NoOne/blob/main/{source_dir}/{meta['rel_path']}"
 
     def sub_link(m: re.Match) -> str:
         text = m.group(1)
@@ -324,17 +326,8 @@ def page_output_path(meta: dict[str, Any]) -> Path:
 
 
 def sidebar_doc_id(meta: dict[str, Any]) -> str:
-    """Docusaurus sidebar id, relative to docs/."""
+    """documentation sidebar id, relative to docs/."""
     return f"user-guide/skills/{meta['source_kind']}/{meta['category']}/{page_id(meta)}"
-
-
-# Marketing comparison pages that exist for a skill's product, keyed by the
-# skill's source slug. These render as a cross-link on the generated doc page.
-COMPARE_LINKS = {
-    "opencode": "OpenCode",
-    "claude-code": "Claude Code",
-    "codex": "Codex",
-}
 
 
 def render_skill_page(
@@ -369,7 +362,7 @@ def render_skill_page(
         info_rows.append(
             (
                 "Source",
-                "Optional — install with `hermes skills install official/"
+                "Optional — install with `noone skills install official/"
                 + meta["category"]
                 + "/"
                 + meta["slug"]
@@ -421,18 +414,7 @@ def render_skill_page(
         "| | |\n|---|---|\n" + info_block
     )
 
-    # Cross-link to the marketing comparison page when one exists for this
-    # skill's product. Keyed by skill slug (the source directory name).
-    compare_target = COMPARE_LINKS.get(meta["slug"])
-    compare_line = ""
-    if compare_target:
-        compare_line = (
-            f"Want the full side-by-side? Read "
-            f"[Hermes Agent vs {compare_target}]"
-            f"(https://hermes-agent.nousresearch.com/compare/{meta['slug']}).\n\n"
-        )
-
-    # Frontmatter for Docusaurus
+    # Frontmatter for documentation
     fm_title = sanitize_yaml_string(display_name + " — " + (short_desc or name))
     if len(fm_title) > 120:
         fm_title = sanitize_yaml_string(display_name)
@@ -442,10 +424,10 @@ def render_skill_page(
     body_clean = mdx_escape_body(rewrite_relative_links(body.strip(), meta))
 
     # Guard against the first heading in body being `# Xxx Skill` which would
-    # duplicate the page title -- Docusaurus handles this fine because the
+    # duplicate the page title -- documentation handles this fine because the
     # frontmatter `title` drives the page header and TOC.
 
-    return (
+    return convert_document(
         "---\n"
         f'title: "{fm_title}"\n'
         f'sidebar_label: "{sidebar_label}"\n'
@@ -458,7 +440,6 @@ def render_skill_page(
         "\n"
         f"{mdx_escape_body(description)}\n"
         "\n"
-        f"{compare_line}"
         "## Skill metadata\n"
         "\n"
         f"{info_table}\n"
@@ -466,7 +447,7 @@ def render_skill_page(
         "## Reference: full SKILL.md\n"
         "\n"
         ":::info\n"
-        "The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.\n"
+        "The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.\n"
         ":::\n"
         "\n"
         f"{body_clean}\n"
@@ -496,14 +477,14 @@ def build_catalog_md_bundled(entries: list[tuple[dict[str, Any], dict[str, Any]]
         "---",
         "sidebar_position: 5",
         'title: "Bundled Skills Catalog"',
-        'description: "Catalog of bundled skills that ship with Hermes Agent"',
+        'description: "Catalog of bundled skills that ship with {{app-name}}"',
         "---",
         "",
         "# Bundled Skills Catalog",
         "",
-        "Hermes ships with a large built-in skill library copied into `~/.hermes/skills/` on install. Each skill below links to a dedicated page with its full definition, setup, and usage.",
+        "{{app-name}} ships with a large built-in skill library copied into `~/.hermes/skills/` on install. Each skill below links to a dedicated page with its full definition, setup, and usage.",
         "",
-        "Hermes also syncs bundled skills on `hermes update`, but the sync manifest respects local deletions and user edits. If a skill listed here is missing from your profile's `~/.hermes/skills/` tree, it is still shipped with Hermes; restore it with `hermes skills reset <name> --restore`.",
+        "{{app-name}} also syncs bundled skills on `noone update`, but the sync manifest respects local deletions and user edits. If a skill listed here is missing from your profile's `~/.hermes/skills/` tree, it is still shipped with {{app-name}}; restore it with `noone skills reset <name> --restore`.",
         "",
         "If a skill is missing from this list but present in the repo, the catalog is regenerated by `website/scripts/generate-skill-docs.py`.",
         "",
@@ -526,7 +507,7 @@ def build_catalog_md_bundled(entries: list[tuple[dict[str, Any], dict[str, Any]]
                 f"| [`{name}`]({link_target}) | {desc_esc} | {path} |"
             )
         lines.append("")
-    return "\n".join(lines).rstrip() + "\n"
+    return convert_document("\n".join(lines).rstrip() + "\n")
 
 
 def build_catalog_md_optional(entries: list[tuple[dict[str, Any], dict[str, Any]]]) -> str:
@@ -542,7 +523,7 @@ def build_catalog_md_optional(entries: list[tuple[dict[str, Any], dict[str, Any]
         "---",
         "sidebar_position: 9",
         'title: "Optional Skills Catalog"',
-        'description: "Official optional skills shipped with hermes-agent — install via hermes skills install official/<category>/<skill>"',
+        'description: "Official optional skills shipped with hermes-agent — install via noone skills install official/<category>/<skill>"',
         "---",
         "",
         "# Optional Skills Catalog",
@@ -550,14 +531,14 @@ def build_catalog_md_optional(entries: list[tuple[dict[str, Any], dict[str, Any]
         "Optional skills ship with hermes-agent under `optional-skills/` but are **not active by default**. Install them explicitly:",
         "",
         "```bash",
-        "hermes skills install official/<category>/<skill>",
+        "noone skills install official/<category>/<skill>",
         "```",
         "",
         "For example:",
         "",
         "```bash",
-        "hermes skills install official/blockchain/solana",
-        "hermes skills install official/mlops/flash-attention",
+        "noone skills install official/blockchain/solana",
+        "noone skills install official/mlops/flash-attention",
         "```",
         "",
         "Each skill below links to a dedicated page with its full definition, setup, and usage.",
@@ -565,7 +546,7 @@ def build_catalog_md_optional(entries: list[tuple[dict[str, Any], dict[str, Any]
         "To uninstall:",
         "",
         "```bash",
-        "hermes skills uninstall <skill-name>",
+        "noone skills uninstall <skill-name>",
         "```",
         "",
     ]
@@ -599,7 +580,7 @@ def build_catalog_md_optional(entries: list[tuple[dict[str, Any], dict[str, Any]
             "4. Submit a pull request — the skill will appear in this catalog and get its own docs page once merged",
         ]
     )
-    return "\n".join(lines).rstrip() + "\n"
+    return convert_document("\n".join(lines).rstrip() + "\n")
 
 
 def build_sidebar_items(entries: list[tuple[dict[str, Any], dict[str, Any]]]) -> dict:
@@ -632,12 +613,6 @@ def build_sidebar_items(entries: list[tuple[dict[str, Any], dict[str, Any]]]) ->
                 {
                     "type": "category",
                     "label": category,
-                    # Docusaurus generates a translation key from the label by
-                    # default (e.g. sidebar.docs.category.productivity). When
-                    # the same category name appears under both Bundled and
-                    # Optional, the duplicate keys break i18n extraction and
-                    # fail the build. Scope each category by source to keep
-                    # the keys unique.
                     "key": f"skills-{source}-{category}",
                     "collapsed": True,
                     "items": [sidebar_doc_id(m) for m in items],
@@ -651,101 +626,39 @@ def build_sidebar_items(entries: list[tuple[dict[str, Any], dict[str, Any]]]) ->
     }
 
 
-def _render_sidebar_item(item: Any, indent: int) -> list[str]:
-    """Render one sidebar item (string doc id, or category dict) as ts lines."""
-    pad = " " * indent
-    lines: list[str] = []
-    if isinstance(item, str):
-        lines.append(f"{pad}'{item}',")
-        return lines
-    # category dict
-    lines.append(f"{pad}{{")
-    lines.append(f"{pad}  type: 'category',")
-    lines.append(f"{pad}  label: '{item['label']}',")
-    if item.get("key"):
-        lines.append(f"{pad}  key: '{item['key']}',")
-    if item.get("collapsed", True):
-        lines.append(f"{pad}  collapsed: true,")
-    lines.append(f"{pad}  items: [")
-    for child in item.get("items", []):
-        lines.extend(_render_sidebar_item(child, indent + 4))
-    lines.append(f"{pad}  ],")
-    lines.append(f"{pad}}},")
-    return lines
-
-
 def write_sidebar(entries):
-    # Sidebar layout:
-    #   Skills
-    #   ├── reference/skills-catalog
-    #   ├── reference/optional-skills-catalog
-    #   ├── Bundled
-    #   │   ├── apple/
-    #   │   │   ├── apple-apple-notes
-    #   │   │   └── ...
-    #   │   └── ...
-    #   └── Optional
-    #       └── ...
-    #
-    # The two catalog index pages stay at the top of the Skills section so
-    # the at-a-glance table view is one click away, and the per-category
-    # subtrees give individual skill pages real sidebar navigation when
-    # users land on them directly.
+    """Update the existing Skills groups while retaining all other navigation."""
     tree = build_sidebar_items(entries)
+    config_path = DOCS / "docs.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
 
-    skills_block: list[dict[str, Any]] = [
-        {
-            "label": "Bundled",
-            "collapsed": True,
-            "items": tree["bundled_categories"],
-        },
-        {
-            "label": "Optional",
-            "collapsed": True,
-            "items": tree["optional_categories"],
-        },
-    ]
-    skills_items: list[Any] = [
-        "reference/skills-catalog",
-        "reference/optional-skills-catalog",
-        *skills_block,
-    ]
+    def convert(item, prefix):
+        if isinstance(item, str):
+            return prefix + item
+        return {"group": item["label"], "expanded": not item.get("collapsed", True),
+                "pages": [convert(child, prefix) for child in item["items"]]}
 
-    skills_top = {
-        "label": "Skills",
-        "collapsed": True,
-        "items": skills_items,
-    }
-    skills_subtree = "\n".join(_render_sidebar_item(skills_top, 8)) + "\n"
+    def update(items, prefix):
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            if item.get("group") == "Skills":
+                item["pages"] = [prefix + "reference/skills-catalog",
+                                 prefix + "reference/optional-skills-catalog",
+                                 {"group": "Bundled", "expanded": False,
+                                  "pages": [convert(child, prefix) for child in tree["bundled_categories"]]},
+                                 {"group": "Optional", "expanded": False,
+                                  "pages": [convert(child, prefix) for child in tree["optional_categories"]]}]
+                return True
+            if update(item.get("pages", []), prefix):
+                return True
+        return False
 
-    sidebar_path = REPO / "website" / "sidebars.ts"
-    text = sidebar_path.read_text(encoding="utf-8")
-    # Replace the existing Skills block.
-    # Safer: match the exact current block shape.
-    old_block_start = "        {\n          type: 'category',\n          label: 'Skills',\n"
-    i = text.find(old_block_start)
-    if i == -1:
-        raise RuntimeError("Could not find Skills sidebar block to replace")
-    # Find matching closing of this block -- walk brace depth
-    depth = 0
-    j = i
-    while j < len(text):
-        ch = text[j]
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                # Include the trailing ,\n after the closing brace
-                end = text.find("\n", j) + 1
-                break
-        j += 1
-    else:
-        raise RuntimeError("Could not find end of Skills sidebar block")
-
-    new_text = text[:i] + skills_subtree + text[end:]
-    sidebar_path.write_text(new_text, encoding="utf-8")
-    print(f"Updated sidebar: {sidebar_path}")
+    for language in config["navigation"]["languages"]:
+        prefix = "" if language["language"] == "en" else "zh-Hans/"
+        if not update(language["groups"], prefix):
+            raise RuntimeError("Could not find Skills navigation group")
+    config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def prune_stale_pages(written: set[Path]) -> int:

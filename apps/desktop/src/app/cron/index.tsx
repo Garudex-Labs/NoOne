@@ -1,13 +1,29 @@
-import { createCronTriggerController, type CronTriggerController } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { createCronTriggerController, type CronTriggerController } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertTriangle } from '@noone/ui/icons'
 import { useQuery } from '@tanstack/react-query'
 import type * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import {
+  type AutomationBlueprint,
+  createCronJob,
+  type CronDeliveryTarget,
+  type CronJob,
+  deleteCronJob,
+  getAutomationBlueprints,
+  getCronDeliveryTargets,
+  getCronJobRuns,
+  instantiateAutomationBlueprint,
+  pauseCronJob,
+  resumeCronJob,
+  type SessionInfo,
+  updateCronJob
+} from '@/agent-client'
 import { PageLoader } from '@/components/page-loader'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Codicon } from '@/components/ui/codicon'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   Dialog,
@@ -29,23 +45,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  type AutomationBlueprint,
-  createCronJob,
-  type CronDeliveryTarget,
-  type CronJob,
-  deleteCronJob,
-  getAutomationBlueprints,
-  getCronDeliveryTargets,
-  getCronJobRuns,
-  instantiateAutomationBlueprint,
-  pauseCronJob,
-  resumeCronJob,
-  type SessionInfo,
-  updateCronJob
-} from '@/hermes'
 import { type Translations, useI18n } from '@/i18n'
-import { AlertTriangle } from '@/lib/icons'
 import { requestModelOptions } from '@/lib/model-options'
 import { asText } from '@/lib/text'
 import { $cronFocusJobId, $cronJobs, invalidateCronJobsRequests, setCronFocusJobId } from '@/store/cron'
@@ -1130,7 +1130,7 @@ function CronJobRuns({
       </PanelSectionLabel>
       {runs === null && !pending ? (
         <div className="flex items-center gap-1.5 py-1 text-xs text-muted-foreground">
-          <Codicon name="loading" size="0.75rem" spinning />
+          <AppIcon name="loading" size="0.75rem" spinning />
         </div>
       ) : runs?.length === 0 && !pending ? (
         <div className="py-1 text-xs text-muted-foreground">{c.noRuns}</div>
@@ -1147,7 +1147,7 @@ function CronJobRuns({
               role="status"
             >
               <span className="flex min-w-0 items-center gap-1.5">
-                <Codicon name="loading" size="0.75rem" spinning />
+                <AppIcon name="loading" size="0.75rem" spinning />
                 <span className="truncate">{c.queuedRun}</span>
               </span>
               <span className="shrink-0 text-[0.62rem] text-muted-foreground/55 tabular-nums">

@@ -10,9 +10,9 @@
  */
 
 import {
+  AppIcon,
   Button,
   cn,
-  Codicon,
   compactNumber,
   ContextMenu,
   ContextMenuContent,
@@ -51,7 +51,7 @@ import {
   useQueryClient,
   useValue,
   WorkspacePageHeaderControl
-} from '@hermes/plugin-sdk'
+} from '@noone/plugin-sdk'
 import {
   type CSSProperties,
   type DragEvent as ReactDragEvent,
@@ -144,7 +144,7 @@ function removeCard(board: KanbanBoard, id: string): KanbanBoard {
 function Meta({ children, icon }: { children: ReactNode; icon: string }) {
   return (
     <span className="inline-flex items-center gap-1">
-      <Codicon name={icon} size="0.7rem" />
+      <AppIcon name={icon} size="0.7rem" />
       {children}
     </span>
   )
@@ -211,7 +211,7 @@ function CardFooter({ arc, task }: { arc: ArcState | null; task: KanbanTask }) {
         // card payload; without it every blocked card reads identically.
         <Tip label={k.blockKindTip(task.block_kind)}>
           <span className="inline-flex shrink-0 cursor-help items-center gap-1 text-destructive">
-            <Codicon name="debug-breakpoint-data-unverified" size="0.7rem" />
+            <AppIcon name="debug-breakpoint-data-unverified" size="0.7rem" />
             {task.block_kind}
           </span>
         </Tip>
@@ -219,7 +219,7 @@ function CardFooter({ arc, task }: { arc: ArcState | null; task: KanbanTask }) {
       {unassignedReady && !fallback && (
         <Tip label={k.wontRunTip}>
           <span className="inline-flex shrink-0 cursor-help items-center gap-1 text-amber-500">
-            <Codicon name="debug-disconnect" size="0.7rem" />
+            <AppIcon name="debug-disconnect" size="0.7rem" />
             {k.wontRun}
           </span>
         </Tip>
@@ -235,7 +235,7 @@ function CardFooter({ arc, task }: { arc: ArcState | null; task: KanbanTask }) {
         {links > 0 && <Meta icon="references">{links}</Meta>}
         {task.warnings && task.warnings.count > 0 && (
           <span className="inline-flex items-center gap-0.5 text-destructive">
-            <Codicon name="warning" size="0.7rem" />
+            <AppIcon name="warning" size="0.7rem" />
             {task.warnings.count}
           </span>
         )}
@@ -319,11 +319,11 @@ function Card({
       </ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem onSelect={() => onOpen(task.id)}>
-          <Codicon name="link-external" size="0.85rem" />
+          <AppIcon name="link-external" size="0.85rem" />
           {k.open}
         </ContextMenuItem>
         <ContextMenuItem onSelect={() => onToggleSelect(task.id)}>
-          <Codicon name={selected ? 'close' : 'check-all'} size="0.85rem" />
+          <AppIcon name={selected ? 'close' : 'check-all'} size="0.85rem" />
           {selected ? k.deselect : k.select(formatModifierToken('mod'))}
         </ContextMenuItem>
         <ContextMenuSeparator />
@@ -337,7 +337,7 @@ function Card({
           ))}
         <ContextMenuSeparator />
         <ContextMenuItem onSelect={() => onDelete(task.id)} variant="destructive">
-          <Codicon name="trash" size="0.85rem" />
+          <AppIcon name="trash" size="0.85rem" />
           {k.delete}
         </ContextMenuItem>
       </ContextMenuContent>
@@ -474,7 +474,7 @@ function Column({
           onClick={onToggle}
           type="button"
         >
-          <Codicon name="chevron-left" size="0.75rem" />
+          <AppIcon name="chevron-left" size="0.75rem" />
         </button>
       </header>
       <div className="relative flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
@@ -524,7 +524,7 @@ function Column({
             onClick={() => onAdd(column.name)}
             type="button"
           >
-            <Codicon name="add" size="0.8rem" />
+            <AppIcon name="add" size="0.8rem" />
           </button>
         )}
         {column.tasks.length === 0 && (
@@ -822,7 +822,7 @@ function NewTaskDialog({
                     size="icon-xs"
                     variant="ghost"
                   >
-                    <Codicon name="refresh" size="0.7rem" spinning={estMut.isPending} />
+                    <AppIcon name="refresh" size="0.7rem" spinning={estMut.isPending} />
                   </Button>
                 </Tip>
               </>
@@ -834,7 +834,7 @@ function NewTaskDialog({
                   size="xs"
                   variant="ghost"
                 >
-                  <Codicon
+                  <AppIcon
                     name={estMut.isPending ? 'loading' : 'dashboard'}
                     size="0.75rem"
                     spinning={estMut.isPending}
@@ -906,7 +906,7 @@ function FilterMenu({
   const active = Boolean(assignee || tenant || archived)
   const lanesByProfile = useValue($lanesByProfile)
 
-  const check = (on: boolean) => (on ? <Codicon className="ml-auto" name="check" size="0.8rem" /> : null)
+  const check = (on: boolean) => (on ? <AppIcon className="ml-auto" name="check" size="0.8rem" /> : null)
 
   return (
     <DropdownMenu>
@@ -917,7 +917,7 @@ function FilterMenu({
           size="icon-xs"
           variant="ghost"
         >
-          <Codicon name="filter" size="0.85rem" />
+          <AppIcon name="filter" size="0.85rem" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
@@ -1035,7 +1035,7 @@ function SelectionBar({
           <DropdownMenuTrigger asChild>
             <Button disabled={busy} size="xs" variant="ghost">
               {k.moveToShort}
-              <Codicon name="chevron-down" size="0.7rem" />
+              <AppIcon name="chevron-down" size="0.7rem" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="center">
@@ -1054,7 +1054,7 @@ function SelectionBar({
           <DropdownMenuTrigger asChild>
             <Button disabled={busy} size="xs" variant="ghost">
               {k.assign}
-              <Codicon name="chevron-down" size="0.7rem" />
+              <AppIcon name="chevron-down" size="0.7rem" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="center">
@@ -1089,7 +1089,7 @@ function SelectionBar({
 
         <Tip label={k.clearSelection}>
           <Button aria-label={k.clearSelection} onClick={onClear} size="icon-xs" variant="ghost">
-            <Codicon name="close" size="0.8rem" />
+            <AppIcon name="close" size="0.8rem" />
           </Button>
         </Tip>
       </div>
@@ -1374,11 +1374,11 @@ export function KanbanBoardPage() {
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name="organization" size="0.85rem" />
+              <AppIcon name="organization" size="0.85rem" />
             </Button>
           </Tip>
           <Button onClick={() => setAddStatus('triage')} size="sm">
-            <Codicon name="add" size="0.8rem" />
+            <AppIcon name="add" size="0.8rem" />
             {k.newTask}
           </Button>
         </div>
@@ -1399,10 +1399,10 @@ export function KanbanBoardPage() {
       ) : total === 0 ? (
         <div className="grid flex-1 place-items-center px-4 text-center">
           <div className="flex flex-col items-center gap-2">
-            <Codicon className="text-(--ui-text-quaternary)" name="project" size="1.25rem" />
+            <AppIcon className="text-(--ui-text-quaternary)" name="project" size="1.25rem" />
             <p className="text-xs text-(--ui-text-tertiary)">{search || tenant || assignee ? k.noMatch : k.noTasks}</p>
             <Button className="mt-0.5" onClick={() => setAddStatus('triage')} size="sm" variant="outline">
-              <Codicon name="add" size="0.75rem" />
+              <AppIcon name="add" size="0.75rem" />
               {k.newTask}
             </Button>
           </div>

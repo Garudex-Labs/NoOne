@@ -1,4 +1,5 @@
-import { Codicon } from '@/components/ui/codicon'
+import { AppIcon } from '@noone/ui/app-icon'
+
 import { Tip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { readableInk } from '@/themes/color'
@@ -32,7 +33,7 @@ export function AccentSwatch({
       {onColorChange ? (
         <label className={cn(className, 'focus-within:outline-2 focus-within:outline-ring')} style={style}>
           <span className="flex" style={{ color: readableInk(hex) }}>
-            <Codicon name="add" size="1rem" />
+            <AppIcon name="add" size="1rem" />
           </span>
           <input
             aria-label={name}

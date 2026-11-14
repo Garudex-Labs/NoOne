@@ -4,6 +4,11 @@ hermesNpmLib.buildPnpmPackage {
   dirs = [
     "web"
     "apps/shared"
+    "apps/ui"
+    "agent_cli/data/ui"
+    "agent_cli/data/application_identity.json"
+    "scripts/build/application-identity.mjs"
+    "scripts/build/application-identity.d.mts"
     "scripts/build/web.mjs"
     "scripts/build/freshness.mjs"
     "scripts/build/frontend-common.mjs"

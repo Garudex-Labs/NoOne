@@ -15,6 +15,7 @@ import tempfile
 import time
 from collections.abc import Callable
 from pathlib import Path
+from agent_cli.version_info import is_project_release_commit, release_history_start
 
 from scripts.releases import lanes as lane_set, stable
 from scripts.releases.draft_warning import draft_body
@@ -54,7 +55,7 @@ def _claims(repo: Path, remote: str) -> list[str]:
     claims = sorted({ref for ref in refs if parse_attempt_ref(ref) or parse_marker_ref(ref)})
     if claims:
         _git(repo, "fetch", remote, *(f"+refs/tags/{ref}:refs/tags/{ref}" for ref in claims))
-    return claims
+    return [ref for ref in claims if is_project_release_commit(_claim_commit(repo, ref), repo)]
 
 
 def _claim_commit(repo: Path, tag: str) -> str:
@@ -72,6 +73,8 @@ def _require_release_line(repo: Path, commit: str) -> None:
     """The commit must be on the remote's ``main`` or a ``release/*`` branch."""
     if not _git(repo, *stable.release_line_contains(commit, _RELEASE_LINE_PREFIX)[1:]):
         raise ReleaseRefused(f"{commit} is not on the remote's main or a release/* branch")
+    if not is_project_release_commit(commit, repo):
+        raise ReleaseRefused("The release must contain the committed project version reset")
 
 
 def _claim_collision(repo: Path, remote: str, tag: str, error: Exception) -> ReleaseRefused:
@@ -187,15 +190,20 @@ def _changelog(repo: Path, repository: str, *, commit: str, tag: str, version: s
 
     published_version, base = published
     receipt = f"v{published_version}"
-    if base is None and subprocess.run(
+    if base is None:
+        seed = subprocess.run(
             ["git", "rev-parse", "--verify", "--quiet", f"refs/tags/{receipt}^{{commit}}"],
-            cwd=repo, capture_output=True, check=False).returncode == 0:
-        # Before the first publication the seed version's tag is the base.
-        base = receipt
+            cwd=repo, capture_output=True, text=True, timeout=3, check=False,
+        )
+        if seed.returncode == 0 and is_project_release_commit(seed.stdout.strip(), repo):
+            base = receipt
+    first_release = base is None
+    if first_release:
+        base = release_history_start(repo)
     commits = release_script.get_commits(since_tag=base, until=commit, cwd=repo)
     return release_script.generate_changelog(
         commits, tag, version, repo_url=f"https://github.com/{repository}",
-        prev_tag=receipt if base else None, no_changelog=no_changelog,
+        prev_tag=base if first_release else receipt, first_release=first_release, no_changelog=no_changelog,
     )
 
 
@@ -250,7 +258,16 @@ def release(commit: str, *, bump: str, repo: Path, remote: str, repository: str,
             raise refusal
     published_version, published_commit = published
     _require_ancestry(repo, commit, published_commit)
-    version = derive_next_version(published=published_version, bump=bump)
+    version = derive_next_version(published=published_version if published_commit else None, bump=bump)
+    if release_history_start(repo) is not None:
+        import tomllib
+
+        source_version = tomllib.loads(_git(repo, "show", f"{commit}:pyproject.toml"))["project"]["version"]
+        if source_version != version:
+            raise ReleaseRefused(
+                f"Release {version} requires committed project metadata at {version}; found {source_version}. "
+                "Run scripts/releases/stamping.py with --tree . --version, then commit the version change."
+            )
     if _git(repo, "ls-remote", remote, f"refs/tags/v{version}"):
         # A final tag records a started publication. Until its GitHub release is
         # public the published identity still names the previous version.
@@ -431,7 +448,7 @@ def publish(version: str, *, repository: str, dispatch, inspect=None, head_versi
             repo: Path | None = None, remote: str | None = None) -> dict:
     """Request ordered publication through the one production sequencer."""
     tag = f"v{version}"
-    from hermes_cli.update_channel import STABLE_TAG_RE
+    from agent_cli.update_channel import STABLE_TAG_RE
 
     if not STABLE_TAG_RE.fullmatch(tag):
         raise ReleaseRefused(f"{version} is not a stable version")
@@ -596,7 +613,7 @@ def cmd_changelog(args) -> None:
     repo, remote, repository = _command_repository(args)
     commit = _git(repo, "rev-parse", "--verify", f"{args.commit}^{{commit}}")
     published = published_stable_identity(repository)
-    version = derive_next_version(published=published[0], bump=args.bump)
+    version = derive_next_version(published=published[0] if published[1] else None, bump=args.bump)
     tag = attempt_ref(version, next_attempt(version, _claims(repo, remote)))
     print(_changelog(repo, repository, commit=commit, tag=tag, version=version,
                      published=published, no_changelog=False))

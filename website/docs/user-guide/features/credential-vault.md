@@ -3,7 +3,7 @@ title: Passwords & Logins
 description: The agent signs into sites, pays and fills addresses for you without ever seeing a password.
 ---
 
-# Passwords & Logins
+# Passwords & Logins {#passwords--logins}
 
 Say **"log into GitHub"** and the agent signs in for you. The first time it
 reaches a sign-in page it has no login for, it asks you, right there, in a
@@ -12,9 +12,9 @@ machine and injected straight into the page; the model never sees them.
 
 There is nothing to set up.
 
-## What it looks like
+## What it looks like {#what-it-looks-like}
 
-**CLI / TUI**
+**CLI**
 
 ```
 🔐 Save login for github.com
@@ -30,11 +30,11 @@ a masked password field. *Save & sign in* stores it and continues; *Don't save*
 tells the agent to stop asking for this turn.
 
 From then on the agent lists your saved logins, types the identifier itself and
-fills the password through Hermes. The tool result it sees is
+fills the password through {{app-name}}. The tool result it sees is
 `{filled_fields: 1, origin: "https://github.com"}`; the password is also
 registered with the redactor so a later page read cannot echo it back.
 
-### Desktop preview or managed browser
+### Desktop preview or managed browser {#desktop-preview-or-managed-browser}
 
 The Desktop preview and the managed automation browser are separate pages.
 For a login open in the preview, the agent calls `browser_vault` (`fill`,
@@ -43,36 +43,36 @@ with the in-app browser available an omitted target means the preview. This
 uses the preview already open beside the chat and does not require a separate
 browser runtime. `target: "browser"` uses the managed browser.
 
-Keep the chat and its preview page selected while filling. Hermes binds each
+Keep the chat and its preview page selected while filling. {{app-name}} binds each
 operation to that window and page, and refuses if the target changes or navigates.
 Vault requests are live-only and are not replayed after a reconnect. A failed
 preview fill never switches to a different browser. Filling does not submit
 the login form.
 
-## Two-factor codes
+## Two-factor codes {#two-factor-codes}
 
 Sites that ask for a code after the password are handled the same way:
 
 - **Authenticator key saved with the login** (the "setup key" or `otpauth://`
   link a site shows when you enable 2FA; 1Password and Bitwarden items that
-  hold a TOTP seed count too): Hermes generates the current code and enters
+  hold a TOTP seed count too): {{app-name}} generates the current code and enters
   it. Nobody is asked. Add the key in **Settings → Passwords & Logins → Add**
   or `hermes vault add`; the item shows a *2FA auto* badge. Like the
   password, the code is only generated for a page on the login's saved site.
 - **Code sent to your phone or email**: a small prompt appears in your
-  surface ("Verification code for github.com"), you type the code, Hermes
+  surface ("Verification code for github.com"), you type the code, {{app-name}}
   enters it into the page. The code never enters the conversation either.
 - **Passkeys, hardware keys, app approvals** ("tap Approve in Duo"): nothing
   to type. The agent tells you to complete it on your device and waits for
   the page to move on.
 
-## Already using 1Password or Bitwarden?
+## Already using 1Password or Bitwarden? {#already-using-1password-or-bitwarden}
 
 Nothing to enable. If the `op` or `bw` command-line tool is installed and signed
-in, Hermes picks it up automatically and its website logins become fillable
+in, {{app-name}} picks it up automatically and its website logins become fillable
 alongside the local ones. The first time the agent needs one of those logins it
 asks you to unlock the manager with your master password (masked prompt; once
-per session, 30 minutes idle). Hermes hands the master password to the manager's
+per session, 30 minutes idle). {{app-name}} hands the master password to the manager's
 CLI through its non-interactive channel (`op signin` on stdin, `bw unlock
 --passwordenv` in the child's environment) and keeps only the session token in
 memory. The agent never sees the master password, the token, or any login.
@@ -83,26 +83,26 @@ origins; nothing is inferred beyond the URLs saved on the item.
 Prefer not to use a detected manager? `hermes vault sources --disable bitwarden`,
 or the switch in **Settings → Passwords & Logins**.
 
-## Logins saved in your real browser
+## Logins saved in your real browser {#logins-saved-in-your-real-browser}
 
 If you turn on [real-profile browsing](browser.md#real-profile-browsing-use-your-own-logins)
 (`browser.use_real_profile: true`), the passwords your everyday Chrome / Brave /
 Edge has saved become a login source too, shown in the Browser bar's key-button
-picker as **Browser profile — `your browser`** beside the Hermes vault and any
-1Password / Bitwarden entries. Pick one and Hermes fills it into the in-app
+picker as **Browser profile — `your browser`** beside the {{app-name}} vault and any
+1Password / Bitwarden entries. Pick one and {{app-name}} fills it into the in-app
 browser just like a vault login.
 
-It is **read-only** and needs no master password: Hermes reads only the site and
+It is **read-only** and needs no master password: {{app-name}} reads only the site and
 username from your profile's saved logins, and the password is filled by your own
 browser (which decrypts its own store) and read back over the debugging protocol
 at the moment of the fill — the agent never sees it, and it is scrubbed from every
-tool result and log. Nothing is decrypted or copied out by Hermes, and there is no
+tool result and log. Nothing is decrypted or copied out by {{app-name}}, and there is no
 separate switch: the source appears exactly while real-profile browsing is on, and
 disappears (along with the profile snapshot) when you turn it off. This is the
 saved-passwords companion to the real-profile **cookies** that the in-app browser
 already carries.
 
-## Paying and filling addresses
+## Paying and filling addresses {#paying-and-filling-addresses}
 
 Cards and addresses work the same way as logins: saved once (**Settings →
 Passwords & Logins → Add**, or `hermes vault add`), bound to the checkout site,
@@ -112,7 +112,7 @@ Headless sessions (cron, webhooks, the API server) cannot confirm and are
 refused, so a prompt injection that reaches a checkout page can ask, but it
 cannot spend. Address fills need no confirmation.
 
-## Managing what's saved
+## Managing what's saved {#managing-whats-saved}
 
 - **Desktop → Settings → Passwords & Logins**: everything saved, the detected
   password managers with Unlock/Lock, Add, Remove.
@@ -123,7 +123,7 @@ Items live encrypted under `~/.hermes/vault/`, scoped to the profile. Labels,
 site origins and login identifiers are visible metadata; passwords and card
 values never leave the vault except into the page.
 
-## Where the vault key is kept
+## Where the vault key is kept {#where-the-vault-key-is-kept}
 
 By default the encryption key sits in `~/.hermes/vault/vault.key` (`0600`),
 next to the encrypted `vault.json.enc`. You can keep it in your operating
@@ -150,7 +150,7 @@ With `keychain` and no reachable keychain (a headless Linux server, an SSH
 session without a desktop keyring), a new vault's key goes to `vault.key` as
 before, with a warning in the log. Each profile gets its own keychain entry,
 named in `~/.hermes/vault/vault.keyref` (which holds no secret). A profile
-made with `hermes profile create --clone-all` gets an entry of its own while it
+made with `noone profile create --clone-all` gets an entry of its own while it
 is being created, so the original moving its key back to a file later cannot
 leave the copy without a key; if the keychain cannot be reached at that moment,
 the clone is refused with a message instead of sharing the original's entry. A
@@ -159,24 +159,24 @@ vault, and never deletes the entry it came from.
 
 What changes in keychain mode:
 
-- **Backups and copies hold the vault without its key.** `hermes backup`, a
+- **Backups and copies hold the vault without its key.** `noone backup`, a
   synced or copied `~/.hermes`, or a disk image no longer carries everything
   needed to open the vault. Before moving a profile to another machine, run
   `hermes vault key migrate --to file`.
-- **The keychain may ask.** macOS can ask whether Hermes may use the entry
-  (for example after an update replaces Hermes' Python), and a locked Linux
+- **The keychain may ask.** macOS can ask whether {{app-name}} may use the entry
+  (for example after an update replaces {{app-name}}' Python), and a locked Linux
   keyring asks to be unlocked. Cron jobs that run while you are logged out
   cannot read the key, so their local logins fail with a clear error.
 - **A lost entry means lost items.** If the keychain entry is deleted, the
-  vault cannot be opened and Hermes says so instead of creating a new key over
+  vault cannot be opened and {{app-name}} says so instead of creating a new key over
   it. Restore the entry from a keychain backup, or delete `vault.json.enc` to
   start over.
 
 That is why keychain storage is opt-in rather than the default.
 
-## Headless sessions
+## Headless sessions {#headless-sessions}
 
-Cron jobs, webhooks, the API server and `hermes chat -q` have nobody to answer a
+Cron jobs, webhooks, the API server and `noone chat -q` have nobody to answer a
 prompt. Saved local logins keep working there; a locked password manager reports
 `unavailable_in_this_session` and a missing login reports `prompt_unavailable`.
 Unlock or save from an interactive session first, or give 1Password a service
@@ -192,16 +192,16 @@ vault:
     enabled: false
 ```
 
-## What this does and does not guarantee
+## What this does and does not guarantee {#what-this-does-and-does-not-guarantee}
 
-**Does:** the password never enters the model's context through Hermes: not in
+**Does:** the password never enters the model's context through {{app-name}}: not in
 tool results, logs, the session database, or the CLI arguments of any process.
 Fills happen over the supervised browser session's direct CDP socket and are
 refused unless the page origin exactly matches the saved origin, checked again
 inside the page immediately before the write. With the Camofox browser plugin,
 which has no CDP endpoint, the same checks run and the fill goes to the Camofox
 tab through its REST evaluate endpoint, only when `CAMOFOX_URL` is loopback or
-HTTPS. In the Hermes Desktop in-app Browser the fill goes to that exact tab
+HTTPS. In the {{app-name}} Desktop in-app Browser the fill goes to that exact tab
 through the Desktop's authenticated preview request channel, with the same
 origin checks; saved authenticator codes are bound to the login's origins too.
 
@@ -211,25 +211,25 @@ yourself. On a cloud browser backend the vendor's browser sees the page like any
 other. The origin binding is the guard against filling on the wrong site, not
 against a compromised right one.
 
-### Who can get at the vault
+### Who can get at the vault {#who-can-get-at-the-vault}
 
 | Who | `vault.key` file (default) | Keychain storage |
 |---|---|---|
 | Other users on this computer (not administrators) | Blocked: both files are `0600` | Blocked |
 | Someone with a backup, sync copy or image of `~/.hermes` | Can decrypt: key and vault travel together | Gets ciphertext only |
 | Someone with the powered-off disk and no full-disk encryption | Can decrypt | Needs whatever protects that keychain (on macOS and Windows, your login password; a Linux keyring left unencrypted protects nothing) |
-| A program running as you, or a plugin running inside Hermes | Can decrypt | Can still ask the keychain, or call the vault code directly |
+| A program running as you, or a plugin running inside {{app-name}} | Can decrypt | Can still ask the keychain, or call the vault code directly |
 | An administrator / root, or malware with your privileges | Can decrypt | Can decrypt |
 
-Password-manager session tokens (1Password, Bitwarden) stay in Hermes' memory
+Password-manager session tokens (1Password, Bitwarden) stay in {{app-name}}' memory
 only, are dropped after 30 idle minutes or on Lock, and are handed only to the
-single `op`/`bw` command that needs them, never to Hermes' own environment, the
+single `op`/`bw` command that needs them, never to {{app-name}}' own environment, the
 terminal tool or any other child process. They are kept out of reach of a plain
 import, which stops casual access by other code in the process, but not a
-plugin determined to read Hermes' memory.
+plugin determined to read {{app-name}}' memory.
 
 Plugins are the boundary that matters: a third-party plugin that runs inside
-the Hermes process can do anything Hermes can, including filling a saved login.
+the {{app-name}} process can do anything {{app-name}} can, including filling a saved login.
 If you save logins and install plugins you have not reviewed, run them out of
 process with [`plugins.isolation: host`](plugins.md#running-plugins-out-of-process-pluginsisolation).
 A plugin host still runs as your user and can read files you can read, so for

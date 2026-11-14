@@ -54,10 +54,10 @@ def test_bundle_stages_git_tree_and_runs_native_children_before_manifest(tmp_pat
     repo.mkdir()
     source = Path(__file__).resolve().parents[2]
     shutil.copytree(source / "pm", repo / "pm", ignore=shutil.ignore_patterns("__pycache__"))
-    (repo / "hermes_cli").mkdir()
+    (repo / "agent_cli").mkdir()
     for name in ("__init__.py", "runtime_state.py"):
-        shutil.copy2(source / "hermes_cli" / name, repo / "hermes_cli" / name)
-    shutil.copy2(source / "hermes_constants.py", repo / "hermes_constants.py")
+        shutil.copy2(source / "agent_cli" / name, repo / "agent_cli" / name)
+    shutil.copy2(source / "agent_constants.py", repo / "agent_constants.py")
     wheels = repo / "wheels"
     wheels.mkdir()
     witness = tmp_path / "inventory-python.json"
@@ -243,13 +243,13 @@ def test_bundle_stages_git_tree_and_runs_native_children_before_manifest(tmp_pat
         (frontend / "index.html").write_text("store web", encoding="utf-8")
         (webapp / "index.html").write_text("store webapp", encoding="utf-8")
         assert native.finish_native(prepared, {"web": frontend, "webapp": webapp}) == 0
-    assert (output / "hermes-agent/hermes_cli/web_dist/index.html").read_text() == "store web"
+    assert (output / "hermes-agent/agent_cli/web_dist/index.html").read_text() == "store web"
     assert (output / "hermes-agent/apps/desktop/dist-webapp/index.html").read_text() == "store webapp"
     assert calls[0]["all_extras"] is True
     assert calls[0]["cache"] == tmp_path / "cache"
     assert (output / "hermes-agent/pyproject.toml").is_file()
     assert 'version="1.0.0"' in (output / "hermes-agent/pyproject.toml").read_text()
-    assert not (output / "hermes-agent/hermes_cli/_version.py").exists()
+    assert not (output / "hermes-agent/agent_cli/_version.py").exists()
     assert not (output / "hermes-agent/untracked").exists()
     assert not (output / "hermes-agent/.git").exists()
     facts = Facts(output / "tools/facts.json")

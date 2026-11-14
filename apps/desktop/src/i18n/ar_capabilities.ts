@@ -1,7 +1,8 @@
+import { appText } from '@noone/shared/application-identity'
+
 import { arPluginPreviewAccess } from './ar_plugin_preview_access'
 import { arPluginUpdateAll } from './ar_plugin_update_all'
 import type { TranslationOverrides } from './define-locale'
-
 export const arCapabilities = {
   skillDeepLink: {
     installTitle: (name: string) => `تثبيت «${name}»؟`,
@@ -29,7 +30,7 @@ export const arCapabilities = {
         pickerTitle: (name: string) => `اختر مجلدًا لـ ${name}`,
         pickerButton: 'السماح بالوصول',
         refusedProtected: (name: string) =>
-          `لا يمكن لـ ${name} استخدام هذا المجلد: فهو يحتوي على إعدادات Hermes أو مفاتيحه أو بيانات الإضافات. اختر مجلدًا لا يحتويها.`,
+          `لا يمكن لـ ${name} استخدام هذا المجلد: فهو يحتوي على إعدادات ${appText('{app_name}')} أو مفاتيحه أو بيانات الإضافات. اختر مجلدًا لا يحتويها.`,
         loadFailed: (name: string) => `تعذّر تحميل المجلدات المشتركة مع ${name}.`
       }
     },

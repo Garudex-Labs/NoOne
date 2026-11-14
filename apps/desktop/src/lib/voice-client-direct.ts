@@ -1,5 +1,5 @@
+import { getApiRequestConnection, getApiRequestProfile, hermesApi } from '@/agent-client'
 import { hermesApiAs, type OwnerScope, ownerScoped, type ResolvedOwner } from '@/api/client'
-import { getApiRequestConnection, getApiRequestProfile, hermesApi } from '@/hermes'
 
 /**
  * Client-direct voice: call the active profile's STT/TTS providers straight

@@ -1,12 +1,12 @@
+import { Plus, X } from '@noone/ui/icons'
 import type * as React from 'react'
 import { useState } from 'react'
 
+import type { MessagingEnvVarInfo } from '@/agent-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tip } from '@/components/ui/tooltip'
-import type { MessagingEnvVarInfo } from '@/hermes'
 import { useI18n } from '@/i18n'
-import { Plus, X } from '@/lib/icons'
 
 import { CREDENTIAL_CONTROL_CLASS } from '../settings/credential-key-ui'
 

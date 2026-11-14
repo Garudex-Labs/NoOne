@@ -1,5 +1,6 @@
-import type { PluginUpdateTranslations } from './types_plugin_update'
+import { appText } from '@noone/shared/application-identity'
 
+import type { PluginUpdateTranslations } from './types_plugin_update'
 /** Copy for updating an installed plugin (Plugins tab): catalog re-pin consent and the security-scan override. */
 export const dePluginUpdate: PluginUpdateTranslations = {
   folderAccess: {
@@ -12,7 +13,7 @@ export const dePluginUpdate: PluginUpdateTranslations = {
     pickerTitle: (name: string) => `Ordner für ${name} auswählen`,
     pickerButton: 'Zugriff erlauben',
     refusedProtected: (name: string) =>
-      `${name} kann diesen Ordner nicht verwenden: Er enthält Hermes-Einstellungen, Schlüssel oder Plugin-Daten. Wählen Sie einen Ordner, der sie nicht enthält.`,
+      `${name} kann diesen Ordner nicht verwenden: Er enthält ${appText('{app_name}')}-Einstellungen, Schlüssel oder Plugin-Daten. Wählen Sie einen Ordner, der sie nicht enthält.`,
     loadFailed: (name: string) => `Die für ${name} freigegebenen Ordner konnten nicht geladen werden.`
   },
   updateToPin: sha => `Auf ${sha} aktualisieren`,

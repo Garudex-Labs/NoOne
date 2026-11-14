@@ -1,4 +1,4 @@
-import type { ToolLabel } from '@hermes/shared'
+import type { ToolLabel } from '@noone/shared'
 
 import { TOOL_LABELS_ARG } from '@/lib/connector-tools'
 import { firstStringField, normalize } from '@/lib/text'
@@ -6,7 +6,7 @@ import { isTodoToolName, parseTodos } from '@/lib/todos'
 import { effectiveToolCall } from '@/lib/tool-media-renderers'
 import { isCardToolName } from '@/lib/tool-render-class'
 import type { ToolResultMetadata } from '@/lib/tool-result-metadata'
-import type { SessionMessage, StoredToolCallLabels } from '@/types/hermes'
+import type { SessionMessage, StoredToolCallLabels } from '@/types/agent-client'
 
 import type { ChatMessage, ChatMessagePart, GatewayEventPayload } from './types'
 

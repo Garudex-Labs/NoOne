@@ -5,14 +5,12 @@
 /build
 
 # Generated files
-.docusaurus
-.cache-loader
-# READMEs fetched from pinned commits by plugins/plugin-catalog-pages (keyed by sha)
+# Pinned-commit README cache
 .cache/
 src/data/skills.json
 src/data/skills-meta.json
-static/llms.txt
-static/llms-full.txt
+docs/llms.txt
+docs/llms-full.txt
 
 # Misc
 .DS_Store

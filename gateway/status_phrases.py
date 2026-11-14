@@ -13,9 +13,9 @@ from collections.abc import Mapping, MutableSequence
 from pathlib import Path
 from typing import Any
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 # Hermes UI surfaces, not app/vendor buckets.  Long-running-only: regular tool/thinking/interim
 # chatter is deliberately not rewritten (too noisy in chat).
@@ -115,7 +115,7 @@ def resolve_status_phrase_catalog(user_config: Mapping[str, Any] | None,
     ``display.status_phrases`` (or legacy alias ``generic_status_phrases``), then
     ``display.platforms.<platform>.status_phrases``."""
     catalog = _copy_catalog(_DEFAULT_PHRASES)
-    hermes_home = get_hermes_home()
+    hermes_home = get_agent_home()
     _merge_phrase_paths(catalog, list(_CONVENTIONAL_RELATIVE_PATHS), base_dir=hermes_home)
     display = (user_config or {}).get("display") if isinstance(user_config, Mapping) else None
     if not isinstance(display, Mapping):

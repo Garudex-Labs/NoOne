@@ -27,7 +27,7 @@ import {
 } from './reference-kinds'
 
 const HERMES_REF_TYPES = WIRE_REFERENCE_KINDS
-type HermesRefType = (typeof HERMES_REF_TYPES)[number]
+type AgentRefType = (typeof HERMES_REF_TYPES)[number]
 
 /** Icon glyphs come from the shared reference vocabulary, so the popover row
  *  and the chip can never drift apart. */

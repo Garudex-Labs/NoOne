@@ -4,10 +4,10 @@ import { join } from 'node:path'
 
 import { expect, test } from 'vitest'
 
-import { HermesGateway } from './client'
+import { AgentGateway } from './client'
 
 // Class sweep: every Desktop producer frame that reaches the shared owner must fit the closed
-// (`additionalProperties: false`) canonical contract generated from tui_gateway/contracts. The
+// (`additionalProperties: false`) canonical contract generated from agent_backend/contracts. The
 // fixture owner refuses exactly what `canonical_param_problems` refuses: unknown or missing keys.
 interface Schema {
   properties: Record<string, unknown>
@@ -90,7 +90,7 @@ const MUTATIONS: Record<string, Record<string, unknown>> = {
 // [label, Desktop method, exact producer params, expected: wire methods sent (after attach) or a named refusal]
 const SITES: Array<[string, string, Record<string, unknown>, string[] | RegExp]> = [
   [
-    'hermes-bots/relay.ts relayDeliverParams',
+    'bot-mode/relay.ts relayDeliverParams',
     'bot_relay.deliver',
     {
       id: 'e',
@@ -247,7 +247,7 @@ test.each(SITES)('%s: the canonical frame fits the generated contract', async (_
       )
     })
   })
-  const client = new HermesGateway()
+  const client = new AgentGateway()
 
   try {
     const address = server.address() as { port: number }

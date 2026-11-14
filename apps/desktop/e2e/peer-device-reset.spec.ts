@@ -8,6 +8,7 @@ import * as fs from 'node:fs'
 import * as net from 'node:net'
 import * as path from 'node:path'
 
+import { writeEnvFile, writeMockProviderConfig } from '../../../tests-js/scripts/mock-provider-config'
 import { MOCK_REPLY, startMockServer } from '../../../tests-js/scripts/mock-server'
 
 import {
@@ -16,7 +17,6 @@ import {
   launchDesktop,
   type Sandbox,
 } from './fixtures'
-import { writeEnvFile, writeMockProviderConfig } from '../../../tests-js/scripts/mock-provider-config'
 import { collectErrorBanners, type ElectronApplication, expect, installErrorBannerGuard, type Page, test } from './test'
 
 const REPO_ROOT = path.resolve(import.meta.dirname, '../../..')
@@ -171,7 +171,7 @@ const peerTest = test.extend<{ gateways: { app: ElectronApplication; source: Pag
 
       const port = await freePort()
       const remoteUrl = `http://127.0.0.1:${port}`
-      child = spawn(pythonBinary(), ['-m', 'hermes_cli.main', 'serve', '--host', '127.0.0.1', '--port', String(port), '--skip-build'], {
+      child = spawn(pythonBinary(), ['-m', 'agent_cli.main', 'serve', '--host', '127.0.0.1', '--port', String(port), '--skip-build'], {
         cwd: REPO_ROOT,
         detached: process.platform !== 'win32',
         env: { ...isolatedEnv(remote), HERMES_DASHBOARD_SESSION_TOKEN: REMOTE_TOKEN },

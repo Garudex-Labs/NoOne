@@ -19,7 +19,7 @@ known_issues:
   - "The tools crumb and crumb_find come through the memory provider, not ctx.register_tool, so the plugin's tool list is empty. Their names carry the prefix mcp__ (mcp__crumb, mcp__crumb_find): Anthropic OAuth maps only registry tools back to their names. BREADCRUMBS_TOOL_PREFIX changes the prefix."
   - "Windows has no flock: use one writer per store there."
   - "Summaries need llama.cpp's llama-completion and a GGUF model. Without them all else works."
-  - "slot.py, seats.py, island.py and logview.py import Hermes modules that have no public seam yet (plugins.memory, hermes_cli.profiles, hermes_cli.relaunch, hermes_cli.sqlite_safe_read). Each import fails soft: if a release moves it, that feature turns off and logs a warning."
+  - "slot.py, seats.py, island.py and logview.py import Hermes modules that have no public seam yet (plugins.memory, agent_cli.profiles, agent_cli.relaunch, agent_cli.sqlite_safe_read). Each import fails soft: if a release moves it, that feature turns off and logs a warning."
   - "/island asks through ctx.ask_choice (Hermes 0.22.5 or later)."
 capabilities:
   provides_tools: []

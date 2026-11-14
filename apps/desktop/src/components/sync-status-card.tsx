@@ -11,9 +11,8 @@
  * between the derivation and the paint.
  */
 
+import { AlertCircle, AlertTriangle, Check } from '@noone/ui/icons'
 import { useEffect, useState } from 'react'
-
-import { AlertCircle, AlertTriangle, Check } from '@/lib/icons'
 
 import { deriveSyncStatusSummary, type SyncStatusSummary } from './sync-status'
 

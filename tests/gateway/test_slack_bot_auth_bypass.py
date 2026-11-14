@@ -1,6 +1,6 @@
 """Regression guard for Slack bot/workflow-sender authorization bypass.
 
-Mirrors tests/gateway/test_feishu_bot_auth_bypass.py for Platform.SLACK.
+Checks Platform.SLACK bot intake authorization.
 
 Slack Workflow Builder posts (and other app/bot messages) arrive as
 ``subtype=bot_message`` with ``user=None``, so the SessionSource carries

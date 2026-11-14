@@ -17,7 +17,7 @@ repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # shellcheck source=scripts/_activation.sh
 . "$repo/scripts/_activation.sh"
 python="$(hermes_bootstrap_python "$repo")" || {
-    echo "no bootstrap Python found; run setup-hermes.sh" >&2
+    echo "no bootstrap Python found; run setup-agent.sh" >&2
     exit 1
 }
 bin="${python%[/\\]*}"

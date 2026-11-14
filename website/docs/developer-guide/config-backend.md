@@ -1,17 +1,16 @@
 ---
-sidebar_position: 12
 title: "Config Backend Seam"
 description: "Where a profile's user config.yaml is read and written: the ConfigBackend seam, the file and remote backends, and the CI lints that keep every caller on it"
 ---
 
-# Config Backend Seam
+# Config Backend Seam {#config-backend-seam}
 
 Every read, stat, existence check and write of a profile's user `config.yaml` goes through
-`hermes_cli/config_backend.py`. The backend is chosen once per process from
+`agent_cli/config_backend.py`. The backend is chosen once per process from
 `HERMES_CONFIG_BACKEND`, never from a config value: `file` is the default, and `remote` is
 [Remote Config](../user-guide/remote-config.md) (`plugins/config_backends/remote/`).
 
-## Helpers
+## Helpers {#helpers}
 
 | Helper | Use |
 |---|---|
@@ -42,13 +41,13 @@ check never makes such a worker open the profile file. Caches keyed on `config_c
 when a remote poll installs a new layer, exactly as they do after a local file edit. With the file
 backend, the managed scope (`/etc/hermes`) stays an overlay on top of the user layer. The remote
 backend ignores the managed `config.yaml`: config and locks come only from Remote Config, and
-`hermes doctor` flags the file if it exists. The managed `.env` still applies in both modes.
+`noone doctor` flags the file if it exists. The managed `.env` still applies in both modes.
 
 Related keys that must change together (a model switch's `model.*` keys, the TUI `/focus`
 toggle) go through `write_config_keys(path, {key: value, ...})`. A remote backend sends them
 as one CAS write, so a lock on any of them refuses all of them.
 
-## Lints
+## Lints {#lints}
 
 - `scripts/check_config_yaml_writers.py` rejects a direct YAML dump of a config path.
 - `scripts/check_config_yaml_readers.py` rejects a direct `open` / `read_text` / `stat` /

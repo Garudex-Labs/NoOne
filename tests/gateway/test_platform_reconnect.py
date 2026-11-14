@@ -85,7 +85,7 @@ class TestStartupPlatformIsolation:
 
     @pytest.mark.asyncio
     async def test_start_continues_after_platform_connect_timeout(self, tmp_path, monkeypatch):
-        """A timeout on Telegram should queue it and still connect Feishu."""
+        """A timeout on Telegram should queue it and still connect Signal."""
         # Skip the boot warm-up and boot-path sends: unrelated to platform
         # isolation, and with create_task stubbed below the bounded wait on
         # the (never-started) send task would hold start() for 30 s.
@@ -95,7 +95,7 @@ class TestStartupPlatformIsolation:
         runner.config = GatewayConfig(
             platforms={
                 Platform.TELEGRAM: PlatformConfig(enabled=True, token="test"),
-                Platform.FEISHU: PlatformConfig(enabled=True, token="test"),
+                Platform.SIGNAL: PlatformConfig(enabled=True, token="test"),
             },
             sessions_dir=tmp_path,
         )
@@ -111,7 +111,7 @@ class TestStartupPlatformIsolation:
 
         adapters = {
             Platform.TELEGRAM: StubAdapter(platform=Platform.TELEGRAM),
-            Platform.FEISHU: StubAdapter(platform=Platform.FEISHU),
+            Platform.SIGNAL: StubAdapter(platform=Platform.SIGNAL),
         }
         runner._create_adapter = MagicMock(
             side_effect=lambda platform, _config: adapters[platform]
@@ -128,8 +128,8 @@ class TestStartupPlatformIsolation:
             return MagicMock()
 
         with patch("gateway.status.publish_runtime_status"):
-            with patch("hermes_cli.plugins.discover_plugins"):
-                with patch("hermes_cli.config.load_config", return_value={}):
+            with patch("agent_cli.plugins.discover_plugins"):
+                with patch("agent_cli.config.load_config", return_value={}):
                     with patch("agent.shell_hooks.register_from_config"):
                         with patch(
                             "tools.process_registry.process_registry.recover_from_checkpoint",
@@ -143,7 +143,7 @@ class TestStartupPlatformIsolation:
                                     assert await runner.start() is True
 
         assert Platform.TELEGRAM in runner._failed_platforms
-        assert Platform.FEISHU in runner.adapters
+        assert Platform.SIGNAL in runner.adapters
         assert Platform.TELEGRAM not in runner.adapters
         assert runner._create_adapter.call_count == 2
 
@@ -367,12 +367,12 @@ class TestPlatformReconnectWatcher:
         """An unregistered plugin platform (its deferred load failed at startup) heals on the next watcher
         tick: the adapter_unavailable branch re-arms the failed load instead of waiting for a manual
         reload-plugins or restart (#126356)."""
-        import hermes_cli.plugins as plugins_mod
+        import agent_cli.plugins as plugins_mod
 
         runner = _make_runner()
         runner._update_platform_runtime_status = MagicMock()
         runner._install_reconnected_adapter = AsyncMock()
-        platform = Platform("irc")  # bundled plugin platform (not a builtin adapter)
+        platform = Platform("line")  # bundled plugin platform (not a builtin adapter)
         monkeypatch.setattr(runner, "_adapter_may_heal", lambda p, c: True)
         runner._failed_platforms[platform] = {
             "config": PlatformConfig(enabled=True), "attempts": 0, "next_retry": 0,
@@ -393,7 +393,7 @@ class TestPlatformReconnectWatcher:
             runner._failed_platforms.get(platform, {})["next_retry"] = 0
             await runner._reconnect_failed_platform(platform, time.monotonic())
 
-        assert rearmed == ["irc"] * 3  # a permanently broken plugin stops being re-imported after the cap
+        assert rearmed == ["line"] * 3  # a permanently broken plugin stops being re-imported after the cap
         assert on_loop and not any(on_loop)  # neither the re-arm nor the plugin load blocks the event loop
         runner._install_reconnected_adapter.assert_awaited_once_with(platform, adapter)
 
@@ -541,8 +541,8 @@ class TestReconnectKeepsInboundDedup:
         runner._configure_profile_adapter = MagicMock(side_effect=lambda *_a: setattr(runner, "_running", False))
         if mode != "connect-raises":  # stub the attempt; connect-raises runs the real one's own teardown
             runner._secondary_reconnect_attempt = attempt
-        with patch("hermes_cli.profiles.get_profile_dir"), \
-             patch("hermes_cli.env_loader.hydrate_profile_secret_sources"), \
+        with patch("agent_cli.profiles.get_profile_dir"), \
+             patch("agent_cli.env_loader.hydrate_profile_secret_sources"), \
              patch("gateway.run._profile_runtime_scope", MagicMock()), \
              patch("gateway.run._platform_has_bot_credential", return_value=True), \
              patch("gateway.config.load_gateway_config") as load, \
@@ -666,7 +666,7 @@ class TestSpawnSupervised:
             is_delegated_child_context,
         )
         from gateway.kanban_watchers_common import _to_thread_process_service
-        from hermes_cli.kanban_db import _assert_not_delegated_child_mutation
+        from agent_cli.kanban_db import _assert_not_delegated_child_mutation
 
         with delegated_child_context():
             assert is_delegated_child_context() is True
@@ -721,7 +721,7 @@ class TestFatalHandoffCancellationProof:
         runner.adapters[Platform.TELEGRAM] = adapter
         # A healthy peer keeps self.adapters non-empty, so the existing
         # "no platforms remain" shutdown branches do not fire.
-        runner.adapters[Platform.FEISHU] = StubAdapter(platform=Platform.FEISHU)
+        runner.adapters[Platform.SIGNAL] = StubAdapter(platform=Platform.SIGNAL)
 
         await runner._handle_adapter_fatal_error(adapter)
 
@@ -870,8 +870,8 @@ class TestVoiceInputCallbackWiring:
 
         with patch.object(runner, "_create_adapter", return_value=adapter):
             with patch("gateway.status.publish_runtime_status"):
-                with patch("hermes_cli.plugins.discover_plugins"):
-                    with patch("hermes_cli.config.load_config", return_value={}):
+                with patch("agent_cli.plugins.discover_plugins"):
+                    with patch("agent_cli.config.load_config", return_value={}):
                         with patch("agent.shell_hooks.register_from_config"):
                             with patch(
                                 "tools.process_registry.process_registry.recover_from_checkpoint",

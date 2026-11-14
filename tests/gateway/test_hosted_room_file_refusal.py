@@ -16,12 +16,12 @@ from gateway import hosted_room_driver as state
 from gateway import hosted_rooms
 from gateway.hosted_room_attachments import HostedRoomAttachmentStore
 from gateway.session_hosted_rpc import HostedRoomAuthorityRPC
-from tests.tui_gateway.test_hosted_room_attachment_routes import (
+from tests.agent_backend.test_hosted_room_attachment_routes import (
     _admit, _legacy_runtime, _run_until_settled_or_error, _server_module)
-from tests.tui_gateway.test_hosted_room_driver_runtime import BINDING, PROFILE, ROOM_ID
+from tests.agent_backend.test_hosted_room_driver_runtime import BINDING, PROFILE, ROOM_ID
 from tests.waiting import wait_until
-from tui_gateway.hosted_room_driver import HostedRoomBinding, HostedRoomRuntime
-from tui_gateway.hosted_room_server_rpc import HostedRoomServerRPC
+from agent_backend.hosted_room_driver import HostedRoomBinding, HostedRoomRuntime
+from agent_backend.hosted_room_server_rpc import HostedRoomServerRPC
 
 
 def _cap_member_media(monkeypatch, limit: int) -> None:

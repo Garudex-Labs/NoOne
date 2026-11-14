@@ -8,7 +8,7 @@ profile has no such provider) and keeps billing until the provider's own timeout
 
 import pytest
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from tools import browser_launcher as launcher
 from tools import browser_session as bs
 from tools import browser_session_cloud
@@ -30,7 +30,7 @@ class _ProfileProvider:
     closed: list = []
 
     def __init__(self):
-        self.home = str(get_hermes_home())
+        self.home = str(get_agent_home())
 
     def close_session(self, session_id):
         _ProfileProvider.closed.append((self.home, session_id))

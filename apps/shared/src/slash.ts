@@ -1,7 +1,7 @@
 /**
  * The slash-command wire contract every TypeScript surface shares: how a typed
  * line splits into `name` + `arg`, and the `command.dispatch` response union
- * (`tui_gateway/methods_tools.py::command.dispatch`). One parser, so a fix such
+ * (`agent_backend/methods_tools.py::command.dispatch`). One parser, so a fix such
  * as the multi-line argument bug (#41323, #55510) reaches desktop and TUI at
  * once instead of landing in whichever copy the reporter happened to use.
  */
@@ -30,7 +30,7 @@ export interface ParsedSlashCommand {
 }
 
 /** Split `/name arg…` the way the backend does. The name is lower-cased because
- *  every consumer (`hermes_cli.commands.resolve_command`, `slash.exec`) is
+ *  every consumer (`agent_cli.commands.resolve_command`, `slash.exec`) is
  *  case-insensitive; keeping the typed case only made surfaces disagree. */
 export function parseSlashCommand(command: string): ParsedSlashCommand {
   const match = SLASH_PARTS_RE.exec(command.replace(/^\/+/, ''))

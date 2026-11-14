@@ -1,34 +1,42 @@
 ---
 title: "Fitness Nutrition — Workout planning, macros, and body metrics via wger/USDA"
-sidebar_label: "Fitness Nutrition"
+sidebarTitle: "Fitness Nutrition"
 description: "Workout planning, macros, and body metrics via wger/USDA"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Fitness Nutrition
+# Fitness Nutrition {#fitness-nutrition}
 
 Workout planning, macros, and body metrics via wger/USDA.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/health/fitness-nutrition` |
+| Source | Optional — install with `noone skills install official/health/fitness-nutrition` |
 | Path | `optional-skills/health/fitness-nutrition` |
 | Version | `1.0.0` |
-| Author | Hailey Marshall (haileymarshall), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `health`, `fitness`, `nutrition`, `gym`, `workout`, `diet`, `exercise` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Fitness & Nutrition
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Fitness & Nutrition {#fitness--nutrition}
 
 Expert fitness coach and sports nutritionist skill. Two data sources
 plus offline calculators — everything a gym-goer needs in one place.
@@ -44,7 +52,7 @@ plus offline calculators — everything a gym-goer needs in one place.
 
 ---
 
-## When to Use
+## When to Use {#when-to-use}
 
 Trigger this skill when the user asks about:
 - Exercises, workouts, gym routines, muscle groups, workout splits
@@ -55,9 +63,9 @@ Trigger this skill when the user asks about:
 
 ---
 
-## Procedure
+## Procedure {#procedure}
 
-### Exercise Lookup (wger API)
+### Exercise Lookup (wger API) {#exercise-lookup-wger-api}
 
 All wger public endpoints return JSON and require no auth. Always add
 `format=json` and `language=2` (English) to exercise queries.
@@ -163,7 +171,7 @@ for ex in data.get('results',[]):
 "
 ```
 
-### Nutrition Lookup (USDA FoodData Central)
+### Nutrition Lookup (USDA FoodData Central) {#nutrition-lookup-usda-fooddata-central}
 
 Uses `USDA_API_KEY` env var if set, otherwise falls back to `DEMO_KEY`.
 DEMO_KEY = 30 requests/hour. Free signup key = 1,000 requests/hour.
@@ -208,7 +216,7 @@ for x in sorted(d.get('foodNutrients',[]),key=lambda x:x.get('nutrient',{}).get(
 "
 ```
 
-### Offline Calculators
+### Offline Calculators {#offline-calculators}
 
 Use the helper scripts in `scripts/` for batch operations,
 or run inline for single calculations:
@@ -223,7 +231,7 @@ See `references/FORMULAS.md` for the science behind each formula.
 
 ---
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - wger exercise endpoint returns **all languages by default** — always add `language=2` for English
 - wger includes **unverified user submissions** — add `status=2` to only get approved exercises
@@ -236,7 +244,7 @@ See `references/FORMULAS.md` for the science behind each formula.
 
 ---
 
-## Verification
+## Verification {#verification}
 
 After running exercise search: confirm results include exercise names, muscle groups, and equipment.
 After nutrition lookup: confirm per-100g macros are returned with kcal, protein, fat, carbs.
@@ -244,7 +252,7 @@ After calculators: sanity-check outputs (e.g. TDEE should be 1500-3500 for most 
 
 ---
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Task | Source | Endpoint |
 |------|--------|----------|

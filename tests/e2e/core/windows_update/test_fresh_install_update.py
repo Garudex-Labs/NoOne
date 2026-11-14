@@ -1,4 +1,4 @@
-"""Fresh source install on native Windows, then ``hermes update`` HEAD -> NEXT.
+"""Fresh source install on native Windows, then ``noone update`` HEAD -> NEXT.
 
 Failure class: the first things a new Windows user does. ``install.ps1 -NonInteractive``
 on a clean profile (no git, no Python, no uv on PATH), the first agent launch, then the
@@ -31,7 +31,7 @@ pytestmark = [pytest.mark.platforms("windows"), pytest.mark.integration,
 
 
 def _installed_state(machine) -> dict:
-    marker = machine.install_dir / ".hermes-bootstrap-complete"
+    marker = machine.install_dir / ".agent-bootstrap-complete"
     pinned = (json.loads(marker.read_text(encoding="utf-8-sig")).get("pinnedCommit")
               if marker.is_file() else None)
     return {"head": machine.installed_head(), "marker": marker.is_file(), "pinned": pinned}
@@ -84,10 +84,10 @@ def test_first_agent_launch_runs_the_turn(journey: Journey) -> None:
 def test_update_moves_checkout_to_next(journey: Journey) -> None:
     m, run = journey.machine, journey["update"]
     assert run.returncode == 0, fail_with(
-        m, f"hermes update exited {run.returncode}: {failure_line(run)}", run)
+        m, f"noone update exited {run.returncode}: {failure_line(run)}", run)
     head = m.installed_head()
     assert head == m.next, fail_with(
-        m, f"after hermes update the checkout is at {head}, expected NEXT {m.next}", run)
+        m, f"after noone update the checkout is at {head}, expected NEXT {m.next}", run)
     assert (m.install_dir / NEXT_MARKER).is_file(), fail_with(
         m, "NEXT's marker file is missing from the checkout", run)
     receipt_path = m.hermes_home / "logs" / "update_receipts" / "latest.json"

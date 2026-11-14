@@ -1,50 +1,59 @@
 ---
 title: "Pr Lens — Draw code changes as animated architecture/data-flow SVGs"
-sidebar_label: "Pr Lens"
+sidebarTitle: "Pr Lens"
 description: "Draw code changes as animated architecture/data-flow SVGs"
 ---
 
+
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Pr Lens
+# Pr Lens {#pr-lens}
 
 Draw code changes as animated architecture/data-flow SVGs.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/software-development/pr-lens` |
+| Source | Optional — install with `noone skills install official/software-development/pr-lens` |
 | Path | `optional-skills/software-development/pr-lens` |
 | Version | `1.0.0` |
-| Author | Coldtea AI (adapted by Nous Research) |
+| Author | Coldtea AI (adapted by Garudex Labs) |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `diagrams`, `pull-requests`, `code-review`, `svg` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# PR Lens Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# PR Lens Skill {#pr-lens-skill}
 
 PR Lens draws code as visually rich animated diagrams: diffs, architecture, data flows. You describe the diff or codebase as one JSON document (lanes, nodes, edges, ordered flows) and the CLI renders it as animated SVGs. There is no findings lens — PR Lens is a comprehension layer, not a review bot. There is no field for a bug, risk, or security note, and a document that invents one is rejected.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - Asked to diagram, visualise, or explain a code change or a system.
 - A pull request should carry an architecture or data-flow diagram.
 - Keywords: PR Lens, diagram, architecture, data flow, visualise, pull request.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Node.js with `npx` (the CLI runs via `npx @coldtea/pr-lens-cli@latest`; no install step).
 - `gh` (GitHub CLI) — optional, only for attaching diagrams to PRs.
 - Optional canvas publishing calls the third-party service prlens.dev (see step 4b).
 
-## How to Run
+## How to Run {#how-to-run}
 
 Run all commands with the terminal tool from the repository root.
 
@@ -76,7 +85,7 @@ Run all commands with the terminal tool from the repository root.
 
    It prints three links. Give the user the **view link** (`https://prlens.dev/c/{id}`): the full-screen diagram, every view on one page, no login. The **edit link** (ending in `#w=…`) lets its holder overwrite the canvas — it is a secret: leave it out of the reply unless asked, never paste it anywhere public. The embed link serves the top view as an SVG for a README. Pushing the same file again updates the same canvas, so "rename that node" is: edit, validate, render, push — the link stays the same. If the push fails, say so and tell the user where the local SVGs are and which is the top view.
 
-5. **Attach to a PR, when there is one.** Upstream documents `gh pr create/edit/comment --attach <path>`, but `--attach` arrived in GitHub CLI 2.99 — check `gh --version` first (e.g. gh 2.97 does NOT have it). With gh ≥ 2.99: write the body with a Markdown image `![alt](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/software-development/pr-lens/.pr-lens/<view>.svg)` (an HTML `<img>` is left as written and the file appended at the bottom instead; alt text is the one-line caption a reader without images gets), then repeat `--attach <path>` per referenced diagram:
+5. **Attach to a PR, when there is one.** Upstream documents `gh pr create/edit/comment --attach <path>`, but `--attach` arrived in GitHub CLI 2.99 — check `gh --version` first (e.g. gh 2.97 does NOT have it). With gh ≥ 2.99: write the body with a Markdown image `![alt](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/software-development/pr-lens/.pr-lens/<view>.svg)` (an HTML `<img>` is left as written and the file appended at the bottom instead; alt text is the one-line caption a reader without images gets), then repeat `--attach <path>` per referenced diagram:
 
    ```bash
    gh pr create --title "…" --body-file .pr-lens/body.md --attach .pr-lens/overview-light-<hash>.svg
@@ -102,7 +111,7 @@ Run all commands with the terminal tool from the repository root.
 
 6. **Optional automation:** `npx @coldtea/pr-lens-cli@latest analyze --base <ref>` does steps 1–2 by asking a provider (Gemini, OpenAI, or any `/chat/completions` endpoint) with a key of your own. That is the only path here that needs one; normally you author the document yourself.
 
-## What makes a document worth reading
+## What makes a document worth reading {#what-makes-a-document-worth-reading}
 
 - **Include what did not change.** Unchanged neighbours a change touches are the context; mark them `delta: "unchanged"`.
 - **Lanes are the reader's mental model** (a runtime, a tier, a boundary), not the folder tree.
@@ -113,7 +122,7 @@ Run all commands with the terminal tool from the repository root.
 - **Walkthroughs** (2–12 steps, aim 3–7): write one for anything non-trivial. Each step = one change (added/removed/moved), headline change first, overview last. Headings ≤48 chars built from change words; bodies ≤140 chars on behaviour, required. Write for a smart twelve-year-old; no "leverages"/"orchestrates". Keep consecutive steps on the same stage. The walkthrough field needs CLI ≥ 0.4.0 (contract 0.1.1).
 - **Fixing a wrong map:** never edit the generated document — write corrections into `.github/pr-lens.yml` (see `references/config.md`), then validate it: `npx @coldtea/pr-lens-cli@latest validate .github/pr-lens.yml`. Prefer path globs over `id:` matches.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Command | Purpose |
 | --- | --- |
@@ -132,7 +141,7 @@ Validator failure codes:
 | `DUPLICATE_ID` | two nodes, edges or views sharing an id |
 | `UNSUPPORTED_SCHEMA_VERSION` | `schemaVersion` is not the contract version installed |
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Six rules are parser-only, not in the JSON Schema (referential integrity, inverted line ranges, disagreeing `self` endpoints, identical patch commits, too many views for a manifest, flow-step focus on the wrong stage) — always run `validate`, structured output alone is not enough.
 - Do not commit anything in `.pr-lens/`; it is regenerated and gitignored by the CLI.
@@ -141,7 +150,7 @@ Validator failure codes:
 - A stored map never carries a walkthrough; a walkthrough tells the story of one change.
 - `pr-lens render` reports corrections in `.github/pr-lens.yml` that matched nothing — that is drift worth fixing, not an error.
 
-## Verification
+## Verification {#verification}
 
 Smoke test (live-verified 2026-09-12 with `@coldtea/pr-lens-cli` via npx, node on Linux):
 

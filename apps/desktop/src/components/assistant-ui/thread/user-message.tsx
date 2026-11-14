@@ -1,5 +1,7 @@
 import { ActionBarPrimitive, BranchPickerPrimitive, MessagePrimitive, useAuiState } from '@assistant-ui/react'
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { StopFilled } from '@noone/ui/icons'
 import { type FC, type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
 import { DirectiveContent } from '@/components/assistant-ui/directive-text'
@@ -18,12 +20,10 @@ import { type RestoreMessageTarget } from '@/components/assistant-ui/thread/type
 import { useMessageReactions } from '@/components/assistant-ui/thread/use-message-reactions'
 import { UserMessageText } from '@/components/assistant-ui/thread/user-message-text'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { useResizeObserver } from '@/hooks/use-resize-observer'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { StopFilled } from '@/lib/icons'
 import { LruCache } from '@/lib/lru-cache'
 import { $touchPointer, isTouchInteraction } from '@/lib/touch-interaction'
 import { cn } from '@/lib/utils'
@@ -322,7 +322,7 @@ const UserBubbleActions: FC<UserBubbleActionsProps> = ({
             }}
             type="button"
           >
-            <Codicon name="discard" size="0.875rem" />
+            <AppIcon name="discard" size="0.875rem" />
           </button>
         </Tip>
       ) : null}
@@ -376,7 +376,7 @@ function TouchUserBubble({
             size="icon"
             variant="ghost"
           >
-            <Codicon name={expanded ? 'chevron-up' : 'chevron-down'} />
+            <AppIcon name={expanded ? 'chevron-up' : 'chevron-down'} />
           </Button>
         )}
         {editable && (
@@ -388,7 +388,7 @@ function TouchUserBubble({
               size="icon"
               variant="ghost"
             >
-              <Codicon name="edit" />
+              <AppIcon name="edit" />
             </Button>
           </ActionBarPrimitive.Edit>
         )}

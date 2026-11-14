@@ -29,7 +29,7 @@ from gateway.session import SessionSource
 from gateway.session_ingress_context import (
     capture_provenance, native_callback, register_transport_home)
 
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 
 class _FakeAdapter:
@@ -45,9 +45,9 @@ def _reserve_homes(tmp_path, monkeypatch, names=("guest",)):
     root.mkdir(mode=0o700)
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
     monkeypatch.setenv("HERMES_HOME", str(root))
-    import hermes_state
+    import agent_state
     monkeypatch.setattr(
-        hermes_state, "DEFAULT_DB_PATH", hermes_state._IMPORT_DEFAULT_DB_PATH)
+        agent_state, "DEFAULT_DB_PATH", agent_state._IMPORT_DEFAULT_DB_PATH)
     homes = [("default", root)]
     for name in names:
         home = root / "profiles" / name
@@ -62,14 +62,14 @@ def _runner(root, homes):
     config.multiplex_profiles = True
     config._runtime_profile_homes = tuple(homes)
     config.profile_routes = parse_profile_routes([
-        {"name": "alice-dm", "platform": "bluebubbles", "user_id": ALICE, "profile": "guest"},
-        {"name": "everyone-else", "platform": "bluebubbles", "profile": "default"},
+        {"name": "alice-dm", "platform": "signal", "user_id": ALICE, "profile": "guest"},
+        {"name": "everyone-else", "platform": "signal", "profile": "default"},
     ])
     return GatewayRunner(config)
 
 
 async def _admit_and_read_provenance(tmp_path, monkeypatch, user_id):
-    """Admit one BlueBubbles DM the way a live adapter does and return its provenance."""
+    """Admit one Signal DM the way a live adapter does and return its provenance."""
     root, homes = _reserve_homes(tmp_path, monkeypatch)
     runner = _runner(root, homes)
     process_ownership.reserve([home for _, home in homes])
@@ -77,12 +77,12 @@ async def _admit_and_read_provenance(tmp_path, monkeypatch, user_id):
         await initialize_gateway_runtime(runner)
         register_transport_home(runner, None, root)
         adapter = _FakeAdapter()
-        runner.adapters = {Platform.BLUEBUBBLES: adapter}
+        runner.adapters = {Platform.SIGNAL: adapter}
         runner._is_user_authorized_for_source = lambda *a, **k: True
 
         stamped = None
         source = SessionSource(
-            platform=Platform.BLUEBUBBLES, chat_id=f"any;-;{user_id}", chat_type="dm",
+            platform=Platform.SIGNAL, chat_id=f"any;-;{user_id}", chat_type="dm",
             user_id=user_id, user_name=user_id)
         # session_identity.identity_of stamps the routed profile onto the primary's source and
         # keeps the receiving adapter as provenance; hand-built sources need both, exactly as

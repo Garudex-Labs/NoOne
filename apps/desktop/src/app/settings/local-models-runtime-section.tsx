@@ -1,11 +1,11 @@
+import { CheckCircle2, Download, Loader2, Pause, StopFilled, Zap } from '@noone/ui/icons'
 import { useIsMutating } from '@tanstack/react-query'
 import { type ReactElement, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { CheckCircle2, Download, Loader2, Pause, StopFilled, Zap } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { localModelsKey, runningRuntimeInstall, startLocalRuntimeInstall } from '@/store/local-runtime-jobs'
-import type { LocalModelsStatus, LocalRuntimeJob } from '@/types/hermes'
+import type { LocalModelsStatus, LocalRuntimeJob } from '@/types/agent-client'
 
 import { LocalModelDownloadActions, LocalModelDownloadProgress } from './local-model-download-progress'
 import { type LocalModelsActionScope, setServerRunning, useLocalModelsActionScope } from './local-models-actions'

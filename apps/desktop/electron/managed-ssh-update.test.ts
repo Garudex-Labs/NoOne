@@ -565,7 +565,7 @@ test.runIf(process.platform !== 'win32')(
       assert.equal(owed.restoreOk, true)
       assert.deepEqual(owed.owed, [{ step: 'dependencies', reason: 'sync failed' }])
       assert.match(owed.message || '', /still owed: dependencies \(sync failed\)/)
-      assert.match(owed.message || '', /hermes update/)
+      assert.match(owed.message || '', /noone update/)
       assert.match(managedSshUpdateAllRow({ id: 'home' }, owed).detail || '', /dependencies/)
 
       const clean = await run([])
@@ -601,7 +601,7 @@ test.runIf(process.platform !== 'win32')(
       const detail = managedSshUpdateAllRow({ id: 'home' }, partial).detail || ''
       assert.ok(detail.includes(instruction), detail)
       assert.match(detail, /local_changes/)
-      assert.doesNotMatch(detail, /Re-run `hermes update`/)
+      assert.doesNotMatch(detail, /Re-run `noone update`/)
     } finally {
       await rm(home, { force: true, recursive: true })
     }

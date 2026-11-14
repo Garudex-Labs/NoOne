@@ -1,3 +1,5 @@
+import { appText } from '@noone/shared/application-identity'
+
 import { $gateway } from '@/store/gateway'
 import { $activeSessionId, setYoloActive } from '@/store/session'
 import { requestForOwnedSession } from '@/store/session-states'
@@ -74,7 +76,7 @@ export async function setYoloEnabled(enabled: boolean): Promise<boolean> {
   const gateway = $gateway.get()
 
   if (!gateway) {
-    throw new Error('Hermes gateway unavailable')
+    throw new Error(appText('{app_name} gateway unavailable'))
   }
 
   return setSessionYolo((method, params) => gateway.request(method, params), sessionId, enabled)

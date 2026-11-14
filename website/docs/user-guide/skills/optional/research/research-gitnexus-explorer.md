@@ -1,60 +1,68 @@
 ---
 title: "Gitnexus Explorer — Serve an interactive codebase knowledge graph web UI"
-sidebar_label: "Gitnexus Explorer"
+sidebarTitle: "Gitnexus Explorer"
 description: "Serve an interactive codebase knowledge graph web UI"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Gitnexus Explorer
+# Gitnexus Explorer {#gitnexus-explorer}
 
 Serve an interactive codebase knowledge graph web UI.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/gitnexus-explorer` |
+| Source | Optional — install with `noone skills install official/research/gitnexus-explorer` |
 | Path | `optional-skills/research/gitnexus-explorer` |
 | Version | `1.0.0` |
-| Author | Hermes Agent + Teknium |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `gitnexus`, `code-intelligence`, `knowledge-graph`, `visualization` |
 | Related skills | [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md), [`codebase-inspection`](../../bundled/software-development/software-development-codebase-inspection.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# GitNexus Explorer
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# GitNexus Explorer {#gitnexus-explorer-1}
 
 Index any codebase into a knowledge graph and serve an interactive web UI for exploring
 symbols, call chains, clusters, and execution flows. Tunneled via Cloudflare for remote access.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User wants to visually explore a codebase's architecture
 - User asks for a knowledge graph / dependency graph of a repo
 - User wants to share an interactive codebase explorer with someone
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **Node.js** (v18+) — required for GitNexus and the proxy
 - **git** — repo must have a `.git` directory
 - **cloudflared** — for tunneling (auto-installed to ~/.local/bin if missing)
 
-## Size Warning
+## Size Warning {#size-warning}
 
 The web UI renders all nodes in the browser. Repos under ~5,000 files work well. Large
 repos (30k+ nodes) will be sluggish or crash the browser tab. The CLI/MCP tools work
 at any scale — only the web visualization has this limit.
 
-## Steps
+## Steps {#steps}
 
-### 1. Clone and Build GitNexus (one-time setup)
+### 1. Clone and Build GitNexus (one-time setup) {#1-clone-and-build-gitnexus-one-time-setup}
 
 ```bash
 GITNEXUS_DIR="${GITNEXUS_DIR:-$HOME/.local/share/gitnexus}"
@@ -66,7 +74,7 @@ if [ ! -d "$GITNEXUS_DIR/gitnexus-web/dist" ]; then
 fi
 ```
 
-### 2. Patch the Web UI for Remote Access
+### 2. Patch the Web UI for Remote Access {#2-patch-the-web-ui-for-remote-access}
 
 The web UI defaults to `localhost:4747` for API calls. Patch it to use same-origin
 so it works through a tunnel/proxy:
@@ -96,7 +104,7 @@ Then build the production bundle:
 cd "$GITNEXUS_DIR/gitnexus-web" && npx vite build
 ```
 
-### 3. Index the Target Repo
+### 3. Index the Target Repo {#3-index-the-target-repo}
 
 ```bash
 cd /path/to/target-repo
@@ -108,7 +116,7 @@ Add `--embeddings` for semantic search (slower — minutes instead of seconds).
 
 The index lives in `.gitnexus/` inside the repo (auto-gitignored).
 
-### 4. Create the Proxy Script
+### 4. Create the Proxy Script {#4-create-the-proxy-script}
 
 Write this to a file (e.g., `$GITNEXUS_DIR/proxy.mjs`). It serves the production
 web UI and proxies `/api/*` to the GitNexus backend — same origin, no CORS issues,
@@ -161,7 +169,7 @@ http.createServer((req, res) => {
 }).listen(PORT, () => console.log(`GitNexus proxy on http://localhost:${PORT}`));
 ```
 
-### 5. Start the Services
+### 5. Start the Services {#5-start-the-services}
 
 ```bash
 # Terminal 1: GitNexus backend API
@@ -173,7 +181,7 @@ node "$GITNEXUS_DIR/proxy.mjs" "$GITNEXUS_DIR/gitnexus-web/dist" 8888 &
 
 Verify: `curl -s http://localhost:8888/api/repos` should return the indexed repo(s).
 
-### 6. Tunnel with Cloudflare (optional — for remote access)
+### 6. Tunnel with Cloudflare (optional — for remote access) {#6-tunnel-with-cloudflare-optional--for-remote-access}
 
 ```bash
 # Install cloudflared if needed (no sudo)
@@ -192,7 +200,7 @@ cloudflared tunnel --config /dev/null --url http://localhost:8888 --no-autoupdat
 The tunnel URL (e.g., `https://random-words.trycloudflare.com`) is printed to stderr.
 Share it — anyone with the link can explore the graph.
 
-### 7. Cleanup
+### 7. Cleanup {#7-cleanup}
 
 ```bash
 # Stop services
@@ -206,7 +214,7 @@ npx gitnexus clean
 rm -rf .claude/
 ```
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **`--config /dev/null` is required for cloudflared** if the user has an existing
   named tunnel config at `~/.cloudflared/config.yml`. Without it, the catch-all

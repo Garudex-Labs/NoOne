@@ -1,19 +1,19 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
-import type { DesktopConnectionsRegistry, HermesConnection } from '@/global'
-import type * as Hermes from '@/hermes'
+import type * as Agent from '@/agent-client'
+import type { AgentConnection, DesktopConnectionsRegistry } from '@/global'
 
 import { deferred } from '../test/deferred'
 
 vi.mock('@/app/contrib/hooks/use-background-sync', () => ({ resetLiveRuntimeTracking: vi.fn() }))
-vi.mock('@/hermes', async importOriginal => {
-  const actual = await importOriginal<typeof Hermes>()
+vi.mock('@/agent-client', async importOriginal => {
+  const actual = await importOriginal<typeof Agent>()
 
   return {
     ...actual,
     getProfiles: vi.fn(async () => ({ profiles: [{ name: 'default' }] })),
     hermesApi: vi.fn(async () => ({ current: 'default', profiles: [{ name: 'default' }] })),
-    HermesGateway: class {
+    AgentGateway: class {
       connectionState = 'closed'
       wsUrl = ''
       connect = async (url: string) => {
@@ -58,7 +58,7 @@ const registry: DesktopConnectionsRegistry = {
   ]
 }
 
-function descriptor(connectionId: string, profile = 'default'): HermesConnection {
+function descriptor(connectionId: string, profile = 'default'): AgentConnection {
   return {
     connectionId,
     profile,
@@ -178,7 +178,7 @@ it('keeps a newer agent draft started while an ordinary switch is still bookkeep
   const first = selectConnection('local')
   await vi.waitFor(() => expect(window.hermesDesktop!.connections!.setLastUsed).toHaveBeenCalled())
   // The newer draft's source is still dialing, so local stays in the foreground.
-  const dial = deferred<HermesConnection>()
+  const dial = deferred<AgentConnection>()
   getConnectionFor.mockImplementation(async ({ connectionId, profile }) =>
     connectionId === 'other' ? dial.promise : descriptor(connectionId, profile)
   )
@@ -196,7 +196,7 @@ it('keeps a newer agent draft started while an ordinary switch is still bookkeep
 })
 
 it('does not let a superseded dial clear a newer explicit draft', async () => {
-  const dial = deferred<HermesConnection>()
+  const dial = deferred<AgentConnection>()
   getConnectionFor.mockImplementationOnce(() => dial.promise)
   const first = selectConnection('local')
   await vi.waitFor(() => expect(getConnectionFor).toHaveBeenCalled())

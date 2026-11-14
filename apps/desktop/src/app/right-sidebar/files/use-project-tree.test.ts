@@ -1,7 +1,7 @@
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesReadDirResult } from '@/global'
+import type { AgentReadDirResult } from '@/global'
 import { $connection } from '@/store/session'
 import { notifyWorkspaceChanged } from '@/store/workspace-events'
 
@@ -9,7 +9,7 @@ import { clearProjectDirCache, readProjectDir } from './ipc'
 import { $showIgnoredRoots } from './prefs'
 import { resetProjectTreeState, useProjectTree } from './use-project-tree'
 
-const readDir = vi.fn<(path: string) => Promise<HermesReadDirResult>>()
+const readDir = vi.fn<(path: string) => Promise<AgentReadDirResult>>()
 
 beforeEach(() => {
   $connection.set(null)
@@ -27,7 +27,7 @@ afterEach(() => {
   delete (window as unknown as { hermesDesktop?: unknown }).hermesDesktop
 })
 
-function ok(entries: { name: string; path: string; isDirectory: boolean }[]): HermesReadDirResult {
+function ok(entries: { name: string; path: string; isDirectory: boolean }[]): AgentReadDirResult {
   return { entries }
 }
 
@@ -73,11 +73,11 @@ describe('useProjectTree', () => {
   })
 
   it('does not fall back after a failed root read from a superseded connection', async () => {
-    let resolveRootFromA: ((result: HermesReadDirResult) => void) | undefined
+    let resolveRootFromA: ((result: AgentReadDirResult) => void) | undefined
     const sanitizeWorkspaceCwd = vi.fn(async () => ({ cwd: '/fallback', sanitized: true }))
     readDir.mockImplementationOnce(
       () =>
-        new Promise<HermesReadDirResult>(resolve => {
+        new Promise<AgentReadDirResult>(resolve => {
           resolveRootFromA = resolve
         })
     )
@@ -247,10 +247,10 @@ describe('useProjectTree', () => {
   it('dedupes concurrent loadChildren calls for the same id', async () => {
     readDir.mockResolvedValueOnce(ok([{ name: 'src', path: '/p/src', isDirectory: true }]))
 
-    let resolveChildren: ((value: HermesReadDirResult) => void) | undefined
+    let resolveChildren: ((value: AgentReadDirResult) => void) | undefined
     readDir.mockImplementationOnce(
       () =>
-        new Promise<HermesReadDirResult>(resolve => {
+        new Promise<AgentReadDirResult>(resolve => {
           resolveChildren = resolve
         })
     )
@@ -276,9 +276,9 @@ describe('useProjectTree', () => {
     async ({ read, refresh }) => {
       const src = { name: 'src', path: '/p/src', isDirectory: true }
       const fresh = { name: 'fresh.txt', path: '/p/fresh.txt', isDirectory: false }
-      let resolveOld!: (value: HermesReadDirResult) => void
+      let resolveOld!: (value: AgentReadDirResult) => void
 
-      const oldRead = new Promise<HermesReadDirResult>(resolve => {
+      const oldRead = new Promise<AgentReadDirResult>(resolve => {
         resolveOld = resolve
       })
 
@@ -334,14 +334,14 @@ describe('useProjectTree', () => {
 
   it('keeps a refreshed folder read in flight when its predecessor finishes', async () => {
     const src = { name: 'src', path: '/p/src', isDirectory: true }
-    let finishOld!: (value: HermesReadDirResult) => void
-    let finishNew!: (value: HermesReadDirResult) => void
+    let finishOld!: (value: AgentReadDirResult) => void
+    let finishNew!: (value: AgentReadDirResult) => void
 
-    const oldRead = new Promise<HermesReadDirResult>(resolve => {
+    const oldRead = new Promise<AgentReadDirResult>(resolve => {
       finishOld = resolve
     })
 
-    const newRead = new Promise<HermesReadDirResult>(resolve => {
+    const newRead = new Promise<AgentReadDirResult>(resolve => {
       finishNew = resolve
     })
 
@@ -393,11 +393,11 @@ describe('useProjectTree', () => {
   })
 
   it('discards a stale live refresh after the active registered connection changes', async () => {
-    let resolveRefreshFromA: ((result: HermesReadDirResult) => void) | undefined
+    let resolveRefreshFromA: ((result: AgentReadDirResult) => void) | undefined
     readDir.mockResolvedValueOnce(ok([{ name: 'from-a', path: '/shared/from-a', isDirectory: false }]))
     readDir.mockImplementationOnce(
       () =>
-        new Promise<HermesReadDirResult>(resolve => {
+        new Promise<AgentReadDirResult>(resolve => {
           resolveRefreshFromA = resolve
         })
     )
@@ -436,11 +436,11 @@ describe('useProjectTree', () => {
   })
 
   it('discards a stale child read after the active registered connection changes', async () => {
-    let resolveChildFromA: ((result: HermesReadDirResult) => void) | undefined
+    let resolveChildFromA: ((result: AgentReadDirResult) => void) | undefined
     readDir.mockResolvedValueOnce(ok([{ name: 'src', path: '/shared/src', isDirectory: true }]))
     readDir.mockImplementationOnce(
       () =>
-        new Promise<HermesReadDirResult>(resolve => {
+        new Promise<AgentReadDirResult>(resolve => {
           resolveChildFromA = resolve
         })
     )
@@ -479,10 +479,10 @@ describe('useProjectTree', () => {
   })
 
   it('discards a stale root read after the active registered connection changes', async () => {
-    let resolveFirst: ((result: HermesReadDirResult) => void) | undefined
+    let resolveFirst: ((result: AgentReadDirResult) => void) | undefined
     readDir.mockImplementationOnce(
       () =>
-        new Promise<HermesReadDirResult>(resolve => {
+        new Promise<AgentReadDirResult>(resolve => {
           resolveFirst = resolve
         })
     )
@@ -581,11 +581,11 @@ describe('useProjectTree', () => {
 
     await waitFor(() => expect(result.current.rootError).toBe('ENOENT'))
 
-    let releaseProbe: ((value: HermesReadDirResult) => void) | undefined
+    let releaseProbe: ((value: AgentReadDirResult) => void) | undefined
 
     readDir.mockImplementationOnce(
       () =>
-        new Promise<HermesReadDirResult>(resolve => {
+        new Promise<AgentReadDirResult>(resolve => {
           releaseProbe = resolve
         })
     )
@@ -611,11 +611,11 @@ describe('useProjectTree', () => {
 
     await waitFor(() => expect(result.current.data.length).toBe(1))
 
-    let releaseRefresh: ((value: HermesReadDirResult) => void) | undefined
+    let releaseRefresh: ((value: AgentReadDirResult) => void) | undefined
 
     readDir.mockImplementationOnce(
       () =>
-        new Promise<HermesReadDirResult>(resolve => {
+        new Promise<AgentReadDirResult>(resolve => {
           releaseRefresh = resolve
         })
     )
@@ -640,11 +640,11 @@ describe('useProjectTree', () => {
 
     await waitFor(() => expect(result.current.data.map(node => node.name)).toEqual(['from-a']))
 
-    let releaseFromB: ((value: HermesReadDirResult) => void) | undefined
+    let releaseFromB: ((value: AgentReadDirResult) => void) | undefined
 
     readDir.mockImplementationOnce(
       () =>
-        new Promise<HermesReadDirResult>(resolve => {
+        new Promise<AgentReadDirResult>(resolve => {
           releaseFromB = resolve
         })
     )
@@ -737,7 +737,7 @@ describe('useProjectTree', () => {
   it('drops a child listing that was read before the preference flipped', async () => {
     const gitRoot = vi.fn(async () => '/p')
     const readFileDataUrl = vi.fn(async () => `data:text/plain;base64,${btoa('*.log\n')}`)
-    let releaseChild: ((value: HermesReadDirResult) => void) | undefined
+    let releaseChild: ((value: AgentReadDirResult) => void) | undefined
 
     readDir.mockImplementation(async path => {
       if (path === '/p') {
@@ -748,7 +748,7 @@ describe('useProjectTree', () => {
       }
 
       if (path === '/p/src') {
-        return new Promise<HermesReadDirResult>(resolve => {
+        return new Promise<AgentReadDirResult>(resolve => {
           releaseChild = resolve
         })
       }

@@ -2,7 +2,7 @@
 
 A reply past ``MAX_SPLIT_MESSAGES`` goes out as one ``.md`` file (#152012). When Discord refuses the
 attachment, the gateway sends the reply as ordinary messages: every part, in order, with no
-truncation notice (Teknium's ruling on PR #153476: Discord matches Telegram and never cuts a reply
+truncation notice (The design rule on PR #153476: Discord matches Telegram and never cuts a reply
 off), and a 429 in the middle is waited out and retried by discord.py. REAL gateway + adapter
 against the Discord stand-in.
 """

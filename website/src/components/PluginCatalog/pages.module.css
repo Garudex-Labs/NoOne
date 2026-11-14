@@ -4,7 +4,7 @@
    uses an ifm variable. */
 
 .page {
-  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--noone-font-sans);
   max-width: 1200px;
   margin: 0 auto;
   padding: 1.5rem 2rem 3rem;
@@ -66,7 +66,7 @@
 }
 
 .eyebrow {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--noone-font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -137,7 +137,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--noone-font-mono);
   font-size: 0.7rem;
   font-weight: 500;
   padding: 0.18rem 0.5rem;
@@ -218,7 +218,7 @@
 }
 
 .installCmd code {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--noone-font-mono);
   font-size: 0.82rem;
   background: none;
   border: none;
@@ -272,7 +272,7 @@
 }
 
 .count {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--noone-font-mono);
   font-size: 0.7rem;
   font-weight: 500;
   padding: 0.1rem 0.45rem;
@@ -307,7 +307,7 @@
 }
 
 .chip {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--noone-font-mono);
   font-size: 0.74rem;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
@@ -454,7 +454,7 @@
 }
 
 .factValue code {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--noone-font-mono);
   font-size: 0.8rem;
 }
 
@@ -555,7 +555,7 @@
 }
 
 .miniStars {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--noone-font-mono);
   font-size: 0.7rem;
   color: #d4af37;
   margin-left: auto;

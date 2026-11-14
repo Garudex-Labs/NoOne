@@ -7,7 +7,7 @@ the real input.
 import json
 from pathlib import Path
 
-_TOP_LEVEL = ("agent", "hermes_cli", "tools")
+_TOP_LEVEL = ("agent", "agent_cli", "tools")
 
 
 def site_packages(root: Path, name: str = "venv") -> Path:
@@ -41,7 +41,7 @@ def _hermes_installed(root: Path, name: str, anchors, *, home: Path, top_level: 
     (root / name / "pyvenv.cfg").write_text(f"home = {home}\ninclude-system-site-packages = false\n",
                                             encoding="utf-8")
     site = site_packages(root, name)
-    dist = site / "hermes_agent-0.0.0.dist-info"
+    dist = site / "agent_compat-0.0.0.dist-info"
     dist.mkdir(parents=True, exist_ok=True)
     (dist / "top_level.txt").write_text("\n".join(top_level) + "\n", encoding="utf-8")
     for anchor in anchors:

@@ -1,13 +1,12 @@
 ---
 title: Bot Screen
-sidebar_position: 17
 ---
 
-# Bot Screen
+# Bot Screen {#bot-screen}
 
 On a headless Linux gateway host (a server, a cloud VM, Hermes Cloud) each bot
 gets its **own desktop**: an Xfce screen the bot's `computer_use` and headed
-browser act on, streamed live into Hermes Desktop. Watch what the bot does,
+browser act on, streamed live into {{app-name}} Desktop. Watch what the bot does,
 **take over** when it hits a login, 2FA prompt, CAPTCHA or payment step, then
 **hand control back** and let it continue with the session you just signed in
 to. The bot keeps working after you close the app or turn off your laptop; the
@@ -17,7 +16,7 @@ the screen lives **inside that sandbox** instead, alongside the shell, so the
 bot's `computer_use` and browser never act outside the boundary you drew (see
 [Where the screen runs](#where-the-screen-runs)).
 
-Every Hermes profile ("bot") has its own screen, its own browser profile and
+Every {{app-name}} profile ("bot") has its own screen, its own browser profile and
 its own cookies. Screens are work surfaces, not security boundaries: the bots
 share the host's user account, files and network (the same model as other
 hosted-agent products).
@@ -28,7 +27,7 @@ running as that user — another bot on the same host, and the bot's own
 `terminal` tool included — can reach them directly, bypassing the pane and the
 lease. The lease is a tool-level fence on `computer_use` and the browser tools,
 not an OS one. One boundary is wider than the OS user: Chromium's DevTools
-port (the dock's Browser and every Chromium Hermes launches advertise one on
+port (the dock's Browser and every Chromium {{app-name}} launches advertise one on
 loopback so the agent can attach) is reachable by **any** local user on the
 host, and Chromium offers no per-user restriction for it. Running each bot as
 its own OS user is out of scope; if that isolation matters to you, or the host
@@ -41,21 +40,21 @@ epoch regardless of the window). And the viewer's single-use, 30-second
 negotiate WebSocket subprotocols, so a header is not an option — which means a
 reverse proxy's access log may record an already-spent ticket.
 
-## Requirements
+## Requirements {#requirements}
 
 - The gateway host runs Linux. macOS and Windows hosts already have a real
   display; the pane is not offered there.
 - TigerVNC's `Xvnc` and the Xfce core components are installed on the host.
-  Nothing installs them silently: `hermes update` and fresh installs leave every
-  machine as it is. When they are missing the Screen pane in Hermes Desktop shows
+  Nothing installs them silently: `noone update` and fresh installs leave every
+  machine as it is. When they are missing the Screen pane in {{app-name}} Desktop shows
   **Install on host** — one click runs the package manager on the gateway host
   (it asks for that host's sudo password in a masked card; the password goes to
-  that host only and is never stored) and streams the log. When Hermes itself
+  that host only and is never stored) and streams the log. When {{app-name}} itself
   runs as root — the usual case in a container — the installer runs the package
   manager directly, with no sudo and no password card. When it is not root and
   the host has no `sudo` at all, the pane and the CLI print the exact install
   command for you to run on the host instead of showing a card. The official
-  Docker image (`nousresearch/hermes-agent`, which also powers Hermes Cloud) is
+  Docker image (`Garudex-Labs/NoOne`, which also powers Hermes Cloud) is
   that second case: the gateway runs as an unprivileged user and the image has no
   `sudo`, so the pane shows the `apt-get` line and an operator runs it once as
   root in the container (`docker exec -u 0 <container> apt-get install -y …`).
@@ -82,7 +81,7 @@ reverse proxy's access log may record an already-spent ticket.
   constraint (idle desktop ≈ 0.01 core, live streaming ≈ 0.03 core). The packages
   take ~930 MB of disk on Debian 13.
 
-  Before starting a screen, Hermes checks that the host — or its container
+  Before starting a screen, {{app-name}} checks that the host — or its container
   cgroup, whichever is tighter — has `bot_desktop.min_free_memory_mb` free
   (default 1536; `0` disables the check). Below that the pane shows why in place
   of **Start screen** and
@@ -98,7 +97,7 @@ reverse proxy's access log may record an already-spent ticket.
   for small instances: 4 GB runs the desktop, 8 GB is where a takeover with a
   browser is comfortable.
 
-### Baking the packages into a container image
+### Baking the packages into a container image {#baking-the-packages-into-a-container-image}
 
 An image for a hosted or unprivileged deployment cannot install anything at run
 time, so the packages have to be built in. CI publishes two variants of every
@@ -125,9 +124,9 @@ or `-desktop`, already carries PM's pinned full Chromium, which can open a
 window. Nothing starts at boot; an image built this way costs no memory until a
 screen is started.
 
-## Using it
+## Using it {#using-it}
 
-Every bot's computer is one click away in three places of Hermes Desktop:
+Every bot's computer is one click away in three places of {{app-name}} Desktop:
 
 - **Bots → a bot → Scheduled Jobs**: the bot's screen is the hero at the very
   top of the pane, above the title and the routines: a live preview of the
@@ -180,7 +179,7 @@ waiting for you.
 Two viewers on one screen: the most recent **Take over** wins; the previous
 controller drops back to watching.
 
-## Browser sessions that survive the handoff
+## Browser sessions that survive the handoff {#browser-sessions-that-survive-the-handoff}
 
 While the screen runs, the bot's browser tool and the dock's **Browser** icon are
 the same browser: the Chromium `browser_exec` drives, with one persistent
@@ -201,7 +200,7 @@ screen does not re-pin the Browser icon. Delete that file and the dock is
 rebuilt on the next `screen start` from whatever is installed then.
 
 Which Chromium the dock and the bot use: an explicit
-`browser.executable_path` wins; otherwise Hermes uses the PM-managed
+`browser.executable_path` wins; otherwise {{app-name}} uses the PM-managed
 Chromium and falls back to a system `chromium` / `google-chrome`. A non-root
 user on a host with `kernel.apparmor_restrict_unprivileged_userns=1` (Ubuntu
 23.10 and later) gets the reverse order, because there the managed build cannot
@@ -216,11 +215,11 @@ that build can draw a window, so the dock's Browser icon uses it. The
 build's sandbox. A Playwright *headless shell* is never used for the
 icon: when it is the only browser, the pane / `screen status` report **no
 headed browser** until you install a headed one (`apt-get install chromium`).
-The dock icon starts the browser with the same sandbox settings Hermes's
+The dock icon starts the browser with the same sandbox settings {{app-name}}'s
 Chromium launcher uses in that container, so the human's Browser and the bot's browser are one
 and the same.
 
-## CLI
+## CLI {#cli}
 
 ```bash
 hermes computer-use screen status          # installed? running? who holds control?
@@ -231,7 +230,7 @@ hermes computer-use screen install [-y]    # apt/dnf/pacman the packages
 hermes -p research computer-use screen start   # another bot's screen
 ```
 
-## Where the screen runs
+## Where the screen runs {#where-the-screen-runs}
 
 `computer_use`, the bot's browser and the screen they act on always run in the
 same place. `bot_desktop.placement` decides where:
@@ -259,7 +258,7 @@ it, so the restarted gateway re-attaches to a still-running sandbox, and
 `Stop` takes down the screen where it actually runs even if you changed
 `placement` in the meantime.
 
-### The sandbox image
+### The sandbox image {#the-sandbox-image}
 
 The sandbox needs the desktop stack. `nousresearch/hermes-sandbox:desktop` is
 the default image for every container backend (Docker, Modal, Daytona,
@@ -302,7 +301,7 @@ kept, not replaced: when `docker_image` is unset and a persisted container runs
 another image (the old default, `nikolaik/python-nodejs:python3.11-nodejs20`),
 the terminal keeps using that container and you decide the switch. The
 interactive CLI asks once at startup; the Screen pane shows the same choice
-with **Switch image** / **Keep current image**; `hermes config set
+with **Switch image** / **Keep current image**; `noone config set
 terminal.docker_image nousresearch/hermes-sandbox:desktop` is the same answer
 from any shell. Either answer writes `terminal.docker_image`, and a written
 image is a decision: the container is recreated on the next terminal call only
@@ -335,7 +334,7 @@ paths keep working, the pane's thumbnail is grabbed inside the sandbox, and
 `browser_exec` / the vault autofill reach the sandbox's Chromium through a port
 forwarded over the same `docker exec` / `ssh` channel.
 
-## Configuration
+## Configuration {#configuration}
 
 ```yaml
 bot_desktop:
@@ -355,7 +354,7 @@ true`) and no display is available.
 State lives under `<HERMES_HOME>/bot-desktop/` per profile (RFB Unix socket,
 Xauthority, launcher log, per-profile xfconf).
 
-## How it works
+## How it works {#how-it-works}
 
 - **TigerVNC `Xvnc`** is the X server and the RFB server in one process, per
   profile, listening only on a `0600` Unix socket. No TCP port, no VNC
@@ -365,7 +364,7 @@ Xauthority, launcher log, per-profile xfconf).
 - **Xfce** starts component-wise (`xfsettingsd`, `xfwm4 --compositor=off`,
   `xfdesktop`, `xfce4-panel`) under a private D-Bus session, without
   `xfce4-session`, so nothing tries to lock the screen or reach `logind`.
-- **Hermes Desktop** bundles noVNC. It asks the gateway for a single-use ticket
+- **{{app-name}} Desktop** bundles noVNC. It asks the gateway for a single-use ticket
   (`display.observe`) over its normal authenticated connection and opens a
   sibling WebSocket to `/api/display/ws`; the gateway splices the RFB stream
   through. Nothing new is exposed; the pane works over local, SSH, URL+token
@@ -383,11 +382,11 @@ Xauthority, launcher log, per-profile xfconf).
   D-Bus address; every cua-driver and headed-browser spawn for that profile
   inherits them, so the bot never acts on a display a human is sitting at.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 - **"Screen packages missing"** — click **Install on host** in the pane, or run
   the printed install line on the gateway host (not on the machine running
-  Hermes Desktop). The pane refuses a second install while one is running.
+  {{app-name}} Desktop). The pane refuses a second install while one is running.
 - **Screen starts then stops** — read `<HERMES_HOME>/bot-desktop/launcher.log`.
 - **Typing produces wrong characters during a takeover** — the screen runs a
   US keymap so RFB keysyms and cua-driver agree, and noVNC sends raw keycodes
@@ -402,11 +401,11 @@ Xauthority, launcher log, per-profile xfconf).
   runbook can never yank a live takeover); `hermes computer-use screen start`
   brings it back with the bot in control.
 
-### Testing under WSL
+### Testing under WSL {#testing-under-wsl}
 
 WSL2 counts as a supported Linux host: `screen status` reports it as such and
 the pane is offered. One WSLg quirk gets in the way of the first start: WSLg
-<!-- no-tmp: ok — the X11 socket directory is fixed by the protocol, not a scratch path -->
+{/* no-tmp: ok — the X11 socket directory is fixed by the protocol, not a scratch path */}
 mounts `/tmp/.X11-unix` read-only, so `Xvnc` cannot create its display socket
 and dies with `Cannot establish any listening sockets` in `launcher.log`.
 Replace the mount with a writable directory before starting the screen:

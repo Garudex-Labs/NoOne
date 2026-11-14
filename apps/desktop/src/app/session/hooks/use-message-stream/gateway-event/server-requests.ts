@@ -1,4 +1,4 @@
-import { JSON_RPC_INTERNAL_ERROR, type SetupBeat } from '@hermes/shared'
+import { JSON_RPC_INTERNAL_ERROR, type SetupBeat } from '@noone/shared'
 
 import {
   hasLivePreviewSurface,
@@ -447,7 +447,7 @@ const sudo: Handler = ctx => {
   notifyInput(ctx, translateNow('notifications.native.inputBody'))
 }
 
-/** Bot Screen package install (`tui_gateway/methods_display.py`): the same masked card as `sudo`,
+/** Bot Screen package install (`agent_backend/methods_display.py`): the same masked card as `sudo`,
  *  but app-level. The gateway sends it sessionless — it belongs to the connection that clicked
  *  Install, not to a chat — so it is stored under the null session and survives a chat switch. */
 const displayInstallSudo: Handler = ctx => {

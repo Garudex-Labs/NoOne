@@ -1,13 +1,14 @@
 {
-  "name": "@hermes/shared",
+  "name": "@noone/shared",
   "private": true,
   "engines": {
     "npm": "npm is refused here: run pnpm install --frozen-lockfile at the repository root"
   },
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./application-identity": "./src/application-identity.ts",
     "./ansi": "./src/ansi.ts",
     "./billing": "./src/billing-types.ts",
     "./billing-policy": "./src/billing-policy.ts",
@@ -45,6 +46,9 @@
     "typecheck": "tsc -p . --noEmit && tsc -p tsconfig.node.json --noEmit",
     "check": "pnpm run typecheck && pnpm run test && pnpm run lint",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "nanostores": "1.4.2"
   },
   "devDependencies": {
     "@types/node": "22.20.5",

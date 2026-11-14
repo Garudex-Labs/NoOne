@@ -1,19 +1,42 @@
-# Stable release admission and promotion
+# Stable release admission and promotion {#stable-release-admission-and-promotion}
 
 `Stable Release` is the release gate. A successful builder alone is not a
 stable release. Stable releases use attempt refs as locks and final tags as
 publish receipts; neither tag is a workflow trigger. Canary builds have their
 own scheduled workflow.
 
-The committed project version is always `0.0.0`. Release jobs derive the payload
-version from the admitted ref and stamp isolated build trees. Do not bump version
-files on `main`.
+The project starts at **`0.1.0`**. `pyproject.toml` is the canonical release
+version; Python, desktop, web and workspace package metadata agree with it.
+Build/channel IDs, commit provenance, native packaging clocks and independent
+plugin/API/schema versions are separate from the public release label.
 
-## Order
+`tool.hermes.release.history-start` records the last upstream revision. Only
+commits carrying the same marker and descending from that revision belong to
+this project's release history. Inherited tags, attempts and release notes do not
+spend the initial version or supply its upgrade/changelog baseline.
+
+Before a subsequent release, use the existing stamper to synchronize owned
+metadata and local lock records, then commit the version change:
+
+```sh
+python scripts/releases/stamping.py --tree . --version 0.1.0
+```
+
+Registry dependency versions and hashes do not change. A release must contain
+committed metadata at its selected version; an uncommitted reset is not a
+publishable source identity. The first publication is `0.1.0`, regardless of
+`--bump`; later publications apply the requested bump normally.
+
+Legacy `requires_hermes` requirements continue checking the inherited runtime
+API compatibility level, not NoOne's new release numbering. They are not
+rewritten or bypassed. Security, lint, protocol, migration and native
+anti-rollback checks remain enabled.
+
+## Order {#order}
 
 1. Refresh `origin/main` and the remote attempt and marker refs (`rc.*` and
    `abandoned-rc.*`). Derive the next SemVer from the published release family
-   seeded at `0.21.5` (the last legacy CalVer release, v2026.9.24) alone: the newer of the protected R2 stable head and the
+   starting at `0.1.0`, within this project's marked history: the newer of the protected R2 stable head and the
    newest published non-prerelease GitHub release with a `vX.Y.Z` tag. A
    release that builds no desktop packages moves only the second. Attempts do not move the
    version line. A cut whose next version already has a final `vX.Y.Z` tag is
@@ -67,7 +90,7 @@ the R2 public origin. Canary tag builds own `releases/canary/index.html`, and
 commit builds own `releases/commit/<sha>/index.html`. Pages list only staged,
 receipt-backed objects; an older run cannot regress a protected channel.
 
-## Run, publish, or abandon a stable release
+## Run, publish, or abandon a stable release {#run-publish-or-abandon-a-stable-release}
 
 Start from an exact commit already on remote `main`:
 
@@ -77,8 +100,8 @@ python scripts/release.py release --commit "$(git rev-parse origin/main)" --bump
 
 `--bump` defaults to `patch`; pass `minor` or `major` only when that change is
 intentional. The selected commit must descend from the newest published
-`vX.Y.Z`. With no published tag, any commit already on remote `main` is
-accepted. An abandoned attempt puts no constraint on the next cut; it was often
+`vX.Y.Z`. With no publication, the committed `0.1.0` reset on remote `main`
+is accepted. An abandoned attempt puts no constraint on the next cut; it was often
 abandoned because its commit is bad. `release` also refuses while any attempt,
 of any version, is outstanding. The refusal prints the attempt's workflow run
 URL, the `abandon` command, and the rerun command before it raises. In an
@@ -87,7 +110,7 @@ interactive terminal it then asks `Abandon <ref> and cut a new attempt? [y/N]`;
 stdin or stdout is not a terminal it raises without asking.
 
 The attempt ref is a public lock, not a SemVer prerelease. It reads
-`rc.1-v0.21.5`, not `v0.21.5-rc.1`. The package version stays plain `0.21.5`.
+`rc.1-v0.1.0`, not `v0.1.0-rc.1`. The package version stays plain `0.1.0`.
 `parse_attempt_ref` in `scripts/releases/versioning.py` is the one grammar for
 the shape.
 
@@ -104,7 +127,7 @@ Add `--autopublish` to publish immediately when the claim becomes the oldest
 green release. Without it, the release stays a draft until an explicit publish
 or a later green claim forces ordered resolution.
 
-### Lanes
+### Lanes {#lanes}
 
 A stable release is a set of lanes. A build lane produces something users get;
 a test lane is a suite that gates the release. `release` starts from the
@@ -200,8 +223,8 @@ version, but only one push wins; the loser reports the winning tagger, time, and
 commit. A rejected or abandoned claim remains spent. To publish or abandon:
 
 ```sh
-python scripts/release.py publish --version 0.21.5 --remote origin
-python scripts/release.py abandon --version 0.21.5 --remote origin
+python scripts/release.py publish --version 0.1.0 --remote origin
+python scripts/release.py abandon --version 0.1.0 --remote origin
 ```
 
 `publish` performs a synchronous supersession preflight, then dispatches the same
@@ -216,7 +239,7 @@ Do not manually dispatch `Stable Release` with a final tag. Recovery keeps the
 original claim ref, object SHA, commit, draft database ID, autopublish policy,
 and skip flags.
 
-## Failure and recovery
+## Failure and recovery {#failure-and-recovery}
 
 When a stable run fails, its completion event starts `Stable Release
 Publication`, which at once reruns only the failed jobs in the same GitHub
@@ -324,7 +347,7 @@ not in the per-arch calls: assembly starts as soon as both arches are built
 instead of waiting for the slower arch's smoke, and the bundle call (so
 `candidate-manifest`) still fails when either smoke fails.
 
-## Tag namespaces and receipts
+## Tag namespaces and receipts {#tag-namespaces-and-receipts}
 
 Before relying on attempt refs as locks, apply a repository ruleset for
 `refs/tags/v*`, `refs/tags/rc.*`, and `refs/tags/abandoned-rc.*` that restricts
@@ -334,7 +357,7 @@ these locks are honor-system — anyone with push access can delete a marker ref
 or move a receipt tag. Attempt refs, marker refs, and final tags are immutable.
 Channel and commit builds write annotated post-build receipts such as
 `v0.0.7+channel.<YYYYMMDDTHHMMSSZ>.<run-id>` and
-`v0.0.0+commit.<YYYYMMDDTHHMMSSZ>.<run-id>` only after publication succeeds.
+`v0.1.0+commit.<YYYYMMDDTHHMMSSZ>.<run-id>` only after publication succeeds.
 Receipt tags do not create GitHub releases and do not trigger workflows.
 
 Canary source identity is only
@@ -354,7 +377,7 @@ The protected publication controller verifies that exact annotated tag object
 before it flips the GitHub prerelease from draft to public, reads both states back,
 and only then advances the R2 head.
 
-## Canary and one-off desktop identities
+## Canary and one-off desktop identities {#canary-and-one-off-desktop-identities}
 
 `release.py --canary` builds the separate canary application. Its package
 identity and CLI command (`hermes-canary`) differ from stable; the existing
@@ -395,7 +418,7 @@ or pass the release-success gate.
 Store submission retains its fixed official stable identity. Nonstable
 packages must not be submitted under that identity.
 
-## Dynamic channels in R2
+## Dynamic channels in R2 {#dynamic-channels-in-r2}
 
 Channel names are R2 objects, not a repository registry. A preview channel owns
 one native application identity across exact-commit builds. The immutable build
@@ -417,14 +440,14 @@ python scripts/release.py --channel pm-preview --build-commit my-branch --remote
 python scripts/release.py --channels --remote origin
 ```
 
-By default a preview channel installs as its own side-by-side app (`Hermes
+By default a preview channel installs as its own side-by-side app (`{{app-name}}
 NAME`, its own package ID). To test an exact commit as the regular app instead,
 create the channel with `--branding stable`: it copies the published stable
 channel's name, icon and package ID, so the build installs over the official
 app, shares its desktop settings, and later updates follow the channel. Branding is fixed when the channel is
 created; repeat the flag on every dispatch of that channel and use a new channel
 name to change it. `--branding` needs `--channel`, since a plain one-off commit
-build always carries its `Hermes Agent <sha>` identity.
+build always carries its `NoOne <sha>` identity.
 
 ```sh
 python scripts/release.py --channel my-commit --branding stable --build-commit SHA --remote origin --publish
@@ -475,7 +498,7 @@ manifest for `main`. Production seeding, CDN cache/CAS verification and native
 signed-package qualification are release operations, not implied by a passing
 local helper suite. Never store the bootstrap output as a repo channel list.
 
-## Signed-package baseline
+## Signed-package baseline {#signed-package-baseline}
 
 The last successful stable release that shipped bundles records
 `releases/stable/release-candidates.json` on the configured R2 public origin.
@@ -499,9 +522,9 @@ claim tag object's immutable tagger timestamp (`year.hourOfYear.secondOfHour.0`)
 independently of the SemVer payload tag.
 Missing baseline
 artifacts are a blocker, not permission to fabricate or skip acceptance.
-See [the bundled update contract](https://github.com/NousResearch/hermes-agent/blob/main/tests/install/BUNDLED_UPDATES.md).
+See [the bundled update contract](https://github.com/Garudex-Labs/NoOne/blob/main/tests/install/BUNDLED_UPDATES.md).
 
-## Explicit exclusions and policy
+## Explicit exclusions and policy {#explicit-exclusions-and-policy}
 
 - Desktop Playwright E2E (`e2e-desktop.yml`) is deferred at the owner's request
   because it is flaky. It is reported as deferred, not passed. Stabilize it
@@ -518,7 +541,7 @@ See [the bundled update contract](https://github.com/NousResearch/hermes-agent/b
 - Housekeeping, autofix, comment and skills-index/deploy workflows are not
   release acceptance suites.
 
-## Implementation ownership
+## Implementation ownership {#implementation-ownership}
 
 Actions owns job ordering, runner selection, permissions and environments.
 Python owns shared release admission, manifests, artifact hashes, publication

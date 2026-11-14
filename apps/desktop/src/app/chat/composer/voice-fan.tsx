@@ -1,11 +1,11 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { Ear, EarOff, iconSize, Loader2, Square, Volume2, VolumeX } from '@noone/ui/icons'
 import { useCallback, useMemo } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { FanMenu, type FanMenuItem } from '@/components/ui/fan-menu'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { Ear, EarOff, iconSize, Loader2, Square, Volume2, VolumeX } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { $wakeWord, toggleWakeWord } from '@/store/wake-word'
 
@@ -70,7 +70,7 @@ export function VoiceFan({ autoSpeak, disabled, state, voiceStatus, onDictate, o
         ) : voiceStatus === 'transcribing' ? (
           <Loader2 className={cn('animate-spin', iconSize.sm)} />
         ) : (
-          <Codicon name="mic" size="0.875rem" />
+          <AppIcon name="mic" size="0.875rem" />
         ),
       label: hubLabel,
       onSelect: dictate

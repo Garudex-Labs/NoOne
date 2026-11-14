@@ -57,8 +57,8 @@ class ResponseStore:
         if db_path is None:
             db_path = ":memory:"
             with suppress(Exception):
-                from hermes_cli.config import get_hermes_home
-                db_path = str(get_hermes_home() / "response_store.db")
+                from agent_cli.config import get_agent_home
+                db_path = str(get_agent_home() / "response_store.db")
         self._db_path: Optional[str] = db_path if db_path != ":memory:" else None
         try:
             self._conn = sqlite3.connect(db_path, check_same_thread=False)
@@ -66,29 +66,14 @@ class ResponseStore:
             self._conn = sqlite3.connect(":memory:", check_same_thread=False)
             self._db_path = None
         # Shared WAL-fallback so response_store.db degrades gracefully on NFS/SMB/FUSE homes.
-        from hermes_state_wal import apply_wal_with_fallback
+        from agent_state_wal import apply_wal_with_fallback
         apply_wal_with_fallback(self._conn, db_label="response_store.db")
-        self._conn.execute(
-            "CREATE TABLE IF NOT EXISTS responses ("
-            "response_id TEXT PRIMARY KEY, data TEXT NOT NULL, accessed_at REAL NOT NULL)")
-        self._conn.execute(
-            "CREATE TABLE IF NOT EXISTS conversations (name TEXT PRIMARY KEY, response_id TEXT NOT NULL)")
-        # Compact immutable request identity outlives the LRU response bodies.
-        # Distinct canonical session targets must not turn a global retry key
-        # into a last-writer-wins response cache entry.
-        self._conn.execute(
-            "CREATE TABLE IF NOT EXISTS response_keys (request_key TEXT PRIMARY KEY, fingerprint TEXT NOT NULL, created_at INTEGER NOT NULL)")
-        self._conn.execute(
-            "CREATE TABLE IF NOT EXISTS response_admissions (request_key TEXT PRIMARY KEY, admission_id TEXT NOT NULL)")
-        self._conn.execute('CREATE TABLE IF NOT EXISTS response_output_order '
-            '(request_key TEXT NOT NULL, item_id TEXT NOT NULL, output_index INTEGER NOT NULL, '
-            'PRIMARY KEY(request_key,item_id), UNIQUE(request_key,output_index))')
-        from hermes_cli.sqlite_util import add_column_if_missing
-        add_column_if_missing(self._conn, 'response_keys', 'model_json', 'model_json TEXT')
-        add_column_if_missing(self._conn, 'response_keys', 'settled_at', 'settled_at REAL')
-        add_column_if_missing(self._conn, 'response_keys', 'response_id', 'response_id TEXT')
-        self._conn.execute('CREATE INDEX IF NOT EXISTS response_keys_settled ON response_keys(settled_at)')
-        self._conn.execute('CREATE INDEX IF NOT EXISTS response_keys_response ON response_keys(response_id)')
+        from agent_cli.database_migrations import initialize_database
+        try:
+            initialize_database(self._conn, "responses")
+        except BaseException:
+            self._conn.close()
+            raise
         # Rows written before settlement was tracked: settled iff their replay record survives.
         self._mark_settled('1', ())
         self._settle_terminal_admissions()
@@ -179,9 +164,9 @@ class ResponseStore:
         state_db = Path(self._db_path).parent / 'state.db'
         if not pending or not state_db.is_file():
             return
-        from hermes_cli.sqlite_safe_read import connect_tracked
-        from hermes_state_holders import read_only_db_uri
-        from hermes_state_terminal import ADMISSION_PREFIX
+        from agent_cli.sqlite_safe_read import connect_tracked
+        from agent_state_holders import read_only_db_uri
+        from agent_state_terminal import ADMISSION_PREFIX
         terminal = []
         ids = list(pending)
         try:
@@ -297,7 +282,7 @@ class ResponseStore:
 
     @_locked
     def bind_request_admission(self, key: str, admission_id: str) -> None:
-        from hermes_state_runtime import RuntimeStoreError
+        from agent_state_runtime import RuntimeStoreError
         with self._conn:
             self._conn.execute('INSERT OR IGNORE INTO response_admissions VALUES (?,?)', (key, admission_id))
             if self.request_admission(key) != admission_id:

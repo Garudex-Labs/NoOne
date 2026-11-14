@@ -1,6 +1,7 @@
 import { useStore } from '@nanostores/react'
 import { type MutableRefObject, useCallback, useEffect, useRef } from 'react'
 
+import { getLatestSessionMessages, type ProfileScope } from '@/agent-client'
 import {
   extendRefreshPageToOverlap,
   graftRefreshedTailOntoBackfill,
@@ -12,7 +13,6 @@ import {
 } from '@/app/session/hooks/use-prompt-actions/utils'
 import { sessionCreatedThisRun } from '@/app/session/hooks/use-session-actions/created-this-run'
 import { preserveLocalPendingTurnMessages } from '@/app/session/hooks/use-session-actions/utils'
-import { getLatestSessionMessages, type ProfileScope } from '@/hermes'
 import {
   type ChatMessage,
   preserveLocalAssistantErrors,

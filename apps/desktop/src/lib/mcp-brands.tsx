@@ -44,7 +44,7 @@ import {
   SiYoutube,
   SiZapier
 } from '@icons-pack/react-simple-icons'
-import { IconBrandSlack } from '@tabler/icons-react'
+import { IconBrandSlack } from '@noone/ui/icons'
 import type { ComponentType, SVGProps } from 'react'
 
 export interface McpBrand {

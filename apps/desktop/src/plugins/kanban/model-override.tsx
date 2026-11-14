@@ -12,9 +12,9 @@
  */
 
 import {
+  AppIcon,
   Button,
   cn,
-  Codicon,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
@@ -22,7 +22,7 @@ import {
   ModelMenuCloseContext,
   type ModelMenuController,
   reasoningEffortLabel
-} from '@hermes/plugin-sdk'
+} from '@noone/plugin-sdk'
 import { useState } from 'react'
 
 import { useKanban } from './ui'
@@ -126,10 +126,10 @@ export function ModelOverrideField({
                 }}
                 role="button"
               >
-                <Codicon name="close" size="0.7rem" />
+                <AppIcon name="close" size="0.7rem" />
               </span>
             )}
-            <Codicon className="opacity-50" name="chevron-down" size="0.7rem" />
+            <AppIcon className="opacity-50" name="chevron-down" size="0.7rem" />
           </span>
         </Button>
       </DropdownMenuTrigger>

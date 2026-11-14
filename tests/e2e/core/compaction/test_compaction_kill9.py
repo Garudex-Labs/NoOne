@@ -48,7 +48,7 @@ import os, sys, time
 from pathlib import Path
 repo, db_path, session_id, base_url, point, sentinel = sys.argv[1:7]
 sys.path.insert(0, repo)
-from hermes_state import SessionDB
+from agent_state import SessionDB
 
 if point == "commit":
     # Park inside archive_and_compact's write transaction (after archive + inserts, before COMMIT).
@@ -168,7 +168,7 @@ def test_kill9_mid_compaction_leaves_state_consistent_and_resumable(make_scenari
     assert count == len(active_rows(rows_after)), "session message_count disagrees with the live rows"
 
     # Resumable: a fresh agent reclaims the dead holder's lease, compacts, and continues.
-    from tui_gateway.server import _compress_session_history
+    from agent_backend.server import _compress_session_history
 
     sc.install()
     sc.resume_from_db()

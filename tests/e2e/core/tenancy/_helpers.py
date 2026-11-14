@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from tests.fakes.fake_llm_provider import FakeLLMServer, Response, Text, ToolCall
 
@@ -211,7 +211,7 @@ def write_tenant_home(t: Tenant, extra_config: dict[str, Any] | None = None,
 def assert_profiles_root_under(root: Path, home: Path) -> None:
     """The profile root is HOME-anchored: prove it resolves inside ``root`` before any write."""
     probe = subprocess.run(
-        [sys.executable, "-c", "from hermes_cli.profiles import _get_profiles_root as r; print(r())"],
+        [sys.executable, "-c", "from agent_cli.profiles import _get_profiles_root as r; print(r())"],
         env=hermetic_env(home), cwd=str(home), capture_output=True, text=True, timeout=120,
         stdin=subprocess.DEVNULL,
         check=False,
@@ -368,7 +368,7 @@ def kill_group(proc: subprocess.Popen, sig: int = signal.SIGKILL) -> None:
 def run_hermes(argv: list[str], home: Path, timeout: float = 120.0,
                extra_env: dict[str, str] | None = None) -> subprocess.CompletedProcess:
     proc = subprocess.Popen(
-        [sys.executable, "-m", "hermes_cli.main", *argv], cwd=str(home), env=hermetic_env(home, extra_env),
+        [sys.executable, "-m", "agent_cli.main", *argv], cwd=str(home), env=hermetic_env(home, extra_env),
         stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
         start_new_session=True,
     )
@@ -383,7 +383,7 @@ def run_hermes(argv: list[str], home: Path, timeout: float = 120.0,
 
 
 class TuiBackend:
-    """The real stdio JSON-RPC backend the TUI/Desktop drive (``python -m tui_gateway.entry``)."""
+    """The real stdio JSON-RPC backend the TUI/Desktop drive (``python -m agent_backend.entry``)."""
 
     def __init__(self, home: Path, log_path: Path, extra_env: dict[str, str] | None = None) -> None:
         import queue
@@ -391,7 +391,7 @@ class TuiBackend:
 
         self._log = open(log_path, "a", encoding="utf-8")
         self.proc = subprocess.Popen(
-            [sys.executable, "-m", "tui_gateway.entry"], cwd=str(home), env=hermetic_env(home, extra_env),
+            [sys.executable, "-m", "agent_backend.entry"], cwd=str(home), env=hermetic_env(home, extra_env),
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self._log, text=True, bufsize=1,
             start_new_session=True,
         )
@@ -423,7 +423,7 @@ class TuiBackend:
             if pred(msg):
                 return msg
         tail = [(m.get("method"), (m.get("params") or {}).get("type"), m.get("id")) for m in self.seen[-20:]]
-        raise AssertionError(f"tui_gateway: condition not met within {timeout}s (rc={self.proc.poll()}); last {tail}")
+        raise AssertionError(f"agent_backend: condition not met within {timeout}s (rc={self.proc.poll()}); last {tail}")
 
     def call(self, method: str, params: dict[str, Any], timeout: float = 90.0) -> dict[str, Any]:
         self._rid += 1
@@ -466,7 +466,7 @@ class TuiBackend:
 
 
 class ServeBackend(TuiBackend):
-    """The real Desktop backend: ``hermes serve --port 0`` with the JSON-RPC surface on ``/api/ws``.
+    """The real Desktop backend: ``noone serve --port 0`` with the JSON-RPC surface on ``/api/ws``.
 
     ``HERMES_DESKTOP=1`` marks it app-spawned, which is also what runs the cron ticker in-process.
     """
@@ -482,7 +482,7 @@ class ServeBackend(TuiBackend):
         self._log = open(log_path, "a", encoding="utf-8")
         env = {"HERMES_DASHBOARD_SESSION_TOKEN": self.token, "HERMES_DESKTOP": "1", **(extra_env or {})}
         self.proc = subprocess.Popen(
-            [sys.executable, "-m", "hermes_cli.main", "serve", "--host", "127.0.0.1", "--port", "0"],
+            [sys.executable, "-m", "agent_cli.main", "serve", "--host", "127.0.0.1", "--port", "0"],
             cwd=str(home), env=hermetic_env(home, env), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True, bufsize=1, start_new_session=True,
         )
@@ -498,8 +498,8 @@ class ServeBackend(TuiBackend):
                     port_box.append(int(m.group(1)))
         threading.Thread(target=pump, daemon=True, name="tenancy-serve-stdout").start()
         self.port = poll(lambda: port_box[0] if port_box else (self.proc.poll() is not None and -1), 120,
-                         "hermes serve to report its port")
-        assert self.port > 0, f"hermes serve exited rc={self.proc.returncode}"
+                         "noone serve to report its port")
+        assert self.port > 0, f"noone serve exited rc={self.proc.returncode}"
         self.ws = connect(f"ws://127.0.0.1:{self.port}/api/ws?token={self.token}", open_timeout=90, max_size=None)
         self._q: queue.Queue[dict[str, Any]] = queue.Queue()
         self._rid = 0

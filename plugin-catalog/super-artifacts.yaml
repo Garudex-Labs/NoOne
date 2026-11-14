@@ -21,7 +21,7 @@ known_issues:
   - "Sign-in needs one extra command after install, because a portable mcp.json cannot declare OAuth: hermes mcp add super-artifacts --url https://superartifacts.app/mcp --auth oauth --connect-timeout 300"
 image: https://raw.githubusercontent.com/Super-Artifacts/plugins/dce02981a179a09dad6509fe58a3a7b8cf020735/assets/social/hero-1280x640.jpg
 screenshots:
-  - https://raw.githubusercontent.com/Super-Artifacts/plugins/dce02981a179a09dad6509fe58a3a7b8cf020735/assets/screenshots/07-hello-from-hermes.png
+  - https://raw.githubusercontent.com/Super-Artifacts/plugins/dce02981a179a09dad6509fe58a3a7b8cf020735/assets/screenshots/07-hello-from-agent.png
   - https://raw.githubusercontent.com/Super-Artifacts/plugins/dce02981a179a09dad6509fe58a3a7b8cf020735/assets/screenshots/02-artifact-on-phone.png
   - https://raw.githubusercontent.com/Super-Artifacts/plugins/dce02981a179a09dad6509fe58a3a7b8cf020735/assets/screenshots/03-data-read-back.png
   - https://raw.githubusercontent.com/Super-Artifacts/plugins/dce02981a179a09dad6509fe58a3a7b8cf020735/assets/screenshots/05-gallery.png

@@ -1,8 +1,8 @@
-import { LOCAL_CONNECTION_ID } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { LOCAL_CONNECTION_ID } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
 import type { ReactNode } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -47,7 +47,7 @@ export function ProfileLaunchMenuItems({ connectionId, label, profile }: Profile
     <>
       {canOpenNewWindow() && (
         <ContextMenuItem onSelect={() => void openNewWindow(route)}>
-          <Codicon name="link-external" size="0.875rem" />
+          <AppIcon name="link-external" size="0.875rem" />
           <span>{p.openInNewWindow}</span>
         </ContextMenuItem>
       )}
@@ -55,7 +55,7 @@ export function ProfileLaunchMenuItems({ connectionId, label, profile }: Profile
         disabled={isDefault || !window.hermesDesktop?.profile?.setDefault}
         onSelect={() => void makeDefault()}
       >
-        <Codicon name={isDefault ? 'check' : 'home'} size="0.875rem" />
+        <AppIcon name={isDefault ? 'check' : 'home'} size="0.875rem" />
         <span>{isDefault ? p.defaultProfile : p.setAsDefault}</span>
       </ContextMenuItem>
     </>

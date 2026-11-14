@@ -100,7 +100,7 @@ def test_mcp_oauth_helpers_use_dashboard_flow_without_loopback_port():
     pytest.importorskip("mcp.shared.auth", reason="MCP SDK not installed")
     from tools.mcp_dashboard_oauth import DashboardOAuthFlow, dashboard_oauth_flow
     from tools.mcp_oauth import (
-        HermesTokenStorage,
+        AgentTokenStorage,
         _build_client_metadata,
         _configure_callback_port,
         _make_callback_waiter,
@@ -116,7 +116,7 @@ def test_mcp_oauth_helpers_use_dashboard_flow_without_loopback_port():
     )
     cfg = {}
     with dashboard_oauth_flow(flow):
-        assert _configure_callback_port(cfg, HermesTokenStorage("reports")) == 0
+        assert _configure_callback_port(cfg, AgentTokenStorage("reports")) == 0
         metadata = _build_client_metadata(cfg)
         assert str(metadata.redirect_uris[0]) == flow.redirect_uri
 
@@ -169,10 +169,10 @@ def test_empty_exception_text_stays_diagnosable():
 
 
 def test_failed_reauth_rollback_preserves_newer_oauth_state(tmp_path, monkeypatch):
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
 
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    storage = HermesTokenStorage("reports")
+    storage = AgentTokenStorage("reports")
     storage._tokens_path().parent.mkdir(parents=True)
     storage._tokens_path().write_text("OLD", encoding="utf-8")
     backup = storage.snapshot()
@@ -194,7 +194,7 @@ def test_preregistered_pinned_redirect_port_keeps_loopback_listener_under_dashbo
 
     from tools.mcp_dashboard_oauth import DashboardOAuthFlow, dashboard_oauth_flow
     from tools.mcp_oauth import (
-        HermesTokenStorage,
+        AgentTokenStorage,
         _build_client_metadata,
         _configure_callback_port,
         _make_callback_waiter,
@@ -210,7 +210,7 @@ def test_preregistered_pinned_redirect_port_keeps_loopback_listener_under_dashbo
                               redirect_uri="https://agent.example/mcp/oauth/callback/flow-5")
     cfg = {"client_id": "pre-registered", "client_secret": "s", "redirect_host": "localhost", "redirect_port": port}
     with dashboard_oauth_flow(flow), force_interactive_oauth():
-        assert _configure_callback_port(cfg, HermesTokenStorage("asana")) == port
+        assert _configure_callback_port(cfg, AgentTokenStorage("asana")) == port
         assert str(_build_client_metadata(cfg).redirect_uris[0]) == f"http://localhost:{port}/callback"
         asyncio.run(_make_redirect_handler(port)("https://idp.example/authorize?state=state-5"))
         assert flow.authorization_url == "https://idp.example/authorize?state=state-5"  # dashboard shows the URL

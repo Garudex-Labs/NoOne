@@ -9,8 +9,8 @@
 
 import { atom, computed } from 'nanostores'
 
-import { getLocalCatalog, getLocalModelsStatus } from '@/hermes'
-import type { LocalCatalogModel, LocalModelsStatus } from '@/types/hermes'
+import { getLocalCatalog, getLocalModelsStatus } from '@/agent-client'
+import type { LocalCatalogModel, LocalModelsStatus } from '@/types/agent-client'
 
 import { $localModelsEnabled } from './local-models-flag'
 import { $connection } from './session'

@@ -11,7 +11,7 @@ redaction helper call is not flagged, and neither is an HTTP payload read off a 
 object (``resp.text``, ``exc.body``) or named for one (``error_text``, ``stderr_text``), which is
 the remote side's answer, not a user's message.
 
-Limits: chat/room/user ids (and the ambiguous ``sender``, an id on Matrix and a dict on WeCom) are
+Limits: chat/room/user ids (and the ambiguous ``sender``, sometimes an id and sometimes a structured object) are
 not matched: they are everywhere, and an operator needs a user id to edit an allowlist. A body a body that reaches the call under any other name (``msg``, ``payload``,
 ``response``) or through a generator is missed. A value named like content that holds none (a
 config string, an API error body) takes ``# health: allow HX017 -- <why>``.

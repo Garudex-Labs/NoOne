@@ -1,10 +1,10 @@
-import { compactNumber } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { compactNumber } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
 import type * as React from 'react'
 
 import { type NewSessionSplitHandler, startNewProjectDrag, startNewSessionDrag } from '@/app/chat/new-session-drag'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { RowButton } from '@/components/ui/row-button'
 import { Tip } from '@/components/ui/tooltip'
@@ -100,7 +100,7 @@ export function SidebarSectionAddButton({
         size="icon-xs"
         variant="ghost"
       >
-        <Codicon name="add" size="0.75rem" />
+        <AppIcon name="add" size="0.75rem" />
       </Button>
     </Tip>
   )
@@ -356,7 +356,7 @@ export function SidebarRowGrab({
       <span className="grid size-full place-items-center transition-opacity group-hover/handle:opacity-0 group-focus-within/handle:opacity-0">
         {children}
       </span>
-      <Codicon
+      <AppIcon
         className={cn(
           'absolute text-(--ui-text-quaternary) opacity-0 transition-opacity group-hover/handle:opacity-80 group-focus-within/handle:opacity-80 hover:text-(--ui-text-secondary)',
           dragging && 'text-(--ui-text-secondary) opacity-100'
@@ -380,7 +380,7 @@ export function SidebarRowLeadGlyph({
 }) {
   return (
     <span
-      className={cn('grid size-full place-items-center text-(--ui-text-tertiary) [&_.codicon]:leading-none', className)}
+      className={cn('grid size-full place-items-center text-(--ui-text-tertiary) [&_.noone-icon]:leading-none', className)}
       style={style}
     >
       {children}

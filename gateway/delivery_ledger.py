@@ -22,8 +22,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 from gateway.dead_targets import classify_dead_error
-from hermes_cli.sqlite_util import add_column_if_missing
-from hermes_constants import get_process_hermes_home
+from agent_constants import get_process_agent_home
 
 logger = logging.getLogger(__name__)
 _DB_LOCK = threading.Lock()
@@ -169,15 +168,15 @@ def retry_not_before(updated_at: Any, last_error: Any, attempts: Any) -> Optiona
 
 
 def _db_path():
-    # Launch home, not get_hermes_home(): a multiplexed gateway records a served profile's replies
+    # Launch home, not get_agent_home(): a multiplexed gateway records a served profile's replies
     # under that profile's home override, but the boot sweep reads from the launch context, so both
-    # must open the one shared store (adapter_profile tells the bots apart). No get_hermes_home()
+    # must open the one shared store (adapter_profile tells the bots apart). No get_agent_home()
     # fallback for an unset HERMES_HOME: a default gateway run in the foreground has none.
-    return get_process_hermes_home() / "state.db"
+    return get_process_agent_home() / "state.db"
 
 
 def _connect() -> sqlite3.Connection:
-    from hermes_cli.sqlite_util import open_db
+    from agent_cli.sqlite_util import open_db
 
     # Shared state.db: SessionDB owns the durable PRAGMA set; this opener keeps the plain-tuple rows
     # and the 10 s busy timeout it always had.
@@ -186,30 +185,12 @@ def _connect() -> sqlite3.Connection:
 
 
 def _initialize_schema(conn: sqlite3.Connection) -> None:
-    conn.execute(
-        """CREATE TABLE IF NOT EXISTS delivery_obligations (
-            obligation_id TEXT PRIMARY KEY,
-            session_key TEXT NOT NULL,
-            platform TEXT NOT NULL,
-            chat_id TEXT NOT NULL,
-            thread_id TEXT,
-            content TEXT NOT NULL,
-            state TEXT NOT NULL,
-            attempts INTEGER NOT NULL DEFAULT 0,
-            created_at REAL NOT NULL,
-            updated_at REAL NOT NULL,
-            owner_pid INTEGER,
-            owner_started_at INTEGER,
-            last_error TEXT,
-            adapter_profile TEXT
-        )"""
-    )
-    if "adapter_profile" not in {row[1] for row in conn.execute("PRAGMA table_info(delivery_obligations)")}:
-        add_column_if_missing(conn, "delivery_obligations", "adapter_profile", "adapter_profile TEXT")
+    from agent_cli.database_migrations import initialize_database
+    initialize_database(conn, "delivery_ledger")
 
 
 def _transaction():
-    from hermes_cli.sqlite_util import transaction
+    from agent_cli.sqlite_util import transaction
 
     return transaction(_connect())
 
@@ -556,7 +537,7 @@ def ledger_enabled(config: Optional[dict[str, Any]] = None) -> bool:
     """Read the ``gateway.delivery_ledger`` config gate (default on)."""
     try:
         if config is None:
-            from hermes_cli.config import load_config
+            from agent_cli.config import load_config
             config = load_config()
         value = (config.get("gateway") or {}).get("delivery_ledger", True)
         return value.strip().lower() not in {"false", "0", "no", "off"} if isinstance(value, str) else bool(value)

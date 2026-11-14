@@ -33,17 +33,13 @@ def _assembled_payload(tmp_path):
     pm = payload / "pm-runtime"
     (pm / "deps").mkdir(parents=True)
     (pm / "pm-runtime.json").write_text(json.dumps({"python": "../" + python.relative_to(payload).as_posix(), "sitePackages": "deps"}), encoding="utf-8")
-    tui = tmp_path / "tui-product"
-    (tui / "dist").mkdir(parents=True)
-    (tui / "dist/entry.js").write_text("built", encoding="utf-8")
-    (tui / "package.json").write_text('{"type":"module"}', encoding="utf-8")
     build_set = tmp_path / "build-set.txt"
     build_set.write_bytes(b"\xef\xbb\xbfnative-fixture\n")
-    write_facts(payload, lock, build_set, tui)
+    write_facts(payload, lock, build_set)
     return payload, site
 
 
-def test_bionic_facts_and_agent_keep_fixed_prefix_and_tui_only(tmp_path):
+def test_bionic_facts_and_agent_keep_fixed_prefix(tmp_path):
     from pm.lock import Facts
 
     payload, site = _assembled_payload(tmp_path)
@@ -51,8 +47,7 @@ def test_bionic_facts_and_agent_keep_fixed_prefix_and_tui_only(tmp_path):
     manifest = json.loads((payload / "manifest.json").read_text())
     assert manifest["runtime"]["commands"] == {"probe": "bin/probe"}
     assert manifest["runtime"]["sitePackages"] == site.relative_to(payload).as_posix()
-    assert (repo / "hermes_cli/tui_dist/entry.js").read_text() == "built"
-    assert not (repo / "hermes_cli/web_dist").exists()
+    assert not (repo / "agent_cli/web_dist").exists()
     assert json.loads((payload / "native-wheels.json").read_text()) == ["native-fixture"]
     facts = Facts(payload / "tools/facts.json", strict=True)
     assert all(facts.get(name)["target"] == TARGET for name in PAYLOAD_TOOLS)

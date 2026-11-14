@@ -1,6 +1,6 @@
 """Shared harness for the MCP + plugin conformance suite.
 
-Every test drives a REAL Hermes process (``hermes chat -q`` or the ``tui_gateway``
+Every test drives a REAL Hermes process (``noone chat -q`` or the ``agent_backend``
 stdio host) against the recording fake LLM provider and one or more REAL MCP
 servers built with the installed ``mcp`` SDK (``mcp_fixture_server.py``), over
 stdio or streamable HTTP. Fakes sit only at boundaries we do not own (the LLM
@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterator
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from tests.e2e.core.parity._helpers import hermes_argv, kill_tagged, tagged_pids, wait_until
 from tests.fakes.fake_llm_provider import FakeLLMServer, Text, ToolCall, write_hermes_home

@@ -1,4 +1,4 @@
-import type * as HermesSdk from '@hermes/plugin-sdk'
+import type * as AgentSdk from '@noone/plugin-sdk'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeAll, expect, it, vi } from 'vitest'
@@ -6,19 +6,19 @@ import { afterEach, beforeAll, expect, it, vi } from 'vitest'
 import { I18nProvider, useI18n } from '@/i18n'
 import type { I18nContextValue } from '@/i18n'
 import { registerPluginLocales } from '@/i18n/plugin-i18n'
-import { $imagenAvailable } from '@/plugins/hermes-bots/avatar-image'
-import { CreateAgentDialog } from '@/plugins/hermes-bots/create-dialog'
-import { EditProfileDialog } from '@/plugins/hermes-bots/edit-profile-dialog'
-import { BOTS_LOCALES } from '@/plugins/hermes-bots/i18n'
-import { translateBotsIn } from '@/plugins/hermes-bots/i18n-test-helper'
+import { $imagenAvailable } from '@/plugins/bot-mode/avatar-image'
+import { CreateAgentDialog } from '@/plugins/bot-mode/create-dialog'
+import { EditProfileDialog } from '@/plugins/bot-mode/edit-profile-dialog'
+import { BOTS_LOCALES } from '@/plugins/bot-mode/i18n'
+import { translateBotsIn } from '@/plugins/bot-mode/i18n-test-helper'
 
 const mocks = vi.hoisted(() => ({
   request: vi.fn(async (_method: string) => ({ skills: [], toolsets: [], mcp_servers: [] })),
   connections: vi.fn(async () => [])
 }))
 
-vi.mock('@hermes/plugin-sdk', async importOriginal => {
-  const sdk = await importOriginal<typeof HermesSdk>()
+vi.mock('@noone/plugin-sdk', async importOriginal => {
+  const sdk = await importOriginal<typeof AgentSdk>()
 
   return { ...sdk, host: { ...sdk.host, request: mocks.request, connections: mocks.connections } }
 })
@@ -81,8 +81,8 @@ it('localizes Edit Profile and image controls without losing user content', asyn
   expect(screen.getByText(zh('editor.editDescription', 'Fixture Bot', 'fixture-bot'))).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: zh('avatar.upload') }))
   expect(screen.getByRole('button', { name: zh('editor.chooseImage') })).toBeTruthy()
-  await act(() => i18n.setLocale('zh-hant'))
-  const hant = translateBotsIn('zh-hant')
-  expect(screen.getByRole('button', { name: hant('editor.chooseImage') })).toBeTruthy()
+  await act(() => i18n.setLocale('hi'))
+  const hindi = translateBotsIn('hi')
+  expect(screen.getByRole('button', { name: hindi('editor.chooseImage') })).toBeTruthy()
   expect(screen.getByDisplayValue('user authored description')).toBeTruthy()
 })

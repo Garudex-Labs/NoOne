@@ -1,5 +1,5 @@
 """
-Tests for timezone support (hermes_time module + integration points).
+Tests for timezone support (agent_time module + integration points).
 
 Covers:
   - Valid timezone applies correctly
@@ -15,16 +15,16 @@ import pytest
 from datetime import datetime, timedelta, timezone, UTC
 from unittest.mock import patch
 
-import hermes_time
+import agent_time
 
 
 def _reset_hermes_time_cache():
-    """Reset the hermes_time module cache."""
-    hermes_time.reset_cache()
+    """Reset the agent_time module cache."""
+    agent_time.reset_cache()
 
 
 # =========================================================================
-# hermes_time.now() — core helper
+# agent_time.now() — core helper
 # =========================================================================
 
 class TestHermesTimeNow:
@@ -40,7 +40,7 @@ class TestHermesTimeNow:
     def test_valid_timezone_applies(self):
         """With a valid IANA timezone, now() returns time in that zone."""
         os.environ["HERMES_TIMEZONE"] = "Asia/Kolkata"
-        result = hermes_time.now()
+        result = agent_time.now()
         assert result.tzinfo is not None
         # IST is UTC+5:30
         offset = result.utcoffset()
@@ -61,17 +61,17 @@ class TestSafeStrftime:
             datetime(2026, 7, 14, 13, 5, tzinfo=ZoneInfo("Europe/Paris")),
             datetime(2026, 7, 14, 13, 5, tzinfo=timezone(timedelta(hours=-3), "Hora estándar de Argentina")),
         ):
-            assert hermes_time.safe_strftime(value, fmt) == value.strftime(fmt)
+            assert agent_time.safe_strftime(value, fmt) == value.strftime(fmt)
 
     def test_surrogate_zone_name_renders_json_safe(self):
         import json
         value = datetime(2026, 7, 14, 13, 5, tzinfo=timezone(timedelta(hours=2), _ESCAPED_ZONE))
-        rendered = hermes_time.safe_strftime(value, "%a %Y-%m-%d %H:%M %Z %z %%Z")
+        rendered = agent_time.safe_strftime(value, "%a %Y-%m-%d %H:%M %Z %z %%Z")
         json.dumps(rendered, ensure_ascii=False).encode("utf-8")
         assert rendered.startswith("Tue 2026-07-14 13:05 Paris, Madrid (heure d'")
         assert rendered.endswith(") +0200 %Z")
         # The escaped bytes decode back through the Windows ANSI code page.
-        assert hermes_time._repair_surrogates(_ESCAPED_ZONE, "cp1252") == "Paris, Madrid (heure d'été)"
+        assert agent_time._repair_surrogates(_ESCAPED_ZONE, "cp1252") == "Paris, Madrid (heure d'été)"
 
 
 class TestGetTimezone:
@@ -98,22 +98,22 @@ class TestGetTimezone:
         monkeypatch.delenv("HERMES_TIMEZONE", raising=False)
 
         monkeypatch.setenv("HERMES_HOME", str(first_home))
-        assert str(hermes_time.get_timezone()) == "Asia/Tokyo"
+        assert str(agent_time.get_timezone()) == "Asia/Tokyo"
 
         # Multiplexed profile runtime scopes switch HERMES_HOME in one process.
         monkeypatch.setenv("HERMES_HOME", str(second_home))
-        assert str(hermes_time.get_timezone()) == "America/New_York"
+        assert str(agent_time.get_timezone()) == "America/New_York"
 
         # Switching BACK must return the first profile's zone (per-identity
         # entries stay hot; no single-slot ping-pong).
         monkeypatch.setenv("HERMES_HOME", str(first_home))
-        assert str(hermes_time.get_timezone()) == "Asia/Tokyo"
+        assert str(agent_time.get_timezone()) == "Asia/Tokyo"
 
     def test_multiplex_prefers_routed_profile_config_over_env(self, tmp_path, monkeypatch):
         """Under the multiplexed gateway HERMES_TIMEZONE holds only the DEFAULT profile's value
         (bridged at startup), so a routed profile must resolve from its own config.yaml."""
         from agent.secret_scope import set_multiplex_active
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+        from agent_constants import reset_agent_home_override, set_agent_home_override
 
         default_home, routed_home = tmp_path / "default", tmp_path / "routed"
         default_home.mkdir()
@@ -124,17 +124,17 @@ class TestGetTimezone:
         monkeypatch.setenv("HERMES_TIMEZONE", "America/New_York")
 
         # Single-profile process: env stays authoritative.
-        assert hermes_time.get_timezone_name() == "America/New_York"
+        assert agent_time.get_timezone_name() == "America/New_York"
 
         set_multiplex_active(True)
         try:
-            assert hermes_time.get_timezone_name() == "America/New_York"  # default profile turn
-            token = set_hermes_home_override(str(routed_home))
+            assert agent_time.get_timezone_name() == "America/New_York"  # default profile turn
+            token = set_agent_home_override(str(routed_home))
             try:
-                assert hermes_time.get_timezone_name() == "Asia/Tokyo"
-                assert str(hermes_time.get_timezone()) == "Asia/Tokyo"
+                assert agent_time.get_timezone_name() == "Asia/Tokyo"
+                assert str(agent_time.get_timezone()) == "Asia/Tokyo"
             finally:
-                reset_hermes_home_override(token)
+                reset_agent_home_override(token)
         finally:
             set_multiplex_active(False)
 
@@ -151,9 +151,9 @@ class TestGetTimezone:
         """
         import threading
 
-        from hermes_constants import (
-            reset_hermes_home_override,
-            set_hermes_home_override,
+        from agent_constants import (
+            reset_agent_home_override,
+            set_agent_home_override,
         )
 
         zones = {"a": "Asia/Tokyo", "b": "America/New_York"}
@@ -173,14 +173,14 @@ class TestGetTimezone:
         def worker(key: str) -> None:
             barrier.wait()
             for _ in range(200):
-                token = set_hermes_home_override(str(homes[key]))
+                token = set_agent_home_override(str(homes[key]))
                 try:
-                    tz = hermes_time.get_timezone()
+                    tz = agent_time.get_timezone()
                     if str(tz) != zones[key]:
                         errors.append((key, str(tz)))
                         return
                 finally:
-                    reset_hermes_home_override(token)
+                    reset_agent_home_override(token)
 
         threads = [
             threading.Thread(target=worker, args=(key,)) for key in zones

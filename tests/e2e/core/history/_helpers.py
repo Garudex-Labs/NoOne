@@ -1,7 +1,7 @@
 """Transcript-ledger harness for the conversation-history (C3) and prompt-cache (C17) suites.
 
 Everything real except the model: a real ``AIAgent`` + ``SessionDB`` on disk in-process, the
-real ``tui_gateway`` stdio JSON-RPC server and the real ``hermes chat -q`` oneshot CLI as
+real ``agent_backend`` stdio JSON-RPC server and the real ``noone chat -q`` oneshot CLI as
 subprocesses, all pointed at one recording ``FakeLLMServer``. The invariants below read the
 three durable/observable projections of a conversation and cross-check them:
 
@@ -106,7 +106,7 @@ def db_connect(hermes_home: Path) -> sqlite3.Connection:
 
 def views(hermes_home: Path, sid: str) -> tuple[list[dict], list[dict]]:
     """(model_history, display_history) exactly as a resuming surface loads them."""
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
 
     db = SessionDB(db_path=hermes_home / "state.db")
     try:
@@ -359,8 +359,8 @@ _SID_RE = re.compile(r"^session_id:\s*(\S+)\s*$", re.MULTILINE)
 
 def run_oneshot(env: dict[str, str], cwd: Path, prompt: str, spawned: Spawned, *,
                 resume: str | None = None, timeout: float = 180.0) -> tuple[str, str]:
-    """``hermes chat -q PROMPT -Q [--resume SID]`` in a fresh process -> (stdout, durable sid)."""
-    cmd = [sys.executable, "-m", "hermes_cli.main", "chat", "-q", prompt, "-Q"]
+    """``noone chat -q PROMPT -Q [--resume SID]`` in a fresh process -> (stdout, durable sid)."""
+    cmd = [sys.executable, "-m", "agent_cli.main", "chat", "-q", prompt, "-Q"]
     if resume:
         cmd += ["--resume", resume]
     p = spawned.add(subprocess.Popen(cmd, cwd=str(cwd), env={**env, "PWD": str(cwd)}, stdin=subprocess.DEVNULL,
@@ -382,7 +382,7 @@ class GatewayError(RuntimeError):
 
 
 class TuiGateway:
-    """The real ``python -m tui_gateway.entry`` stdio JSON-RPC server (what the TUI spawns)."""
+    """The real ``python -m agent_backend.entry`` stdio JSON-RPC server (what the TUI spawns)."""
 
     def __init__(self, env: dict[str, str], cwd: Path, spawned: Spawned, *, ready_timeout: float = 120.0):
         self.env, self.cwd, self.spawned, self.ready_timeout = env, str(cwd), spawned, ready_timeout
@@ -396,14 +396,14 @@ class TuiGateway:
         self.stored: dict[str, str] = {}
 
     def __enter__(self) -> TuiGateway:
-        # A ``hermes chat -q`` hop leaves the always-on gateway owning this home, and the standalone
+        # A ``noone chat -q`` hop leaves the always-on gateway owning this home, and the standalone
         # stdio entry refuses a home a gateway owns (it would be a second state.db writer). Stop
         # the owner first so each "gw" hop is still a fresh process on the same durable store.
-        subprocess.run([sys.executable, "-m", "hermes_cli.main", "gateway", "stop"], cwd=self.cwd,
+        subprocess.run([sys.executable, "-m", "agent_cli.main", "gateway", "stop"], cwd=self.cwd,
                        env={**self.env, "PWD": self.cwd}, stdin=subprocess.DEVNULL,
                        capture_output=True, text=True, encoding="utf-8", timeout=120, check=False)
         self.proc = self.spawned.add(subprocess.Popen(
-            [sys.executable, "-m", "tui_gateway.entry"], cwd=self.cwd, env={**self.env, "PWD": self.cwd},
+            [sys.executable, "-m", "agent_backend.entry"], cwd=self.cwd, env={**self.env, "PWD": self.cwd},
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, encoding="utf-8", bufsize=1))
         threading.Thread(target=self._read_stdout, daemon=True).start()
@@ -581,9 +581,9 @@ class InProcessSession:
     owns ``history`` and hands it back each turn; ``/compress`` goes through ``compress_now``."""
 
     def __init__(self, base_url: str, hermes_home: Path, sid: str, *, platform: str = "cli") -> None:
-        from hermes_cli.config import load_config
-        from hermes_cli.tools_config import _get_platform_tools
-        from hermes_state import SessionDB
+        from agent_cli.config import load_config
+        from agent_cli.tools_config import _get_platform_tools
+        from agent_state import SessionDB
         from run_agent import AIAgent
 
         self.db = SessionDB(db_path=hermes_home / "state.db")
@@ -605,7 +605,7 @@ class InProcessSession:
         return result
 
     def compress(self, args: str = "") -> Any:
-        """Mirror ``hermes_cli.cli_session_mixin`` ``/compress``: install ``after_messages``, follow a
+        """Mirror ``agent_cli.cli_session_mixin`` ``/compress``: install ``after_messages``, follow a
         rotated session id, re-flush the handoff on rotation, finalize the engine notification."""
         from agent.conversation_compression import finalize_context_engine_compression_notification
         from agent.conversation_compression_manual import compress_now, parse_compress_args

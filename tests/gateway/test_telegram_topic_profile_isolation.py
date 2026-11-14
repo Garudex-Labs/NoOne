@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
-from hermes_state import SessionDB
+import pytest
+
+from agent_cli.database_migrations import UnsupportedDatabaseSchema
+
+from agent_state import SessionDB
 
 
 CHAT = "208214988"
@@ -15,8 +20,8 @@ def _session(db, sid, profile_name=None):
     db.create_session(session_id=sid, source="telegram", user_id=CHAT, profile_name=profile_name)
 
 
-def test_legacy_rows_migrate_only_to_default(tmp_path: Path):
-    """v1 shape (no CASCADE, old user index) → v3: rows land in 'default' only."""
+def test_legacy_topic_rows_are_refused_without_conversion(tmp_path: Path):
+    """An unversioned historical store is not silently adopted into any profile."""
     db_path = tmp_path / "legacy.db"
     conn = sqlite3.connect(str(db_path))
     conn.executescript(
@@ -57,24 +62,15 @@ def test_legacy_rows_migrate_only_to_default(tmp_path: Path):
     )
     conn.close()
 
-    db = SessionDB(db_path=db_path)
-    db.apply_telegram_topic_migration()
-    assert db.get_meta("telegram_dm_topic_schema_version") == "3"
-    assert db.is_telegram_topic_mode_enabled(
-        chat_id=CHAT, user_id=CHAT, profile_name="default",
-    )
-    assert not db.is_telegram_topic_mode_enabled(
-        chat_id=CHAT, user_id=CHAT, profile_name="coder",
-    )
-    assert db.get_telegram_topic_binding(
-        chat_id=CHAT, thread_id="99", profile_name="default",
-    )["session_id"] == "legacy-sess"
-    assert db.get_telegram_topic_binding(
-        chat_id=CHAT, thread_id="99", profile_name="coder",
-    ) is None
-    fk = db._conn.execute("PRAGMA foreign_key_list('telegram_dm_topic_bindings')").fetchall()
-    assert any(row[2] == "sessions" and row[6] == "CASCADE" for row in fk)
-    db.close()
+    before = db_path.read_bytes()
+    with pytest.raises(UnsupportedDatabaseSchema, match="historical state"):
+        SessionDB(db_path=db_path)
+    assert db_path.read_bytes() == before
+    with closing(sqlite3.connect(db_path)) as conn:
+        assert conn.execute("SELECT session_id FROM telegram_dm_topic_bindings").fetchall() == [("legacy-sess",)]
+        assert conn.execute("SELECT value FROM state_meta WHERE key=?", (
+            "telegram_dm_topic_schema_version",)).fetchone() == ("1",)
+        assert conn.execute("SELECT name FROM sqlite_master WHERE name='schema_migrations'").fetchone() is None
 
 
 def test_mode_and_bindings_isolated_across_profiles(tmp_path: Path):
@@ -115,4 +111,9 @@ def test_mode_and_bindings_isolated_across_profiles(tmp_path: Path):
     # Omitted kwarg == the single-profile "default" namespace, not a wildcard.
     assert not db.is_telegram_topic_mode_enabled(chat_id=CHAT, user_id=CHAT)
     assert db.get_telegram_topic_binding(chat_id=CHAT, thread_id="77") is None
+    assert db.delete_session("sess-b")
+    assert db.get_telegram_topic_binding(
+        chat_id=CHAT, thread_id="77", profile_name="beta",
+    ) is None
+    assert db.is_telegram_topic_mode_enabled(chat_id=CHAT, user_id=CHAT, profile_name="beta")
     db.close()

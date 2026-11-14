@@ -14,16 +14,15 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from agent.image_gen_provider import ImageGenProvider
-from tools.tool_backend_helpers import NOUS_MANAGED_PROVIDER
 
 logger = logging.getLogger(__name__)
 
 # Providers that can ground generation on a reference image, in preference order.
 # OpenRouter/Nous run a quality-first model chain and may fall back depending on
 # account access, so fidelity can vary by configured backend.
-_REF_CAPABLE = ("nous", "openai", "openai-codex", "openrouter", "krea")
+_REF_CAPABLE = ( "openai", "openai-codex", "openrouter", "krea")
 # Friendly display label per reference-capable provider (desktop pet-gen picker).
-_PROVIDER_LABELS = {"nous": "Nous Portal", "openrouter": "OpenRouter", "openai": "OpenAI", "openai-codex": "OpenAI (Codex)", "krea": "Krea"}
+_PROVIDER_LABELS = { "openrouter": "OpenRouter", "openai": "OpenAI", "openai-codex": "OpenAI (Codex)", "krea": "Krea"}
 
 
 class GenerationError(RuntimeError):
@@ -42,7 +41,7 @@ class SpriteProvider:
 
 def _discover() -> None:
     try:
-        from hermes_cli.plugins import _ensure_plugins_discovered
+        from agent_cli.plugins import _ensure_plugins_discovered
 
         _ensure_plugins_discovered()
     except Exception as exc:
@@ -81,9 +80,6 @@ def _candidate(name: str) -> SpriteProvider | None:
     """
     if (provider := _available(name)) is None:
         return None
-    if name == NOUS_MANAGED_PROVIDER and (model := _managed_krea_model()):
-        krea = _available("krea")
-        return None if krea is None else SpriteProvider(name=name, provider=krea, supports_references=True, model=model)
     return SpriteProvider(name=name, provider=provider, supports_references=True)
 
 
@@ -116,16 +112,11 @@ def resolve_provider(*, require_references: bool = True, prefer: str | None = No
     # The scan above found Nous unable to serve; when it is configured, that means its Krea model
     # lacks the Krea backend. Raised before the prompt-only fallback, which would send the Krea id
     # to another backend (FAL swaps in its default model; the Portal 404s on it).
-    if _available(NOUS_MANAGED_PROVIDER) is not None:
-        raise GenerationError(
-            "The selected Nous image model needs the Krea gateway, but that backend is "
-            "unavailable. Check Nous Subscription under `hermes tools` → Image Generation."
-        )
     if not require_references and active is not None and active.is_available():
         return SpriteProvider(name=getattr(active, "name", "unknown"), provider=active, supports_references=False)
     raise GenerationError(
         "Pet generation needs an image backend that supports reference images. "
-        "Open `hermes tools` → Image Generation and configure Nous Portal, "
+        "Open `noone tools` → Image Generation and configure Nous Portal, "
         "OpenRouter, or OpenAI (gpt-image-2) with an API key."
     )
 

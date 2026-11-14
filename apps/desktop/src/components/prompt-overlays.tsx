@@ -1,6 +1,7 @@
 'use client'
 
 import { useStore } from '@nanostores/react'
+import { KeyRound, Loader2, Lock, ShieldLock } from '@noone/ui/icons'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -18,7 +19,6 @@ import { LogView } from '@/components/ui/log-view'
 import { useI18n } from '@/i18n'
 import { isMissingPendingPromptRequest } from '@/lib/gateway-rpc'
 import { triggerHaptic } from '@/lib/haptics'
-import { KeyRound, Loader2, Lock, ShieldLock } from '@/lib/icons'
 import { $gateway } from '@/store/gateway'
 import { reconnectAction } from '@/store/gateway-reconnect'
 import { notifyError } from '@/store/notifications'

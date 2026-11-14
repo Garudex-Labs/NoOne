@@ -16,7 +16,7 @@ from agent.secret_scope import (
     set_multiplex_active,
     set_secret_scope,
 )
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 _SECONDARY_YAML = """\
 require_mention: false
@@ -25,20 +25,12 @@ gateway:
 telegram:
   mention_patterns: ['^bot2']
   reactions: false
-matrix:
-  require_mention: false
-  allowed_users: ['@b2:example.org']
-  session_scope: room
 whatsapp:
   dm_policy: open
   allow_from: ['+15550002']
-feishu:
-  allow_bots: all
 slack:
   allow_bots: all
   ignored_channels: [C_B2]
-dingtalk:
-  allowed_users: [b2user]
 discord:
   auto_thread: false
   reactions: false
@@ -48,16 +40,16 @@ signal:
 
 _BRIDGED_ENV = (
     "TELEGRAM_REQUIRE_MENTION", "TELEGRAM_MENTION_PATTERNS", "TELEGRAM_REACTIONS",
-    "MATRIX_REQUIRE_MENTION", "MATRIX_ALLOWED_USERS", "MATRIX_SESSION_SCOPE",
-    "WHATSAPP_DM_POLICY", "WHATSAPP_ALLOWED_USERS", "FEISHU_ALLOW_BOTS",
-    "SLACK_ALLOW_BOTS", "SLACK_IGNORED_CHANNELS", "DINGTALK_ALLOWED_USERS",
+
+    "WHATSAPP_DM_POLICY", "WHATSAPP_ALLOWED_USERS",
+    "SLACK_ALLOW_BOTS", "SLACK_IGNORED_CHANNELS",
     "DISCORD_AUTO_THREAD", "DISCORD_REACTIONS", "SIGNAL_REQUIRE_MENTION", "GATEWAY_ALLOW_ALL_USERS",
 )
 
 _EXPECTED_EXTRA = (
-    ("telegram", "mention_patterns"), ("telegram", "reactions"), ("matrix", "session_scope"),
-    ("matrix", "allowed_users"), ("whatsapp", "dm_policy"), ("feishu", "allow_bots"),
-    ("slack", "allow_bots"), ("slack", "ignored_channels"), ("dingtalk", "allowed_users"),
+    ("telegram", "mention_patterns"), ("telegram", "reactions"),
+     ("whatsapp", "dm_policy"),
+    ("slack", "allow_bots"), ("slack", "ignored_channels"),
     ("discord", "auto_thread"), ("signal", "require_mention"),
 )
 
@@ -73,18 +65,18 @@ def secondary_scope(tmp_path, monkeypatch):
     for name in _BRIDGED_ENV:
         monkeypatch.delenv(name, raising=False)
     set_multiplex_active(True)
-    home_token = set_hermes_home_override(str(secondary))
+    home_token = set_agent_home_override(str(secondary))
     secret_token = set_secret_scope({"TELEGRAM_BOT_TOKEN": "222:b2"})
     try:
         yield
     finally:
         reset_secret_scope(secret_token)
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
         set_multiplex_active(False)
 
 
 def test_secondary_profile_yaml_reaches_its_extra_not_the_process_env(secondary_scope):
-    from hermes_cli.plugins import discover_plugins
+    from agent_cli.plugins import discover_plugins
     from gateway.config import Platform, load_gateway_config
 
     discover_plugins()

@@ -21,8 +21,8 @@ from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
 from cron import executions as _executions
-from hermes_constants import get_hermes_home
-from hermes_time import now as _hermes_now
+from agent_constants import get_agent_home
+from agent_time import now as _hermes_now
 
 # Optional test override (mirrors ``cron.executions.EXECUTIONS_FILE``).
 EXECUTIONS_FILE: Optional[Path] = None
@@ -57,15 +57,15 @@ def _db_path() -> Path:
     for override in (_executions.EXECUTIONS_FILE, EXECUTIONS_FILE):
         if override is not None:
             return Path(override)
-    return get_hermes_home().resolve() / "cron" / "executions.db"
+    return get_agent_home().resolve() / "cron" / "executions.db"
 
 
 def _connect() -> sqlite3.Connection:
     # Late imports: a scheduler daemon that outlives an on-disk upgrade already has the OLD
-    # ``hermes_cli.sqlite_util`` / ``cron.jobs`` cached, so new names must be resolved at call time,
+    # ``agent_cli.sqlite_util`` / ``cron.jobs`` cached, so new names must be resolved at call time,
     # not at import time (the guarantee cron/ledger.py used to carry, see e24c8499).
     from cron.jobs import _ensure_cron_dir
-    from hermes_cli.sqlite_util import open_db
+    from agent_cli.sqlite_util import open_db
 
     path = _db_path()
     _ensure_cron_dir(path.parent)
@@ -73,39 +73,13 @@ def _connect() -> sqlite3.Connection:
 
 
 def _initialize_schema(conn: sqlite3.Connection) -> None:
-    from hermes_cli.sqlite_util import add_column_if_missing
-
-    conn.execute(
-        """CREATE TABLE IF NOT EXISTS cron_incidents (
-             id            TEXT PRIMARY KEY,
-             job_id        TEXT NOT NULL,
-             error_sig     TEXT NOT NULL,
-             state         TEXT NOT NULL,
-             failure_type  TEXT NOT NULL DEFAULT 'unknown',
-             first_seen_at TEXT NOT NULL,
-             last_seen_at  TEXT NOT NULL,
-             acked_at      TEXT,
-             alerted_at    TEXT,
-             closed_at     TEXT,
-             error         TEXT NOT NULL,
-             output_file   TEXT
-           )"""
-    )
-    # Ledgers created before the alert-once gate lack ``alerted_at``; add it in place.
-    add_column_if_missing(conn, "cron_incidents", "alerted_at", "alerted_at TEXT")
-    conn.execute(
-        "CREATE INDEX IF NOT EXISTS idx_cron_incidents_job "
-        "ON cron_incidents(job_id)"
-    )
-    conn.execute(
-        "CREATE INDEX IF NOT EXISTS idx_cron_incidents_state "
-        "ON cron_incidents(state)"
-    )
+    from agent_cli.database_migrations import initialize_database
+    initialize_database(conn, "cron_incidents")
 
 
 @contextmanager
 def _transaction() -> Iterator[sqlite3.Connection]:
-    from hermes_cli.sqlite_util import transaction
+    from agent_cli.sqlite_util import transaction
 
     with _lock, transaction(_connect()) as conn:
         yield conn
@@ -242,7 +216,7 @@ def ack_incident(incident_id: str) -> bool:
 def close_incidents_for_recovered_job(job_id: str) -> int:
     """Mark every open incident for ``job_id`` ``resolved`` after a successful run; returns how many.
     Without this the ledger only ever grows: a one-off failure (a config drift skip, a provider
-    outage) stayed ``detected``/``alerted`` forever after the job recovered, so ``hermes cron
+    outage) stayed ``detected``/``alerted`` forever after the job recovered, so ``noone cron
     incidents`` showed dozens of "open" incidents for jobs that had been green for weeks (32 of 32 on
     one install). ``resolved`` is distinct from the operator's ``closed`` on purpose: a repeat of the
     same error re-opens a resolved incident and alerts again (see ``upsert_incident``), whereas

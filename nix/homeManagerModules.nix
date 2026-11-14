@@ -1,11 +1,11 @@
-# nix/homeManagerModules.nix — the Home Manager module for hermes-agent
+# nix/homeManagerModules.nix — the Home Manager module for noone
 #
 # This module is the user-level equivalent of nixosModules.default. Hermes is
 # an agent for one person. The credentials, the memory, the sessions and the
 # cron jobs all belong to that person. Thus a user-level module is correct on
 # each distribution, and not only on NixOS.
 #
-# `services.hermes-agent` is the same option set on both modules. All of the
+# `services.noone` is the same option set on both modules. All of the
 # options except the system-level ones come from nix/moduleCommon.nix, so an
 # example from the NixOS documentation works here without a change. Only the
 # necessary parts are different:
@@ -17,20 +17,20 @@
 #   changed   systemd.services         -> systemd.user.services or
 #                                        launchd.agents
 #   changed   system.activationScripts -> home.activation
-#   changed   addToSystemPackages      -> programs.hermes-agent.enable and
+#   changed   addToSystemPackages      -> programs.noone.enable and
 #                                        home.sessionVariables
-#   added     programs.hermes-agent    the CLI and the desktop application,
+#   added     programs.noone    the CLI and the desktop application,
 #                                      because Home Manager separates an
 #                                      installation from a daemon
 #   changed   stateDir (+ "/.hermes")  -> hermesHome, set directly
 #
 # To use the module:
-#   imports = [ hermes-agent.homeManagerModules.default ];
-#   programs.hermes-agent = {
+#   imports = [ noone.homeManagerModules.default ];
+#   programs.noone = {
 #     enable = true;          # the hermes CLI on your PATH
 #     desktop.enable = true;  # the Electron application and a launcher
 #   };
-#   services.hermes-agent = {
+#   services.noone = {
 #     enable = true;
 #     gateway.enable = true;
 #     settings.model.default = "anthropic/claude-sonnet-4";
@@ -54,12 +54,12 @@
     }:
 
     let
-      cfg = config.services.hermes-agent;
-      cfgPrograms = config.programs.hermes-agent;
+      cfg = config.services.noone;
+      cfgPrograms = config.programs.noone;
       common = import ./moduleCommon.nix { inherit lib; };
 
       effectivePackage = common.effectivePackage cfg;
-      hermes-agent = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      noone = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
       inherit (pkgs.stdenv.hostPlatform) isDarwin isLinux;
 
@@ -196,32 +196,32 @@
 
     in
     {
-      # ── programs.hermes-agent — the installation ───────────────────────
+      # ── programs.noone — the installation ───────────────────────
       # Home Manager separates "install this application for me" from "run
       # this daemon". Hermes needs both, and a person can want one without
       # the other: an application with no gateway, or a headless gateway on
       # a machine with no display.
       #
-      # `services.hermes-agent` stays the authority for the state and the
+      # `services.noone` stays the authority for the state and the
       # configuration. This module reads hermesHome and the backend address
       # from it, and never the reverse.
-      options.programs.hermes-agent = {
+      options.programs.noone = {
         enable = lib.mkEnableOption ''
           the Hermes Agent command line application.
 
           This adds `hermes` to home.packages, and exports HERMES_HOME with
           home.sessionVariables. An interactive shell then uses the same
-          state as `services.hermes-agent`
+          state as `services.noone`
         '';
 
         package = lib.mkOption {
           type = lib.types.package;
           default = effectivePackage;
-          defaultText = lib.literalExpression "config.services.hermes-agent.package";
+          defaultText = lib.literalExpression "config.services.noone.package";
           description = ''
-            The hermes-agent package to install.
+            The noone package to install.
 
-            The default follows `services.hermes-agent.package`, and applies
+            The default follows `services.noone.package`, and applies
             `extraPythonPackages` and `extraDependencyGroups` from that
             module. Thus the command line and the services are one build,
             and a plugin that the services can load is a plugin that your
@@ -236,7 +236,7 @@
             This adds `hermes-desktop` to home.packages, with an XDG
             launcher entry on Linux. The launcher starts the same Hermes
             runtime that `package` gives, and reads the HERMES_HOME of
-            `services.hermes-agent`. Thus the application, the interactive
+            `services.noone`. Thus the application, the interactive
             shell and the services share one state directory.
 
             The Electron application carries its own Hermes runtime with
@@ -248,12 +248,12 @@
           package = lib.mkOption {
             type = lib.types.package;
             default = cfgPrograms.package.hermesDesktop;
-            defaultText = lib.literalExpression "config.programs.hermes-agent.package.hermesDesktop";
+            defaultText = lib.literalExpression "config.programs.noone.package.hermesDesktop";
             description = ''
               The hermes-desktop package to use.
 
               The default follows `package`, and thus also
-              `services.hermes-agent.extraPythonPackages` and
+              `services.noone.extraPythonPackages` and
               `extraDependencyGroups`, because the desktop application is a
               passthru of the agent package. A package that you set here
               carries its own Hermes runtime, and this module cannot make
@@ -263,10 +263,10 @@
         };
       };
 
-      options.services.hermes-agent =
+      options.services.noone =
         common.sharedOptions {
-          defaultPackage = hermes-agent;
-          defaultPackageText = lib.literalExpression "hermes-agent.packages.\${system}.default";
+          defaultPackage = noone;
+          defaultPackageText = lib.literalExpression "noone.packages.\${system}.default";
           defaultWorkingDirectory = config.home.homeDirectory;
           defaultWorkingDirectoryText = lib.literalExpression "config.home.homeDirectory";
         }
@@ -288,7 +288,7 @@
             example = "/home/alice/.hermes-work";
           };
 
-          # `installPackage` moved to `programs.hermes-agent.enable`. The
+          # `installPackage` moved to `programs.noone.enable`. The
           # option is dead, but it must not be silent: it defaulted to true,
           # so a person who never named it still got the command line, and a
           # quiet removal gives them a machine with no `hermes` and no
@@ -300,7 +300,7 @@
             default = null;
             visible = false;
             description = ''
-              Removed. Use `programs.hermes-agent.enable` instead.
+              Removed. Use `programs.noone.enable` instead.
             '';
           };
 
@@ -309,7 +309,7 @@
 
       config = lib.mkMerge [
 
-        # ── programs.hermes-agent — the installation ──────────────────────
+        # ── programs.noone — the installation ──────────────────────
         # Outside the `services.enable` guard on purpose. A person can want
         # the command line or the application on a machine that runs no
         # daemon at all.
@@ -345,30 +345,30 @@
 
             # ── Merge MCP servers into settings ────────────────────────────
             (lib.mkIf (cfg.mcpServers != { }) {
-              services.hermes-agent.settings.mcp_servers = common.mcpServersToConfig cfg.mcpServers;
+              services.noone.settings.mcp_servers = common.mcpServersToConfig cfg.mcpServers;
             })
 
             {
               assertions =
                 common.pluginNameAssertions {
                   inherit cfg;
-                  optionPath = "services.hermes-agent";
+                  optionPath = "services.noone";
                 }
                 ++ common.workspaceFilesAssertions {
                   inherit cfg;
-                  opt = options.services.hermes-agent.workingDirectory;
-                  optionPath = "services.hermes-agent";
+                  opt = options.services.noone.workingDirectory;
+                  optionPath = "services.noone";
                 }
                 ++ common.backendBindAssertions {
                   inherit cfg;
-                  optionPath = "services.hermes-agent";
+                  optionPath = "services.noone";
                 }
                 ++ [
                   {
                     # The interface poll reads `ip`, which iproute2 supplies on
                     # Linux only.
                     assertion = !isDarwin || cfg.backend.waitFor != "interface";
-                    message = "services.hermes-agent.backend.waitFor = \"interface\" works on Linux only. Use \"hostname\" on Darwin.";
+                    message = "services.noone.backend.waitFor = \"interface\" works on Linux only. Use \"hostname\" on Darwin.";
                   }
                 ];
             }
@@ -412,7 +412,7 @@
 
             # ── Linux: systemd user services ───────────────────────────────
             (lib.mkIf (isLinux && cfg.gateway.enable) {
-              systemd.user.services.hermes-agent = mkUnit {
+              systemd.user.services.noone = mkUnit {
                 description = "Hermes Agent Gateway";
                 argv = common.gatewayArgv cfg;
               };
@@ -428,9 +428,9 @@
 
             # ── Darwin: launchd agents ─────────────────────────────────────
             (lib.mkIf (isDarwin && cfg.gateway.enable) {
-              launchd.agents.hermes-agent = mkAgent {
+              launchd.agents.noone = mkAgent {
                 argv = common.gatewayArgv cfg;
-                logName = "hermes-agent";
+                logName = "noone";
               };
             })
 

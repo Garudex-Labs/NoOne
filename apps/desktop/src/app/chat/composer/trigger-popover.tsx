@@ -1,8 +1,8 @@
 import type { Unstable_TriggerItem } from '@assistant-ui/core'
+import { AppIcon } from '@noone/ui/app-icon'
 import { Fragment, useEffect, useRef } from 'react'
 
 import { referenceKind, referenceStyle } from '@/components/assistant-ui/reference-kinds'
-import { Codicon } from '@/components/ui/codicon'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
@@ -220,7 +220,7 @@ export function ComposerTriggerPopover({
                   ) : (
                     <>
                       <span className="grid size-4 shrink-0 place-items-center text-(--ref-color)" data-ref={refKind}>
-                        <Codicon name={referenceStyle(refKind).codicon} size="0.875rem" />
+                        <AppIcon name={referenceStyle(refKind).codicon} size="0.875rem" />
                       </span>
                       <span className="min-w-0 shrink truncate font-medium leading-5 text-foreground">{display}</span>
                       {description && (

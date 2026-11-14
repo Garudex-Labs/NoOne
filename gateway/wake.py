@@ -78,7 +78,7 @@ def session_owned_by_profile(config: Any, profile: Optional[str], session_id: An
         home = dict(_multiplex_profile_homes(config)).get(profile)
         if home is None:
             return False
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         db = SessionDB(Path(home) / "state.db", read_only=True)
     except Exception as exc:
         logger.debug("wake: session ownership check unavailable for %s/%s: %s", profile, session_id, exc)
@@ -139,7 +139,7 @@ async def deliver_wake(adapter: Any, *, text: str, session_id: str = "", source:
         runner = getattr(adapter, "gateway_runner", None)
         if runner is not None:
             from gateway.session_automation import admit_route_wake
-            from hermes_state_runtime import RuntimeStoreError
+            from agent_state_runtime import RuntimeStoreError
             category = {"notification_category": notification_category} if notification_category != "result" else {}
             try:
                 if await admit_route_wake(runner, adapter, source, text, "kanban-wake", category):
@@ -163,7 +163,7 @@ async def deliver_wake(adapter: Any, *, text: str, session_id: str = "", source:
 
 def _delegation_display_metadata(evt: dict) -> dict:
     """Display-only metadata for a persisted delegation delivery row. Mirrors
-    ``tui_gateway.server._async_delegation_display_metadata`` (same ``display_kind`` consumer
+    ``agent_backend.server._async_delegation_display_metadata`` (same ``display_kind`` consumer
     contract) without importing the TUI stack."""
     raw_results = evt.get("results")
     results = [r for r in raw_results if isinstance(r, dict)] if isinstance(raw_results, list) else []

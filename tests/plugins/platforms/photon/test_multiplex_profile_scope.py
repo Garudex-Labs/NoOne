@@ -13,13 +13,13 @@ silently authenticate against the default profile's Spectrum project, or
 have its mention-gating/reaction behavior driven by the default profile's
 settings.
 
-Notably project_id was a stronger variant of the bug (like the IRC fix in
+Notably project_id was a stronger variant of the bug (like the scoped-platform fix in
 this series): __init__'s original
 `os.getenv("PHOTON_PROJECT_ID") or extra.get("project_id") or stored_id`
 ordering let a raw env read override even an explicitly configured
 config.yaml extra.
 
-Mirrors the LINE/DingTalk/IRC/Mattermost fix for #98738.
+Mirrors the LINE/Mattermost fix for #98738.
 """
 from __future__ import annotations
 

@@ -1,11 +1,11 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import type * as React from 'react'
 import { useRef, useState } from 'react'
 
+import type { SessionInfo } from '@/agent-client'
 import { type NewSessionSplitHandler, startNewSessionDrag } from '@/app/chat/new-session-drag'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
-import type { SessionInfo } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { $sidebarShowAllSessions } from '@/store/layout'
@@ -55,7 +55,7 @@ export function projectIcon({ color, icon, isAuto, isNoProject }: SidebarProject
 
   return (
     <SidebarRowLeadGlyph style={color ? { color } : undefined}>
-      <Codicon
+      <AppIcon
         name={icon || (isNoProject ? 'home' : isAuto ? 'repo' : 'folder-library')}
         size={SIDEBAR_LEAD_ICON_SIZE}
       />
@@ -72,7 +72,7 @@ export function ProjectBackRow({ label, onClick }: { label: string; onClick: () 
       >
         <SidebarRowLead>
           <SidebarRowLeadGlyph>
-            <Codicon name="arrow-left" size={SIDEBAR_LEAD_ICON_SIZE} />
+            <AppIcon name="arrow-left" size={SIDEBAR_LEAD_ICON_SIZE} />
           </SidebarRowLeadGlyph>
         </SidebarRowLead>
         <SidebarRowLabel className="text-xs underline-offset-4 group-hover/back:underline">{label}</SidebarRowLabel>

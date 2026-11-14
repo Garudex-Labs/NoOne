@@ -1,39 +1,47 @@
 ---
 title: "Siyuan — Query and edit a SiYuan knowledge base via its API"
-sidebar_label: "Siyuan"
+sidebarTitle: "Siyuan"
 description: "Query and edit a SiYuan knowledge base via its API"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Siyuan
+# Siyuan {#siyuan}
 
 Query and edit a SiYuan knowledge base via its API.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/productivity/siyuan` |
+| Source | Optional — install with `noone skills install official/productivity/siyuan` |
 | Path | `optional-skills/productivity/siyuan` |
 | Version | `1.0.0` |
-| Author | FEUAZUR |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `SiYuan`, `Notes`, `Knowledge Base`, `PKM`, `API` |
 | Related skills | [`obsidian`](../../bundled/note-taking/note-taking-obsidian.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# SiYuan Note API
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# SiYuan Note API {#siyuan-note-api}
 
 Use the [SiYuan](https://github.com/siyuan-note/siyuan) kernel API via curl to search, read, create, update, and delete blocks and documents in a self-hosted knowledge base. No extra tools needed -- just curl and an API token.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 1. Install and run SiYuan (desktop or Docker)
 2. Get your API token: **Settings > About > API token**
@@ -44,7 +52,7 @@ Use the [SiYuan](https://github.com/siyuan-note/siyuan) kernel API via curl to s
    ```
    `SIYUAN_URL` defaults to `http://127.0.0.1:6806` if not set.
 
-## API Basics
+## API Basics {#api-basics}
 
 All SiYuan API calls are **POST with JSON body**. Every request follows this pattern:
 
@@ -63,7 +71,7 @@ Responses are JSON with this structure:
 
 **ID format:** SiYuan IDs look like `20210808180117-6v0mkxr` (14-digit timestamp + 7 alphanumeric chars).
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Operation | Endpoint |
 |-----------|----------|
@@ -85,9 +93,9 @@ Responses are JSON with this structure:
 | Delete document | `/api/filetree/removeDocByID` |
 | Export as Markdown | `/api/export/exportMdContent` |
 
-## Common Operations
+## Common Operations {#common-operations}
 
-### Search (Full-Text)
+### Search (Full-Text) {#search-full-text}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/search/fullTextSearchBlock" \
@@ -96,7 +104,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/search/fullTextSearchB
   -d '{"query": "meeting notes", "page": 0}' | jq '.data.blocks[:5]'
 ```
 
-### Search (SQL)
+### Search (SQL) {#search-sql}
 
 Query the blocks database directly. Only SELECT statements are safe.
 
@@ -109,7 +117,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/query/sql" \
 
 Useful columns: `id`, `parent_id`, `root_id`, `box` (notebook ID), `path`, `content`, `type`, `subtype`, `created`, `updated`.
 
-### Read Block Content
+### Read Block Content {#read-block-content}
 
 Returns block content in Kramdown (Markdown-like) format.
 
@@ -120,7 +128,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/getBlockKramdown
   -d '{"id": "20210808180117-6v0mkxr"}' | jq '.data.kramdown'
 ```
 
-### Read Child Blocks
+### Read Child Blocks {#read-child-blocks}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/getChildBlocks" \
@@ -129,7 +137,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/getChildBlocks" 
   -d '{"id": "20210808180117-6v0mkxr"}' | jq '.data'
 ```
 
-### Get Human-Readable Path
+### Get Human-Readable Path {#get-human-readable-path}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/filetree/getHPathByID" \
@@ -138,7 +146,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/filetree/getHPathByID"
   -d '{"id": "20210808180117-6v0mkxr"}' | jq '.data'
 ```
 
-### Get Block Attributes
+### Get Block Attributes {#get-block-attributes}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/attr/getBlockAttrs" \
@@ -147,7 +155,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/attr/getBlockAttrs" \
   -d '{"id": "20210808180117-6v0mkxr"}' | jq '.data'
 ```
 
-### List Notebooks
+### List Notebooks {#list-notebooks}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/notebook/lsNotebooks" \
@@ -156,7 +164,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/notebook/lsNotebooks" 
   -d '{}' | jq '.data.notebooks[] | {id, name, closed}'
 ```
 
-### List Documents in a Notebook
+### List Documents in a Notebook {#list-documents-in-a-notebook}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/filetree/listDocsByPath" \
@@ -165,7 +173,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/filetree/listDocsByPat
   -d '{"notebook": "NOTEBOOK_ID", "path": "/"}' | jq '.data.files[] | {id, name}'
 ```
 
-### Create a Document
+### Create a Document {#create-a-document}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/filetree/createDocWithMd" \
@@ -178,7 +186,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/filetree/createDocWith
   }' | jq '.data'
 ```
 
-### Create a Notebook
+### Create a Notebook {#create-a-notebook}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/notebook/createNotebook" \
@@ -187,7 +195,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/notebook/createNoteboo
   -d '{"name": "My New Notebook"}' | jq '.data.notebook.id'
 ```
 
-### Append Block to Document
+### Append Block to Document {#append-block-to-document}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/appendBlock" \
@@ -202,7 +210,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/appendBlock" \
 
 Also available: `/api/block/prependBlock` (same params, inserts at the beginning) and `/api/block/insertBlock` (uses `previousID` instead of `parentID` to insert after a specific block).
 
-### Update Block Content
+### Update Block Content {#update-block-content}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/updateBlock" \
@@ -215,7 +223,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/updateBlock" \
   }' | jq '.data'
 ```
 
-### Rename a Document
+### Rename a Document {#rename-a-document}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/filetree/renameDocByID" \
@@ -224,7 +232,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/filetree/renameDocByID
   -d '{"id": "DOCUMENT_ID", "title": "New Title"}'
 ```
 
-### Set Block Attributes
+### Set Block Attributes {#set-block-attributes}
 
 Custom attributes must be prefixed with `custom-`:
 
@@ -241,7 +249,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/attr/setBlockAttrs" \
   }'
 ```
 
-### Delete a Block
+### Delete a Block {#delete-a-block}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/deleteBlock" \
@@ -253,7 +261,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/block/deleteBlock" \
 To delete a whole document: use `/api/filetree/removeDocByID` with `{"id": "DOC_ID"}`.
 To delete a notebook: use `/api/notebook/removeNotebook` with `{"notebook": "NOTEBOOK_ID"}`.
 
-### Export Document as Markdown
+### Export Document as Markdown {#export-document-as-markdown}
 
 ```bash
 curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/export/exportMdContent" \
@@ -262,7 +270,7 @@ curl -s -X POST "${SIYUAN_URL:-http://127.0.0.1:6806}/api/export/exportMdContent
   -d '{"id": "DOCUMENT_ID"}' | jq -r '.data.content'
 ```
 
-## Block Types
+## Block Types {#block-types}
 
 Common `type` values in SQL queries:
 
@@ -280,7 +288,7 @@ Common `type` values in SQL queries:
 | `s` | Super block |
 | `html` | HTML block |
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **All endpoints are POST** -- even read-only operations. Do not use GET.
 - **SQL safety**: only use SELECT queries. INSERT/UPDATE/DELETE/DROP are dangerous and should never be sent.
@@ -289,7 +297,7 @@ Common `type` values in SQL queries:
 - **Large documents**: block content and export results can be very large. Use `LIMIT` in SQL and pipe through `jq` to extract only what you need.
 - **Notebook IDs**: when working with a specific notebook, get its ID first via `lsNotebooks`.
 
-## Alternative: MCP Server
+## Alternative: MCP Server {#alternative-mcp-server}
 
 If you prefer a native integration instead of curl, install the SiYuan MCP server:
 

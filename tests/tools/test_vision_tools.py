@@ -144,7 +144,7 @@ class TestHandleVisionAnalyze:
                 st.enter_context(patch.dict(os.environ, {}, clear=False))
                 if config is not None:
                     st.enter_context(patch(
-                        "hermes_cli.config.load_config", return_value=config,
+                        "agent_cli.config.load_config", return_value=config,
                     ))
                 if env_model is None:
                     os.environ.pop("AUXILIARY_VISION_MODEL", None)
@@ -256,7 +256,7 @@ class TestVisionConfig:
             mock_response.choices = [mock_choice]
 
             with (
-                patch("hermes_cli.config.load_config", return_value=config),
+                patch("agent_cli.config.load_config", return_value=config),
                 patch(
                     "tools.vision_tools._image_to_base64_data_url",
                     return_value="data:image/png;base64,abc",
@@ -992,7 +992,7 @@ class TestVisionCpuBurstCap:
             with (
                 patch.dict(os.environ, {}, clear=False),
                 patch("tools.vision_tools._detect_host_cpus", return_value=host_cpus),
-                patch("hermes_cli.config.load_config", side_effect=Exception),
+                patch("agent_cli.config.load_config", side_effect=Exception),
             ):
                 if env_value is None:
                     os.environ.pop("HERMES_VISION_MAX_CONCURRENCY", None)
@@ -1044,13 +1044,13 @@ class TestVisionCpuBurstCap:
         """The pool worker runs under the caller's contextvars: a turn routed to another profile
         encodes with that profile's home, not the launch profile's."""
         import importlib
-        from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
+        from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
         vt = importlib.import_module("tools.vision_tools")
-        token = set_hermes_home_override(str(tmp_path / "profiles" / "b"))
+        token = set_agent_home_override(str(tmp_path / "profiles" / "b"))
         try:
-            seen = await vt._run_encode_on_cpu_executor(get_hermes_home)
+            seen = await vt._run_encode_on_cpu_executor(get_agent_home)
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         assert seen == tmp_path / "profiles" / "b"
 
     @pytest.mark.asyncio

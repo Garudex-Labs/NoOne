@@ -1,10 +1,9 @@
 ---
-sidebar_position: 3
 title: "Curator"
 description: "Background maintenance for agent-created skills — usage tracking, staleness, archival, and LLM-driven review"
 ---
 
-# Curator
+# Curator {#curator}
 
 The curator is a background maintenance pass for **agent-created skills**. It tracks how often each skill is viewed, used, and patched, moves long-unused skills through `active → stale → archived` states, and periodically spawns a short auxiliary-model review that proposes consolidations or patches drift.
 
@@ -14,24 +13,32 @@ By default the curator manages only agent-created skills. With `curator.prune_bu
 
 Tracks [issue #7816](https://github.com/NousResearch/hermes-agent/issues/7816).
 
-## How it runs
+## How it runs {#how-it-runs}
 
-The curator is triggered by an inactivity check, not a cron job. On CLI session start, during gateway housekeeping (which also covers a local Desktop, since it attaches to the gateway), and on the `hermes serve` maintenance timer, Hermes checks whether:
+The curator is triggered by an inactivity check, not a cron job. On CLI session start, during gateway housekeeping (which also covers a local Desktop, since it attaches to the gateway), and on the `noone serve` maintenance timer, {{app-name}} checks whether:
 
 1. Enough time has passed since the last curator run (`interval_hours`, default **7 days**), and
 2. The agent has been idle long enough (`min_idle_hours`, default **2 hours**).
 
-`hermes serve` / `hermes dashboard` backends (for example a remote Desktop connection) share the existing hourly maintenance timer (first poll after 90 seconds), independently of cron jobs. They measure inactivity from process startup and the most recent chat activity in the same profile, retaining that activity timestamp after a session closes or is reaped, and skip curator while a turn in that profile is running. A connected but inactive window does not block maintenance. A running messaging gateway for the same profile owns these chores instead.
+`noone serve` / `noone dashboard` backends (for example a remote Desktop connection) share the existing hourly maintenance timer (first poll after 90 seconds), independently of cron jobs. They measure inactivity from process startup and the most recent chat activity in the same profile, retaining that activity timestamp after a session closes or is reaped, and skip curator while a turn in that profile is running. A connected but inactive window does not block maintenance. A running messaging gateway for the same profile owns these chores instead.
 
 The timer services its backend's profile. In-flight maintenance runs in a worker thread; closing the backend does not cooperatively interrupt that pass. Starting multiple independent serve processes for the same profile can still race the curator's interval check.
 
 If both are true, it spawns a background fork of `AIAgent` — the same pattern used by the memory/skill self-improvement nudges. The fork runs in its own prompt cache and never touches the active conversation.
 
-:::info First-run behavior
-On a brand-new install (or the first time a pre-curator install ticks after `hermes update`), the curator **does not run immediately**. The first observation seeds `last_run_at` to "now" and defers the first real pass by one full `interval_hours`. This gives you a full interval to review your skill library, pin anything important, or opt out entirely before the curator ever touches it.
+<Info>
+
+<div className="doc-callout-title">
+
+First-run behavior
+
+</div>
+
+On a brand-new install (or the first time a pre-curator install ticks after `noone update`), the curator **does not run immediately**. The first observation seeds `last_run_at` to "now" and defers the first real pass by one full `interval_hours`. This gives you a full interval to review your skill library, pin anything important, or opt out entirely before the curator ever touches it.
 
 If you want to see what the curator *would* do before it runs for real, run `hermes curator run --dry-run` — it produces the same review report without mutating the library.
-:::
+
+</Info>
 
 A run has two phases:
 
@@ -40,13 +47,21 @@ A run has two phases:
    - **Never-used skills** (`use_count == 0`) get a grace floor: they are not archived until they are at least `stale_after_days` old. Zero uses is absence of evidence, not proof the skill is disposable.
 2. **LLM consolidation** (single aux-model pass with a high iteration ceiling — a full curation sweep typically takes 50–100 API calls) — **OFF by default**. When `curator.consolidate: true`, the forked agent surveys the agent-created skills, can read any of them with `skill_view`, and decides per-skill whether to keep, patch (via `skill_manage`), consolidate overlapping ones into class-level umbrellas, or archive (via `skill_manage action=delete` with an `absorbed_into` target — the pass has no terminal). The candidate list it is given contains only skills it can actually read and write: bundled built-ins (even with `prune_builtins: true`, which only affects the deterministic archival pass) and skills in `skills.disabled` (which `skill_view` refuses) are never offered to it, so the pass cannot burn its tool budget on refused reads or writes. Consolidation treats a skill as a full package: if a skill has `references/`, `templates/`, `scripts/`, `assets/`, or relative links to those paths, the curator must either keep it standalone, re-home the needed support files and rewrite paths, or archive the entire package unchanged — not flatten only `SKILL.md` into another skill's `references/` file.
 
-:::info Consolidation is opt-in
+<Info>
+
+<div className="doc-callout-title">
+
+Consolidation is opt-in
+
+</div>
+
 By default the curator only **prunes** — the deterministic inactivity pass marks skills stale and archives long-unused ones. The opinionated LLM **consolidation** pass (umbrella-building, merging overlapping skills) is off by default because it costs aux-model tokens on every run and makes broad structural changes to your library. Turn it on with `curator.consolidate: true`, or run it once on demand with `hermes curator run --consolidate`.
-:::
+
+</Info>
 
 Pinned skills are skipped by the curator's auto-transitions, and the agent's `skill_manage` tool refuses to **delete** them; edits and patches still go through. To stop the agent from changing a skill at all, lock it instead. See [Pinning a skill](#pinning-a-skill) and [Locking a skill](#locking-a-skill) below.
 
-## Configuration
+## Configuration {#configuration}
 
 All settings live in `config.yaml` under `curator:` (not `.env` — this isn't a secret). Defaults:
 
@@ -63,14 +78,14 @@ curator:
 
 To disable entirely, set `curator.enabled: false`. To keep the always-on pruning but opt into LLM consolidation, set `curator.consolidate: true`.
 
-### Running the review on a cheaper aux model
+### Running the review on a cheaper aux model {#running-the-review-on-a-cheaper-aux-model}
 
 The curator's LLM review pass is a regular auxiliary task slot — `auxiliary.curator` — alongside Vision, Compression, Session Search, etc. "Auto" means "use my main chat model"; override the slot to pin a specific provider + model for the review pass instead.
 
-**Easiest — `hermes model`:**
+**Easiest — `noone model`:**
 
 ```bash
-hermes model                   # → "Auxiliary models — side-task routing"
+noone model                   # → "Auxiliary models — side-task routing"
                                # → pick "Curator" → pick provider → pick model
 ```
 
@@ -88,11 +103,19 @@ auxiliary:
 
 Leaving `provider: auto` (the default) routes the review pass through whatever your main chat model is, matching the behavior of every other auxiliary task.
 
-:::note Legacy config
-Earlier releases used a one-off `curator.auxiliary.{provider,model}` block. That path still works but emits a deprecation log line — please migrate to `auxiliary.curator` above so the curator shares the same plumbing (`hermes model`, dashboard Models tab, `base_url`, `api_key`, `timeout`, `extra_body`) as every other aux task.
-:::
+<Note>
 
-## CLI
+<div className="doc-callout-title">
+
+Legacy config
+
+</div>
+
+Earlier releases used a one-off `curator.auxiliary.{provider,model}` block. That path still works but emits a deprecation log line — please migrate to `auxiliary.curator` above so the curator shares the same plumbing (`noone model`, dashboard Models tab, `base_url`, `api_key`, `timeout`, `extra_body`) as every other aux task.
+
+</Note>
+
+## CLI {#cli}
 
 ```bash
 hermes curator status         # last run, counts, pinned list, LRU top 5
@@ -124,9 +147,9 @@ hermes curator rollback <entry-id>  # undo a single mutation from the ledger
 hermes curator purge [--days N] [--dry-run]  # delete archived skills older than the TTL (explicit only)
 ```
 
-## Backups and rollback
+## Backups and rollback {#backups-and-rollback}
 
-Before a consolidation pass (`consolidate: true`, the only pass that rewrites skill content in place), Hermes takes a tar.gz snapshot of `~/.hermes/skills/` at `~/.hermes/skills/.curator_backups/<utc-iso>/skills.tar.gz`. The snapshot covers the live skill tree only: `.archive/`, the audit ledger, `.hub/`, and the backups themselves are never rolled in, and a rollback never rewinds them (an older copy would lose archived skills or ledger entries). If a pass archives or consolidates something you didn't want touched, you can undo the whole run with one command:
+Before a consolidation pass (`consolidate: true`, the only pass that rewrites skill content in place), {{app-name}} takes a tar.gz snapshot of `~/.hermes/skills/` at `~/.hermes/skills/.curator_backups/<utc-iso>/skills.tar.gz`. The snapshot covers the live skill tree only: `.archive/`, the audit ledger, `.hub/`, and the backups themselves are never rolled in, and a rollback never rewinds them (an older copy would lose archived skills or ledger entries). If a pass archives or consolidates something you didn't want touched, you can undo the whole run with one command:
 
 ```bash
 hermes curator rollback        # restore newest snapshot (with confirmation)
@@ -134,7 +157,7 @@ hermes curator rollback -y     # skip the prompt
 hermes curator rollback --list # see all snapshots with reason + size
 ```
 
-The rollback itself is reversible: before replacing the skills tree, Hermes takes another snapshot tagged `pre-rollback to <target-id>`, so a mistaken rollback can be undone by rolling forward to that one with `--id`.
+The rollback itself is reversible: before replacing the skills tree, {{app-name}} takes another snapshot tagged `pre-rollback to <target-id>`, so a mistaken rollback can be undone by rolling forward to that one with `--id`.
 
 You can also take manual snapshots at any time with `hermes curator backup --reason "before-refactor"`. The `--reason` string lands in the snapshot's `manifest.json` and is shown in `--list`.
 
@@ -153,7 +176,7 @@ Set `curator.backup.enabled: false` to disable automatic snapshotting. The manua
 
 The same subcommands are available as the `/curator` slash command inside a running session (CLI or gateway platforms).
 
-## Audit ledger and single-edit rollback
+## Audit ledger and single-edit rollback {#audit-ledger-and-single-edit-rollback}
 
 Whole-run snapshots answer "undo everything the last curator pass did" — but sometimes you want to know *who changed what* and undo exactly one mutation. Every skill mutation — curator auto-transitions, agent `skill_manage` calls, and your own CLI archive/restore/purge — appends one entry to the append-only JSONL ledger at `~/.hermes/skills/.curator_ledger.jsonl`:
 
@@ -184,7 +207,7 @@ skills:
   ledger_max_bytes: 5242880   # 0 = never auto-maintain
 ```
 
-## Archive TTL purge
+## Archive TTL purge {#archive-ttl-purge}
 
 Archived skills are kept forever by default. If you want `~/.hermes/skills/.archive/` bounded, set a TTL and purge explicitly — purging never runs automatically, and every purged skill is captured into the ledger (with blobs) first, so even a purge leaves an auditable, recoverable trail:
 
@@ -199,7 +222,7 @@ hermes curator purge             # delete archives older than the TTL (with conf
 hermes curator purge --days 90   # one-off TTL override
 ```
 
-## What "agent-created" means
+## What "agent-created" means {#what-agent-created-means}
 
 The curator only manages skills explicitly marked as **agent-created** in
 `~/.hermes/skills/.usage.json`. A skill qualifies when ALL of the following
@@ -222,8 +245,15 @@ recorded as `created_by: learn`, which makes them show up in the
 curator opt-in. They are considered user-directed and the curator intentionally
 leaves them alone.
 
-:::warning Your hand-written skills are NOT curated
-If you manually created a `SKILL.md` or pointed Hermes at an external skill
+<Warning>
+
+<div className="doc-callout-title">
+
+Your hand-written skills are NOT curated
+
+</div>
+
+If you manually created a `SKILL.md` or pointed {{app-name}} at an external skill
 directory, that skill will have a `.usage.json` entry with `created_by: null`
 (or the field absent). The curator will not touch it. The same applies to
 skills the foreground agent created at your request (`created_by: learn`).
@@ -232,9 +262,10 @@ skills the foreground agent created at your request (`created_by: learn`).
 If the agent-created count is 0, no skills are currently in the curator's
 jurisdiction — the LLM review pass is skipped and the report will show
 `Model: (not resolved) via (not resolved)` with `Duration: 0s`.
-:::
 
-### Adopting unmanaged skills
+</Warning>
+
+### Adopting unmanaged skills {#adopting-unmanaged-skills}
 
 `hermes curator status` reports an **unmanaged** count alongside the managed
 one:
@@ -286,25 +317,41 @@ in the skill ledger. It may archive (delete) only curator-managed skills, never
 pinned ones. To review those writes before they land, turn on
 `skills.write_approval` (see [Gating agent skill writes](./skills.md#gating-agent-skill-writes-skillswrite_approval)).
 A bundled or hub-installed skill the review has edited counts as locally
-modified, so `hermes update` / `hermes skills update` stop overwriting it.
+modified, so `noone update` / `noone skills update` stop overwriting it.
 
-:::note `created_by` is a policy flag, not a provenance claim
+<Note>
+
+<div className="doc-callout-title">
+
+`created_by` is a policy flag, not a provenance claim
+
+</div>
+
 The stored field is named `created_by`, but it is consumed as "may autonomous
 curation touch this?" — not "who wrote this file". Those are different
 questions, and for records predating the marker the authorship answer is simply
 unrecoverable. The name is kept because it is already on disk in every
 `.usage.json`; read it as policy. `hermes curator adopt` changes the policy, and
 says nothing about who authored the file.
-:::
 
-:::note Provenance is declared, never inferred
+</Note>
+
+<Note>
+
+<div className="doc-callout-title">
+
+Provenance is declared, never inferred
+
+</div>
+
 Adoption is deliberately manual. Telemetry cannot establish authorship: a skill
 with thousands of patches proves the agent **maintains** it, not that the agent
-**wrote** it — Hermes edits user-authored skills on your behalf constantly. An
+**wrote** it — {{app-name}} edits user-authored skills on your behalf constantly. An
 automatic "looks agent-made, adopt it" heuristic would eventually archive
 something you hand-wrote. `adopt` refuses bundled, hub-installed, external, and
 protected built-in skills, which have an owner other than you.
-:::
+
+</Note>
 
 Skills that ARE agent-created follow the full lifecycle:
 
@@ -317,7 +364,7 @@ If you want to protect an agent-created skill from archival, use
 for example a hand-authored skill you rely on — use `hermes curator lock <name>`.
 Both are described below.
 
-## Pinning a skill
+## Pinning a skill {#pinning-a-skill}
 
 Pinning protects a skill from deletion — both the curator's automated archive passes and the agent's `skill_manage(action="delete")` tool call. Once a skill is pinned:
 
@@ -341,7 +388,7 @@ A small set of **protected built-ins** can be hardcoded as never-archivable and 
 
 If you want a stronger guarantee than "no deletion" — freezing a skill's content while the agent still reads and uses it — lock it (next section). Neither pin nor lock guards your own edits: your editor and the Desktop skill editor always work.
 
-## Locking a skill
+## Locking a skill {#locking-a-skill}
 
 Pinning stops archival. Locking stops **the agent from changing a skill at all**, while the skill stays readable, listed in the skill index, auto-loadable and usable exactly as before.
 
@@ -369,9 +416,9 @@ What a lock is not:
 
 - It is a **policy check, not a sandbox.** The terminal check reads the command's write targets; a script that writes into the skill through its own logic, or `execute_code`, is not inspected. Pair it with filesystem permissions if you need a hard boundary.
 - If `.usage.json` is corrupt, the background passes are refused (fail closed) while normal turns proceed, so one broken file does not freeze every skill edit. Repair it, or run `hermes curator unlock <skill>` to rewrite it.
-- It does **not** stop `hermes update` / `hermes skills update` from refreshing a bundled or hub skill you have not modified; those are your commands, not agent writes.
+- It does **not** stop `noone update` / `noone skills update` from refreshing a bundled or hub skill you have not modified; those are your commands, not agent writes.
 
-## Usage telemetry
+## Usage telemetry {#usage-telemetry}
 
 The curator maintains a sidecar at `~/.hermes/skills/.usage.json` with one entry per skill:
 
@@ -400,7 +447,7 @@ Counters increment when:
 
 Bundled and hub-installed skills are explicitly excluded from telemetry writes.
 
-## Per-run reports
+## Per-run reports {#per-run-reports}
 
 Every curator run writes a timestamped directory under `~/.hermes/logs/curator/`:
 
@@ -413,20 +460,28 @@ Every curator run writes a timestamped directory under `~/.hermes/logs/curator/`
 
 `REPORT.md` is a quick way to see what a given run did — which skills transitioned, what the LLM reviewer said, which skills it patched. Good for auditing without having to grep `agent.log`.
 
-:::note No candidates? Report shows `(not resolved)`
+<Note>
+
+<div className="doc-callout-title">
+
+No candidates? Report shows `(not resolved)`
+
+</div>
+
 When the curator has **no agent-created skills** to review, the LLM review pass
 is skipped entirely. The report header will show
 `Model: (not resolved) via (not resolved)` with `Duration: 0s` — this does **not**
 indicate a configuration error or model resolution failure. It simply means there
 were no candidates, so no model was ever invoked. The auto-transition phase still
 runs and reports its counts normally.
-:::
 
-### Rename map in the summary
+</Note>
+
+### Rename map in the summary {#rename-map-in-the-summary}
 
 If a run consolidated multiple skills under an umbrella (or merged near-duplicates), the user-visible summary printed at the end of the run includes an explicit rename map showing every `old-name → new-name` pair the curator applied. This is in addition to per-skill transition lines, so when a wave of renames lands you can spot them at a glance without diffing the JSON report. The hint also surfaces under `hermes curator pin` so you can pin the umbrella name immediately if you want to lock the new label in.
 
-## Restoring an archived skill
+## Restoring an archived skill {#restoring-an-archived-skill}
 
 If the curator archived something you still want:
 
@@ -436,7 +491,7 @@ hermes curator restore <skill-name>
 
 This moves the skill back from `~/.hermes/skills/.archive/` to the active tree and resets its state to `active`. The restore refuses if a bundled or hub-installed skill has since been installed under the same name (would shadow upstream).
 
-## Disabling per environment
+## Disabling per environment {#disabling-per-environment}
 
 The curator is on by default. To turn it off:
 
@@ -445,7 +500,7 @@ The curator is on by default. To turn it off:
 
 The curator also refuses to run if `min_idle_hours` hasn't elapsed, so on an active dev machine it naturally only runs during quiet stretches.
 
-## See also
+## See also {#see-also}
 
 - [Skills System](./skills.md) — how skills work in general and the self-improvement loop that creates them
 - [Memory](./memory.md) — a parallel background review that maintains long-term memory

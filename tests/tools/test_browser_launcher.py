@@ -65,8 +65,8 @@ def fake_chromium(tmp_path, monkeypatch):
 
 def _records() -> Path:
     """The test profile's launch records dir (created private, as the launcher creates it)."""
-    from hermes_constants import get_hermes_home
-    path = Path(get_hermes_home()) / "cache" / "browser" / "chromium-records"
+    from agent_constants import get_agent_home
+    path = Path(get_agent_home()) / "cache" / "browser" / "chromium-records"
     path.mkdir(mode=0o700, parents=True, exist_ok=True)
     return path
 
@@ -83,8 +83,8 @@ def test_launch_reads_devtools_port_and_runs_headless_on_an_ephemeral_home_profi
     assert browser.cdp_url == "ws://127.0.0.1:45678/devtools/browser/fake-id"
     assert browser.http_url == "http://127.0.0.1:45678"
     assert browser.owned and browser.ephemeral
-    from hermes_constants import get_hermes_home
-    assert Path(browser.user_data_dir).parent == Path(get_hermes_home()) / "cache" / "browser" / "chromium"
+    from agent_constants import get_agent_home
+    assert Path(browser.user_data_dir).parent == Path(get_agent_home()) / "cache" / "browser" / "chromium"
     argv = _argv(browser)
     assert "--remote-debugging-port=0" in argv
     assert f"--user-data-dir={browser.user_data_dir}" in argv
@@ -97,10 +97,10 @@ def test_launch_reads_devtools_port_and_runs_headless_on_an_ephemeral_home_profi
 def test_launch_record_lives_in_the_profiles_private_state_dir(fake_chromium):
     """Launcher state lives in a private per-profile dir: the record under ``<HERMES_HOME>/cache/browser/
     chromium-records`` (0700) and the throwaway profile under the 0700 ephemeral root beside it."""
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     browser, err = launcher.launch_chromium("recorded", env=dict(os.environ))
     assert err is None
-    state = Path(get_hermes_home()) / "cache" / "browser"
+    state = Path(get_agent_home()) / "cache" / "browser"
     assert stat.S_IMODE((state / "chromium-records").stat().st_mode) == 0o700
     assert stat.S_IMODE((state / "chromium").stat().st_mode) == 0o700
     [record] = (state / "chromium-records").glob("*.json")
@@ -125,10 +125,10 @@ def test_one_browser_per_key_and_separate_browsers_for_separate_keys(fake_chromi
 def test_two_processes_on_one_profile_never_share_an_ephemeral_profile(fake_chromium):
     """CLI + gateway on one profile launch the same key (``browser-exec-default``, a named session): each
     process gets its own throwaway profile, and a launch never wipes the other process's live one."""
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     code = ("import sys; from tools.browser_launcher import _default_user_data_dir; "
             "print(_default_user_data_dir(sys.argv[1], sys.argv[2]))")
-    other = Path(subprocess.run([sys.executable, "-c", code, "browser-exec-default", hermes_home_key()],
+    other = Path(subprocess.run([sys.executable, "-c", code, "browser-exec-default", agent_home_key()],
                                 cwd=Path(__file__).resolve().parents[2], env=dict(os.environ),
                                 capture_output=True, text=True, check=True).stdout.strip())
     (other / "Default").mkdir(parents=True)
@@ -398,7 +398,7 @@ def test_a_throwaway_profile_left_by_a_process_that_died_mid_launch_is_reclaimed
     """A process that dies between creating its throwaway profile and writing the launch record (a first
     launch can wait 120 s) leaves no record behind. The next reap reclaims the dir by its owner's pid and
     start time; the dir of a live process is never touched."""
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     code = ("import sys\n"
             "from tools.browser_launcher import _default_user_data_dir, _prepare_dir\n"
             "udd = _default_user_data_dir('browser-exec-default', sys.argv[1])\n"
@@ -406,9 +406,9 @@ def test_a_throwaway_profile_left_by_a_process_that_died_mid_launch_is_reclaimed
             "print(udd, flush=True)\n"
             "if sys.argv[2] == 'hold': sys.stdin.readline()\n")
     run = dict(cwd=Path(__file__).resolve().parents[2], env=dict(os.environ), text=True)
-    died = Path(subprocess.run([sys.executable, "-c", code, hermes_home_key(), "die"], capture_output=True,
+    died = Path(subprocess.run([sys.executable, "-c", code, agent_home_key(), "die"], capture_output=True,
                                check=True, **run).stdout.strip())
-    alive = subprocess.Popen([sys.executable, "-c", code, hermes_home_key(), "hold"], stdin=subprocess.PIPE,
+    alive = subprocess.Popen([sys.executable, "-c", code, agent_home_key(), "hold"], stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, **run)
     try:
         held = Path(alive.stdout.readline().strip())
@@ -435,10 +435,10 @@ _NEVER_READY_CHROMIUM = textwrap.dedent('''\
 # A Hermes process waiting for that Chromium's readiness: prints its throwaway dir, then launches.
 _WAITING_LAUNCHER = textwrap.dedent("""\
     import os, sys
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     from tools import browser_launcher as launcher
     launcher.needs_chromium_sandbox_bypass = lambda: False
-    print(launcher._default_user_data_dir("slow", hermes_home_key()), flush=True)
+    print(launcher._default_user_data_dir("slow", agent_home_key()), flush=True)
     launcher.launch_chromium("slow", executable=sys.argv[1], headed=False, env=dict(os.environ), timeout=300)
 """)
 

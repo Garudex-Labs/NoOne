@@ -1,4 +1,5 @@
-import { Codicon } from '@/components/ui/codicon'
+import { AppIcon } from '@noone/ui/app-icon'
+
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
@@ -30,7 +31,7 @@ export function SidebarLoadMoreRow({ step, onClick, loading = false }: SidebarLo
         {loading ? (
           <GlyphSpinner ariaLabel={label} className="text-[0.75rem]" />
         ) : (
-          <Codicon name="ellipsis" size="0.75rem" />
+          <AppIcon name="ellipsis" size="0.75rem" />
         )}
       </button>
     </Tip>

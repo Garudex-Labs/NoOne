@@ -3,7 +3,7 @@
 While a gateway owns a profile the offline REST backfill is refused, so authority bring-up is
 the one place an upgraded install's legacy rows get their owner.
 """
-from hermes_state import SessionDB
+from agent_state import SessionDB
 
 from gateway.session_authority import backfill_legacy_session_owners
 
@@ -19,8 +19,8 @@ def _owners(db):
 
 
 def test_default_store_stamps_only_unowned_rows(_isolate_hermes_home):
-    from hermes_constants import get_default_hermes_root
-    with SessionDB(db_path=get_default_hermes_root() / 'state.db') as db:
+    from agent_constants import get_default_agent_root
+    with SessionDB(db_path=get_default_agent_root() / 'state.db') as db:
         _legacy(db, 'null-row')
         _legacy(db, 'blank-row', '  ')
         _legacy(db, 'owned-row', 'work')
@@ -31,8 +31,8 @@ def test_default_store_stamps_only_unowned_rows(_isolate_hermes_home):
 
 
 def test_named_profile_store_stamps_its_own_name(_isolate_hermes_home):
-    from hermes_constants import get_default_hermes_root
-    home = get_default_hermes_root() / 'profiles' / 'work'
+    from agent_constants import get_default_agent_root
+    home = get_default_agent_root() / 'profiles' / 'work'
     home.mkdir(parents=True)
     with SessionDB(db_path=home / 'state.db') as db:
         _legacy(db, 'null-row')

@@ -42,7 +42,7 @@ def test_prune_site_pth_keeps_only_load_bearing_pth(tmp_path):
     for site in (win_site, posix_site):
         (site / "pywin32.pth").write_text("win32\nwin32\\lib\nimport pywin32_bootstrap\n", encoding="utf-8")
         (site / "_virtualenv.pth").write_text("import _virtualenv\n", encoding="utf-8")
-        (site / "__editable__.hermes_agent-0.21.1.pth").write_text(
+        (site / "__editable__.agent_compat-0.21.1.pth").write_text(
             "import __editable___hermes_agent_0_21_1_finder\n", encoding="utf-8"
         )
 
@@ -210,7 +210,7 @@ def test_a_checkout_venv_built_on_an_external_python_is_not_a_pre_pm_install(ins
     venv = executable.parent.parent
     assert f"home = {external}" in (venv / "pyvenv.cfg").read_text(encoding="utf-8")
     # Hermes installed into it, as a contributor's checkout `.venv` holds it.
-    (site_packages(venv) / "hermes_agent-0.0.0.dist-info").mkdir()
+    (site_packages(venv) / "agent_compat-0.0.0.dist-info").mkdir()
 
     assert pre_pm_baseline(source) == []
 

@@ -26,8 +26,8 @@ from pathlib import Path
 
 from tests.e2e.core.upgrade import _helpers as H
 
-OFFICIAL_HTTPS = "https://github.com/NousResearch/hermes-agent.git"
-OFFICIAL_SSH = "git@github.com:NousResearch/hermes-agent.git"
+OFFICIAL_HTTPS = "https://github.com/Garudex-Labs/NoOne.git"
+OFFICIAL_SSH = "git@github.com:Garudex-Labs/NoOne.git"
 TRACEBACK = "Traceback (most recent call last)"
 FAKE_KEY = "sk-fake-e2e-install-update"
 
@@ -57,8 +57,8 @@ _RELEASE_TAG_EXCLUDES = ("*+*", "rc.*", "abandoned-*")
 # The updater generation a release ships, by the first file of that generation present in its tree;
 # newest first. A start version of each is the set an update has to survive from.
 UPDATER_GENERATIONS = (
-    ("by-path", "hermes_cli/update_completion.py"),
-    ("handoff", "hermes_cli/update_handoff.py"),
+    ("by-path", "agent_cli/update_completion.py"),
+    ("handoff", "agent_cli/update_handoff.py"),
     ("pre-handoff", None),
 )
 
@@ -260,12 +260,12 @@ def fresh_install_env(sb: Sandbox) -> dict[str, str]:
 
 
 def pin_main_channel(sb: Sandbox) -> None:
-    """Follow every commit on main, as `hermes update --set-channel main` records it.
+    """Follow every commit on main, as `noone update --set-channel main` records it.
 
     An official-origin source checkout defaults to the stable channel (the latest published GitHub
     release). These sandboxes publish commits on main and no releases, and their subject is moving
     between commits; channel resolution has its own suites (test_release_channel_records,
-    tests/hermes_cli/test_source_release_channels.py)."""
+    tests/agent_cli/test_source_release_channels.py)."""
     cp = sb.cli("update", "--set-channel", "main", timeout=120)
     assert cp.returncode == 0 and "Update channel for" in cp.stdout, "could not pin the main channel:\n" + describe(cp)
 

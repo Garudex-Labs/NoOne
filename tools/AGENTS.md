@@ -37,23 +37,23 @@ toggled without touching `tools/` or `toolsets.py` (`plugins/AGENTS.md`).
        handler=lambda args, **kw: example_tool(param=args.get("param", ""), task_id=kw.get("task_id")),
        check_fn=check_requirements, requires_env=["EXAMPLE_API_KEY"])
    ```
-2. `toolsets.py`: add the name to `_HERMES_CORE_TOOLS` (all platforms) or a new toolset. **Required**
+2. `toolsets.py`: add the name to `_CORE_AGENT_TOOLS` (all platforms) or a new toolset. **Required**
    — discovery registers the schema, but a tool is only exposed if a toolset names it.
-   `_HERMES_CORE_TOOLS` is the default bundle every platform's base toolset inherits, not dead code.
+   `_CORE_AGENT_TOOLS` is the default bundle every platform's base toolset inherits, not dead code.
 
 Rules for tool code:
 - **Schema descriptions must not name tools from other toolsets** (a browser tool saying "prefer
   web_search"). Those tools may be unavailable (missing key, disabled toolset) and the model
   hallucinates calls to them. Cross-references are added dynamically in `get_tool_definitions()` in
   `model_tools.py` — see the `browser_cdp` / `execute_code` post-processing blocks.
-- **Paths in schema descriptions use `display_hermes_home()`** (schema is built at import; under
-  multiplex it shows the launch home, which is display-only). **State files use `get_hermes_home()`**
+- **Paths in schema descriptions use `display_agent_home()`** (schema is built at import; under
+  multiplex it shows the launch home, which is display-only). **State files use `get_agent_home()`**
   at call time, never `Path.home()/.hermes` and never a module constant, so each served profile gets
   its own state.
 - **No `offset`/`limit` on instructional tools** (skills, prompts, playbooks) — models read page 1
   and skip the rest (root rubric).
 - **`check_fn` answers reachability/opt-in for the profile it runs under, never surface.** Results
-  are TTL-cached in `registry.py::_check_fn_cache` keyed by `hermes_home_key()`, and one process
+  are TTL-cached in `registry.py::_check_fn_cache` keyed by `agent_home_key()`, and one process
   serves many sessions AND many profiles: a probe reads credentials through
   `agent.secret_scope.get_secret`, never bare `os.getenv` (that answers with the launch profile's
   `.env` for everyone). The registry classifies an `UnscopedSecretError` from
@@ -64,16 +64,16 @@ Rules for tool code:
   `INLINE_TOOL_EXECUTORS` table (`agent/inline_tool_executors.py`; `agent/AGENTS.md`).
 - **`_last_resolved_tool_names`** is a process-global in `model_tools.py`; `_run_single_child()` in
   `delegate_tool.py` saves/restores it around child runs — readers may see it stale mid-delegation.
-- New tools integrate with existing setup UX (`hermes tools`, `hermes setup`, auto-install) rather
-  than a raw env var; secrets go in `OPTIONAL_ENV_VARS` (`hermes_cli/AGENTS.md`).
+- New tools integrate with existing setup UX (`noone tools`, `noone setup`, auto-install) rather
+  than a raw env var; secrets go in `OPTIONAL_ENV_VARS` (`agent_cli/AGENTS.md`).
 
 ## Toolsets (`toolsets.py`)
 
 Single `TOOLSETS` dict. Keys today: `browser, clarify, code_execution, cronjob, debugging,
-delegation, discord, discord_admin, feishu_doc, feishu_drive, file, image_gen,
+delegation, discord, discord_admin, file, image_gen,
 kanban, memory, messaging, moa, rl, safe, search, session_search, skills, terminal, todo,
 tts, video, vision, web` (don't assert the list in tests). Per-platform enable/disable via
-`hermes tools` (curses) or `tools.<platform>.enabled/disabled` in config.yaml. `browser_exec` is the
+`noone tools` (curses) or `tools.<platform>.enabled/disabled` in config.yaml. `browser_exec` is the
 one core browser tool (beside `browser_cdp` / `browser_dialog` / `browser_vault`, all CDP).
 
 ## Browser runtime
@@ -117,7 +117,7 @@ and its default cap applies only inside `agent.delegation_context.is_delegated_c
 Put new embed-cost rules there, never a second counter in a tool.
 
 **Every spawn goes through one env builder.** `environments/local.py::build_subprocess_env` (+
-`hermes_constants.apply_subprocess_home_env`, `env_passthrough.py::resolve_passthrough_value`) is
+`agent_constants.apply_subprocess_home_env`, `env_passthrough.py::resolve_passthrough_value`) is
 how a terminal, `execute_code`, background process, delegation child, ACP or MCP stdio child gets
 its environment; a child that acts FOR the served profile (`hermes -p X` workers, `key_cmd`
 helpers, browser drivers, Bot Chat relay turns) uses `environments/local.py::
@@ -172,10 +172,10 @@ processes are killed at its teardown and their notices are suppressed in the par
 (`process_registry.transfer_ownership`) so the completion routes and reaps by the new owner; un-handed leftovers land on
 the result as `orphaned_processes`, exited-but-never-read notify processes as `unread_completions` (`_ChildRun.account_background_processes`, before `cleanup` kills them). **Child kernels:** a child's `execute_code` kernels are keyed `<parent-owner>::child::<child-session-id>`, pinned against the `max_session_kernels` LRU cap while the child runs and disposed by `cleanup` (`code_kernel.shutdown_kernels_for_delegated_child`) — never let a finished child's kernel squat the cap. **output_schema:** a miss after the one retry keeps `status: completed` with the raw text in `summary` plus `schema_valid: false` / `schema_errors` / `schema_note` — never discard a child's result. **Durability:** background
 delegation is process-local; work that must survive restart uses `cronjob` or
-`terminal(background=True, notify_on_complete=True)`. `heartbeat=N` on the same spawn emits a `heartbeat` event (type on the completion queue; delta output only, `HEARTBEAT_MIN_SECONDS` floor, one daemon timer thread for all sessions in `process_registry.py::ProcessRegistry._heartbeat_loop`) — every surface that renders `watch_match` must render `heartbeat` (`process_registry_notifications.py`, `gateway/run.py::_drain_gateway_watch_events`, `tui_gateway/session_notifications.py::_DEDUP_EXTRA_FIELDS`). **Stop fan-out:** a turn's hard interrupt reaches only
-`_active_children`; background units are detached at dispatch and survive it on purpose (Teknium ruling: a
+`terminal(background=True, notify_on_complete=True)`. `heartbeat=N` on the same spawn emits a `heartbeat` event (type on the completion queue; delta output only, `HEARTBEAT_MIN_SECONDS` floor, one daemon timer thread for all sessions in `process_registry.py::ProcessRegistry._heartbeat_loop`) — every surface that renders `watch_match` must render `heartbeat` (`process_registry_notifications.py`, `gateway/run.py::_drain_gateway_watch_events`, `agent_backend/session_notifications.py::_DEDUP_EXTRA_FIELDS`). **Stop fan-out:** a turn's hard interrupt reaches only
+`_active_children`; background units are detached at dispatch and survive it on purpose (a
 background subagent, `/review` included, is independent of the chat that spawned it). Turn stops — Ctrl+C,
-Esc, the Desktop/TUI Stop button, a message that interrupts, `session.interrupt`, ACP `cancel` — never call
+Esc, the Desktop Stop button, a message that interrupts, `session.interrupt`, ACP `cancel` — never call
 `async_delegation.interrupt_for_session`. Only the explicit `/stop` command (gateway busy AND idle paths, CLI
 and Desktop process stop) and session close/reset end them. Depth>0 delegations are always synchronous
 (`_model_background_value`), so a stop recurses through the child's own `_active_children` fan-out; an
@@ -196,9 +196,9 @@ from an env var on the backend. Client and backend are separate machines: the de
 drive a locally spawned backend, one over SSH, one behind URL + token, or Hermes Cloud, and
 only the first two carry `HERMES_DESKTOP=1`. An env-keyed gate is a silent no-op on the other
 topologies — the tool is stripped from the schema while the platform hint tells the model it
-is "inside the Hermes desktop app". The pattern:
+is "inside the NoOne desktop app". The pattern:
 
-- **The toolset is the surface gate.** Keep such tools off `_HERMES_CORE_TOOLS` and in a named
+- **The toolset is the surface gate.** Keep such tools off `_CORE_AGENT_TOOLS` and in a named
   toolset (`desktop_ui`, `project`); the GUI gateway's `_load_enabled_toolsets(platform)`
   folds it in when the session's platform says GUI. One resolver, every topology.
 - **`check_fn` answers reachability or opt-in, not surface.** "Is the bridge wired?" — fine.
@@ -206,7 +206,7 @@ is "inside the Hermes desktop app". The pattern:
   (`tools/registry.py`); a per-session answer does not belong there.
 - **Ask which identity you mean.** `HERMES_DESKTOP=1` legitimately means "this backend was
   spawned by the app" (cron ticker, web-dist handling). It does NOT mean "a GUI is watching";
-  the embedded terminal pane (`hermes --tui` against that backend) is the counterexample.
+  the embedded terminal pane (`noone --cli` against that backend) is the counterexample.
 
 Test: if the capability still makes sense with the client on another machine, it is
 session-scoped. Assert the GUI session gets the tool **with the env var absent**.

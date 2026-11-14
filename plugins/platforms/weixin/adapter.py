@@ -36,7 +36,7 @@ from gateway.platforms.base import (
     cache_audio_from_bytes_async, cache_document_from_bytes_async, cache_image_from_bytes_async,
 )
 from gateway.platforms.event import MessageEvent, MessageType
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from utils import atomic_json_write
 from gateway.platforms._shared import env_is_connected, extra_or_secret as _extra_or_env, get_scoped_secret as _wx_secret
 from gateway.platforms.send_targets import StandaloneSendPolicy, regex_groups_parser
@@ -715,7 +715,7 @@ class WeixinAdapter(OwnAccessPolicyMixin, BasePlatformAdapter):
     def __init__(self, config: PlatformConfig):
         super().__init__(config, Platform.WEIXIN)
         extra = config.extra or {}
-        self._hermes_home = hermes_home = str(get_hermes_home())
+        self._hermes_home = hermes_home = str(get_agent_home())
         self._token_store = ContextTokenStore(hermes_home)
         self._typing_cache = TypingTicketCache()
         self._poll_session = self._send_session = None  # type: Optional[aiohttp.ClientSession]
@@ -1247,7 +1247,7 @@ async def send_weixin_direct(
         return {"error": "Weixin token missing. Configure WEIXIN_TOKEN or platforms.weixin.token."}
     if not account_id:
         return {"error": "Weixin account ID missing. Configure WEIXIN_ACCOUNT_ID or platforms.weixin.extra.account_id."}
-    token_store = ContextTokenStore(str(get_hermes_home()))
+    token_store = ContextTokenStore(str(get_agent_home()))
     token_store.restore(account_id)
     context_token = token_store.get(account_id, chat_id)
     live_adapter = _LIVE_ADAPTERS.get(resolved_token)
@@ -1264,7 +1264,7 @@ async def send_weixin_direct(
 
 # ---------------------------------------------------------------------------
 # Plugin wiring (formerly core: gateway/run.py _BUILTIN_ADAPTERS row, tools/send_message_senders.py
-# ``_send_weixin``, hermes_cli/gateway_setup_wizard.py ``_setup_weixin``).
+# ``_send_weixin``, agent_cli/gateway_setup_wizard.py ``_setup_weixin``).
 # ---------------------------------------------------------------------------
 
 _INSTALL_HINT = "Weixin: aiohttp/cryptography not installed"
@@ -1293,7 +1293,7 @@ async def _standalone_send(pconfig: Any, chat_id: str, message: str, *, thread_i
                            media_files: Optional[list] = None, force_document: bool = False) -> dict[str, Any]:
     """Out-of-process ``send_message``/cron sender: native text + media via :func:`send_weixin_direct`.
     ``thread_id``/``force_document`` are signature parity only (iLink has neither). Imports nothing from
-    other plugins, so an unrelated optional SDK (e.g. lark-oapi) can never block Weixin delivery."""
+    other plugins, so an unrelated optional SDK can never block Weixin delivery."""
     from gateway.platforms._shared import send_error
     if not check_weixin_requirements():
         return send_error("Weixin requirements not met. Need aiohttp + cryptography.")
@@ -1321,11 +1321,11 @@ _WEIXIN_GROUP_NOTE = (
 
 
 def interactive_setup() -> None:
-    """``hermes gateway setup`` flow for Weixin / WeChat personal accounts (QR login via :func:`qr_login`).
-    Helpers resolve through the ``hermes_cli.gateway`` facade so the prompts/output match every other
+    """``noone gateway setup`` flow for Weixin / WeChat personal accounts (QR login via :func:`qr_login`).
+    Helpers resolve through the ``agent_cli.gateway`` facade so the prompts/output match every other
     wizard and the facade seams tests patch keep intercepting."""
-    from hermes_cli import gateway as gw
-    from hermes_cli.gateway_setup_wizard import (
+    from agent_cli import gateway as gw
+    from agent_cli.gateway_setup_wizard import (
         confirm_reconfigure, offer_home_channel, print_setup_header, prompt_csv, save_env_values)
 
     print_setup_header("💬 Weixin / WeChat")
@@ -1340,14 +1340,14 @@ def interactive_setup() -> None:
         return
     if not check_weixin_requirements():
         gw.print_error("  Missing dependencies: Weixin needs aiohttp and cryptography.")
-        gw.print_info("  Install them, then rerun `hermes gateway setup`.")
+        gw.print_info("  Install them, then rerun `noone gateway setup`.")
         return
     print()
     if not gw.prompt_yes_no("  Start QR login now?", True):
         gw.print_info("  Cancelled.")
         return
     try:
-        credentials = gw.asyncio.run(qr_login(str(gw.get_hermes_home())))
+        credentials = gw.asyncio.run(qr_login(str(gw.get_agent_home())))
     except KeyboardInterrupt:
         print()
         gw.print_warning("  Weixin setup cancelled.")
@@ -1429,7 +1429,7 @@ def register(ctx) -> None:
         name="weixin", label="Weixin / WeChat", adapter_factory=WeixinAdapter, check_fn=check_weixin_requirements,
         dashboard_label="Weixin / WeChat (Personal)",
         dashboard_description="Connect a personal WeChat account through Tencent's iLink Bot API.",
-        docs_url="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/weixin/",
+        docs_url="https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/weixin.md",
         dashboard_env_vars=("WEIXIN_ACCOUNT_ID", "WEIXIN_TOKEN", "WEIXIN_BASE_URL"),
         is_connected=_is_connected, required_env=["WEIXIN_ACCOUNT_ID", "WEIXIN_TOKEN"], install_hint=_INSTALL_HINT,
         config_connected_fn=_config_connected,

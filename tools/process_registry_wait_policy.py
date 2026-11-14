@@ -37,15 +37,15 @@ _STOP_NOTE = (
 
 def _effective_config() -> dict:
     """The profile's effective user config (managed overlay, ``${VAR}`` expansion): the same reader the
-    completion consumers use (``gateway.run._load_gateway_config``, ``tui_gateway.server._load_cfg``), so
+    completion consumers use (``gateway.run._load_gateway_config``, ``agent_backend.server._load_cfg``), so
     an admin-managed or env-expanded value decides promotion exactly as it decides delivery."""
-    from hermes_cli.config_effective import load_user_config_effective
+    from agent_cli.config_effective import load_user_config_effective
     return load_user_config_effective()
 
 
 def _enabled() -> bool:
     """``terminal.process_wait_auto_notify`` (default true); true when config is unreadable."""
-    from hermes_cli.config import cfg_get
+    from agent_cli.config import cfg_get
     try:
         return cfg_get(_effective_config(), "terminal", "process_wait_auto_notify", default=True) is not False
     except Exception:  # a broken config.yaml must not break process_manage
@@ -74,7 +74,7 @@ def _count_unchanged(session) -> int:
 def _can_deliver_completion() -> bool:
     """Whether a completion notice for this session can reach the agent that is waiting.
 
-    Finite turns (non-interactive ``hermes chat -q`` / ``-z``, as ``delegate_task`` decides inline execution) end
+    Finite turns (non-interactive ``noone chat -q`` / ``-z``, as ``delegate_task`` decides inline execution) end
     the run when the turn ends, so a promised notice would never arrive."""
     from agent.delegation_context import is_delegated_child_context
     from gateway.session_context import async_delivery_supported, get_session_env
@@ -86,7 +86,7 @@ def _can_deliver_completion() -> bool:
         return False
     # ``off`` drains the completion but never starts the agent turn (CLI, TUI and gateway alike). The
     # gateway also honours the HERMES_BACKGROUND_NOTIFICATIONS override; either one saying off is off.
-    from hermes_cli.config import cfg_get
+    from agent_cli.config import cfg_get
     try:
         from gateway.platforms._shared import platform_gate_env
         modes = (platform_gate_env("HERMES_BACKGROUND_NOTIFICATIONS"),
@@ -132,7 +132,7 @@ def _claim_notify_if_running(registry, session) -> bool:
 def _promote(registry, session) -> None:
     """Wire completion delivery for a process just claimed by ``_claim_notify_if_running``.
 
-    CLI, TUI/Desktop and ``hermes chat -q`` drain ``completion_queue``, which the exit path fills
+    CLI, TUI/Desktop and ``noone chat -q`` drain ``completion_queue``, which the exit path fills
     whenever the flag is set. The messaging gateway delivers only through a per-process watcher, so a
     process started silently also needs the chat routing stamped and a watcher armed."""
     from tools.terminal_tool_background import _register_completion_watcher, _stamp_gateway_routing

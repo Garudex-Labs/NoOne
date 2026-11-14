@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 // Typed /undo /retry /steer /queue lines (en_session_commands.ts is the source).
 export const esSessionCommands = {
   undoUsage: 'uso: /undo [N]',
@@ -7,7 +8,7 @@ export const esSessionCommands = {
   retryNothing: 'nada que reintentar',
   retryUnsupported: '/retry: no se pueden reintentar contenidos multimedia o partes desconocidas',
   busy: (command: string) =>
-    `sesión ocupada — Hermes sigue respondiendo. Detén primero la respuesta actual (botón Detener o Ctrl+C en una terminal) y luego ejecuta /${command}.`,
+    `sesión ocupada — ${appText('{app_name}')} sigue respondiendo. Detén primero la respuesta actual (botón Detener o Ctrl+C en una terminal) y luego ejecuta /${command}.`,
   busyCompressing: (command: string) =>
     `sesión ocupada — se está ejecutando un /compress; ejecuta /${command} cuando termine.`,
   steerUsage: 'uso: /steer <prompt>',
@@ -22,5 +23,5 @@ export const esSessionCommands = {
   queueEditKept: 'Empezó o fue rechazado antes de guardar tu edición. Tu texto editado está en el editor.',
   queueEditUnconfirmedTitle: 'Edición sin confirmar',
   queueEditUnconfirmed:
-    'Hermes no pudo confirmar tu edición. Guarda de nuevo para reintentar la misma edición; nunca se pone en cola dos veces.'
+    '{app_name} no pudo confirmar tu edición. Guarda de nuevo para reintentar la misma edición; nunca se pone en cola dos veces.'
 }

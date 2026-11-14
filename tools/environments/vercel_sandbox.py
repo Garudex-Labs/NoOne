@@ -21,8 +21,8 @@ from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from hermes_cli.config_defaults import DEFAULT_VERCEL_IMAGE
-from hermes_constants import get_hermes_home
+from agent_cli.config_defaults import DEFAULT_VERCEL_IMAGE
+from agent_constants import get_agent_home
 from tools.environments.base import BaseEnvironment, _load_json_store, _update_json_store
 from tools.environments.base_output import _ThreadedProcessHandle
 from tools.environments.file_sync import FileSyncManager, iter_sync_files, quoted_rm_command
@@ -136,7 +136,7 @@ def _result_parts(result: Any) -> tuple[str, int]:
 
 
 def _snapshot_store() -> Path:
-    return get_hermes_home() / "vercel_sandbox_snapshots.json"
+    return get_agent_home() / "vercel_sandbox_snapshots.json"
 
 
 def _load_snapshots() -> dict:

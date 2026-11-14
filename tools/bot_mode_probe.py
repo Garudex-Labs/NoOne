@@ -45,8 +45,8 @@ _cached: dict[str, str] = {}
 
 def _default_home() -> str:
     """Ambient process HERMES_HOME (env, else the platform default) as a string."""
-    from hermes_constants import get_process_hermes_home
-    return str(get_process_hermes_home())
+    from agent_constants import get_process_agent_home
+    return str(get_process_agent_home())
 
 
 def _resolve_home(home: str | os.PathLike | None) -> Path:
@@ -88,7 +88,7 @@ def _roster(root: Path) -> list[tuple[str, Path]]:
     predicate as ``profile list``: infra dirs (``sessions/``, ``logs/``) and tombstones are not
     teammates (#99392), and neither is a marker-carrying dir whose name is not a profile id —
     a parked backup or staging dir must never become a ``message_agent`` target (#116905)."""
-    from hermes_constants import PROFILE_ID_RE, named_profile_is_live
+    from agent_constants import PROFILE_ID_RE, named_profile_is_live
 
     profiles = root / "profiles"
     named = _swallow(
@@ -113,7 +113,7 @@ def _read_yaml_dict(path: Path, needle: str | None = None) -> dict | None:
         raw = path.read_text(encoding="utf-8-sig", errors="replace")
         if needle is not None and needle not in raw:
             return None
-        import hermes_yaml as yaml
+        import agent_yaml as yaml
 
         data = yaml.safe_load(raw)
         return data if isinstance(data, dict) else None
@@ -155,7 +155,7 @@ def _bullet(handle: str, *parts: str) -> str:
 
 def _profile_role(profile_dir: Path) -> str:
     """Teammate role line: Bot Mode title — profile description; tells a teammate
-    WHO to message for a job. A friendly ``display_name`` (``hermes profile rename``) that
+    WHO to message for a job. A friendly ``display_name`` (``noone profile rename``) that
     differs from both the folder id and the title leads the line, so an untagged
     "talk to Scribe" maps to the folder handle without a disk search (#100671).
     Single-line, ≤160 chars, "" when nothing. Never raises."""
@@ -183,7 +183,7 @@ def _friendly_names(profile_dir: Path) -> tuple[str, str]:
 
 def _display_name(name: str, profile_dir: Path, names: Collection[str]) -> str:
     """Human-facing sender name, in the Desktop's ``botFriendlyNames`` order: Bot Mode title,
-    then profile.yaml ``display_name`` (``hermes profile rename``), else the @handle — the
+    then profile.yaml ``display_name`` (``noone profile rename``), else the @handle — the
     renamed primary signs as ``Maia (@hermes)``, not ``hermes (@hermes)`` (#89720)."""
     return next((n for n in _friendly_names(profile_dir) if n), None) or _handle(name, names)
 
@@ -220,10 +220,10 @@ def local_alias_map(root: Path) -> dict[str, set[str]]:
 
 
 def _peers(root: Path) -> list[str]:
-    """Registered peer gateway names (``hermes peer``) from config.yaml, read
+    """Registered peer gateway names (``noone peer``) from config.yaml, read
     directly (no config-loader import; the section is absent on most installs). Never raises."""
     def _names() -> list[str]:
-        from hermes_cli.config_backend import read_config_doc_readonly
+        from agent_cli.config_backend import read_config_doc_readonly
         doc = read_config_doc_readonly(root / "config.yaml")
         peers = doc.get("bot_peers") if isinstance(doc, dict) else None
         return sorted(str(n) for n in peers if str(n).strip()) if isinstance(peers, dict) else []
@@ -280,7 +280,7 @@ def _peer_paragraph(root: Path) -> str:
         "\n\nTeammates on OTHER machines: this install also has peer gateways "
         f"registered ({listed}). Message an agent on a peer the same way — "
         'message_agent with target "<peer>/<agent-name>" (or "<peer>" alone '
-        "for the peer's main agent). Run `hermes peer list` for the live "
+        "for the peer's main agent). Run `noone peer list` for the live "
         "peer list."
     )
 
@@ -401,21 +401,21 @@ def capability_fingerprint(home: str | os.PathLike | None = None) -> str:
         # Canonical loader (managed overlay + env expansion + normalization),
         # scoped to the bot's home via the override the loaders already honor.
         from agent.skill_utils import parse_config_string_list
-        from hermes_cli.config import load_config_readonly
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+        from agent_cli.config import load_config_readonly
+        from agent_constants import reset_agent_home_override, set_agent_home_override
 
-        token = set_hermes_home_override(str(resolved))
+        token = set_agent_home_override(str(resolved))
         try:
             cfg = load_config_readonly() or {}
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         skills_cfg = cfg.get("skills") if isinstance(cfg.get("skills"), dict) else {}
         model_cfg = cfg.get("model") if isinstance(cfg.get("model"), dict) else {}
         surface["model_capabilities"] = _model_prompt_capability_surface(model_cfg)
         surface["disabled_skills"] = sorted(str(s).lower() for s in (skills_cfg.get("disabled") or []))
         # The live selection is platform_toolsets.<platform> minus agent.disabled_toolsets;
         # tools.enabled_toolsets is written by no surface, so watching it left Bot Chats
-        # blind to `hermes tools enable/disable` (#124211). Raw slices: an edit that leaves
+        # blind to `noone tools enable/disable` (#124211). Raw slices: an edit that leaves
         # the effective selection unchanged costs one spurious rebuild at most.
         agent_cfg = cfg.get("agent") if isinstance(cfg.get("agent"), dict) else {}
         surface["platform_toolsets"] = json.dumps(cfg.get("platform_toolsets") or {}, sort_keys=True, default=str)

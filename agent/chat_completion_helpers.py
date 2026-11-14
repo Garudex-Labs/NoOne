@@ -24,15 +24,14 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any, Dict, Optional
 
-from hermes_cli.timeouts import get_provider_request_timeout, get_provider_stale_timeout
-from hermes_constants import PARTIAL_STREAM_STUB_ID, FINISH_REASON_LENGTH
+from agent_cli.timeouts import get_provider_request_timeout, get_provider_stale_timeout
+from agent_constants import PARTIAL_STREAM_STUB_ID, FINISH_REASON_LENGTH
 from agent.error_classifier import (
     FailoverReason, PROVIDER_STREAM_EMPTY_FRAME_ERROR_CODE, PROVIDER_STREAM_NON_JSON_ERROR_CODE,
     _extract_status_code)
 from agent.sdk_transform_bypass import bypass_chat_sdk_request_transform
 from agent.errors import EmptyStreamError
 from agent.chat_completion_local import _streams_llamacpp, stale_giveup
-from agent.chat_completion_headers import _chat_completion_capturing_headers
 from agent.chat_completion_stream_monitor import StreamingWaitMonitor, StreamLifetimeExceeded
 from agent.transports.chat_completions import is_router_timeout_shim, router_timeout_shim_may_follow
 from agent.fast_mode import effective_request_overrides
@@ -477,8 +476,8 @@ def _provider_preferences_for_agent(agent) -> dict[str, Any]:
         "data_collection": agent.provider_data_collection}
     per_model = {}
     with contextlib.suppress(Exception):
-        from hermes_cli.config import load_config_readonly
-        from hermes_constants import resolve_per_model_provider_routing
+        from agent_cli.config import load_config_readonly
+        from agent_constants import resolve_per_model_provider_routing
         _pr = load_config_readonly().get("provider_routing")
         per_model = resolve_per_model_provider_routing(agent.model, (_pr or {}).get("models") if isinstance(_pr, dict) else None)
     merged = {**flat, **{k: v for k, v in per_model.items() if k in flat}}
@@ -498,20 +497,6 @@ def _prompt_cache_scope_for_agent(agent) -> str | None:
         return None
 
 
-def _merge_nous_portal_messages_extra_body(agent, anthropic_kwargs: dict, api_messages: list) -> dict:
-    """The Nous profile body on the Messages wire, which the profile hook never reaches; never
-    ``provider_preferences`` (OpenAI-wire routing the Portal 400s on)."""
-    if getattr(agent, "provider", None) not in {"nous", "nous-portal", "nousresearch"}:
-        return anthropic_kwargs
-    try:
-        from providers import get_provider_profile
-        nous_profile = get_provider_profile("nous")
-        if nous_profile is not None:
-            anthropic_kwargs.setdefault("extra_body", {}).update(nous_profile.build_extra_body(
-                session_id=getattr(agent, "session_id", None), data_use=data_use_requirement(api_messages)))
-    except Exception as exc:
-        logger.debug("Nous Portal extra_body merge failed: %s", exc)
-    return anthropic_kwargs
 
 
 def _estimate_chunk_bytes(chunk: Any) -> int:
@@ -637,7 +622,7 @@ def _local_stream_stale_timeout_default() -> float:
     Responses first-event watchdog so both give a local server the same prefill grace."""
     local_default = 900.0
     with contextlib.suppress(Exception):
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
         cfg = load_config_readonly()  # read-only consumer — no deepcopy
         agent_cfg = cfg.get("agent") if isinstance(cfg, dict) else None
         value = agent_cfg.get("local_stream_stale_timeout") if isinstance(agent_cfg, dict) else None
@@ -790,7 +775,7 @@ def _dispatch_nonstreaming_api_request(agent, api_kwargs: dict, *, make_client):
     # request transform. No-op unless this really is the OpenAI SDK, so the
     # MoA facade above and the suite's stand-in clients are unaffected.
     api_kwargs = bypass_chat_sdk_request_transform(api_kwargs, request_client)
-    return _chat_completion_capturing_headers(agent, request_client, api_kwargs)
+    return request_client.chat.completions.create(**api_kwargs)
 
 
 
@@ -1389,7 +1374,7 @@ def _build_anthropic_kwargs(agent, api_messages, tools_for_api, reasoning_config
         drop_context_1m_beta=bool(getattr(agent, "_oauth_1m_beta_disabled", False)))
     # Portal reads ``tags`` / ``session_id`` on its Messages route too, but the profile hook
     # is only consulted by the OpenAI-wire transport — merge here to keep sticky routing.
-    return _merge_nous_portal_messages_extra_body(agent, anthropic_kwargs, api_messages)
+    return anthropic_kwargs
 
 
 def _build_bedrock_kwargs(agent, api_messages, tools_for_api, reasoning_config):
@@ -1749,10 +1734,9 @@ def _fallback_entry_key(fb: dict) -> tuple[str, str, str]:
 
 def _fallback_entry_unavailable_without_network(agent, fb: dict) -> Optional[str]:
     """Return a skip reason for fallback entries known to be unusable locally."""
-    if (fb.get("provider") or "").strip().lower() != "nous":
-        return None
+    return None
     try:
-        from hermes_cli.auth import get_provider_auth_state
+        from agent_cli.auth import get_provider_auth_state
         state = get_provider_auth_state("nous") or {}
     except Exception as exc:
         return f"nous_auth_unreadable:{type(exc).__name__}"
@@ -1797,7 +1781,7 @@ def _fallback_reason_text(reason: FailoverReason | None) -> str:
 def _is_anthropic_wire_url(url: str) -> bool:
     """Same Messages-only host match as determine_api_mode() / _detect_api_mode_for_url(): api.anthropic.com,
     a /anthropic suffix, or Kimi Code's api.kimi.com/coding (its /chat/completions 404s — #77256)."""
-    from hermes_cli.providers import host_mandated_api_mode
+    from agent_cli.providers import host_mandated_api_mode
     return host_mandated_api_mode(url) == "anthropic_messages"
 
 
@@ -1806,7 +1790,7 @@ def _fallback_api_mode_hint(fb: dict, fb_provider: str, fb_base_url_hint: Option
     rewrites a dual-surface /anthropic base to /v1, losing the Anthropic wire signal. An explicit
     ``api_mode`` always wins (even "chat_completions") and suppresses later re-detection;
     ``provider: anthropic`` without a base_url still resolves to anthropic_messages."""
-    from hermes_cli.runtime_provider import _get_named_custom_provider, _parse_api_mode
+    from agent_cli.runtime_provider import _get_named_custom_provider, _parse_api_mode
     # Entries accept the same ``api_mode`` / ``transport`` spellings as ``providers.<name>``.
     explicit = _parse_api_mode(fb.get("api_mode") or fb.get("transport"))
     if explicit:
@@ -1829,18 +1813,14 @@ def _fallback_api_mode_resolved(agent, fb_provider: str, fb_model: str, fb_base_
     landed on the chat_completions default (never called for an explicit api_mode)."""
     if fb_provider == "openai-codex":
         return "codex_responses"
-    from hermes_cli.models import opencode_model_api_mode
-    from hermes_cli.runtime_provider_custom import _opencode_family_for_custom
+    from agent_cli.models import opencode_model_api_mode
+    from agent_cli.runtime_provider_custom import _opencode_family_for_custom
     opencode_family = _opencode_family_for_custom(fb_provider, fb_base_url)
     if opencode_family is not None:
         # OpenCode Zen/Go/free serve Responses-only (muse-spark, gpt-*, grok-*), anthropic_messages
         # (minimax, qwen) and chat_completions models behind one provider; the primary /model path
         # already re-derives per model — the fallback wire must agree (#102148).
         return opencode_model_api_mode(opencode_family, fb_model)
-    if fb_provider in {"nous", "nous-portal", "nousresearch"}:
-        # Portal is dual-wire: anthropic/* must land on /v1/messages (the swap rebuilds the native client).
-        from hermes_cli.providers import nous_api_mode
-        return nous_api_mode(fb_model)
     if _is_anthropic_wire_url(fb_base_url):
         # Named custom providers (cron-anthropic) resolve base_url from config; the hint pass never saw it.
         return "anthropic_messages"
@@ -1884,9 +1864,9 @@ def _log_fallback_activated(agent, reason, old_model, old_provider, fb_model, fb
     if reason != FailoverReason.billing:
         logger.info("Fallback activated: %s → %s (%s)", old_model, fb_model, fb_provider)
         return
-    from hermes_constants import get_hermes_home, profile_name_for_home
-    profile = profile_name_for_home(get_hermes_home()) or "default"
-    remedy = "hermes model" if profile == "default" else f"hermes -p {profile} model"
+    from agent_constants import get_agent_home, profile_name_for_home
+    profile = profile_name_for_home(get_agent_home()) or "default"
+    remedy = "noone model" if profile == "default" else f"hermes -p {profile} model"
     logger.warning(
         "Profile %s: %s via %s refused for billing/credits — using fallback %s via %s. "
         "Top up credits, or run `%s` to pick a model this account can use.",
@@ -1990,8 +1970,8 @@ def _reresolve_fallback_reasoning_config(agent) -> None:
     try:
         # Re-resolve reasoning_config for the new fallback model (Closes #21256). Wrapped in try/except
         # because a config load failure must not kill the swap.
-        from hermes_cli.config import load_config
-        from hermes_constants import resolve_reasoning_config
+        from agent_cli.config import load_config
+        from agent_constants import resolve_reasoning_config
         agent.reasoning_config = resolve_reasoning_config(load_config() or {}, agent.model)
         logger.info("Fallback %s: reasoning_config resolved: %s", agent.model, agent.reasoning_config)
     except Exception as _reasoning_err:
@@ -2078,7 +2058,7 @@ def try_activate_fallback(agent, reason: FailoverReason | None = None, reset_at=
             agent._provider_fallback_active = True
             agent._provider_fallback_route = (str(fb_model), str(fb_provider))
             _log_fallback_activated(agent, reason, old_model, old_provider, fb_model, fb_provider)
-            from hermes_cli.observability.shared_metrics_events import record_fallback
+            from agent_cli.observability.shared_metrics_events import record_fallback
             record_fallback(from_provider=old_provider, to_provider=fb_provider, reason=reason)
             # The stale-call streak measured the OLD provider; carrying it over would
             # short-circuit the fresh fallback before its first stream attempt.
@@ -2088,8 +2068,6 @@ def try_activate_fallback(agent, reason: FailoverReason | None = None, reset_at=
                 model=agent.model, base_url=agent.base_url, provider=fb_provider, is_codex_backend=fb_provider == "openai-codex")
             return True
         except Exception as e:
-            if fb_provider == "nous":
-                unavailable.add(fb_key)
             logger.error("Failed to activate fallback %s: %s", fb_model, e)
             continue  # try next in chain
 
@@ -2226,7 +2204,6 @@ def _anthropic_summary_attempt(agent, api_messages: list, api_request_id: str):
             model=agent.model, messages=api_messages, tools=None, max_tokens=agent.max_tokens,
             reasoning_config=agent.reasoning_config, is_oauth=agent._is_anthropic_oauth,
             preserve_dots=agent._anthropic_preserve_dots(), base_url=getattr(agent, "_anthropic_base_url", None))
-        ant_kw = _merge_nous_portal_messages_extra_body(agent, ant_kw, api_messages)
         response = _managed_summary_call(
             agent, api_request_id, ant_kw, agent._interruptible_api_call, retry_count=retry_count)
         return _summary_text(agent, response, strip_tool_prefix=agent._is_anthropic_oauth)
@@ -2941,7 +2918,6 @@ class _StreamingCall(StreamingWaitMonitor):
         response = self._attempt_stream_response = getattr(raw_stream, "response", None)
         self.agent._capture_rate_limits(response)
         self.agent._capture_credits(response)
-        self.agent._capture_nous_model_switch(response)
         self.agent._stream_diag_capture_response(self.clients.diag, response)
         self.agent._check_openrouter_cache_status(response)
         self._writer_token = claim_stream_writer(self.agent)

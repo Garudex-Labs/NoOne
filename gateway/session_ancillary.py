@@ -10,7 +10,7 @@ from pathlib import Path
 import sys
 
 from gateway.session_busy_controls import authorize
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 
 _SUBAGENT_FIELDS = (
@@ -141,7 +141,7 @@ async def attach_file(connection, ref, params):
     session, so every file drop failed with ``session not found``.
 
     A browser pick arrives as ``staged_upload`` (the Webapp upload route's receipt,
-    ``hermes_cli/staged_uploads.py``): it is copied out of the profile it was uploaded to, which must
+    ``agent_cli/staged_uploads.py``): it is copied out of the profile it was uploaded to, which must
     be one this connection may reach."""
     staged_upload = params.get('staged_upload')
     if (set(params) - {'session_id', 'profile', 'path', 'data_url', 'name', 'staged_upload'} or not ref.session_id
@@ -159,7 +159,7 @@ async def attach_file(connection, ref, params):
     if policy is None:
         raise RuntimeStoreError('permission_denied')
     # The staging helpers are bound onto the sidecar module's globals (method_ctx.bind_module).
-    from tui_gateway import server
+    from agent_backend import server
     session = {'cwd': policy.cwd, 'profile_home': authority.profile_id}
 
     def stage():
@@ -372,7 +372,7 @@ async def _held_mcp_rev(connection, ref):
 def _mcp_revision_in_scope(home, policy):
     from gateway.run import _profile_runtime_scope
     from gateway.session_config import mcp_revision
-    from hermes_cli.config import load_config
+    from agent_cli.config import load_config
     with _profile_runtime_scope(home):
         return mcp_revision(policy, load_config())
 
@@ -383,8 +383,8 @@ def _session_servers(authority, sid, ready):
     a platform allowlist enabled, and one the policy names but that parked serves the chat nothing."""
     import json
     from gateway.session_policy import restore_policy
-    from hermes_cli.tools_config import enabled_mcp_server_names
-    from hermes_state_local import local_receipt
+    from agent_cli.tools_config import enabled_mcp_server_names
+    from agent_state_local import local_receipt
     policy = restore_policy(local_receipt(authority.db, sid)['policy'])
     return sorted(set(policy.toolsets) & enabled_mcp_server_names(json.loads(policy.config_json)) & set(ready))
 
@@ -466,18 +466,18 @@ def physical_target(authority, ref):
     from gateway.config import Platform
     source = authority.sessions[ref.session_id].source  # None: a history mount
     if source is not None and source.platform == Platform.LOCAL:
-        from hermes_state_local import local_receipt
+        from agent_state_local import local_receipt
         return local_receipt(authority.db, ref.session_id)['entry']['session_id']
     return ref.session_id
 
 
 def control_snapshot(authority, ref):
-    from hermes_cli.goals import GoalState
-    from hermes_cli.loops import LoopState
-    from hermes_cli.heartbeat import HeartbeatState
+    from agent_cli.goals import GoalState
+    from agent_cli.loops import LoopState
+    from agent_cli.heartbeat import HeartbeatState
     # These pure serializers don't bind/import the legacy server. In particular
     # do not reuse _snapshot_control: its manager loader can write on a read.
-    from tui_gateway.methods_session_control import (
+    from agent_backend.methods_session_control import (
         _safe_goal_snapshot, _safe_loop_snapshot, _safe_heartbeat_snapshot,
         _snapshot_revision, _snapshot_updated_at,
     )

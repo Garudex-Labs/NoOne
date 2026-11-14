@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import { flattenMessageKeys } from '@hermes/shared/i18n'
+import { flattenMessageKeys } from '@noone/shared/i18n'
 import { expect, it } from 'vitest'
 
 import { arOverrides } from './ar'
@@ -10,12 +10,12 @@ import type { TranslationOverrides } from './define-locale'
 import { en } from './en'
 import { esOverrides } from './es'
 import { frOverrides } from './fr'
+import { hiOverrides } from './hi'
 import { jaOverrides } from './ja'
+import { koOverrides } from './ko'
 import knownGaps from './overlay-gaps.json'
-import { ruOverrides } from './ru'
 import type { BundledLocale } from './types'
 import { zhOverrides } from './zh'
-import { zhHantOverrides } from './zh-hant'
 
 // Overlays are partial, so a missing key renders English without failing typecheck
 // or catalog-completeness.test.ts (which reads the merged catalog). This reads each
@@ -28,10 +28,10 @@ const OVERLAYS = {
   de: deOverrides,
   es: esOverrides,
   fr: frOverrides,
+  hi: hiOverrides,
   ja: jaOverrides,
-  ru: ruOverrides,
+  ko: koOverrides,
   zh: zhOverrides,
-  'zh-hant': zhHantOverrides
 } satisfies Record<Exclude<BundledLocale, 'en'>, TranslationOverrides>
 
 // `intro` is display-only; intro.test.tsx covers its translated rotation.

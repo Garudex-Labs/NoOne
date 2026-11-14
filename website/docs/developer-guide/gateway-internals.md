@@ -1,14 +1,13 @@
 ---
-sidebar_position: 7
 title: "Gateway Internals"
 description: "How the messaging gateway boots, authorizes users, routes sessions, and delivers messages"
 ---
 
-# Gateway Internals
+# Gateway Internals {#gateway-internals}
 
-The messaging gateway is the long-running process that connects Hermes to 20+ external messaging platforms through a unified architecture.
+The messaging gateway is the long-running process that connects {{app-name}} to 20+ external messaging platforms through a unified architecture.
 
-## Canonical group metadata and profile discovery
+## Canonical group metadata and profile discovery {#canonical-group-metadata-and-profile-discovery}
 
 The authenticated canonical WebSocket exposes `groups.capabilities`, `groups.list`,
 `groups.state`, and `groups.log` with `session:read`; `groups.create`,
@@ -39,7 +38,7 @@ reused while a profile's store has not moved. Discovery does not create, restore
 or unarchive sessions, open a database handle of its own or reopen one an unserve
 closed, or run inference.
 
-## Canonical ancillary reads
+## Canonical ancillary reads {#canonical-ancillary-reads}
 
 Desktop and Ink use authenticated `session.control.read`, `process.list`,
 `subagent.list`, and `subagent.tail` with `session_id`. They require
@@ -66,7 +65,7 @@ the owner's process-local registry cannot truthfully describe another interprete
 Control mutations (`session.control`), process mutations and subagent steering are
 not enabled by these read projections.
 
-## Shared authority pending-input snapshots
+## Shared authority pending-input snapshots {#shared-authority-pending-input-snapshots}
 
 `session.resume` returns each pending admission with its original `input_id` and
 committed public `text`, alongside the canonical `admission_id`, sequence and status.
@@ -81,7 +80,7 @@ last event of that turn. Desktop translates both paths into its existing
 `pending_submissions` queue store.
 
 A turn that was `started` when its owning gateway died is recovered by the next owner
-as `unknown`: Hermes cannot prove which side effects happened, so it neither replays
+as `unknown`: {{app-name}} cannot prove which side effects happened, so it neither replays
 the input nor lets the queued turns behind it run. `prompt.resolve_unknown`
 (`session:control`, params `session_id`, `admission_id`, `execution_generation`)
 acknowledges the loss: the row settles as `interrupted`, the session FIFO resumes and
@@ -90,7 +89,7 @@ row (visible in the resume/`session.info` projection), so a stale or already-res
 row is refused with `stale_generation`. Desktop shows such a row in the queue panel as
 "Turn lost during restart" with a **Discard** button; the gateway CLI exposes it as
 `/discard <admission_id>`. The lost input stays in the transcript for the user to resend; the
-discard closes it with a Hermes notice (like a failed turn), so it is never merged into the
+discard closes it with a {{app-name}} notice (like a failed turn), so it is never merged into the
 follower's model request.
 
 A messaging user (Telegram, Discord, ...) whose session is paused this way is told once per
@@ -100,7 +99,7 @@ stay queued. Their delivery waiters are released with the pause reason instead o
 adapter loop. `/reset` rotates the route to a new session (the lost turn and its followers stay
 on the old one); the operator can alternatively resolve the unknown row from Desktop or the CLI.
 
-## Shared authority prompt attachments
+## Shared authority prompt attachments {#shared-authority-prompt-attachments}
 
 `prompt.submit` accepts an optional `attachments: [{path, mime}]` list beside `text`.
 The client stages image bytes in the profile image cache (`cache/images/` under the
@@ -117,7 +116,7 @@ Text-only submissions keep the `{text}` payload and fingerprint. The ACP transpo
 agent uses this for image, image resource-link and embedded-image prompt blocks;
 Ink and Desktop still attach through the legacy `image.attach`/`file.attach` RPCs.
 
-## Native admission startup recovery
+## Native admission startup recovery {#native-admission-startup-recovery}
 
 Ordinary gateway startup recovers accepted native inputs after adapter connection,
 route publication, and the startup restore gate. Only never-started queued work is
@@ -141,7 +140,7 @@ clients discover the multiplexer through the default home's descriptor
 (`served_profiles`) and attach to its control socket with their own `profile_id`
 ([Local control socket](#local-control-socket-public-client-contract)).
 
-## Shared authority local slash commands
+## Shared authority local slash commands {#shared-authority-local-slash-commands}
 
 Authenticated local sessions accept `slash.exec({session_id, command})` and
 `command.dispatch({session_id, name, arg})`. Both use the existing command registry
@@ -170,7 +169,7 @@ Other commands return `unsupported_command`: bundles, configuration/runtime chan
 lifecycle commands, and approval/secret slash shortcuts are not exposed. Existing generation-bound approval and interrupt
 RPCs remain separate. Catalog discovery is broader than this reviewed execution set.
 
-## Shared authority busy input and corrections
+## Shared authority busy input and corrections {#shared-authority-busy-input-and-corrections}
 
 `config.get({session_id, key: "busy"})` projects the session's frozen busy-input
 preference. `config.set({session_id, key: "busy", value})` accepts `interrupt`,
@@ -190,7 +189,7 @@ active correction window, while `stale_generation` rejects settled/replaced work
 Managed-worker corrections currently return `unsupported_control`; normal durable
 queue submission and Stop remain separate controls.
 
-## Shared authority setup readiness
+## Shared authority setup readiness {#shared-authority-setup-readiness}
 
 Authenticated local clients can call `setup.status` and `setup.runtime_check` before
 creating a session. Both require `session:create` and run against the daemon's owned
@@ -199,7 +198,7 @@ existing provider resolver off the event loop and does not create a legacy sessi
 runtime. Missing provider credentials remain a failed readiness result, not a bypass
 of onboarding.
 
-## Shared authority clarification protocol
+## Shared authority clarification protocol {#shared-authority-clarification-protocol}
 
 When the HTTP/WebSocket surface is bound to a `SessionAuthority`, attached authorized
 viewers receive `clarify.request` events and pending questions in the `session.resume`
@@ -220,7 +219,7 @@ create an actionable shared form. Ordinary approvals use the separate `approval.
 permission path; sudo/secret prompts and durable control restoration after daemon restart
 are not implemented by this clarification path.
 
-## Revision-checked session metadata
+## Revision-checked session metadata {#revision-checked-session-metadata}
 
 The authority-bound WebSocket accepts `session.mutate` for a registered session.
 Parameters are `session_id`, `request_id`, `expected_revision`, `operation`, and
@@ -242,7 +241,7 @@ does not cancel its owner-held mutation: the commit, live projection and queue
 wakeup finish together, and profile retirement joins that work before releasing
 the store. An exact old receipt cannot evict a newer running agent.
 
-Canonical wire models live in `tui_gateway/contracts/canonical*.py` and generate
+Canonical wire models live in `agent_backend/contracts/canonical*.py` and generate
 `CanonicalRpcMethods` plus the OpenRPC `x-canonical-methods` catalog, separately
 from the standalone protocol. Both parameters and successful results are checked.
 
@@ -250,7 +249,7 @@ ACP and finite CLI viewers detach with an explicit recovery notice if an accepte
 input becomes blocked behind an unknown execution. The accepted input remains
 queued: resolve the lost turn before continuing, rather than resending it.
 
-## Private control request workers
+## Private control request workers {#private-control-request-workers}
 
 The POSIX control listener owns two executors of its own: one for hosted producer
 requests and one for every other control request. A `hosted-producer` operation
@@ -279,7 +278,7 @@ cancelling the task. Discard of an indeterminate attempt follows the same rule.
 This preserves history and lets the next group input proceed without replaying
 the lost turn.
 
-## Private native HTTP authentication
+## Private native HTTP authentication {#private-native-http-authentication}
 
 The authoritative daemon accepts a **fresh, one-use HTTP grant per request** from
 its same-user private control socket. Send `session-ticket` with exactly
@@ -335,7 +334,7 @@ probes in `tests/gateway/test_native_http_auth.py`, alongside gated OAuth/cookie
 actual non-loopback-peer controls. This does not establish native Desktop UI parity
 or platform-specific Windows/macOS bootstrap validation.
 
-## Frozen local launch credentials
+## Frozen local launch credentials {#frozen-local-launch-credentials}
 
 Local `session.create` receipts retain the launch policy, not plaintext API keys.
 Inline credentials in the profile config are borrowed from that existing private
@@ -356,7 +355,7 @@ credentials. Credential fingerprints are private metadata, never public API resp
 CLI cost/data-training consent runs before gateway discovery and session creation,
 including top-level one-shot launches. It does not become a process-wide option.
 
-## Key Files
+## Key Files {#key-files}
 
 | File | Purpose |
 |------|---------|
@@ -372,14 +371,14 @@ including top-level one-shot launches. It does not become a process-wide option.
 | `plugins/platforms/<name>/` | Bundled messaging adapters (most platforms: `adapter.py` + `plugin.yaml`) |
 | `gateway/platforms/` | Shared `base.py` plus legacy/direct adapters (Signal, API server, webhooks, …) |
 
-## Optional service installation
+## Optional service installation {#optional-service-installation}
 
-A running gateway and an installed OS service are different things. `hermes gateway run`
+A running gateway and an installed OS service are different things. `noone gateway run`
 works without a service, including with no messaging platforms configured.
 
-`hermes setup`, quick setup, and `hermes gateway setup` ask interactive users once:
+`noone setup`, quick setup, and `noone gateway setup` ask interactive users once:
 
-> Install the gateway service so Hermes starts automatically at login and keeps scheduled jobs and messaging available?
+> Install the gateway service so {{app-name}} starts automatically at login and keeps scheduled jobs and messaging available?
 
 The profile's `gateway.service_install_choice` stores `null`, `install`, or `decline`.
 An unset value is not permission to install. Declining records `decline` without creating,
@@ -390,18 +389,18 @@ run while the host is off.
 
 Noninteractive setup and imports do not install a missing service, even when the imported
 config says `install`. Existing installed services remain authoritative and can be started
-regardless of the saved preference. To opt in explicitly later, run `hermes gateway install`;
+regardless of the saved preference. To opt in explicitly later, run `noone gateway install`;
 the choice is recorded only after successful installation. To be asked again during setup,
-reset the choice with `hermes config set gateway.service_install_choice null`.
+reset the choice with `noone config set gateway.service_install_choice null`.
 
-Setup orchestration lives in `hermes_cli/gateway_setup_service.py`. Its
+Setup orchestration lives in `agent_cli/gateway_setup_service.py`. Its
 `ensure_gateway_service` helper is not a general runtime discovery or auto-start API:
 ordinary calls never reinstall a missing service based only on stored preference.
 
-## `hermes gateway ensure`
+## `noone gateway ensure` {#hermes-gateway-ensure}
 
-Clients (Desktop, `hermes chat`, the TUI) discover or start the profile's session
-runtime with `hermes gateway ensure --json --timeout 60`; the summary is in the
+Clients (Desktop, `noone chat`, the TUI) discover or start the profile's session
+runtime with `noone gateway ensure --json --timeout 60`; the summary is in the
 [CLI reference](../reference/cli-commands.md#local-runtime-discovery-and-startup).
 
 The timeout is a finite, positive total deadline in seconds (default `60`, enough for a
@@ -474,14 +473,14 @@ Service persistence is separately opt-in during setup. Imports and noninteractiv
 setup do not install a missing service based on an imported preference. See
 [optional service installation](#optional-service-installation).
 
-## Local control socket (public client contract)
+## Local control socket (public client contract) {#local-control-socket-public-client-contract}
 
 Each gateway listens on a local control socket. It is how a client on the same machine finds the
 gateway that serves its profile and gets a WebSocket ticket, without spawning Python. Three verbs
 are public: `identify` (read-only), `resolve-profile` and the public form of `session-ticket`.
 Every other verb, the `session-ticket` parameters `subject` and `scope`, and purposes other than
-`interactive` are internal to Hermes (Desktop, the dashboard, the updater) and may change.
-Starting or recovering a gateway stays `hermes gateway attach --start` / `--recover`
+`interactive` are internal to {{app-name}} (Desktop, the dashboard, the updater) and may change.
+Starting or recovering a gateway stays `noone gateway attach --start` / `--recover`
 ([below](#hermes-gateway-attach)).
 
 **Envelope.** One connection carries one request: one UTF-8 JSON object plus `\n` (at most
@@ -493,7 +492,7 @@ refuse any other top-level key and `params` that is not an object. The reply is 
 part of the contract.
 
 **`resolve-profile`** takes `{"home": "<absolute profile home>"}` and answers with the verdict
-`hermes gateway attach` discovery gives for that home (a verdict that is not attachable is still
+`noone gateway attach` discovery gives for that home (a verdict that is not attachable is still
 `ok: true`). Send a plain absolute path: one with a `.` or `..` component, a repeated separator or
 a trailing separator is refused as invalid parameters. Symlinks in it are resolved.
 
@@ -502,11 +501,11 @@ a trailing separator is refused as invalid parameters. Symlinks in it are resolv
 | `resolve_protocol` | `1` |
 | `state`, `reason_code`, `detail` | The discovery verdict: `ready`, `draining`, `starting`, `absent`, `inaccessible`, `incompatible` or `conflict`, with its bounded code and remedy |
 | `attachable` | `ready`, or a restart's after-turn wait (`draining`/`restart_wait`) |
-| `update_fenced` | An update owns the install. `hermes gateway attach --start` would not return this verdict as it is, so a client that wants to start goes through the CLI |
+| `update_fenced` | An update owns the install. `noone gateway attach --start` would not return this verdict as it is, so a client that wants to start goes through the CLI |
 | `control` | `self` (this is the profile's own socket), `host` (the multiplexer answering for a profile it may serve) or `null` (a home outside this gateway's root) |
 | `message` | When not attachable: the `gateway <state>: <reason>` lines `attach --json` prints |
 | `endpoint` | `null`, or `attach --json`'s `endpoint` plus `ws_url`, `ws_protocol` and `ticket_protocol_prefix` |
-| `install_code_sha` | The commit installed on disk now. When it differs from `endpoint.code_sha`, the gateway outlived `hermes update` |
+| `install_code_sha` | The commit installed on disk now. When it differs from `endpoint.code_sha`, the gateway outlived `noone update` |
 
 **`session-ticket`, public form:** `{"profile_id": <endpoint.profile_id>, "instance_id":
 <endpoint.instance_id>, "purpose": "interactive"}`, plus `"restart_wait": "refuse"` for machine
@@ -521,7 +520,7 @@ every connection and reconnect.
 |---|---|
 | `resolve-profile`: bad envelope | `PermissionError: invalid resolve envelope` |
 | `resolve-profile`: `params` other than one absolute `home` | `PermissionError: invalid resolve parameters` |
-| A gateway older than the verb | `unknown verb: 'resolve-profile'` (plus `supported_verbs`): use `hermes gateway attach --json` |
+| A gateway older than the verb | `unknown verb: 'resolve-profile'` (plus `supported_verbs`): use `noone gateway attach --json` |
 | Peer not verified as your OS user | `PermissionError: authenticated runtime bootstrap unavailable` |
 | `session-ticket`: bad envelope | `PermissionError: invalid bootstrap envelope` |
 | Missing or unknown parameters, `restart_wait` other than `refuse` | `PermissionError: invalid bootstrap parameters` (an owner older than `restart_wait` answers this too: retry once without it) |
@@ -530,7 +529,7 @@ every connection and reconnect.
 | 1024 tickets outstanding | `PermissionError: bootstrap capacity exhausted` |
 
 **Rendezvous.** The socket node and its `gateway.sock.path` pointer are the only files in a
-profile home a client touches. They are a rendezvous, not Hermes data: read no lock, state file or
+profile home a client touches. They are a rendezvous, not {{app-name}} data: read no lock, state file or
 config. Try the profile home, then, for a named profile `<root>/profiles/<name>` (name not starting
 with `.`), the root, whose multiplexer answers for the profiles it serves. For each candidate,
 canonicalized like Python's `Path.resolve`:
@@ -547,7 +546,7 @@ canonicalized like Python's `Path.resolve`:
   next candidate. Any other failed check is a refusal: stop, do not try the next candidate.
 - **Windows:** the pipe `\\.\pipe\hermes-gateway-<sha256 of the normcased canonical home, 16 hex>`.
   A client must verify that the pipe server runs as your SID before trusting its answer; a client
-  that cannot (Node) uses `hermes gateway attach --json` on every connect.
+  that cannot (Node) uses `noone gateway attach --json` on every connect.
 
 Ask the first candidate that answers `resolve-profile`. A `profile_mismatch` from the profile's
 own socket means try the next candidate; otherwise that answer is the verdict, and that socket
@@ -571,18 +570,18 @@ out of the root resolves outside and is refused. Only then does it follow a priv
 `profile_mismatch` with `control: null`, and nothing outside the root is opened, created or
 changed (the only calls that reach outside are resolving the home's path and an in-root
 `gateway.lock` link). For a home it accepts it does what discovery does: an unserved profile's
-same-user lock left at mode 0644 by an older Hermes is narrowed to 0600, as
-`hermes gateway attach` does. None of this protects against code already running as your user,
+same-user lock left at mode 0644 by an older {{app-name}} is narrowed to 0600, as
+`noone gateway attach` does. None of this protects against code already running as your user,
 or root.
 
 The contract is pinned by `apps/shared/src/node/control-socket.vectors.json`: request and reply
 pairs a client in any language can replay, run against the gateway by
 `tests/gateway/test_control_socket_vectors.py`.
 
-## `hermes gateway attach`
+## `noone gateway attach` {#hermes-gateway-attach}
 
-`hermes gateway attach --json` is the public attach step for a local client that has its own UI
-and dials the gateway itself. It runs `hermes_cli/gateway_runtime_attach.py::attach_gateway`, the
+`noone gateway attach --json` is the public attach step for a local client that has its own UI
+and dials the gateway itself. It runs `agent_cli/gateway_runtime_attach.py::attach_gateway`, the
 same function behind the Ink TUI's `ui-tui/scripts/gateway_bootstrap.py`, so both clients get the
 same discovery, start, recovery and verdicts.
 
@@ -590,7 +589,7 @@ same discovery, start, recovery and verdicts.
 |------|---------|
 | (none) | Discover the owner that serves the active profile. Never start one. |
 | `--start` | Ensure the owner, as `ensure` does (a client's first launch). |
-| `--recover` | Discover; when the owner is not ready (it crashed, ended by its idle exit, was stopped, or an older Hermes's gateway answers), ensure it. Bound how often a client uses this, as Ink does with `OWNER_RECOVERY_LIMIT`, so a crash-looping owner is not restarted without pause. |
+| `--recover` | Discover; when the owner is not ready (it crashed, ended by its idle exit, was stopped, or an older {{app-name}}'s gateway answers), ensure it. Bound how often a client uses this, as Ink does with `OWNER_RECOVERY_LIMIT`, so a crash-looping owner is not restarted without pause. |
 | `--timeout S` | Start deadline for `--start`/`--recover` (default `60`). Discovery and the ticket mint each add at most 5 seconds. `--start` and `--recover` are mutually exclusive. |
 
 When no service is installed, `attach` starts an unmanaged gateway with the idle exit: it stops
@@ -613,7 +612,7 @@ fields. Dial `url` with `protocols` as the WebSocket subprotocols, from loopback
 `Origin` header**, and check that the server selected `protocol`. Then speak `hermes-gateway-v1`:
 `runtime.describe` for the owner's `session.create` contract, then `session.create` or
 `session.resume`. When `client_code_sha` and `endpoint.code_sha` differ, the gateway outlived
-`hermes update`: restart it (`hermes gateway restart`) rather than keep attaching to old code.
+`noone update`: restart it (`noone gateway restart`) rather than keep attaching to old code.
 
 The ticket is the WebSocket's only credential. It is minted by the control socket's
 `session-ticket` verb (purpose `interactive`, scope `profile`) over the same-user socket, or the
@@ -633,7 +632,7 @@ verdict is `inaccessible`/`ticket_unavailable` (exit `7`) with the bounded cause
 repair command, in `detail`; run `attach` again. Invalid arguments exit `2` with `ensure`'s
 `invalid_invocation` line.
 
-## Architecture Overview
+## Architecture Overview {#architecture-overview}
 
 ```text
 ┌─────────────────────────────────────────────────┐
@@ -659,7 +658,7 @@ repair command, in `detail`; run `attach` again. Invalid arguments exit `2` with
 └───────┴─────────────┴─────────────┴─────────────┘
 ```
 
-## Message Flow
+## Message Flow {#message-flow}
 
 When a message arrives from any platform:
 
@@ -675,7 +674,7 @@ When a message arrives from any platform:
    - Otherwise → create `AIAgent` instance and run conversation
 4. **Response** is sent back through the platform adapter
 
-### Session Key Format
+### Session Key Format {#session-key-format}
 
 Session keys encode the full routing context:
 
@@ -689,7 +688,7 @@ For example: `agent:main:telegram:private:123456789` for the default profile, or
 
 Thread-aware platforms (Telegram forum topics, Discord threads, Slack threads) may include thread IDs in the chat_id portion. **Never construct session keys manually** — always use `build_session_key()` from `gateway/session.py`.
 
-### Two-Level Message Guard
+### Two-Level Message Guard {#two-level-message-guard}
 
 When an agent is actively running, incoming messages pass through two sequential guards:
 
@@ -699,7 +698,7 @@ When an agent is actively running, incoming messages pass through two sequential
 
 Commands that must reach the runner while the agent is blocked (like `/approve`) are dispatched **inline** via `await self._message_handler(event)` — they bypass the background task system to avoid race conditions.
 
-## Authorization
+## Authorization {#authorization}
 
 The gateway uses a multi-layer authorization check, evaluated in order:
 
@@ -709,7 +708,7 @@ The gateway uses a multi-layer authorization check, evaluated in order:
 4. **Global allow-all** (`GATEWAY_ALLOW_ALL_USERS`, or `gateway.allow_all_users` in `config.yaml`, bridged to the env var by `gateway/config_loader.py::bridge_core_env_settings`) — if set, all users across all platforms are authorized
 5. **Default: deny** — unauthorized users are rejected
 
-### DM Pairing Flow
+### DM Pairing Flow {#dm-pairing-flow}
 
 ```text
 Admin: /pair
@@ -720,16 +719,16 @@ Gateway: "Paired! You're now authorized."
 
 Pairing state is persisted in `gateway/pairing.py` and survives restarts.
 
-## Slash Command Dispatch
+## Slash Command Dispatch {#slash-command-dispatch}
 
 All slash commands in the gateway flow through the same resolution pipeline:
 
-1. `resolve_command()` from `hermes_cli/commands.py` maps input to canonical name (handles aliases, prefix matching)
+1. `resolve_command()` from `agent_cli/commands.py` maps input to canonical name (handles aliases, prefix matching)
 2. The canonical name is checked against `GATEWAY_KNOWN_COMMANDS`
 3. `_handle_message()` (`gateway/run_inbound.py`) looks the handler up by name — `_handle_<name>_command` on the `gateway/slash_commands_*.py` mixins — via `_command_handler_table` over `_IDLE_COMMANDS` / `_PLAIN_COMMANDS` in `gateway/run_busy.py`; there is no `if canonical == ...` chain
 4. Some commands are gated on config (`gateway_config_gate` on `CommandDef`)
 
-### Running-Agent Guard
+### Running-Agent Guard {#running-agent-guard}
 
 Commands that must NOT execute while the agent is processing are rejected early:
 
@@ -737,7 +736,7 @@ While `_quick_key in self._running_agents`, `_dispatch_busy_slash_command()` in 
 
 Bypass commands (`/stop`, `/new`, `/approve`, `/deny`, `/queue`, `/status`) have mid-run handlers and are dispatched inline.
 
-## Config Sources
+## Config Sources {#config-sources}
 
 The gateway reads configuration from multiple sources:
 
@@ -749,7 +748,7 @@ The gateway reads configuration from multiple sources:
 
 Unlike the CLI (which uses `load_cli_config()` with hardcoded defaults), the gateway reads `config.yaml` directly via YAML loader. This means config keys that exist in the CLI's defaults dict but not in the user's config file may behave differently between CLI and gateway.
 
-## Platform Adapters
+## Platform Adapters {#platform-adapters}
 
 Every messaging platform ships as a plugin adapter under `plugins/platforms/<name>/`; `gateway/platforms/` keeps the base class and the HTTP ingress adapters (`api_server`, `webhook`, `msgraph_webhook`). All extend `BasePlatformAdapter` from `gateway/platforms/base.py`:
 
@@ -760,21 +759,14 @@ plugins/platforms/                  # plugin-packaged adapters (one dir each)
 ├── slack/adapter.py        # Slack Socket Mode
 ├── whatsapp/adapter.py     # WhatsApp via the local Baileys bridge
 ├── whatsapp_cloud/adapter.py # WhatsApp Business Cloud API
-├── matrix/adapter.py       # Matrix via mautrix (optional E2EE)
 ├── mattermost/adapter.py   # Mattermost WebSocket API
 ├── email/adapter.py        # Email via IMAP/SMTP
 ├── sms/adapter.py          # SMS via Twilio
-├── dingtalk/adapter.py     # DingTalk WebSocket
-├── feishu/adapter.py       # Feishu/Lark WebSocket or webhook
-├── wecom/adapter.py        # WeCom (WeChat Work) callback
 ├── line/adapter.py         # LINE Messaging API
 ├── teams/adapter.py        # Microsoft Teams
 ├── signal/adapter.py       # Signal via signal-cli HTTP daemon (SSE + JSON-RPC)
-├── irc/adapter.py          # IRC (canonical scoped-lock example)
-├── bluebubbles/adapter.py  # Apple iMessage via BlueBubbles macOS server
 ├── weixin/adapter.py       # Weixin (personal WeChat) via iLink Bot API
-├── qqbot/                  # QQ Bot (Tencent QQ) via Official API v2
-└── …                       # google_chat, ntfy, photon, raft, simplex, …
+└── …                       # google_chat, photon, …
 
 gateway/platforms/                  # core base + HTTP ingress adapters
 ├── base.py              # BasePlatformAdapter — shared logic for all platforms
@@ -783,9 +775,9 @@ gateway/platforms/                  # core base + HTTP ingress adapters
 └── api_server.py        # REST API server adapter
 ```
 
-**Deferred loading:** Bundled `kind: platform` plugins register cheap `register_deferred` loaders in `gateway/platform_registry.py` (via `hermes_cli/plugins.py`) so platform SDKs import only when the gateway starts, delivers, or runs setup/status — not on plain `hermes chat`. Resolution loads one adapter on lookup; full enumeration runs pending loaders only on paths that need every platform.
+**Deferred loading:** Bundled `kind: platform` plugins register cheap `register_deferred` loaders in `gateway/platform_registry.py` (via `agent_cli/plugins.py`) so platform SDKs import only when the gateway starts, delivers, or runs setup/status — not on plain `noone chat`. Resolution loads one adapter on lookup; full enumeration runs pending loaders only on paths that need every platform.
 
-Experimental connector-backed platforms use the generic relay adapter in `gateway/relay/` instead of a direct platform module. When `GATEWAY_RELAY_URL` or `gateway.relay_url` is configured, the gateway registers the `relay` platform, dials the connector over an outbound WebSocket, and receives `descriptor`, `inbound`, and `interrupt_inbound` frames on that same socket. The connector advertises a `CapabilityDescriptor`; Hermes can send normal outbound replies, token-less `follow_up` operations, and interrupt frames back through the relay. The source-grounded wire contract lives in [Relay ↔ Connector contract](relay-connector-contract.md).
+Experimental connector-backed platforms use the generic relay adapter in `gateway/relay/` instead of a direct platform module. When `GATEWAY_RELAY_URL` or `gateway.relay_url` is configured, the gateway registers the `relay` platform, dials the connector over an outbound WebSocket, and receives `descriptor`, `inbound`, and `interrupt_inbound` frames on that same socket. The connector advertises a `CapabilityDescriptor`; {{app-name}} can send normal outbound replies, token-less `follow_up` operations, and interrupt frames back through the relay. The source-grounded wire contract lives in [Relay ↔ Connector contract](relay-connector-contract.md).
 
 Adapters implement a common interface:
 - `connect()` / `disconnect()` — lifecycle management
@@ -802,28 +794,28 @@ not equate a consumed/dropped callback with acceptance. This receipt is separate
 from heartbeat execution accounting and does not bypass authorization, emergency
 stop, or later turn-preparation gates.
 
-### Token Locks
+### Token Locks {#token-locks}
 
 Adapters that connect with unique credentials call `acquire_scoped_lock()` in `connect()` and `release_scoped_lock()` in `disconnect()`. This prevents two profiles from using the same bot token simultaneously.
 
 A lock conflict is emitted as `{scope}_lock` with `retryable=True` so a **mid-run** reconnect can recover once the other holder exits. At **startup**, though, a live foreign holder is a configuration conflict: `gateway/restart.py::is_global_startup_conflict()` recognizes the `*_lock` / `lock_conflict` code families and the startup router parks the platform `fatal` instead of retry-queueing it. With nothing else connected the gateway exits `78` (`EX_CONFIG`, `gateway_state=startup_failed`) so the supervisor stops restarting it: systemd via `RestartPreventExitStatus=78`, s6 via finish→125, launchd via `KeepAlive.SuccessfulExit=false` after the stderr wrapper maps 78→0. Alongside a genuinely transient peer failure the gateway stays alive and only the peer retries.
 
-## Delivery Path
+## Delivery Path {#delivery-path}
 
 Outgoing deliveries (`gateway/delivery.py`) handle:
 
 - **Direct reply** — send response back to the originating chat
 - **Home channel delivery** — route cron job outputs and background results to a configured home channel
-- **Explicit target delivery** — the send engine specifying `telegram:-1001234567890`, exposed via the [`hermes send` CLI](../guides/pipe-script-output.md) for shell scripts and via cron `deliver:` targets
+- **Explicit target delivery** — the send engine specifying `telegram:-1001234567890`, exposed via the [`noone send` CLI](../guides/pipe-script-output.md) for shell scripts and via cron `deliver:` targets
 - **Cross-platform delivery** — deliver to a different platform than the originating message
 
 Cron job deliveries are NOT mirrored into gateway session history — they live in their own cron session only. This is a deliberate design choice to avoid message alternation violations.
 
-## Hooks
+## Hooks {#hooks}
 
 Gateway hooks are Python modules that respond to lifecycle events:
 
-### Gateway Hook Events
+### Gateway Hook Events {#gateway-hook-events}
 
 | Event | When fired |
 |-------|-----------|
@@ -838,7 +830,7 @@ Gateway hooks are Python modules that respond to lifecycle events:
 
 Hooks are discovered from `<profile home>/hooks/` (user-installed; `~/.hermes/hooks/` for the default profile, one directory per served profile under multiplexing — paths resolve at call time, never at import). Each hook is a directory with a `HOOK.yaml` manifest and `handler.py`.
 
-## Memory Provider Integration
+## Memory Provider Integration {#memory-provider-integration}
 
 When a memory provider plugin (e.g., Honcho) is enabled:
 
@@ -854,13 +846,13 @@ AIAgent._invoke_tool()
 
 4. On session end/reset, `on_session_end()` fires for cleanup and final data flush
 
-### Memory Flush Lifecycle
+### Memory Flush Lifecycle {#memory-flush-lifecycle}
 
 Explicit conversation boundaries (such as `/new`, `/reset`, or `/resume`) flush and finalize the outgoing session. Idle time and daily boundaries never finalize it.
 
 Resource-only TTL, LRU, and memory-pressure eviction commits the cached transcript to configured memory providers before releasing the agent's clients. It does not close the durable conversation: the next turn reloads the same transcript and identity.
 
-## Background Maintenance
+## Background Maintenance {#background-maintenance}
 
 The gateway runs periodic maintenance alongside message handling:
 
@@ -869,17 +861,17 @@ The gateway runs periodic maintenance alongside message handling:
 - **Memory flush** — commits memory before soft cache eviction
 - **Cache refresh** — refreshes model lists and provider status
 
-## Process Management
+## Process Management {#process-management}
 
 The gateway runs as a long-lived process, managed via:
 
-- `hermes gateway start` / `hermes gateway stop` — manual control
+- `noone gateway start` / `noone gateway stop` — manual control
 - `systemctl` (Linux) or `launchctl` (macOS) — service management
 - PID file at `~/.hermes/gateway.pid` — profile-scoped process tracking
 
-**Profile-scoped vs global**: `start_gateway()` uses profile-scoped PID files. Standalone (one gateway per profile), `hermes -p x gateway stop` stops only that profile's gateway. Under multiplexing there is ONE gateway process per host, owned by whichever profile launched it (`gateway/host_rendezvous.py` publishes its PID, home and served set; `gateway/host_attach.py` is the attach/rescan/refuse decision every lifecycle verb goes through): `hermes gateway stop` on the owner takes every served profile down, and `hermes -p x gateway stop` for a served secondary refuses with exit 78 (it has no gateway of its own). A second `gateway run` for a served profile attaches and exits 0 — under a service supervisor it exits 75 (EX_TEMPFAIL) instead, so the redundant unit is RETRIED rather than parked: "someone else serves me right now" is a runtime observation that ends when that process does, and 78 (which systemd, s6 and launchd all treat as permanent) would strand the profile. ATTACH requires a live `identify` answer from the owner; a rendezvous record with nothing answering behind it proves an owner exists but never that it serves you, so it yields a transient refusal (exit 75), never an attach. An owner that answers `multiplex: False` to the rescan is another profile's *standalone* gateway, not a multiplexer that excluded you: the verb starts this profile's own gateway beside it (the one-process-per-profile topology), it does not refuse — refusing there exited 78 and parked every launchd unit but the first to claim the host lock. `hermes gateway stop --all` uses global `ps aux` scanning to kill all gateway processes (used during updates). Liveness is decided by `gateway.status.live_gateway_pid_for_home` (PID + start-time fingerprint), never bare PID existence.
+**Profile-scoped vs global**: `start_gateway()` uses profile-scoped PID files. Standalone (one gateway per profile), `hermes -p x gateway stop` stops only that profile's gateway. Under multiplexing there is ONE gateway process per host, owned by whichever profile launched it (`gateway/host_rendezvous.py` publishes its PID, home and served set; `gateway/host_attach.py` is the attach/rescan/refuse decision every lifecycle verb goes through): `noone gateway stop` on the owner takes every served profile down, and `hermes -p x gateway stop` for a served secondary refuses with exit 78 (it has no gateway of its own). A second `gateway run` for a served profile attaches and exits 0 — under a service supervisor it exits 75 (EX_TEMPFAIL) instead, so the redundant unit is RETRIED rather than parked: "someone else serves me right now" is a runtime observation that ends when that process does, and 78 (which systemd, s6 and launchd all treat as permanent) would strand the profile. ATTACH requires a live `identify` answer from the owner; a rendezvous record with nothing answering behind it proves an owner exists but never that it serves you, so it yields a transient refusal (exit 75), never an attach. An owner that answers `multiplex: False` to the rescan is another profile's *standalone* gateway, not a multiplexer that excluded you: the verb starts this profile's own gateway beside it (the one-process-per-profile topology), it does not refuse — refusing there exited 78 and parked every launchd unit but the first to claim the host lock. `noone gateway stop --all` uses global `ps aux` scanning to kill all gateway processes (used during updates). Liveness is decided by `gateway.status.live_gateway_pid_for_home` (PID + start-time fingerprint), never bare PID existence.
 
-## Background process notifications
+## Background process notifications {#background-process-notifications}
 
 `terminal(background=true, notify_on_complete=true)` starts a gateway watcher that detects
 completion and triggers a new agent turn. Verbosity: `display.background_process_notifications`
@@ -918,13 +910,13 @@ or opted-in explicit targets. `all` expansions do not gain home mirror eligibili
 briefs are labelled user turns appended at a turn boundary, preserving role alternation
 (`cron/AGENTS.md`).
 
-## `/login` (off-turn, paired DM only)
+## `/login` (off-turn, paired DM only) {#login-off-turn-paired-dm-only}
 
-`/login` is registered in `hermes_cli/commands.py` with `busy_policy="dispatch"` and
+`/login` is registered in `agent_cli/commands.py` with `busy_policy="dispatch"` and
 `desktop="settings"`, listed in `run_busy.py::_PLAIN_COMMANDS`, and handled by
 `GatewayLoginCommandsMixin` (`gateway/slash_commands_login.py`). It refuses outside a paired DM:
 `chat_type in {"dm","private"}`, a truthy `chat_id`, and a platform whose `"dm"` really is a paired
-conversation — ntfy, raft and a2a all report `chat_type="dm"` for a broadcast topic, a channel and
+conversation — a2a reports `chat_type="dm"` for a channel and
 an agent peer, so posting a sign-in link and code there would publish them.
 
 **It binds the whole install.** The sign-in writes the singleton `providers.nous`, so whoever
@@ -950,9 +942,9 @@ turn re-resolves the config and the credentials, and `_agent_config_signature` a
 rebuild when the route changes — so an in-place swap buys no cache warmth and an override would pin
 an expiring access token that nothing refreshes.
 
-## Multiplexed profiles
+## Multiplexed profiles {#multiplexed-profiles}
 
-With `gateway.multiplex_profiles: true` one process serves the default profile plus every live directory under `profiles/` (`hermes_cli/profiles.py::profiles_to_serve(multiplex=True)`). `os.environ` and module globals hold the **launch** profile's values, so every activity for a secondary binds its scope explicitly — a profile is home + secret scope + terminal scope together:
+With `gateway.multiplex_profiles: true` one process serves the default profile plus every live directory under `profiles/` (`agent_cli/profiles.py::profiles_to_serve(multiplex=True)`). `os.environ` and module globals hold the **launch** profile's values, so every activity for a secondary binds its scope explicitly — a profile is home + secret scope + terminal scope together:
 
 | Activity | Binding |
 |---|---|
@@ -966,7 +958,7 @@ With `gateway.multiplex_profiles: true` one process serves the default profile p
 
 Secret reads fail closed (`agent.secret_scope.get_secret` raises `UnscopedSecretError`) only after `set_multiplex_active(True)`, which the gateway, cron, `gateway migrate` and the Desktop/dashboard `serve` backend set. Adapter YAML never reaches `os.environ` under multiplex: `gateway/platforms/_shared.py::apply_yaml_bridge` seeds `PlatformConfig.extra` and skips the environ write under a secondary's scope; gates read through `platform_gate_env`. Shared-ingress platforms (WhatsApp bridge, Relay) run on the default profile only; a secondary that enables one is logged once and stamped into runtime status (`run_adapters.py::_note_unserved_secondary_platform`). Per-profile isolation as the user sees it: [Multi-profile gateways § What is isolated per profile](../user-guide/multi-profile-gateways.md#what-is-isolated-per-profile).
 
-## Mid-run plugin loading
+## Mid-run plugin loading {#mid-run-plugin-loading}
 
 Plugins that load after the adapters connected (install/enable from the CLI, Desktop, dashboard or
 `plugins.manage`; a tool-triggered force re-discovery) re-wire their platform handlers without a restart
@@ -981,13 +973,13 @@ Plugins that load after the adapters connected (install/enable from the CLI, Des
   client (keyed `(plugin, qualname)` because a force reload hands back new function objects). Telegram
   hoists the added handlers ahead of core's catch-alls; Slack also re-registers missing
   `register_slack_action_handler` callbacks once per `AsyncApp`.
-- **`reload-plugins` control verb** — other processes (`hermes plugins install`, `hermes serve`) ask the
+- **`reload-plugins` control verb** — other processes (`noone plugins install`, `noone serve`) ask the
   running gateway to force-rescan the requested (served) home; the answer carries `plugins`, per-plugin
   `activations` and `adapters_rewired`, so the caller can say "active now" truthfully.
 - **Scope limit** — handlers only. Tools and system-prompt sections of a late plugin wait for the next
   session (prompt-cache invariant); portable MCP servers wait for `mcp.reload`. Nothing un-wires on disable.
 
-## Related Docs
+## Related Docs {#related-docs}
 
 - [Session Storage](./session-storage.md)
 - [Cron Internals](./cron-internals.md)

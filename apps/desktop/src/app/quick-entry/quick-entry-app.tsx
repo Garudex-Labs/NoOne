@@ -1,3 +1,6 @@
+import { useStore } from '@nanostores/react'
+import { appText } from '@noone/shared/application-identity'
+import { $appName, applyAppIdentity } from '@noone/shared/application-identity'
 import { useEffect, useReducer, useRef } from 'react'
 
 import { isSubmitEnter } from '@/lib/ime'
@@ -36,6 +39,13 @@ const QUICK_TARGET_OPTION_STYLE = {
  * the primary renderer's normal prompt-submit path.
  */
 export function QuickEntryApp() {
+  const appName = useStore($appName)
+  useEffect(() => {
+    const bridge = window.hermesDesktop
+    applyAppIdentity({ display: { app_name: bridge?.applicationName } })
+
+    return bridge?.onApplicationNameChanged?.(name => applyAppIdentity({ display: { app_name: name } }))
+  }, [])
   const inputRef = useRef<HTMLInputElement>(null)
   const submitIdRef = useRef(0)
 
@@ -83,7 +93,7 @@ export function QuickEntryApp() {
 
     const offLateResult = api?.onLateResult(payload => {
       dispatch({
-        message: payload?.result?.message ?? 'Hermes could not deliver the prompt.',
+        message: payload?.result?.message ?? appText('{app_name} could not deliver the prompt.', appName),
         ok: payload?.result?.ok === true,
         type: 'late-result'
       })
@@ -96,7 +106,7 @@ export function QuickEntryApp() {
       offState?.()
       offLateResult?.()
     }
-  }, [])
+  }, [appName])
 
   return (
     <div
@@ -162,7 +172,7 @@ export function QuickEntryApp() {
                 dispatch({ type: 'dismiss' })
               }
             }}
-            placeholder={state.connected ? 'Ask Hermes…' : 'Not connected — open Hermes to reconnect'}
+            placeholder={state.connected ? appText('Ask {app_name}…', appName) : appText('Not connected — open {app_name} to reconnect', appName)}
             ref={inputRef}
             spellCheck={false}
             style={{

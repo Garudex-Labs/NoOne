@@ -1,7 +1,6 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-
-import { Codicon } from '@/components/ui/codicon'
 
 import { StatusRow } from './status-row'
 
@@ -25,7 +24,7 @@ it('keeps dismiss and nested controls independent from row activation', () => {
     <div data-slot="composer-status-stack">
       <StatusRow
         dismiss={{ label: 'Dismiss task', onDismiss: dismiss }}
-        leading={<Codicon name="comment" />}
+        leading={<AppIcon name="comment" />}
         onActivate={activate}
         trailing={
           <button

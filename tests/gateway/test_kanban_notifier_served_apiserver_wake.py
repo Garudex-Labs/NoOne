@@ -24,11 +24,11 @@ from gateway.config import Platform, PlatformConfig
 from gateway.kanban_watchers_notifier import _adapter_for_subscription
 from gateway.profile_routing import parse_profile_routes
 from gateway.run import GatewayRunner, _profile_runtime_scope
-from hermes_cli import kanban_db as kb
-from hermes_cli import kanban_db_connect as kbc
-from hermes_cli import kanban_db_notify as kbn
-from hermes_constants import get_hermes_home
-from hermes_state import SessionDB
+from agent_cli import kanban_db as kb
+from agent_cli import kanban_db_connect as kbc
+from agent_cli import kanban_db_notify as kbn
+from agent_constants import get_agent_home
+from agent_state import SessionDB
 
 SESSION = "20260918_033413_0665eb"      # the originating (Relay/web-UI) session id
 WORKER_SESSION = "20260918_034333_945a5a"  # the dispatcher-spawned worker's own session
@@ -45,7 +45,7 @@ class RecordingApiServerAdapter:
         self.profiles = []
 
     async def run_internal_session_turn(self, *, session_id, text, profile, notification_category="result"):
-        self.homes.append(str(get_hermes_home()))
+        self.homes.append(str(get_agent_home()))
         self.profiles.append(profile)
         self.turns.append({"session_id": session_id, "text": text, "category": notification_category})
 
@@ -108,7 +108,7 @@ def served(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(root))
     monkeypatch.setenv("HERMES_KANBAN_DB", str(tmp_path / "board.db"))
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
-    monkeypatch.setattr("hermes_constants.get_default_hermes_root", lambda: root)
+    monkeypatch.setattr("agent_constants.get_default_agent_root", lambda: root)
     return SimpleNamespace(root=root, builder=root / "profiles" / "builder", atlas=root / "profiles" / "atlas")
 
 
@@ -252,7 +252,7 @@ def test_internal_session_turn_targets_the_live_session_under_the_owner_profile(
 
     async def fake_run_agent(**kwargs):
         seen.update(kwargs)
-        seen["home"] = str(get_hermes_home())
+        seen["home"] = str(get_agent_home())
         seen["request_profile"] = _api_request_profile.get()
         return {}, {}
 

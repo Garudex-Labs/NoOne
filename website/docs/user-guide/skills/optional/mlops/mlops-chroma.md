@@ -1,20 +1,20 @@
 ---
 title: "Chroma — Embedding database for RAG and semantic search"
-sidebar_label: "Chroma"
+sidebarTitle: "Chroma"
 description: "Embedding database for RAG and semantic search"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Chroma
+# Chroma {#chroma}
 
 Embedding database for RAG and semantic search.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/chroma` |
+| Source | Optional — install with `noone skills install official/mlops/chroma` |
 | Path | `optional-skills/mlops/chroma` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ Embedding database for RAG and semantic search.
 | Platforms | linux, macos, windows |
 | Tags | `RAG`, `Chroma`, `Vector Database`, `Embeddings`, `Semantic Search`, `Open Source`, `Self-Hosted`, `Document Retrieval`, `Metadata Filtering` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Chroma - Open-Source Embedding Database
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Chroma - Open-Source Embedding Database {#chroma---open-source-embedding-database}
 
 The AI-native database for building LLM applications with memory.
 
-## When to use Chroma
+## When to use Chroma {#when-to-use-chroma}
 
 **Use Chroma when:**
 - Building RAG (retrieval-augmented generation) applications
@@ -55,9 +63,9 @@ The AI-native database for building LLM applications with memory.
 - **Weaviate**: Production ML-native database
 - **Qdrant**: High performance, Rust-based
 
-## Quick start
+## Quick start {#quick-start}
 
-### Installation
+### Installation {#installation}
 
 ```bash
 # Python
@@ -67,7 +75,7 @@ pip install chromadb
 npm install chromadb @chroma-core/default-embed
 ```
 
-### Basic usage (Python)
+### Basic usage (Python) {#basic-usage-python}
 
 ```python
 import chromadb
@@ -94,9 +102,9 @@ results = collection.query(
 print(results)
 ```
 
-## Core operations
+## Core operations {#core-operations}
 
-### 1. Create collection
+### 1. Create collection {#1-create-collection}
 
 ```python
 # Simple collection
@@ -122,7 +130,7 @@ collection = client.get_collection("my_docs")
 client.delete_collection("my_docs")
 ```
 
-### 2. Add documents
+### 2. Add documents {#2-add-documents}
 
 ```python
 # Add with auto-generated IDs
@@ -144,7 +152,7 @@ collection.add(
 )
 ```
 
-### 3. Query (similarity search)
+### 3. Query (similarity search) {#3-query-similarity-search}
 
 ```python
 # Basic query
@@ -178,7 +186,7 @@ print(results["distances"])      # Similarity scores
 print(results["ids"])            # Document IDs
 ```
 
-### 4. Get documents
+### 4. Get documents {#4-get-documents}
 
 ```python
 # Get by IDs
@@ -196,7 +204,7 @@ docs = collection.get(
 docs = collection.get()
 ```
 
-### 5. Update documents
+### 5. Update documents {#5-update-documents}
 
 ```python
 # Update document content
@@ -207,7 +215,7 @@ collection.update(
 )
 ```
 
-### 6. Delete documents
+### 6. Delete documents {#6-delete-documents}
 
 ```python
 # Delete by IDs
@@ -219,7 +227,7 @@ collection.delete(
 )
 ```
 
-## Persistent storage
+## Persistent storage {#persistent-storage}
 
 ```python
 # Persist to disk
@@ -234,9 +242,9 @@ client = chromadb.PersistentClient(path="./chroma_db")
 collection = client.get_collection("my_docs")
 ```
 
-## Embedding functions
+## Embedding functions {#embedding-functions}
 
-### Default (Sentence Transformers)
+### Default (Sentence Transformers) {#default-sentence-transformers}
 
 ```python
 # Uses sentence-transformers by default
@@ -244,7 +252,7 @@ collection = client.create_collection("my_docs")
 # Default model: all-MiniLM-L6-v2
 ```
 
-### OpenAI
+### OpenAI {#openai}
 
 ```python
 from chromadb.utils import embedding_functions
@@ -260,7 +268,7 @@ collection = client.create_collection(
 )
 ```
 
-### HuggingFace
+### HuggingFace {#huggingface}
 
 ```python
 huggingface_ef = embedding_functions.HuggingFaceEmbeddingFunction(
@@ -274,7 +282,7 @@ collection = client.create_collection(
 )
 ```
 
-### Custom embedding function
+### Custom embedding function {#custom-embedding-function}
 
 ```python
 from chromadb import Documents, EmbeddingFunction, Embeddings
@@ -291,7 +299,7 @@ collection = client.create_collection(
 )
 ```
 
-## Metadata filtering
+## Metadata filtering {#metadata-filtering}
 
 ```python
 # Exact match
@@ -324,7 +332,7 @@ results = collection.query(
 )
 ```
 
-## LangChain integration
+## LangChain integration {#langchain-integration}
 
 ```python
 from langchain_chroma import Chroma
@@ -349,7 +357,7 @@ results = vectorstore.similarity_search("machine learning", k=3)
 retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 ```
 
-## LlamaIndex integration
+## LlamaIndex integration {#llamaindex-integration}
 
 ```python
 from llama_index.vector_stores.chroma import ChromaVectorStore
@@ -375,7 +383,7 @@ query_engine = index.as_query_engine()
 response = query_engine.query("What is machine learning?")
 ```
 
-## Server mode
+## Server mode {#server-mode}
 
 ```python
 # Run Chroma server
@@ -395,7 +403,7 @@ client = chromadb.HttpClient(
 collection = client.get_or_create_collection("my_docs")
 ```
 
-## Best practices
+## Best practices {#best-practices}
 
 1. **Use persistent client** - Don't lose data on restart
 2. **Add metadata** - Enables filtering and tracking
@@ -408,7 +416,7 @@ collection = client.get_or_create_collection("my_docs")
 9. **Test embedding functions** - Ensure quality
 10. **Use server mode for production** - Better for multi-user
 
-## Performance
+## Performance {#performance}
 
 | Operation | Latency | Notes |
 |-----------|---------|-------|
@@ -416,7 +424,7 @@ collection = client.get_or_create_collection("my_docs")
 | Query (top 10) | ~50-200ms | Depends on collection size |
 | Metadata filter | ~10-50ms | Fast with proper indexing |
 
-## Resources
+## Resources {#resources}
 
 - **GitHub**: https://github.com/chroma-core/chroma ⭐ 24,300+
 - **Docs**: https://docs.trychroma.com

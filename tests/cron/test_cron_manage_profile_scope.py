@@ -2,14 +2,14 @@
 
 Mirrors ``skills.manage`` / ``mcp.catalog``: when a ``profile`` is passed the
 handler resolves ``get_profile_dir(profile)`` and wraps the action dispatch in
-``set_hermes_home_override`` / ``reset_hermes_home_override``. Because
-``cronjob()`` -> ``list_jobs()`` keys off ``get_hermes_home()``, the list action
+``set_agent_home_override`` / ``reset_agent_home_override``. Because
+``cronjob()`` -> ``list_jobs()`` keys off ``get_agent_home()``, the list action
 must then read THAT profile's ``cron/jobs.json``, not the launch profile's.
 """
 
 import json
 
-from tui_gateway import server
+from agent_backend import server
 
 
 def test_cron_manage_profile_reads_that_profiles_store(tmp_path, monkeypatch):
@@ -36,7 +36,7 @@ def test_cron_manage_profile_reads_that_profiles_store(tmp_path, monkeypatch):
     )
 
     # Route the profile name the handler resolves to our temp home.
-    from hermes_cli import profiles
+    from agent_cli import profiles
 
     monkeypatch.setattr(profiles, "get_profile_dir", lambda name: profile_home)
 
@@ -53,20 +53,20 @@ def test_cron_manage_profile_reads_that_profiles_store(tmp_path, monkeypatch):
     names = [j.get("name") for j in resp["result"]["jobs"]]
     assert "botA-only-job" in names
     # The wire contract must accept the real row shape (a list of targets, not a bool).
-    from tui_gateway.contracts.tools_commands import CronManageResult
+    from agent_backend.contracts.tools_commands import CronManageResult
 
     jobs = CronManageResult.model_validate(resp["result"]).jobs or []
     assert jobs[0].last_delivery_unverified == ["telegram:123"]
 
     # The override must not leak: an unscoped call after this one resolves the
     # launch profile again, which does not contain botA's job.
-    from hermes_constants import get_hermes_home_override
+    from agent_constants import get_agent_home_override
 
-    assert get_hermes_home_override() is None
+    assert get_agent_home_override() is None
 
 
 def test_cron_manage_unknown_profile_errors(tmp_path, monkeypatch):
-    from hermes_cli import profiles
+    from agent_cli import profiles
 
     missing = tmp_path / "profiles" / "ghost"
     monkeypatch.setattr(profiles, "get_profile_dir", lambda name: missing)

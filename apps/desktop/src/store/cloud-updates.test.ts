@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesConnection } from '@/global'
+import type { AgentConnection } from '@/global'
 import { $connection } from '@/store/session'
 
 import { $cloudOwnsUpdates, cloudOwnsUpdates, updateTargetFor } from './cloud-updates'
 
-const remote = (baseUrl: string, remoteKind?: HermesConnection['remoteKind']): HermesConnection =>
-  ({ baseUrl, mode: 'remote', remoteKind }) as HermesConnection
+const remote = (baseUrl: string, remoteKind?: AgentConnection['remoteKind']): AgentConnection =>
+  ({ baseUrl, mode: 'remote', remoteKind }) as AgentConnection
 
 afterEach(() => {
   $connection.set(null)

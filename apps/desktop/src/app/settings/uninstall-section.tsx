@@ -1,9 +1,9 @@
+import { AlertTriangle, Loader2, Trash2 } from '@noone/ui/icons'
 import { type ReactElement, useContext, useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import type { DesktopUninstallMode, DesktopUninstallResult, DesktopUninstallSummary } from '@/global'
 import { useI18n } from '@/i18n'
-import { AlertTriangle, Loader2, Trash2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { SectionHeading, SettingsBreadcrumbContext } from './primitives'

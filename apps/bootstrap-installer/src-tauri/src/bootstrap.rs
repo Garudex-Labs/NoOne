@@ -255,7 +255,7 @@ pub(crate) fn resolve_hermes_desktop_app(install_root: &std::path::Path) -> Opti
 /// launchable desktop app exists on disk. Used by the installer's launcher fast
 /// path so a bare re-open just opens Hermes instead of re-running setup.
 pub(crate) fn hermes_is_installed(install_root: &std::path::Path) -> bool {
-    install_root.join(".hermes-bootstrap-complete").exists()
+    install_root.join(".agent-bootstrap-complete").exists()
         && resolve_hermes_desktop_exe(install_root).is_some()
 }
 
@@ -310,7 +310,7 @@ fn resolve_marker_commit(install_root: &Path, pin: &Pin, marker_path: &Path) -> 
 }
 
 /// UTC ISO-8601 with milliseconds, the `completedAt` format install.ps1,
-/// Electron (`toISOString`) and hermes_cli/source_stamp.py all write.
+/// Electron (`toISOString`) and agent_cli/source_stamp.py all write.
 fn iso8601_utc(since_epoch: std::time::Duration) -> String {
     let secs = since_epoch.as_secs();
     let (days, rem) = ((secs / 86_400) as i64, secs % 86_400);
@@ -361,7 +361,7 @@ fn write_bootstrap_complete_marker(install_root: &Path, pin: &Pin) -> Result<ser
     // Atomic publish (temp sibling + flush + rename), matching Electron's
     // writeFileAtomic(). hermes_is_installed() only checks existence, so a
     // partial direct write would incorrectly enable the launcher fast path.
-    let tmp_path = install_root.join(".hermes-bootstrap-complete.tmp");
+    let tmp_path = install_root.join(".agent-bootstrap-complete.tmp");
     {
         let mut file = std::fs::File::create(&tmp_path).with_context(|| {
             format!(
@@ -874,7 +874,7 @@ async fn run_bootstrap(
 
     // 4. Resolve install_root. install.ps1 doesn't (yet) report this back
     // explicitly; we infer it from $HermesHome which Stage-Repository clones
-    // the repo INTO at $HermesHome\hermes-agent. Mirrors hermes_constants.
+    // the repo INTO at $HermesHome\hermes-agent. Mirrors agent_constants.
     let hermes_home = args
         .hermes_home
         .clone()
@@ -1118,7 +1118,7 @@ mod tests {
 
     fn unique_tmp_dir(tag: &str) -> PathBuf {
         let base = std::env::temp_dir().join(format!(
-            "hermes-bootstrap-test-{tag}-{}-{}",
+            "agent-bootstrap-test-{tag}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -1221,7 +1221,7 @@ mod tests {
 
         let marker =
             write_bootstrap_complete_marker(&root, &pin).expect("marker write should succeed");
-        let marker_path = root.join(".hermes-bootstrap-complete");
+        let marker_path = root.join(".agent-bootstrap-complete");
         let from_disk: serde_json::Value =
             serde_json::from_slice(&std::fs::read(&marker_path).unwrap()).unwrap();
 
@@ -1272,7 +1272,7 @@ mod tests {
         let receipt = format!(
             "\u{feff}{{\"schemaVersion\":1,\"pinnedCommit\":\"{head}\",\"pinnedBranch\":\"main\",\"completedAt\":\"2026-01-01T00:00:00.000Z\"}}"
         );
-        std::fs::write(root.join(".hermes-bootstrap-complete"), receipt).unwrap();
+        std::fs::write(root.join(".agent-bootstrap-complete"), receipt).unwrap();
         let marker = write_bootstrap_complete_marker(&root, &pin).unwrap();
         assert_eq!(marker["pinnedCommit"], head);
         let _ = std::fs::remove_dir_all(&root);
@@ -1289,8 +1289,8 @@ mod tests {
 
         write_bootstrap_complete_marker(&root, &pin).expect("marker write should succeed");
 
-        let marker_path = root.join(".hermes-bootstrap-complete");
-        let tmp_path = root.join(".hermes-bootstrap-complete.tmp");
+        let marker_path = root.join(".agent-bootstrap-complete");
+        let tmp_path = root.join(".agent-bootstrap-complete.tmp");
         assert!(
             marker_path.is_file(),
             "final marker must exist after atomic publish"
@@ -1313,7 +1313,7 @@ mod tests {
         // final marker would still enable the fast path.
         let root = unique_tmp_dir("marker-existence-only");
         make_release_tree(&root);
-        std::fs::write(root.join(".hermes-bootstrap-complete"), b"").unwrap();
+        std::fs::write(root.join(".agent-bootstrap-complete"), b"").unwrap();
 
         assert!(
             hermes_is_installed(&root),
@@ -1342,11 +1342,11 @@ mod tests {
             "error should mention the marker path: {msg}"
         );
         assert!(
-            !not_a_dir.join(".hermes-bootstrap-complete").exists(),
+            !not_a_dir.join(".agent-bootstrap-complete").exists(),
             "failed write must not leave a final marker that enables the fast path"
         );
         assert!(
-            !not_a_dir.join(".hermes-bootstrap-complete.tmp").exists(),
+            !not_a_dir.join(".agent-bootstrap-complete.tmp").exists(),
             "failed write must not leave a temp marker sibling either"
         );
         let _ = std::fs::remove_dir_all(&base);

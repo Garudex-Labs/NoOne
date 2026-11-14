@@ -1,35 +1,43 @@
 ---
 title: "Dynamic Workflow — Plan-in-code fan-outs, adversarial verification, waves"
-sidebar_label: "Dynamic Workflow"
+sidebarTitle: "Dynamic Workflow"
 description: "Plan-in-code fan-outs, adversarial verification, waves"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Dynamic Workflow
+# Dynamic Workflow {#dynamic-workflow}
 
 Plan-in-code fan-outs, adversarial verification, waves.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/autonomous-ai-agents/dynamic-workflow` |
+| Source | Optional — install with `noone skills install official/autonomous-ai-agents/dynamic-workflow` |
 | Path | `optional-skills/autonomous-ai-agents/dynamic-workflow` |
 | Version | `2.0.0` |
-| Author | Teknium + Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `orchestration`, `fan-out`, `subagents`, `delegation`, `verification`, `migration`, `audit`, `research`, `campaign` |
 | Related skills | [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md), [`simplify-code`](../../bundled/software-development/software-development-simplify-code.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Dynamic Workflow Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Dynamic Workflow Skill {#dynamic-workflow-skill}
 
 Runs large fan-out work as a workflow: the plan, the loop and every intermediate
 result live in a script and on disk, so the parent's context holds only verified
@@ -37,27 +45,27 @@ results. Covers one-shot fan-outs, adversarial convergence (attempts + refuters)
 and multi-wave campaigns that integrate dozens of worker branches. It does not
 make `delegate_task` durable across restarts; that is the kanban swarm's job.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Reach for it when the unit of work is clear (a file, an endpoint, a record) and
 there are more units than one context can hold. Skip it for under ~10 units or
 for serial chains. For a refactor or fix campaign on hermes-agent itself, load
 `hermes-agent` (the dev workflow) alongside; this skill owns the fan-out shape.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - `delegate_task` available and `delegation.max_concurrent_children` sized for
   the wave (default 10; the runtime rejects a `tasks=[]` larger than that with a
   clear error rather than queueing). `delegation.max_spawn_depth >= 2` only if
   children must fan out themselves.
-<!-- no-tmp: ok — explains why a literal /tmp is wrong -->
+{/* no-tmp: ok — explains why a literal /tmp is wrong */}
 - A writable run directory resolved from the terminal environment's temp dir (`$TMPDIR`, else the platform temp dir). Never a literal `/tmp`:
   Termux has no such directory and native Windows breaks on it. Use `<tmp>/wf_<name>_<uuid>/`, unique per
   run, so an interrupted earlier run cannot leave stale outputs to be misread.
 - `execute_code` for the deterministic layer (only `web_search`, `web_extract`,
   `read_file`, `write_file`, `search_files`, `terminal`, `patch` exist inside it).
 
-## How to Run
+## How to Run {#how-to-run}
 
 Two layers, split by a real capability boundary:
 
@@ -72,7 +80,7 @@ Two layers, split by a real capability boundary:
 Do the deterministic part in Layer A first, fan out only the irreducibly-LLM
 step in Layer B, synthesize on the parent.
 
-### Background-first: results re-enter as messages
+### Background-first: results re-enter as messages {#background-first-results-re-enter-as-messages}
 
 A top-level `delegate_task` returns immediately with one handle per task; each
 child's result re-enters the conversation as a new message when it finishes. You
@@ -82,7 +90,7 @@ result message as it lands. An ordinary follow-up user message does not cancel
 children; `/stop`, `/new` and process exit do. Only a delegation issued by an
 orchestrator subagent (depth > 0) is synchronous.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 - Unit must be answerable without sibling output, else it is serial.
 - Manifest: one unit per line in `<run>/manifest.jsonl`; print count + run dir.
@@ -93,9 +101,9 @@ orchestrator subagent (depth > 0) is synchronous.
 - A "stalled" child usually completed its write; check the filesystem first.
 - Scoped slice first (one directory, 20 records), report token cost, then scale.
 
-## Procedure
+## Procedure {#procedure}
 
-### One-shot fan-out
+### One-shot fan-out {#one-shot-fan-out}
 
 1. Decompose into independent units.
 2. Layer A pre-pass writes the manifest.
@@ -106,7 +114,7 @@ orchestrator subagent (depth > 0) is synchronous.
 5. End the turn. As result messages arrive, read the files, verify, merge; the
    cross-cutting synthesis stays on the parent.
 
-### Adversarial convergence (finding-quality work)
+### Adversarial convergence (finding-quality work) {#adversarial-convergence-finding-quality-work}
 
 1. Independent attempts: the SAME question to N children (2-4) with DIFFERENT
    framings in each `context`, each writing one claim per line to
@@ -126,7 +134,7 @@ hand children a heuristic ("every patch target on a facade is a dead seam"),
 tell them to refute it with evidence before acting on it. Four squads doing so
 turned a 647-site blanket rewrite into 59 real fixes and saved 130+ green tests.
 
-### Campaign shape (dozens of workers, several waves, hours)
+### Campaign shape (dozens of workers, several waves, hours) {#campaign-shape-dozens-of-workers-several-waves-hours}
 
 The one-shot recipe does not scale to a whole-codebase pass. What did:
 
@@ -174,7 +182,7 @@ The one-shot recipe does not scale to a whole-codebase pass. What did:
     per-branch scorecard (LOC delta, import smoke, targeted tests), and the exact
     re-dispatch text. Snapshot every dirty worktree into a `wip:` commit first.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Calling `delegate_task` inside an `execute_code` script: not in the sandbox.
 - Synthesizing on the same turn as the fan-out call: the files do not exist yet.
@@ -187,7 +195,7 @@ The one-shot recipe does not scale to a whole-codebase pass. What did:
 - Reporting a hit target when the honest number is lower. Say "16% so far, here
   is the path to 30%" and run the next round.
 
-## Verification
+## Verification {#verification}
 
 - Manifest line count matches the expected unit count.
 - Every `out_*.csv` exists and was written this run.

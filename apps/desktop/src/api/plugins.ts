@@ -1,6 +1,7 @@
-import { isStableOpen, reconnectBackoffDelayMs } from '@hermes/shared'
+import { isStableOpen, reconnectBackoffDelayMs } from '@noone/shared'
+import { appText } from '@noone/shared/application-identity'
 
-import type { HermesConnection } from '@/global'
+import type { AgentConnection } from '@/global'
 import { hostHas } from '@/lib/host-capabilities'
 import { RECONNECT_ATTEMPT_TIMEOUT_MS, withTimeout } from '@/lib/with-timeout'
 
@@ -20,7 +21,7 @@ import { $apiRequestScope, getApiRequestConnection, getApiRequestProfile, hermes
  *  openSecondary bounds the same *For/plain pair.
  *
  *  Exported for tests. */
-export async function activeConnection(): Promise<HermesConnection> {
+export async function activeConnection(): Promise<AgentConnection> {
   const getConnectionFor = window.hermesDesktop.getConnectionFor
   const connectionId = getApiRequestConnection()
   const profile = getApiRequestProfile()
@@ -45,7 +46,7 @@ export async function activeConnection(): Promise<HermesConnection> {
 export interface PluginRestOptions {
   method?: string
   body?: unknown
-  /** Single-file multipart upload (see HermesApiRequest.upload). */
+  /** Single-file multipart upload (see AgentApiRequest.upload). */
   upload?: { filename: string; contentType?: string; bytes: ArrayBuffer }
   timeoutMs?: number
 }
@@ -72,7 +73,7 @@ function pluginPathSuffix(caller: string, path: string): string {
  *  declared-capability seam; today the namespace IS the boundary. */
 export async function pluginRest<T>(pluginId: string, path: string, opts: PluginRestOptions = {}): Promise<T> {
   if (!window.hermesDesktop?.api) {
-    throw new Error('Hermes desktop bridge unavailable')
+    throw new Error(appText('{app_name} desktop bridge unavailable'))
   }
 
   const suffix = pluginPathSuffix('pluginRest', path)
@@ -97,7 +98,7 @@ type PluginSocketTarget = null | string | { refused: 'permission' }
 /** The URL a plugin socket dials, or null to stay on polling. A local gateway
  *  (`authMode: 'native'`, no static token) gets a fresh one-use URL from main:
  *  its native grant rides a request header main attaches to that one dial. */
-async function pluginSocketUrl(connection: HermesConnection, pluginId: string, suffix: string): Promise<PluginSocketTarget> {
+async function pluginSocketUrl(connection: AgentConnection, pluginId: string, suffix: string): Promise<PluginSocketTarget> {
   if (connection.authMode === 'native') {
     const mint = window.hermesDesktop.getPluginWsUrl
 
@@ -179,7 +180,7 @@ export function pluginSocket(pluginId: string, path: string, onMessage: (data: u
       return
     }
 
-    let connection: HermesConnection
+    let connection: AgentConnection
 
     try {
       connection = await activeConnection()

@@ -9,12 +9,12 @@
  */
 
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef } from 'react'
 
 import { HUD_SURFACE } from '@/app/floating-hud'
 import { TITLEBAR_HEIGHT } from '@/app/shell/titlebar'
 import { useOnboardingChatActive } from '@/components/onboarding/first-run/assembly'
-import { Codicon } from '@/components/ui/codicon'
 import { ContribBoundary, ContribRender } from '@/contrib/react/boundary'
 import { useContributions } from '@/contrib/react/use-contributions'
 import type { Contribution } from '@/contrib/types'
@@ -187,7 +187,7 @@ function FloatingPane({ pane }: { pane: Contribution }) {
           onClick={toggleCollapsed}
           type="button"
         >
-          <Codicon name={collapsed ? 'chevron-up' : 'chevron-down'} size="0.75rem" />
+          <AppIcon name={collapsed ? 'chevron-up' : 'chevron-down'} size="0.75rem" />
         </button>
       </header>
 

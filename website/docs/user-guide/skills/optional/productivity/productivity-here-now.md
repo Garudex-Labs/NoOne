@@ -1,20 +1,20 @@
 ---
 title: "Here Now — Publish sites to {slug}.here.now and store files in Drives"
-sidebar_label: "Here Now"
+sidebarTitle: "Here Now"
 description: "Publish sites to {slug}.here.now and store files in Drives"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Here Now
+# Here Now {#here-now}
 
 Publish sites to &#123;slug&#125;.here.now and store files in Drives.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/productivity/here-now` |
+| Source | Optional — install with `noone skills install official/productivity/here-now` |
 | Path | `optional-skills/productivity/here-now` |
 | Version | `1.15.3` |
 | Author | here.now |
@@ -22,13 +22,21 @@ Publish sites to &#123;slug&#125;.here.now and store files in Drives.
 | Platforms | macos, linux |
 | Tags | `here.now`, `herenow`, `publish`, `deploy`, `hosting`, `static-site`, `web`, `share`, `URL`, `drive`, `storage` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# here.now
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# here.now {#herenow}
 
 here.now lets agents publish websites and store private files in cloud Drives.
 
@@ -37,7 +45,7 @@ Use here.now for two jobs:
 - **Sites**: publish websites and files at `{slug}.here.now`.
 - **Drives**: store private agent files in cloud folders.
 
-## Current docs
+## Current docs {#current-docs}
 
 **Before answering questions about here.now capabilities, features, or workflows, read the current docs:**
 
@@ -67,7 +75,7 @@ Topics that require current docs (do not rely on local skill text alone):
 
 If the docs fetch fails or times out, continue with the local skill and live API/script output. Prefer live API behavior for active operations.
 
-## Requirements
+## Requirements {#requirements}
 
 - Required binaries: `curl`, `file`, `jq`
 - Optional environment variable: `$HERENOW_API_KEY`
@@ -77,7 +85,7 @@ If the docs fetch fails or times out, continue with the local skill and live API
   - `${HERMES_SKILL_DIR}/scripts/publish.sh` for publishing sites
   - `${HERMES_SKILL_DIR}/scripts/drive.sh` for private Drive storage
 
-## Create a site
+## Create a site {#create-a-site}
 
 ```bash
 PUBLISH="${HERMES_SKILL_DIR}/scripts/publish.sh"
@@ -95,7 +103,7 @@ With a saved API key, the site is permanent.
 
 You can also publish raw files without any HTML. Single files get a rich auto-viewer (images, PDF, video, audio). Multiple files get an auto-generated directory listing with folder navigation and an image gallery.
 
-## Update an existing site
+## Update an existing site {#update-an-existing-site}
 
 ```bash
 PUBLISH="${HERMES_SKILL_DIR}/scripts/publish.sh"
@@ -106,7 +114,7 @@ The script auto-loads the `claimToken` from `.herenow/state.json` when updating 
 
 Authenticated updates require a saved API key.
 
-## Use a Drive
+## Use a Drive {#use-a-drive}
 
 Use a Drive when the user wants private cloud storage for agent files: documents, context, memory, plans, assets, media, research, code, and anything else that should persist without being published as a website.
 
@@ -123,7 +131,7 @@ bash "$DRIVE" share "My Drive" --perms write --prefix notes/ --ttl 7d
 
 Use scoped Drive tokens for agent-to-agent handoff. If you receive a `herenow_drive` share block, use its `token` as `Authorization: Bearer <token>` against `api_base`, respect `pathPrefix` when present, and preserve ETags on writes. A `pathPrefix` of `null` means full-Drive access. If the skill is available, prefer `drive.sh`; otherwise call the listed API operations directly.
 
-## API key storage
+## API key storage {#api-key-storage}
 
 The publish script reads the API key from these sources (first match wins):
 
@@ -141,7 +149,7 @@ mkdir -p ~/.herenow && echo "{API_KEY}" > ~/.herenow/credentials && chmod 600 ~/
 
 Never commit credentials or local state files (`~/.herenow/credentials`, `.herenow/state.json`) to source control.
 
-## Getting an API key
+## Getting an API key {#getting-an-api-key}
 
 To upgrade from anonymous (24h) to permanent sites:
 
@@ -169,7 +177,7 @@ curl -sS https://here.now/api/auth/agent/verify-code \
 mkdir -p ~/.herenow && echo "{API_KEY}" > ~/.herenow/credentials && chmod 600 ~/.herenow/credentials
 ```
 
-## State file
+## State file {#state-file}
 
 After every site create/update, the script writes to `.herenow/state.json` in the working directory:
 
@@ -190,7 +198,7 @@ Before creating or updating sites, you may check this file to find prior slugs.
 Treat `.herenow/state.json` as internal cache only.
 Never present this local file path as a URL, and never use it as source of truth for auth mode, expiry, or claim URL.
 
-## What to tell the user
+## What to tell the user {#what-to-tell-the-user}
 
 For published sites:
 
@@ -206,7 +214,7 @@ For Drives:
 - Tell the user Drive contents are private unless shared with a scoped token.
 - When sharing access with another agent, prefer a scoped token with a narrow `pathPrefix` and short TTL.
 
-## publish.sh options
+## publish.sh options {#publishsh-options}
 
 | Flag                   | Description                                  |
 | ---------------------- | -------------------------------------------- |
@@ -222,7 +230,7 @@ For Drives:
 | `--spa`                | Enable SPA routing (serve index.html for unknown paths) |
 | `--forkable`           | Allow others to fork this site                           |
 
-## Beyond publish.sh
+## Beyond publish.sh {#beyond-publishsh}
 
 For Drive operations, use `drive.sh` or the Drive API. For broader account and site management — delete, metadata, passwords, payments, domains, handles, links, variables, proxy routes, forking, duplication, and more — see the current docs:
 

@@ -53,15 +53,15 @@ from .auth import load_project_credentials
 # mirror files. Tests monkeypatch sidecar_paths._SIDECAR_DIR.
 from .sidecar_paths import _NPM_ERROR_LOG_MAX_CHARS, _lock_newer_than_install, _npm_error_log, _sidecar_dir
 from .sidecar_paths import dir_writable as _dir_writable
-from hermes_constants import find_node_executable, with_hermes_node_path
+from agent_constants import find_node_executable, with_agent_node_path
 import contextlib
 
 logger = logging.getLogger(__name__)
 
 _DEFAULT_SIDECAR_PORT = 8789
 _DEFAULT_SIDECAR_BIND = "127.0.0.1"
-_MAX_MESSAGE_LENGTH = 8000  # iMessage caps practical size at ~16 KB; conservative, matches BlueBubbles
-# Out-of-process senders (cron, `hermes send`) need the live sidecar's port + spawn-time
+_MAX_MESSAGE_LENGTH = 8000  # iMessage caps practical size at ~16 KB; conservative
+# Out-of-process senders (cron, `noone send`) need the live sidecar's port + spawn-time
 # token; persisted once /healthz passes, removed on every stop / failed-start path.
 # --------------------------------------------------------------------------- Sidecar runtime record The
 # gateway persists this record once the sidecar passes its /healthz readiness check, and removes it on every
@@ -82,7 +82,7 @@ _PHOTON_RETRYABLE_PATTERNS = (
 _RICHLINK_PREVIEW_SUPPRESS_SECONDS = 30.0
 _RICHLINK_PREVIEW_ATTACHMENT_SUFFIX = ".pluginpayloadattachment"
 _TYPING_COOLDOWN_SECONDS = 5.0  # per chat; reduces gRPC pressure during overflow
-# Group-chat wake words — same defaults as BlueBubbles so both iMessage adapters gate alike.
+# Group-chat wake words — gate unsolicited group replies.
 _DEFAULT_MENTION_PATTERNS = [r"(?<![\w@])@?hermes\s+agent\b[,:\-]?", r"(?<![\w@])@?hermes\b[,:\-]?"]
 # Shared/free-tier lines can only reply to conversations the target initiated.
 _TARGET_NOT_ALLOWED_MESSAGE = (
@@ -105,8 +105,8 @@ async def _aiter_ndjson_lines(response: Any) -> AsyncIterator[str]:
 # -- Sidecar runtime record ----------------------------------------------------
 
 def _runtime_record_path() -> Path:
-    from hermes_constants import get_hermes_home  # honors profile overrides
-    return get_hermes_home() / _RUNTIME_RECORD_NAME
+    from agent_constants import get_agent_home  # honors profile overrides
+    return get_agent_home() / _RUNTIME_RECORD_NAME
 
 
 def _legacy_runtime_record_path() -> Path:
@@ -256,7 +256,7 @@ def check_requirements() -> bool:
         # cold-installs from the committed lockfile (on hosted images the
         # user has no CLI to run `hermes photon setup`, so the connect path
         # must self-heal). Otherwise keep returning False so
-        # `hermes setup` / status surface the missing-deps state.
+        # `noone setup` / status surface the missing-deps state.
         if (find_node_executable("npm") or can_prepare) and _dir_writable(_sidecar_dir()):
             return True
         # DEBUG, not WARNING: normal pre-setup state, and check_fn is polled from hot paths.
@@ -281,7 +281,7 @@ def check_requirements() -> bool:
 
 
 def _sidecar_deps_stale() -> bool:
-    """True when node_modules predates the lockfile (`hermes update` rewrites it without
+    """True when node_modules predates the lockfile (`noone update` rewrites it without
     reinstalling); False if either file is missing."""
     return _lock_newer_than_install(_sidecar_dir())
 
@@ -299,7 +299,7 @@ def _reinstall_sidecar_deps() -> None:
 
     try:
         npm = find_node_executable("npm")
-        env = with_hermes_node_path()
+        env = with_agent_node_path()
         if npm is None:
             env = pm.ensure("npm").env
             installed = pm.installed_package("npm")
@@ -309,7 +309,7 @@ def _reinstall_sidecar_deps() -> None:
     except pm.InstallError as exc:
         logger.warning("[photon] cannot prepare sidecar dependencies: %s", exc)
         return
-    from hermes_cli._subprocess_compat import windows_hide_flags  # no console flash on Windows
+    from agent_cli._subprocess_compat import windows_hide_flags  # no console flash on Windows
 
     def _run(verb: str) -> subprocess.CompletedProcess:
         return subprocess.run(
@@ -656,7 +656,7 @@ class PhotonAdapter(BasePlatformAdapter):
         self._recent_richlinks_by_chat: dict[str, float] = {}  # coalesce preview-art attachments
         self._typing_last_sent: dict[str, float] = {}
         self._pending_fffc: dict[str, tuple[float, Any]] = {}  # chat_key → (timestamp, asyncio.Task)
-        # Group-chat mention gating (parity with BlueBubbles); DMs are never gated.
+        # Group-chat mention gating; DMs are never gated.
         require_mention = extra.get("require_mention")
         if require_mention is None:
             require_mention = _get_scoped_secret("PHOTON_REQUIRE_MENTION")
@@ -665,7 +665,7 @@ class PhotonAdapter(BasePlatformAdapter):
             extra["mention_patterns"] if "mention_patterns" in extra
             else _get_scoped_secret("PHOTON_MENTION_PATTERNS"))
 
-    # -- Group-mention gating (parity with BlueBubbles) ----------------------------
+    # -- Group-mention gating ----------------------------
 
     @staticmethod
     def _compile_mention_patterns(raw: Any) -> list[re.Pattern]:
@@ -1084,7 +1084,7 @@ class PhotonAdapter(BasePlatformAdapter):
                     f"{_sidecar_dir()} (see log for the npm error). "
                     f"Run: cd {_sidecar_dir()} && npm ci   (or `hermes photon setup`)",
                     code="SIDECAR_DEPS_MISSING", retryable=False)
-        # `hermes update` bumps the lockfile without reinstalling node_modules; the sidecar
+        # `noone update` bumps the lockfile without reinstalling node_modules; the sidecar
         # would spawn against stale deps and die on every reconnect.
         if _sidecar_deps_stale():
             logger.warning("[photon] sidecar deps are stale (lockfile newer than install); reinstalling before start")
@@ -1097,7 +1097,7 @@ class PhotonAdapter(BasePlatformAdapter):
                 subprocess.run,
                 [self._node_bin, str(_sidecar_dir() / "patch-spectrum-mixed-attachments.mjs"), str(_sidecar_dir())],
                 capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=10, check=False,
-                creationflags=hide_flags, env=with_hermes_node_path())
+                creationflags=hide_flags, env=with_agent_node_path())
             if patch.returncode != 0:
                 raise RuntimeError((patch.stderr or patch.stdout or "").strip())
             if patch.stderr.strip():
@@ -1119,14 +1119,14 @@ class PhotonAdapter(BasePlatformAdapter):
                 raise PhotonSidecarStartupError(str(exc), code="SIDECAR_NODE_MISSING", retryable=False) from exc
         await self._ensure_sidecar_deps()
         await self._reap_stale_sidecar()
-        env = with_hermes_node_path()
+        env = with_agent_node_path()
         env.update({
             "PHOTON_PROJECT_ID": self._project_id, "PHOTON_PROJECT_SECRET": self._project_secret,
             "PHOTON_SIDECAR_PORT": str(self._sidecar_port), "PHOTON_SIDECAR_BIND": self._sidecar_bind,
             "PHOTON_SIDECAR_TOKEN": self._sidecar_token,
             # Exit on stdin EOF so ANY gateway death (incl. SIGKILL) can't orphan it on the port.
             "PHOTON_SIDECAR_WATCH_STDIN": "1"})
-        from hermes_cli._subprocess_compat import windows_hide_flags  # hide child console on Windows
+        from agent_cli._subprocess_compat import windows_hide_flags  # hide child console on Windows
         await self._apply_spectrum_patch(windows_hide_flags())
         try:
             self._sidecar_proc = subprocess.Popen(  # noqa: ASYNC220 -- persistent sidecar; callers use the Popen pipes and poll()
@@ -1144,7 +1144,7 @@ class PhotonAdapter(BasePlatformAdapter):
             # Retrying can never fix a missing binary (OOF-153).
             raise PhotonSidecarStartupError(
                 f"node binary not found ({self._node_bin!r}) — install Node.js "
-                f"18+ or run `hermes pm install`: {exc}",
+                f"18+ or run `noone pm install`: {exc}",
                 code="SIDECAR_NODE_MISSING",
                 retryable=False,
             ) from exc
@@ -1355,7 +1355,7 @@ class PhotonAdapter(BasePlatformAdapter):
             return await super().send_clarify(chat_id, question, choices, clarify_id, session_key, metadata)
         return result
 
-    # -- Outbound media (parity with BlueBubbles): URL-based helpers cache to a local path
+    # -- Outbound media: URL-based helpers cache to a local path
     # first; file-based ones pass the path straight to /send-attachment.
 
     async def send_image(self, chat_id: str, image_url: str, caption: Optional[str] = None,
@@ -1630,7 +1630,7 @@ def _attachment_message_type(mime: str) -> MessageType:
     return MessageType.DOCUMENT
 
 
-# MIME → extension maps for cached inbound bytes (mirror BlueBubbles naming).
+# MIME → extension maps for cached inbound bytes (stable cached-file naming).
 _IMAGE_EXT_BY_MIME = {
     "image/jpeg": ".jpg", "image/png": ".png", "image/gif": ".gif", "image/webp": ".webp",
     "image/heic": ".jpg", "image/heif": ".jpg", "image/tiff": ".jpg"}
@@ -1784,14 +1784,14 @@ def register(ctx) -> None:
         target_ref_syntax_fn=regex_stripped_parser(_SEND_DM_GUID_RE),
         name="photon", label="iMessage via Photon", adapter_factory=lambda cfg: PhotonAdapter(cfg),
         dashboard_description="Use Hermes through iMessage via Photon's managed Spectrum platform.",
-        docs_url="https://hermes-agent.nousresearch.com/docs/user-guide/messaging/photon",
+        docs_url="https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/photon.md",
         check_fn=check_requirements, validate_config=validate_config, is_connected=is_connected,
         required_env=["PHOTON_PROJECT_ID", "PHOTON_PROJECT_SECRET"],
         install_hint=(
             "Run: hermes photon setup  (logs in via device flow, creates a "
             "Spectrum project, links your phone number, installs the "
             "spectrum-ts sidecar)."),
-        setup_fn=_cli.gateway_setup,  # surfaces Photon in the unified `hermes gateway setup` wizard
+        setup_fn=_cli.gateway_setup,  # surfaces Photon in the unified `noone gateway setup` wizard
         env_enablement_fn=_env_enablement, cron_deliver_env_var="PHOTON_HOME_CHANNEL",
         standalone_sender_fn=_standalone_send, allowed_users_env="PHOTON_ALLOWED_USERS",
         allow_all_env="PHOTON_ALLOW_ALL_USERS", max_message_length=_MAX_MESSAGE_LENGTH, emoji="📱",

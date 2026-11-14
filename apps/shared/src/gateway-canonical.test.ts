@@ -11,29 +11,29 @@ afterEach(() => {
 it('mints the session.create request_id outside a secure context', () => {
   vi.stubGlobal('crypto', { getRandomValues: (bytes: Uint8Array) => bytes.fill(7) })
 
-  const request = canonicalRequest('session.create', {}, { sources: ['tui'], parameters: ['source', 'request_id'] })
+  const request = canonicalRequest('session.create', {}, { sources: ['cli'], parameters: ['source', 'request_id'] })
 
-  expect(request.params).toEqual({ source: 'tui', request_id: '07070707-0707-4707-8707-070707070707' })
+  expect(request.params).toEqual({ source: 'cli', request_id: '07070707-0707-4707-8707-070707070707' })
 })
 
 // The launch identity: no identity is main's request and wording; another source or a client name is
 // honored when the owner advertises it and refused in neutral words when it does not.
-const owner = { sources: ['cli', 'tui'], parameters: ['source', 'request_id', 'model', 'client_env'] }
+const owner = { sources: ['cli'], parameters: ['source', 'request_id', 'model', 'client_env'] }
 
 const refusal = (run: () => unknown) => { try { run() } catch (error) { return (error as Error).message } }
 
-it('launches as tui with main\'s params and wording when no identity is given', () => {
+it('launches as CLI with main\'s params and wording when no identity is given', () => {
   const create = (params: Record<string, unknown>, contract = owner) => canonicalRequest('session.create', params, contract)
 
   expect(Object.entries(create({ model: 'm', cols: 80, request_id: 'r' }).params))
-    .toEqual([['model', 'm'], ['request_id', 'r'], ['source', 'tui']])
+    .toEqual([['model', 'm'], ['request_id', 'r'], ['source', 'cli']])
   expect(create({ request_id: 'r' }, { ...owner, parameters: [...owner.parameters, 'client'] }).params)
-    .toEqual({ request_id: 'r', source: 'tui' })
+    .toEqual({ request_id: 'r', source: 'cli' })
   expect(refusal(() => create({}, { sources: ['cli'], parameters: [] })))
-    .toBe('gateway does not support tui session policy; update/restart the gateway')
-  expect(refusal(() => create({ yolo: true }))).toBe('gateway does not support TUI launch options: yolo')
-  expect(canonicalRequest('session.create', { request_id: 'r' }, owner, undefined, { source: 'tui' }).params)
-    .toEqual({ request_id: 'r', source: 'tui' })
+    .toBe('gateway does not support these session options: source, request_id')
+  expect(refusal(() => create({ yolo: true }))).toBe('gateway does not support these session options: yolo')
+  expect(canonicalRequest('session.create', { request_id: 'r' }, owner, undefined, { source: 'cli' }).params)
+    .toEqual({ request_id: 'r', source: 'cli' })
 })
 
 it('launches with another advertised source and refuses an unadvertised one in neutral words', () => {
@@ -50,17 +50,17 @@ it('sends the client name only to an owner that lists client', () => {
   const takes = { ...owner, parameters: [...owner.parameters, 'client'] }
 
   expect(canonicalRequest('session.create', { request_id: 'r' }, takes, undefined, { client }).params)
-    .toEqual({ request_id: 'r', source: 'tui', client })
+    .toEqual({ request_id: 'r', source: 'cli', client })
   expect(canonicalRequest('session.create', { request_id: 'r' }, owner, undefined, { client }).params)
-    .toEqual({ request_id: 'r', source: 'tui' })
+    .toEqual({ request_id: 'r', source: 'cli' })
   expect(refusal(() => canonicalRequest('session.create', { yolo: true }, owner, undefined, { client })))
     .toBe('gateway does not support these session options: yolo')
   expect(refusal(() => canonicalRequest('session.create', {}, { sources: ['cli'], parameters: [] }, undefined, { client })))
-    .toBe('gateway does not support tui session policy; update/restart the gateway')
+    .toBe('gateway does not support these session options: source, request_id')
   // The option replaces a client already in the params, and neither reaches an owner that doesn't take it.
   const stale = { request_id: 'r', client: { name: 'other' } }
   expect(canonicalRequest('session.create', stale, takes, undefined, { client }).params)
-    .toEqual({ request_id: 'r', source: 'tui', client })
+    .toEqual({ request_id: 'r', source: 'cli', client })
   expect(canonicalRequest('session.create', stale, owner, undefined, { client }).params)
-    .toEqual({ request_id: 'r', source: 'tui' })
+    .toEqual({ request_id: 'r', source: 'cli' })
 })

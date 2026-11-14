@@ -1,10 +1,15 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import Layout from "@theme/Layout";
-import Link from "@docusaurus/Link";
-import styles from "./styles.module.css";
-import CatalogFeatured from "../../components/CatalogFeatured";
+import Icon from "../../components/Icon";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { isOfficialSkillSource, pickFeatured } from "../../../../apps/shared/src/catalog-featured";
 import { skillCatalogInstallIdentifier, skillCatalogInstallUrl } from "../../../../apps/shared/src/catalog-install";
+import type { SvgIconName } from "../../../../apps/ui/src/svg";
+import { appText } from '../../application-identity';
+import CatalogFeatured from "../../components/CatalogFeatured";
+import Layout from "../../components/DocLayout";
+import { docUrl, DocLink as Link } from "../../components/DocLink";
+
+import styles from "./styles.module.css";
 
 interface Skill {
   name: string;
@@ -67,190 +72,190 @@ function formatRelativeTime(iso?: string): string | null {
   return `${months} month${months === 1 ? "" : "s"} ago`;
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  apple: "\u{f179}",
-  "autonomous-ai-agents": "\u{1F916}",
-  blockchain: "\u{26D3}",
-  communication: "\u{1F4AC}",
-  creative: "\u{1F3A8}",
-  "data-science": "\u{1F4CA}",
-  devops: "\u{2699}",
-  dogfood: "\u{1F436}",
-  domain: "\u{1F310}",
-  email: "\u{2709}",
-  feeds: "\u{1F4E1}",
-  gaming: "\u{1F3AE}",
-  gifs: "\u{1F3AC}",
-  github: "\u{1F4BB}",
-  health: "\u{2764}",
-  "inference-sh": "\u{26A1}",
-  leisure: "\u{2615}",
-  mcp: "\u{1F50C}",
-  media: "\u{1F3B5}",
-  migration: "\u{1F4E6}",
-  mlops: "\u{1F9EA}",
-  "note-taking": "\u{1F4DD}",
-  productivity: "\u{2705}",
-  "red-teaming": "\u{1F6E1}",
-  research: "\u{1F50D}",
-  security: "\u{1F512}",
-  "smart-home": "\u{1F3E0}",
-  "social-media": "\u{1F4F1}",
-  "software-development": "\u{1F4BB}",
-  translation: "\u{1F30D}",
-  other: "\u{1F4E6}",
+const CATEGORY_ICONS: Record<string, SvgIconName> = {
+  "apple": "device-desktop",
+  "autonomous-ai-agents": "brain",
+  "blockchain": "link",
+  "communication": "message",
+  "creative": "palette",
+  "data-science": "database",
+  "devops": "settings",
+  "dogfood": "heart",
+  "domain": "world",
+  "email": "message",
+  "feeds": "world",
+  "gaming": "player-play",
+  "gifs": "photo",
+  "github": "code",
+  "health": "heart",
+  "inference-sh": "bolt",
+  "leisure": "clock",
+  "mcp": "plug",
+  "media": "photo",
+  "migration": "package",
+  "mlops": "brain",
+  "note-taking": "file",
+  "productivity": "check",
+  "red-teaming": "shield",
+  "research": "search",
+  "security": "lock",
+  "smart-home": "device-desktop",
+  "social-media": "message",
+  "software-development": "code",
+  "translation": "world",
+  "other": "package"
 };
 
 const SOURCE_CONFIG: Record<
   string,
-  { label: string; color: string; bg: string; border: string; icon: string }
+  { label: string; color: string; bg: string; border: string; icon: SvgIconName }
 > = {
   "built-in": {
     label: "Built-in",
     color: "#4ade80",
     bg: "rgba(74, 222, 128, 0.08)",
     border: "rgba(74, 222, 128, 0.2)",
-    icon: "\u{2713}",
+    icon: "check",
   },
   optional: {
     label: "Optional",
     color: "#fbbf24",
     bg: "rgba(251, 191, 36, 0.08)",
     border: "rgba(251, 191, 36, 0.2)",
-    icon: "\u{2B50}",
+    icon: "star",
   },
   Anthropic: {
     label: "Anthropic",
     color: "#d4845a",
     bg: "rgba(212, 132, 90, 0.08)",
     border: "rgba(212, 132, 90, 0.2)",
-    icon: "\u{25C6}",
+    icon: "diamond",
   },
   LobeHub: {
     label: "LobeHub",
     color: "#60a5fa",
     bg: "rgba(96, 165, 250, 0.08)",
     border: "rgba(96, 165, 250, 0.2)",
-    icon: "\u{25CB}",
+    icon: "circle",
   },
   "skills.sh": {
     label: "skills.sh",
     color: "#34d399",
     bg: "rgba(52, 211, 153, 0.08)",
     border: "rgba(52, 211, 153, 0.2)",
-    icon: "\u{2734}",
+    icon: "star",
   },
   ClawHub: {
     label: "ClawHub",
     color: "#f472b6",
     bg: "rgba(244, 114, 182, 0.08)",
     border: "rgba(244, 114, 182, 0.2)",
-    icon: "\u{2726}",
+    icon: "sparkles",
   },
   "browse.sh": {
     label: "browse.sh",
     color: "#22d3ee",
     bg: "rgba(34, 211, 238, 0.08)",
     border: "rgba(34, 211, 238, 0.2)",
-    icon: "\u{29BF}",
+    icon: "circle",
   },
   OpenAI: {
     label: "OpenAI",
     color: "#10b981",
     bg: "rgba(16, 185, 129, 0.08)",
     border: "rgba(16, 185, 129, 0.2)",
-    icon: "\u{2737}",
+    icon: "star",
   },
   HuggingFace: {
     label: "HuggingFace",
     color: "#fbbf24",
     bg: "rgba(251, 191, 36, 0.08)",
     border: "rgba(251, 191, 36, 0.2)",
-    icon: "\u{1F917}",
+    icon: "heart",
   },
   NVIDIA: {
     label: "NVIDIA",
     color: "#76b900",
     bg: "rgba(118, 185, 0, 0.08)",
     border: "rgba(118, 185, 0, 0.25)",
-    icon: "\u{25B6}",
+    icon: "player-play",
   },
   VoltAgent: {
     label: "VoltAgent",
     color: "#facc15",
     bg: "rgba(250, 204, 21, 0.08)",
     border: "rgba(250, 204, 21, 0.2)",
-    icon: "\u{26A1}",
+    icon: "bolt",
   },
   GitHub: {
     label: "GitHub",
     color: "#94a3b8",
     bg: "rgba(148, 163, 184, 0.08)",
     border: "rgba(148, 163, 184, 0.2)",
-    icon: "\u{2756}",
+    icon: "package",
   },
   "Well-Known": {
     label: "Well-Known",
     color: "#818cf8",
     bg: "rgba(129, 140, 248, 0.08)",
     border: "rgba(129, 140, 248, 0.2)",
-    icon: "\u{2756}",
+    icon: "package",
   },
   gstack: {
     label: "gstack",
     color: "#fb923c",
     bg: "rgba(251, 146, 60, 0.08)",
     border: "rgba(251, 146, 60, 0.2)",
-    icon: "\u{2756}",
+    icon: "package",
   },
   MiniMax: {
     label: "MiniMax",
     color: "#f87171",
     bg: "rgba(248, 113, 113, 0.08)",
     border: "rgba(248, 113, 113, 0.2)",
-    icon: "\u{2756}",
+    icon: "package",
   },
   "Weights & Biases": {
     label: "Weights & Biases",
     color: "#facc15",
     bg: "rgba(250, 204, 21, 0.08)",
     border: "rgba(250, 204, 21, 0.2)",
-    icon: "\u{2756}",
+    icon: "package",
   },
   Qdrant: {
     label: "Qdrant",
     color: "#f43f5e",
     bg: "rgba(244, 63, 94, 0.08)",
     border: "rgba(244, 63, 94, 0.2)",
-    icon: "\u{2756}",
+    icon: "package",
   },
   Pinecone: {
     label: "Pinecone",
     color: "#a3e635",
     bg: "rgba(163, 230, 53, 0.08)",
     border: "rgba(163, 230, 53, 0.2)",
-    icon: "\u{2756}",
+    icon: "package",
   },
   Notion: {
     label: "Notion",
     color: "#e5e7eb",
     bg: "rgba(229, 231, 235, 0.08)",
     border: "rgba(229, 231, 235, 0.2)",
-    icon: "\u{25A0}",
+    icon: "package",
   },
   Airtable: {
     label: "Airtable",
     color: "#fcb400",
     bg: "rgba(252, 180, 0, 0.08)",
     border: "rgba(252, 180, 0, 0.2)",
-    icon: "\u{25A6}",
+    icon: "layout-dashboard",
   },
   Shopify: {
     label: "Shopify",
     color: "#95bf47",
     bg: "rgba(149, 191, 71, 0.08)",
     border: "rgba(149, 191, 71, 0.2)",
-    icon: "\u{25B2}",
+    icon: "diamond",
   },
 };
 
@@ -315,18 +320,9 @@ function CopyButton({ text }: { text: string }) {
       aria-label="Copy install command"
     >
       {copied ? (
-        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
-          <path
-            fillRule="evenodd"
-            d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-            clipRule="evenodd"
-          />
-        </svg>
+        <Icon name="check" size={14} />
       ) : (
-        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
-          <path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" />
-          <path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" />
-        </svg>
+        <Icon name="copy" size={14} />
       )}
       <span className={styles.copyBtnLabel}>{copied ? "Copied" : "Copy"}</span>
     </button>
@@ -354,7 +350,7 @@ function SkillCard({
   onPick?: (skill: Skill) => void;
 }) {
   const src = SOURCE_CONFIG[skill.source] || SOURCE_CONFIG["optional"];
-  const icon = CATEGORY_ICONS[skill.category] || "\u{1F4E6}";
+  const icon = CATEGORY_ICONS[skill.category] || "package";
   const installUrl = skillCatalogInstallUrl(skill);
 
   return (
@@ -368,7 +364,7 @@ function SkillCard({
 
       <div className={styles.cardInner}>
         <div className={styles.cardTop}>
-          <span className={styles.cardIcon}>{icon}</span>
+          <span className={styles.cardIcon}><Icon name={icon} /></span>
           <div className={styles.cardTitleGroup}>
             <h3 className={styles.cardTitle}>
               {highlightMatch(skill.name, query)}
@@ -381,7 +377,7 @@ function SkillCard({
                 borderColor: src.border,
               }}
             >
-              {src.icon} {src.label}
+              <Icon name={src.icon} /> {src.label}
             </span>
           </div>
         </div>
@@ -414,8 +410,7 @@ function SkillCard({
             href={installUrl}
             onClick={(e) => e.stopPropagation()}
           >
-            Install in Hermes
-          </a>
+            {appText("Install in {app_name}\n          ")}</a>
         )}
 
         {expanded && (
@@ -486,9 +481,9 @@ function SkillCard({
               </div>
             )}
             <div className={styles.installHint}>
-              <code>{skill.installCmd || `hermes skills install ${skillCatalogInstallIdentifier(skill) || skill.name}`}</code>
+              <code>{skill.installCmd || `noone skills install ${skillCatalogInstallIdentifier(skill) || skill.name}`}</code>
               <CopyButton
-                text={skill.installCmd || `hermes skills install ${skillCatalogInstallIdentifier(skill) || skill.name}`}
+                text={skill.installCmd || `noone skills install ${skillCatalogInstallIdentifier(skill) || skill.name}`}
               />
             </div>
             {onPick ? (
@@ -543,7 +538,7 @@ function StatCard({ value, label, color }: { value: number; label: string; color
 
 const PAGE_SIZE = 60;
 
-// Routes Docusaurus serves the static API JSON from. `baseUrl` is `/docs/`,
+// Routes the documentation site serves the static API JSON from. `baseUrl` is `/docs/`,
 // `static/api/` ends up at `/docs/api/`. Hardcoding here is fine because the
 // same `baseUrl` is enforced repo-wide; if it ever changes, this is the only
 // place that needs to follow.
@@ -574,7 +569,7 @@ function buildSearchHaystack(s: Skill): string {
 
 export default function SkillsDashboard() {
   // Picker embed mode (?embed=picker): the page is being iframed by a host
-  // app (Hermes desktop's Bot Mode agent editor) as a skill PICKER. Site
+  // app (the desktop's Bot Mode agent editor) as a skill PICKER. Site
   // chrome is hidden via a CSS class and every card gains an
   // "+ Add to this Agent" button that posts
   //   { type: 'hermes-skill-pick', name, identifier, installCmd, source }
@@ -594,7 +589,7 @@ export default function SkillsDashboard() {
           type: "hermes-skill-pick",
           name: skill.name,
           identifier: skillCatalogInstallIdentifier(skill) || skill.name,
-          installCmd: skill.installCmd || `hermes skills install ${skillCatalogInstallIdentifier(skill) || skill.name}`,
+          installCmd: skill.installCmd || `noone skills install ${skillCatalogInstallIdentifier(skill) || skill.name}`,
           source: skill.source,
         },
         "*"
@@ -644,7 +639,7 @@ export default function SkillsDashboard() {
     };
     let cancelled = false;
     const readJson = async (url: string): Promise<unknown> => {
-      const res = await fetch(url, { signal: ctrl.signal });
+      const res = await fetch(docUrl(url), { signal: ctrl.signal });
       if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
       if (!res.body) return res.json();
       const reader = res.body.getReader();
@@ -884,13 +879,13 @@ export default function SkillsDashboard() {
   return (
     <Layout
       title="Skills Hub"
-      description="Browse all skills and plugins available for Hermes Agent"
+      description={appText("Browse all skills and plugins available for {app_name}")}
     >
       <div className={`${styles.page} ${pickerMode ? styles.pickerMode : ""}`}>
         <header className={styles.hero}>
           <div className={styles.heroGlow} />
           <div className={styles.heroContent}>
-            <p className={styles.heroEyebrow}>Hermes Agent</p>
+            <p className={styles.heroEyebrow}>{appText("{app_name}")}</p>
             <h1 className={styles.heroTitle}>Skills Hub</h1>
             <nav className={styles.crossNav} aria-label="Catalog pages">
               <span className={`${styles.crossNavLink} ${styles.crossNavActive}`}>
@@ -962,13 +957,7 @@ export default function SkillsDashboard() {
         <div className={styles.controlsBar}>
           <div className={styles.controlsTopRow}>
           <div className={styles.searchWrap}>
-            <svg className={styles.searchIcon} viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
-              <path
-                fillRule="evenodd"
-                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <Icon className={styles.searchIcon} name="search" size={18} />
             <input
               ref={searchRef}
               type="text"
@@ -979,13 +968,7 @@ export default function SkillsDashboard() {
             />
             {search && (
               <button className={styles.clearBtn} onClick={() => setSearch("")}>
-                <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <Icon name="x" size={16} />
               </button>
             )}
           </div>
@@ -1108,7 +1091,7 @@ export default function SkillsDashboard() {
                   onClick={() => handleCategoryClick(cat.key)}
                 >
                   <span className={styles.catItemIcon}>
-                    {CATEGORY_ICONS[cat.key] || "\u{1F4E6}"}
+                    <Icon name={CATEGORY_ICONS[cat.key] || "package"} />
                   </span>
                   <span className={styles.catItemLabel}>{cat.label}</span>
                   <span className={styles.catItemCount}>{cat.count}</span>

@@ -1,11 +1,13 @@
 import { useStore } from '@nanostores/react'
+import { appText } from '@noone/shared/application-identity'
+import { Mail } from '@noone/ui/icons'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { PetHeartField, playVibeHearts } from '@/components/chat/vibe-hearts'
 import { PetBubble } from '@/components/pet/pet-bubble'
 import { PetSprite } from '@/components/pet/pet-sprite'
 import { type PetZoomAnchor, usePetZoomGesture } from '@/components/pet/use-pet-zoom-gesture'
-import { Mail } from '@/lib/icons'
+import { useNativeAppName } from '@/hooks/use-app-name'
 import { isSubmitEnter } from '@/lib/ime'
 import { $petActivity, $petInfo, setPetInfo } from '@/store/pet'
 import { overlayWindowSize } from '@/store/pet-overlay'
@@ -63,12 +65,12 @@ interface DragState {
 }
 
 export function PetOverlayApp() {
+  const appName = useNativeAppName()
   const info = useStore($petInfo)
   const [composerOpen, setComposerOpen] = useState(false)
   const [draft, setDraft] = useState('')
   // Mirrored from the main renderer: a finish landed while you were away.
   const [unread, setUnread] = useState(false)
-
   const dragRef = useRef<DragState | null>(null)
   // Last Alt+wheel anchor, consumed by the resize effect to zoom toward the
   // cursor; null means a non-wheel scale change (slider) → anchor bottom-center.
@@ -449,7 +451,7 @@ export function PetOverlayApp() {
               stopPropagation keeps a click from starting a window drag. */}
           {unread && (
             <button
-              aria-label="Open in Hermes"
+              aria-label={appText("Open in {app_name}", appName)}
               onClick={openApp}
               onPointerDown={e => e.stopPropagation()}
               onPointerUp={e => e.stopPropagation()}

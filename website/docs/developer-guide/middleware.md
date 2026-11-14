@@ -3,29 +3,29 @@ title: "Middleware"
 description: "Behavior-changing plugin middleware for LLM and tool calls: contract, execution order, examples"
 ---
 
-# Hermes Middleware
+# {{app-name}} Middleware {#hermes-middleware}
 
-Hermes middleware is the behavior-changing companion to observer hooks.
+{{app-name}} middleware is the behavior-changing companion to observer hooks.
 Observer hooks report what happened. Middleware can change what happens by
 rewriting a request before execution or by wrapping the execution callback
 itself.
 
 This contract is intentionally backend-neutral. A plugin can use it for local
 policy, request shaping, tracing, adaptive routing, cache control, sandbox
-selection, or handoff to runtimes such as NeMo Relay without changing Hermes'
+selection, or handoff to runtimes such as NeMo Relay without changing {{app-name}}'
 planner, model provider adapters, tool registry, memory, or CLI UX.
 
 With middleware enabled, plugins can:
 
-- Rewrite LLM provider request kwargs before Hermes calls the provider.
+- Rewrite LLM provider request kwargs before {{app-name}} calls the provider.
 - Rewrite tool arguments before guardrails, approval checks, hooks, and tool
   execution see them.
-- Wrap the actual LLM execution callback while preserving Hermes retry,
+- Wrap the actual LLM execution callback while preserving {{app-name}} retry,
   streaming, interrupt, and hook behavior.
-- Wrap the actual tool execution callback while preserving Hermes guardrails,
+- Wrap the actual tool execution callback while preserving {{app-name}} guardrails,
   approval, post-tool hooks, and tool-result transformation.
 
-## Contract
+## Contract {#contract}
 
 Plugins register middleware from `register(ctx)`:
 
@@ -64,7 +64,7 @@ return {
 }
 ```
 
-Hermes stores those trace entries in later observer hook payloads as
+{{app-name}} stores those trace entries in later observer hook payloads as
 `middleware_trace`.
 
 Execution middleware receives a `next_call` callback. Call it to continue the
@@ -79,20 +79,20 @@ def on_tool_execution(**kwargs):
 As with hooks, a callback without `**kwargs` receives only the fields its
 signature names, so a field added to the payload later does not break it.
 
-If multiple plugins register the same execution middleware kind, Hermes runs
+If multiple plugins register the same execution middleware kind, {{app-name}} runs
 them as a nested chain in registration order. Middleware failures are fail-open:
-Hermes logs a warning and continues with the next middleware or the base
+{{app-name}} logs a warning and continues with the next middleware or the base
 runtime path. A callback that fails the same way on every call (typically a
 signature naming a field the middleware does not send) is reported **once** at
 WARNING — the message lists the fields it does provide — and identical repeats go
 to DEBUG, so a mis-declared middleware cannot flood the log; a plugin reload
 resets the report.
 
-## Execution Order
+## Execution Order {#execution-order}
 
-### LLM Calls
+### LLM Calls {#llm-calls}
 
-For each provider request, Hermes applies middleware in this order:
+For each provider request, {{app-name}} applies middleware in this order:
 
 1. Build provider kwargs from the current conversation.
 2. Apply `llm_request` middleware.
@@ -105,13 +105,13 @@ Responses API `input`, model settings, tool definitions, stream options, and
 provider-specific options. Execution middleware receives the same effective
 request plus `next_call`.
 
-### Tool Calls
+### Tool Calls {#tool-calls}
 
-For each tool call, Hermes applies middleware in this order:
+For each tool call, {{app-name}} applies middleware in this order:
 
 1. Parse and coerce model-provided tool arguments.
 2. Apply `tool_request` middleware.
-3. Run the normal Hermes pre-execution path against the effective arguments:
+3. Run the normal {{app-name}} pre-execution path against the effective arguments:
    tool availability checks, observer block directives, guardrails, and
    approval checks.
 4. Run tool execution through `tool_execution` middleware.
@@ -122,12 +122,12 @@ For each tool call, Hermes applies middleware in this order:
 Tool request middleware runs before approval checks. Use it carefully: a
 rewritten path, command, or URL is the value downstream policy will evaluate.
 
-## Enablement
+## Enablement {#enablement}
 
 Middleware only runs for enabled plugins. For a bundled plugin:
 
 ```bash
-hermes plugins enable <plugin-name>
+noone plugins enable <plugin-name>
 ```
 
 For isolated local testing, use one `HERMES_HOME` for plugin enablement and the
@@ -136,8 +136,8 @@ agent run:
 ```bash
 export HERMES_HOME=$HOME/.hermes/cache/scratch/hermes-middleware-test
 mkdir -p "$HERMES_HOME"
-hermes plugins enable <plugin-name>
-hermes chat --query 'Reply exactly ok'
+noone plugins enable <plugin-name>
+noone chat --query 'Reply exactly ok'
 ```
 
 For source checkouts, use the [PM developer workflow](../reference/package-management.md#developer-workflow)
@@ -148,16 +148,16 @@ the working tree:
 export HERMES_HOME="$HOME/hermes-middleware-test"
 export HERMES_RUNTIME_DIR="$HERMES_HOME/tools"
 source ./activate
-python hermes plugins enable <plugin-name>
-python hermes chat --query 'Reply exactly ok'
+python noone plugins enable <plugin-name>
+python noone chat --query 'Reply exactly ok'
 ```
 
-## Generic Plugin Examples
+## Generic Plugin Examples {#generic-plugin-examples}
 
 The examples below are intentionally small. They show the middleware contract
 shape without depending on NeMo Relay.
 
-### LLM Request Middleware
+### LLM Request Middleware {#llm-request-middleware}
 
 This plugin tags provider requests and records a middleware trace entry:
 
@@ -181,7 +181,7 @@ def tag_llm_request(**kwargs):
 The effective request is passed to `pre_api_request`, provider execution, and
 `post_api_request`.
 
-### Tool Request Middleware
+### Tool Request Middleware {#tool-request-middleware}
 
 This plugin constrains `terminal` calls to a known working directory:
 
@@ -208,7 +208,7 @@ def normalize_terminal_workdir(**kwargs):
 Because this runs before hooks and approvals, downstream telemetry and policy
 observe the rewritten `workdir`.
 
-### LLM Execution Middleware
+### LLM Execution Middleware {#llm-execution-middleware}
 
 This plugin wraps the provider call and preserves the raw provider response:
 
@@ -228,11 +228,11 @@ def time_llm_execution(**kwargs):
     return response
 ```
 
-Return the same response shape Hermes expects from the provider adapter. Do not
+Return the same response shape {{app-name}} expects from the provider adapter. Do not
 wrap the response in a plugin-specific envelope unless the rest of the runtime
 expects that envelope.
 
-### Tool Execution Middleware
+### Tool Execution Middleware {#tool-execution-middleware}
 
 This plugin wraps tool execution while preserving the tool result:
 
@@ -256,7 +256,7 @@ and system configuration, or through an explicit `plugins.toml` selected with
 `HERMES_NEMO_RELAY_PLUGINS_TOML`; see
 [Relay shared metrics](relay-shared-metrics.md).
 
-## Safety Notes
+## Safety Notes {#safety-notes}
 
 - Middleware should be deterministic for the same input unless it is explicitly
   routing to a dynamic external system.
@@ -264,14 +264,14 @@ and system configuration, or through an explicit `plugins.toml` selected with
   patches.
 - Execution middleware should call `next_call(...)` exactly once unless it is
   intentionally short-circuiting execution.
-- If execution middleware raises before calling `next_call(...)`, Hermes treats
+- If execution middleware raises before calling `next_call(...)`, {{app-name}} treats
   that as middleware failure and continues with the remaining middleware chain
   and base execution.
 - If execution middleware calls `next_call(...)` successfully and then raises
-  during post-processing, Hermes preserves the downstream result and does not
+  during post-processing, {{app-name}} preserves the downstream result and does not
   run the provider or tool a second time.
 - If downstream provider or tool execution fails, middleware may let that error
-  propagate or translate it deliberately. Hermes does not convert downstream
+  propagate or translate it deliberately. {{app-name}} does not convert downstream
   failure into a successful `None` result.
 - Tool request middleware runs before approvals. If it mutates file paths,
   commands, URLs, or arguments, the mutated values are what guardrails and

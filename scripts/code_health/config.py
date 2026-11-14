@@ -76,8 +76,8 @@ RULES: tuple[Rule, ...] = (
     Rule("E722", "bare `except:`", "catch a named exception (bare except also swallows"
          " KeyboardInterrupt/SystemExit)", "ruff"),
     # Correctness basics.
-    # tui_gateway method modules get the server's names injected (`bind_module(globals(), ...)`).
-    Rule("F821", "undefined name", "import or define it", "ruff", exclude=("tui_gateway/*",)),
+    # agent_backend method modules get the server's names injected (`bind_module(globals(), ...)`).
+    Rule("F821", "undefined name", "import or define it", "ruff", exclude=("agent_backend/*",)),
     Rule("F823", "local used before assignment", "assign before use or declare global",
          "ruff", exclude=()),
     Rule("F811", "redefinition of unused name", "remove the shadowed definition", "ruff",
@@ -101,12 +101,12 @@ RULES: tuple[Rule, ...] = (
     Rule("HX009", "isinstance(r, Exception) on gather results", "check `BaseException`:"
          " `gather(return_exceptions=True)` also returns CancelledError", "ast"),
     # Profile scope (one process serves many profiles).
-    Rule("HX001", "hardcoded Hermes home", "`get_hermes_home()` for paths,"
-         " `display_hermes_home()` for user-facing text (`hermes_constants`); a path that"
+    Rule("HX001", "hardcoded Hermes home", "`get_agent_home()` for paths,"
+         " `display_agent_home()` for user-facing text (`agent_constants`); a path that"
          " deliberately lives under the user's home, not the profile (e.g. the profiles root),"
          " takes `# health: allow HX001 -- <why>`", "ast",
          blocking=WARN_UNTIL_REPLAYED,
-         exclude=SINGLE_PROFILE + ("hermes_constants.py",)),
+         exclude=SINGLE_PROFILE + ("agent_constants.py",)),
     Rule("HX002", "new HERMES_* environment variable", "behavioural settings go in"
          " config.yaml, secrets through the secret scope; `.env` is for credentials only",
          "ast", exclude=SINGLE_PROFILE),
@@ -114,7 +114,7 @@ RULES: tuple[Rule, ...] = (
          " secret scope at the spawn site; never read the launch profile's environment",
          "ast", exclude=SINGLE_PROFILE),
     Rule("HX005", "home/config/env captured at import time", "resolve it at call time"
-         " (`get_hermes_home()`, `load_config()`) or key the slot by `hermes_home_key()`;"
+         " (`get_agent_home()`, `load_config()`) or key the slot by `agent_home_key()`;"
          " module constants hold the launch profile's value", "ast",
          exclude=SINGLE_PROFILE),
     Rule("HX012", "raw threading.Thread", "`spawn_context_thread(...)` so the thread keeps"
@@ -130,15 +130,15 @@ RULES: tuple[Rule, ...] = (
     Rule("HX016", "legacy profile setter", "bind a scope:"
          " `agent.runtime_scope.bind_profile_scope(home)` moves home, secrets and terminal policy"
          " together (`bind_turn(session_id, turn_id, fence)` inside it for a turn); `bind_state(scope, ...)` for a host"
-         " that binds less on purpose. A raw `set_hermes_home_override` / `set_secret_scope` /"
+         " that binds less on purpose. A raw `set_agent_home_override` / `set_secret_scope` /"
          " `set_terminal_scope` / `install_profile_terminal_scope` call blocks only when it is new: an"
          " existing call stays until someone migrates it", "ast",
-         exclude=SINGLE_PROFILE + ("agent/runtime_scope.py", "hermes_constants.py",
+         exclude=SINGLE_PROFILE + ("agent/runtime_scope.py", "agent_constants.py",
                                    "agent/secret_scope.py", "tools/terminal_scope.py")),
     # Process identity.
     Rule("HX003", "process identity from argv substrings", "use"
          " `gateway.status.looks_like_gateway_command_line` /"
-         " `hermes_cli.update_cmd._hermes_holder_subcommand` and match full cmdlines", "ast",
+         " `agent_cli.update_cmd._hermes_holder_subcommand` and match full cmdlines", "ast",
          blocking=WARN_UNTIL_REPLAYED),
     # Config truthiness.
     Rule("HX010", "bool() of a config/env string", "`bool(\"false\")` is True. Is it set?"
@@ -149,9 +149,9 @@ RULES: tuple[Rule, ...] = (
     Rule("HX011", "if/elif ladder on one name", "use a dict/table -> handler (`_SLASH_DISPATCH`"
          " is the shape)", "ast", exclude=()),
     # Session store: an fd the lock-safety registry cannot see (closing any raw fd on the file
-    # cancels the process's POSIX locks on it; see `_HEADER_PROBE_FDS` in hermes_state_dbfile.py).
+    # cancels the process's POSIX locks on it; see `_HEADER_PROBE_FDS` in agent_state_dbfile.py).
     Rule("HX015", "untracked sqlite3.connect on state.db", "open it with"
-         " `hermes_cli.sqlite_safe_read.connect_tracked(..., tracking_path=<the db path>)`"
+         " `agent_cli.sqlite_safe_read.connect_tracked(..., tracking_path=<the db path>)`"
          " so `has_live_connection()` / `offline_file_access()` see the fd; a deliberately offline"
          " file (snapshot, scratch copy, quarantined file) takes `# health: allow HX015 -- <why>`",
          "ast", blocking=WARN_UNTIL_REPLAYED, exclude=TESTS + ("evals/*",)),
@@ -166,7 +166,7 @@ RULES: tuple[Rule, ...] = (
     Rule("HX014", "private API-error predicate", "use `classify_api_error` (`agent.auxiliary_error_policy`"
          " on the aux path); add the phrasing to its pattern tables", "ast",
          include=("agent/auxiliary*.py", "agent/context_compressor*.py", "agent/turn_*.py")),
-    # Logs reach `hermes debug share` and bug reports: user content and identities stay out of INFO+.
+    # Logs reach `noone debug share` and bug reports: user content and identities stay out of INFO+.
     Rule("HX017", "user content or identity logged at INFO+", "log the metadata, not the value:"
          " `len(text)`, an id or a short hash (`gateway.platforms.helpers.hash_for_log`), or a"
          " redacted form (`redact_phone`); the verbatim value goes to `logger.debug`. A content-named"
@@ -184,6 +184,8 @@ def _matches(path: str, globs: tuple[str, ...]) -> bool:
 
 
 def rule_applies(rule: Rule, path: str) -> bool:
+    from scripts.code_health.identity_names import canonical_path
+    path = canonical_path(path)
     if rule.include and not _matches(path, rule.include):
         return False
     return not _matches(path, rule.exclude)

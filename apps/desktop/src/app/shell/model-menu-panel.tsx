@@ -1,10 +1,10 @@
-import type { ModelOptionsResult } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import type { ModelOptionsResult } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'
-import { Codicon } from '@/components/ui/codicon'
 import { DropdownMenuItem, dropdownMenuRow } from '@/components/ui/dropdown-menu'
 import { useI18n } from '@/i18n'
 import { modelOptionsQueryKey, requestModelOptions } from '@/lib/model-options'
@@ -84,7 +84,7 @@ export function ModelMenuPanel({ onFollowDefaultModel, ...props }: ModelMenuPane
               className={cn(dropdownMenuRow, 'text-(--ui-text-tertiary)')}
               onSelect={onFollowDefaultModel}
             >
-              <Codicon name="discard" size="0.75rem" />
+              <AppIcon name="discard" size="0.75rem" />
               {copy.followDefault}
             </DropdownMenuItem>
           )}
@@ -96,7 +96,7 @@ export function ModelMenuPanel({ onFollowDefaultModel, ...props }: ModelMenuPane
               void refreshModels()
             }}
           >
-            <Codicon name="sync" size="0.75rem" spinning={refreshing} />
+            <AppIcon name="sync" size="0.75rem" spinning={refreshing} />
             {copy.refreshModels}
           </DropdownMenuItem>
         </>

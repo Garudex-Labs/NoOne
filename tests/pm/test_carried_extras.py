@@ -32,7 +32,7 @@ class _Venv:
     def apply(self, enabled, **_inputs):
         self.applied.append(sorted(enabled))
         if self.broken & set(enabled):
-            raise BuildFailure("venv", "uv sync exited 1: Failed to build `python-olm==3.2.16`")
+            raise BuildFailure("venv", "uv sync exited 1: Failed to build `fixture-native==1.0`")
         environment = install_state_dir(self.project_root()) / "environments" / str(len(self.applied)) / "venv"
         environment.mkdir(parents=True)
         (environment / "pyvenv.cfg").write_text("home = fixture\n")
@@ -57,31 +57,31 @@ def _recorded():
 
 
 def test_a_carried_extra_that_cannot_build_is_left_out_and_not_carried_again(venv, capsys):
-    package = venv({"matrix"})
+    package = venv({"keychain"})
 
-    install.sync_venv(["all", "fal", "matrix"], explicit=True, carried=["fal", "matrix"])
+    install.sync_venv(["all", "fal", "keychain"], explicit=True, carried=["fal", "keychain"])
 
     # The update completes with everything that builds, the carried extra that builds included.
     assert _recorded() == ["all", "fal"]
-    assert extras.declined_extras() == {"matrix"}
-    assert extras.declined_reasons() == {"matrix": "it no longer builds on this machine"}
+    assert extras.declined_extras() == {"keychain"}
+    assert extras.declined_reasons() == {"keychain": "it no longer builds on this machine"}
     notice = capsys.readouterr().err
-    assert "'matrix'" in notice and "hermes pm install --extra matrix" in notice
+    assert "'keychain'" in notice and "noone pm install --extra keychain" in notice
     # The next update finds the environment current: nothing is rebuilt or re-carried.
     builds = len(package.applied)
     install.sync_venv(None, explicit=True)
     assert len(package.applied) == builds
     # A lazy first use names why the extra is out instead of a `--without` nobody ran.
-    with pytest.raises(Exception, match="an update left 'matrix' out"):
-        install.sync_venv(["matrix"])
+    with pytest.raises(Exception, match="an update left 'keychain' out"):
+        install.sync_venv(["keychain"])
 
 
-@pytest.mark.parametrize(("broken", "carried"), [({"matrix"}, None), ({"all"}, ["matrix"])])
+@pytest.mark.parametrize(("broken", "carried"), [({"keychain"}, None), ({"all"}, ["keychain"])])
 def test_a_requested_extra_or_core_that_cannot_build_still_fails(venv, broken, carried):
     venv(broken)
 
     with pytest.raises(BuildFailure):
-        install.sync_venv(["all", "matrix"], explicit=True, carried=carried)
+        install.sync_venv(["all", "keychain"], explicit=True, carried=carried)
 
     assert _recorded() is None
     assert extras.declined_extras() == frozenset()
@@ -94,25 +94,25 @@ def test_a_carried_extra_that_fails_for_the_moment_is_retried_by_the_next_update
     from pm.package import InstallError
 
     package = venv(set())
-    # The full sync fails to build matrix; then its source goes missing for every per-extra trial.
+    # The full sync fails to build keychain; then its source goes missing for every per-extra trial.
     failures = [BuildFailure("venv", "uv sync exited 1: Failed to build `review-optional`")]
     unavailable = InstallError("venv", "uv sync exited 2: `review-optional` does not appear to be a Python project")
     source_down = [True]
 
     def apply(enabled, **inputs):
-        if "matrix" in enabled and source_down[0]:
+        if "keychain" in enabled and source_down[0]:
             package.applied.append(sorted(enabled))
             raise failures.pop() if failures else unavailable
         return _Venv.apply(package, enabled, **inputs)
 
     package.apply = apply
-    with pytest.raises(InstallError, match=r"\['matrix'\].*could not be prepared") as refused:
-        install.sync_venv(["all", "fal", "matrix"], explicit=True, carried=["fal", "matrix"])
-    assert "hermes pm install --without matrix" in refused.value.remedy
+    with pytest.raises(InstallError, match=r"\['keychain'\].*could not be prepared") as refused:
+        install.sync_venv(["all", "fal", "keychain"], explicit=True, carried=["fal", "keychain"])
+    assert "noone pm install --without keychain" in refused.value.remedy
     assert _recorded() is None
     assert extras.declined_extras() == frozenset()
 
     source_down[0] = False
     # No facts yet, so the next update scans the old venv and carries the same selection.
-    install.sync_venv(["all", "fal", "matrix"], explicit=True, carried=["fal", "matrix"])
-    assert _recorded() == ["all", "fal", "matrix"]
+    install.sync_venv(["all", "fal", "keychain"], explicit=True, carried=["fal", "keychain"])
+    assert _recorded() == ["all", "fal", "keychain"]

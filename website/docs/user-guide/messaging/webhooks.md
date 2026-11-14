@@ -1,21 +1,20 @@
 ---
-sidebar_position: 13
 title: "Webhooks"
-description: "Receive events from GitHub, GitLab, and other services to trigger Hermes agent runs"
+description: "Receive events from GitHub, GitLab, and other services to trigger the agent agent runs"
 ---
 
-# Webhooks
+# Webhooks {#webhooks}
 
-Receive events from external services (GitHub, GitLab, JIRA, Stripe, etc.) and trigger Hermes agent runs automatically. The webhook adapter runs an HTTP server that accepts POST requests, validates HMAC signatures, transforms payloads into agent prompts, and routes responses back to the source or to another configured platform.
+Receive events from external services (GitHub, GitLab, JIRA, Stripe, etc.) and trigger {{app-name}} agent runs automatically. The webhook adapter runs an HTTP server that accepts POST requests, validates HMAC signatures, transforms payloads into agent prompts, and routes responses back to the source or to another configured platform.
 
 The agent processes the event and can respond by posting comments on PRs, sending messages to Telegram/Discord, or logging the result.
 
-## Video Tutorial
+## Video Tutorial {#video-tutorial}
 
 <div style={{position: 'relative', width: '100%', aspectRatio: '16 / 9', marginBottom: '1.5rem'}}>
   <iframe
     src="https://www.youtube.com/embed/WNYe5mD4fY8"
-    title="Hermes Agent — Webhooks Tutorial"
+    title="NoOne — Webhooks Tutorial"
     style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0}}
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     allowFullScreen
@@ -24,27 +23,27 @@ The agent processes the event and can respond by posting comments on PRs, sendin
 
 ---
 
-## Quick Start
+## Quick Start {#quick-start}
 
-1. Enable via `hermes gateway setup` or environment variables
+1. Enable via `noone gateway setup` or environment variables
 2. Define routes in `config.yaml` **or** create them dynamically with `hermes webhook subscribe`
 3. Point your service at `http://your-server:8644/webhooks/<route-name>`
 
 ---
 
-## Setup
+## Setup {#setup}
 
 There are two ways to enable the webhook adapter.
 
-### Via setup wizard
+### Via setup wizard {#via-setup-wizard}
 
 ```bash
-hermes gateway setup
+noone gateway setup
 ```
 
 Follow the prompts to enable webhooks, set the port, and set a global HMAC secret.
 
-### Via environment variables
+### Via environment variables {#via-environment-variables}
 
 Add to `~/.hermes/.env`:
 
@@ -54,7 +53,7 @@ WEBHOOK_PORT=8644        # default
 WEBHOOK_SECRET=your-global-secret
 ```
 
-### Verify the server
+### Verify the server {#verify-the-server}
 
 Once the gateway is running:
 
@@ -74,7 +73,7 @@ Expected response:
 
 Routes define how different webhook sources are handled. Each route is a named entry under `platforms.webhook.extra.routes` in your `config.yaml`. Adapter settings (`port`, `host`, `secret`, `routes`) may also be written directly under `platforms.webhook:` — both spellings reach the adapter; a value nested under `extra:` wins if the same key appears in both places.
 
-### Route properties
+### Route properties {#route-properties}
 
 | Property | Required | Description |
 |----------|----------|-------------|
@@ -87,14 +86,14 @@ Routes define how different webhook sources are handled. Each route is a named e
 | `script` | No | Filter/transform script under `~/.hermes/scripts/`. The webhook payload is passed as JSON on stdin. JSON object stdout replaces the payload before templating; text stdout is exposed as `script_output`; empty stdout, `[SILENT]`, or a nonzero exit code ignores the webhook. |
 | `skills` | No | List of skill names to load for the agent run. |
 | `toolsets` | No | List of toolset keys (e.g. `["terminal", "file", "web"]`) that **replaces** the platform-level webhook toolset for runs triggered by this route only. Manual config edit only — not settable via `hermes webhook subscribe`, so agent-created subscriptions cannot self-grant elevated tools. Names are validated the same way as `platform_toolsets` entries (unknown or platform-restricted names are dropped). See [Per-route toolsets](#per-route-toolsets). |
-| `deliver` | No | Where to send the response: `github_comment`, `telegram`, `discord`, `slack`, `signal`, `sms`, `whatsapp`, `matrix`, `mattermost`, `homeassistant` (plugin), `email`, `dingtalk`, `feishu`, `wecom`, `weixin`, `bluebubbles`, `qqbot`, or `log` (default). |
+| `deliver` | No | Where to send the response: `github_comment`, `telegram`, `discord`, `slack`, `signal`, `sms`, `whatsapp`, `mattermost`, `homeassistant` (plugin), `email`, `weixin`, or `log` (default). |
 | `deliver_extra` | No | Additional delivery config — keys depend on `deliver` type (e.g. `repo`, `pr_number`, `chat_id`). Values support the same `{dot.notation}` templates as `prompt`. |
 | `deliver_only` | No | If `true`, skip the agent entirely — the rendered `prompt` template becomes the literal message that gets delivered. Zero LLM cost, sub-second delivery. See [Direct Delivery Mode](#direct-delivery-mode) for use cases. Requires `deliver` to be a real target (not `log`). |
 | `cron_job` | No | Fire an existing cron job (by ID or name) on each event instead of starting a fresh webhook agent session. The rendered `prompt` becomes transient per-run context; the job's own prompt, skills, model, and delivery settings apply. Mutually exclusive with `deliver_only`. See [Event-Triggered Cron Jobs](#event-triggered-cron-jobs). |
 | `coalesce` | No | Debounce rapid distinct events on the same logical entity into one agent run. Block with a required `key` (payload field or template identifying the entity, e.g. `pull_request.number`), optional `window_seconds` (quiet window, default 30) and `max_wait_seconds` (dispatch cap, default 300). See [Event Coalescing](#event-coalescing). Mutually exclusive with `deliver_only` and `cron_job`. |
 | `mirror_to_session` | No | Default `false`. When `true`, after a successful delivery to a chat platform the delivered message is also written into that chat's session transcript (as a labelled user turn, the same way continuable cron briefs are), so when you reply in that chat the agent knows what it just sent you. See [Replying to a delivery](#replying-to-a-delivery). |
 
-### Full example
+### Full example {#full-example}
 
 ```yaml
 platforms:
@@ -131,7 +130,7 @@ platforms:
           deliver: "telegram"
 ```
 
-### Payload Filters
+### Payload Filters {#payload-filters}
 
 Use `filters` when a provider sends a broad event stream but only some payloads should wake the agent or trigger `deliver_only` delivery. Filters run after signature validation, body parsing, and `events`, but before prompt rendering, idempotency, agent dispatch, or direct delivery.
 
@@ -201,10 +200,10 @@ How it works:
 - When more than one event was coalesced, the prompt gets a short note telling the agent how many earlier events were superseded.
 - If the `key` does not resolve for an event (the payload lacks the field — e.g. an `issue_comment` event on a route keyed by `pull_request.number`), that event is **dispatched immediately** instead of being coalesced, so unrelated entities never collapse into one group. Pick a key present on every event type the route accepts.
 - Coalesced requests return HTTP 202 with `{"status": "coalesced"}`. Delivery-ID idempotency still runs first, so provider retries of the same delivery are dropped rather than counted.
-- Pending groups are flushed (dispatched immediately) when the adapter disconnects — a gateway reconnect or `hermes gateway stop` — not dropped. Buffered events live in memory, so a hard process kill loses at most the current window's buffered burst.
+- Pending groups are flushed (dispatched immediately) when the adapter disconnects — a gateway reconnect or `noone gateway stop` — not dropped. Buffered events live in memory, so a hard process kill loses at most the current window's buffered burst.
 - `coalesce` applies to agent-mode routes only; combining it with `deliver_only` or `cron_job` is rejected at startup.
 
-### Script Filters and Transforms
+### Script Filters and Transforms {#script-filters-and-transforms}
 
 Use `script` when declarative filters are not enough. Scripts must live under `~/.hermes/scripts/` for the active profile; relative paths resolve there, and path traversal outside that directory is blocked. `.sh` and `.bash` scripts run with bash, and all other extensions run with the current Python interpreter.
 
@@ -231,7 +230,7 @@ Script outcomes:
 - Non-JSON text stdout is added to the payload as `script_output`.
 - Empty stdout, exact `[SILENT]`, `{"__hermes_ignore__": true}`, timeout, missing script, or nonzero exit code returns HTTP 200 with `{"status":"ignored","reason":"script"}`.
 
-### Prompt Templates
+### Prompt Templates {#prompt-templates}
 
 Prompts use dot-notation to access nested fields in the webhook payload:
 
@@ -251,7 +250,7 @@ If no `prompt` template is configured for a route, the entire payload is dumped 
 
 The same dot-notation templates work in `deliver_extra` values.
 
-### Forum Topic Delivery
+### Forum Topic Delivery {#forum-topic-delivery}
 
 When delivering webhook responses to Telegram, you can target a specific forum topic by including `message_thread_id` (or `thread_id`) in `deliver_extra`:
 
@@ -275,7 +274,7 @@ If `chat_id` is not provided in `deliver_extra`, the delivery falls back to the 
 
 This walkthrough sets up automatic code review on every pull request.
 
-### 1. Create the webhook in GitHub
+### 1. Create the webhook in GitHub {#1-create-the-webhook-in-github}
 
 1. Go to your repository → **Settings** → **Webhooks** → **Add webhook**
 2. Set **Payload URL** to `http://your-server:8644/webhooks/github-pr`
@@ -284,11 +283,11 @@ This walkthrough sets up automatic code review on every pull request.
 5. Under **Which events?**, select **Let me select individual events** and check **Pull requests**
 6. Click **Add webhook**
 
-### 2. Add the route config
+### 2. Add the route config {#2-add-the-route-config}
 
 Add the `github-pr` route to your `~/.hermes/config.yaml` as shown in the example above.
 
-### 3. Ensure `gh` CLI is authenticated
+### 3. Ensure `gh` CLI is authenticated {#3-ensure-gh-cli-is-authenticated}
 
 The `github_comment` delivery type uses the GitHub CLI to post comments:
 
@@ -296,9 +295,9 @@ The `github_comment` delivery type uses the GitHub CLI to post comments:
 gh auth login
 ```
 
-### 4. Test it
+### 4. Test it {#4-test-it}
 
-Open a pull request on the repository. The webhook fires, Hermes processes the event, and posts a review comment on the PR.
+Open a pull request on the repository. The webhook fires, {{app-name}} processes the event, and posts a review comment on the PR.
 
 ---
 
@@ -306,7 +305,7 @@ Open a pull request on the repository. The webhook fires, Hermes processes the e
 
 GitLab webhooks work similarly but use a different authentication mechanism. GitLab sends the secret as a plain `X-Gitlab-Token` header (exact string match, not HMAC).
 
-### 1. Create the webhook in GitLab
+### 1. Create the webhook in GitLab {#1-create-the-webhook-in-gitlab}
 
 1. Go to your project → **Settings** → **Webhooks**
 2. Set the **URL** to `http://your-server:8644/webhooks/gitlab-mr`
@@ -314,7 +313,7 @@ GitLab webhooks work similarly but use a different authentication mechanism. Git
 4. Select **Merge request events** (and any other events you want)
 5. Click **Add webhook**
 
-### 2. Add the route config
+### 2. Add the route config {#2-add-the-route-config-1}
 
 ```yaml
 platforms:
@@ -352,15 +351,10 @@ The `deliver` field controls where the agent's response goes after processing th
 | `signal` | Routes the response to Signal. Uses the home channel, or specify `chat_id` in `deliver_extra`. |
 | `sms` | Routes the response to SMS via Twilio. Uses the home channel, or specify `chat_id` in `deliver_extra`. |
 | `whatsapp` | Routes the response to WhatsApp. Uses the home channel, or specify `chat_id` in `deliver_extra`. |
-| `matrix` | Routes the response to Matrix. Uses the home channel, or specify `chat_id` in `deliver_extra`. |
 | `mattermost` | Routes the response to Mattermost. Uses the home channel, or specify `chat_id` in `deliver_extra`. |
 | `homeassistant` | Routes the response to Home Assistant (requires the [`homeassistant` plugin](homeassistant.md)). Uses the home channel (`HASS_HOME_CHANNEL`), or specify `chat_id` in `deliver_extra`. |
 | `email` | Routes the response to Email. Uses the home channel, or specify `chat_id` in `deliver_extra`. |
-| `dingtalk` | Routes the response to DingTalk. Uses the home channel, or specify `chat_id` in `deliver_extra`. |
-| `feishu` | Routes the response to Feishu/Lark. Uses the home channel, or specify `chat_id` in `deliver_extra`. |
-| `wecom` | Routes the response to WeCom. Uses the home channel, or specify `chat_id` in `deliver_extra`. |
 | `weixin` | Routes the response to Weixin (WeChat). Uses the home channel, or specify `chat_id` in `deliver_extra`. |
-| `bluebubbles` | Routes the response to BlueBubbles (iMessage). Uses the home channel, or specify `chat_id` in `deliver_extra`. |
 
 For cross-platform delivery, the target platform must also be enabled and connected in the gateway. If no `chat_id` is provided in `deliver_extra`, the response is sent to that platform's configured home channel.
 
@@ -380,7 +374,7 @@ By default, every webhook POST triggers an agent run — the payload becomes a p
 
 For use cases where you just want to **push a plain notification** — no reasoning, no agent loop, just deliver the message — set `deliver_only: true` on the route. The rendered `prompt` template becomes the literal message body, and the adapter dispatches it directly to the configured delivery target.
 
-### When to use direct delivery
+### When to use direct delivery {#when-to-use-direct-delivery}
 
 - **External service push** — Supabase/Firebase webhook fires on a database change → notify a user in Telegram instantly
 - **Monitoring alerts** — Datadog/Grafana alert webhook → push to a Discord channel
@@ -394,7 +388,7 @@ Benefits:
 - **Same security as agent mode** — HMAC auth, rate limits, idempotency, and body-size limits all still apply
 - **Synchronous response** — the POST returns `200 OK` once delivery succeeds, or `502` if the target rejects it, so your upstream service can retry intelligently
 
-### Example: Telegram push from Supabase
+### Example: Telegram push from Supabase {#example-telegram-push-from-supabase}
 
 ```yaml
 platforms:
@@ -415,7 +409,7 @@ platforms:
 
 Your Supabase edge function signs the payload with HMAC-SHA256 and POSTs to `https://your-server:8644/webhooks/antenna-matches`. The webhook adapter validates the signature, renders the template from the payload, delivers to Telegram, and returns `200 OK`.
 
-### Example: Dynamic subscription via CLI
+### Example: Dynamic subscription via CLI {#example-dynamic-subscription-via-cli}
 
 ```bash
 hermes webhook subscribe antenna-matches \
@@ -426,7 +420,7 @@ hermes webhook subscribe antenna-matches \
   --description "Antenna match notifications"
 ```
 
-### Response codes
+### Response codes {#response-codes}
 
 | Status | Meaning |
 |--------|---------|
@@ -439,7 +433,7 @@ hermes webhook subscribe antenna-matches \
 | `429 Too Many Requests` | Route rate limit exceeded. |
 | `502 Bad Gateway` | Target adapter rejected the message or raised. The error is logged server-side; the response body is a generic `Delivery failed` to avoid leaking adapter internals. |
 
-### Configuration gotchas
+### Configuration gotchas {#configuration-gotchas}
 
 - `deliver_only: true` requires `deliver` to be a real target. `deliver: log` (or omitting `deliver`) is rejected at startup — the adapter refuses to start if it finds a misconfigured route.
 - The `skills` field is ignored in direct delivery mode (no agent runs, so there's nothing to inject skills into).
@@ -458,7 +452,7 @@ How it works:
 2. The route's `prompt` template is rendered from the payload and injected into the job as **transient per-run context** (the same rail as `cronjob(action='run', prompt=...)` — the job's stored prompt is never mutated).
 3. The job fires through the same at-most-once claim the scheduler uses, so a webhook burst cannot double-fire a job that is already running, and the job's own delivery target receives the output.
 
-### Example: fire a PR-review job on review feedback
+### Example: fire a PR-review job on review feedback {#example-fire-a-pr-review-job-on-review-feedback}
 
 ```yaml
 platforms:
@@ -476,7 +470,7 @@ platforms:
             from {review.user.login}: {review.body}
 ```
 
-### Via the CLI
+### Via the CLI {#via-the-cli}
 
 ```bash
 hermes webhook subscribe pr-feedback \
@@ -488,7 +482,7 @@ hermes webhook subscribe pr-feedback \
 
 The job reference is validated when you create the subscription, so typos surface immediately.
 
-### Notes
+### Notes {#notes}
 
 - `cron_job` and `deliver_only` are mutually exclusive (the adapter refuses to start if a route sets both). A cron job handles its own delivery.
 - The route-level `deliver`, `deliver_extra`, and `skills` fields are ignored on `cron_job` routes — the job's own settings apply.
@@ -501,7 +495,7 @@ The job reference is validated when you create the subscription, so typos surfac
 
 In addition to static routes in `config.yaml`, you can create webhook subscriptions dynamically using the `hermes webhook` CLI command. This is especially useful when the agent itself needs to set up event-driven triggers.
 
-### Create a subscription
+### Create a subscription {#create-a-subscription}
 
 ```bash
 hermes webhook subscribe github-issues \
@@ -517,19 +511,19 @@ This returns the webhook URL and an auto-generated HMAC secret. Configure your s
 
 New subscriptions are pinned to `--signature generic` (timestamp-bound V2 or Standard Webhooks) unless you pass `--signature github`, `gitlab` or `linear` for a provider that signs its own way. Updating an existing subscription keeps its pin. A dashboard re-save of an existing route keeps its pin too, and MCP event subscriptions are pinned to `generic` when first created.
 
-### List subscriptions
+### List subscriptions {#list-subscriptions}
 
 ```bash
 hermes webhook list
 ```
 
-### Remove a subscription
+### Remove a subscription {#remove-a-subscription}
 
 ```bash
 hermes webhook remove github-issues
 ```
 
-### Test a subscription
+### Test a subscription {#test-a-subscription}
 
 ```bash
 hermes webhook test github-issues
@@ -538,7 +532,7 @@ hermes webhook test github-issues --payload '{"issue": {"number": 42, "title": "
 
 `test` signs the way the route's `signature` pin expects: `X-Hub-Signature-256` for `github`, `X-Gitlab-Token` for `gitlab`, `Linear-Signature` for `linear`, and `X-Webhook-Signature-V2` + `X-Webhook-Timestamp` for `generic` or unpinned routes.
 
-### How dynamic subscriptions work
+### How dynamic subscriptions work {#how-dynamic-subscriptions-work}
 
 - Subscriptions are stored in `~/.hermes/webhook_subscriptions.json`
 - The webhook adapter hot-reloads a coherent snapshot of this file on each incoming request (stat-gated (mtime/size/inode), lock-free)
@@ -548,7 +542,7 @@ hermes webhook test github-issues --payload '{"issue": {"number": 42, "title": "
 - Rebinding an existing route with `--route-profile` rotates its HMAC secret automatically. A caller with the old profile's secret cannot authenticate the rebound route; pass a different `--secret` only when the receiving service requires an operator-chosen value
 - No gateway restart required — subscribe and it's immediately live
 
-### Agent-driven subscriptions
+### Agent-driven subscriptions {#agent-driven-subscriptions}
 
 The agent can create subscriptions via the terminal tool when guided by the `webhook-subscriptions` skill. Ask the agent to "set up a webhook for GitHub issues" and it will run the appropriate `hermes webhook subscribe` command.
 
@@ -599,7 +593,7 @@ Behavior and safety properties:
 
 The webhook adapter includes multiple layers of security:
 
-### HMAC signature validation
+### HMAC signature validation {#hmac-signature-validation}
 
 The adapter validates incoming webhook signatures using the appropriate method for each source:
 
@@ -629,7 +623,7 @@ An unknown value is a configuration error: a static route stops the adapter from
 
 If a sender used body-only V1 (`X-Webhook-Signature`), **rotate that route's secret** when you move it to V2. Old captures stop validating under every header family only once the secret changes. GitHub and Linear signatures have no timestamp of their own, so a pinned `github`/`linear` route still relies on the 1-hour delivery-ID cache against replays of its own provider's requests.
 
-### Secret is required
+### Secret is required {#secret-is-required}
 
 Every route must have a secret — either set directly on the route or inherited from the global `secret`. Routes without a secret cause the adapter to fail at startup with an error. For development/testing only, you can set the secret to `"INSECURE_NO_AUTH"` to skip validation entirely.
 
@@ -640,7 +634,7 @@ rejected if its `/p/<profile>/` prefix does not match the route binding.
 
 `INSECURE_NO_AUTH` is only accepted when the gateway is bound to a loopback host (`127.0.0.1`, `localhost`, `::1`). If it is combined with a non-loopback bind such as `0.0.0.0` or a LAN IP, the adapter refuses to start — this prevents accidentally exposing an unauthenticated endpoint on a public interface.
 
-### Rate limiting
+### Rate limiting {#rate-limiting}
 
 Each route is rate-limited to **30 requests per minute** by default (fixed-window). Configure this globally:
 
@@ -653,11 +647,11 @@ platforms:
 
 Requests exceeding the limit receive a `429 Too Many Requests` response.
 
-### Idempotency
+### Idempotency {#idempotency}
 
 Delivery IDs (from `X-GitHub-Delivery`, `svix-id`, `webhook-id`, `X-Request-ID`, or a random per-request ID) are cached for **1 hour**. Duplicate deliveries (e.g. webhook retries) are silently skipped with a `200` response, preventing duplicate agent runs.
 
-### Body size limits
+### Body size limits {#body-size-limits}
 
 Payloads exceeding **1 MB** are rejected before the body is read. Configure this:
 
@@ -668,31 +662,39 @@ platforms:
       max_body_bytes: 2097152  # 2 MB
 ```
 
-### Authenticated does not mean trusted
+### Authenticated does not mean trusted {#authenticated-does-not-mean-trusted}
 
-:::warning
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
 **HMAC validation authenticates the _sender_, not the _content_.** A valid signature only proves the request came from a party holding the route's secret (e.g. GitHub). It says nothing about who wrote the _business fields_ inside the payload — PR titles, commit messages, issue descriptions, and any other upstream text are authored by arbitrary third parties and must be treated as untrusted.
 
-This is the same trust model that applies to everything the agent reads: web pages, files, and tool output are all untrusted input. Hermes does not — and cannot reliably — sanitize untrusted text with a blocklist; phrasing, encoding, and translation make that trivially bypassable. **The trust boundary is the agent's capability surface, not the input channel.** Harden there:
+This is the same trust model that applies to everything the agent reads: web pages, files, and tool output are all untrusted input. {{app-name}} does not — and cannot reliably — sanitize untrusted text with a blocklist; phrasing, encoding, and translation make that trivially bypassable. **The trust boundary is the agent's capability surface, not the input channel.** Harden there:
 
 - **Sandbox the runtime.** Run the gateway with the Docker or SSH terminal backend (or in a VM) when exposed to the internet, so a hijacked turn cannot touch the host.
 - **Scope the toolset.** Disable `terminal`, `file`, and outbound-action tools on webhook-triggered sessions if the route only needs to read and summarize. Fewer capabilities means a smaller blast radius if a payload field carries injected instructions.
 - **Keep approvals on** for any destructive or outbound operation, so an injected instruction cannot act unattended.
 - **Template narrowly.** Prefer a specific `prompt` with named fields (`{pull_request.title}`) over `{__raw__}` or an empty template that dumps the whole payload, so only the fields you intend reach the prompt.
-:::
+
+</Warning>
 
 ---
 
 ## Troubleshooting {#troubleshooting}
 
-### Webhook not arriving
+### Webhook not arriving {#webhook-not-arriving}
 
 - Verify the port is exposed and accessible from the webhook source
 - Check firewall rules — port `8644` (or your configured port) must be open
 - Verify the URL path matches: `http://your-server:8644/webhooks/<route-name>`
 - Use the `/health` endpoint to confirm the server is running
 
-### Signature validation failing
+### Signature validation failing {#signature-validation-failing}
 
 - Ensure the secret in your route config exactly matches the secret configured in the webhook source
 - For GitHub, the secret is HMAC-based — check `X-Hub-Signature-256`
@@ -701,25 +703,25 @@ This is the same trust model that applies to everything the agent reads: web pag
 - A route with `signature` set rejects every other scheme with `401` (look for `is pinned to signature` in the gateway log); a subscription created by `hermes webhook subscribe` without `--signature` is pinned to `generic`
 - Check gateway logs for `Invalid signature` warnings
 
-### Event being ignored
+### Event being ignored {#event-being-ignored}
 
 - Check that the event type is in your route's `events` list
 - GitHub events use values like `pull_request`, `push`, `issues` (the `X-GitHub-Event` header value)
 - GitLab events use values like `merge_request`, `push` (the `X-GitLab-Event` header value)
 - If `events` is empty or not set, all events are accepted
 
-### Agent not responding
+### Agent not responding {#agent-not-responding}
 
-- Run the gateway in foreground to see logs: `hermes gateway run`
+- Run the gateway in foreground to see logs: `noone gateway run`
 - Check that the prompt template is rendering correctly
 - Verify the delivery target is configured and connected
 
-### Duplicate responses
+### Duplicate responses {#duplicate-responses}
 
 - The idempotency cache should prevent this — check that the webhook source is sending a delivery ID header (`X-GitHub-Delivery`, `svix-id`, `webhook-id`, or `X-Request-ID`)
 - Delivery IDs are cached for 1 hour
 
-### `gh` CLI errors (GitHub comment delivery)
+### `gh` CLI errors (GitHub comment delivery) {#gh-cli-errors-github-comment-delivery}
 
 - Run `gh auth login` on the gateway host
 - Ensure the authenticated GitHub user has write access to the repository

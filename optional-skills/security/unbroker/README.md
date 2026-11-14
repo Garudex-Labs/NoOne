@@ -34,7 +34,7 @@ scanning and submitting with native tools (`web_extract`, `browser_exec`, email,
 ## Install
 
 ```bash
-hermes skills install official/security/unbroker
+noone skills install official/security/unbroker
 ```
 
 Then start a new Hermes session and drive it (below). The skill works zero-config; a few optional

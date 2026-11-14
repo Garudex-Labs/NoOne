@@ -19,10 +19,10 @@ import pytest
 from tests.gateway.test_normal_runtime_boot import control
 from tests.waiting import wait_until
 
-# The owner, with ``tui_gateway.ws.handle_ws`` failing the way the unimportable onboarding module did.
+# The owner, with ``agent_backend.ws.handle_ws`` failing the way the unimportable onboarding module did.
 _BROKEN_OWNER = textwrap.dedent('''
     import runpy, sys
-    import tui_gateway.ws as ws
+    import agent_backend.ws as ws
     del ws.handle_ws
     def __getattr__(name):
         if name == 'handle_ws':
@@ -38,11 +38,11 @@ _DIALS = textwrap.dedent('''
     import json
     from cron.scheduler_authority import run_canonical_job
     from agent.runtime_session_store import WorkerRPC
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     success, _output, _answer, error = run_canonical_job({'id': 'cron4job', 'name': 'cron-4'},
                                                          execution_id='cron4-exec')
     try:
-        WorkerRPC(get_hermes_home())('worker.heartbeat')
+        WorkerRPC(get_agent_home())('worker.heartbeat')
         worker = None
     except Exception as exc:
         worker = f'{type(exc).__name__}: {exc}'

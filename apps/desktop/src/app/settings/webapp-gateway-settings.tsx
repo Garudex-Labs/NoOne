@@ -1,8 +1,8 @@
+import { Check, Loader2 } from '@noone/ui/icons'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
-import { Check, Loader2 } from '@/lib/icons'
 import { notifyError } from '@/store/notifications'
 
 import { ConnectionsRegistrySection } from './connections-registry'

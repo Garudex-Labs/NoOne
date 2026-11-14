@@ -11,8 +11,8 @@ import pytest
 from gateway import hosted_room_driver as tasks
 from gateway import hosted_rooms
 from gateway.runtime_ownership import ProfileOwnership
-from hermes_state import SessionDB
-from hermes_state_runtime import begin_runtime_epoch
+from agent_state import SessionDB
+from agent_state_runtime import begin_runtime_epoch
 
 
 @pytest.fixture
@@ -92,9 +92,9 @@ def test_a_live_daemon_that_does_not_answer_keeps_the_turn(tmp_path, deferred, l
 
 
 def test_a_deleted_profile_whose_entry_remains_settles_once_its_daemon_is_gone(tmp_path, deferred):
-    from hermes_constants import mark_named_profile_deleted
+    from agent_constants import mark_named_profile_deleted
     home = tmp_path.resolve() / 'profiles' / 'two'
     service, db, identity, _roster = deferred(home)
-    mark_named_profile_deleted(home)  # `hermes profile delete` tombstones it; the config entry stays
+    mark_named_profile_deleted(home)  # `noone profile delete` tombstones it; the config entry stays
     _disband(service)
     assert tasks.get_task(db, identity)['status'] == 'cancelled'

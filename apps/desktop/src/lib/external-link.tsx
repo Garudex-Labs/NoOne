@@ -1,8 +1,8 @@
+import { ArrowUpRight } from '@noone/ui/icons'
 import type { ComponentProps, ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { hostHas } from '@/lib/host-capabilities'
-import { ArrowUpRight } from '@/lib/icons'
 import { IS_MAC } from '@/lib/keybinds/combo'
 import { $alwaysExternalLinks } from '@/store/external-links'
 

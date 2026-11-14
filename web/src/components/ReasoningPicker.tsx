@@ -19,8 +19,8 @@
  * reads/writes the same config the chat PTY was launched from.
  */
 
+import { Brain } from "@noone/ui/icons";
 import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
-import { Brain } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { api } from "@/lib/api";

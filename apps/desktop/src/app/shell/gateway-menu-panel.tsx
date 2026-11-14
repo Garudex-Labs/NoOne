@@ -1,19 +1,19 @@
+import { LayoutDashboard, Power, RefreshCw } from '@noone/ui/icons'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 
+import { getLogs } from '@/agent-client'
 import { StatusDot } from '@/components/status-dot'
 import { Button } from '@/components/ui/button'
 import { LogView } from '@/components/ui/log-view'
 import { Tip } from '@/components/ui/tooltip'
-import { getLogs } from '@/hermes'
 import { useI18n } from '@/i18n'
-import { LayoutDashboard, Power, RefreshCw } from '@/lib/icons'
 import { platformStatusTone } from '@/lib/platform-status'
 import type { RuntimeReadinessResult } from '@/lib/runtime-readiness'
 import { cn } from '@/lib/utils'
 import { reconnectGateway } from '@/store/gateway-reconnect'
 import { notifyError } from '@/store/notifications'
 import { runGatewayRestart } from '@/store/system-actions'
-import type { StatusResponse } from '@/types/hermes'
+import type { StatusResponse } from '@/types/agent-client'
 
 interface GatewayMenuPanelProps {
   gatewayState: string

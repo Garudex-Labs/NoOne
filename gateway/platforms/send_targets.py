@@ -3,7 +3,7 @@
 Plugins import these instead of core-private helpers in ``tools/send_message_*``:
 
 * ``target_ref_syntax_fn`` parsers — ``(target_ref) -> (chat_id, thread_id) | None | NOT_EXPLICIT``.
-  None falls through to core's generic id rules (E.164, numeric, Matrix ``!``/``@``); ``NOT_EXPLICIT``
+  None falls through to core's generic id rules (E.164, numeric); ``NOT_EXPLICIT``
   skips them and goes straight to the channel directory.
 * ``StandaloneSendPolicy`` — when send_message bypasses the live adapter for ``standalone_sender_fn``.
 
@@ -27,7 +27,7 @@ def regex_stripped_parser(regex):
 
 
 def parse_nonempty(ref):
-    # ntfy topics and WeCom ids (the adapter picks the send command) are explicit when non-empty.
+    # Plugin target ids (the adapter picks the send command) are explicit when non-empty.
     stripped = ref.strip()
     return (stripped, None) if stripped else None
 

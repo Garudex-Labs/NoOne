@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { ChevronDown, Globe } from '@noone/ui/icons'
 import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -15,7 +16,6 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useIsMobile } from '@/hooks/use-mobile'
 import { $appLocaleVersion, type LanguageOption, languageOptions, type Locale, localeMeta, useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { ChevronDown, Globe } from '@/lib/icons'
 import { normalize } from '@/lib/text'
 import { cn } from '@/lib/utils'
 import { notifyError } from '@/store/notifications'
@@ -46,7 +46,7 @@ export function LanguageSwitcher({ className, collapsed = false, dropUp = false 
   // Bundled ∪ plugin-registered ∪ backend `i18n.languages`; the registry
   // version re-lists when a pack lands after first paint.
   const registryVersion = useStore($appLocaleVersion)
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- registryVersion is the registry's change token
+   
   const allLocales = useMemo(() => languageOptions(), [registryVersion])
   const current = allLocales.find(option => option.id === locale) ?? { id: locale, ...localeMeta(locale) }
   const title = t.language.switchTo
@@ -146,7 +146,7 @@ function LanguageCommand({
 
   // Own the search term and filter manually. cmdk's built-in shouldFilter
   // reorders items by its fuzzy-match score (≈alphabetical with an empty
-  // query), which destroys the curated en→zh→zh-hant→ja order. We disable it
+  // query), which destroys the curated en→zh→hi→ko→ja order. We disable it
   // and do a plain substring filter that preserves array order — matching
   // model-picker.tsx. Match against the endonym, the (hidden) English name,
   // and the locale code so "日本"/"japanese"/"ja" all find Japanese.

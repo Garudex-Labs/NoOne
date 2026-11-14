@@ -1,8 +1,9 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { Loader2 } from '@noone/ui/icons'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +24,6 @@ import {
   sortConnectionsForDisplay
 } from '@/lib/connection-display'
 import { triggerHaptic } from '@/lib/haptics'
-import { Loader2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { $activeConnectionId, $connectionsRegistry, $pendingConnectionId, selectConnection } from '@/store/connections'
 import { closeFindBar } from '@/store/find-in-page'
@@ -260,7 +260,7 @@ function ConnectionSwitcherTrigger({
           <span className="truncate">{title}</span>
         )}
       </span>
-      <Codicon aria-hidden="true" className="shrink-0 opacity-60" name="chevron-down" size="0.875rem" />
+      <AppIcon aria-hidden="true" className="shrink-0 opacity-60" name="chevron-down" size="0.875rem" />
     </Button>
   )
 }
@@ -268,7 +268,7 @@ function ConnectionSwitcherTrigger({
 function ManageGatewaysLabel({ label }: { label: string }) {
   return (
     <span className="flex min-w-0 items-center gap-1.5 text-(--ui-text-secondary)">
-      <Codicon aria-hidden="true" name="settings-gear" size="0.875rem" />
+      <AppIcon aria-hidden="true" name="settings-gear" size="0.875rem" />
       <span className="truncate">{label}</span>
     </span>
   )

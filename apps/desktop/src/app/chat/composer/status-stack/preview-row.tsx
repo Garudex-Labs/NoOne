@@ -1,8 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo, useState } from 'react'
 
 import { StatusRow } from '@/components/chat/status-row'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { isDesktopFsRemoteMode } from '@/lib/desktop-fs'
@@ -83,7 +83,7 @@ export const PreviewStatusRow = memo(function PreviewStatusRow({ item, onDismiss
     <StatusRow
       dismiss={{ label: t.statusStack.dismiss, onDismiss: () => onDismiss(item.id) }}
       leading={
-        <Codicon
+        <AppIcon
           aria-hidden
           className={cn('text-muted-foreground/70', opening && 'animate-pulse')}
           name="globe"

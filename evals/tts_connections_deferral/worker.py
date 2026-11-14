@@ -51,7 +51,7 @@ os.makedirs(hermes_home, exist_ok=True)
 os.makedirs(workspace, exist_ok=True)
 isolate_host(tmp_root, hermes_home)
 # A model that cannot see manage_connections reaches for the host's `hermes` CLI (`hermes mcp install`,
-# `hermes pm repair`); keep that out of the operator's install.
+# `noone pm repair`); keep that out of the operator's install.
 with open(os.path.join(tmp_root, "bin", "hermes"), "w", encoding="utf-8") as f:
     f.write("#!/bin/sh\necho 'hermes: the CLI is not available inside this eval sandbox' >&2\nexit 127\n")
 os.chmod(os.path.join(tmp_root, "bin", "hermes"), 0o755)
@@ -61,7 +61,7 @@ os.chdir(workspace)
 sys.path.insert(0, TREE)
 defer_yaml = ""
 if ARM in ARMS:  # every arm pins the list, so the only difference is the one name
-    from hermes_cli.config_defaults import DEFAULT_CONFIG
+    from agent_cli.config_defaults import DEFAULT_CONFIG
     defer = [n for n in DEFAULT_CONFIG["tools"]["tool_search"]["defer"] if n != "manage_connections"]
     defer_yaml = "tools:\n  tool_search:\n    defer: [" + ", ".join(defer + ["manage_connections"] * ARMS[ARM][0]) + "]\n"
 with open(os.path.join(hermes_home, "config.yaml"), "w", encoding="utf-8") as f:

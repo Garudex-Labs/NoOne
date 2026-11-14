@@ -1,8 +1,8 @@
 """Backend boot handshake contract, Python side (issue class C5).
 
-The Desktop spawns ``hermes serve`` with stdout piped and learns the port ONLY from
+The Desktop spawns ``noone serve`` with stdout piped and learns the port ONLY from
 the READY sentinel on stdout (``apps/desktop/electron/backend-ready.ts``); the Ink
-TUI spawns ``tui_gateway.entry`` and treats stdout as a pure JSON-RPC stream whose
+TUI spawns ``agent_backend.entry`` and treats stdout as a pure JSON-RPC stream whose
 first frame is ``gateway.ready``. Both break the same way — the sentinel/frame goes
 to the wrong stream, arrives after other bytes, or stops parsing — and every such
 break presents to users as "backend failed to start" / a hung spinner.
@@ -13,7 +13,7 @@ Invariants (spawned exactly as the real clients spawn them, cold, fake provider)
   Node, not a Python copy of its regex) resolves a port from the stdout bytes seen
   up to and including it, and that port is the live backend (authenticated
   ``/api/status`` answers).
-* tui_gateway: the FIRST stdout line is a JSON-RPC ``gateway.ready`` event whose
+* agent_backend: the FIRST stdout line is a JSON-RPC ``gateway.ready`` event whose
   payload validates against the published contract, and every later stdout line
   is JSON-RPC too (stray prints must land on stderr).
 """
@@ -96,13 +96,13 @@ def test_tui_gateway_first_stdout_frame_is_contract_valid_gateway_ready(tmp_path
 
 
 def _check_tui_gateway_ready(home) -> None:
-    from tui_gateway.contracts.registry import EVENTS
+    from agent_backend.contracts.registry import EVENTS
 
     proc, cap = spawn_tui_gateway(home)
     try:
         deadline = time.monotonic() + READY_TIMEOUT
         while not cap.stdout_seen:
-            assert proc.poll() is None, f"tui_gateway exited {proc.returncode}\n{cap.stderr[-2000:]}"
+            assert proc.poll() is None, f"agent_backend exited {proc.returncode}\n{cap.stderr[-2000:]}"
             assert time.monotonic() < deadline, f"no stdout frame within {READY_TIMEOUT}s\n{cap.stderr[-2000:]}"
             time.sleep(0.05)
         first = cap.stdout_seen[0]
@@ -110,7 +110,7 @@ def _check_tui_gateway_ready(home) -> None:
             frame = json.loads(first)
         except ValueError:
             frame = None
-        assert isinstance(frame, dict), f"first stdout line of tui_gateway is not JSON-RPC: {first!r}"
+        assert isinstance(frame, dict), f"first stdout line of agent_backend is not JSON-RPC: {first!r}"
         params = frame.get("params") or {}
         assert frame.get("method") == "event" and params.get("type") == "gateway.ready", frame
         ready = EVENTS["gateway.ready"]
@@ -130,7 +130,7 @@ def _check_tui_gateway_ready(home) -> None:
             try:
                 assert json.loads(line).get("jsonrpc") == "2.0"
             except ValueError:
-                pytest.fail(f"non-JSON bytes on tui_gateway stdout: {line!r}")
+                pytest.fail(f"non-JSON bytes on agent_backend stdout: {line!r}")
     finally:
         if proc.stdin is not None and not proc.stdin.closed:
             proc.stdin.close()

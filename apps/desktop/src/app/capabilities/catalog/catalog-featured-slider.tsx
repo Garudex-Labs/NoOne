@@ -1,8 +1,8 @@
+import { ChevronLeft, ChevronRight } from '@noone/ui/icons'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
-import { ChevronLeft, ChevronRight } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 /** How long a slide holds before the hero advances on its own. */

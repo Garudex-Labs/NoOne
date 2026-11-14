@@ -1,4 +1,4 @@
-"""Session-attach handshake: ``hermes --tui --resume SID`` must hand the TUI only the REAL owner's socket.
+"""Session-attach handshake: ``noone --tui --resume SID`` must hand the TUI only the REAL owner's socket.
 
 When a resumed session is already open elsewhere, the launcher reads the owner's lease from the
 active-session registry, calls ``GET <metadata.shared_runtime_url>/api/session-attach`` and exports the
@@ -9,7 +9,7 @@ Real processes throughout:
 
 * the lease holder is a separate Python process that creates the session through ``SessionDB`` and
   acquires its lease through ``try_acquire_active_session`` (the registry path production uses);
-* the client is the real ``hermes --tui --resume SID`` CLI (argparse, profile-home resolution, the
+* the client is the real ``noone --tui --resume SID`` CLI (argparse, profile-home resolution, the
   launcher's discovery, its error exit);
 * the TUI child is a recording stand-in bundle selected through the supported prebuilt-bundle override
   (``HERMES_TUI_DIR/dist/entry.js``). It writes the environment the launcher handed it and exits, so the
@@ -26,7 +26,7 @@ Scenarios (the listener answering the advertised port):
   its own identity; the TUI must receive that owner's socket and the lease must stay with the owner.
 
 Why the owner side is a test process: no shipped Hermes runtime advertises ``shared_runtime_url`` or
-serves ``/api/session-attach`` yet (``hermes serve`` and the dashboard do not register one), so the
+serves ``/api/session-attach`` yet (``noone serve`` and the dashboard do not register one), so the
 closest real owner is a process holding the real lease that answers from its own lease knowledge. It
 speaks both the current dialect (``lease_id`` in the reply) and the proof dialect of the candidate fix
 (``attach_proof`` = HMAC-SHA256 keyed by the lease over the client's nonce), so the control holds on main
@@ -78,15 +78,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from hermes_constants import get_hermes_home
-from hermes_state import SessionDB
-from hermes_cli.active_sessions import try_acquire_active_session
+from agent_constants import get_agent_home
+from agent_state import SessionDB
+from agent_cli.active_sessions import try_acquire_active_session
 
 sid, advertise, token = sys.argv[1], sys.argv[2], sys.argv[3]
 db = SessionDB()
 db.create_session(session_id=sid, source="cli")
 db.close()
-home = str(Path(get_hermes_home()).resolve())
+home = str(Path(get_agent_home()).resolve())
 state = {}
 
 
@@ -144,9 +144,9 @@ fs.writeFileSync(process.env.ATTACH_PROBE_OUT, JSON.stringify({
 
 SNAPSHOT_CODE = r"""
 import json, sys
-from hermes_constants import get_hermes_home
-from hermes_cli.active_sessions import active_session_registry_snapshot
-rows = [e for e in active_session_registry_snapshot(get_hermes_home(), strict=True)
+from agent_constants import get_agent_home
+from agent_cli.active_sessions import active_session_registry_snapshot
+rows = [e for e in active_session_registry_snapshot(get_agent_home(), strict=True)
         if e.get("session_id") == sys.argv[1]]
 print(json.dumps([{"pid": e.get("pid"), "url": (e.get("metadata") or {}).get("shared_runtime_url")}
                   for e in rows]))
@@ -245,7 +245,7 @@ def home(tmp_path: Path) -> Path:
 
 
 def _resume(home: Path, sid: str) -> tuple[subprocess.CompletedProcess, dict | None]:
-    """Run ``hermes --tui --resume SID``; return the process result and what the TUI child received."""
+    """Run ``noone --tui --resume SID``; return the process result and what the TUI child received."""
     out = home.parent / f"handoff-{uuid.uuid4().hex}.json"
     result = run_hermes(
         ["--tui", "--resume", sid], home, timeout=90,

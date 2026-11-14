@@ -1,6 +1,6 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { useEffect, useRef } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import {
   ANNOTATE_CARD_HEIGHT,
   ANNOTATE_CARD_WIDTH,
@@ -112,7 +112,7 @@ export function PreviewAnnotateCard({
         style={{ background: ANNOTATE_PILL_SEND }}
         type="submit"
       >
-        <Codicon name="arrow-up" size="0.875rem" />
+        <AppIcon name="arrow-up" size="0.875rem" />
       </button>
     </form>
   )

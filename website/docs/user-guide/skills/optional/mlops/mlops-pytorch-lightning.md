@@ -1,20 +1,20 @@
 ---
 title: "Pytorch Lightning — Clean training loops with built-in distributed support"
-sidebar_label: "Pytorch Lightning"
+sidebarTitle: "Pytorch Lightning"
 description: "Clean training loops with built-in distributed support"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Pytorch Lightning
+# Pytorch Lightning {#pytorch-lightning}
 
 Clean training loops with built-in distributed support.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/pytorch-lightning` |
+| Source | Optional — install with `noone skills install official/mlops/pytorch-lightning` |
 | Path | `optional-skills/mlops/pytorch-lightning` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,15 +23,23 @@ Clean training loops with built-in distributed support.
 | Platforms | linux, macos, windows |
 | Tags | `PyTorch Lightning`, `Training Framework`, `Distributed Training`, `DDP`, `FSDP`, `DeepSpeed`, `High-Level API`, `Callbacks`, `Best Practices`, `Scalable` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# PyTorch Lightning - High-Level Training Framework
+<div className="doc-callout-title">
 
-## Quick start
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# PyTorch Lightning - High-Level Training Framework {#pytorch-lightning---high-level-training-framework}
+
+## Quick start {#quick-start}
 
 PyTorch Lightning organizes PyTorch code to eliminate boilerplate while maintaining flexibility.
 
@@ -86,9 +94,9 @@ trainer.fit(model, train_loader)
 - Logging
 - Progress bars
 
-## Common workflows
+## Common workflows {#common-workflows}
 
-### Workflow 1: From PyTorch to Lightning
+### Workflow 1: From PyTorch to Lightning {#workflow-1-from-pytorch-to-lightning}
 
 **Original PyTorch code**:
 ```python
@@ -126,7 +134,7 @@ trainer.fit(LitModel(), train_loader)
 
 **Benefits**: 40+ lines → 15 lines, no device management, automatic distributed
 
-### Workflow 2: Validation and testing
+### Workflow 2: Validation and testing {#workflow-2-validation-and-testing}
 
 ```python
 class LitModel(L.LightningModule):
@@ -171,7 +179,7 @@ trainer.test(model, test_loader)
 - Metrics logged to TensorBoard
 - Best model checkpointing based on val_loss
 
-### Workflow 3: Distributed training (DDP)
+### Workflow 3: Distributed training (DDP) {#workflow-3-distributed-training-ddp}
 
 ```python
 # Same code as single GPU!
@@ -198,7 +206,7 @@ python train.py
 - Gradient synchronization
 - Multi-node support (just set `num_nodes=2`)
 
-### Workflow 4: Callbacks for monitoring
+### Workflow 4: Callbacks for monitoring {#workflow-4-callbacks-for-monitoring}
 
 ```python
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping, LearningRateMonitor
@@ -233,7 +241,7 @@ trainer.fit(model, train_loader, val_loader)
 - Stops early if no improvement for 5 epochs
 - Logs learning rate to TensorBoard
 
-### Workflow 5: Learning rate scheduling
+### Workflow 5: Learning rate scheduling {#workflow-5-learning-rate-scheduling}
 
 ```python
 class LitModel(L.LightningModule):
@@ -263,7 +271,7 @@ trainer = L.Trainer(max_epochs=100)
 trainer.fit(model, train_loader)
 ```
 
-## When to use vs alternatives
+## When to use vs alternatives {#when-to-use-vs-alternatives}
 
 **Use PyTorch Lightning when**:
 - Want clean, organized code
@@ -285,7 +293,7 @@ trainer.fit(model, train_loader)
 - **Raw PyTorch**: Maximum control, learning purposes
 - **Keras**: TensorFlow ecosystem
 
-## Common issues
+## Common issues {#common-issues}
 
 **Issue: Loss not decreasing**
 
@@ -332,15 +340,15 @@ trainer = L.Trainer(accelerator='cpu', devices=1)
 trainer = L.Trainer(accelerator='gpu', devices=1)
 ```
 
-## Advanced topics
+## Advanced topics {#advanced-topics}
 
-**Callbacks**: See [references/callbacks.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/pytorch-lightning/references/callbacks.md) for EarlyStopping, ModelCheckpoint, custom callbacks, and callback hooks.
+**Callbacks**: See [references/callbacks.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/pytorch-lightning/references/callbacks.md) for EarlyStopping, ModelCheckpoint, custom callbacks, and callback hooks.
 
-**Distributed strategies**: See [references/distributed.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/pytorch-lightning/references/distributed.md) for DDP, FSDP, DeepSpeed ZeRO integration, multi-node setup.
+**Distributed strategies**: See [references/distributed.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/pytorch-lightning/references/distributed.md) for DDP, FSDP, DeepSpeed ZeRO integration, multi-node setup.
 
-**Hyperparameter tuning**: See [references/hyperparameter-tuning.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/pytorch-lightning/references/hyperparameter-tuning.md) for integration with Optuna, Ray Tune, and WandB sweeps.
+**Hyperparameter tuning**: See [references/hyperparameter-tuning.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/pytorch-lightning/references/hyperparameter-tuning.md) for integration with Optuna, Ray Tune, and WandB sweeps.
 
-## Hardware requirements
+## Hardware requirements {#hardware-requirements}
 
 - **CPU**: Works (good for debugging)
 - **Single GPU**: Works
@@ -355,7 +363,7 @@ trainer = L.Trainer(accelerator='gpu', devices=1)
 - BF16 (A100/H100, recommended)
 - FP8 (H100)
 
-## Resources
+## Resources {#resources}
 
 - Docs: https://lightning.ai/docs/pytorch/stable/
 - GitHub: https://github.com/Lightning-AI/pytorch-lightning ⭐ 29,000+

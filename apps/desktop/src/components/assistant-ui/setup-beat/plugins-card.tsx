@@ -1,9 +1,9 @@
 'use client'
 
-import type { CatalogPluginPresence, PluginsManageResult } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import type { CatalogPluginPresence, PluginsManageResult } from '@noone/shared'
+import { Puzzle } from '@noone/ui/icons'
 import { useQuery } from '@tanstack/react-query'
-import { Puzzle } from 'lucide-react'
 import { useEffect } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'

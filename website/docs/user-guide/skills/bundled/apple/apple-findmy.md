@@ -1,40 +1,48 @@
 ---
 title: "Findmy — Track Apple devices/AirTags via FindMy.app on macOS"
-sidebar_label: "Findmy"
+sidebarTitle: "Findmy"
 description: "Track Apple devices/AirTags via FindMy.app on macOS"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Findmy
+# Findmy {#findmy}
 
 Track Apple devices/AirTags via FindMy.app on macOS.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/apple/findmy` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | macos |
 | Tags | `FindMy`, `AirTag`, `location`, `tracking`, `macOS`, `Apple` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Find My (Apple)
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Find My (Apple) {#find-my-apple}
 
 Track Apple devices and AirTags via the FindMy.app on macOS. Since Apple doesn't
 provide a CLI for FindMy, this skill uses AppleScript to open the app and
 screen capture to read device locations.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **macOS** with Find My app and iCloud signed in
 - Devices/AirTags already registered in Find My
@@ -42,16 +50,16 @@ screen capture to read device locations.
 - **Optional but recommended**: Install `peekaboo` for better UI automation:
   `brew install steipete/tap/peekaboo`
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks "where is my [device/cat/keys/bag]?"
 - Tracking AirTag locations
 - Checking device locations (iPhone, iPad, Mac, AirPods)
 - Monitoring pet or item movement over time (AirTag patrol routes)
 
-## Method 1: AppleScript + Screenshot (Basic)
+## Method 1: AppleScript + Screenshot (Basic) {#method-1-applescript--screenshot-basic}
 
-### Open FindMy and Navigate
+### Open FindMy and Navigate {#open-findmy-and-navigate}
 
 ```bash
 # Open Find My app
@@ -69,7 +77,7 @@ Then use `vision_analyze` to read the screenshot:
 vision_analyze(image_url="~/.hermes/cache/scratch/findmy.png", question="What devices/items are shown and what are their locations?")
 ```
 
-### Switch Between Tabs
+### Switch Between Tabs {#switch-between-tabs}
 
 ```bash
 # Switch to Devices tab
@@ -89,7 +97,7 @@ tell application "System Events"
 end tell'
 ```
 
-## Method 2: Peekaboo UI Automation (Recommended)
+## Method 2: Peekaboo UI Automation (Recommended) {#method-2-peekaboo-ui-automation-recommended}
 
 If `peekaboo` is installed, use it for more reliable UI interaction:
 
@@ -113,7 +121,7 @@ Then analyze with vision:
 vision_analyze(image_url="~/.hermes/cache/scratch/findmy-detail.png", question="What is the location shown for this device/item? Include address and coordinates if visible.")
 ```
 
-## Workflow: Track AirTag Location Over Time
+## Workflow: Track AirTag Location Over Time {#workflow-track-airtag-location-over-time}
 
 For monitoring an AirTag (e.g., tracking a cat's patrol route):
 
@@ -133,7 +141,7 @@ done
 
 Analyze each screenshot with vision to extract coordinates, then compile a route.
 
-## Limitations
+## Limitations {#limitations}
 
 - FindMy has **no CLI or API** — must use UI automation
 - AirTags only update location while the FindMy page is actively displayed
@@ -141,7 +149,7 @@ Analyze each screenshot with vision to extract coordinates, then compile a route
 - Screen Recording permission required for screenshots
 - AppleScript UI automation may break across macOS versions
 
-## Rules
+## Rules {#rules}
 
 1. Keep FindMy app in the foreground when tracking AirTags (updates stop when minimized)
 2. Use `vision_analyze` to read screenshot content — don't try to parse pixels

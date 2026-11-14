@@ -8,7 +8,7 @@ description: >-
   profile's OPENROUTER_API_KEY through agent.secret_scope (profile-scope aware, safe under
   multiplexing; the key never leaves the backend) and proxies the free openrouter.ai
   /api/v1/credits endpoint, mounted at /api/plugins/openrouter-balance/* behind the dashboard
-  auth gate. The desktop half registers a statusBar.right chip via @hermes/plugin-sdk. The
+  auth gate. The desktop half registers a statusBar.right chip via @noone/plugin-sdk. The
   Python register() is a no-op — no tools, hooks or middleware. Disclosure — the only network
   egress is the openrouter.ai credits call authenticated with the user's own key; no telemetry;
   no file reads outside Hermes's own env resolution; no shell commands or background processes.

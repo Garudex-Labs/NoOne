@@ -1,10 +1,10 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { SearchIcon } from '@noone/ui/icons'
 import { Command as CommandPrimitive } from 'cmdk'
 import * as React from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { usePointerQuiet } from '@/components/ui/keyboard-first'
 import { menuItemClass } from '@/components/ui/menu'
-import { SearchIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 type CommandVariant = 'default' | 'menu'
@@ -175,7 +175,7 @@ function CommandItem({ className, ...props }: React.ComponentProps<typeof Comman
 
 /** The trailing check a menu row wears when it's the current value — same glyph and spot as DropdownMenu/Select. */
 function CommandItemCheck({ checked }: { checked: boolean }) {
-  return checked ? <Codicon className="ml-auto pl-2 text-foreground" name="check" size="0.75rem" /> : null
+  return checked ? <AppIcon className="ml-auto pl-2 text-foreground" name="check" size="0.75rem" /> : null
 }
 
 function CommandShortcut({ className, ...props }: React.ComponentProps<'span'>) {

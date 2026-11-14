@@ -33,23 +33,6 @@ async def test_whatsapp_bridge_sends_plain_audio_as_a_document(tmp_path, is_voic
     assert [p["mediaType"] for p in posted] == [expected]
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize("is_voice, audio_message", [(False, False), (None, True)], ids=["plain", "voice"])
-async def test_bluebubbles_sends_plain_audio_without_the_voice_memo_flag(tmp_path, monkeypatch, is_voice, audio_message):
-    from plugins.platforms.bluebubbles.adapter import BlueBubblesAdapter
-
-    adapter = BlueBubblesAdapter(PlatformConfig(enabled=True, extra={"server_url": "http://localhost:1234", "password": "x"}))
-    response = MagicMock()
-    response.json.return_value = {"status": 200, "data": {"guid": "g1"}}
-    adapter.client = SimpleNamespace(post=AsyncMock(return_value=response))
-    monkeypatch.setattr(adapter, "_resolve_chat_guid", AsyncMock(return_value="iMessage;-;+15551234567"))
-    path = tmp_path / "door_knock.mp3"
-    path.write_bytes(b"ID3\x04" + b"\x00" * 32)
-
-    assert (await adapter.send_voice("+15551234567", str(path), is_voice=is_voice)).success
-    data = adapter.client.post.await_args.kwargs["data"]
-    assert ("isAudioMessage" in data) is audio_message
-    assert data["name"] == "door_knock.mp3"
 
 
 @pytest.mark.asyncio

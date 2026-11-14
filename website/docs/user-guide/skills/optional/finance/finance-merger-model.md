@@ -1,47 +1,55 @@
 ---
 title: "Merger Model — Build M&A accretion/dilution workbooks in Excel"
-sidebar_label: "Merger Model"
+sidebarTitle: "Merger Model"
 description: "Build M&A accretion/dilution workbooks in Excel"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Merger Model
+# Merger Model {#merger-model}
 
 Build M&A accretion/dilution workbooks in Excel.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/finance/merger-model` |
+| Source | Optional — install with `noone skills install official/finance/merger-model` |
 | Path | `optional-skills/finance/merger-model` |
 | Version | `1.0.0` |
-| Author | Anthropic (adapted by Nous Research) |
+| Author | Anthropic (adapted by Garudex Labs) |
 | License | Apache-2.0 |
 | Platforms | linux, macos, windows |
 | Tags | `finance`, `m-and-a`, `merger`, `accretion-dilution`, `excel`, `openpyxl`, `modeling`, `investment-banking` |
 | Related skills | [`excel-author`](../../optional/finance/finance-excel-author.md), [`pptx-author`](../../optional/finance/finance-pptx-author.md), [`dcf-model`](../../optional/finance/finance-dcf-model.md), [`3-statement-model`](../../optional/finance/finance-3-statement-model.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-## Environment
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+## Environment {#environment}
 
 This skill assumes **headless openpyxl** — you are producing an .xlsx file on disk.
 Follow the `excel-author` skill's conventions for cell coloring, formulas, named ranges, and sensitivity tables.
 Recalculate before delivery: `python /path/to/excel-author/scripts/recalc.py ./out/model.xlsx`.
 
-# Merger Model
+# Merger Model {#merger-model-1}
 
 Build accretion/dilution analysis for M&A transactions. Models pro forma EPS impact, synergy sensitivities, and purchase price allocation. Use when evaluating a potential acquisition, preparing merger consequences analysis for a pitch, or advising on deal terms.
 
-## Workflow
+## Workflow {#workflow}
 
-### Step 1: Gather Inputs
+### Step 1: Gather Inputs {#step-1-gather-inputs}
 
 **Acquirer:**
 - Company name, current share price, shares outstanding
@@ -63,7 +71,7 @@ Build accretion/dilution analysis for M&A transactions. Models pro forma EPS imp
 - Transaction fees and financing costs
 - Expected close date
 
-### Step 2: Purchase Price Analysis
+### Step 2: Purchase Price Analysis {#step-2-purchase-price-analysis}
 
 | Item | Value |
 |------|-------|
@@ -75,7 +83,7 @@ Build accretion/dilution analysis for M&A transactions. Models pro forma EPS imp
 | EV / EBITDA implied | |
 | P/E implied | |
 
-### Step 3: Sources & Uses
+### Step 3: Sources & Uses {#step-3-sources--uses}
 
 | Sources | $ | Uses | $ |
 |---------|---|------|---|
@@ -85,7 +93,7 @@ Build accretion/dilution analysis for M&A transactions. Models pro forma EPS imp
 | | | Financing fees | |
 | **Total** | | **Total** | |
 
-### Step 4: Pro Forma EPS (Accretion / Dilution)
+### Step 4: Pro Forma EPS (Accretion / Dilution) {#step-4-pro-forma-eps-accretion--dilution}
 
 Calculate year-by-year (Year 1-3):
 
@@ -102,7 +110,7 @@ Calculate year-by-year (Year 1-3):
 | **Pro forma EPS** | | | |
 | **Accretion / (Dilution) %** | | | |
 
-### Step 5: Sensitivity Analysis
+### Step 5: Sensitivity Analysis {#step-5-sensitivity-analysis}
 
 **Accretion/Dilution vs. Synergies and Offer Premium:**
 
@@ -120,11 +128,11 @@ Calculate year-by-year (Year 1-3):
 | Year 1 | | | | | |
 | Year 2 | | | | | |
 
-### Step 6: Breakeven Synergies
+### Step 6: Breakeven Synergies {#step-6-breakeven-synergies}
 
 Calculate the minimum synergies needed for the deal to be EPS-neutral in Year 1.
 
-### Step 7: Output
+### Step 7: Output {#step-7-output}
 
 - Excel workbook with:
   - Assumptions tab
@@ -135,7 +143,7 @@ Calculate the minimum synergies needed for the deal to be EPS-neutral in Year 1.
   - Breakeven analysis
 - One-page merger consequences summary for pitch book
 
-## Important Notes
+## Important Notes {#important-notes}
 
 - Always show both GAAP and adjusted (cash) EPS where relevant
 - Stock deals: use acquirer's current price for exchange ratio, note dilution from new shares
@@ -145,11 +153,11 @@ Calculate the minimum synergies needed for the deal to be EPS-neutral in Year 1.
 - Tax rate on synergies and interest adjustments should match the acquirer's marginal rate
 
 
-## Data sources — MCP first, web fallback
+## Data sources — MCP first, web fallback {#data-sources--mcp-first-web-fallback}
 
-Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Those are commercial financial-data MCPs from the original Cowork plugin context. In Hermes:
+Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Those are commercial financial-data MCPs from the original Cowork plugin context. In {{app-name}}:
 
-- **If you have any structured financial-data MCP configured** (Hermes supports MCP — see `native-mcp` skill), prefer it for point-in-time comps, precedent transactions, and filings.
+- **If you have any structured financial-data MCP configured** ({{app-name}} supports MCP — see `native-mcp` skill), prefer it for point-in-time comps, precedent transactions, and filings.
 - **Otherwise**, fall back to:
   - `web_search` / `web_extract` against SEC EDGAR (`https://www.sec.gov/cgi-bin/browse-edgar`) for US filings
   - Company IR pages for press releases, earnings decks
@@ -157,6 +165,6 @@ Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Th
   - User-provided data (explicitly ask when the context doesn't have it)
 - **Never fabricate**. If a multiple, precedent, or filing number can't be sourced, flag the cell as `[UNSOURCED]` and surface it to the user.
 
-## Attribution
+## Attribution {#attribution}
 
 This skill is adapted from Anthropic's Claude for Financial Services plugin suite (Apache-2.0). The Office-JS / Cowork live-Excel paths have been removed; this version targets headless openpyxl via the `excel-author` skill's conventions. Original: https://github.com/anthropics/financial-services

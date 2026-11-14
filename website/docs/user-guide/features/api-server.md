@@ -1,22 +1,29 @@
 ---
-sidebar_position: 14
 title: "API Server"
-description: "Expose hermes-agent as an OpenAI-compatible API for any frontend"
+description: "Expose the agent as an OpenAI-compatible API for any frontend"
 ---
 
-# API Server
+# API Server {#api-server}
 
-The API server exposes hermes-agent as an OpenAI-compatible HTTP endpoint. Any frontend that speaks the OpenAI format — Open WebUI, LobeChat, LibreChat, NextChat, ChatBox, and hundreds more — can connect to hermes-agent and use it as a backend.
+The API server exposes the agent as an OpenAI-compatible HTTP endpoint. Any frontend that speaks the OpenAI format — Open WebUI, LobeChat, LibreChat, NextChat, ChatBox, and hundreds more — can connect to the agent and use it as a backend.
 
 Your agent handles requests with its full toolset (terminal, file operations, web search, memory, skills) and returns the final response. When streaming, tool progress indicators appear inline so frontends can show what the agent is doing.
 
-:::tip One backend covers models + tools
-Hermes itself needs a configured provider and tool backends for the API server to be useful. A [Nous Portal](./tool-gateway.md) subscription handles both — 300+ models plus web/image/TTS/browser via the Tool Gateway. Run `hermes setup --portal` once before starting the API server and frontends like Open WebUI or LobeChat get a fully tool-equipped backend.
-:::
+<Tip>
 
-## Quick Start
+<div className="doc-callout-title">
 
-### 1. Enable the API server
+One backend covers models + tools
+
+</div>
+
+{{app-name}} itself needs a configured provider and tool backends for the API server to be useful. A [Nous Portal](./tool-gateway.md) subscription handles both — 300+ models plus web/image/TTS/browser via the Tool Gateway. Run `noone setup --portal` once before starting the API server and frontends like Open WebUI or LobeChat get a fully tool-equipped backend.
+
+</Tip>
+
+## Quick Start {#quick-start}
+
+### 1. Enable the API server {#1-enable-the-api-server}
 
 Add to `~/.hermes/.env`:
 
@@ -27,10 +34,10 @@ API_SERVER_KEY=change-me-local-dev
 # API_SERVER_CORS_ORIGINS=http://localhost:3000
 ```
 
-### 2. Start the gateway
+### 2. Start the gateway {#2-start-the-gateway}
 
 ```bash
-hermes gateway
+noone gateway
 ```
 
 You'll see:
@@ -39,7 +46,7 @@ You'll see:
 [API Server] API server listening on http://127.0.0.1:8642
 ```
 
-### 3. Connect a frontend
+### 3. Connect a frontend {#3-connect-a-frontend}
 
 Point any OpenAI-compatible client at `http://localhost:8642/v1`:
 
@@ -53,7 +60,7 @@ curl http://localhost:8642/v1/chat/completions \
 
 Or connect Open WebUI, LobeChat, or any other frontend — see the [Open WebUI integration guide](../messaging/open-webui.md) for step-by-step instructions.
 
-## Conversation and terminal-result semantics
+## Conversation and terminal-result semantics {#conversation-and-terminal-result-semantics}
 
 API requests use the gateway's durable admission queue. Structured image content stays
 structured through execution; it is not interpreted as a gateway slash command.
@@ -139,12 +146,20 @@ removed only when a prune pass runs, and until then the key behaves as below.
   gone answers 409 `admission_conflict`, even on a live session. Once its identity is
   gone and its tombstones are pruned, the key can name new work.
 
-:::note
+<Note>
+
+<div className="doc-callout-title">
+
+NOTE
+
+</div>
+
 By default the response store retains the 1,000 most recently settled identities per
 profile (10 per stored-response slot). Pending or running identities are not counted
 and are never dropped, and deleting a response removes its identity sooner. This is a
 current default, not a replay guarantee.
-:::
+
+</Note>
 
 An explicit `X-Hermes-Session-Id` is never remapped. The deleted session's id stays
 retired even after pruning. An exact keyed retry whose identity is still retained there
@@ -158,9 +173,9 @@ conversation that opens like a deleted one gets a new session, and its later tur
 on that same session, including after a restart. An exact keyed retry of a turn from the
 deleted conversation is not moved; it replays as described above.
 
-## Endpoints
+## Endpoints {#endpoints}
 
-### POST /v1/chat/completions
+### POST /v1/chat/completions {#post-v1chatcompletions}
 
 Standard OpenAI Chat Completions format. Stateless — the full conversation is included in each request via the `messages` array.
 
@@ -211,13 +226,13 @@ Standard OpenAI Chat Completions format. Stateless — the full conversation is 
 
 Uploaded files (`file` / `input_file` / `file_id`) and non-image `data:` URLs return `400 unsupported_content_type`.
 
-**Streaming** (`"stream": true`): Returns Server-Sent Events (SSE) with token-by-token response chunks. For **Chat Completions**, the stream uses standard `chat.completion.chunk` events plus Hermes' custom `hermes.tool.progress` event for tool-start UX. For **Responses**, the stream uses OpenAI Responses event types such as `response.created`, `response.output_text.delta`, `response.output_item.added`, `response.output_item.done`, and `response.completed`.
+**Streaming** (`"stream": true`): Returns Server-Sent Events (SSE) with token-by-token response chunks. For **Chat Completions**, the stream uses standard `chat.completion.chunk` events plus {{app-name}}' custom `hermes.tool.progress` event for tool-start UX. For **Responses**, the stream uses OpenAI Responses event types such as `response.created`, `response.output_text.delta`, `response.output_item.added`, `response.output_item.done`, and `response.completed`.
 
 All SSE streams (Chat Completions, Responses, `/api/sessions/{id}/chat/stream`, `/v1/runs/{id}/events`) emit a `: keepalive` comment line whenever no event has been sent for 10 seconds, so long tool calls do not trip client idle timeouts. Standard SSE clients ignore comment lines; custom parsers must skip lines that start with `:`.
 
 **Tool progress in streams**:
-- **Chat Completions**: Hermes emits `event: hermes.tool.progress` for tool-start visibility without polluting persisted assistant text. Strict OpenAI clients that choke on named SSE events can turn these frames off with `gateway.platforms.api_server.tool_progress_events: false` (default `true`); content chunks are unaffected. The opt-out applies only to Chat Completions — `/v1/runs/{id}/events` always emits tool events, which is what the `tool_progress_events` feature in `/v1/capabilities` describes.
-- **Responses**: Hermes emits spec-native `function_call` and `function_call_output` output items during the SSE stream, so clients can render structured tool UI in real time.
+- **Chat Completions**: {{app-name}} emits `event: hermes.tool.progress` for tool-start visibility without polluting persisted assistant text. Strict OpenAI clients that choke on named SSE events can turn these frames off with `gateway.platforms.api_server.tool_progress_events: false` (default `true`); content chunks are unaffected. The opt-out applies only to Chat Completions — `/v1/runs/{id}/events` always emits tool events, which is what the `tool_progress_events` feature in `/v1/capabilities` describes.
+- **Responses**: {{app-name}} emits spec-native `function_call` and `function_call_output` output items during the SSE stream, so clients can render structured tool UI in real time.
 
 **Model reasoning** (emitted only when the model actually produces reasoning and the resolved `reasoning` config allows it; the input-side opt-out is `model_options.reasoning.enabled: false`):
 - **Chat Completions**: reasoning deltas arrive as `choices[0].delta.reasoning_content` chunks (the DeepSeek-style field Open WebUI, opencode and the Vercel AI SDK render as a thinking block); answer text stays in `delta.content`.
@@ -226,7 +241,7 @@ All SSE streams (Chat Completions, Responses, `/api/sessions/{id}/chat/stream`, 
 - Echoing a prior response's `output` list back as the next `input` (what Responses SDK clients do) is fine: `reasoning` items are ignored on input rather than parsed as empty user turns.
 - Support is advertised as `features.reasoning_streaming: true` on `GET /v1/capabilities`.
 
-### POST /v1/responses
+### POST /v1/responses {#post-v1responses}
 
 OpenAI Responses API format. Supports server-side conversation state via `previous_response_id` — the server stores full conversation history (including tool calls and results) so multi-turn context is preserved without the client managing it.
 
@@ -256,7 +271,7 @@ OpenAI Responses API format. Supports server-side conversation state via `previo
 }
 ```
 
-Tool calls in the `output` array were already executed server-side by the Hermes agent — they are replayed with `"status": "completed"` for structured tool UI, never as pending calls for the client to execute.
+Tool calls in the `output` array were already executed server-side by the {{app-name}} agent — they are replayed with `"status": "completed"` for structured tool UI, never as pending calls for the client to execute.
 
 With `"stream": true`, mid-turn assistant commentary (the `openai-codex` backend's `phase="commentary"` progress preambles, or text a model writes alongside its tool calls) arrives as its own completed `message` output item carrying `"phase": "commentary"` (`response.output_item.added` + `response.output_item.done`, also listed in `response.completed`). It is never merged into the final answer item, so clients can render it as live progress and skip it when assembling the reply. Private reasoning never reaches this item. `display.interim_assistant_messages: false` (or the `display.platforms.api_server` override) suppresses it on every API-server surface.
 
@@ -279,7 +294,7 @@ With `"stream": true`, mid-turn assistant commentary (the `openai-codex` backend
 
 Uploaded files (`input_file` / `file_id`) and non-image `data:` URLs return `400 unsupported_content_type`.
 
-#### Multi-turn with previous_response_id
+#### Multi-turn with previous_response_id {#multi-turn-with-previous_response_id}
 
 Chain responses to maintain full context (including tool calls) across turns:
 
@@ -292,9 +307,9 @@ Chain responses to maintain full context (including tool calls) across turns:
 
 The server reconstructs the full conversation from the stored response chain — all previous tool calls and results are preserved. Chained requests also share the same session, so multi-turn conversations appear as a single entry in the dashboard and session history.
 
-Each response's `output` lists only that turn's items (its `function_call` / `function_call_output` entries and final `message`), never earlier turns' tool calls — including when Hermes repaired the supplied history before the call (merged consecutive `assistant` or `user` items, dropped orphan tool results) or compacted it mid-chain. The stored chain is that repaired transcript, so the history does not grow by a second copy on every turn.
+Each response's `output` lists only that turn's items (its `function_call` / `function_call_output` entries and final `message`), never earlier turns' tool calls — including when {{app-name}} repaired the supplied history before the call (merged consecutive `assistant` or `user` items, dropped orphan tool results) or compacted it mid-chain. The stored chain is that repaired transcript, so the history does not grow by a second copy on every turn.
 
-#### Named conversations
+#### Named conversations {#named-conversations}
 
 Use the `conversation` parameter instead of tracking response IDs:
 
@@ -306,25 +321,25 @@ Use the `conversation` parameter instead of tracking response IDs:
 
 The server automatically chains to the latest response in that conversation. Like the `/title` command for gateway sessions.
 
-### GET /v1/responses/\{id\}
+### GET /v1/responses/\{id\} {#get-v1responsesid}
 
 Retrieve a previously stored response by ID.
 
-### DELETE /v1/responses/\{id\}
+### DELETE /v1/responses/\{id\} {#delete-v1responsesid}
 
 Delete a stored response.
 
-### GET /v1/models
+### GET /v1/models {#get-v1models}
 
 Lists the agent as an available model. The advertised model name defaults to the [profile](../profiles.md) name (or `hermes-agent` for the default profile). Required by most frontends for model discovery.
 
 `/v1/models` is intentionally the cheap OpenAI-compat surface. It does **not**
-enumerate every authenticated provider/model combination Hermes can route to,
+enumerate every authenticated provider/model combination {{app-name}} can route to,
 and it does not do pricing or capability enrichment.
 
-### GET /api/model/options
+### GET /api/model/options {#get-apimodeloptions}
 
-Hermes-aware clients can request the same curated provider/model inventory used
+{{app-name}}-aware clients can request the same curated provider/model inventory used
 by the dashboard and TUI. This route uses the API server's normal bearer
 authentication and returns provider rows, model capability hints, and pricing
 metadata that do not belong in the OpenAI-compatible `/v1/models` response:
@@ -339,7 +354,7 @@ That payload is the same substrate the dashboard Models page and the TUI
 `model.options` RPC use. It returns authenticated providers, curated model
 lists, per-model pricing, and model capability hints.
 
-Normal opens are intentionally conservative for custom providers: Hermes probes
+Normal opens are intentionally conservative for custom providers: {{app-name}} probes
 only the **currently selected** custom endpoint so a stale or offline saved
 endpoint does not block the picker. An explicit refresh flips to full probing
 and busts the provider model cache:
@@ -352,9 +367,9 @@ curl \
 
 Use `/v1/models` when an OpenAI-compatible client only needs a model name to
 send back in chat/responses requests. Use `/api/model/options` when an
-authenticated UI needs the richer Hermes-specific picker metadata.
+authenticated UI needs the richer {{app-name}}-specific picker metadata.
 
-### GET /v1/capabilities
+### GET /v1/capabilities {#get-v1capabilities}
 
 Returns a machine-readable description of the API server's stable surface for external UIs, orchestrators, and plugin bridges.
 
@@ -376,27 +391,27 @@ Returns a machine-readable description of the API server's stable surface for ex
 }
 ```
 
-Use this endpoint when integrating dashboards, browser UIs, or control planes so they can discover whether the running Hermes version supports runs, streaming, cancellation, and session continuity without depending on private Python internals.
+Use this endpoint when integrating dashboards, browser UIs, or control planes so they can discover whether the running {{app-name}} version supports runs, streaming, cancellation, and session continuity without depending on private Python internals.
 
-## Browser-extension control (removed)
+## Browser-extension control (removed) {#browser-extension-control-removed}
 
 The browser-extension controller protocol (`POST /v1/browser-control/register`,
 `GET /v1/browser-control/ws`, the `/v1/artifacts/*` routes, the dashboard
 `browser.controller.*` RPCs and the `browser.extension_control` config key) has
 been removed. It routed the old `browser_navigate`/`browser_click`/… tools,
 which no longer exist: browser automation is now `browser_exec` over CDP. To let
-Hermes drive a browser you already run, point it at that browser's DevTools
+{{app-name}} drive a browser you already run, point it at that browser's DevTools
 endpoint with `browser.cdp_url` in `config.yaml` or `/browser connect` — see
 [Your own browser via CDP](./browser#your-own-browser-via-cdp-browser-connect).
 Upgrading drops a leftover `browser.extension_control` block from `config.yaml`.
 
-## Per-request model selection
+## Per-request model selection {#per-request-model-selection}
 
-Authenticated clients can override Hermes' default model selection per request
+Authenticated clients can override {{app-name}}' default model selection per request
 by sending:
 
 - `model` — the target model id for this turn
-- `provider` — the Hermes provider slug to resolve credentials/runtime for this turn
+- `provider` — the {{app-name}} provider slug to resolve credentials/runtime for this turn
 - `model_options` — request-scoped reasoning / service-tier controls
 
 The same request fields are accepted on:
@@ -417,7 +432,7 @@ Precedence is deterministic:
 
 `model_options` stays request-scoped regardless of which model/provider wins.
 If a request sends a `provider` that conflicts with a configured `model_routes`
-alias, Hermes rejects the request with `400` instead of silently remixing route
+alias, {{app-name}} rejects the request with `400` instead of silently remixing route
 credentials with another provider.
 
 **Bare `model` values on the OpenAI-compatible endpoints are opt-in.** Generic
@@ -433,7 +448,7 @@ gateway:
       direct_model_requests: true
 ```
 
-Requests that include an explicit `provider` — and the Hermes-native
+Requests that include an explicit `provider` — and the {{app-name}}-native
 `/v1/runs` and session-chat endpoints — always honor the requested model
 regardless of this flag.
 
@@ -453,11 +468,11 @@ Example:
 }
 ```
 
-### GET /health
+### GET /health {#get-health}
 
 Health check. Returns `{"status": "ok"}`. Also available at **GET /v1/health** for OpenAI-compatible clients that expect the `/v1/` prefix.
 
-### GET /health/detailed
+### GET /health/detailed {#get-healthdetailed}
 
 Authenticated readiness check for monitoring and control planes. It reports
 bounded status for the active profile's config, state database, configured
@@ -469,11 +484,11 @@ The public `/health` route remains a cheap liveness probe and does not run
 readiness checks. A degraded readiness result still uses HTTP 200; inspect the
 top-level `status` and `readiness.checks` fields.
 
-## Runs API (streaming-friendly alternative)
+## Runs API (streaming-friendly alternative) {#runs-api-streaming-friendly-alternative}
 
 In addition to `/v1/chat/completions` and `/v1/responses`, the server exposes a **runs** API for long-form sessions where the client wants to subscribe to progress events instead of managing streaming themselves.
 
-### POST /v1/runs
+### POST /v1/runs {#post-v1runs}
 
 Create a new agent run. Returns a `run_id` that can be used to subscribe to progress events.
 
@@ -484,9 +499,9 @@ Create a new agent run. Returns a `run_id` that can be used to subscribe to prog
 }
 ```
 
-Runs accept a simple `input` string and optional `session_id`, `instructions`, `conversation_history`, or `previous_response_id`. When `session_id` is provided, Hermes surfaces it in the run status so external UIs can correlate runs with their own conversation IDs.
+Runs accept a simple `input` string and optional `session_id`, `instructions`, `conversation_history`, or `previous_response_id`. When `session_id` is provided, {{app-name}} surfaces it in the run status so external UIs can correlate runs with their own conversation IDs.
 
-For safely retryable creation, send an `Idempotency-Key` header (1–255 visible ASCII characters). Hermes durably reserves the key before starting work. An identical retry returns the original `run_id` with HTTP 202 and `Idempotency-Replayed: true`, including after a gateway restart and after the run has completed, failed, or been cancelled. Reusing the same key with a different JSON payload returns HTTP 409 with code `idempotency_key_conflict`. Keys are isolated by authenticated API profile/credential and retained for 24 hours after their last status update; clients should use unique, unguessable keys and must not reuse them for unrelated operations. Requests without the header retain the legacy behavior and always create a new run.
+For safely retryable creation, send an `Idempotency-Key` header (1–255 visible ASCII characters). {{app-name}} durably reserves the key before starting work. An identical retry returns the original `run_id` with HTTP 202 and `Idempotency-Replayed: true`, including after a gateway restart and after the run has completed, failed, or been cancelled. Reusing the same key with a different JSON payload returns HTTP 409 with code `idempotency_key_conflict`. Keys are isolated by authenticated API profile/credential and retained for 24 hours after their last status update; clients should use unique, unguessable keys and must not reuse them for unrelated operations. Requests without the header retain the legacy behavior and always create a new run.
 
 A run the gateway could not admit keeps no reservation, so an exact retry is safe. While the profile is
 draining or retiring, or when the state database stays locked past the write timeout, `POST /v1/runs`
@@ -494,7 +509,7 @@ and the run controls answer HTTP 503 (`runtime_draining` or `storage_unavailable
 a malformed control body answers 400 `invalid_params`; ownership, generation and identity refusals
 stay 409.
 
-When `session_id` identifies an existing Hermes session and no explicit
+When `session_id` identifies an existing {{app-name}} session and no explicit
 `conversation_history` or `previous_response_id` is supplied, the run loads
 that session's active transcript. Session turn leases serialize concurrent
 writers and refresh the transcript after a contended wait.
@@ -502,7 +517,7 @@ writers and refresh the transcript after a contended wait.
 **API sessions are their own sessions.** `session_id` (here) and the
 `X-Hermes-Session-Id` header (on `/v1/chat/completions` and `/v1/responses`) may
 name a session the API server created or one it may create; they cannot bind a
-session that another surface owns — a CLI, TUI, Desktop, ACP or messaging
+session that another surface owns — a CLI, Desktop, ACP or messaging
 conversation. Such a request is refused with HTTP 409 and error code
 `permission_denied` before any admission: no run is created, no
 `Idempotency-Key` reservation is kept, and an exact retry answers 409 again. This
@@ -511,7 +526,7 @@ foreign transcript in parallel with its live owner. To work on a chat from
 another surface, attach through the gateway WebSocket (a `prompt.submit` on the
 shared session) instead of the OpenAI-compatible routes.
 
-### GET /v1/runs/\{run_id\}
+### GET /v1/runs/\{run_id\} {#get-v1runsrun_id}
 
 Poll the current run state. This is useful for dashboards that need status without holding an SSE connection open, or for UIs that reconnect after navigation.
 
@@ -532,9 +547,9 @@ Poll the current run state. This is useful for dashboards that need status witho
 
 Statuses are retained briefly after terminal states (`completed`, `failed`, `cancelled`, or `interrupted`) for polling and UI reconciliation. When the gateway shuts down while a run is active, the run is persisted as `interrupted` (error `Gateway shutdown interrupted the run.`, terminal event `run.interrupted`) before the agent is asked to stop, so a durable run never survives a restart as `running`; a late result from the interrupted turn cannot overwrite it. A canonical run whose owner restarted mid-turn reports `unknown` instead, which is not terminal: later turns in that session wait until it is acknowledged with `POST /v1/runs/{run_id}/resolve-unknown` (below).
 
-While the gateway is still draining (a `hermes gateway stop`/`restart` or SIGTERM with a turn in flight), every non-terminal run additionally carries `shutdown_requested_at` (Unix seconds) from the moment new turns are refused. `status` stays `running` because the turn is still being served; a poller that sees the field knows the process is on its way out and the run will end `interrupted` at the latest when the drain budget expires. Terminal runs never gain the field.
+While the gateway is still draining (a `noone gateway stop`/`restart` or SIGTERM with a turn in flight), every non-terminal run additionally carries `shutdown_requested_at` (Unix seconds) from the moment new turns are refused. `status` stays `running` because the turn is still being served; a poller that sees the field knows the process is on its way out and the run will end `interrupted` at the latest when the drain budget expires. Terminal runs never gain the field.
 
-### GET /v1/runs/\{run_id\}/events
+### GET /v1/runs/\{run_id\}/events {#get-v1runsrun_idevents}
 
 Server-Sent Events stream of the run's tool-call progress, token deltas, and lifecycle events. Designed for dashboards and thick clients that want to attach/detach without losing state.
 
@@ -568,7 +583,7 @@ play-by-play. These events are available while the parent stream is open; a
 late detached completion does not reopen a finished run's SSE stream or change
 its terminal status.
 
-#### Detached results and session history
+#### Detached results and session history {#detached-results-and-session-history}
 
 Background delegation requires a continuation that reads server-side session
 history: an explicit `X-Hermes-Session-Id` on Chat Completions, a native
@@ -597,11 +612,11 @@ still executing remains visible to status polling, approval, stop control, and
 concurrency accounting until its executor work actually exits. A connected SSE
 subscriber continues draining normally.
 
-### POST /v1/runs/\{run_id\}/resolve-unknown
+### POST /v1/runs/\{run_id\}/resolve-unknown {#post-v1runsrun_idresolve-unknown}
 
 After an authority-owner restart, a turn that was already claimed has an
 unknown execution outcome, and `GET /v1/runs/{run_id}` reports it as
-`"status": "unknown"` (not terminal). Hermes pauses later work in that session
+`"status": "unknown"` (not terminal). {{app-name}} pauses later work in that session
 rather than risk replaying the lost head. Read the exact `admission_id` and
 `execution_generation` from that body, then acknowledge that the
 lost execution will not finish:
@@ -646,14 +661,14 @@ retirement removes the canonical admission payload and its recoverable owner.
 The replay ledger and canonical admission are separate database transactions;
 this recovery control does not promise global exactly-once execution.
 
-### POST /v1/runs/\{run_id\}/stop
+### POST /v1/runs/\{run_id\}/stop {#post-v1runsrun_idstop}
 
-Interrupt a running agent turn. The endpoint returns immediately with `{"status": "stopping"}` while Hermes asks the active agent to stop at the next safe interruption point.
+Interrupt a running agent turn. The endpoint returns immediately with `{"status": "stopping"}` while {{app-name}} asks the active agent to stop at the next safe interruption point.
 The run stays tracked as `stopping` until the executor-backed work exits, then
 settles as `cancelled`; requesting stop never hides a worker that is still
 running.
 
-### POST /v1/runs/\{run_id\}/approval
+### POST /v1/runs/\{run_id\}/approval {#post-v1runsrun_idapproval}
 
 Resolve a pending approval for a run that is waiting on a human decision (for example, a tool call gated behind an approval policy). The body carries the approval decision; the run resumes once the decision is recorded. This endpoint is advertised in `/v1/capabilities` as the `run_approval` feature so external UIs can detect support before surfacing an approval prompt.
 
@@ -669,52 +684,52 @@ Canonical controls do not accept identityless or bulk responses. Stale generatio
 foreign prompt IDs, and settled runs return HTTP 409. Existing run authentication
 and hosted-room approval restrictions still apply.
 
-### POST /v1/runs/\{run_id\}/clarify
+### POST /v1/runs/\{run_id\}/clarify {#post-v1runsrun_idclarify}
 
 Answer a canonical clarification with `request_id`, `execution_generation`, and
 `answer` (a string). This authenticated endpoint and WebSocket `clarify.respond`
 resolve the same waiting tool; answering does not submit another inference turn.
 MCP trust-gate consent — a write-capable tool on a server configured `trust: untrusted` — surfaces the same way: the run emits an `approval.request` event and parks in `waiting_for_approval` until this endpoint resolves it (`once` runs the tool, `deny` blocks it).
 
-## Jobs API (background scheduled work)
+## Jobs API (background scheduled work) {#jobs-api-background-scheduled-work}
 
 The server exposes a lightweight jobs CRUD surface for managing scheduled / background agent runs from a remote client. All endpoints are gated behind the same bearer auth.
 
-### GET /api/jobs
+### GET /api/jobs {#get-apijobs}
 
 List all scheduled jobs.
 
-### POST /api/jobs
+### POST /api/jobs {#post-apijobs}
 
-Create a new scheduled job. Body accepts the same shape as `hermes cron` — prompt, schedule, skills, provider override, delivery target.
+Create a new scheduled job. Body accepts the same shape as `noone cron` — prompt, schedule, skills, provider override, delivery target.
 
-### GET /api/jobs/\{job_id\}
+### GET /api/jobs/\{job_id\} {#get-apijobsjob_id}
 
 Fetch a single job's definition and last-run state.
 
-### PATCH /api/jobs/\{job_id\}
+### PATCH /api/jobs/\{job_id\} {#patch-apijobsjob_id}
 
 Update fields on an existing job (prompt, schedule, etc.). Partial updates are merged.
 
-### DELETE /api/jobs/\{job_id\}
+### DELETE /api/jobs/\{job_id\} {#delete-apijobsjob_id}
 
 Remove a job. Also cancels any in-flight run.
 
-### POST /api/jobs/\{job_id\}/pause
+### POST /api/jobs/\{job_id\}/pause {#post-apijobsjob_idpause}
 
 Pause a job without deleting it. Next-scheduled-run timestamps are suspended until resumed.
 
-### POST /api/jobs/\{job_id\}/resume
+### POST /api/jobs/\{job_id\}/resume {#post-apijobsjob_idresume}
 
 Resume a previously paused job.
 
-### POST /api/jobs/\{job_id\}/run
+### POST /api/jobs/\{job_id\}/run {#post-apijobsjob_idrun}
 
 Trigger the job to run immediately, out of schedule.
 
-## Sessions API (session control over REST)
+## Sessions API (session control over REST) {#sessions-api-session-control-over-rest}
 
-External UIs can manage Hermes sessions over REST without standing up the dashboard. All endpoints are gated by `API_SERVER_KEY` and live under `/api/sessions/*`.
+External UIs can manage {{app-name}} sessions over REST without standing up the dashboard. All endpoints are gated by `API_SERVER_KEY` and live under `/api/sessions/*`.
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -742,7 +757,7 @@ curl -N -X POST http://localhost:8642/api/sessions/$ID/chat/stream \
   -d '{"input": "what files changed in the last hour?"}'
 ```
 
-## Skills and toolsets discovery
+## Skills and toolsets discovery {#skills-and-toolsets-discovery}
 
 `GET /v1/skills` and `GET /v1/toolsets` let external clients enumerate the agent's capabilities deterministically over REST instead of asking the model. Both are read-only and gated by `API_SERVER_KEY`.
 
@@ -759,9 +774,9 @@ curl http://localhost:8642/v1/toolsets \
 
 `/v1/skills` returns the same metadata the skills hub uses internally. `/v1/toolsets` returns toolsets resolved for the `api_server` platform with the concrete `tools` list each one expands to. Both are advertised under `endpoints.*` in `/v1/capabilities`.
 
-## Long-term memory scoping (`X-Hermes-Session-Key`)
+## Long-term memory scoping (`X-Hermes-Session-Key`) {#long-term-memory-scoping-x-hermes-session-key}
 
-Multi-user frontends like Open WebUI need a stable per-channel identifier for long-term memory (Honcho, etc.) that is **independent** of the transcript-scoped `X-Hermes-Session-Id` (which rotates on `/new`). Pass `X-Hermes-Session-Key` on `/v1/chat/completions`, `/v1/responses`, or `/v1/runs` and Hermes threads it through to `AIAgent(gateway_session_key=...)`, where the Honcho memory provider uses it to derive a stable scope.
+Multi-user frontends like Open WebUI need a stable per-channel identifier for long-term memory (Honcho, etc.) that is **independent** of the transcript-scoped `X-Hermes-Session-Id` (which rotates on `/new`). Pass `X-Hermes-Session-Key` on `/v1/chat/completions`, `/v1/responses`, or `/v1/runs` and {{app-name}} threads it through to `AIAgent(gateway_session_key=...)`, where the Honcho memory provider uses it to derive a stable scope.
 
 ```http
 POST /v1/chat/completions HTTP/1.1
@@ -770,11 +785,11 @@ X-Hermes-Session-Id: transcript-alpha
 X-Hermes-Session-Key: agent:main:webui:dm:user-42
 ```
 
-Rules: max 256 chars, control characters (`\r`, `\n`, `\x00`) are rejected, and the value is echoed back on responses (JSON + SSE). `/v1/capabilities` advertises support via `"session_key_header": "X-Hermes-Session-Key"`. Without the key, Honcho's `per-session` strategy produces a different scope per `session_id` — exactly the behavior Hermes had before.
+Rules: max 256 chars, control characters (`\r`, `\n`, `\x00`) are rejected, and the value is echoed back on responses (JSON + SSE). `/v1/capabilities` advertises support via `"session_key_header": "X-Hermes-Session-Key"`. Without the key, Honcho's `per-session` strategy produces a different scope per `session_id` — exactly the behavior {{app-name}} had before.
 
 Automatic recall follows the **transcript**: the memory provider is initialised once per session and kept across requests, so a continued session (`X-Hermes-Session-Id`, `previous_response_id`, or a declared `X-Hermes-Session-Key` conversation) receives the recall the provider prepared after the previous turn, exactly like a Telegram or Discord chat does. A request without any continuation starts a fresh session and, like the first turn of any new CLI session, has nothing queued yet. Idle sessions release their provider after the same idle TTL as the gateway agent cache (`agent.agent_cache.idle_ttl_secs`, default one hour).
 
-## System Prompt Handling
+## System Prompt Handling {#system-prompt-handling}
 
 When a frontend sends a `system` message (Chat Completions) or `instructions` field (Responses API), hermes-agent **layers it on top** of its core system prompt. Your agent keeps all its tools, memory, and skills — the frontend's system prompt adds extra instructions.
 
@@ -782,7 +797,7 @@ This means you can customize behavior per-frontend without losing capabilities:
 - Open WebUI system prompt: "You are a Python expert. Always include type hints."
 - The agent still has terminal, file tools, web search, memory, etc.
 
-## Authentication
+## Authentication {#authentication}
 
 Bearer token auth via the `Authorization` header:
 
@@ -790,9 +805,9 @@ Bearer token auth via the `Authorization` header:
 Authorization: Bearer ***
 ```
 
-Configure the key via `API_SERVER_KEY` env var. If you need a browser to call Hermes directly, also set `API_SERVER_CORS_ORIGINS` to an explicit allowlist.
+Configure the key via `API_SERVER_KEY` env var. If you need a browser to call {{app-name}} directly, also set `API_SERVER_CORS_ORIGINS` to an explicit allowlist.
 
-### Multi-profile routing (`/p/<profile>/…`)
+### Multi-profile routing (`/p/<profile>/…`) {#multi-profile-routing-pprofile}
 
 When [multi-profile gateway routing](../multi-profile-gateways.md) is
 enabled (`gateway.multiplex_profiles`), the shared listener serves every
@@ -810,20 +825,36 @@ to the routed profile**:
   the run (including runs started via `/api/sessions/{id}/chat/stream`);
   another profile's run id returns `404`, never `403`.
 
-:::warning Breaking change (July 2026)
+<Warning>
+
+<div className="doc-callout-title">
+
+Breaking change (July 2026)
+
+</div>
+
 Before this fix, a valid default-profile key was accepted on any
 `/p/<profile>/` prefix. If you relied on one shared key across profile
 prefixes, set a distinct `API_SERVER_KEY` in each profile's `.env` — reused
 default keys on named prefixes now return `401`.
-:::
 
-:::warning Security
+</Warning>
+
+<Warning>
+
+<div className="doc-callout-title">
+
+Security
+
+</div>
+
 The API server gives full access to hermes-agent's toolset, **including terminal commands**. `API_SERVER_KEY` is **required for every deployment**, including the default loopback bind on `127.0.0.1`. Keep `API_SERVER_CORS_ORIGINS` narrow to control browser access when you explicitly allow browser callers.
-:::
 
-## Configuration
+</Warning>
 
-### Environment Variables
+## Configuration {#configuration}
+
+### Environment Variables {#environment-variables}
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -834,7 +865,7 @@ The API server gives full access to hermes-agent's toolset, **including terminal
 | `API_SERVER_CORS_ORIGINS` | _(none)_ | Comma-separated allowed browser origins |
 | `API_SERVER_MODEL_NAME` | _(profile name)_ | Model name on `/v1/models`. Defaults to profile name, or `hermes-agent` for default profile. |
 
-### config.yaml
+### config.yaml {#configyaml}
 
 The same settings can live in `~/.hermes/config.yaml` under a nested `gateway.api_server:` section:
 
@@ -853,21 +884,21 @@ gateway:
 
 `port`, `key`, `host`, `cors_origins`, and `model_name` are automatically bridged into the platform's `extra` settings, so they behave exactly like their `API_SERVER_*` environment-variable counterparts. Environment variables take precedence over `config.yaml` values. The block is also accepted under `gateway.platforms.api_server:` or a top-level `platforms.api_server:` section.
 
-### Concurrent-run cap
+### Concurrent-run cap {#concurrent-run-cap}
 
 The API server limits how many agent runs may execute at once across the endpoints that start one directly: the OpenAI-compatible endpoints, the Runs endpoints, and the session-chat endpoints (`POST /api/sessions/{id}/chat` and its `/stream` variant, which carry cross-machine agent DMs). Cron-triggered runs (`POST /api/jobs/{id}/run`, `POST /api/cron/fire`) go through the cron scheduler and are governed by cron's own limits, not this cap. The cap is read from `gateway.api_server.max_concurrent_runs` (default **10**; `0` disables the limit, negative values clamp to 0). When the cap is reached, new run-starting requests are rejected with **HTTP 429** `Too many concurrent runs (max N)` — clients should back off and retry.
 
-### Stored history size for `previous_response_id` chaining
+### Stored history size for `previous_response_id` chaining {#stored-history-size-for-previous_response_id-chaining}
 
 Each stored `/v1/responses` snapshot embeds the full cumulative conversation history (that is what `previous_response_id` and `conversation` chaining replay), including every tool output verbatim. A conversation with a few large tool outputs can therefore make a single `response_store.db` write several hundred KB. Set `gateway.api_server.history_tool_output_max_chars` (default **0** = store verbatim) to cap each tool output and each string tool-call argument in the **stored** history at that many characters; anything longer is cut to the head plus a `...[N more chars]` marker. User and assistant text is never touched, and the `response.completed` payload and incremental SSE events are unaffected. Because the stored history is what the model sees on the next chained turn, enabling the cap also trims what the model is replayed — leave it at 0 if your workflow needs complete tool outputs across turns.
 
-## Security Headers
+## Security Headers {#security-headers}
 
 All responses include security headers:
 - `X-Content-Type-Options: nosniff` — prevents MIME type sniffing
 - `Referrer-Policy: no-referrer` — prevents referrer leakage
 
-## CORS
+## CORS {#cors}
 
 The API server does **not** enable browser CORS by default.
 
@@ -885,7 +916,7 @@ When CORS is enabled:
 
 Most documented frontends such as Open WebUI connect server-to-server and do not need CORS at all.
 
-## Compatible Frontends
+## Compatible Frontends {#compatible-frontends}
 
 Any frontend that supports the OpenAI API format works. Tested/documented integrations:
 
@@ -903,14 +934,14 @@ Any frontend that supports the OpenAI API format works. Tested/documented integr
 | OpenAI Python SDK | — | `OpenAI(base_url="http://localhost:8642/v1")` |
 | curl | — | Direct HTTP requests |
 
-## Multi-User Setup with Profiles
+## Multi-User Setup with Profiles {#multi-user-setup-with-profiles}
 
-To give multiple users their own isolated Hermes instance (separate config, memory, skills), use [profiles](../profiles.md):
+To give multiple users their own isolated {{app-name}} instance (separate config, memory, skills), use [profiles](../profiles.md):
 
 ```bash
 # Create a profile per user
-hermes profile create alice
-hermes profile create bob
+noone profile create alice
+noone profile create bob
 
 # Configure each profile's API server on a different port. API_SERVER_* are env
 # vars (not config.yaml keys), so write them to each profile's .env:
@@ -936,18 +967,16 @@ Each profile's API server automatically advertises the profile name as the model
 - `http://localhost:8643/v1/models` → model `alice`
 - `http://localhost:8644/v1/models` → model `bob`
 
-In Open WebUI, add each as a separate connection. The model dropdown shows `alice` and `bob` as distinct models, each backed by a fully isolated Hermes instance. See the [Open WebUI guide](../messaging/open-webui.md#multi-user-setup-with-profiles) for details.
+In Open WebUI, add each as a separate connection. The model dropdown shows `alice` and `bob` as distinct models, each backed by a fully isolated {{app-name}} instance. See the [Open WebUI guide](../messaging/open-webui.md#multi-user-setup-with-profiles) for details.
 
-## Limitations
+## Limitations {#limitations}
 
 - **Response storage** — stored responses (for `previous_response_id`) are persisted in SQLite and survive gateway restarts. Max 100 stored responses (LRU eviction).
 - **No file upload** — inline images are supported on both `/v1/chat/completions` and `/v1/responses`, but uploaded files (`file`, `input_file`, `file_id`) and non-image document inputs are not supported through the API.
 - **Simple OpenAI clients still see an alias** — `/v1/models` advertises the
-  stable Hermes alias (`hermes-agent` or the active profile name). Richer
+  stable {{app-name}} alias (`hermes-agent` or the active profile name). Richer
   clients can send explicit `provider` / `model_options` overrides on requests.
 
-## Proxy Mode
+## Proxy Mode {#proxy-mode}
 
-The API server also serves as the backend for **gateway proxy mode**. When another Hermes gateway instance is configured with `GATEWAY_PROXY_URL` pointing at this API server, it forwards all messages here instead of running its own agent. This enables split deployments — for example, a Docker container handling Matrix E2EE that relays to a host-side agent.
-
-See [Matrix Proxy Mode](../messaging/matrix.md#proxy-mode-e2ee-on-macos) for the full setup guide.
+The API server also serves as the backend for **gateway proxy mode**. When another {{app-name}} gateway instance is configured with `GATEWAY_PROXY_URL` pointing at this API server, it forwards all messages here instead of running its own agent. This enables split deployments — for example, a Docker container handling messaging transport that relays to a host-side agent.

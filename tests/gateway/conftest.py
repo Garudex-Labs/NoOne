@@ -64,7 +64,7 @@ def private_db_probe_cleanup(tmp_path):
     owns the inode cancels its POSIX locks. Opt-in tests must first register normal
     runner/store cleanup and use only databases underneath their private tmp_path.
     """
-    import hermes_state_dbfile as dbfile
+    import agent_state_dbfile as dbfile
 
     with dbfile._HEADER_PROBE_LOCK:
         existing = set(dbfile._HEADER_PROBE_FDS)
@@ -76,38 +76,13 @@ def private_db_probe_cleanup(tmp_path):
                 os.close(fd)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def _bind_lark_sdk_globals_when_installed():
-    """Bind the feishu adapter's lark SDK globals once per test session.
-
-    The adapter defers ``import lark_oapi`` to first use
-    (``_load_lark_oapi`` — called from connect()/probe_bot()/standalone
-    send), so the request-builder globals (``CreateMessageRequestBody``
-    etc.) stay ``None`` at module import time. Feishu tests across many
-    files inject a mock ``_client`` and skip connect() entirely, then call
-    send paths that reference those globals. Bind them eagerly when the
-    SDK is installed; when it isn't, the affected tests already skip via
-    their own ``skipUnless`` guards.
-    """
-    try:
-        import lark_oapi
-    except ImportError:
-        yield
-        return
-    try:
-        from plugins.platforms.feishu.adapter import _load_lark_oapi
-
-        _load_lark_oapi()
-    except Exception:
-        pass  # adapter not importable in this environment — tests will skip
-    yield
 
 
 def make_async_session_db(sync_mock=None):
     """Wrap a sync mock SessionDB in AsyncSessionDB so gateway code that awaits
     the facade works in tests. Returns (facade, sync_mock); configure return
     values and assert calls on sync_mock."""
-    from hermes_state import AsyncSessionDB
+    from agent_state import AsyncSessionDB
     sync_mock = sync_mock if sync_mock is not None else MagicMock()
     return AsyncSessionDB(sync_mock), sync_mock
 
@@ -672,8 +647,8 @@ def owner(tmp_path):
     from gateway.config import GatewayConfig
     from gateway.session import SessionStore
     from gateway.session_authority import SessionAuthority
-    from hermes_state import SessionDB
-    from hermes_state_runtime import begin_runtime_epoch
+    from agent_state import SessionDB
+    from agent_state_runtime import begin_runtime_epoch
 
     db = SessionDB(tmp_path / 'state.db')
     store = SessionStore(config=GatewayConfig(), sessions_dir=tmp_path / 'sessions')

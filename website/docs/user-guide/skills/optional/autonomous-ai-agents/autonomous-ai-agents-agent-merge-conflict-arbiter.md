@@ -1,35 +1,43 @@
 ---
 title: "Agent Merge Conflict Arbiter — Neutral arbiter for merge conflicts between two agents"
-sidebar_label: "Agent Merge Conflict Arbiter"
+sidebarTitle: "Agent Merge Conflict Arbiter"
 description: "Neutral arbiter for merge conflicts between two agents"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Agent Merge Conflict Arbiter
+# Agent Merge Conflict Arbiter {#agent-merge-conflict-arbiter}
 
 Neutral arbiter for merge conflicts between two agents.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/autonomous-ai-agents/agent-merge-conflict-arbiter` |
+| Source | Optional — install with `noone skills install official/autonomous-ai-agents/agent-merge-conflict-arbiter` |
 | Path | `optional-skills/autonomous-ai-agents/agent-merge-conflict-arbiter` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Multi-Agent`, `Git`, `Merge-Conflict`, `Kanban`, `Arbitration` |
 | Related skills | [`hermes-agent`](../../bundled/autonomous-ai-agents/autonomous-ai-agents-hermes-agent.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Agent Merge-Conflict Arbiter
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Agent Merge-Conflict Arbiter {#agent-merge-conflict-arbiter-1}
 
 Resolve a git merge conflict between two AGENTS' branches as an impartial third
 party. Agents resolving conflicts against a peer's work reliably either
@@ -38,7 +46,7 @@ and are biased toward their own side. This skill is the fix: a neutral
 reconciler that receives both diffs plus both sides' stated intents and
 produces a merged result, like a merge-queue arbiter.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - Two agent branches/worktrees collide during a parallel campaign (kanban
   engineering pipeline, parallel-PR wave, multi-worktree refactor).
@@ -47,16 +55,16 @@ produces a merged result, like a merge-queue arbiter.
 - Do NOT use for conflicts within a single agent's own work, or for trivial
   lockfile/generated-file conflicts (regenerate those instead).
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - A repo checkout containing the halted merge, or the two branch names plus
   permission to run the merge yourself.
 - Both sides' intent sources: kanban completion summaries (`terminal` running
-  `hermes kanban show <task-id>`), PR bodies, or at minimum each branch's
+  `noone kanban show <task-id>`), PR bodies, or at minimum each branch's
   commit messages.
 - The project's build/test command, if one exists.
 
-## How to Run
+## How to Run {#how-to-run}
 
 **Standalone** — a human (or agent) invokes this skill inside the conflicted
 repo: load the skill, then follow the Procedure top to bottom.
@@ -73,7 +81,7 @@ repo: load the skill, then follow the Procedure top to bottom.
   summaries into the reconciler's context automatically; the card body should
   name the repo path and the two branches.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Hunk class | Definition | Resolution |
 |---|---|---|
@@ -85,22 +93,22 @@ Impartiality contract: never favor the side that spawned you; touch ONLY
 conflicted regions (no drive-by edits); every design-question pick must appear
 explicitly in the hand-back summary.
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. Gather both sides
+### 1. Gather both sides {#1-gather-both-sides}
 
 - Run via `terminal`: `git status` (confirm the conflicted state and list
   conflicted files), `git merge-base <A> <B>`, then for each side
   `git log --oneline <base>..<side>` and `git diff <base>..<side> -- <file>`
   for every conflicted file. In a halted merge, `HEAD` is one side and
   `MERGE_HEAD` is the other.
-- Collect each side's intent: `hermes kanban show <task-id>` for completion
+- Collect each side's intent: `noone kanban show <task-id>` for completion
   summaries/metadata, or the PR body, or the commit messages from the log
   above. Write down one sentence of intent per side before touching any file.
 - Done when: you can state both intents in your own words and have both diffs
   for every conflicted file.
 
-### 2. Classify every conflicted hunk
+### 2. Classify every conflicted hunk {#2-classify-every-conflicted-hunk}
 
 - Open each conflicted file with `read_file` and locate each
   `<<<<<<<`/`=======`/`>>>>>>>` block.
@@ -113,7 +121,7 @@ explicitly in the hand-back summary.
   a neighboring hunk is disjoint. Classify per hunk, not per file.
 - Done when: every hunk has a written class and a one-line rationale.
 
-### 3. Resolve under the impartiality contract
+### 3. Resolve under the impartiality contract {#3-resolve-under-the-impartiality-contract}
 
 - Edit each hunk with `patch` (or `write_file` for whole-file rewrites):
   - disjoint-intent → merge both changes so each intent is fully served.
@@ -130,7 +138,7 @@ explicitly in the hand-back summary.
 - Done when: `search_files` finds no `<<<<<<<` markers in the repo and every
   resolved file is staged.
 
-### 4. Verify
+### 4. Verify {#4-verify}
 
 - Run the project's build/tests via `terminal`; at minimum import/execute the
   touched modules. Both intents must be observable in the merged behavior
@@ -139,7 +147,7 @@ explicitly in the hand-back summary.
   listing hunk decisions is fine).
 - Done when: verification passes and the merge commit exists.
 
-### 5. Hand back
+### 5. Hand back {#5-hand-back}
 
 - Produce a completion summary naming EVERY hunk decision:
   `file:lines — class — which side(s) kept — rationale`. For every
@@ -148,7 +156,7 @@ explicitly in the hand-back summary.
 - Kanban: `kanban_complete(summary=...)`. Standalone: print the summary.
 - Done when: the summary is delivered and lists all hunks.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Self-favoring**: if you were spawned by one of the conflicting agents,
   you are structurally biased — state this and weigh the other side's intent
@@ -167,7 +175,7 @@ explicitly in the hand-back summary.
   `hotspot: <path> — <reason>` kanban comment) so the orchestrator decomposes
   that file, rather than serially reconciling every new collision on it.
 
-## Verification
+## Verification {#verification}
 
 - `git status` shows a clean tree on the target branch with a merge commit.
 - No conflict markers remain (`search_files` pattern `<<<<<<<`).

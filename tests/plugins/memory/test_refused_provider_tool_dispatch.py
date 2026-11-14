@@ -16,7 +16,7 @@ import sys
 import pytest
 
 from agent.memory_manager import MemoryManager
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 _TOOL = "sharedmem_recall"
 
@@ -84,7 +84,7 @@ def homes(tmp_path, monkeypatch):
         (home / "config.yaml").write_text("memory:\n  provider: sharedmem\n", encoding="utf-8")
     monkeypatch.setenv("HERMES_HOME", str(root))
     from agent.secret_scope import reset_multiplex_context, set_multiplex_context
-    from hermes_cli.plugins import _reset_plugin_managers_for_tests
+    from agent_cli.plugins import _reset_plugin_managers_for_tests
     _reset_plugin_managers_for_tests()
     token = set_multiplex_context(True)
     try:
@@ -97,11 +97,11 @@ def homes(tmp_path, monkeypatch):
 
 @contextlib.contextmanager
 def _scoped(home):
-    token = set_hermes_home_override(str(home))
+    token = set_agent_home_override(str(home))
     try:
         yield
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def _build_manager(home):
@@ -165,7 +165,7 @@ def test_subclass_fallback_ctx_tool_still_refuses_shared_instance(homes, loader)
         dist.mkdir()
         (dist / "METADATA").write_text("Metadata-Version: 2.1\nName: sharedmem-ep\nVersion: 0.1\n", encoding="utf-8")
         (dist / "entry_points.txt").write_text(
-            "[hermes_agent.memory_providers]\nsharedmem = sharedmem_singleton\n", encoding="utf-8")
+            "[agent_compat.memory_providers]\nsharedmem = sharedmem_singleton\n", encoding="utf-8")
 
     owner, _ = _build_manager(beta_home)
     type(owner).stores[str(beta_home)] = ["beta-private"]

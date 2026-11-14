@@ -1,11 +1,11 @@
 import { useStore } from '@nanostores/react'
+import { Loader2, RefreshCw } from '@noone/ui/icons'
 import { useEffect } from 'react'
 
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { Button } from '@/components/ui/button'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { Loader2, RefreshCw } from '@/lib/icons'
 import { notify, notifyError } from '@/store/notifications'
 import {
   $pluginAutoUpdate,

@@ -14,9 +14,9 @@ import os
 from pathlib import Path
 import time
 from typing import Optional
-from hermes_dir_acl import make_user_dir
+from agent_dir_acl import make_user_dir
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 logger = logging.getLogger("tools.process_registry")
 
@@ -26,7 +26,7 @@ _FINAL_DRAIN_MAX_BYTES = 1 << 20
 
 
 def output_dir() -> Path:
-    return get_hermes_home() / "logs" / "process-output"
+    return get_agent_home() / "logs" / "process-output"
 
 
 def worker_output_log(session_id: str) -> Optional[Path]:

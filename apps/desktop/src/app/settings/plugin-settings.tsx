@@ -1,11 +1,12 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon, getAppIcon } from '@noone/ui/app-icon'
+import type { IconComponent } from '@noone/ui/icons'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { setEnvVar } from '@/api/config'
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { Button } from '@/components/ui/button'
-import { Codicon, codiconIcon } from '@/components/ui/codicon'
 import { $pluginRecords } from '@/contrib/plugins-store'
 import { ContribBoundary, ContribRender } from '@/contrib/react/boundary'
 import { useContributions } from '@/contrib/react/use-contributions'
@@ -23,7 +24,6 @@ import {
   SETTINGS_PLUGINS_AREA
 } from '@/contrib/settings-pages'
 import { useI18n } from '@/i18n'
-import type { IconComponent } from '@/lib/icons'
 import {
   $agentPluginBusy,
   $agentPlugins,
@@ -49,7 +49,7 @@ export type OpenPluginSettings = (route: null | PluginSettingsRoute) => void
 
 const MANAGE_PLUGINS_HREF = `#${CAPABILITIES_ROUTE}?tab=plugins`
 
-// codiconIcon mints a component per call; cache so rail rows keep a stable
+// getAppIcon mints a component per call; cache so rail rows keep a stable
 // element type across renders (no icon remount on every navigation).
 const iconCache = new Map<string, IconComponent>()
 
@@ -57,7 +57,7 @@ function iconFor(name: string): IconComponent {
   let icon = iconCache.get(name)
 
   if (!icon) {
-    icon = codiconIcon(name)
+    icon = getAppIcon(name)
     iconCache.set(name, icon)
   }
 
@@ -265,7 +265,7 @@ function PluginSettingsOverview({
           <Button asChild className="gap-1.5" size="sm" variant="outline">
             <a href={MANAGE_PLUGINS_HREF}>
               {copy.manage}
-              <Codicon name="arrow-right" size="0.75rem" />
+              <AppIcon name="arrow-right" size="0.75rem" />
             </a>
           </Button>
         }
@@ -308,7 +308,7 @@ function PluginSettingsOverview({
                     {copy.pageCount(pages)}
                   </span>
                 )}
-                <Codicon className="text-(--ui-text-tertiary)" name="chevron-right" size="0.8rem" />
+                <AppIcon className="text-(--ui-text-tertiary)" name="chevron-right" size="0.8rem" />
               </button>
             )
           })}

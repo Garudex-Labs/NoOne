@@ -13,7 +13,7 @@ from __future__ import annotations
 import concurrent.futures
 
 import cron.scheduler as sched
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 
 class _Scope:
@@ -23,11 +23,11 @@ class _Scope:
         self._home = str(home)
 
     def __enter__(self):
-        self._token = set_hermes_home_override(self._home)
+        self._token = set_agent_home_override(self._home)
         return self
 
     def __exit__(self, *_exc):
-        reset_hermes_home_override(self._token)
+        reset_agent_home_override(self._token)
         return False
 
 

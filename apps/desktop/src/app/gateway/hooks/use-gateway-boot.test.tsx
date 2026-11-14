@@ -69,7 +69,7 @@ vi.mock(import('@/store/terminal-backend-warning'), () => ({
 }))
 
 // End-to-end-ish repro of the "remote VPS → stuck on CONNECTING, no Settings"
-// bug that drives the REAL useGatewayBoot hook + REAL HermesGateway through a
+// bug that drives the REAL useGatewayBoot hook + REAL AgentGateway through a
 // fake WebSocket we fully control. No Docker / no real port: from the desktop's
 // point of view a "remote VPS" is just a WebSocket that opens once and later
 // refuses to reopen, so that is exactly (and only) what we fake.

@@ -31,9 +31,9 @@ def fixture_repo(tmp_path):
     git(repo, 'remote', 'set-url', 'origin', 'https://github.com/fixture-owner/fixture-repo.git')
     shutil.copytree(ROOT / 'scripts/releases', repo / 'scripts/releases')
     for relative in ('scripts/release.py', 'scripts/release-content-types.json',
-                     'hermes_cli/__init__.py', 'hermes_cli/update_channel.py',
-                     'hermes_cli/release_channels.py',
-                     'pm/paths.py', 'pm/environments.py', 'hermes_constants.py'):
+                     'agent_cli/__init__.py', 'agent_cli/update_channel.py',
+                     'agent_cli/release_channels.py',
+                     'pm/paths.py', 'pm/environments.py', 'agent_constants.py'):
         dest = repo / relative
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / relative, dest)
@@ -128,13 +128,13 @@ def test_commit_build_dispatch_is_repository_independent(fixture_repo):
     assert dispatches == [expected]
     assert 'disposable' not in result.stdout.lower()
     # The upstream URL used to select a different command shape; it no longer does.
-    git(repo, 'remote', 'set-url', 'origin', 'https://github.com/NousResearch/hermes-agent.git')
+    git(repo, 'remote', 'set-url', 'origin', 'https://github.com/Garudex-Labs/NoOne.git')
     result, calls = invoke('--build-commit', tip, '--publish',
-                           extra={'PROBE_UPSTREAM_URL': 'https://github.com/NousResearch/hermes-agent.git'})
+                           extra={'PROBE_UPSTREAM_URL': 'https://github.com/Garudex-Labs/NoOne.git'})
     assert result.returncode == 0, result.stderr
     dispatches = [call for call in calls if call[1:3] == ['workflow', 'run']]
     assert dispatches == [['gh', 'workflow', 'run', 'desktop-bundled-release.yml',
-                           '--ref', 'main', '--repo', 'NousResearch/hermes-agent',
+                           '--ref', 'main', '--repo', 'Garudex-Labs/NoOne',
                            '-f', f'build_commit={tip}', '-f', 'tag=', '-f', 'upload_release=false',
                            '-f', 'termux_upgrade_from_tag=']]
 

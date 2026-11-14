@@ -1,35 +1,43 @@
 ---
 title: "Simplify Code — Parallel 4-agent cleanup of recent code changes"
-sidebar_label: "Simplify Code"
+sidebarTitle: "Simplify Code"
 description: "Parallel 4-agent cleanup of recent code changes"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Simplify Code
+# Simplify Code {#simplify-code}
 
 Parallel 4-agent cleanup of recent code changes.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/software-development/simplify-code` |
 | Version | `1.1.0` |
-| Author | Hermes Agent (inspired by Claude Code /simplify) |
+| Author | {{app-name}} (inspired by Claude Code /simplify) |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `code-review`, `cleanup`, `refactor`, `delegation`, `subagent`, `parallel`, `simplify` |
 | Related skills | [`requesting-code-review`](../../bundled/software-development/software-development-requesting-code-review.md), [`test-driven-development`](../../bundled/software-development/software-development-test-driven-development.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Simplify Code — Parallel Review & Cleanup
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Simplify Code — Parallel Review & Cleanup {#simplify-code--parallel-review--cleanup}
 
 Review your recent code changes with four focused reviewers running in
 parallel, aggregate their findings, and apply the fixes worth applying.
@@ -44,7 +52,7 @@ deeply searches the codebase for a single class of problem — reuse, quality,
 efficiency, altitude — without diluting its attention across all four. They
 run concurrently, so you pay the latency of one review, not four.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Trigger this skill when the user says any of:
 
@@ -66,9 +74,9 @@ Do NOT auto-run this after every edit or tack it onto the end of unrelated
 tasks. It costs four subagents' worth of tokens — invoke it only when the
 user explicitly asks.
 
-## The Process
+## The Process {#the-process}
 
-### Phase 1 — Identify the changes
+### Phase 1 — Identify the changes {#phase-1--identify-the-changes}
 
 Capture the diff to review. Pick the source by what the user asked for, in
 this default order:
@@ -97,7 +105,7 @@ changed lines), warn the user that four subagents each carrying the full diff
 will be token-heavy, and offer to scope it down (per-directory, per-commit)
 before proceeding.
 
-### Phase 2 — Launch four reviewers in parallel
+### Phase 2 — Launch four reviewers in parallel {#phase-2--launch-four-reviewers-in-parallel}
 
 Use `delegate_task` **batch mode** — pass all four tasks in one `tasks`
 array so they run concurrently. Four is the right fan-out for this pattern;
@@ -202,7 +210,7 @@ Pass these four goals (drop any the user's focus excludes):
 > sometimes a deliberate boundary (compat shims, staged migrations,
 > vendored-code isolation). Don't flag those.
 
-### Phase 3 — Aggregate and apply
+### Phase 3 — Aggregate and apply {#phase-3--aggregate-and-apply}
 
 Wait for all four to return (batch mode returns them together).
 
@@ -237,7 +245,7 @@ Wait for all four to return (batch mode returns them together).
    reviewer category and risk tier, plus any findings you deliberately skipped
    and why. If you ran inline (no delegation), say so here.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Don't fan out wider than 4.** More reviewers means more cost and more
   conflicting suggestions to reconcile, not better coverage. The four
@@ -279,7 +287,7 @@ Wait for all four to return (batch mode returns them together).
   are deliberate design. Check `git blame` and surrounding comments before
   flagging; when the intent is unclear, mark `confidence: low`.
 
-## Related
+## Related {#related}
 
 If your install has the `subagent-driven-development` skill (optional), it
 covers the complementary case: parallel review *during* implementation, per

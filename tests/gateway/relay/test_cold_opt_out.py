@@ -7,7 +7,7 @@ import sys
 import textwrap
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 
 @pytest.mark.parametrize("case", ["native", "url-only", "disabled", "managed", "managed-only", "scoped"])
@@ -42,9 +42,9 @@ def test_cold_fronted_platforms_is_read_only(tmp_path, case):
                     "GATEWAY_RELAY_SECRET": "inherited-test-secret"})
     code = textwrap.dedent("""
         import json, os, sys
-        from hermes_constants import set_hermes_home_override
+        from agent_constants import set_agent_home_override
         if sys.argv[1] == "scoped":
-            set_hermes_home_override(sys.argv[2])
+            set_agent_home_override(sys.argv[2])
         before = dict(os.environ)
         assert "gateway.run" not in sys.modules
         from gateway.relay import relay_fronted_platforms

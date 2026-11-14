@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from fastapi import APIRouter
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 router = APIRouter()
 
@@ -146,14 +146,14 @@ _CHECKPOINT_SCHEMA_VERSION = 2
 
 def _data_dir() -> Path:
     """Durable data root (``<hermes home>/plugin-data/hermes-achievements/``). State used to
-    live in the install tree and died on ``hermes plugins remove``/``update``; legacy files
+    live in the install tree and died on ``noone plugins remove``/``update``; legacy files
     migrate on first read (see ``_data_file``)."""
     try:
         from plugins.plugin_storage import plugin_data_dir
         return plugin_data_dir("hermes-achievements")
     except Exception:
         # Standalone dashboard import (no plugins package on sys.path): same layout, computed locally.
-        root = get_hermes_home() / "plugin-data" / "hermes-achievements"
+        root = get_agent_home() / "plugin-data" / "hermes-achievements"
         root.mkdir(parents=True, exist_ok=True)
         return root
 
@@ -161,7 +161,7 @@ def _data_dir() -> Path:
 def _data_file(name: str) -> Path:
     path = _data_dir() / name
     if not path.exists():
-        legacy = get_hermes_home() / "plugins" / "hermes-achievements" / name
+        legacy = get_agent_home() / "plugins" / "hermes-achievements" / name
         if legacy.exists():
             try:
                 # Two statements so the read (utf-8-sig, tolerates a BOM)
@@ -268,7 +268,7 @@ def _count_tool(tool_names: list[str], *needles: str) -> int:
     return sum(1 for name in lowered if any(needle in name for needle in needles))
 
 
-_PROVIDER_MARKERS = ["openai", "anthropic", "google", "gemini", "mistral", "meta", "qwen", "deepseek", "xai", "nous", "ollama", "groq", "openrouter", "codex"]
+_PROVIDER_MARKERS = ["openai", "anthropic", "google", "gemini", "mistral", "meta", "qwen", "deepseek", "xai",  "ollama", "groq", "openrouter", "codex"]
 _LOCAL_MARKERS = ["ollama", "llama.cpp", "localhost", "127.0.0.1", "local/", "local:", "gguf", "vllm-local"]
 
 
@@ -555,7 +555,7 @@ def scan_sessions(limit: Optional[int] = None, progress_callback: Optional[Any] 
     intermediate snapshots.
     """
     try:
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         # The scan only reads. A writable open here was a second writer connection (schema
         # init, write lock, close-time checkpoint) beside the dashboard's own store on every

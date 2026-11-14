@@ -38,7 +38,7 @@ def test_explicit_reload_updates_same_name_schema_and_retains_history(surface, m
         runner._agent_cache = {"conversation": (agent, 0)}
         runner._mcp_reload_refresh_cached_agents(False, None)
     elif surface == "tui":
-        import tui_gateway.server as srv
+        import agent_backend.server as srv
         session = {"agent": agent, "history": history, "history_lock": threading.RLock(),
                    "running": False, "profile_home": None}
         monkeypatch.setattr(srv, "_sessions", {"conversation": session})
@@ -52,7 +52,7 @@ def test_explicit_reload_updates_same_name_schema_and_retains_history(surface, m
         response = srv._methods["reload.mcp"](1, {"session_id": "conversation", "confirm": True})
         assert response["result"]["status"] == "reloaded"
     else:
-        from hermes_cli.cli_info_mixin import CLIInfoMixin
+        from agent_cli.cli_info_mixin import CLIInfoMixin
         cli = CLIInfoMixin.__new__(CLIInfoMixin)
         cli.agent, cli.enabled_toolsets = agent, None
         cli._command_running = False

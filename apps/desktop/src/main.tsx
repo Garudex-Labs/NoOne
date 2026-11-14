@@ -24,6 +24,7 @@ import './store/keep-awake'
 // counters nor bippy reach a shipped renderer.
 import '@/debug/dev-only'
 
+import { DEFAULT_APP_NAME } from '@noone/shared/application-identity'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -64,7 +65,7 @@ if (import.meta.env.MODE !== 'production' || import.meta.env.VITE_PERF_PROBE ===
 const winParam = new URLSearchParams(window.location.search).get('win')
 
 if (winParam === 'hud') {
-  document.title = 'Hermes HUD'
+  document.title = `${window.hermesDesktop?.applicationName ?? DEFAULT_APP_NAME} HUD`
 }
 
 // Each transparent root used to force its host layers see-through when it

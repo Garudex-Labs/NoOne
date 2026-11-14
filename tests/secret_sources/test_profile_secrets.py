@@ -65,25 +65,25 @@ PROFILE_HOME = Path("/home/u/.hermes/profiles/milla")
 
 def test_preserve_existing_beats_override():
     report, env = _apply(
-        {"FEISHU_APP_SECRET": "shared", "OPENAI_API_KEY": "fresh"},
-        cfg_extra={"preserve_existing": ["FEISHU_APP_SECRET"]},
-        env={"FEISHU_APP_SECRET": "profile-local", "OPENAI_API_KEY": "stale"},
+        {"LINE_CHANNEL_SECRET": "shared", "OPENAI_API_KEY": "fresh"},
+        cfg_extra={"preserve_existing": ["LINE_CHANNEL_SECRET"]},
+        env={"LINE_CHANNEL_SECRET": "profile-local", "OPENAI_API_KEY": "stale"},
     )
-    assert env["FEISHU_APP_SECRET"] == "profile-local"   # preserved
+    assert env["LINE_CHANNEL_SECRET"] == "profile-local"   # preserved
     assert env["OPENAI_API_KEY"] == "fresh"              # override still works
     sr = report.sources[0]
-    assert "FEISHU_APP_SECRET" in sr.skipped_existing
+    assert "LINE_CHANNEL_SECRET" in sr.skipped_existing
     assert "OPENAI_API_KEY" in sr.applied
 
 
 def test_preserve_existing_only_guards_set_vars():
     """A preserve-listed var with NO existing value still gets applied."""
     _, env = _apply(
-        {"FEISHU_APP_SECRET": "shared"},
-        cfg_extra={"preserve_existing": ["FEISHU_APP_SECRET"]},
+        {"LINE_CHANNEL_SECRET": "shared"},
+        cfg_extra={"preserve_existing": ["LINE_CHANNEL_SECRET"]},
         env={},
     )
-    assert env["FEISHU_APP_SECRET"] == "shared"
+    assert env["LINE_CHANNEL_SECRET"] == "shared"
 
 
 

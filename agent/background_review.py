@@ -6,7 +6,7 @@ The fork inherits the parent's live runtime (provider, model, credentials, cache
 so it hits the same prefix cache, and runs under a dispatch-side tool whitelist."""
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import copy
 import json
 import logging
@@ -140,7 +140,7 @@ def cancel_background_review_for_live_turn(
     warning is logged and the live turn proceeds anyway. See #84423.
 
     Despite the name, this is also the session-teardown/interrupt cancellation path
-    (``tui_gateway.session_lifecycle._finalize_session`` and ``_interrupt_session_turn``, #102895): a
+    (``agent_backend.session_lifecycle._finalize_session`` and ``_interrupt_session_turn``, #102895): a
     session ending or being explicitly stopped while its background review is still running must
     cancel that review the same way a new live turn preempts one — the review fork is invisible to
     every other interrupt/teardown mechanism (not tracked on ``session["running"]``, not joined by
@@ -195,7 +195,7 @@ def _background_review_task_config(task_cfg: Optional[dict[str, Any]] = None) ->
     if task_cfg is not None:
         return task_cfg if isinstance(task_cfg, dict) else {}
     try:
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
         return _task_block(load_config_readonly())
     except Exception:
         return {}
@@ -237,7 +237,7 @@ def load_background_review_settings() -> tuple[bool, dict[str, Any]]:
     if safe_worker_enabled() or finite_turn_required() is True:
         return False, {}
     try:
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
         from utils import is_truthy_value
         task = _task_block(load_config_readonly())
         return is_truthy_value(task.get("enabled"), default=True), task
@@ -275,7 +275,7 @@ def _resolve_review_runtime(agent: Any, task_cfg: Optional[dict[str, Any]] = Non
     ):
         return parent
     try:
-        from hermes_cli.runtime_provider import resolve_runtime_provider
+        from agent_cli.runtime_provider import resolve_runtime_provider
         rp = resolve_runtime_provider(
             requested=task_provider, target_model=task_model,
             explicit_api_key=task_api_key, explicit_base_url=task_base_url,
@@ -922,7 +922,7 @@ def _routed_reasoning_config(task_cfg: Optional[dict[str, Any]]) -> Optional[dic
     effort = _background_review_task_config(task_cfg).get("reasoning_effort")
     if effort is None or effort == "":
         return None
-    from hermes_constants import VALID_REASONING_EFFORTS, parse_reasoning_effort
+    from agent_constants import VALID_REASONING_EFFORTS, parse_reasoning_effort
     parsed = parse_reasoning_effort(effort)
     if parsed is None:
         logger.warning(
@@ -1200,7 +1200,7 @@ def _run_review_fork(
         agent, task_cfg, max_iterations=_REVIEW_MAX_ITERATIONS)
     st.review_agent._review_attended = explicit
     _track_review_fork(agent, st.review_agent, register=True)
-    from hermes_cli.plugins import set_thread_tool_whitelist, clear_thread_tool_whitelist
+    from agent_cli.plugins import set_thread_tool_whitelist, clear_thread_tool_whitelist
     review_whitelist, configured_extra_tools = _review_tool_whitelist(st.review_agent, task_cfg, review_memory)
     extra_list = ", ".join(sorted(configured_extra_tools))
     deny_extra = f" Configured extra tools also allowed: {extra_list}." if configured_extra_tools else ""
@@ -1279,9 +1279,9 @@ def _run_review_in_thread(
     # check first so the normal path never resolves the runtime twice.
     if not _parent_can_emit_tool_calls(agent) and not _resolve_review_runtime(agent, task_cfg).get("routed"):
         logger.warning(
-            "Background review skipped: provider %r cannot emit Hermes tool calls, "
+            app_text("Background review skipped: provider %r cannot emit {app_name} tool calls, "
             "so the review fork could not write memories or skills. Set "
-            "auxiliary.background_review.{provider,model} to route the review to a normal model.",
+            "auxiliary.background_review.{provider,model} to route the review to a normal model.", percent_format=True),
             getattr(agent, "provider", "?"),
         )
         _set_thread_approval_callback(None)

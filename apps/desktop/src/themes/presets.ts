@@ -1,3 +1,4 @@
+import { THEME_PRESET_PALETTES } from '@noone/shared'
 /**
  * Built-in desktop themes. Names match the CLI skins / dashboard presets.
  * Add new themes here — no code changes needed elsewhere.
@@ -17,8 +18,7 @@
  * hand-editing hexes; hand edits drift from upstream silently and can't be
  * re-derived. `nous-alt` is first-party — do not re-derive it from GitHub.
  */
-
-import { THEME_PRESET_PALETTES } from '@hermes/shared'
+import { FONT_MONO, FONT_SANS } from '@noone/ui/typography'
 
 import { skinToDesktopTheme } from './skin'
 import type { DesktopTheme, DesktopThemeTypography } from './types'
@@ -29,19 +29,14 @@ import type { DesktopTheme, DesktopThemeTypography } from './types'
 // Covers macOS, Windows, Linux, plus the `emoji` generic for anything else.
 export const EMOJI_FALLBACK = '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", emoji'
 
-const SYSTEM_SANS =
-  '"Segoe WPC", "Segoe UI", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif, ' +
-  EMOJI_FALLBACK
+const SYSTEM_SANS = FONT_SANS
 
 // Keep the bundled JetBrains Mono first in every mono fallback chain. Several
 // theme display fonts (Courier Prime, IBM Plex Mono) do not cover Vietnamese /
 // Latin Extended glyphs; falling directly to platform UI fonts makes code
 // blocks visibly non-monospace. JetBrains Mono is bundled with the app and
 // covers those glyphs, while the Linux fallbacks catch distros without it.
-const SYSTEM_MONO =
-  '"JetBrains Mono", "Cascadia Code", "Cascadia Mono", "DejaVu Sans Mono", "Liberation Mono", "Noto Sans Mono", ' +
-  '"Noto Mono", "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace, ' +
-  EMOJI_FALLBACK
+const SYSTEM_MONO = FONT_MONO
 
 export const DEFAULT_TYPOGRAPHY: DesktopThemeTypography = { fontSans: SYSTEM_SANS, fontMono: SYSTEM_MONO }
 
@@ -72,7 +67,6 @@ export const githubTheme: DesktopTheme = {
   typography: {
     fontSans: SYSTEM_SANS,
     fontMono: SYSTEM_MONO,
-    fontUrl: 'https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap'
   },
   terminal: {
     foreground: '#1f2328',
@@ -135,7 +129,6 @@ export const nousTheme: DesktopTheme = {
   typography: {
     fontSans: SYSTEM_SANS,
     fontMono: SYSTEM_MONO,
-    fontUrl: 'https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap'
   },
   terminal: {
     foreground: '#1f2328',
@@ -335,11 +328,10 @@ export const nousAltTheme: DesktopTheme = {
   typography: {
     fontSans: SYSTEM_SANS,
     fontMono: SYSTEM_MONO,
-    fontUrl: 'https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap'
   }
 }
 
-// The converter's input: the keys it reads from `hermes_cli/skin_engine.py`'s
+// The converter's input: the keys it reads from `agent_cli/skin_engine.py`'s
 // `default` skin. Light is that skin's `light_colors` overlay (its goldenrod
 // ladder for white backgrounds; `banner_border` is not overridden there) with
 // one change: the ink. The CLI's `#5C4718` is a single-weight terminal color,
@@ -394,8 +386,7 @@ export const midnightTheme: DesktopTheme = {
   description: 'Deep blue-violet with cool accents',
   ...THEME_PRESET_PALETTES.midnight,
   typography: {
-    fontMono: `"JetBrains Mono", ${SYSTEM_MONO}`,
-    fontUrl: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap'
+    fontMono: SYSTEM_MONO,
   }
 }
 
@@ -405,8 +396,7 @@ export const emberTheme: DesktopTheme = {
   description: 'Warm crimson and bronze — forge vibes',
   ...THEME_PRESET_PALETTES.ember,
   typography: {
-    fontMono: `"IBM Plex Mono", ${SYSTEM_MONO}`,
-    fontUrl: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap'
+    fontMono: SYSTEM_MONO,
   }
 }
 
@@ -425,8 +415,8 @@ export const cyberpunkTheme: DesktopTheme = {
   description: 'Neon green on black — matrix terminal',
   ...THEME_PRESET_PALETTES.cyberpunk,
   typography: {
-    fontMono: `"Courier New", Courier, ${SYSTEM_MONO}`,
-    fontSans: `"Courier New", Courier, ${SYSTEM_MONO}`
+    fontMono: SYSTEM_MONO,
+    fontSans: SYSTEM_SANS
   }
 }
 
@@ -437,7 +427,7 @@ export const slateTheme: DesktopTheme = {
   description: 'Cool slate blue — focused developer theme',
   ...THEME_PRESET_PALETTES.slate,
   typography: {
-    fontMono: `"JetBrains Mono", ${SYSTEM_MONO}`
+    fontMono: SYSTEM_MONO
   }
 }
 

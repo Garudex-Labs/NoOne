@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as notifications from '@/store/notifications'
 import { markOnboardingDecided } from '@/store/onboarding-presence'
 import { makeOAuthProvider } from '@/test/oauth-provider'
-import type { AppHandoffStatus, OAuthProvider } from '@/types/hermes'
+import type { AppHandoffStatus, OAuthProvider } from '@/types/agent-client'
 
 import {
   $desktopOnboarding,
@@ -25,7 +25,7 @@ import {
 markOnboardingDecided()
 
 const NOT_CONNECTED =
-  'Hermes is not connected to any AI provider yet. Run `hermes model` to pick one, or `hermes auth add <provider>`.'
+  'Hermes is not connected to any AI provider yet. Run `noone model` to pick one, or `noone auth add <provider>`.'
 
 function baseState(overrides: Partial<DesktopOnboardingState> = {}): DesktopOnboardingState {
   return {
@@ -221,7 +221,7 @@ describe('refreshOnboarding', () => {
       if (method === 'setup.runtime_check') {
         return {
           ok: false,
-          error: 'Hermes is not connected to any AI provider yet. Run `hermes model` to pick one.'
+          error: 'Hermes is not connected to any AI provider yet. Run `noone model` to pick one.'
         } as never
       }
 
@@ -256,7 +256,7 @@ describe('refreshOnboarding', () => {
     }
 
     expect(await refreshOnboarding(onboardingContext(unconfigured))).toBe(false)
-    expect($desktopOnboarding.get().reason).not.toContain('hermes model')
+    expect($desktopOnboarding.get().reason).not.toContain('noone model')
   })
 
   it('keeps cached providers when onboarding was not re-requested', async () => {

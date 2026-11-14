@@ -1,31 +1,30 @@
 ---
-sidebar_position: 1
 title: "CLI Commands Reference"
-description: "Authoritative reference for Hermes terminal commands and command families"
+description: "Authoritative reference for the agent terminal commands and command families"
 ---
 
-# CLI Commands Reference
+# CLI Commands Reference {#cli-commands-reference}
 
 Python dependency commands on this page use a
 [PM-prepared source checkout](./package-management.md#developer-workflow).
-After a dependency change, reactivate the checkout and restart Hermes.
+After a dependency change, reactivate the checkout and restart {{app-name}}.
 
 This page covers the **terminal commands** you run from your shell.
 
 For in-chat slash commands, see [Slash Commands Reference](./slash-commands.md).
 
-## Global entrypoint
+## Global entrypoint {#global-entrypoint}
 
 ```bash
 hermes [global-options] <command> [subcommand/options]
 ```
 
-### Global options
+### Global options {#global-options}
 
 | Option | Description |
 |--------|-------------|
 | `--version`, `-V` | Show version and exit. |
-| `--profile <name>`, `-p <name>` | Select which Hermes profile to use for this invocation. Overrides the sticky default set by `hermes profile use`. |
+| `--profile <name>`, `-p <name>` | Select which {{app-name}} profile to use for this invocation. Overrides the sticky default set by `noone profile use`. |
 | `--resume <session>`, `-r <session>` | Resume a previous session by ID or title. The keyword `latest` resumes the most recent session (workspace-scoped, same lookup as `-c`). |
 | `--continue [name]`, `-c [name]` | Resume the most recent session, or the most recent session matching a title. |
 | `--in <dir>` | Change into `<dir>` before starting or resuming. Scopes `--resume latest` / `-c` lookups to that directory's workspace and keeps the session there (skips the recorded-cwd restore). |
@@ -34,91 +33,90 @@ hermes [global-options] <command> [subcommand/options]
 | `--pass-session-id` | Include the session ID in the agent's system prompt. |
 | `--ignore-user-config` | Ignore `~/.hermes/config.yaml` and fall back to built-in defaults. Credentials in `.env` are still loaded. |
 | `--ignore-rules` | Skip auto-injection of `AGENTS.md`, `SOUL.md`, `.cursorrules`, memory, and preloaded skills. |
-| `--tui` | Launch the [TUI](../user-guide/tui.md) instead of the classic CLI. Equivalent to `HERMES_TUI=1`. Always wins over `display.interface`. |
 | `--cli` | Force the classic prompt_toolkit REPL. Use this to override `display.interface: tui` for a single invocation. |
 | `--dev` | With `--tui`: run the TypeScript sources directly via `tsx` instead of the prebuilt bundle (for TUI contributors). |
 
-### `hermes-agent` (legacy single-query runner)
+### `hermes-agent` (legacy single-query runner) {#hermes-agent-legacy-single-query-runner}
 
-The install also ships `hermes-agent`, a minimal runner that sends one query and exits: `hermes-agent --query "summarize README.md"` (or `hermes-agent "summarize README.md"`). `hermes-agent --help` lists its options (`--model`, `--base-url`, `--max-turns`, `--enabled-toolsets`, `--disabled-toolsets`, `--list-tools`, `--save-trajectories`, …) and `hermes-agent --version` prints the version; neither starts the agent. Run with no query, it prints the same help and exits. For anything else use `hermes` (`hermes -z <prompt>` is the scripted one-shot).
+The install also ships `hermes-agent`, a minimal runner that sends one query and exits: `hermes-agent --query "summarize README.md"` (or `hermes-agent "summarize README.md"`). `hermes-agent --help` lists its options (`--model`, `--base-url`, `--max-turns`, `--enabled-toolsets`, `--disabled-toolsets`, `--list-tools`, `--save-trajectories`, …) and `hermes-agent --version` prints the version; neither starts the agent. Run with no query, it prints the same help and exits. For anything else use `hermes` (`noone -z <prompt>` is the scripted one-shot).
 
-## Top-level commands
+## Top-level commands {#top-level-commands}
 
 | Command | Purpose |
 |---------|---------|
-| `hermes chat` | Interactive or one-shot chat with the agent. |
-| `hermes model` | Interactively choose the default provider and model. |
+| `noone chat` | Interactive or one-shot chat with the agent. |
+| `noone model` | Interactively choose the default provider and model. |
 | `hermes moa` | Configure named Mixture of Agents presets selectable from the model picker. |
 | `hermes fallback` | Manage fallback providers tried when the primary model errors. |
-| `hermes gateway` | Run or manage the messaging gateway service. |
+| `noone gateway` | Run or manage the messaging gateway service. |
 | `hermes proxy` | Local OpenAI-compatible proxy that attaches OAuth provider credentials. See [Subscription Proxy](../user-guide/features/subscription-proxy.md). |
 | `hermes egress` | Outbound credential-injection firewall for remote terminal sandboxes (iron-proxy). Disabled by default. See [Egress proxy](../user-guide/egress/iron-proxy.md). |
 | `hermes lsp` | Manage Language Server Protocol integration (semantic diagnostics for write_file/patch). |
-| `hermes setup` | Interactive setup wizard for all or part of the configuration. |
+| `noone setup` | Interactive setup wizard for all or part of the configuration. |
 | `hermes whatsapp` | Configure and pair the WhatsApp bridge. |
 | `hermes whatsapp-cloud` | Configure the official Meta WhatsApp Business Cloud API adapter (Business account + public webhook required). Distinct from `hermes whatsapp` (Baileys personal-account bridge). |
 | `hermes slack` | Slack helpers (currently: generate the app manifest with every command as a native slash). |
-| `hermes auth` | Manage credentials — add, list, remove, reset, status, logout. Handles OAuth flows for Codex/Nous/Anthropic. |
-| `hermes login` / `logout` | **Deprecated** — use `hermes auth` instead. |
-| `hermes send` | Send a one-shot message to a configured messaging platform (Telegram, Discord, Slack, Signal, SMS, …). Useful from shell scripts, cron jobs, CI hooks, and monitoring daemons — no agent loop, no LLM. |
-| `hermes peer` | Register peer Hermes gateways on other machines and DM their agents' canonical Bot Chats (`hermes peer dm <peer>[/<agent>] "…"`). The transport behind cross-machine bot-to-bot messaging. |
+| `noone auth` | Manage credentials — add, list, remove, reset, status, logout. Handles OAuth flows for Codex/Nous/Anthropic. |
+| `hermes login` / `logout` | **Deprecated** — use `noone auth` instead. |
+| `noone send` | Send a one-shot message to a configured messaging platform (Telegram, Discord, Slack, Signal, SMS, …). Useful from shell scripts, cron jobs, CI hooks, and monitoring daemons — no agent loop, no LLM. |
+| `noone peer` | Register peer {{app-name}} gateways on other machines and DM their agents' canonical Bot Chats (`noone peer dm <peer>[/<agent>] "…"`). The transport behind cross-machine bot-to-bot messaging. |
 | `hermes secrets` | Manage external secret sources (currently Bitwarden Secrets Manager) for pulling API keys at process startup instead of from `~/.hermes/.env`. |
 | `hermes migrate` | Move over from another agent (`migrate grok-bot`, `migrate claude-code`, ... or bare to detect), or rewrite `config.yaml` for retired models and deprecated settings (`migrate xai`). |
-| `hermes codex-runtime` | Noninteractive counterpart of `/codex-runtime`: `migrate [--dry-run] [--json]` regenerates the Hermes-managed block in `~/.codex/config.toml` for the selected profile. See [Codex app-server runtime](../user-guide/features/codex-app-server-runtime.md#running-the-migration-from-a-script). |
-| `hermes status` | Show agent, auth, and platform status. |
+| `noone codex-runtime` | Noninteractive counterpart of `/codex-runtime`: `migrate [--dry-run] [--json]` regenerates the {{app-name}}-managed block in `~/.codex/config.toml` for the selected profile. See [Codex app-server runtime](../user-guide/features/codex-app-server-runtime.md#running-the-migration-from-a-script). |
+| `noone status` | Show agent, auth, and platform status. |
 | `hermes usage` | Show the configured account's rate-limit windows (the `/usage` block) without a session; `--json` for scripts. |
-| `hermes cron` | Inspect and tick the cron scheduler. |
-| `hermes pause` / `hermes resume` | Global emergency stop: no new cron fires (built-in ticker, managed-cron webhook, misfire catch-up), kanban dispatch or gateway turns start until resumed. Interactive CLI, TUI and Desktop turns are gateway turns, so they are held too, and each surface shows "Hermes is paused" with the reason and "run `hermes resume`". Turns already running finish; in-flight work is never killed. |
-| `hermes kanban` | Multi-profile collaboration board (tasks, links, dispatcher). |
+| `noone cron` | Inspect and tick the cron scheduler. |
+| `hermes pause` / `hermes resume` | Global emergency stop: no new cron fires (built-in ticker, managed-cron webhook, misfire catch-up), kanban dispatch or gateway turns start until resumed. Interactive CLI, TUI and Desktop turns are gateway turns, so they are held too, and each surface shows "{{app-name}} is paused" with the reason and "run `hermes resume`". Turns already running finish; in-flight work is never killed. |
+| `noone kanban` | Multi-profile collaboration board (tasks, links, dispatcher). |
 | `hermes project` | Manage named, multi-folder workspaces (projects). Anchors desktop session grouping; kanban tasks linked to a project with a primary folder default to a deterministic worktree + branch. State is per-profile. |
 | `hermes webhook` | Manage dynamic webhook subscriptions for event-driven activation. |
 | `hermes hooks` | Inspect, approve, or remove shell-script hooks declared in `config.yaml`. |
-| `hermes doctor` | Diagnose config and dependency issues. |
+| `noone doctor` | Diagnose config and dependency issues. |
 | `hermes security audit` | On-demand supply-chain audit (OSV.dev) for the venv, plugin requirements, and pinned MCP servers. |
 | `hermes approvals` | Approval-prompt tools — mine approval history into allowlist proposals. |
 | `hermes dump` | Copy-pasteable setup summary for support/debugging. |
 | `hermes prompt-size` | Show a byte breakdown of the system prompt + tool schemas (skills index, memory, profile). Runs offline. |
-| `hermes debug` | Debug tools — upload logs and system info for support. |
-| `hermes backup` | Back up Hermes home directory to a zip file. |
+| `noone debug` | Debug tools — upload logs and system info for support. |
+| `noone backup` | Back up {{app-name}} home directory to a zip file. |
 | `hermes checkpoints` | Inspect / prune / clear `~/.hermes/checkpoints/` (the shadow store used by `/rollback`). Run with no args for a status overview. |
-| `hermes import` | Restore a Hermes backup from a zip file. |
-| `hermes logs` | View, tail, and filter agent/gateway/error log files. |
-| `hermes config` | Show, edit, migrate, and query configuration files. |
+| `noone import` | Restore a {{app-name}} backup from a zip file. |
+| `noone logs` | View, tail, and filter agent/gateway/error log files. |
+| `noone config` | Show, edit, migrate, and query configuration files. |
 | `hermes skin` | List, switch, and tweak display skins. |
-| `hermes console` | Open the safe Hermes command console. |
+| `noone console` | Open the safe {{app-name}} command console. |
 | `hermes pairing` | Approve or revoke messaging pairing codes. |
-| `hermes skills` | Browse, install, publish, audit, and configure skills. |
+| `noone skills` | Browse, install, publish, audit, and configure skills. |
 | `hermes bundles` | Group several skills under a single `/<name>` slash command. See [Skill Bundles](../user-guide/features/skills.md#skill-bundles). |
 | `hermes curator` | Background skill maintenance — status, run, pause, pin. See [Curator](../user-guide/features/curator.md). |
 | `hermes journey` (aliases `learning`, `memory-graph`) | Timeline of learned skills + memories over time. |
 | `hermes memory` | Configure external memory provider. Plugin-specific subcommands (e.g. `hermes honcho`) register automatically when their provider is active. |
-| `hermes acp` | Run Hermes as an ACP server for editor integration. |
-| `hermes mcp` | Manage MCP server configurations. Running Hermes as an MCP server is the [mcp-serve plugin](../user-guide/features/mcp.md#running-hermes-as-an-mcp-server). |
+| `hermes acp` | Run {{app-name}} as an ACP server for editor integration. |
+| `noone mcp` | Manage MCP server configurations. Running {{app-name}} as an MCP server is the [mcp-serve plugin](../user-guide/features/mcp.md#running-hermes-as-an-mcp-server). |
 | `hermes connectors` | List, connect, rename and disconnect hosted connector accounts. |
-| `hermes plugins` | Manage Hermes Agent plugins (install, enable, disable, remove). |
-| `hermes portal` | Nous Portal status, subscription link, and Tool Gateway routing. See [Tool Gateway](../user-guide/features/tool-gateway.md). |
-| `hermes tools` | Configure enabled tools per platform. |
+| `noone plugins` | Manage {{app-name}} plugins (install, enable, disable, remove). |
+| `noone portal` | Nous Portal status, subscription link, and Tool Gateway routing. See [Tool Gateway](../user-guide/features/tool-gateway.md). |
+| `noone tools` | Configure enabled tools per platform. |
 | `hermes computer-use` | Install or check the Computer Use (cua-driver) backend (macOS/Windows/Linux). |
-| `hermes pets` | Browse, install, and select [petdex](../user-guide/features/pets.md) animated pets shown across the CLI, TUI, and desktop app. Subcommands: `list`, `install`, `select`, `show`, `off`, `scale`, `remove`, `doctor`. |
+| `hermes pets` | Browse, install, and select [petdex](../user-guide/features/pets.md) animated pets shown across the CLI, and desktop app. Subcommands: `list`, `install`, `select`, `show`, `off`, `scale`, `remove`, `doctor`. |
 | `hermes clipboard image` | Write this machine's clipboard image to a file (`--json` for scripts). Device-local: no gateway, no session store. |
-| `hermes sessions` | Browse, export, prune, rename, and delete sessions. |
+| `noone sessions` | Browse, export, prune, rename, and delete sessions. |
 | `hermes insights` | Show token/cost/activity analytics. |
-| `hermes claw` | OpenClaw migration (`migrate`, `cleanup`), from the [`agent-importers`](../user-guide/import-from-other-agents.md) plugin; `hermes claw migrate` is the same as `hermes import-agent openclaw`. |
-| `hermes import-agent` | Import an OpenClaw, Claude Code, Codex CLI or Cursor setup (from the [`agent-importers`](../user-guide/import-from-other-agents.md) plugin). |
-| `hermes dashboard` | Launch the web dashboard for managing config, API keys, and sessions. |
-| `hermes serve` | Start the Hermes backend server (headless; powers the desktop app and remote backends). |
-| `hermes webapp` | Open the Desktop workspace in a browser, served by the gateway. |
-| `hermes desktop` (alias `gui`) | Build and launch the native Electron desktop app. |
-| `hermes profile` | Manage profiles — multiple isolated Hermes instances. |
-| `hermes completion` | Print shell completion scripts (bash/zsh/fish). |
-| `hermes --version` | Show version information. |
-| `hermes update` | Update to the latest stable release (or the selected channel) and reinstall dependencies. `--check` previews without installing; `--backup` takes a pre-pull `HERMES_HOME` snapshot. |
-| `hermes uninstall` | Remove Hermes from the system. |
+| `noone claw` | OpenClaw migration (`migrate`, `cleanup`), from the [`agent-importers`](../user-guide/import-from-other-agents.md) plugin; `noone claw migrate` is the same as `noone import-agent openclaw`. |
+| `noone import-agent` | Import an OpenClaw, Claude Code, Codex CLI or Cursor setup (from the [`agent-importers`](../user-guide/import-from-other-agents.md) plugin). |
+| `noone dashboard` | Launch the web dashboard for managing config, API keys, and sessions. |
+| `noone serve` | Start the {{app-name}} backend server (headless; powers the desktop app and remote backends). |
+| `noone webapp` | Open the Desktop workspace in a browser, served by the gateway. |
+| `noone desktop` (alias `gui`) | Build and launch the native Electron desktop app. |
+| `noone profile` | Manage profiles — multiple isolated {{app-name}} instances. |
+| `noone completion` | Print shell completion scripts (bash/zsh/fish). |
+| `noone --version` | Show version information. |
+| `noone update` | Update to the latest stable release (or the selected channel) and reinstall dependencies. `--check` previews without installing; `--backup` takes a pre-pull `HERMES_HOME` snapshot. |
+| `noone uninstall` | Remove {{app-name}} from the system. |
 
-## `hermes chat`
+## `noone chat` {#hermes-chat}
 
 ```bash
-hermes chat [options]
+noone chat [options]
 ```
 
 Common options:
@@ -152,19 +150,19 @@ Examples:
 
 ```bash
 hermes
-hermes chat -q "Summarize the latest PRs"          # seeds an interactive session
-hermes chat --oneshot -q "Summarize the latest PRs"  # answer and exit
-hermes chat --provider openrouter --model anthropic/claude-sonnet-4.6
-hermes chat --toolsets web,terminal,skills
-hermes chat --quiet -q "Return only JSON"
-hermes chat -q "Inspect this repository" --format stream-json
-hermes chat --worktree -q "Review this repo and open a PR"
-hermes chat --ignore-user-config --ignore-rules -q "Repro without my personal setup"
-hermes chat --safe-mode --model gpt-4.1 -q "Is this bug mine or Hermes'?"
-hermes chat --safe-mode --provider custom --base-url http://127.0.0.1:8000/v1 --model local -q "Isolate against a local server"
+noone chat -q "Summarize the latest PRs"          # seeds an interactive session
+noone chat --oneshot -q "Summarize the latest PRs"  # answer and exit
+noone chat --provider openrouter --model anthropic/claude-sonnet-4.6
+noone chat --toolsets web,terminal,skills
+noone chat --quiet -q "Return only JSON"
+noone chat -q "Inspect this repository" --format stream-json
+noone chat --worktree -q "Review this repo and open a PR"
+noone chat --ignore-user-config --ignore-rules -q "Repro without my personal setup"
+noone chat --safe-mode --model gpt-4.1 -q "Is this bug mine or Hermes'?"
+noone chat --safe-mode --provider custom --base-url http://127.0.0.1:8000/v1 --model local -q "Isolate against a local server"
 ```
 
-### `--format stream-json` — structured JSONL output
+### `--format stream-json` — structured JSONL output {#--format-stream-json--structured-jsonl-output}
 
 Use `--format stream-json` when a program needs to consume progress without
 scraping terminal output. It requires `-q` / `--query` (or `--query-file`), implies
@@ -172,7 +170,7 @@ quiet non-interactive CLI mode, and rejects an explicit `--tui` request. Every
 stdout line is one JSON object; diagnostics and the `session_id:` line stay on stderr.
 
 ```bash
-hermes chat -q "Summarize this repository" --format stream-json
+noone chat -q "Summarize this repository" --format stream-json
 ```
 
 Every event carries `timestamp` (Unix epoch milliseconds).
@@ -189,7 +187,7 @@ Once a conversation starts, its terminal record is always `result` — including
 `exit_code: 130` when it is interrupted with Ctrl-C. Treat that record as the
 completion signal; the process exit code matches its `exit_code`.
 
-#### Exit codes for one-shot runs
+#### Exit codes for one-shot runs {#exit-codes-for-one-shot-runs}
 
 When chat answers and exits (`-Q`, `chat --oneshot`, or a query with non-TTY
 stdio) the process exit code reports the turn's outcome, on both the quiet and
@@ -203,15 +201,15 @@ billing/quota wall, exits
 failure. With `--format stream-json` the terminal `result` record carries the
 same `exit_code`.
 
-#### Delegation in finite chat runs
+#### Delegation in finite chat runs {#delegation-in-finite-chat-runs}
 
 When chat answers and exits, `delegate_task` waits for its children and returns their
 results in the same turn instead of running them in the background. Details and limits:
 [Delegation: finite chat runs](../user-guide/features/delegation.md#finite-chat-runs).
 
-### `hermes -z <prompt>` — scripted one-shot
+### `noone -z <prompt>` — scripted one-shot {#hermes--z-prompt--scripted-one-shot}
 
-For programmatic callers (shell scripts, CI, cron, parent processes piping in a prompt), `hermes -z` is the purest one-shot entry point: **single prompt in, final response text out, nothing else on stdout or stderr.** No banner, no spinner, no tool previews, no `Session:` line — just the agent's final reply as plain text.
+For programmatic callers (shell scripts, CI, cron, parent processes piping in a prompt), `noone -z` is the purest one-shot entry point: **single prompt in, final response text out, nothing else on stdout or stderr.** No banner, no spinner, no tool previews, no `Session:` line — just the agent's final reply as plain text.
 
 ```bash
 hermes -z "What's the capital of France?"
@@ -235,7 +233,7 @@ hermes -z "…" --provider openrouter --model openai/gpt-5.5
 HERMES_INFERENCE_MODEL=anthropic/claude-sonnet-4.6 hermes -z "…"
 ```
 
-Same agent, same tools, same skills — just strips every interactive / cosmetic layer. If you need tool output in the transcript too, use `hermes chat --oneshot -q` instead; `-z` is explicitly for "I only want the final answer".
+Same agent, same tools, same skills — just strips every interactive / cosmetic layer. If you need tool output in the transcript too, use `noone chat --oneshot -q` instead; `-z` is explicitly for "I only want the final answer".
 
 Exit codes: `0` the turn completed; `2` it failed or stopped partway (`partial`,
 iteration budget, `completed: false`) — even when an explanation was printed;
@@ -246,9 +244,9 @@ differ from `chat -q`/`-Q` above (which exit `1` for failed/partial/budget and
 Judge the run by the exit code (or the `--usage-file` flags), not by whether
 stdout is non-empty.
 
-#### `--usage-file` — JSON usage report for pipelines
+#### `--usage-file` — JSON usage report for pipelines {#--usage-file--json-usage-report-for-pipelines}
 
-`hermes -z "…" --usage-file /path/report.json` writes a machine-readable usage report after the run: `estimated_cost_usd`, `input_tokens` / `output_tokens` / `cache_read_tokens` / `cache_write_tokens` / `reasoning_tokens` / `total_tokens`, `api_calls`, `model`, `provider`, `session_id`, `service_tier`, the `completed` / `failed` / `partial` / `interrupted` flags and `turn_exit_reason` (why `completed` is false, e.g. `max_iterations_reached(3/3)`). Those top-level counters cover the **main agent loop** only. Auxiliary LLM calls made on the same run (title generation, vision, context compression, background review, …) are reported separately under `auxiliary` — the same totals plus a per-task `by_task` map — and `total_including_auxiliary` (`estimated_cost_usd`, `total_tokens`, `api_calls`) is the grand total to bill on. The report is written **even when the run fails**, so batch pipelines can always account for spend. It has no effect outside `-z`/`--oneshot`, and a broken usage write never masks the run's own outcome.
+`noone -z "…" --usage-file /path/report.json` writes a machine-readable usage report after the run: `estimated_cost_usd`, `input_tokens` / `output_tokens` / `cache_read_tokens` / `cache_write_tokens` / `reasoning_tokens` / `total_tokens`, `api_calls`, `model`, `provider`, `session_id`, `service_tier`, the `completed` / `failed` / `partial` / `interrupted` flags and `turn_exit_reason` (why `completed` is false, e.g. `max_iterations_reached(3/3)`). Those top-level counters cover the **main agent loop** only. Auxiliary LLM calls made on the same run (title generation, vision, context compression, background review, …) are reported separately under `auxiliary` — the same totals plus a per-task `by_task` map — and `total_including_auxiliary` (`estimated_cost_usd`, `total_tokens`, `api_calls`) is the grand total to bill on. The report is written **even when the run fails**, so batch pipelines can always account for spend. It has no effect outside `-z`/`--oneshot`, and a broken usage write never masks the run's own outcome.
 
 ```bash
 hermes -z "summarize this repo" --usage-file ~/.hermes/cache/scratch/usage.json
@@ -256,12 +254,12 @@ jq .total_including_auxiliary.estimated_cost_usd ~/.hermes/cache/scratch/usage.j
 jq .auxiliary.by_task ~/.hermes/cache/scratch/usage.json      # what did title generation / vision cost?
 ```
 
-## `hermes model`
+## `noone model` {#hermes-model}
 
-Interactive provider + model selector. **This is the command for adding new providers, setting up API keys, and running OAuth flows.** Run it from your terminal — not from inside an active Hermes chat session.
+Interactive provider + model selector. **This is the command for adding new providers, setting up API keys, and running OAuth flows.** Run it from your terminal — not from inside an active {{app-name}} chat session.
 
 ```bash
-hermes model
+noone model
 ```
 
 Use this when you want to:
@@ -272,15 +270,23 @@ Use this when you want to:
 - configure a custom/self-hosted endpoint
 - save the new default into config
 
-:::warning hermes model vs /model — know the difference
-**`hermes model`** (run from your terminal, outside any Hermes session) is the **full provider setup wizard**. It can add new providers, run OAuth flows, prompt for API keys, and configure endpoints.
+<Warning>
 
-**`/model`** (typed inside an active Hermes chat session) can only **switch between providers and models you've already set up**. It cannot add new providers, run OAuth, or prompt for API keys.
+<div className="doc-callout-title">
 
-**If you need to add a new provider:** Exit your Hermes session first (`Ctrl+C` or `/quit`), then run `hermes model` from your terminal prompt.
-:::
+noone model vs /model — know the difference
 
-### `/model` slash command (mid-session)
+</div>
+
+**`noone model`** (run from your terminal, outside any {{app-name}} session) is the **full provider setup wizard**. It can add new providers, run OAuth flows, prompt for API keys, and configure endpoints.
+
+**`/model`** (typed inside an active {{app-name}} chat session) can only **switch between providers and models you've already set up**. It cannot add new providers, run OAuth, or prompt for API keys.
+
+**If you need to add a new provider:** Exit your {{app-name}} session first (`Ctrl+C` or `/quit`), then run `noone model` from your terminal prompt.
+
+</Warning>
+
+### `/model` slash command (mid-session) {#model-slash-command-mid-session}
 
 Switch between already-configured models without leaving a session:
 
@@ -300,16 +306,24 @@ By default, `/model` changes apply **to the current session only**. Add `--globa
 /model claude-sonnet-4 --global     # Switch and save as new default
 ```
 
-:::info What if I only see OpenRouter models?
-If you've only configured OpenRouter, `/model` will only show OpenRouter models. To add another provider (Anthropic, DeepSeek, etc.), exit your session and run `hermes model` from the terminal.
-:::
+<Info>
+
+<div className="doc-callout-title">
+
+What if I only see OpenRouter models?
+
+</div>
+
+If you've only configured OpenRouter, `/model` will only show OpenRouter models. To add another provider (Anthropic, DeepSeek, etc.), exit your session and run `noone model` from the terminal.
+
+</Info>
 
 On a `--global` switch, provider and base URL changes are persisted to `config.yaml` alongside the model. When switching away from a custom endpoint, the stale base URL is cleared to prevent it leaking into other providers.
 
-## `hermes gateway`
+## `noone gateway` {#hermes-gateway}
 
 ```bash
-hermes gateway <subcommand>
+noone gateway <subcommand>
 ```
 
 Subcommands:
@@ -327,22 +341,22 @@ Subcommands:
 | `install` | Install as a systemd (Linux) or launchd (macOS) background service. |
 | `uninstall` | Remove the installed service. |
 | `setup` | Interactive messaging-platform setup. |
-| `migrate` | Fold per-profile standalone gateways onto the one host gateway (`--multiplex`, the only mode — `hermes update` runs it automatically unless a real boundary blocks it). Re-running it converges a half-migrated host; a manifest on disk is the resume record, never a rollback (there is no `--standalone`). Runs a preflight (duplicate bot tokens, secondary port-binders without a `/p/<profile>/` ingress) and changes nothing when blocked. Flags: `--dry-run`, `-y`/`--yes`. `--backends [--json]` instead reports serve/dashboard background services and their ownership, changing no service, unit, plist or ledger (normal startup bookkeeping still runs; see [Reporting dashboard background services](../user-guide/features/web-dashboard.md#reporting-dashboard-background-services)). See [Migrating from per-profile gateways](../user-guide/multi-profile-gateways.md#migrating-from-per-profile-gateways). |
+| `migrate` | Fold per-profile standalone gateways onto the one host gateway (`--multiplex`, the only mode — `noone update` runs it automatically unless a real boundary blocks it). Re-running it converges a half-migrated host; a manifest on disk is the resume record, never a rollback (there is no `--standalone`). Runs a preflight (duplicate bot tokens, secondary port-binders without a `/p/<profile>/` ingress) and changes nothing when blocked. Flags: `--dry-run`, `-y`/`--yes`. `--backends [--json]` instead reports serve/dashboard background services and their ownership, changing no service, unit, plist or ledger (normal startup bookkeeping still runs; see [Reporting dashboard background services](../user-guide/features/web-dashboard.md#reporting-dashboard-background-services)). See [Migrating from per-profile gateways](../user-guide/multi-profile-gateways.md#migrating-from-per-profile-gateways). |
 | `migrate-legacy` | Remove legacy `hermes.service` units left over from pre-rename installs. Profile units (`hermes-gateway-<profile>.service`) and unrelated services are never touched. Flags: `--dry-run`, `-y`/`--yes`. |
-| `enroll` | Experimental: enroll this gateway with a relay connector and save relay credentials for connector-backed platforms. See [Hermes Relay](../user-guide/messaging/relay.md). |
+| `enroll` | Experimental: enroll this gateway with a relay connector and save relay credentials for connector-backed platforms. See [{{app-name}} Relay](../user-guide/messaging/relay.md). |
 
 Options:
 
 | Option | Description |
 |--------|-------------|
-| `--all` | On `start` / `restart` / `stop`: act on **every profile's** gateway, not just the active `HERMES_HOME`. Useful if you run multiple profiles side-by-side and want to restart them all after `hermes update`. |
+| `--all` | On `start` / `restart` / `stop`: act on **every profile's** gateway, not just the active `HERMES_HOME`. Useful if you run multiple profiles side-by-side and want to restart them all after `noone update`. |
 | `-y`, `--yes` | On `stop` / `restart`: when the gateway is running chat turns, cron jobs or background delegations, the command lists them and asks `y/N` before interrupting them. `--yes` skips the question. With no terminal to ask on (scripts, cron) it refuses unless `--yes` is passed. `--interrupt` is an alias. |
-| `--detach` | On `restart`: when no gateway service is installed, start the replacement in the background (the way `hermes gateway ensure` starts one) instead of in the current terminal. The desktop app and the updater's recovery restart pass it so their short-lived restart call never becomes the gateway itself. Service, supervisor and Windows-task restarts are unchanged. |
+| `--detach` | On `restart`: when no gateway service is installed, start the replacement in the background (the way `noone gateway ensure` starts one) instead of in the current terminal. The desktop app and the updater's recovery restart pass it so their short-lived restart call never becomes the gateway itself. Service, supervisor and Windows-task restarts are unchanged. |
 | `--no-supervise` | On `run`: inside the s6-overlay Docker image, opt out of auto-supervision and use pre-s6 foreground semantics — gateway runs as the container's main process with no auto-restart. No-op outside the s6 image. Equivalent to setting `HERMES_GATEWAY_NO_SUPERVISE=1`. |
 | `--external-supervisor` | On `run`: declare that a wrapper-provided process manager owns the foreground gateway. Use this when `sudo`, `env -i`, or another wrapper strips launchd/systemd's native environment marker. In-chat restarts and updates exit back to that manager instead of spawning a detached replacement. |
 
 `--external-supervisor` is a restart-policy contract: an in-chat restart,
-`hermes gateway restart`, or service-restart update exits with status `75`
+`noone gateway restart`, or service-restart update exits with status `75`
 (the CLI then waits for the supervisor's fresh PID instead of running a
 foreground gateway of its own), so the wrapper's supervisor must
 relaunch the gateway after that nonzero exit. For systemd, use
@@ -351,39 +365,47 @@ relaunch the gateway after that nonzero exit. For systemd, use
 unsuccessful exits. Without that policy, a requested restart leaves the gateway
 stopped.
 
-`hermes gateway enroll` accepts `--token`, `--connector-url`, `--gateway-id`, and `--wake-url`. It exchanges the enrollment token with the connector and writes the resulting `GATEWAY_RELAY_ID`, `GATEWAY_RELAY_SECRET`, `GATEWAY_RELAY_DELIVERY_KEY`, optional `GATEWAY_RELAY_URL`, and (when `--wake-url` is given) `GATEWAY_RELAY_WAKE_URL` values to the active profile's `.env`.
+`noone gateway enroll` accepts `--token`, `--connector-url`, `--gateway-id`, and `--wake-url`. It exchanges the enrollment token with the connector and writes the resulting `GATEWAY_RELAY_ID`, `GATEWAY_RELAY_SECRET`, `GATEWAY_RELAY_DELIVERY_KEY`, optional `GATEWAY_RELAY_URL`, and (when `--wake-url` is given) `GATEWAY_RELAY_WAKE_URL` values to the active profile's `.env`.
 
-:::tip WSL users
-Use `hermes gateway run` instead of `hermes gateway start` — WSL's systemd support is unreliable. Wrap it in tmux for persistence: `tmux new -s hermes 'hermes gateway run'`. See [WSL FAQ](./faq.md#wsl-gateway-keeps-disconnecting-or-hermes-gateway-start-fails) for details.
-:::
+<Tip>
 
-### Local runtime discovery and startup
+<div className="doc-callout-title">
 
-`hermes gateway ensure [--json] [--timeout 60]` discovers or starts the active profile's
+WSL users
+
+</div>
+
+Use `noone gateway run` instead of `noone gateway start` — WSL's systemd support is unreliable. Wrap it in tmux for persistence: `tmux new -s hermes 'noone gateway run'`. See [WSL FAQ](./faq.md#wsl-gateway-keeps-disconnecting-or-hermes-gateway-start-fails) for details.
+
+</Tip>
+
+### Local runtime discovery and startup {#local-runtime-discovery-and-startup}
+
+`noone gateway ensure [--json] [--timeout 60]` discovers or starts the active profile's
 session runtime and prints one JSON object (`state`, `reason_code`, and an `endpoint` only
 once authenticated discovery reports compatible readiness; never tickets or credentials).
 It waits for an existing or starting owner instead of replacing it and never installs a
 service. Exit `0` means ready; any other code is a refusal or a deadline, never permission
 to start a replacement. Service identity checks, the home-permission policy behind
 `unsafe_control_permissions`, and every exit code:
-[Gateway internals: `hermes gateway ensure`](../developer-guide/gateway-internals.md#hermes-gateway-ensure).
+[Gateway internals: `noone gateway ensure`](../developer-guide/gateway-internals.md#hermes-gateway-ensure).
 
-`hermes gateway attach [--json] [--start] [--recover] [--timeout 60]` is the attach step for a
+`noone gateway attach [--json] [--start] [--recover] [--timeout 60]` is the attach step for a
 local client that dials the gateway itself (a third-party chat UI, for example). It prints
 `ensure`'s JSON plus, once the gateway is attachable, `url` (`ws://127.0.0.1:<port>/api/ws`),
 `protocol` (`hermes-gateway-v1`), `protocols` (the WebSocket subprotocols to dial with) and
 `ticket`. The ticket is single-use, bound to the active profile, and expires 30 seconds after it
 is minted; it goes to stdout for the calling process only and is never logged. A plain call only
 discovers the gateway; `--start` starts it when none serves the profile; `--recover` discovers
-first and starts (or replaces an older Hermes's gateway) only when it is not ready. An unmanaged
+first and starts (or replaces an older {{app-name}}'s gateway) only when it is not ready. An unmanaged
 gateway that `attach` starts (no service installed) stops itself once it has been idle for a while.
 With no gateway to attach,
 the JSON carries `message` (the `gateway <state>: <reason>` lines, with the remedy when there is
 one), the same text goes to stderr, and the exit code is `ensure`'s for that verdict. The Ink TUI
 attaches through the same code. Details and the dial rules:
-[Gateway internals: `hermes gateway attach`](../developer-guide/gateway-internals.md#hermes-gateway-attach).
+[Gateway internals: `noone gateway attach`](../developer-guide/gateway-internals.md#hermes-gateway-attach).
 
-## `hermes lsp`
+## `hermes lsp` {#hermes-lsp}
 
 ```bash
 hermes lsp <subcommand>
@@ -410,19 +432,19 @@ Subcommands:
 See [LSP — Semantic Diagnostics](../user-guide/features/lsp.md) for
 the full guide, supported languages, and configuration knobs.
 
-## `hermes setup`
+## `noone setup` {#hermes-setup}
 
 ```bash
-hermes setup [model|tts|terminal|gateway|tools|agent] [--non-interactive] [--reset] [--quick] [--reconfigure] [--portal]
+noone setup [model|tts|terminal|gateway|tools|agent] [--non-interactive] [--reset] [--quick] [--reconfigure] [--portal]
 ```
 
-**Easiest path:** `hermes setup --portal` — OAuth into Nous Portal and opt into the [Tool Gateway](../user-guide/features/tool-gateway.md) in one shot.
+**Easiest path:** `noone setup --portal` — OAuth into Nous Portal and opt into the [Tool Gateway](../user-guide/features/tool-gateway.md) in one shot.
 
 **First run:** launches the first-time wizard.
 
 **Returning user (already configured):** drops straight into the full reconfigure wizard — every prompt shows your current value as its default, press Enter to keep or type a new value. No menu.
 
-**Coming from another agent:** when the first run finds an OpenClaw, Claude Code, Codex CLI or Cursor setup (`~/.openclaw`, `~/.claude`, `~/.codex`, `~/.cursor`), it first asks **"Import your setup from …?"** (default yes). With more than one found, you then pick which from a checklist. Setup installs the [`agent-importers`](../user-guide/import-from-other-agents.md) plugin from the catalog, unless you already have it, and runs its import for each pick, which shows a preview and asks before changing anything (OpenClaw's allowlisted API keys and bot tokens are included, as the old built-in step did). Quick Setup after an import that brought a model and its key asks **"Keep your imported model (…) or switch to Nous Portal?"** (default keep, which skips the Nous Portal login). Nothing found, a no, `--non-interactive` or a setup started by the dashboard: no question and nothing installed. On an already configured install, run `hermes import-agent` instead.
+**Coming from another agent:** when the first run finds an OpenClaw, Claude Code, Codex CLI or Cursor setup (`~/.openclaw`, `~/.claude`, `~/.codex`, `~/.cursor`), it first asks **"Import your setup from …?"** (default yes). With more than one found, you then pick which from a checklist. Setup installs the [`agent-importers`](../user-guide/import-from-other-agents.md) plugin from the catalog, unless you already have it, and runs its import for each pick, which shows a preview and asks before changing anything (OpenClaw's allowlisted API keys and bot tokens are included, as the old built-in step did). Quick Setup after an import that brought a model and its key asks **"Keep your imported model (…) or switch to Nous Portal?"** (default keep, which skips the Nous Portal login). Nothing found, a no, `--non-interactive` or a setup started by the dashboard: no question and nothing installed. On an already configured install, run `noone import-agent` instead.
 
 Jump into one section instead of the full wizard:
 
@@ -441,13 +463,13 @@ Options:
 | `--quick` | On returning-user runs: only prompt for items that are missing or unset. Skip items you already have configured. |
 | `--non-interactive` | Use defaults / environment values without prompts. |
 | `--reset` | Reset configuration to defaults before setup. |
-| `--reconfigure` | Backwards-compat alias — bare `hermes setup` on an existing install now does this by default. |
+| `--reconfigure` | Backwards-compat alias — bare `noone setup` on an existing install now does this by default. |
 | `--portal` | One-shot Nous Portal setup: log in via OAuth, set Nous as the inference provider, and opt into the [Tool Gateway](../user-guide/features/tool-gateway.md). Skips the rest of the wizard. |
 
-## `hermes portal`
+## `noone portal` {#hermes-portal}
 
 ```bash
-hermes portal [status|open|tools]
+noone portal [status|open|tools]
 ```
 
 Inspect Nous Portal auth, Tool Gateway routing, and reach the subscription page. Subcommand-less invocation runs `status`.
@@ -458,9 +480,9 @@ Inspect Nous Portal auth, Tool Gateway routing, and reach the subscription page.
 | `open` | Open `portal.nousresearch.com/manage-subscription` in your default browser. |
 | `tools` | List every Tool Gateway partner (Firecrawl, FAL, OpenAI TTS, Browser Use, Modal) and which are routed via Nous. |
 
-For configuration of the gateway itself, see [Tool Gateway](../user-guide/features/tool-gateway.md). For the one-shot setup path, see `hermes setup --portal` above.
+For configuration of the gateway itself, see [Tool Gateway](../user-guide/features/tool-gateway.md). For the one-shot setup path, see `noone setup --portal` above.
 
-## `hermes whatsapp`
+## `hermes whatsapp` {#hermes-whatsapp}
 
 ```bash
 hermes whatsapp
@@ -468,7 +490,7 @@ hermes whatsapp
 
 Runs the WhatsApp pairing/setup flow, including mode selection and QR-code pairing.
 
-## `hermes slack`
+## `hermes slack` {#hermes-slack}
 
 ```bash
 hermes slack manifest              # print manifest to stdout
@@ -494,22 +516,22 @@ reinstall if scopes or slash commands changed.
 | `--long-description-file PATH` | unset | Read the long description from a UTF-8 text file, preserving its contents exactly. Mutually exclusive with `--long-description` and incompatible with `--slashes-only`. |
 | `--slashes-only` | off | Emit only `features.slash_commands` for merging into a manually-maintained manifest. |
 
-Run `hermes slack manifest --write` again after `hermes update` to pick
+Run `hermes slack manifest --write` again after `noone update` to pick
 up any new commands.
 
 
-## `hermes send`
+## `noone send` {#hermes-send}
 
 ```bash
-hermes send --to <target> "message text"
-hermes send --to <target> --file <path>
-echo "message" | hermes send --to <target>
-hermes send --list [platform]
+noone send --to <target> "message text"
+noone send --to <target> --file <path>
+echo "message" | noone send --to <target>
+noone send --list [platform]
 ```
 
 Send a one-shot message to a configured messaging platform without spinning up an agent or gateway loop. Reuses the gateway's already-configured credentials (`~/.hermes/.env` + `~/.hermes/config.yaml`) so ops scripts, cron jobs, CI hooks, and monitoring daemons can post status updates without reimplementing each platform's REST client.
 
-For bot-token platforms (Telegram, Discord, Slack, Signal, SMS, WhatsApp-CloudAPI) no running gateway is required — `hermes send` talks directly to the platform's REST endpoint. Plugin platforms that need a persistent adapter still require a live gateway.
+For bot-token platforms (Telegram, Discord, Slack, Signal, SMS, WhatsApp-CloudAPI) no running gateway is required — `noone send` talks directly to the platform's REST endpoint. Plugin platforms that need a persistent adapter still require a live gateway.
 
 | Option | Description |
 |--------|-------------|
@@ -520,52 +542,52 @@ For bot-token platforms (Telegram, Discord, Slack, Signal, SMS, WhatsApp-CloudAP
 | `-q`, `--quiet` | Suppress stdout on success — useful in scripts (rely on exit code only). |
 | `--json` | Emit raw JSON result instead of human-readable output. |
 
-If neither a positional `message` argument nor `--file` is provided, `hermes send` reads from stdin when it is not a TTY. Exit codes: `0` on success, `1` on delivery/backend failure, `2` on usage errors.
+If neither a positional `message` argument nor `--file` is provided, `noone send` reads from stdin when it is not a TTY. Exit codes: `0` on success, `1` on delivery/backend failure, `2` on usage errors.
 
-### Sending images and other media
+### Sending images and other media {#sending-images-and-other-media}
 
 `--file` is for *text* bodies only. To deliver an image, document, video, or audio file as a native platform attachment, reference it inside the message text with the `MEDIA:<local_path>` directive:
 
 ```bash
-hermes send --to telegram "MEDIA:~/.hermes/cache/scratch/screenshot.png"
-hermes send --to telegram "Build chart for today MEDIA:~/.hermes/cache/scratch/chart.png"   # with caption
-hermes send --to discord:#ops "MEDIA:~/.hermes/cache/scratch/report.pdf"
+noone send --to telegram "MEDIA:~/.hermes/cache/scratch/screenshot.png"
+noone send --to telegram "Build chart for today MEDIA:~/.hermes/cache/scratch/chart.png"   # with caption
+noone send --to discord:#ops "MEDIA:~/.hermes/cache/scratch/report.pdf"
 ```
 
 By default, image files are sent as photos (platforms like Telegram recompress these). Add `[[as_document]]` to the message to deliver them as uncompressed file attachments instead:
 
 ```bash
-hermes send --to telegram "[[as_document]] MEDIA:~/.hermes/cache/scratch/screenshot.png"
+noone send --to telegram "[[as_document]] MEDIA:~/.hermes/cache/scratch/screenshot.png"
 ```
 
 Examples:
 
 ```bash
-hermes send --to telegram "deploy finished"
-echo "RAM 92%" | hermes send --to telegram:-1001234567890
-hermes send --to discord:#ops --file ~/.hermes/cache/scratch/report.md
-hermes send --to slack:#eng --subject "[CI]" --file build.log
-hermes send --list                  # all platforms
-hermes send --list telegram         # filter by platform
+noone send --to telegram "deploy finished"
+echo "RAM 92%" | noone send --to telegram:-1001234567890
+noone send --to discord:#ops --file ~/.hermes/cache/scratch/report.md
+noone send --to slack:#eng --subject "[CI]" --file build.log
+noone send --list                  # all platforms
+noone send --list telegram         # filter by platform
 ```
 
 
 
-## `hermes peer`
+## `noone peer` {#hermes-peer}
 
 ```bash
-hermes peer add <name> --url http://host:port --key <API_SERVER_KEY>
-hermes peer list
-hermes peer dm <peer>[/<agent>] "message"
-hermes peer run <peer>[/<agent>] --idempotency-key <key> "message"
-hermes peer status <peer>[/<agent>] <run_id>
-hermes peer stop <peer>[/<agent>] <run_id>
-hermes peer remove <name>
+noone peer add <name> --url http://host:port --key <API_SERVER_KEY>
+noone peer list
+noone peer dm <peer>[/<agent>] "message"
+noone peer run <peer>[/<agent>] --idempotency-key <key> "message"
+noone peer status <peer>[/<agent>] <run_id>
+noone peer stop <peer>[/<agent>] <run_id>
+noone peer remove <name>
 ```
 
-Bot-to-bot DMs across machines. Register another Hermes gateway (any machine
+Bot-to-bot DMs across machines. Register another {{app-name}} gateway (any machine
 running the `api_server` platform) as a *peer*, then message its agents:
-`hermes peer dm` resolves the remote agent's canonical **Bot Chat** session
+`noone peer dm` resolves the remote agent's canonical **Bot Chat** session
 over the peer's API server, runs one agent turn there, and prints the reply
 on stdout — the cross-machine twin of the local
 `hermes -p <bot> chat --in ~ -c "Bot Chat" …` bot-messaging command.
@@ -586,13 +608,13 @@ its `/p/<profile>/` mirror).
 
 When at least one peer is registered, the Bot Mode messaging protocol
 (`agent.bot_mode_protocol`) taught to every canonical Bot Chat automatically
-includes the peer roster and the `hermes peer dm` pattern, so agents discover
+includes the peer roster and the `noone peer dm` pattern, so agents discover
 cross-machine teammates without SOUL edits. See
 [Bot Mode](../user-guide/bot-mode.md).
 
 Exit codes: `0` on success, `1` on delivery/peer failure, `2` on usage errors.
 
-## `hermes secrets`
+## `hermes secrets` {#hermes-secrets}
 
 ```bash
 hermes secrets bitwarden <subcommand>
@@ -613,7 +635,7 @@ Pull API keys from an external secret manager at process startup instead of stor
 | `disable` | Turn off the Bitwarden integration. |
 
 
-## `hermes migrate`
+## `hermes migrate` {#hermes-migrate}
 
 ```bash
 hermes migrate                 # find another agent's setup here and offer to import it
@@ -621,7 +643,7 @@ hermes migrate <agent>         # openclaw, claude-code, codex, cursor, grok-bot 
 hermes migrate <type>          # xai, relay
 ```
 
-Bare `hermes migrate` looks for OpenClaw, Claude Code, Codex CLI, Cursor, Grok Bot and OpenBot on this computer and offers to import what it finds, the same step a first `hermes setup` runs (without setup's own choices: OpenClaw keys come over only with `hermes migrate openclaw --migrate-secrets`). `hermes migrate <agent>` imports from that agent even when nothing is detected: it installs the [`agent-importers`](../user-guide/import-from-other-agents.md) plugin from the catalog when it is missing, then runs `hermes import-agent <agent>` (preview, then confirmation). It takes `--source`, `--dry-run`, `--overwrite` and `-y`; `grok-bot` and `openbot` also take `--activate-routines` and `--bot <name>`; `openclaw` takes `--migrate-secrets` (API keys and bot tokens come over only with it, unlike first-run setup, which passes it).
+Bare `hermes migrate` looks for OpenClaw, Claude Code, Codex CLI, Cursor, Grok Bot and OpenBot on this computer and offers to import what it finds, the same step a first `noone setup` runs (without setup's own choices: OpenClaw keys come over only with `hermes migrate openclaw --migrate-secrets`). `hermes migrate <agent>` imports from that agent even when nothing is detected: it installs the [`agent-importers`](../user-guide/import-from-other-agents.md) plugin from the catalog when it is missing, then runs `noone import-agent <agent>` (preview, then confirmation). It takes `--source`, `--dry-run`, `--overwrite` and `-y`; `grok-bot` and `openbot` also take `--activate-routines` and `--bot <name>`; `openclaw` takes `--migrate-secrets` (API keys and bot tokens come over only with it, unlike first-run setup, which passes it).
 
 The `xai` and `relay` types diagnose and (optionally) rewrite the active `config.yaml` to replace references to retired models or deprecated settings. A timestamped backup of the original `config.yaml` is taken before any rewrite (skip with `--no-backup`).
 
@@ -639,13 +661,13 @@ Common flags for migration subcommands:
 
 
 
-## `hermes codex-runtime`
+## `noone codex-runtime` {#hermes-codex-runtime}
 
 ```bash
 hermes codex-runtime migrate [--dry-run] [--json]
 ```
 
-Runs the `~/.codex/config.toml` migration that `/codex-runtime codex_app_server` triggers, without a chat session: Hermes' `mcp_servers` (plus installed codex plugins and the `default_permissions` default) are projected into the managed block for the selected profile (`hermes -p <name> codex-runtime migrate`). User text outside the block is kept verbatim; a user-owned `[mcp_servers.<name>]` with the same name as a Hermes server is preserved and the Hermes projection for that name skipped (reported as `preserved_user_servers`). The result is validated as TOML before an atomic write; exit code is 1 when the report contains errors.
+Runs the `~/.codex/config.toml` migration that `/codex-runtime codex_app_server` triggers, without a chat session: {{app-name}}' `mcp_servers` (plus installed codex plugins and the `default_permissions` default) are projected into the managed block for the selected profile (`hermes -p <name> codex-runtime migrate`). User text outside the block is kept verbatim; a user-owned `[mcp_servers.<name>]` with the same name as a {{app-name}} server is preserved and the {{app-name}} projection for that name skipped (reported as `preserved_user_servers`). The result is validated as TOML before an atomic write; exit code is 1 when the report contains errors.
 
 | Flag | Description |
 |------|-------------|
@@ -653,7 +675,7 @@ Runs the `~/.codex/config.toml` migration that `/codex-runtime codex_app_server`
 | `--json` | Print the full migration report as JSON (`migrated`, `preserved_user_servers`, `skipped_keys_per_server`, `errors`, `target_path`, `written`). |
 
 
-## `hermes proxy`
+## `hermes proxy` {#hermes-proxy}
 
 ```bash
 hermes proxy <subcommand>
@@ -668,13 +690,13 @@ Run a local OpenAI-compatible HTTP server that forwards requests to an OAuth-aut
 | `providers` | List available proxy upstream providers. |
 
 
-## `hermes security`
+## `hermes security` {#hermes-security}
 
 ```bash
 hermes security <subcommand>
 ```
 
-On-demand vulnerability scan against [OSV.dev](https://osv.dev). Covers the Hermes venv (installed PyPI distributions), Python dependencies declared by plugins under `~/.hermes/plugins/`, and pinned `npx`/`uvx` MCP servers in `config.yaml`. Does NOT scan globally-installed packages or editor/browser extensions.
+On-demand vulnerability scan against [OSV.dev](https://osv.dev). Covers the {{app-name}} venv (installed PyPI distributions), Python dependencies declared by plugins under `~/.hermes/plugins/`, and pinned `npx`/`uvx` MCP servers in `config.yaml`. Does NOT scan globally-installed packages or editor/browser extensions.
 
 | Subcommand | Description |
 |------------|-------------|
@@ -686,42 +708,50 @@ On-demand vulnerability scan against [OSV.dev](https://osv.dev). Covers the Herm
 |------|---------|-------------|
 | `--json` | off | Emit machine-readable JSON instead of human-readable text. |
 | `--fail-on <level>` | `critical` | Exit non-zero when any finding meets this severity (`low`, `moderate`, `high`, `critical`). |
-| `--skip-venv` | off | Skip scanning the Hermes Python venv. |
+| `--skip-venv` | off | Skip scanning the {{app-name}} Python venv. |
 | `--skip-plugins` | off | Skip scanning plugin requirements files. |
 | `--skip-mcp` | off | Skip scanning pinned MCP servers in `config.yaml`. |
 
 
-## `hermes login` / `hermes logout` *(Deprecated)*
+## `hermes login` / `hermes logout` *(Deprecated)* {#hermes-login--hermes-logout-deprecated}
 
-:::caution
-`hermes login` has been removed. Use `hermes auth` to manage OAuth credentials, `hermes model` to select a provider, or `hermes setup` for full interactive setup.
-:::
+<Warning>
 
-## `hermes auth`
+<div className="doc-callout-title">
+
+CAUTION
+
+</div>
+
+`hermes login` has been removed. Use `noone auth` to manage OAuth credentials, `noone model` to select a provider, or `noone setup` for full interactive setup.
+
+</Warning>
+
+## `noone auth` {#hermes-auth}
 
 Manage credential pools for same-provider key rotation. See [Credential Pools](../user-guide/features/credential-pools.md) for full documentation.
 
 ```bash
-hermes auth                                              # Interactive wizard
-hermes auth list                                         # Show all pools
-hermes auth list openrouter                              # Show specific provider
-hermes auth add openrouter --api-key sk-or-v1-xxx        # Add API key
-hermes auth add openrouter --type oauth                  # Browser login (OpenRouter PKCE) mints a key for you
-hermes auth add anthropic --type oauth                   # Add OAuth credential
-hermes auth add openai-codex --type oauth --priority 0   # Add an account and try it first
-hermes auth add openai-codex --browser                   # Codex: browser auth-code + PKCE on localhost:1455 instead of device code
-hermes auth remove openrouter 2                          # Remove by index
-hermes auth priority openrouter backup-key 0             # Move a credential to the front of fill_first order
-hermes auth reset openrouter                             # Clear cooldowns
-hermes auth reset openrouter 2                           # Clear the cooldown on one credential
-hermes auth refresh openai-codex work                    # Refresh one OAuth credential and clear its cooldown
-hermes auth status anthropic                             # Show auth status for a provider
-hermes auth logout anthropic                             # Log out and clear stored auth state
+noone auth                                              # Interactive wizard
+noone auth list                                         # Show all pools
+noone auth list openrouter                              # Show specific provider
+noone auth add openrouter --api-key sk-or-v1-xxx        # Add API key
+noone auth add openrouter --type oauth                  # Browser login (OpenRouter PKCE) mints a key for you
+noone auth add anthropic --type oauth                   # Add OAuth credential
+noone auth add openai-codex --type oauth --priority 0   # Add an account and try it first
+noone auth add openai-codex --browser                   # Codex: browser auth-code + PKCE on localhost:1455 instead of device code
+noone auth remove openrouter 2                          # Remove by index
+noone auth priority openrouter backup-key 0             # Move a credential to the front of fill_first order
+noone auth reset openrouter                             # Clear cooldowns
+noone auth reset openrouter 2                           # Clear the cooldown on one credential
+noone auth refresh openai-codex work                    # Refresh one OAuth credential and clear its cooldown
+noone auth status anthropic                             # Show auth status for a provider
+noone auth logout anthropic                             # Log out and clear stored auth state
 ```
 
 Subcommands: `add`, `list`, `remove`, `reset`, `priority`, `refresh`, `status`, `logout`. Spotify login moved to the `spotify` catalog plugin's `hermes spotify login`. When called with no subcommand, launches the interactive management wizard.
 
-## `hermes usage`
+## `hermes usage` {#hermes-usage}
 
 The account-limits block of the `/usage` slash command — Codex 5-hour / weekly windows, plan and banked
 resets; Anthropic OAuth windows; OpenRouter credits — without starting a session, so shell scripts and cron
@@ -764,10 +794,10 @@ has no usage endpoint, or the fetch fails (stdout stays empty).
 `used_percent` is `null` when the provider did not report the window; `resets_at` is ISO-8601 UTC or `null`
 (some windows carry a free-text `detail` instead); `plan` is `null` when unknown.
 
-## `hermes status`
+## `noone status` {#hermes-status}
 
 ```bash
-hermes status [--full] [--deep]
+noone status [--full] [--deep]
 ```
 
 By default prints a one-screen summary: model, active provider, every provider with
@@ -779,10 +809,10 @@ platforms the gateway would start, and scheduled jobs. No key values are printed
 | `--full` | Print every section (API keys redacted, auth providers, terminal backend, sessions, ...). `--all` is an alias. |
 | `--deep` | Run deeper checks that may take longer. Implies `--full`. |
 
-## `hermes cron`
+## `noone cron` {#hermes-cron}
 
 ```bash
-hermes cron <list|create|edit|pause|resume|run|remove|status|runs|incidents|doctor|tick>
+noone cron <list|create|edit|pause|resume|run|remove|status|runs|incidents|doctor|tick>
 ```
 
 | Subcommand | Description |
@@ -807,10 +837,10 @@ NAS-managed provider for scale-to-zero hosted gateways) — configured via the
 the built-in, so cron is never left without a trigger. See the
 [cron internals](../developer-guide/cron-internals.md#gateway-integration) doc.
 
-## `hermes kanban`
+## `noone kanban` {#hermes-kanban}
 
 ```bash
-hermes kanban [--board <slug>] <action> [options]
+noone kanban [--board <slug>] <action> [options]
 ```
 
 Multi-profile, multi-project collaboration board. Each install can host many boards (one per project, repo, or domain); each board is a standalone queue with its own SQLite DB and dispatcher scope. New installs start with one board called `default`, whose DB is `~/.hermes/kanban.db` for back-compat; additional boards live at `~/.hermes/kanban/boards/<slug>/kanban.db`. The gateway-embedded dispatcher sweeps every board per tick.
@@ -819,9 +849,9 @@ Multi-profile, multi-project collaboration board. Each install can host many boa
 
 | Flag | Purpose |
 |------|---------|
-| `--board <slug>` | Operate on a specific board. Defaults to the current board (set via `hermes kanban boards switch`, the `HERMES_KANBAN_BOARD` env var, or `default`). |
+| `--board <slug>` | Operate on a specific board. Defaults to the current board (set via `noone kanban boards switch`, the `HERMES_KANBAN_BOARD` env var, or `default`). |
 
-**This is the human / scripting surface.** Agent workers spawned by the dispatcher drive the board through a dedicated `kanban_*` [toolset](../user-guide/features/kanban.md#how-workers-interact-with-the-board) (`kanban_show`, `kanban_complete`, `kanban_request_review`, `kanban_request_changes`, `kanban_block`, `kanban_create`, `kanban_link`, `kanban_comment`, `kanban_heartbeat`; orchestrator profiles also get `kanban_list` and `kanban_unblock`) instead of shelling to `hermes kanban`. Workers have `HERMES_KANBAN_BOARD` pinned in their env so they physically cannot see other boards.
+**This is the human / scripting surface.** Agent workers spawned by the dispatcher drive the board through a dedicated `kanban_*` [toolset](../user-guide/features/kanban.md#how-workers-interact-with-the-board) (`kanban_show`, `kanban_complete`, `kanban_request_review`, `kanban_request_changes`, `kanban_block`, `kanban_create`, `kanban_link`, `kanban_comment`, `kanban_heartbeat`; orchestrator profiles also get `kanban_list` and `kanban_unblock`) instead of shelling to `noone kanban`. Workers have `HERMES_KANBAN_BOARD` pinned in their env so they physically cannot see other boards.
 
 | Action | Purpose |
 |--------|---------|
@@ -859,16 +889,16 @@ Examples:
 
 ```bash
 # Create a second board and put a task on it without switching away.
-hermes kanban boards create atm10-server --name "ATM10 Server" --icon 🎮
-hermes kanban --board atm10-server create "Restart server" --assignee ops
+noone kanban boards create atm10-server --name "ATM10 Server" --icon 🎮
+noone kanban --board atm10-server create "Restart server" --assignee ops
 
 # Switch the active board for subsequent calls.
-hermes kanban boards switch atm10-server
-hermes kanban list                  # shows atm10-server tasks
+noone kanban boards switch atm10-server
+noone kanban list                  # shows atm10-server tasks
 
 # Archive a board (recoverable) or hard-delete it.
-hermes kanban boards rm atm10-server
-hermes kanban boards rm atm10-server --delete
+noone kanban boards rm atm10-server
+noone kanban boards rm atm10-server --delete
 ```
 
 Board resolution order (highest precedence first): `--board <slug>` flag → `HERMES_KANBAN_BOARD` env var → `~/.hermes/kanban/current` file → `default`.
@@ -877,7 +907,7 @@ All actions are also available as a slash command in the gateway (`/kanban …`)
 
 For the full design — comparison with Cline Kanban / Paperclip / NanoClaw / Gemini Enterprise, eight collaboration patterns, four user stories, concurrency correctness proof — see the [Kanban user guide](../user-guide/features/kanban.md).
 
-## `hermes egress`
+## `hermes egress` {#hermes-egress}
 
 Outbound credential-injection firewall for remote terminal sandboxes. Wraps the [iron-proxy](https://github.com/ironsh/iron-proxy) daemon — a TLS-intercepting proxy that swaps opaque proxy tokens for real upstream API credentials at the network boundary, so sandboxes never hold real keys. Disabled by default; see the full [Egress proxy](../user-guide/egress/iron-proxy.md) page for setup + architecture.
 
@@ -904,13 +934,13 @@ hermes egress disable                  # flip proxy.enabled = false (does not st
 hermes egress config                   # print the path to proxy.yaml for inspection
 ```
 
-### Common flows
+### Common flows {#common-flows}
 
 ```bash
 # First-time setup
 export OPENROUTER_API_KEY=…
 hermes egress setup && hermes egress start
-hermes config set terminal.backend docker   # if not already
+noone config set terminal.backend docker   # if not already
 
 # Switching credential source after the fact
 hermes egress setup --from-bitwarden       # env → bitwarden
@@ -927,7 +957,7 @@ hermes egress setup
 hermes egress restart                  # one-command apply (stop + start)
 ```
 
-### Diagnostic shortcuts
+### Diagnostic shortcuts {#diagnostic-shortcuts}
 
 ```bash
 hermes egress status                     # current state in one view
@@ -938,13 +968,13 @@ tail -f ~/.hermes/proxy/iron-proxy.log | jq  # daemon + per-request log (line-de
 
 Common failure modes + recovery are covered in [Egress proxy → Troubleshooting](../user-guide/egress/iron-proxy.md#troubleshooting).
 
-## `hermes project`
+## `hermes project` {#hermes-project}
 
 ```bash
 hermes project <create|list|show|add-folder|remove-folder|rename|set-primary|use|archive|restore|bind-board>
 ```
 
-Projects are human-named workspaces that can span multiple folders / repos. They anchor desktop session grouping, and a kanban task linked to a project (`hermes kanban create --project <slug>`, or a board bound to the project in the kanban dashboard) gets a deterministic worktree + branch under the project's primary folder by default (when the project has one). State is per-profile.
+Projects are human-named workspaces that can span multiple folders / repos. They anchor desktop session grouping, and a kanban task linked to a project (`noone kanban create --project <slug>`, or a board bound to the project in the kanban dashboard) gets a deterministic worktree + branch under the project's primary folder by default (when the project has one). State is per-profile.
 
 | Subcommand | Description |
 |------------|-------------|
@@ -960,7 +990,7 @@ Projects are human-named workspaces that can span multiple folders / repos. They
 | `restore` | Restore an archived project. |
 | `bind-board` | Record a kanban board on the project and, when the board exists and the project has a primary folder, point the board's default workdir at it. Does not link the board's tasks to the project. |
 
-## `hermes webhook`
+## `hermes webhook` {#hermes-webhook}
 
 ```bash
 hermes webhook <subscribe|list|remove|test>
@@ -975,7 +1005,7 @@ Manage dynamic webhook subscriptions for event-driven agent activation. Requires
 | `remove` / `rm` | Delete a dynamic subscription. Static routes from config.yaml are not affected. |
 | `test` | Send a test POST to verify a subscription is working. |
 
-### `hermes webhook subscribe`
+### `hermes webhook subscribe` {#hermes-webhook-subscribe}
 
 ```bash
 hermes webhook subscribe <name> [options]
@@ -998,17 +1028,17 @@ hermes webhook subscribe <name> [options]
 
 Subscriptions persist to `~/.hermes/webhook_subscriptions.json` and are hot-reloaded by the webhook adapter without a gateway restart. Re-running `subscribe` for an existing name keeps its secret, signature pin and profile binding unless you pass `--secret` / `--signature` / `--route-profile`. `hermes webhook test` signs the way the route's pin expects (V2 for `generic` and unpinned routes).
 
-## `hermes doctor`
+## `noone doctor` {#hermes-doctor}
 
 ```bash
-hermes doctor [--fix]
+noone doctor [--fix]
 ```
 
 | Option | Description |
 |--------|-------------|
 | `--fix` | Attempt automatic repairs where possible. |
 
-Exit status: `0` when the report lists no unresolved problems, `1` when at least one remains (including problems `--fix` could not repair), so a health gate or CI step can trust `hermes doctor` as a check.
+Exit status: `0` when the report lists no unresolved problems, `1` when at least one remains (including problems `--fix` could not repair), so a health gate or CI step can trust `noone doctor` as a check.
 
 The **API Connectivity** section includes an `IPv6 route` check: it opens one short (2 s) IPv6 TCP connection to a known dual-stack host. A route that is advertised but only times out (a blackholed IPv6 prefix) is reported as a warning naming the remedy, `network.force_ipv4: true`. Having no IPv6 route at all is healthy and reported as OK; the check is skipped when `force_ipv4` is already set.
 
@@ -1017,25 +1047,25 @@ Custom-endpoint config checks (both warn-only; `--fix` does not rewrite them):
 - `custom_providers` that is not a YAML list (for example a string left by a bad `config set`) is reported as an error naming the key and the received type — the runtime ignores every custom endpoint until it is a list again.
 - A legacy `custom_providers` list entry with no matching `providers:` entry (same endpoint URL) is reported with the move to make: such an entry is still served from the retired list store (the model picker and the Custom Endpoints page dual-read it) rather than the `providers:` map every other surface edits, and the one-shot v12 migration that moved the list into `providers:` does not run again.
 
-**Config Structure** also flags any list/mapping setting stored as one quoted string (`plugins.enabled: '["a","b"]'`, `model_catalog.excluded_providers: '["openai-api"]'` — the shape older `config set` versions wrote): every reader ignores such a string, so the plugins silently stay unmounted and the exclusion never applies. The finding names the key and the `hermes config set <key> '<literal>'` command that stores a real list; the same warning appears in the startup banner. `--fix` does not rewrite the file.
+**Config Structure** also flags any list/mapping setting stored as one quoted string (`plugins.enabled: '["a","b"]'`, `model_catalog.excluded_providers: '["openai-api"]'` — the shape older `config set` versions wrote): every reader ignores such a string, so the plugins silently stay unmounted and the exclusion never applies. The finding names the key and the `noone config set <key> '<literal>'` command that stores a real list; the same warning appears in the startup banner. `--fix` does not rewrite the file.
 
-## `hermes dump`
+## `hermes dump` {#hermes-dump}
 
 ```bash
 hermes dump [--show-keys]
 ```
 
-Outputs a compact, plain-text summary of your entire Hermes setup. Designed to be copy-pasted into Discord, GitHub issues, or Telegram when asking for support — no ANSI colors, no special formatting, just data.
+Outputs a compact, plain-text summary of your entire {{app-name}} setup. Designed to be copy-pasted into Discord, GitHub issues, or Telegram when asking for support — no ANSI colors, no special formatting, just data.
 
 | Option | Description |
 |--------|-------------|
 | `--show-keys` | Show redacted API key prefixes (first and last 4 characters) instead of just `set`/`not set`. |
 
-### What it includes
+### What it includes {#what-it-includes}
 
 | Section | Details |
 |---------|---------|
-| **Header** | Hermes version, release date, git commit hash |
+| **Header** | {{app-name}} version, release date, git commit hash |
 | **Environment** | OS, Python version, OpenAI SDK version |
 | **Identity** | Active profile name, HERMES_HOME path |
 | **Model** | Configured default model and provider |
@@ -1046,7 +1076,7 @@ Outputs a compact, plain-text summary of your entire Hermes setup. Designed to b
 | **Workload** | Cron job counts, installed skill count |
 | **Config overrides** | Any config values that differ from defaults. Credentials in them are redacted: a `fallback_providers` entry's `api_key`, and credentials in its `base_url` (userinfo, `key`/token query parameters, signed-URL signatures). |
 
-### Example output
+### Example output {#example-output}
 
 ```
 --- hermes dump ---
@@ -1055,7 +1085,7 @@ os:               Linux 6.14.0-37-generic x86_64
 python:           3.11.14
 openai_sdk:       2.24.0
 profile:          default
-hermes_home:      ~/.hermes
+hermes_home:      ~/.noone
 model:            anthropic/claude-opus-4.6
 provider:         openrouter
 terminal:         local
@@ -1084,21 +1114,29 @@ config_overrides:
 --- end dump ---
 ```
 
-### When to use
+### When to use {#when-to-use}
 
 - Reporting a bug on GitHub — paste the dump into your issue
 - Asking for help in Discord — share it in a code block
 - Comparing your setup to someone else's
 - Quick sanity check when something isn't working
 
-:::tip
-`hermes dump` is specifically designed for sharing. For interactive diagnostics, use `hermes doctor`. For a visual overview, use `hermes status`.
-:::
+<Tip>
 
-## `hermes debug`
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+`hermes dump` is specifically designed for sharing. For interactive diagnostics, use `noone doctor`. For a visual overview, use `noone status`.
+
+</Tip>
+
+## `noone debug` {#hermes-debug}
 
 ```bash
-hermes debug share [options]
+noone debug share [options]
 ```
 
 Upload a debug report (system info + recent logs) to a paste service and get a shareable URL. Useful for quick support requests — includes everything a helper needs to diagnose your issue.
@@ -1111,27 +1149,27 @@ Upload a debug report (system info + recent logs) to a paste service and get a s
 | `--local` | Print the report locally instead of uploading. |
 | `--no-redact` | Disable upload-time secret redaction. By default, uploads are redacted. |
 
-The report includes system info (OS, Python version, Hermes version), recent agent, gateway, GUI/dashboard, and desktop logs (512 KB limit per file), plus the update and Desktop update hand-off logs when present, and redacted API key status. By default, uploads are redacted so secrets are not included; this covers the system dump (including config values such as `fallback_providers` entries and credentials in their URLs) as well as the logs, and the gateway `/debug` report too.
+The report includes system info (OS, Python version, {{app-name}} version), recent agent, gateway, GUI/dashboard, and desktop logs (512 KB limit per file), plus the update and Desktop update hand-off logs when present, and redacted API key status. By default, uploads are redacted so secrets are not included; this covers the system dump (including config values such as `fallback_providers` entries and credentials in their URLs) as well as the logs, and the gateway `/debug` report too.
 
 Default uploads use public paste services tried in order: paste.rs, dpaste.com. `--nous` uploads the same debug bundle to private Nous diagnostics storage instead; the returned viewer link is for the Nous team and auto-deletes after 14 days.
 
-### Examples
+### Examples {#examples}
 
 ```bash
-hermes debug share              # Upload debug report, print URL
-hermes debug share --lines 500  # Include more log lines
-hermes debug share --expire 30  # Keep a dpaste.com fallback paste for 30 days
-hermes debug share --nous       # Upload a private diagnostics bundle for Nous support
-hermes debug share --local      # Print report to terminal (no upload)
+noone debug share              # Upload debug report, print URL
+noone debug share --lines 500  # Include more log lines
+noone debug share --expire 30  # Keep a dpaste.com fallback paste for 30 days
+noone debug share --nous       # Upload a private diagnostics bundle for Nous support
+noone debug share --local      # Print report to terminal (no upload)
 ```
 
-## `hermes backup`
+## `noone backup` {#hermes-backup}
 
 ```bash
-hermes backup [options]
+noone backup [options]
 ```
 
-Create a zip archive of your Hermes configuration, skills, sessions, and data. The backup excludes the hermes-agent codebase itself, and it does not nest earlier backup artifacts (`backups/`, `state-snapshots/`) — each of those already contains its own copy of `state.db`.
+Create a zip archive of your {{app-name}} configuration, skills, sessions, and data. The backup excludes the hermes-agent codebase itself, and it does not nest earlier backup artifacts (`backups/`, `state-snapshots/`) — each of those already contains its own copy of `state.db`.
 
 | Option | Description |
 |--------|-------------|
@@ -1140,7 +1178,7 @@ Create a zip archive of your Hermes configuration, skills, sessions, and data. T
 | `-l`, `--label <name>` | Label for the snapshot (only used with `--quick`). |
 | `-k`, `--keep <N>` | After a full backup, delete older `hermes-backup-*.zip` files in the output directory beyond the newest N (default 3; `0` keeps everything). Custom-named zips are never touched. |
 
-The backup uses SQLite's `backup()` API for safe copying, so it works correctly even when Hermes is running (WAL-mode safe).
+The backup uses SQLite's `backup()` API for safe copying, so it works correctly even when {{app-name}} is running (WAL-mode safe).
 
 **Exit status:** `0` only when every selected file landed in the archive. If some files could not be added (`Backup incomplete: …`), the zip is kept so the rest can still be restored, but the command exits `1` — a cron or systemd timer will not report a partial archive as success, and `--keep` pruning is skipped so older complete archives survive. `2` means another backup was already running.
 
@@ -1154,16 +1192,16 @@ The backup uses SQLite's `backup()` API for safe copying, so it works correctly 
 - Unix sockets, devices, and symlinks — a zip cannot hold them; before they were excluded, a stray `gateway.sock` made every full backup report `Backup incomplete`.
 - The `hermes-agent` code itself (this is a user-data backup, not a repo snapshot).
 
-### Examples
+### Examples {#examples-1}
 
 ```bash
-hermes backup                           # Full backup to ~/hermes-backup-*.zip
-hermes backup -o ~/backups/hermes.zip   # Full backup to specific path
-hermes backup --quick                   # Quick state-only snapshot
-hermes backup --quick --label "pre-upgrade"  # Quick snapshot with label
+noone backup                           # Full backup to ~/hermes-backup-*.zip
+noone backup -o ~/backups/hermes.zip   # Full backup to specific path
+noone backup --quick                   # Quick state-only snapshot
+noone backup --quick --label "pre-upgrade"  # Quick snapshot with label
 ```
 
-## `hermes checkpoints`
+## `hermes checkpoints` {#hermes-checkpoints}
 
 ```bash
 hermes checkpoints [COMMAND]
@@ -1179,7 +1217,7 @@ Inspect and manage the shadow git store at `~/.hermes/checkpoints/` — the stor
 | `clear` | Delete the entire checkpoint base. Irreversible; asks for confirmation unless `-f`. |
 | `clear-legacy` | Delete only the `legacy-<timestamp>/` archives produced by the v1→v2 migration. Exits `2` (after printing `Could not delete N archive(s)`) when any archive could not be removed, e.g. read-only git objects on Windows. |
 
-### Options
+### Options {#options}
 
 | Option | Subcommand | Description |
 |--------|------------|-------------|
@@ -1189,7 +1227,7 @@ Inspect and manage the shadow git store at `~/.hermes/checkpoints/` — the stor
 | `--keep-orphans` | `prune` | Skip deleting projects whose working directory no longer exists. |
 | `-f`, `--force` | `clear`, `clear-legacy` | Skip the confirmation prompt. |
 
-### Examples
+### Examples {#examples-2}
 
 ```bash
 hermes checkpoints                                  # status overview
@@ -1201,25 +1239,33 @@ hermes checkpoints clear -f                         # wipe everything
 
 See [Checkpoints and `/rollback`](../user-guide/checkpoints-and-rollback.md) for the full architecture and the in-session commands.
 
-## `hermes import`
+## `noone import` {#hermes-import}
 
 ```bash
-hermes import <zipfile> [options]
+noone import <zipfile> [options]
 ```
 
-Restore a previously created Hermes backup into your Hermes home directory. All files in the archive overwrite existing files in your Hermes home; `--force` only skips the confirmation prompt that fires when the target already has a Hermes installation.
+Restore a previously created {{app-name}} backup into your {{app-name}} home directory. All files in the archive overwrite existing files in your {{app-name}} home; `--force` only skips the confirmation prompt that fires when the target already has a {{app-name}} installation.
 
 | Option | Description |
 |--------|-------------|
 | `-f`, `--force` | Skip the existing-installation confirmation prompt. |
 
-:::warning
+<Warning>
+
+<div className="doc-callout-title">
+
+WARNING
+
+</div>
+
 Stop the gateway before importing to avoid conflicts with running processes.
-:::
 
-**Exit status:** `1` when the archive is damaged — before anything is written, every member is decompressed once and its CRC checked; if any fail, the command prints `Error: backup archive is damaged (N member(s) …)` with the offending members and stops with the Hermes home untouched. Also `1` when any file from the archive could not be restored (listed under `Warnings (N files skipped)` and summarised as `Import incomplete: …`). The files that did land stay in place, but a script or the dashboard will not report a partial restore as success. Runtime files the import deliberately keeps from this machine (`gateway.pid`, `gateway_state.json`, …) and the older-backup session warning below do not change the exit status.
+</Warning>
 
-### SQLite databases
+**Exit status:** `1` when the archive is damaged — before anything is written, every member is decompressed once and its CRC checked; if any fail, the command prints `Error: backup archive is damaged (N member(s) …)` with the offending members and stops with the {{app-name}} home untouched. Also `1` when any file from the archive could not be restored (listed under `Warnings (N files skipped)` and summarised as `Import incomplete: …`). The files that did land stay in place, but a script or the dashboard will not report a partial restore as success. Runtime files the import deliberately keeps from this machine (`gateway.pid`, `gateway_state.json`, …) and the older-backup session warning below do not change the exit status.
+
+### SQLite databases {#sqlite-databases}
 
 `.db` members (`state.db`, `kanban.db`, `response_store.db`, …) are not published with a rename like ordinary files. Renaming would replace the file's inode while a gateway, dashboard, or WebUI process still holds the old one open: that process would keep reading pre-import pages and keep writing sessions nobody else can see, and those sessions would simply be absent from the database everyone opens next — with nothing logged. Instead the imported pages are written **into the existing database file**, the same way `/snapshot restore` does it, so every open connection converges on the imported data.
 
@@ -1234,21 +1280,21 @@ Importing an older backup over newer work is still allowed, but it is no longer 
     Recover from a newer backup or snapshot: hermes snapshot list
 ```
 
-### Examples
+### Examples {#examples-3}
 ```bash
-hermes import ~/hermes-backup-20260423.zip           # Prompts before overwriting existing config
-hermes import ~/hermes-backup-20260423.zip --force   # Overwrite without prompting
+noone import ~/hermes-backup-20260423.zip           # Prompts before overwriting existing config
+noone import ~/hermes-backup-20260423.zip --force   # Overwrite without prompting
 ```
 
-## `hermes logs`
+## `noone logs` {#hermes-logs}
 
 ```bash
-hermes logs [log_name] [options]
+noone logs [log_name] [options]
 ```
 
-View, tail, and filter Hermes log files. All logs are stored in `~/.hermes/logs/` (or `<profile>/logs/` for non-default profiles).
+View, tail, and filter {{app-name}} log files. All logs are stored in `~/.hermes/logs/` (or `<profile>/logs/` for non-default profiles).
 
-### Log files
+### Log files {#log-files}
 
 | Name | File | What it captures |
 |------|------|-----------------|
@@ -1258,10 +1304,10 @@ View, tail, and filter Hermes log files. All logs are stored in `~/.hermes/logs/
 | `gui` | `gui.log` | Dashboard / TUI-gateway / PTY-bridge / websocket events |
 | `desktop` | `desktop.log` | Electron desktop app — boot, backend spawn output, and recent Python tracebacks |
 | `mcp` | `mcp-stderr.log` | stderr of every stdio MCP server, one `starting MCP server` banner per launch |
-| `update` | `update.log` | Full stdout/stderr mirror of `hermes update` runs (append-only) — the root cause of update/dependency failures |
+| `update` | `update.log` | Full stdout/stderr mirror of `noone update` runs (append-only) — the root cause of update/dependency failures |
 | `handoff` | `desktop-update-handoff.log` | Desktop-driven update hand-off stages, including the Desktop rebuild retry output |
 
-### Options
+### Options {#options-1}
 
 | Option | Description |
 |--------|-------------|
@@ -1275,48 +1321,48 @@ View, tail, and filter Hermes log files. All logs are stored in `~/.hermes/logs/
 
 A line without its own timestamp, such as a traceback frame or the rest of a multi-line message, is shown or hidden together with the timestamped line above it.
 
-### Examples
+### Examples {#examples-4}
 
 ```bash
 # View the last 50 lines of agent.log (default)
-hermes logs
+noone logs
 
 # Follow agent.log in real time
-hermes logs -f
+noone logs -f
 
 # View the last 100 lines of gateway.log
-hermes logs gateway -n 100
+noone logs gateway -n 100
 
 # Show only warnings and errors from the last hour
-hermes logs --level WARNING --since 1h
+noone logs --level WARNING --since 1h
 
 # Filter by a specific session
-hermes logs --session abc123
+noone logs --session abc123
 
 # Follow errors.log, starting from 30 minutes ago
-hermes logs errors --since 30m -f
+noone logs errors --since 30m -f
 
 # List all log files with their sizes
-hermes logs list
+noone logs list
 ```
 
-### Filtering
+### Filtering {#filtering}
 
 Filters can be combined. When multiple filters are active, a log line must pass **all** of them to be shown:
 
 ```bash
 # WARNING+ lines from the last 2 hours containing session "tg-12345"
-hermes logs --level WARNING --since 2h --session tg-12345
+noone logs --level WARNING --since 2h --session tg-12345
 ```
 
 Lines without a parseable timestamp are included when `--since` is active (they may be continuation lines from a multi-line log entry). Lines without a detectable level are included when `--level` is active.
 
-### Log rotation
+### Log rotation {#log-rotation}
 
-Hermes uses Python's `RotatingFileHandler`. Old logs are rotated automatically — look for `agent.log.1`, `agent.log.2`, etc. The `hermes logs list` subcommand shows all log files including rotated ones.
+{{app-name}} uses Python's `RotatingFileHandler`. Old logs are rotated automatically — look for `agent.log.1`, `agent.log.2`, etc. The `noone logs list` subcommand shows all log files including rotated ones.
 
 
-## `hermes prompt-size`
+## `hermes prompt-size` {#hermes-prompt-size}
 
 ```bash
 hermes prompt-size [--platform <name>] [--json]
@@ -1334,7 +1380,7 @@ It builds the same system prompt the agent would, then breaks it down:
 - **Skills index** — the `<available_skills>` block. This is often the largest
   single block when many skills are installed.
 - **Memory** and **user profile** — your `MEMORY.md` / `USER.md` snapshots.
-- **Prompt tiers** — stable / context / volatile, matching how Hermes layers
+- **Prompt tiers** — stable / context / volatile, matching how {{app-name}} layers
   the prompt for cache-friendliness.
 - **Tool schemas** — the JSON for all enabled tools (the other half of the
   fixed per-call payload).
@@ -1352,17 +1398,25 @@ hermes prompt-size --platform telegram
 hermes prompt-size --json
 ```
 
-:::tip
-The skills index and tool schemas scale with how many skills and tools you have
-enabled. To shrink the prompt, disable unused toolsets (`hermes tools`) or
-uninstall skills you don't need (`hermes skills`). Context files (AGENTS.md,
-.cursorrules) in your current directory also count toward the total.
-:::
+<Tip>
 
-## `hermes config`
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+The skills index and tool schemas scale with how many skills and tools you have
+enabled. To shrink the prompt, disable unused toolsets (`noone tools`) or
+uninstall skills you don't need (`noone skills`). Context files (AGENTS.md,
+.cursorrules) in your current directory also count toward the total.
+
+</Tip>
+
+## `noone config` {#hermes-config}
 
 ```bash
-hermes config <subcommand>
+noone config <subcommand>
 ```
 
 Subcommands:
@@ -1371,8 +1425,8 @@ Subcommands:
 |------------|-------------|
 | `show` | Show current config values. |
 | `edit` | Open `config.yaml` in your editor. |
-| `get <key> [--json] [--raw]` | Print a single config value by dotted key (e.g. `hermes config get model.default`). `--json` emits machine-readable output. Credential-shaped values (`api_key`, `*_TOKEN`, `*_SECRET`, `password`, …) are masked (`sk-o...7890`) because the agent runs this from sessions whose transcripts persist; `--raw` prints the real value (or set `security.redact_secrets: false`). A nested key under a known section that the schema does not define (`compression.compressor.enabled`) still prints its file value, plus a stderr notice that Hermes may not read it; stdout and the exit code (0) are unchanged. |
-| `set <key> <value> [--force]` | Set a config value. Dotted paths go to `config.yaml`; every `UPPER_SNAKE` name (`OPENROUTER_API_KEY`, `DISCORD_HOME_CHANNEL`, `TELEGRAM_GROUP_ALLOWED_USERS`, `HERMES_TIMEZONE`, …) is an environment variable and goes to `.env` — the same file the platform setup flows and `/sethome` write, and the one every runtime reader resolves against. `config set` never writes an `UPPER_SNAKE` key into `config.yaml`, `--force` included; names on the env writer's denylist (`HERMES_YOLO_MODE`, `PATH`, …) are refused outright; any other `UPPER_SNAKE` name is saved to `.env` as-is (plugins, skills and external tools read it from the process environment). A known key written under the wrong prefix (`gateway.discord.foo`, where `discord.foo` is itself a known key) is refused with a did-you-mean and nothing is written; any other unknown path under a known section (`agent.max_turnz`, or a runtime-read key that has no seeded default) is written with a did-you-mean notice, and an unknown lowercase *top-level* key is written with a notice (top-level scalars are bridged into the environment for skills). `--force` writes the refused wrong-prefix path too. Values are type-checked against the schema: a key that must hold a list or a mapping (`custom_providers`, `model.aliases`, `display.platforms`, `plugins.enabled`/`plugins.disabled`, `model_catalog.excluded_providers`, any key already holding one) refuses a plain string or a wrong-shaped literal, and a value that looks like a list/mapping but is not valid YAML/JSON is refused instead of being stored as a string — nothing is written and the error names the expected type. Pass a YAML/JSON literal (`hermes config set custom_providers '[{name: x, base_url: https://...}]'`); to store a string that merely starts with `[` or `{`, quote it in YAML (`"'[text'"`). `--force` still replaces a whole mapping section; a non-list in a list slot has no override, except that a bare name for a list of names read leniently (`agent.disabled_toolsets`, `skills.disabled`) is stored as a one-item list. |
+| `get <key> [--json] [--raw]` | Print a single config value by dotted key (e.g. `noone config get model.default`). `--json` emits machine-readable output. Credential-shaped values (`api_key`, `*_TOKEN`, `*_SECRET`, `password`, …) are masked (`sk-o...7890`) because the agent runs this from sessions whose transcripts persist; `--raw` prints the real value (or set `security.redact_secrets: false`). A nested key under a known section that the schema does not define (`compression.compressor.enabled`) still prints its file value, plus a stderr notice that {{app-name}} may not read it; stdout and the exit code (0) are unchanged. |
+| `set <key> <value> [--force]` | Set a config value. Dotted paths go to `config.yaml`; every `UPPER_SNAKE` name (`OPENROUTER_API_KEY`, `DISCORD_HOME_CHANNEL`, `TELEGRAM_GROUP_ALLOWED_USERS`, `HERMES_TIMEZONE`, …) is an environment variable and goes to `.env` — the same file the platform setup flows and `/sethome` write, and the one every runtime reader resolves against. `config set` never writes an `UPPER_SNAKE` key into `config.yaml`, `--force` included; names on the env writer's denylist (`HERMES_YOLO_MODE`, `PATH`, …) are refused outright; any other `UPPER_SNAKE` name is saved to `.env` as-is (plugins, skills and external tools read it from the process environment). A known key written under the wrong prefix (`gateway.discord.foo`, where `discord.foo` is itself a known key) is refused with a did-you-mean and nothing is written; any other unknown path under a known section (`agent.max_turnz`, or a runtime-read key that has no seeded default) is written with a did-you-mean notice, and an unknown lowercase *top-level* key is written with a notice (top-level scalars are bridged into the environment for skills). `--force` writes the refused wrong-prefix path too. Values are type-checked against the schema: a key that must hold a list or a mapping (`custom_providers`, `model.aliases`, `display.platforms`, `plugins.enabled`/`plugins.disabled`, `model_catalog.excluded_providers`, any key already holding one) refuses a plain string or a wrong-shaped literal, and a value that looks like a list/mapping but is not valid YAML/JSON is refused instead of being stored as a string — nothing is written and the error names the expected type. Pass a YAML/JSON literal (`noone config set custom_providers '[{name: x, base_url: https://...}]'`); to store a string that merely starts with `[` or `{`, quote it in YAML (`"'[text'"`). `--force` still replaces a whole mapping section; a non-list in a list slot has no override, except that a bare name for a list of names read leniently (`agent.disabled_toolsets`, `skills.disabled`) is stored as a one-item list. |
 | `unset <key>` | Remove a config key, reverting it to the built-in default. For `UPPER_SNAKE` names this removes the `.env` entry and also drops a stale top-level `config.yaml` copy left by older `config set` runs (`get` reports such a copy as stale). |
 | `path` | Print the config file path. |
 | `env-path` | Print the `.env` file path. |
@@ -1386,19 +1440,19 @@ with a credential error naming the wrong provider. A URL that is the new provide
 named `custom_providers` entry's endpoint, or any URL under `custom`/local aliases stays; an
 unrecognised host (a proxy, a LAN server) stays with a warning that it still applies.
 
-### Dots inside key names
+### Dots inside key names {#dots-inside-key-names}
 
-`hermes config set/get/unset` use `.` as the nesting separator, but many real
+`noone config set/get/unset` use `.` as the nesting separator, but many real
 key names contain literal dots — model IDs (`grok-4.6`, `glm-5.3-flash`),
 Matrix room IDs (`!room:example.org`), versioned provider names. Two rules
 make these addressable:
 
 - **Existing keys just work.** When navigating an existing mapping, an
   existing literal key that matches the dotted remainder is preferred over
-  splitting. `hermes config set providers.p.models.grok-4.6.supports_vision true`
+  splitting. `noone config set providers.p.models.grok-4.6.supports_vision true`
   updates the real `grok-4.6` entry (and `get`/`unset` resolve the same way).
 - **Creating a new dotted key requires escaping.** Escape literal dots with a
-  backslash: `hermes config set 'providers.p.models.grok-4\.7.context_length' 128000`
+  backslash: `noone config set 'providers.p.models.grok-4\.7.context_length' 128000`
   creates the literal `grok-4.7` key. (Quote the key so your shell keeps the
   backslash.)
 
@@ -1407,7 +1461,7 @@ dotted sibling (e.g. creating `grok-4` next to an existing `grok-4.6`), the
 command fails with an error instead of silently writing a phantom entry the
 runtime would never read.
 
-## `hermes pairing`
+## `hermes pairing` {#hermes-pairing}
 
 ```bash
 hermes pairing <list|approve|revoke|clear-pending>
@@ -1420,10 +1474,10 @@ hermes pairing <list|approve|revoke|clear-pending>
 | `revoke <platform> <user-id>` | Revoke a user's access. |
 | `clear-pending` | Clear pending pairing codes. |
 
-## `hermes skills`
+## `noone skills` {#hermes-skills}
 
 ```bash
-hermes skills <subcommand>
+noone skills <subcommand>
 ```
 
 Subcommands:
@@ -1440,8 +1494,8 @@ Subcommands:
 | `audit` | Re-scan installed hub skills. |
 | `uninstall` | Remove a hub-installed skill. |
 | `reset` | Un-stick a bundled skill flagged as `user_modified` by clearing its manifest entry. With `--restore`, also replaces the user copy with the bundled version. |
-| `opt-out` | Stop bundled skills from being seeded into the active profile. Writes a `.no-bundled-skills` marker so the installer, `hermes update`, and any sync skip bundled-skill seeding. Safe by default — nothing on disk is touched. With `--remove`, also deletes already-present bundled skills that are **unmodified** (user-edited, hub-installed, and hand-written skills are never removed; previews and confirms first, `--yes` to skip). |
-| `opt-in` | Undo `opt-out` by removing the `.no-bundled-skills` marker so bundled skills are seeded again on the next `hermes update`. With `--sync`, re-seed immediately. |
+| `opt-out` | Stop bundled skills from being seeded into the active profile. Writes a `.no-bundled-skills` marker so the installer, `noone update`, and any sync skip bundled-skill seeding. Safe by default — nothing on disk is touched. With `--remove`, also deletes already-present bundled skills that are **unmodified** (user-edited, hub-installed, and hand-written skills are never removed; previews and confirms first, `--yes` to skip). |
+| `opt-in` | Undo `opt-out` by removing the `.no-bundled-skills` marker so bundled skills are seeded again on the next `noone update`. With `--sync`, re-seed immediately. |
 | `publish` | Publish a skill to a registry. |
 | `snapshot` | Export/import skill configurations. |
 | `tap` | Manage custom skill sources. |
@@ -1450,35 +1504,35 @@ Subcommands:
 Common examples:
 
 ```bash
-hermes skills browse
-hermes skills browse --source official
-hermes skills search react --source skills-sh
-hermes skills search https://mintlify.com/docs --source well-known
-hermes skills inspect official/security/1password
-hermes skills inspect skills-sh/vercel-labs/json-render/json-render-react
-hermes skills install official/mcp/fastmcp
-hermes skills install skills-sh/anthropics/skills/pdf --force
-hermes skills install https://sharethis.chat/SKILL.md                     # Direct URL (+ referenced support files)
-hermes skills install https://example.com/SKILL.md --name my-skill        # Override name when frontmatter has none
-hermes skills check
-hermes skills update
-hermes skills config
-hermes skills reset google-workspace
-hermes skills reset google-workspace --restore --yes
-hermes skills opt-out                  # stop future bundled-skill seeding (nothing deleted)
-hermes skills opt-out --remove --yes   # also delete UNMODIFIED bundled skills
-hermes skills opt-in --sync            # undo: remove marker and re-seed now
+noone skills browse
+noone skills browse --source official
+noone skills search react --source skills-sh
+noone skills search https://mintlify.com/docs --source well-known
+noone skills inspect official/security/1password
+noone skills inspect skills-sh/vercel-labs/json-render/json-render-react
+noone skills install official/mcp/fastmcp
+noone skills install skills-sh/anthropics/skills/pdf --force
+noone skills install https://sharethis.chat/SKILL.md                     # Direct URL (+ referenced support files)
+noone skills install https://example.com/SKILL.md --name my-skill        # Override name when frontmatter has none
+noone skills check
+noone skills update
+noone skills config
+noone skills reset google-workspace
+noone skills reset google-workspace --restore --yes
+noone skills opt-out                  # stop future bundled-skill seeding (nothing deleted)
+noone skills opt-out --remove --yes   # also delete UNMODIFIED bundled skills
+noone skills opt-in --sync            # undo: remove marker and re-seed now
 ```
 
 Notes:
 - `--force` can override non-dangerous policy blocks for third-party/community skills.
 - `--force` does not override a `dangerous` scan verdict.
 - `--source skills-sh` searches the public `skills.sh` directory.
-- `--source well-known` lets you point Hermes at a site exposing `/.well-known/skills/index.json`.
+- `--source well-known` lets you point {{app-name}} at a site exposing `/.well-known/skills/index.json`.
 - `--source browse-sh` searches [browse.sh](https://browse.sh)'s catalog of 200+ site-specific browser-automation skills. Identifiers look like `browse-sh/airbnb.com/search-listings-ddgioa`.
 - Passing an `http(s)://…/*.md` URL installs `SKILL.md` plus explicitly referenced files under `references/`, `templates/`, `scripts/`, `assets/`, and `examples/`. When frontmatter has no `name:` and the URL slug isn't a valid identifier, an interactive terminal prompts for a name; non-interactive surfaces (`/skills install` inside the TUI, gateway platforms) require `--name <x>` instead.
 
-## `hermes bundles`
+## `hermes bundles` {#hermes-bundles}
 
 ```bash
 hermes bundles <subcommand>
@@ -1512,7 +1566,7 @@ hermes bundles delete backend-dev
 
 In a chat session, `/bundles` lists installed bundles and `/<bundle-name>` loads one.
 
-## `hermes curator`
+## `hermes curator` {#hermes-curator}
 
 ```bash
 hermes curator <subcommand>
@@ -1540,11 +1594,11 @@ The curator is an auxiliary-model background task that periodically reviews agen
 | `prune` | Manually prune skills the curator would normally clean up |
 | `list-archived` | List archived skills (recoverable via `restore`) |
 
-On a fresh install the first scheduled pass is deferred by one full `interval_hours` (7 days by default) — the gateway will not curate immediately on the first tick after `hermes update`. Use `hermes curator run --dry-run` to preview before that happens.
+On a fresh install the first scheduled pass is deferred by one full `interval_hours` (7 days by default) — the gateway will not curate immediately on the first tick after `noone update`. Use `hermes curator run --dry-run` to preview before that happens.
 
 See [Curator](../user-guide/features/curator.md) for behavior and config.
 
-## `hermes moa`
+## `hermes moa` {#hermes-moa}
 
 Configure named Mixture of Agents presets. Presets appear as selectable models under a `Mixture of Agents` provider in every model picker; `/moa <prompt>` runs one prompt through the default preset.
 
@@ -1554,9 +1608,9 @@ hermes moa configure [name]
 hermes moa delete <name>
 ```
 
-`hermes moa configure` reuses Hermes' provider → model picker for each reference model and the aggregator. A preset is an execution-mode configuration, not a primary model or provider.
+`hermes moa configure` reuses {{app-name}}' provider → model picker for each reference model and the aggregator. A preset is an execution-mode configuration, not a primary model or provider.
 
-## `hermes fallback`
+## `hermes fallback` {#hermes-fallback}
 
 ```bash
 hermes fallback <subcommand>
@@ -1567,14 +1621,14 @@ Manage the fallback provider chain. Fallback providers are tried in order when t
 | Subcommand | Description |
 |------------|-------------|
 | `list` (alias: `ls`) | Show the current fallback chain (default when no subcommand) |
-| `add` | Pick a provider + model (same picker as `hermes model`) and append to the chain |
+| `add` | Pick a provider + model (same picker as `noone model`) and append to the chain |
 | `remove` (alias: `rm`) | Pick an entry to delete from the chain |
 | `clear` | Remove all fallback entries |
 | `check [--live] [--json]` | Check each entry resolves with usable credentials (`--live`: one minimal request per statically ready fixed-route entry, on that entry's own provider/model, never another). Exits 1 when any entry is not ready. No agent session is created |
 
 See [Fallback Providers](../user-guide/features/fallback-providers.md).
 
-## `hermes hooks`
+## `hermes hooks` {#hermes-hooks}
 
 ```bash
 hermes hooks <subcommand>
@@ -1591,13 +1645,13 @@ Inspect shell-script hooks declared in `~/.hermes/config.yaml`, test them agains
 
 See [Hooks](../user-guide/features/hooks.md) for event signatures and payload shapes.
 
-## `hermes memory`
+## `hermes memory` {#hermes-memory}
 
 ```bash
 hermes memory <subcommand>
 ```
 
-Set up and manage external memory provider plugins. Bundled providers: retaindb, byterover; honcho, hindsight, supermemory, mem0, openviking and holographic (plugin catalog) after `hermes plugins install <name>` (`hermes update` does this automatically for a provider already named in `memory.provider`). Only one external provider can be active at a time. Built-in memory (MEMORY.md/USER.md) is always active.
+Set up and manage external memory provider plugins. Bundled providers: retaindb, byterover; honcho, hindsight, supermemory, mem0, openviking and holographic (plugin catalog) after `noone plugins install <name>` (`noone update` does this automatically for a provider already named in `memory.provider`). Only one external provider can be active at a time. Built-in memory (MEMORY.md/USER.md) is always active.
 
 Subcommands:
 
@@ -1607,17 +1661,25 @@ Subcommands:
 | `status` | Show current memory provider config. |
 | `off` | Disable external provider (built-in only). |
 
-:::info Provider-specific subcommands
-When an external memory provider is active, it may register its own top-level `hermes <provider>` command for provider-specific management (e.g. `hermes honcho` when Honcho is active). Inactive providers do not expose their subcommands. Run `hermes --help` to see what's currently wired in.
-:::
+<Info>
 
-## `hermes acp`
+<div className="doc-callout-title">
+
+Provider-specific subcommands
+
+</div>
+
+When an external memory provider is active, it may register its own top-level `hermes <provider>` command for provider-specific management (e.g. `hermes honcho` when Honcho is active). Inactive providers do not expose their subcommands. Run `noone --help` to see what's currently wired in.
+
+</Info>
+
+## `hermes acp` {#hermes-acp}
 
 ```bash
 hermes acp
 ```
 
-Starts Hermes as an ACP (Agent Client Protocol) stdio server for editor integration.
+Starts {{app-name}} as an ACP (Agent Client Protocol) stdio server for editor integration.
 
 Related entrypoints:
 
@@ -1634,19 +1696,19 @@ cd ~/.hermes/hermes-agent && python -c "import pm; pm.sync_venv(['acp'], explici
 
 See [ACP Editor Integration](../user-guide/features/acp.md) and [ACP Internals](../developer-guide/acp-internals.md).
 
-## `hermes mcp`
+## `noone mcp` {#hermes-mcp}
 
 ```bash
 hermes mcp <subcommand>
 ```
 
-Manage MCP (Model Context Protocol) server configurations. Running Hermes itself as an MCP server moved to the `mcp-serve` plugin (`hermes plugins install mcp-serve`, then `hermes mcp-serve`); `hermes mcp serve` prints that new spelling.
+Manage MCP (Model Context Protocol) server configurations. Running {{app-name}} itself as an MCP server moved to the `mcp-serve` plugin (`noone plugins install mcp-serve`, then `noone mcp-serve`); `noone mcp serve` prints that new spelling.
 
 | Subcommand | Description |
 |------------|-------------|
 | *(none)* or `picker` | Interactive catalog picker — browse Nous-approved MCPs and install/enable/disable. |
 | `catalog` | List Nous-approved MCPs (plain text, scriptable). |
-| `install <name>` | Install a catalog entry (e.g. `hermes mcp install deepwiki`). |
+| `install <name>` | Install a catalog entry (e.g. `noone mcp install deepwiki`). |
 | `add <name> [--url URL] [--command CMD] [--auth oauth\|header] [--args ...]` | Add a custom MCP server with automatic tool discovery. `--args` passes the remaining argv to the stdio command, so put it last. |
 | `remove <name>` (alias: `rm`) | Remove an MCP server from config. |
 | `list` (alias: `ls`) | List configured MCP servers. |
@@ -1654,9 +1716,9 @@ Manage MCP (Model Context Protocol) server configurations. Running Hermes itself
 | `configure <name>` (alias: `config`) | Toggle tool selection for a server. |
 | `login <name>` | Force re-authentication for an OAuth-based MCP server. |
 
-See [MCP Config Reference](./mcp-config-reference.md), [Use MCP with Hermes](../guides/use-mcp-with-hermes.md), and [MCP Server Mode](../user-guide/features/mcp.md#running-hermes-as-an-mcp-server).
+See [MCP Config Reference](./mcp-config-reference.md), [Use MCP with {{app-name}}](../guides/use-mcp-with-agent.md), and [MCP Server Mode](../user-guide/features/mcp.md#running-hermes-as-an-mcp-server).
 
-## `hermes connectors`
+## `hermes connectors` {#hermes-connectors}
 
 ```bash
 hermes connectors <subcommand>
@@ -1674,13 +1736,13 @@ Manage hosted connector accounts (apps such as Gmail reached through the Nous to
 
 Rename needs a Nous Portal version that supports it. Until then it reports "This Nous Portal cannot rename connector accounts yet."
 
-## `hermes plugins`
+## `noone plugins` {#hermes-plugins}
 
 ```bash
-hermes plugins [subcommand]
+noone plugins [subcommand]
 ```
 
-Unified plugin management — general plugins, memory providers, and context engines in one place. Running `hermes plugins` with no subcommand opens a composite interactive screen with two sections:
+Unified plugin management — general plugins, memory providers, and context engines in one place. Running `noone plugins` with no subcommand opens a composite interactive screen with two sections:
 
 - **General Plugins** — multi-select checkboxes to enable/disable installed plugins
 - **Provider Plugins** — single-select configuration for Memory Provider and Context Engine. Press ENTER on a category to open a radio picker.
@@ -1688,8 +1750,8 @@ Unified plugin management — general plugins, memory providers, and context eng
 | Subcommand | Description |
 |------------|-------------|
 | *(none)* | Composite interactive UI — general plugin toggles + provider plugin configuration. |
-| `install <identifier> [--force] [--ref COMMIT_SHA] [--allow-removed]` | Install a plugin from the Hermes plugin catalog (bare entry name), a Git URL, or `owner/repo` shorthand. Catalog names resolve to the reviewed 40-hex commit SHA and show declared capabilities. Source, checked-out revision, and a nested catalog-provenance block are recorded in the installer's `plugins/.install-metadata.json`; the `.hermes-catalog.json` copy inside the plugin directory is only for convenience and is never trusted. Raw URLs are flagged as custom (unreviewed) sources. `--ref` selects a full-SHA custom pin and records the SHA actually checked out. `--allow-removed` (DANGEROUS) bypasses the removed-plugin blocklist at install and exempts that install from update, enable, and load-time kill-list checks. |
-| `search [term] [--json]` | Search the Hermes plugin catalog (matches entry names, descriptions, and declared tools; omit `term` to list everything). The catalog is curated in-repo (`plugin-catalog/`), refreshed from the live repo with a 6-hour cache, and falls back to the in-tree copy offline. Cataloged ≠ audited — admission reviews the entry, not the code. |
+| `install <identifier> [--force] [--ref COMMIT_SHA] [--allow-removed]` | Install a plugin from the {{app-name}} plugin catalog (bare entry name), a Git URL, or `owner/repo` shorthand. Catalog names resolve to the reviewed 40-hex commit SHA and show declared capabilities. Source, checked-out revision, and a nested catalog-provenance block are recorded in the installer's `plugins/.install-metadata.json`; the `.hermes-catalog.json` copy inside the plugin directory is only for convenience and is never trusted. Raw URLs are flagged as custom (unreviewed) sources. `--ref` selects a full-SHA custom pin and records the SHA actually checked out. `--allow-removed` (DANGEROUS) bypasses the removed-plugin blocklist at install and exempts that install from update, enable, and load-time kill-list checks. |
+| `search [term] [--json]` | Search the {{app-name}} plugin catalog (matches entry names, descriptions, and declared tools; omit `term` to list everything). The catalog is curated in-repo (`plugin-catalog/`), refreshed from the live repo with a 6-hour cache, and falls back to the in-tree copy offline. Cataloged ≠ audited — admission reviews the entry, not the code. |
 | `update <name>` | Re-pin catalog installs to the reviewed catalog SHA, or update a custom Git install from its recorded source/feed. PM validates active-plugin dependencies before code publication. Explicit custom pins move only with `install --force --ref <new-commit>`. |
 | `update [--yes]` | With no name: list every installed plugin that has an update `update <name>` can apply (catalog re-pin or Git pull) plus the ones it skips and why, then ask `Update all N? [Y/n]` and update each through the single-plugin path (per-plugin consent prompts still apply). One failure does not stop the rest; exits 1 if any failed. Without a terminal nothing is updated unless `--yes` is passed; `--yes` keeps consent fail-closed (new capabilities stay ungranted). |
 | `remove <name>` (aliases: `rm`, `uninstall`) | Remove an installed plugin. |
@@ -1710,12 +1772,12 @@ Git installs also record only their canonical source, exact installed revision, 
 pin status in the profile-local `plugins/.install-metadata.json` sidecar. It does
 not contain plugin config, environment values, secrets, or capability grants.
 
-See [Plugins](../user-guide/features/plugins.md) and [Build a Hermes Plugin](../developer-guide/plugins/index.md).
+See [Plugins](../user-guide/features/plugins.md) and [Build a {{app-name}} Plugin](../developer-guide/plugins/index.md).
 
-## `hermes tools`
+## `noone tools` {#hermes-tools}
 
 ```bash
-hermes tools [--summary]
+noone tools [--summary]
 ```
 
 | Option | Description |
@@ -1724,7 +1786,7 @@ hermes tools [--summary]
 
 Without `--summary`, this launches the interactive per-platform tool configuration UI.
 
-## `hermes computer-use`
+## `hermes computer-use` {#hermes-computer-use}
 
 ```bash
 hermes computer-use <subcommand>
@@ -1744,34 +1806,34 @@ Subcommands:
 `hermes computer-use install` is the stable entry point for installing the
 [cua-driver](https://github.com/trycua/cua) binary used by the
 `computer_use` toolset. It runs the same upstream installer that
-`hermes tools` invokes when you first enable Computer Use, so it's safe
+`noone tools` invokes when you first enable Computer Use, so it's safe
 to use for re-running the install if the toolset toggle didn't trigger
 it (for example, on returning-user setups).
 
-If cua-driver is already present, Hermes checks its version and runtime
+If cua-driver is already present, {{app-name}} checks its version and runtime
 manifest. A compatible 0.20.0 or newer installation is left in place. An old or
 incomplete standard installation is repaired with the current upstream
-installer. Hermes never replaces a custom binary selected through
+installer. {{app-name}} never replaces a custom binary selected through
 `HERMES_CUA_DRIVER_CMD`; update that binary directly or remove the override.
 `hermes computer-use status` reports when repair is required.
 
-The built-in `computer_use` toolset is the recommended Hermes integration.
+The built-in `computer_use` toolset is the recommended {{app-name}} integration.
 Registering raw Cua MCP tools is an alternative when you need Cua's low-level
-tool vocabulary. `cua-driver skills install` detects Hermes and links Cua's
-skill pack into the Hermes skills directory automatically.
+tool vocabulary. `cua-driver skills install` detects {{app-name}} and links Cua's
+skill pack into the {{app-name}} skills directory automatically.
 
 Permission mode and capability-manifest approval
-belong to runtime launch. In bounded mode Hermes passes Cua's canonical
+belong to runtime launch. In bounded mode {{app-name}} passes Cua's canonical
 `--capability-manifest` and `--approve-capability-manifest` flags. Every MCP
 transport owns a private lifecycle session inside its runtime. Public session
 names label cursor and session state; they do not own or share the runtime.
 
-`hermes update` automatically re-runs the upstream installer at the end
+`noone update` automatically re-runs the upstream installer at the end
 of the update if cua-driver is on PATH, so most users will not need to
 call `--upgrade` manually. Use it when upstream ships a fix you want
-right now without waiting for the next Hermes update.
+right now without waiting for the next {{app-name}} update.
 
-## `hermes clipboard`
+## `hermes clipboard` {#hermes-clipboard}
 
 ```bash
 hermes clipboard image --out PATH [--json]
@@ -1807,13 +1869,13 @@ subcommand, so it cannot see the host's clipboard and `--out` is a path inside t
 {"ok": false, "reason": "no_tool", "tools": ["wl-paste", "xclip"], "message": "no clipboard tool found; install one of: wl-paste, xclip"}
 ```
 
-## `hermes pets`
+## `hermes pets` {#hermes-pets}
 
 ```bash
 hermes pets <list|install|select|show|off|scale|remove|doctor>
 ```
 
-[Petdex](https://github.com/crafter-station/petdex) is a public gallery of animated sprite pets for coding agents. Install one and Hermes shows it reacting to agent activity across the CLI, TUI, and desktop app.
+[Petdex](https://github.com/crafter-station/petdex) is a public gallery of animated sprite pets for coding agents. Install one and {{app-name}} shows it reacting to agent activity across the CLI, and desktop app.
 
 | Subcommand | Description |
 |------------|-------------|
@@ -1828,7 +1890,7 @@ hermes pets <list|install|select|show|off|scale|remove|doctor>
 
 You can also generate a brand-new pet from a text description with the `/hatch` slash command. See [Pets](../user-guide/features/pets.md).
 
-## `hermes sessions`
+## `noone sessions` {#hermes-sessions}
 
 ```bash
 hermes sessions <subcommand>
@@ -1856,7 +1918,7 @@ Subcommands:
 | `recover` | Offline, non-destructive recovery of a damaged `state.db` into a separate clean database. |
 | `retitle-skills` | Regenerate titles for sessions opened with a `/skill`, using what the user actually typed; lists changes unless `--apply` is passed. |
 
-## `hermes insights`
+## `hermes insights` {#hermes-insights}
 
 ```bash
 hermes insights [--days N] [--source platform]
@@ -1867,43 +1929,43 @@ hermes insights [--days N] [--source platform]
 | `--days <n>` | Analyze the last `n` days (default: 30). |
 | `--source <platform>` | Filter by source such as `cli`, `telegram`, or `discord`. |
 
-## `hermes import-agent`
+## `noone import-agent` {#hermes-import-agent}
 
 ```bash
-hermes plugins install agent-importers   # once; the command comes from this official plugin
-hermes import-agent [openclaw|claude-code|codex|cursor] [options]
+noone plugins install agent-importers   # once; the command comes from this official plugin
+noone import-agent [openclaw|claude-code|codex|cursor] [options]
 ```
 
-Import an **OpenClaw** (`~/.openclaw`), **Claude Code** (`~/.claude`), **OpenAI Codex CLI** (`~/.codex`) or **Cursor** (`~/.cursor`) setup into Hermes: instructions and rules become memory entries, `Bash(...)` permission rules become `command_allowlist`/`approvals.deny`, MCP servers land in `mcp_servers`, and skills are copied. Always previews first. API keys and credentials are never imported, except OpenClaw's allowlisted keys when you pass `--migrate-secrets`. `--sync` re-imports registered Claude Code, Codex and Cursor sources that changed. On a fresh install, `hermes setup` offers to install the plugin and run the import for you when it finds one of these agents.
+Import an **OpenClaw** (`~/.openclaw`), **Claude Code** (`~/.claude`), **OpenAI Codex CLI** (`~/.codex`) or **Cursor** (`~/.cursor`) setup into {{app-name}}: instructions and rules become memory entries, `Bash(...)` permission rules become `command_allowlist`/`approvals.deny`, MCP servers land in `mcp_servers`, and skills are copied. Always previews first. API keys and credentials are never imported, except OpenClaw's allowlisted keys when you pass `--migrate-secrets`. `--sync` re-imports registered Claude Code, Codex and Cursor sources that changed. On a fresh install, `noone setup` offers to install the plugin and run the import for you when it finds one of these agents.
 
-The command moved out of core into the official `agent-importers` plugin, together with `hermes claw` (OpenClaw migration), whose spelling the plugin keeps. Without the plugin, `hermes import-agent` and `hermes claw` print the install line. See the **[import guide](../user-guide/import-from-other-agents.md)** for options and mapping tables.
+The command moved out of core into the official `agent-importers` plugin, together with `noone claw` (OpenClaw migration), whose spelling the plugin keeps. Without the plugin, `noone import-agent` and `noone claw` print the install line. See the **[import guide](../user-guide/import-from-other-agents.md)** for options and mapping tables.
 
-### OpenClaw: `hermes import-agent openclaw`
+### OpenClaw: `noone import-agent openclaw` {#openclaw-hermes-import-agent-openclaw}
 
 ```bash
-hermes import-agent openclaw [options]    # same as the older spelling: hermes claw migrate [options]
-hermes claw cleanup [--source <path>] [--dry-run] [--yes]
+noone import-agent openclaw [options]    # same as the older spelling: noone claw migrate [options]
+noone claw cleanup [--source <path>] [--dry-run] [--yes]
 ```
 
-Migrate your OpenClaw setup to Hermes. Reads from `~/.openclaw` (or a custom path) and writes to `~/.hermes`. Automatically detects legacy directory names (`~/.clawdbot`, `~/.moltbot`) and config filenames (`clawdbot.json`, `moltbot.json`).
+Migrate your OpenClaw setup to {{app-name}}. Reads from `~/.openclaw` (or a custom path) and writes to `~/.hermes`. Automatically detects legacy directory names (`~/.clawdbot`, `~/.moltbot`) and config filenames (`clawdbot.json`, `moltbot.json`).
 
 | Option | Description |
 |--------|-------------|
 | `--dry-run` | Preview what would be migrated without writing anything. |
 | `--preset <name>` | Migration preset: `full` (all compatible settings) or `user-data` (excludes infrastructure config). Neither preset imports secrets — pass `--migrate-secrets` explicitly. |
-| `--overwrite` | Overwrite existing Hermes files on conflicts (default: refuse to apply when the plan has conflicts). |
+| `--overwrite` | Overwrite existing {{app-name}} files on conflicts (default: refuse to apply when the plan has conflicts). |
 | `--migrate-secrets` | Include API keys in migration. Required even under `--preset full`. |
-| `--no-backup` | Skip the pre-migration zip snapshot of `~/.hermes/` (by default a single restore-point archive is written to `~/.hermes/backups/pre-migration-*.zip` before apply; restorable with `hermes import`). |
+| `--no-backup` | Skip the pre-migration zip snapshot of `~/.hermes/` (by default a single restore-point archive is written to `~/.hermes/backups/pre-migration-*.zip` before apply; restorable with `noone import`). |
 | `--source <path>` | Custom OpenClaw directory (default: `~/.openclaw`). |
 | `--workspace-target <path>` | Target directory for workspace instructions (AGENTS.md). |
 | `--skill-conflict <mode>` | Handle skill name collisions: `skip` (default), `overwrite`, or `rename`. |
 | `--yes` | Skip the confirmation prompt. |
 
-`hermes claw cleanup` renames leftover OpenClaw directories to `*.pre-migration` once you have migrated (OpenClaw stops working after this; rename them back to undo).
+`noone claw cleanup` renames leftover OpenClaw directories to `*.pre-migration` once you have migrated (OpenClaw stops working after this; rename them back to undo).
 
-#### What gets migrated
+#### What gets migrated {#what-gets-migrated}
 
-The migration covers 30+ categories across persona, memory, skills, model providers, messaging platforms, agent behavior, session policies, MCP servers, TTS, and more. Items are either **directly imported** into Hermes equivalents or **archived** for manual review.
+The migration covers 30+ categories across persona, memory, skills, model providers, messaging platforms, agent behavior, session policies, MCP servers, TTS, and more. Items are either **directly imported** into {{app-name}} equivalents or **archived** for manual review.
 
 **Directly imported:** SOUL.md, MEMORY.md, USER.md, AGENTS.md, skills (4 source directories), default model, custom providers, MCP servers, messaging platform tokens and allowlists (Telegram, Discord, Slack, WhatsApp, Signal, Matrix, Mattermost), agent defaults (reasoning effort, compression, human delay, timezone, sandbox), approval rules, TTS config, browser settings, tool settings, exec timeout, command allowlist, gateway config, and API keys from 3 sources.
 
@@ -1913,42 +1975,42 @@ The migration covers 30+ categories across persona, memory, skills, model provid
 
 For the complete config key mapping, SecretRef handling details, and post-migration checklist, see the **[full migration guide](../guides/migrate-from-openclaw.md)**.
 
-#### Examples
+#### Examples {#examples-5}
 
 ```bash
 # Preview what would be migrated
-hermes import-agent openclaw --dry-run
+noone import-agent openclaw --dry-run
 
 # Full migration (all compatible settings, no secrets)
-hermes import-agent openclaw --preset full
+noone import-agent openclaw --preset full
 
 # Full migration including API keys
-hermes import-agent openclaw --preset full --migrate-secrets
+noone import-agent openclaw --preset full --migrate-secrets
 
 # Migrate user data only (no secrets), overwrite conflicts
-hermes import-agent openclaw --preset user-data --overwrite
+noone import-agent openclaw --preset user-data --overwrite
 
 # Migrate from a custom OpenClaw path
-hermes import-agent openclaw --source /home/user/old-openclaw
+noone import-agent openclaw --source /home/user/old-openclaw
 ```
 
-## `hermes serve`
+## `noone serve` {#hermes-serve}
 
 ```bash
-hermes serve [options]
+noone serve [options]
 ```
 
-Start the Hermes **backend server** — the JSON-RPC/WebSocket gateway the [desktop app](../user-guide/desktop.md) and remote clients connect to. It is the same server `hermes dashboard` runs, but **headless**: it never opens a browser UI. The desktop app launches its own `hermes serve` backend; use this command directly when you want a headless backend on a remote host. Accepts the same `--host` / `--port` / `--insecure` / `--skip-build` / `--stop` / `--status` options as `hermes dashboard` below (a non-loopback bind engages the same auth gate). Requires the `[web]` extra; the embedded Chat socket additionally needs `[pty]` on a POSIX host.
+Start the {{app-name}} **backend server** — the JSON-RPC/WebSocket gateway the [desktop app](../user-guide/desktop.md) and remote clients connect to. It is the same server `noone dashboard` runs, but **headless**: it never opens a browser UI. The desktop app launches its own `noone serve` backend; use this command directly when you want a headless backend on a remote host. Accepts the same `--host` / `--port` / `--insecure` / `--skip-build` / `--stop` / `--status` options as `noone dashboard` below (a non-loopback bind engages the same auth gate). Requires the `[web]` extra; the embedded Chat socket additionally needs `[pty]` on a POSIX host.
 
-**Port conflicts:** if the requested port (default `9119`) is already held by another process (e.g. a second `hermes serve` or the gateway), the command prints a machine-readable sentinel line `BACKEND_PORT_IN_USE port=<port>` to stdout, a human hint naming the likely holder, and exits with code **75** (`EX_TEMPFAIL`) instead of a generic error — so scripts and the desktop app can tell "port occupied" apart from "backend broken". Pass `--port 0` to bind a free ephemeral port (the successful boot announces the chosen port via `HERMES_BACKEND_READY port=<port>`).
+**Port conflicts:** if the requested port (default `9119`) is already held by another process (e.g. a second `noone serve` or the gateway), the command prints a machine-readable sentinel line `BACKEND_PORT_IN_USE port=<port>` to stdout, a human hint naming the likely holder, and exits with code **75** (`EX_TEMPFAIL`) instead of a generic error — so scripts and the desktop app can tell "port occupied" apart from "backend broken". Pass `--port 0` to bind a free ephemeral port (the successful boot announces the chosen port via `HERMES_BACKEND_READY port=<port>`).
 
-## `hermes dashboard`
+## `noone dashboard` {#hermes-dashboard}
 
 ```bash
-hermes dashboard [options]
+noone dashboard [options]
 ```
 
-Launch the web dashboard to manage configuration, API keys, and sessions. For a headless backend, use [`hermes serve`](#hermes-serve). FastAPI, Uvicorn, and the platform PTY helper are core dependencies. The `web` extra adds exact HTTP-stack constraints and is selected by standard PM setup through `all`. If dependencies are damaged, run `hermes pm repair`. The embedded Chat tab requires a POSIX PTY environment, such as Linux, macOS, or WSL2. See [Web Dashboard](../user-guide/features/web-dashboard.md).
+Launch the web dashboard to manage configuration, API keys, and sessions. For a headless backend, use [`noone serve`](#hermes-serve). FastAPI, Uvicorn, and the platform PTY helper are core dependencies. The `web` extra adds exact HTTP-stack constraints and is selected by standard PM setup through `all`. If dependencies are damaged, run `noone pm repair`. The embedded Chat tab requires a POSIX PTY environment, such as Linux, macOS, or WSL2. See [Web Dashboard](../user-guide/features/web-dashboard.md).
 
 | Option | Default | Description |
 |--------|---------|-------------|
@@ -1958,12 +2020,12 @@ Launch the web dashboard to manage configuration, API keys, and sessions. For a 
 | `--insecure` | off | **Deprecated / no-op.** Formerly bypassed auth on a non-loopback bind. Since the June 2026 hardening a public bind *always* requires an auth provider (password or OAuth). Bind `127.0.0.1` and tunnel to keep it local. |
 | `--skip-build` | off | Skip the web UI build step and serve the existing `dist` directly. Useful for non-interactive contexts (Windows Scheduled Tasks, CI) where pnpm isn't available. Pre-build with `cd web && pnpm run build`. |
 | `--isolated` | off | When launched from a named profile (`worker dashboard`), run a dedicated per-profile server instead of routing to the machine dashboard. It lists only that profile. Routing/ops convenience, **not** a security boundary: profiles under one OS user can read each other; isolate tenants with separate OS users or containers. |
-| `--stop` | — | Stop the running `hermes dashboard` / `hermes serve` backend **of this Hermes home** and exit (`-p <profile>` / `HERMES_HOME` select which; backends of other profiles, other installs on the machine, and the shell you typed the command into are never touched — a backend whose owner cannot be read is left alone). SIGTERM, a 10s grace, then SIGKILL; a hosted Chat TUI that outlives its backend is stopped too (it would otherwise keep the deleted `state.db-wal` open and block the next start). Messaging-gateway bots started from the dashboard are not touched. |
-| `--status` | — | List running `hermes dashboard` processes and exit. |
+| `--stop` | — | Stop the running `noone dashboard` / `noone serve` backend **of this {{app-name}} home** and exit (`-p <profile>` / `HERMES_HOME` select which; backends of other profiles, other installs on the machine, and the shell you typed the command into are never touched — a backend whose owner cannot be read is left alone). SIGTERM, a 10s grace, then SIGKILL; a hosted Chat TUI that outlives its backend is stopped too (it would otherwise keep the deleted `state.db-wal` open and block the next start). Messaging-gateway bots started from the dashboard are not touched. |
+| `--status` | — | List running `noone dashboard` processes and exit. |
 
-### `hermes dashboard register`
+### `noone dashboard register` {#hermes-dashboard-register}
 
-Register this install as a self-hosted dashboard with your Nous Portal account. Creates an OAuth client, writes `HERMES_DASHBOARD_OAUTH_CLIENT_ID` into `~/.hermes/.env`, and prints how to engage the login gate. Requires being logged in (`hermes setup`).
+Register this install as a self-hosted dashboard with your Nous Portal account. Creates an OAuth client, writes `HERMES_DASHBOARD_OAUTH_CLIENT_ID` into `~/.hermes/.env`, and prints how to engage the login gate. Requires being logged in (`noone setup`).
 
 | Option | Description |
 |--------|-------------|
@@ -1973,23 +2035,23 @@ Register this install as a self-hosted dashboard with your Nous Portal account. 
 
 ```bash
 # Default — opens browser to http://127.0.0.1:9119
-hermes dashboard
+noone dashboard
 
 # Custom port, no browser
-hermes dashboard --port 8080 --no-open
+noone dashboard --port 8080 --no-open
 
 # From a profile alias — routes to the machine dashboard with the
 # profile preselected in the sidebar switcher (attach if running)
 worker dashboard
 ```
 
-## `hermes webapp`
+## `noone webapp` {#hermes-webapp}
 
 ```bash
-hermes webapp [options]
+noone webapp [options]
 ```
 
-Open the Hermes Desktop workspace in a normal browser. The gateway serves it on its own listener when
+Open the {{app-name}} Desktop workspace in a normal browser. The gateway serves it on its own listener when
 `webapp.enabled` is `true` in the config ([Configuration → Webapp](../user-guide/configuration.md#webapp)).
 This command builds the Webapp bundle when it is out of date, starts the gateway if it is not running,
 and opens a one-use sign-in link. Chats run on that gateway, the same one the CLI, Desktop and messaging
@@ -2003,7 +2065,7 @@ standard users cannot read. On macOS, the BSDs and illumos neither holds, so the
 the link to a browser launcher: it writes it into a page only your OS user can read
 (`webapp/launch-*.html` in the gateway home) and opens that page. Where it cannot open a browser, and
 on WSL, it prints the link for you to open. On macOS a browser can open where you don't see it (over
-SSH, on the Mac's own screen): if none did, run `hermes webapp --no-open` for the link. Until it is
+SSH, on the Mac's own screen): if none did, run `noone webapp --no-open` for the link. Until it is
 used it signs a browser in as you, so keep it private.
 
 For a named profile served by the default gateway (`hermes -p work webapp`), the Webapp opens on that
@@ -2016,7 +2078,7 @@ for (`webapp/sign-in-registration.json`), while it is still this machine's LAN a
 Webapp's port; otherwise the loopback address, which serves a password provider or sign-in set up by
 hand for it. You sign in there with your dashboard account. When the gateway cannot
 serve the Webapp, the command says why; the gateway reads its Webapp settings when it starts, so run
-`hermes gateway restart` after fixing the cause. A Webapp bundle that is not built yet is the
+`noone gateway restart` after fixing the cause. A Webapp bundle that is not built yet is the
 exception: this command builds it, and the running gateway serves it at once.
 
 | Option | Description |
@@ -2030,18 +2092,18 @@ exception: this command builds it, and the running gateway serves it at once.
 
 ```bash
 # Turn it on once, then open it
-hermes config set webapp.enabled true
-hermes gateway restart
-hermes webapp
+noone config set webapp.enabled true
+noone gateway restart
+noone webapp
 ```
 
-## `hermes profile`
+## `noone profile` {#hermes-profile}
 
 ```bash
-hermes profile <subcommand>
+noone profile <subcommand>
 ```
 
-Manage profiles — multiple isolated Hermes instances, each with its own config, sessions, skills, and home directory.
+Manage profiles — multiple isolated {{app-name}} instances, each with its own config, sessions, skills, and home directory.
 
 | Subcommand | Description |
 |------------|-------------|
@@ -2061,25 +2123,25 @@ Manage profiles — multiple isolated Hermes instances, each with its own config
 Examples:
 
 ```bash
-hermes profile list
-hermes profile create work --clone
-hermes profile create work --clone --sync-imports   # also carry over the import-agent sync manifest
-hermes profile use work
-hermes profile alias work --name h-work
-hermes profile export work -o work-backup.tar.gz
-hermes profile import work-backup.tar.gz --name restored
-hermes profile install github.com/user/my-distro --alias
-hermes profile update work
+noone profile list
+noone profile create work --clone
+noone profile create work --clone --sync-imports   # also carry over the import-agent sync manifest
+noone profile use work
+noone profile alias work --name h-work
+noone profile export work -o work-backup.tar.gz
+noone profile import work-backup.tar.gz --name restored
+noone profile install github.com/user/my-distro --alias
+noone profile update work
 hermes -p work chat -q "Hello from work profile"
 ```
 
-## `hermes completion`
+## `noone completion` {#hermes-completion}
 
 ```bash
 hermes completion [bash|zsh|fish]
 ```
 
-Print a shell completion script to stdout. Source the output in your shell profile for tab-completion of Hermes commands, subcommands, and profile names.
+Print a shell completion script to stdout. Source the output in your shell profile for tab-completion of {{app-name}} commands, subcommands, and profile names.
 
 Examples:
 
@@ -2094,18 +2156,18 @@ hermes completion zsh >> ~/.zshrc
 hermes completion fish > ~/.config/fish/completions/hermes.fish
 ```
 
-## `hermes pm`
+## `noone pm` {#hermes-pm}
 
 Manage pinned tools, Python dependency environments, and their diagnostics.
-This command does not update the Hermes application itself.
+This command does not update the {{app-name}} application itself.
 
 ```bash
-hermes pm --help
-hermes pm doctor
-hermes pm status
-hermes pm repair
-hermes pm install
-hermes pm install chromium
+noone pm --help
+noone pm doctor
+noone pm status
+noone pm repair
+noone pm install
+noone pm install chromium
 ```
 
 For source development, run the setup script once, then activate the installed
@@ -2117,10 +2179,10 @@ daily commands, dependency refresh, and test environments.
 See [Package management](./package-management.md) for every subcommand,
 source-versus-bundle behavior, lazy-install policy, and maintainer commands.
 
-## `hermes update`
+## `noone update` {#hermes-update}
 
 ```bash
-hermes update [--gateway] [--check] [--plan] [--no-backup] [--backup] [--yes]
+noone update [--gateway] [--check] [--plan] [--no-backup] [--backup] [--yes]
 ```
 
 Updates an admitted source checkout and prepares dependencies through PM.
@@ -2128,7 +2190,7 @@ Use `--check` to compare with its configured source target without applying
 the update. Desktop bundles, Docker, Nix, and Termux packages retain their
 external update owner. See [Updating & Uninstalling](../getting-started/updating.md).
 
-`hermes update` follows this installation's update channel. A source checkout of the official repository defaults to `stable`, the latest published `vX.Y.Z` GitHub release at its exact commit; forks and mirrors default to `main`. To follow every commit on `main` instead, run `hermes update --set-channel main`; `hermes update --set-channel stable` switches back. On the `main` channel, a checkout on another branch may be switched to the update branch before pulling. Commit branch work before updating when you want to keep it outside the update autostash flow.
+`noone update` follows this installation's update channel. A source checkout of the official repository defaults to `stable`, the latest published `vX.Y.Z` GitHub release at its exact commit; forks and mirrors default to `main`. To follow every commit on `main` instead, run `noone update --set-channel main`; `noone update --set-channel stable` switches back. On the `main` channel, a checkout on another branch may be switched to the update branch before pulling. Commit branch work before updating when you want to keep it outside the update autostash flow.
 
 | Option | Description |
 |--------|-------------|
@@ -2138,32 +2200,32 @@ external update owner. See [Updating & Uninstalling](../getting-started/updating
 | `--branch NAME` | Select a source branch for this invocation; takes precedence over source channel selection. |
 | `--gateway` | Internal mode used by the messaging `/update` command. Uses file-based IPC for prompts and progress streaming instead of reading from terminal stdin. Not a gateway restart flag. |
 | `--check` | Check whether an update is available without pulling, installing dependencies, or restarting anything. |
-| `--plan` | Print the update plan and exit without changing anything: install kind (git/Docker/Nix/apt), every running Hermes service across all profiles with its supervisor and running code version, and how each will be restarted. On image- or package-managed installs, reports the correct external update command instead. Read-only. |
+| `--plan` | Print the update plan and exit without changing anything: install kind (git/Docker/Nix/apt), every running {{app-name}} service across all profiles with its supervisor and running code version, and how each will be restarted. On image- or package-managed installs, reports the correct external update command instead. Read-only. |
 | `--no-backup` | Skip all pre-update backups for this run (both the quick state snapshot and the full zip), regardless of `updates.pre_update_backup`. |
 | `--backup` | Force a **full** pre-update backup for this run: the quick state snapshot plus a complete zip of `HERMES_HOME` (config, auth, sessions, skills, pairing data). The default mode is `quick` — a lightweight state snapshot only. Set the permanent mode via `updates.pre_update_backup: quick | full | off` in `config.yaml`. |
-| `--yes`, `-y` | Assume yes for interactive prompts such as config migration and stash restore. API-key entry is skipped; run `hermes config migrate` separately for those. |
+| `--yes`, `-y` | Assume yes for interactive prompts such as config migration and stash restore. API-key entry is skipped; run `noone config migrate` separately for those. |
 
 Additional behavior:
 
-- **Gateway restart.** After a successful update, Hermes attempts to restart all running gateway profiles of the home being updated (its root and every `profiles/<name>` under it) automatically so they pick up the new code. Gateways and `hermes-gateway*` services that belong to a different `HERMES_HOME` on the same machine — another install, or a scratch home running `hermes update` — are named in the output and left alone. Use `hermes gateway restart` when you want to restart a gateway without applying an update.
+- **Gateway restart.** After a successful update, {{app-name}} attempts to restart all running gateway profiles of the home being updated (its root and every `profiles/<name>` under it) automatically so they pick up the new code. Gateways and `hermes-gateway*` services that belong to a different `HERMES_HOME` on the same machine — another install, or a scratch home running `noone update` — are named in the output and left alone. Use `noone gateway restart` when you want to restart a gateway without applying an update.
 - **Restart-phase recovery.** If the in-process restart phase aborts while importing the freshly pulled tree, supervised gateway profiles are retried through a clean Python process. Only restarts independently confirmed by systemd (`systemctl --user is-active`) are reported as verified; a relaunch that merely exited 0 is recorded as `relaunch_attempted` and the restart stays owed (a `gateway_restart` follow-up; the update itself still exits 0 because the code is in place). Manual gateways and serve/dashboard runtimes are never killed without a relaunch authority; they are recorded as skipped with a reason and remain in the incomplete-update report with the exact restart command.
-- **Update receipts + fleet version check.** Every run writes a machine-readable receipt to `~/.hermes/logs/update_receipts/` in the root Hermes home, even from a sticky profile (pre-update fleet plan, steps, skips with reasons, restart outcome, follow-ups; `latest.json` points at the newest and reads `running` while an update is in progress). After the restart phase the updater verifies each live gateway's running code against the updated checkout and prints a per-profile version matrix. A gateway still on pre-update code does not fail the update once the new code is in place: the update prints a `⚠` line with the exact restart command, exits 0, records a `gateway_restart` follow-up, and keeps the restart owed — every CLI start warns about it and the next `hermes update` retries it.
+- **Update receipts + fleet version check.** Every run writes a machine-readable receipt to `~/.hermes/logs/update_receipts/` in the root {{app-name}} home, even from a sticky profile (pre-update fleet plan, steps, skips with reasons, restart outcome, follow-ups; `latest.json` points at the newest and reads `running` while an update is in progress). After the restart phase the updater verifies each live gateway's running code against the updated checkout and prints a per-profile version matrix. A gateway still on pre-update code does not fail the update once the new code is in place: the update prints a `⚠` line with the exact restart command, exits 0, records a `gateway_restart` follow-up, and keeps the restart owed — every CLI start warns about it and the next `noone update` retries it.
 - **Local source changes.** For git installs, dirty tracked files are auto-stashed before branch checkout or pull, together with any untracked file at a path the update adds. Other untracked files and folders stay where they are, untouched, because they cannot block the update. Interactive terminal updates ask "Keep these changes after updating?" before anything is stashed: yes stashes them and puts them back after the pull, no deletes them right away, so no stash entry is left behind. A run with nothing to pull does not ask. Non-interactive updates restore it by default; set `updates.non_interactive_local_changes: discard` only on managed installs where local source edits should be thrown away after a successful pull. If stash restore conflicts or the pull fails, the stash is left in place for manual recovery.
-- **npm lockfile churn.** Before stashing or switching branches, Hermes makes a best-effort cleanup of tracked `package-lock.json` diffs that npm installs leave in the npm projects (the WhatsApp bridge and the Photon sidecar). `pnpm-lock.yaml` is never reverted: installs do not rewrite it. Commit or manually stash intentional lockfile edits before running `hermes update`.
-- **Pairing data snapshot.** Even when `--backup` is off, `hermes update` takes a lightweight snapshot of `~/.hermes/pairing/` and the Feishu comment rules before `git pull`. You can roll it back with `hermes backup restore --state pre-update` if a pull rewrites a file you were editing.
-- **Legacy `hermes.service` warning.** If Hermes detects a pre-rename `hermes.service` systemd unit (instead of the current `hermes-gateway.service`), it prints a one-time migration hint so you can avoid flap-loop issues.
+- **npm lockfile churn.** Before stashing or switching branches, {{app-name}} makes a best-effort cleanup of tracked `package-lock.json` diffs that npm installs leave in the npm projects (the WhatsApp bridge and the Photon sidecar). `pnpm-lock.yaml` is never reverted: installs do not rewrite it. Commit or manually stash intentional lockfile edits before running `noone update`.
+- **Pairing data snapshot.** Even when `--backup` is off, `noone update` takes a lightweight snapshot of `~/.hermes/pairing/` before `git pull`. You can roll it back with `noone backup restore --state pre-update` if a pull rewrites a file you were editing.
+- **Legacy `hermes.service` warning.** If {{app-name}} detects a pre-rename `hermes.service` systemd unit (instead of the current `agent-gateway.service`), it prints a one-time migration hint so you can avoid flap-loop issues.
 - **Exit codes.** `0` on success, `1` on pull/install/post-install errors, `2` on unexpected working-tree changes that block `git pull`.
 
-## Maintenance commands
+## Maintenance commands {#maintenance-commands}
 
 | Command | Description |
 |---------|-------------|
-| `hermes --version` | Print version information. |
-| `hermes update` | Pull latest changes and reinstall dependencies. |
+| `noone --version` | Print version information. |
+| `noone update` | Pull latest changes and reinstall dependencies. |
 
-| `hermes uninstall [--full] [--gui] [--data] [--dry-run] [--yes]` | Remove owned source-install files. `--gui` selects source-built desktop removal; `--full` also removes data. `--data` removes user data without deleting package-owned code. Sealed installs use their package owner for application removal. `--dry-run` previews the scope; `--yes` skips confirmation. |
+| `noone uninstall [--full] [--gui] [--data] [--dry-run] [--yes]` | Remove owned source-install files. `--gui` selects source-built desktop removal; `--full` also removes data. `--data` removes user data without deleting package-owned code. Sealed installs use their package owner for application removal. `--dry-run` previews the scope; `--yes` skips confirmation. |
 
-## See also
+## See also {#see-also}
 
 - [Slash Commands Reference](./slash-commands.md)
 - [CLI Interface](../user-guide/cli.md)

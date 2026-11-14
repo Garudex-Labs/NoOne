@@ -232,7 +232,7 @@ test('Windows relaunch gate refuses live and uncertain markers before executing 
       (error: any) => error.kind === 'update-in-progress'
     )
     assert.equal(
-      scripts.some(script => script.includes('hermes_cli.windows_ssh_runtime')),
+      scripts.some(script => script.includes('agent_cli.windows_ssh_runtime')),
       false
     )
   }
@@ -419,7 +419,7 @@ test('the update marker gate stays CLEAR when CLIXML lands after the final Write
 
 test('every parsed Windows PowerShell script silences the progress stream', async () => {
   // The marker gate runs Add-Type (C# compilation) and the spawn/helper scripts
-  // import the remote hermes_cli module — both emit progress records the
+  // import the remote agent_cli module — both emit progress records the
   // probe's Get-Item/Get-Command suppression knows nothing about, on the same
   // stdout the parsers read.
   const decode = (command: string, options: SshExecOptions = {}) => scriptFromInvocation(command, options)
@@ -503,7 +503,7 @@ test('Windows platform probe and marker gate send their scripts without stdin', 
   assert.match(markerCommand, /-EncodedCommand [A-Za-z0-9+/=]+$/)
   assert.doesNotMatch(probeCommand, /-Command /)
   assert.match(decodePowerShellCommand(probeCommand), /Assert-NoReparse/)
-  assert.match(decodePowerShellCommand(markerCommand), /HermesMarkerNoFollow/)
+  assert.match(decodePowerShellCommand(markerCommand), /AgentMarkerNoFollow/)
 })
 
 test('Windows platform probe preserves Unicode paths in its compressed command', async () => {
@@ -802,7 +802,7 @@ test('helper command enters through the launcher module dispatch and quotes path
 
   const encoded = command.split(' ').pop()!
   const script = Buffer.from(encoded, 'base64').toString('utf16le')
-  assert.match(script, /bin\\hermes\.exe' '--run-module' 'hermes_cli\.windows_ssh_runtime' 'inspect'/)
+  assert.match(script, /bin\\hermes\.exe' '--run-module' 'agent_cli\.windows_ssh_runtime' 'inspect'/)
   assert.match(script, /Hermes''s/)
   assert.match(script, /C:\\x y\\hermes\.exe/)
 })

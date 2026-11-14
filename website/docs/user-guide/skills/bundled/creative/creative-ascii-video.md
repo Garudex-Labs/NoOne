@@ -1,44 +1,52 @@
 ---
 title: "Ascii Video — ASCII video: convert video/audio to colored ASCII MP4/GIF"
-sidebar_label: "Ascii Video"
+sidebarTitle: "Ascii Video"
 description: "ASCII video: convert video/audio to colored ASCII MP4/GIF"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Ascii Video
+# Ascii Video {#ascii-video}
 
 ASCII video: convert video/audio to colored ASCII MP4/GIF.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/creative/ascii-video` |
 | Version | `1.0.0` |
-| Author | SHL0MS, Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `ASCII`, `Video`, `FFmpeg`, `Terminal-Art` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# ASCII Video Production Pipeline
+<div className="doc-callout-title">
 
-## When to use
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# ASCII Video Production Pipeline {#ascii-video-production-pipeline}
+
+## When to use {#when-to-use}
 
 Use when users request: ASCII video, text art video, terminal-style video, character art animation, retro text visualization, audio visualizer in ASCII, converting video to ASCII art, matrix-style effects, or any animated ASCII output.
 
-## What's inside
+## What's inside {#whats-inside}
 
 Production pipeline for ASCII art video — any format. Converts video/audio/images/generative input into colored ASCII character video output (MP4, GIF, image sequence). Covers: video-to-ASCII conversion, audio-reactive music visualizers, generative ASCII art animations, hybrid video+audio reactive, text/lyrics overlays, real-time terminal rendering.
 
-## Creative Standard
+## Creative Standard {#creative-standard}
 
 This is visual art. ASCII characters are the medium; cinema is the standard.
 
@@ -54,7 +62,7 @@ This is visual art. ASCII characters are the medium; cinema is the standard.
 
 **Dense, layered, considered.** Every frame should reward viewing. Never flat black backgrounds. Always multi-grid composition. Always per-scene variation. Always intentional color.
 
-## Modes
+## Modes {#modes}
 
 | Mode | Input | Output | Reference |
 |------|-------|--------|-----------|
@@ -65,7 +73,7 @@ This is visual art. ASCII characters are the medium; cinema is the standard.
 | **Lyrics/text** | Audio + text/SRT | Timed text with visual effects | `references/inputs.md` § Text/Lyrics |
 | **TTS narration** | Text quotes + TTS API | Narrated testimonial/quote video with typed text | `references/inputs.md` § TTS Integration |
 
-## Stack
+## Stack {#stack}
 
 Single self-contained Python script per project. No GPU required.
 
@@ -79,7 +87,7 @@ Single self-contained Python script per project. No GPU required.
 | TTS | ElevenLabs API (optional) | Generate narration clips |
 | Optional | OpenCV | Video frame sampling, edge detection |
 
-## Pipeline Architecture
+## Pipeline Architecture {#pipeline-architecture}
 
 Every mode follows the same 6-stage pipeline:
 
@@ -94,9 +102,9 @@ INPUT → ANALYZE → SCENE_FN → TONEMAP → SHADE → ENCODE
 5. **SHADE** — Post-processing via `ShaderChain` + `FeedbackBuffer`. See `references/shaders.md`
 6. **ENCODE** — Pipe raw RGB frames to ffmpeg for H.264/GIF encoding
 
-## Creative Direction
+## Creative Direction {#creative-direction}
 
-### Aesthetic Dimensions
+### Aesthetic Dimensions {#aesthetic-dimensions}
 
 | Dimension | Options | Reference |
 |-----------|---------|-----------|
@@ -112,7 +120,7 @@ INPUT → ANALYZE → SCENE_FN → TONEMAP → SHADE → ENCODE
 | **Masking** | Circle, ring, gradient, text stencil, animated iris/wipe/dissolve | `composition.md` § Masking |
 | **Transitions** | Crossfade, wipe, dissolve, glitch cut, iris, mask-based reveal | `shaders.md` § Transitions |
 
-### Per-Section Variation
+### Per-Section Variation {#per-section-variation}
 
 Never use the same config for the entire video. For each section/scene:
 - **Different background effect** (or compose 2-3)
@@ -121,7 +129,7 @@ Never use the same config for the entire video. For each section/scene:
 - **Vary shader intensity** (more bloom during peaks, more grain during quiet)
 - **Different particle types** if particles are active
 
-### Project-Specific Invention
+### Project-Specific Invention {#project-specific-invention}
 
 For every project, invent at least one of:
 - A custom character palette matching the theme
@@ -132,9 +140,9 @@ For every project, invent at least one of:
 
 Don't just pick from the catalog. The catalog is vocabulary — you write the poem.
 
-## Workflow
+## Workflow {#workflow}
 
-### Step 1: Creative Vision
+### Step 1: Creative Vision {#step-1-creative-vision}
 
 Before any code, articulate the creative concept:
 
@@ -147,7 +155,7 @@ Before any code, articulate the creative concept:
 
 Map the user's prompt to aesthetic choices. A "chill lo-fi visualizer" demands different everything from a "glitch cyberpunk data stream."
 
-### Step 2: Technical Design
+### Step 2: Technical Design {#step-2-technical-design}
 
 - **Mode** — which of the 6 modes above
 - **Resolution** — landscape 1920x1080 (default), portrait 1080x1920, square 1080x1080 @ 24fps
@@ -155,7 +163,7 @@ Map the user's prompt to aesthetic choices. A "chill lo-fi visualizer" demands d
 - **Sections** — map timestamps to scene functions, each with its own effect/palette/color/shader config
 - **Output format** — MP4 (default), GIF (640x360 @ 15fps), PNG sequence
 
-### Step 3: Build the Script
+### Step 3: Build the Script {#step-3-build-the-script}
 
 Single Python file. Components (with references):
 
@@ -172,16 +180,16 @@ Single Python file. Components (with references):
 11. **Parallel encoder** — N-worker clip rendering with ffmpeg pipes
 12. **Main** — orchestrate full pipeline
 
-### Step 4: Quality Verification
+### Step 4: Quality Verification {#step-4-quality-verification}
 
 - **Test frames first**: render single frames at key timestamps before full render
 - **Brightness check**: `canvas.mean() > 8` for all ASCII content. If dark, lower gamma
 - **Visual coherence**: do all scenes feel like they belong to the same video?
 - **Creative vision check**: does the output match the concept from Step 1? If it looks generic, go back
 
-## Critical Implementation Notes
+## Critical Implementation Notes {#critical-implementation-notes}
 
-### Brightness — Use `tonemap()`, Not Linear Multipliers
+### Brightness — Use `tonemap()`, Not Linear Multipliers {#brightness--use-tonemap-not-linear-multipliers}
 
 This is the #1 visual issue. ASCII on black is inherently dark. **Never use `canvas * N` multipliers** — they clip highlights. Use adaptive tonemap:
 
@@ -198,23 +206,23 @@ Pipeline: `scene_fn() → tonemap() → FeedbackBuffer → ShaderChain → ffmpe
 
 Per-scene gamma: default 0.75, solarize 0.55, posterize 0.50, bright scenes 0.85. Use `screen` blend (not `overlay`) for dark layers.
 
-### Font Cell Height
+### Font Cell Height {#font-cell-height}
 
 macOS Pillow: `textbbox()` returns wrong height. Use `font.getmetrics()`: `cell_height = ascent + descent`. See `references/troubleshooting.md`.
 
-### ffmpeg Pipe Deadlock
+### ffmpeg Pipe Deadlock {#ffmpeg-pipe-deadlock}
 
 Never `stderr=subprocess.PIPE` with long-running ffmpeg — buffer fills at 64KB and deadlocks. Redirect to file. See `references/troubleshooting.md`.
 
-### Font Compatibility
+### Font Compatibility {#font-compatibility}
 
 Not all Unicode chars render in all fonts. Validate palettes at init — render each char, check for blank output. See `references/troubleshooting.md`.
 
-### Per-Clip Architecture
+### Per-Clip Architecture {#per-clip-architecture}
 
 For segmented videos (quotes, scenes, chapters), render each as a separate clip file for parallel rendering and selective re-rendering. See `references/scenes.md`.
 
-## Performance Targets
+## Performance Targets {#performance-targets}
 
 | Component | Budget |
 |-----------|--------|
@@ -224,7 +232,7 @@ For segmented videos (quotes, scenes, chapters), render each as a separate clip 
 | Shader pipeline | 5-25ms |
 | **Total** | ~100-200ms/frame |
 
-## References
+## References {#references}
 
 | File | Contents |
 |------|----------|
@@ -239,7 +247,7 @@ For segmented videos (quotes, scenes, chapters), render each as a separate clip 
 
 ---
 
-## Creative Divergence (use only when user requests experimental/creative/unique output)
+## Creative Divergence (use only when user requests experimental/creative/unique output) {#creative-divergence-use-only-when-user-requests-experimentalcreativeunique-output}
 
 If the user asks for creative, experimental, surprising, or unconventional output, select the strategy that best fits and reason through its steps BEFORE generating code.
 
@@ -247,19 +255,19 @@ If the user asks for creative, experimental, surprising, or unconventional outpu
 - **Conceptual Blending** — when the user names two things to combine ("ocean meets music," "space + calligraphy")
 - **Oblique Strategies** — when the user is maximally open ("surprise me," "something I've never seen")
 
-### Forced Connections
+### Forced Connections {#forced-connections}
 1. Pick a domain unrelated to the visual goal (weather systems, microbiology, architecture, fluid dynamics, textile weaving)
 2. List its core visual/structural elements (erosion → gradual reveal; mitosis → splitting duplication; weaving → interlocking patterns)
 3. Map those elements onto ASCII characters and animation patterns
 4. Synthesize — what does "erosion" or "crystallization" look like in a character grid?
 
-### Conceptual Blending
+### Conceptual Blending {#conceptual-blending}
 1. Name two distinct visual/conceptual spaces (e.g., ocean waves + sheet music)
 2. Map correspondences (crests = high notes, troughs = rests, foam = staccato)
 3. Blend selectively — keep the most interesting mappings, discard forced ones
 4. Develop emergent properties that exist only in the blend
 
-### Oblique Strategies
+### Oblique Strategies {#oblique-strategies}
 1. Draw one: "Honor thy error as a hidden intention" / "Use an old idea" / "What would your closest friend do?" / "Emphasize the flaws" / "Turn it upside down" / "Only a part, not the whole" / "Reverse"
 2. Interpret the directive against the current ASCII animation challenge
 3. Apply the lateral insight to the visual design before writing code

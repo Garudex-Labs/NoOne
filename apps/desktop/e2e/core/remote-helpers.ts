@@ -1,5 +1,5 @@
 /**
- * Remote-backend topology for the core suite: a real `hermes serve` the TEST
+ * Remote-backend topology for the core suite: a real `noone serve` the TEST
  * spawns (not the app) under its OWN sandbox HOME / HERMES_HOME / cwd, reached
  * by the Desktop only by URL + token (HERMES_DESKTOP_REMOTE_URL/_TOKEN). Paths
  * that exist on the client sandbox do not exist on the backend's filesystem
@@ -123,7 +123,7 @@ function hidingCommand(hide: string[], argv: string[]): null | string[] {
   ]
 }
 
-/** Spawn `hermes serve` for `sandbox` (its HOME/HERMES_HOME, cwd = its root). */
+/** Spawn `noone serve` for `sandbox` (its HOME/HERMES_HOME, cwd = its root). */
 export async function startRemoteBackend(
   sandbox: CoreSandbox,
   { hide = [] }: { hide?: string[] } = {}
@@ -147,7 +147,7 @@ export async function startRemoteBackend(
     }
   }
 
-  const argv = [python(), '-m', 'hermes_cli.main', 'serve', '--host', '127.0.0.1', '--port', String(port)]
+  const argv = [python(), '-m', 'agent_cli.main', 'serve', '--host', '127.0.0.1', '--port', String(port)]
   const hiding = hidingCommand(hide, argv)
   const [command, ...args] = hiding ?? argv
 

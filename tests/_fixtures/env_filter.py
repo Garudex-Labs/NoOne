@@ -77,22 +77,8 @@ _CREDENTIAL_NAMES = frozenset({
     "SLACK_BOT_TOKEN",
     "SLACK_APP_TOKEN",
     "MATTERMOST_TOKEN",
-    "MATRIX_ACCESS_TOKEN",
-    "MATRIX_PASSWORD",
-    "MATRIX_RECOVERY_KEY",
     "HASS_TOKEN",
     "EMAIL_PASSWORD",
-    "BLUEBUBBLES_PASSWORD",
-    "FEISHU_APP_SECRET",
-    "FEISHU_ENCRYPT_KEY",
-    "FEISHU_VERIFICATION_TOKEN",
-    "DINGTALK_CLIENT_SECRET",
-    "QQ_CLIENT_SECRET",
-    "QQ_STT_API_KEY",
-    "WECOM_SECRET",
-    "WECOM_CALLBACK_CORP_SECRET",
-    "WECOM_CALLBACK_TOKEN",
-    "WECOM_CALLBACK_ENCODING_AES_KEY",
     "WEIXIN_TOKEN",
     "MODAL_TOKEN_ID",
     "MODAL_TOKEN_SECRET",
@@ -129,10 +115,10 @@ def _looks_like_credential(name: str) -> bool:
 # HERMES_* vars that change test behavior by being set. Unset all of these
 # unconditionally — individual tests that need them set do so explicitly.
 _HERMES_BEHAVIORAL_VARS = frozenset({
-    # Voice/TTS runtime flags. ``tui_gateway/server.py`` reads these straight
+    # Voice/TTS runtime flags. ``agent_backend/server.py`` reads these straight
     # off ``os.environ`` at call time (``_voice_mode_enabled`` /
     # ``_voice_tts_enabled``) and, on every completed turn, hands the turn's
-    # final response text to ``hermes_cli.voice.speak_text`` — real synthesis,
+    # final response text to ``agent_cli.voice.speak_text`` — real synthesis,
     # real playback, out of the developer's speakers. Blank them per-test so a
     # leak (from the shell, or from an earlier test that drove the
     # ``voice.toggle`` RPC, which writes ``os.environ`` directly) cannot carry
@@ -142,7 +128,7 @@ _HERMES_BEHAVIORAL_VARS = frozenset({
     "HERMES_YOLO_MODE",
     # Injected into subprocess envs by the terminal tool (_make_run_env), so
     # any test run launched FROM a Hermes agent session inherits them and
-    # hermes_constants home-resolution helpers prefer them over monkeypatched
+    # agent_constants home-resolution helpers prefer them over monkeypatched
     # HOME (test_subprocess_home_isolation red locally, green on CI).
     "HERMES_REAL_HOME",
     "TERMINAL_HOME_MODE",
@@ -230,8 +216,6 @@ _HERMES_BEHAVIORAL_VARS = frozenset({
     "TELEGRAM_ALLOWED_USERS",
     "TELEGRAM_GROUP_ALLOWED_USERS",
     "TELEGRAM_GROUP_ALLOWED_CHATS",
-    "QQ_ALLOWED_USERS",
-    "QQ_GROUP_ALLOWED_USERS",
     "DISCORD_ALLOWED_USERS",
     "WHATSAPP_ALLOWED_USERS",
     "SLACK_ALLOWED_USERS",
@@ -240,10 +224,6 @@ _HERMES_BEHAVIORAL_VARS = frozenset({
     "EMAIL_ALLOWED_USERS",
     "SMS_ALLOWED_USERS",
     "MATTERMOST_ALLOWED_USERS",
-    "MATRIX_ALLOWED_USERS",
-    "DINGTALK_ALLOWED_USERS",
-    "FEISHU_ALLOWED_USERS",
-    "WECOM_ALLOWED_USERS",
     "PHOTON_ALLOWED_USERS",
     "GATEWAY_ALLOWED_USERS",
     "GATEWAY_ALLOW_ALL_USERS",
@@ -283,18 +263,6 @@ _HERMES_BEHAVIORAL_VARS = frozenset({
     "MATTERMOST_HOME_CHANNEL",
     "MATTERMOST_HOME_CHANNEL_THREAD_ID",
     "MATTERMOST_HOME_CHANNEL_NAME",
-    "MATRIX_HOME_CHANNEL",
-    "MATRIX_HOME_CHANNEL_THREAD_ID",
-    "MATRIX_HOME_CHANNEL_NAME",
-    "DINGTALK_HOME_CHANNEL",
-    "DINGTALK_HOME_CHANNEL_THREAD_ID",
-    "DINGTALK_HOME_CHANNEL_NAME",
-    "FEISHU_HOME_CHANNEL",
-    "FEISHU_HOME_CHANNEL_THREAD_ID",
-    "FEISHU_HOME_CHANNEL_NAME",
-    "WECOM_HOME_CHANNEL",
-    "WECOM_HOME_CHANNEL_THREAD_ID",
-    "WECOM_HOME_CHANNEL_NAME",
     "PHOTON_HOME_CHANNEL",
     "PHOTON_HOME_CHANNEL_THREAD_ID",
     "PHOTON_HOME_CHANNEL_NAME",
@@ -327,6 +295,4 @@ _HERMES_BEHAVIORAL_VARS = frozenset({
     "DISCORD_FREE_RESPONSE_CHANNELS",
     "TELEGRAM_REQUIRE_MENTION",
     "WHATSAPP_REQUIRE_MENTION",
-    "DINGTALK_REQUIRE_MENTION",
-    "MATRIX_REQUIRE_MENTION",
 })

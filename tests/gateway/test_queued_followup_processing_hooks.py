@@ -6,7 +6,7 @@ adapter's ``_pending_messages`` slot and drained *in-band* by
 ``BasePlatformAdapter._process_message_background``.  The runner-side drain
 must still fire the ``on_processing_start`` / ``on_processing_complete``
 lifecycle hooks, otherwise every platform that renders a read-receipt
-reaction from those hooks (Slack 👀, Discord, Telegram, Feishu, Matrix,
+reaction from those hooks (Slack 👀, Discord, Telegram,
 Signal, ...) silently skips the acknowledgement for mid-turn messages.
 """
 

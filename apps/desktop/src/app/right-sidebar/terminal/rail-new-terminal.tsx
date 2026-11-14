@@ -1,8 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import type { ReactNode } from 'react'
 
 import { ConnectionGlyph } from '@/app/chat/sidebar/connection-glyph'
-import { Codicon } from '@/components/ui/codicon'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -60,7 +60,7 @@ export function NewTerminalButton({ className }: { className: string }) {
       onClick={() => createTerminal()}
       type="button"
     >
-      <Codicon name="add" size="0.8125rem" />
+      <AppIcon name="add" size="0.8125rem" />
     </button>
   )
 
@@ -106,7 +106,7 @@ export function NewTerminalButton({ className }: { className: string }) {
               data-slot="terminal-new-on"
               type="button"
             >
-              <Codicon name="chevron-down" size="0.625rem" />
+              <AppIcon name="chevron-down" size="0.625rem" />
             </button>
           </DropdownMenuTrigger>
         </Tip>

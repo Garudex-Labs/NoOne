@@ -32,7 +32,7 @@ from gateway.session_transcript import TranscriptReadError
 from gateway.turn_context import TurnContext
 from gateway.warning_notifications import diagnostic_wake_muted
 from gateway.turn_lease import DEFAULT_LEASE_WAIT, TurnLeaseTimeoutError
-from hermes_constants import get_hermes_home_override
+from agent_constants import get_agent_home_override
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from utils import base_url_hostname
@@ -48,7 +48,7 @@ logger = logging.getLogger("gateway.run")
 def _acp_launch(runner, source) -> bool:
     """An editor session: ACP shows no reasoning event yet, so its reply keeps the projected block."""
     from gateway.session_setting_commands import local_policy
-    from hermes_state_runtime import RuntimeStoreError
+    from agent_state_runtime import RuntimeStoreError
     try:
         return getattr(local_policy(runner, source), "source", None) == "acp"
     except RuntimeStoreError:  # a local route with no restored policy is not an editor launch
@@ -468,7 +468,7 @@ class GatewayTurnPersistenceMixin:
     def _hmwa_fresh_session_has_pending_input(self, session_entry) -> bool:
         """Whether the authority FIFO of the fresh session already holds an admitted input."""
         from gateway.session_authorities import active_authority
-        from hermes_state_runtime import list_session_admissions
+        from agent_state_runtime import list_session_admissions
         authority = active_authority(self)
         if authority is None or session_entry is None:
             return False
@@ -477,7 +477,7 @@ class GatewayTurnPersistenceMixin:
 
     def _hmwa_defer_exhaustion_reset(self, session_entry, session_key, source):
         """True when the reset was handed to the authority drain. A LOCAL session (the Bot Chat a
-        ``hermes peer dm`` lands in) resets its target in the store, which refuses while an admission
+        ``noone peer dm`` lands in) resets its target in the store, which refuses while an admission
         on it is started (``session_busy``): this turn's own. The drain runs the reset right after it
         settles this admission, before it claims any successor (the Bot Chat's retry included)."""
         from gateway.session_ingress import executing_admission
@@ -667,7 +667,7 @@ class GatewayTurnPersistenceMixin:
         """Retain a safety-refused turn for display while forcing the next turn to rebuild from the
         clean (model) transcript. The ONE owner-side refusal cleanup for every durable gateway owner:
         the in-process runner (this persist path), the managed worker (Bot Chat / safe-mode, via
-        ``execute_managed``) and the standalone tui_gateway finish path all funnel here so none can be
+        ``execute_managed``) and the standalone agent_backend finish path all funnel here so none can be
         missed (#149708 review).
 
         The agent flushed the turn-start user row before the refusal was known (a managed worker's

@@ -1,57 +1,59 @@
-import { useEffect, useLayoutEffect, useRef, useState, useMemo } from "react";
 import {
+  BookOpen,
+  Bot,
+  Brain,
+  ClipboardList,
+  Cloud,
   Code,
   Download,
-  FormInput,
-  RotateCcw,
-  Search,
-  Upload,
-  X,
-  Settings2,
-  FileText,
-  Settings,
-  Bot,
-  Monitor,
-  Palette,
-  Users,
-  Brain,
-  Package,
-  Lock,
-  Globe,
-  Mic,
-  Volume2,
   Ear,
-  ClipboardList,
-  MessageCircle,
-  Wrench,
-  FileQuestion,
-  Filter,
-  Cloud,
-  Sparkles,
-  LayoutDashboard,
-  BookOpen,
-  Route,
-  History,
-  Shield,
   FileOutput,
+  FileQuestion,
+  FileText,
+  Filter,
+  FormInput,
+  Globe,
+  History,
+  LayoutDashboard,
+  Lock,
+  MessageCircle,
+  Mic,
+  Monitor,
+  Package,
+  Palette,
   RefreshCw,
-} from "lucide-react";
-import { api } from "@/lib/api";
-import { getNestedValue, setNestedValue } from "@/lib/nested";
+  RotateCcw,
+  Route,
+  Search,
+  Settings,
+  Settings2,
+  Shield,
+  Sparkles,
+  Upload,
+  Users,
+  Volume2,
+  Wrench,
+  X,
+} from "@noone/ui/icons";
 import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { AutoField } from "@/components/AutoField";
+import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
-import { ListItem } from "@nous-research/ui/ui/components/list-item";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
 import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { Input } from "@nous-research/ui/ui/components/input";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { useI18n } from "@/i18n";
+import { ListItem } from "@nous-research/ui/ui/components/list-item";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Toast } from "@nous-research/ui/ui/components/toast";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+
+import { AutoField } from "@/components/AutoField";
 import { usePageHeader } from "@/contexts/usePageHeader";
-import { PluginSlot } from "@/plugins";
+import { useI18n } from "@/i18n";
+import { pluralSuffix } from '@/i18n/plural';
+import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/api-error";
+import { getNestedValue, setNestedValue } from "@/lib/nested";
+import { PluginSlot } from "@/plugins";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -123,7 +125,7 @@ export default function ConfigPage() {
   const [confirmReset, setConfirmReset] = useState(false);
   const { toast, showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { setEnd } = usePageHeader();
 
   useLayoutEffect(() => {
@@ -614,7 +616,7 @@ export default function ConfigPage() {
                       {searchMatchedFields.length}{" "}
                       {t.config.fields.replace(
                         "{s}",
-                        searchMatchedFields.length !== 1 ? "s" : "",
+                        pluralSuffix(locale, searchMatchedFields.length),
                       )}
                     </Badge>
                   </div>
@@ -645,7 +647,7 @@ export default function ConfigPage() {
                       {activeFields.length}{" "}
                       {t.config.fields.replace(
                         "{s}",
-                        activeFields.length !== 1 ? "s" : "",
+                        pluralSuffix(locale, activeFields.length),
                       )}
                     </Badge>
                   </div>

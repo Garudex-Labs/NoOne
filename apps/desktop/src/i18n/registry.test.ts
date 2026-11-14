@@ -5,9 +5,11 @@ import {
   isLocale,
   isSupportedLocaleValue,
   languageOptions,
+  LOCALE_OPTIONS,
   localeConfigValue,
   localeMeta,
-  normalizeLocale
+  normalizeLocale,
+  resolveInitialLocale
 } from './languages'
 import {
   $appLocaleVersion,
@@ -150,7 +152,24 @@ describe('languages + registry', () => {
     expect(normalizeLocale('pl_PL')).toBe('en')
     expect(normalizeLocale('PL')).toBe('pl')
     expect(localeConfigValue('pl')).toBe('pl')
-    expect(normalizeLocale('zh-TW')).toBe('zh-hant')
+    expect(normalizeLocale('hi-IN')).toBe('hi')
+  })
+
+  it.each(['hi-in', 'ko-kr', 'hindi', 'korean', 'zh-sg'])(
+    'preserves an exact registered %s pack through saved selection and reload', id => {
+      registerAppLocale(id, { endonym: 'Regional pack', translations: { 'common.save': 'CUSTOM' } })
+      expect(normalizeLocale(id)).toBe(id)
+      const saved = localeConfigValue(id)
+      const reloaded = resolveInitialLocale(saved, 'en-US')
+      expect(reloaded).toBe(id)
+      expect(resolveTranslations(reloaded).common.save).toBe('CUSTOM')
+    }
+  )
+
+  it('does not replace an explicitly registered Chinese regional pack with a prefix alias', () => {
+    registerAppLocale('zh-hans-my', { endonym: 'Custom pack' })
+    expect(normalizeLocale('zh-Hans-MY')).toBe('zh-hans-my')
+    expect(isSupportedLocaleValue('zh-Hans-MY')).toBe(true)
   })
 
   it('lists bundled then registered languages by endonym, with registry rtl and source', () => {
@@ -160,8 +179,8 @@ describe('languages + registry', () => {
     const options = languageOptions()
     const ids = options.map(option => option.id)
 
-    expect(ids.slice(0, 9)).toEqual(Object.keys(TRANSLATIONS))
-    expect(ids.slice(9)).toEqual(['he', 'pl'])
+    expect(ids.slice(0, LOCALE_OPTIONS.length)).toEqual(LOCALE_OPTIONS.map(option => option.id))
+    expect(ids.slice(LOCALE_OPTIONS.length)).toEqual(['he', 'pl'])
     expect(options.find(option => option.id === 'pl')).toMatchObject({
       endonym: 'Polski',
       englishName: 'Polish',

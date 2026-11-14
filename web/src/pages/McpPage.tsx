@@ -1,10 +1,22 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
-import { KeyRound, Package, Power, Server, Trash2, X, Zap } from "lucide-react";
+import { appText } from '@noone/shared/application-identity';
+import { KeyRound, Package, Power, Server, Trash2, X, Zap } from "@noone/ui/icons";
+import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
 import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
+import { Card, CardContent } from "@nous-research/ui/ui/components/card";
+import { Input } from "@nous-research/ui/ui/components/input";
+import { Label } from "@nous-research/ui/ui/components/label";
 import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Toast } from "@nous-research/ui/ui/components/toast";
 import { H2 } from "@nous-research/ui/ui/components/typography/h2";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+
+import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+import { usePageHeader } from "@/contexts/usePageHeader";
+import { useAppName } from '@/hooks/useAppName';
+import { useModalBehavior } from "@/hooks/useModalBehavior";
 import { api } from "@/lib/api";
 import type {
   McpCatalogDiagnostic,
@@ -13,23 +25,13 @@ import type {
   McpServer,
   McpTestResult,
 } from "@/lib/api";
-import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
-import { useModalBehavior } from "@/hooks/useModalBehavior";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { Card, CardContent } from "@nous-research/ui/ui/components/card";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Label } from "@nous-research/ui/ui/components/label";
-import { usePageHeader } from "@/contexts/usePageHeader";
-import { cn, themedBody } from "@/lib/utils";
+import { errorMessage } from "@/lib/api-error";
+import { completeMcpDashboardOAuth } from "@/lib/mcp-dashboard-oauth";
 import {
   buildMcpServerCreate,
   type McpTransport,
 } from "@/lib/mcp-server-create";
-import { completeMcpDashboardOAuth } from "@/lib/mcp-dashboard-oauth";
-import { errorMessage } from "@/lib/api-error";
-
+import { cn, themedBody } from "@/lib/utils";
 function isHttpUrl(value: string): boolean {
   return /^https?:\/\//i.test(value.trim());
 }
@@ -45,13 +47,13 @@ const TRANSPORT_TONE: Record<string, "success" | "warning" | "secondary"> = {
 };
 
 export default function McpPage() {
+  const appName = useAppName();
   const [servers, setServers] = useState<McpServer[]>([]);
   const [catalog, setCatalog] = useState<McpCatalogEntry[]>([]);
   const [diagnostics, setDiagnostics] = useState<McpCatalogDiagnostic[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast, showToast } = useToast();
   const { setEnd } = usePageHeader();
-
   // Add server modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [name, setName] = useState("");
@@ -449,10 +451,7 @@ export default function McpPage() {
                   )}
                   {httpAuth === "oauth" && (
                     <p className="text-xs text-muted-foreground">
-                      Add the server, then use Authenticate. Hermes opens the
-                      OAuth browser on the machine running the Dashboard
-                      backend.
-                    </p>
+                      {appText("Add the server, then use Authenticate. {app_name} opens the\n                      OAuth browser on the machine running the Dashboard\n                      backend.\n                    ", appName)}</p>
                   )}
                 </>
               ) : (

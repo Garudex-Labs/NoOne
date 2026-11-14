@@ -1,36 +1,44 @@
 ---
 title: "Unreal Mcp — Automate Unreal Engine editor scenes, actors, and renders"
-sidebar_label: "Unreal Mcp"
+sidebarTitle: "Unreal Mcp"
 description: "Automate Unreal Engine editor scenes, actors, and renders"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Unreal Mcp
+# Unreal Mcp {#unreal-mcp}
 
 Automate Unreal Engine editor scenes, actors, and renders.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/unreal-mcp` |
+| Source | Optional — install with `noone skills install official/creative/unreal-mcp` |
 | Path | `optional-skills/creative/unreal-mcp` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `unreal`, `unreal-engine`, `ue5`, `3d`, `mcp`, `scenes`, `cinematics`, `lighting`, `gamedev` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Unreal Engine MCP Skill
+<div className="doc-callout-title">
 
-Companion skill for the `unreal-engine` entry in the Hermes MCP catalog. The
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Unreal Engine MCP Skill {#unreal-engine-mcp-skill}
+
+Companion skill for the `unreal-engine` entry in the {{app-name}} MCP catalog. The
 MCP server (Epic's official, experimental "Unreal MCP" plugin, internal id
 `ModelContextProtocol`) runs INSIDE the Unreal Editor process and exposes
 editor functionality as typed tools. This skill teaches how to drive it well:
@@ -38,7 +46,7 @@ discovering the live tool surface, sequencing calls safely, translating
 plain-English asks into scenes that actually look good, and verifying work
 visually. The user should never need to touch the editor beyond launching it.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use when the user wants anything done in Unreal Engine: build or dress a
 level, spawn/move/delete actors, set up lighting and atmosphere, create or
@@ -52,11 +60,11 @@ Don't use for: DCC-style mesh modeling/sculpting (model in Blender and
 import the result), or for editing Unreal C++ project source (that's normal
 code work — use the terminal; this skill is about the live editor).
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
-Two halves, in this order: the editor side must be up before Hermes connects.
+Two halves, in this order: the editor side must be up before {{app-name}} connects.
 
-### One-time, editor side
+### One-time, editor side {#one-time-editor-side}
 
 1. Unreal Editor **5.8+** with a project open. (macOS: full Xcode must be
    installed and its license accepted — the editor exits on first launch
@@ -74,7 +82,7 @@ Two halves, in this order: the editor side must be up before Hermes connects.
    To start manually instead, run `ModelContextProtocol.StartServer` in the
    editor console (backtick key).
 
-### One-time, Hermes side
+### One-time, {{app-name}} side {#one-time-hermes-side}
 
     hermes mcp install unreal-engine
 
@@ -84,28 +92,28 @@ while the editor + server are up so the probe sees the real surface. If the
 user changed port/path in Editor Preferences, edit the `url` in
 `~/.hermes/config.yaml` under `mcp_servers.unreal-engine` to match.
 
-Do NOT use `ModelContextProtocol.GenerateClientConfig` for Hermes — that
-writes `.mcp.json`-style files for Claude Code/Cursor/etc. Hermes connects
+Do NOT use `ModelContextProtocol.GenerateClientConfig` for {{app-name}} — that
+writes `.mcp.json`-style files for Claude Code/Cursor/etc. {{app-name}} connects
 from `config.yaml` via the catalog entry.
 
-### Every session
+### Every session {#every-session}
 
 1. Launch Unreal Editor, wait for the project to finish loading; confirm the
    server started (Output Log shows the bind address, or run
    `ModelContextProtocol.StartServer` manually).
-2. Start the Hermes session. Tools register as `mcp_unreal_engine_*`. If
+2. Start the {{app-name}} session. Tools register as `mcp_unreal_engine_*`. If
    they're missing: editor wasn't up first — start it, then open a new
-   Hermes session.
+   {{app-name}} session.
 3. Sanity check: call `mcp_unreal_engine_list_toolsets` and confirm toolsets
    come back.
 
-## The Tool Surface: Discovery, Not a Fixed List
+## The Tool Surface: Discovery, Not a Fixed List {#the-tool-surface-discovery-not-a-fixed-list}
 
 By default the plugin runs in **tool-search mode**: `tools/list` returns only
-three meta-tools, and every real tool is reached through them. Through Hermes
+three meta-tools, and every real tool is reached through them. Through {{app-name}}
 they appear as:
 
-| Hermes tool | Purpose |
+| {{app-name}} tool | Purpose |
 |---|---|
 | `mcp_unreal_engine_list_toolsets` | Names + descriptions of every registered toolset |
 | `mcp_unreal_engine_describe_toolset` | Full JSON schemas for one named toolset's tools |
@@ -135,7 +143,7 @@ out of every API call, so prefer it.
 See `references/tool-surface.md` for the shipped toolset catalog, authoring
 custom toolsets, and the full plugin configuration/console-command reference.
 
-## Operating Loop
+## Operating Loop {#operating-loop}
 
 Every Unreal task follows the same loop:
 
@@ -152,7 +160,7 @@ Every Unreal task follows the same loop:
    server-side without breaking the serial rule
    (`references/advanced-workflows.md`).
 3. **NEVER issue overlapping calls.** Do not batch multiple
-   `mcp_unreal_engine_*` calls in one turn — Hermes runs batched calls
+   `mcp_unreal_engine_*` calls in one turn — {{app-name}} runs batched calls
    concurrently, and parallel calls against the game thread deadlock or
    fail. Strictly one call, await result, next call. This overrides the
    general parallel-tool-calls guidance.
@@ -191,7 +199,7 @@ Rules of the world while you work:
   them out (`references/scene-craft.md` has the numbers,
   `references/pitfalls.md` #12b has the calibration rule).
 
-## From Plain English to a Scene
+## From Plain English to a Scene {#from-plain-english-to-a-scene}
 
 The user gives intent, not specs. Translate before you build:
 
@@ -216,7 +224,7 @@ The user gives intent, not specs. Translate before you build:
 moody interior, golden-hour cinematic + render, asset import & placement)
 with the exact call sequences and values.
 
-## Reference Files
+## Reference Files {#reference-files}
 
 Load on demand; keep SKILL.md-level rules in mind throughout.
 
@@ -228,9 +236,9 @@ Load on demand; keep SKILL.md-level rules in mind throughout.
 | `references/recipes.md` | End-to-end worked builds with exact call sequences |
 | `references/pitfalls.md` | Setup, runtime, and workflow pitfalls with fixes — read before your first session and whenever something misbehaves |
 
-## Pitfalls (top of mind — full list in references/pitfalls.md)
+## Pitfalls (top of mind — full list in references/pitfalls.md) {#pitfalls-top-of-mind--full-list-in-referencespitfallsmd}
 
-- **Start order matters.** Editor + server up first, then the Hermes
+- **Start order matters.** Editor + server up first, then the {{app-name}}
   session. Missing `mcp_unreal_engine_*` tools = wrong order.
 - **One call at a time.** Serial game thread; no batching, no overlap.
 - **The editor UI freezes during each call.** That's by design (game-thread
@@ -238,7 +246,7 @@ Load on demand; keep SKILL.md-level rules in mind throughout.
 - **Modal dialogs block everything.** A tool call that opens (or collides
   with) a modal editor dialog stalls until a human dismisses it. If a call
   hangs indefinitely, tell the user to check the editor for a dialog.
-- **Timeouts on long operations.** Hermes' per-call default is 120 s; asset
+- **Timeouts on long operations.** {{app-name}}' per-call default is 120 s; asset
   imports, big level saves, and renders can exceed it. Raise
   `mcp_servers.unreal-engine.timeout` in `~/.hermes/config.yaml` for
   render/import-heavy sessions.
@@ -256,7 +264,7 @@ Load on demand; keep SKILL.md-level rules in mind throughout.
   EULA (§6(e)) — the user is responsible for ensuring their LLM provider
   doesn't train on it. Surface this if the user asks about data handling.
 
-## Verification Checklist
+## Verification Checklist {#verification-checklist}
 
 - [ ] `list_toolsets` returns toolsets at session start (connection healthy)
 - [ ] Scene state queried before first edit (never assumed empty)

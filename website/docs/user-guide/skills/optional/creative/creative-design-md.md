@@ -1,35 +1,43 @@
 ---
 title: "Design Md — Author/validate/export Google's DESIGN.md token spec files"
-sidebar_label: "Design Md"
+sidebarTitle: "Design Md"
 description: "Author/validate/export Google's DESIGN.md token spec files"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Design Md
+# Design Md {#design-md}
 
 Author/validate/export Google's DESIGN.md token spec files.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/design-md` |
+| Source | Optional — install with `noone skills install official/creative/design-md` |
 | Path | `optional-skills/creative/design-md` |
 | Version | `1.1.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `design`, `design-system`, `tokens`, `ui`, `accessibility`, `wcag`, `tailwind`, `dtcg`, `google` |
 | Related skills | [`popular-web-designs`](../../bundled/creative/creative-popular-web-designs.md), [`claude-design`](../../bundled/creative/creative-claude-design.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md), [`architecture-diagram`](../../bundled/creative/creative-architecture-diagram.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# DESIGN.md Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# DESIGN.md Skill {#designmd-skill}
 
 DESIGN.md is Google's open spec (Apache-2.0, `google-labs-code/design.md`) for
 describing a visual identity to coding agents. One file combines:
@@ -41,7 +49,7 @@ Tokens give exact values. Prose tells agents *why* those values exist and how to
 apply them. The CLI (`npx @google/design.md`) lints structure + WCAG contrast,
 diffs versions for regressions, and exports to Tailwind or W3C DTCG JSON.
 
-## When to use this skill
+## When to use this skill {#when-to-use-this-skill}
 
 - User asks for a DESIGN.md file, design tokens, or a design system spec
 - User wants consistent UI/brand across multiple projects or tools
@@ -54,7 +62,7 @@ instead. For *process and taste* when designing a one-off HTML artifact
 from scratch (prototype, deck, landing page, component lab), use
 `claude-design`. This skill is for the *formal spec file* itself.
 
-## File anatomy
+## File anatomy {#file-anatomy}
 
 ```md
 ---
@@ -112,7 +120,7 @@ Public Sans for everything except small all-caps labels...
 `button-primary` is the only high-emphasis action on a page...
 ```
 
-## Token types
+## Token types {#token-types}
 
 | Type | Format | Example |
 |------|--------|---------|
@@ -126,7 +134,7 @@ Component property whitelist: `backgroundColor`, `textColor`, `typography`,
 pressed) are **separate component entries** with related key names
 (`button-primary-hover`), not nested.
 
-## Canonical section order
+## Canonical section order {#canonical-section-order}
 
 Sections are optional, but present ones should appear in this order. The
 linter flags out-of-order sections (`section-order`, warning) and duplicate
@@ -145,7 +153,7 @@ returning the file.
 Unknown sections are preserved, not errored. Unknown token names are accepted
 if the value type is valid. Unknown component properties produce a warning.
 
-## Workflow: authoring a new DESIGN.md
+## Workflow: authoring a new DESIGN.md {#workflow-authoring-a-new-designmd}
 
 1. **Ask the user** (or infer) the brand tone, accent color, and typography
    direction. If they provided a site, image, or vibe, translate it to the
@@ -159,7 +167,7 @@ if the value type is valid. Unknown component properties produce a warning.
 5. **If the user has an existing project**, also write Tailwind or DTCG
    exports next to the file (`tailwind.theme.json`, `tokens.json`).
 
-## Workflow: lint / diff / export
+## Workflow: lint / diff / export {#workflow-lint--diff--export}
 
 The CLI is `@google/design.md` (Node). Use `npx` — no global install needed.
 
@@ -192,7 +200,7 @@ On Windows, the `design.md` bin name can collide with the `.md` file
 association (silent no-op or the file opens in an editor). Use the dot-free
 alias: `npx -y -p @google/design.md designmd lint DESIGN.md`.
 
-### Lint rule reference (the 9 rules, as of CLI 0.3.0)
+### Lint rule reference (the 9 rules, as of CLI 0.3.0) {#lint-rule-reference-the-9-rules-as-of-cli-030}
 
 - `broken-ref` (error) — `{colors.missing}` points at a non-existent token
 - `contrast-ratio` (warning) — component `textColor` vs `backgroundColor`
@@ -209,7 +217,7 @@ alias: `npx -y -p @google/design.md designmd lint DESIGN.md`.
 When the user cares about accessibility, call this out explicitly in your
 summary — WCAG findings are the most load-bearing reason to use the CLI.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Don't nest component variants.** `button-primary.hover` is wrong;
   `button-primary-hover` as a sibling key is right.
@@ -230,7 +238,7 @@ summary — WCAG findings are the most load-bearing reason to use the CLI.
 - **Token references resolve by dotted path.** `{colors.primary}` works;
   `{primary}` does not.
 
-## Spec source of truth
+## Spec source of truth {#spec-source-of-truth}
 
 - Repo: https://github.com/google-labs-code/design.md (Apache-2.0)
 - CLI: `@google/design.md` on npm

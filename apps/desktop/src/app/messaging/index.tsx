@@ -1,18 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AlertTriangle, ExternalLink, RefreshCw, Save, Trash2 } from '@noone/ui/icons'
 import type * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { PageLoader } from '@/components/page-loader'
-import { StatusDot, type StatusTone } from '@/components/status-dot'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { DisclosureCaret } from '@/components/ui/disclosure-caret'
-import { ErrorBanner } from '@/components/ui/error-state'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { ResponsiveTabs } from '@/components/ui/tab-dropdown'
-import { Tip } from '@/components/ui/tooltip'
 import {
   approvePairing,
   getMessagingPlatforms,
@@ -24,10 +14,20 @@ import {
   revokePairing,
   type TelegramOnboardingApplyResponse,
   updateMessagingPlatform
-} from '@/hermes'
+} from '@/agent-client'
+import { PageLoader } from '@/components/page-loader'
+import { StatusDot, type StatusTone } from '@/components/status-dot'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { DisclosureCaret } from '@/components/ui/disclosure-caret'
+import { ErrorBanner } from '@/components/ui/error-state'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { ResponsiveTabs } from '@/components/ui/tab-dropdown'
+import { Tip } from '@/components/ui/tooltip'
 import { type Translations, useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
-import { AlertTriangle, ExternalLink, RefreshCw, Save, Trash2 } from '@/lib/icons'
 import { platformStatusTone } from '@/lib/platform-status'
 import { normalize } from '@/lib/text'
 import { cn } from '@/lib/utils'
@@ -126,12 +126,8 @@ const FIELD_COPY: Record<string, { advanced?: boolean }> = {
   DISCORD_ALLOW_ALL_USERS: { advanced: true },
   DISCORD_HOME_CHANNEL: { advanced: true },
   DISCORD_HOME_CHANNEL_NAME: { advanced: true },
-  BLUEBUBBLES_ALLOW_ALL_USERS: { advanced: true },
   MATTERMOST_ALLOW_ALL_USERS: { advanced: true },
   MATTERMOST_HOME_CHANNEL: { advanced: true },
-  QQ_ALLOW_ALL_USERS: { advanced: true },
-  QQBOT_HOME_CHANNEL: { advanced: true },
-  QQBOT_HOME_CHANNEL_NAME: { advanced: true },
   WHATSAPP_ENABLED: { advanced: true },
   WHATSAPP_MODE: { advanced: true }
 }
@@ -1065,30 +1061,19 @@ const PLATFORM_INTRO: Record<string, string> = {
     'Create a Slack app, enable Socket Mode, install it to your workspace, then copy the bot token and app-level token.',
   mattermost:
     'On your Mattermost server, create a bot account or personal access token, then paste the server URL and token here.',
-  matrix: 'Sign in to your homeserver with the bot account, then copy the access token, user ID, and homeserver URL.',
   signal:
-    'Run a signal-cli REST bridge somewhere reachable, then point Hermes at the URL and the registered phone number.',
+    'Run a signal-cli REST bridge somewhere reachable, then point the agent at the URL and the registered phone number.',
   whatsapp:
-    'Start the WhatsApp bridge that ships with Hermes, scan the QR code on first run, then enable the platform.',
-  bluebubbles:
-    'Run BlueBubbles Server on a Mac with iMessage, expose its API, then point Hermes at the URL with the server password.',
+    'Start the WhatsApp bridge that ships with the agent, scan the QR code on first run, then enable the platform.',
   homeassistant:
     'In Home Assistant, open your profile and create a long-lived access token. Paste it here along with your HA URL.',
   email:
     'Use a dedicated mailbox. For Gmail/Workspace, create an app password and use imap.gmail.com / smtp.gmail.com.',
   sms: 'Get your Twilio Account SID and Auth Token from the Twilio console, plus a phone number that can send SMS.',
-  dingtalk: 'Create a DingTalk app in the developer console, then copy the Client ID (App key) and Client Secret here.',
-  feishu:
-    'Create a Feishu / Lark app, configure the bot capability, and copy the App ID, App secret, and event encryption keys.',
-  wecom:
-    'Add a group robot in WeCom and copy its webhook key as WECOM_BOT_ID. Send-only — use the WeCom (app) option for two-way.',
-  wecom_callback:
-    'Set up a WeCom self-built app, expose its callback URL, and provide the corp ID, secret, agent ID, and AES key.',
   weixin:
-    "Run `hermes gateway setup`, select Weixin, then scan and confirm the QR code with a personal WeChat account. Hermes connects through Tencent's iLink Bot API and saves the credentials.",
-  qqbot: 'Register an app on the QQ Open Platform (q.qq.com) and copy the App ID and Client Secret.',
+    "Run `noone gateway setup`, select Weixin, then scan and confirm the QR code with a personal WeChat account. The agent connects through Tencent's iLink Bot API and saves the credentials.",
   api_server:
-    'Expose Hermes as an OpenAI-compatible API. Set an auth key, then point Open WebUI / LobeChat / etc. at the host:port.',
+    'Expose the agent as an OpenAI-compatible API. Set an auth key, then point Open WebUI / LobeChat / etc. at the host:port.',
   webhook:
     'Run an HTTP server that other tools (GitHub, GitLab, custom apps) can POST to. Use the secret to verify signatures.'
 }

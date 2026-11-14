@@ -45,35 +45,7 @@ let
       };
     };
 
-  # Legacy alibabacloud packages ship only sdists with setup.py/setup.cfg
-  # and no pyproject.toml, so setuptools isn't declared as a build dep.
-  buildSystemOverrides =
-    final: prev:
-    builtins.mapAttrs
-      (
-        name: _:
-        prev.${name}.overrideAttrs (old: {
-          nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ final.setuptools ];
-        })
-      )
-      (
-        lib.genAttrs [
-          "alibabacloud-credentials-api"
-          "alibabacloud-endpoint-util"
-          "alibabacloud-gateway-dingtalk"
-          "alibabacloud-gateway-spi"
-          "alibabacloud-tea"
-        ] (_: null)
-      )
-    // {
-      # The locked sdist has no build-system metadata; setup.py imports
-      # setuptools and uses CFFI to compile the bundled libolm.
-      python-olm = prev.python-olm.overrideAttrs (old: {
-        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ final.resolveBuildSystem {
-          setuptools = [ ];
-          cffi = [ ];
-        };
-      });
+  buildSystemOverrides = final: prev: {
       # [kittentts] locks misaki as a git source. uv.lock records no build
       # backend for it, so supply the hatchling its pyproject declares.
       misaki = prev.misaki.overrideAttrs (old: {
@@ -137,7 +109,7 @@ let
           # variable, not a devShell variable: ``nix develop -c uv build``
           # must remain blocked.
           (final: prev: {
-            hermes-agent = prev.hermes-agent.overrideAttrs (_old: {
+            noone = prev.noone.overrideAttrs (_old: {
               HERMES_NIX_BUILD = "1";
             });
           })
@@ -160,7 +132,7 @@ let
     lib.composeManyExtensions [
       editableOverlay
       (final: prev: {
-        hermes-agent = prev.hermes-agent.overrideAttrs (old: {
+        noone = prev.noone.overrideAttrs (old: {
           # point straight at the real source instead of the filtered nix store copy
           src = workspaceRoot;
           nativeBuildInputs = old.nativeBuildInputs ++ final.resolveBuildSystem { editables = [ ]; };
@@ -172,10 +144,10 @@ in
 {
   inherit python;
 
-  venv = pythonSet.mkVirtualEnv "hermes-agent-env" {
-    hermes-agent = dependency-groups;
+  venv = pythonSet.mkVirtualEnv "noone-env" {
+    noone = dependency-groups;
   };
-  editableVenv = editableSet.mkVirtualEnv "hermes-agent-editable-env" {
-    hermes-agent = dependency-groups;
+  editableVenv = editableSet.mkVirtualEnv "noone-editable-env" {
+    noone = dependency-groups;
   };
 }

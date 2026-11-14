@@ -28,9 +28,9 @@ def _document(skill):
 
 
 @pytest.mark.parametrize("skill,contributor", [
-    (GITHUB, "benbarclay"), (MEETING, "benbarclay"), (PRICE, "benbarclay"),
-    (WEEKLY, "benbarclay"), (EMAIL, "benbarclay"), (SOCIAL, "benbarclay"),
-    (ACTUAL, "shl0ms"), (DARWINIAN, "Bihruze"),
+    (GITHUB, "RAWx18"), (MEETING, "RAWx18"), (PRICE, "RAWx18"),
+    (WEEKLY, "RAWx18"), (EMAIL, "RAWx18"), (SOCIAL, "RAWx18"),
+    (ACTUAL, "RAWx18"), (DARWINIAN, "RAWx18"),
     (QUESTIONNAIRE, "mattpocock"), (MCP, None),
 ])
 def test_required_document_and_credit(skill, contributor):
@@ -57,7 +57,7 @@ def test_required_references_are_present_and_routed(skill, references):
     (QUESTIONNAIRE, ("## Context", "## How to answer", "## Anything else?",
                      "decision-questionnaire-<slug>.md", "Interview the Send"),
      ("claude", "slash command", "disable-model-invocation")),
-    (ACTUAL, ("--provider actual",), ("hermes config set providers.actual.api ", "key_env")),
+    (ACTUAL, ("--provider actual",), ("noone config set providers.actual.api ", "key_env")),
     (MEETING, ("never invent", "before creating anything", "`unresolved`"), (r"\bLinear\b",)),
     (PRICE, ("Setup (foreground, once)", "Tick (each scheduled run)", "cronjob(action=",
              "Do not schedule until one foreground fetch works",

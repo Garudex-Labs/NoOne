@@ -1,20 +1,20 @@
 ---
 title: "Openhue — Control Philips Hue lights, scenes, rooms via OpenHue CLI"
-sidebar_label: "Openhue"
+sidebarTitle: "Openhue"
 description: "Control Philips Hue lights, scenes, rooms via OpenHue CLI"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Openhue
+# Openhue {#openhue}
 
 Control Philips Hue lights, scenes, rooms via OpenHue CLI.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/smart-home/openhue` |
+| Source | Optional — install with `noone skills install official/smart-home/openhue` |
 | Path | `optional-skills/smart-home/openhue` |
 | Version | `1.0.1` |
 | Author | community |
@@ -22,17 +22,25 @@ Control Philips Hue lights, scenes, rooms via OpenHue CLI.
 | Platforms | linux, macos, windows |
 | Tags | `Smart-Home`, `Hue`, `Lights`, `IoT`, `Automation` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# OpenHue CLI
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# OpenHue CLI {#openhue-cli}
 
 Control Philips Hue lights and scenes via a Hue Bridge from the terminal.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 ```bash
 # Linux (pre-built binary — releases ship tarballs, not bare binaries)
@@ -47,7 +55,7 @@ brew install openhue/cli/openhue-cli
 
 First run requires pressing the button on your Hue Bridge to pair. The bridge must be on the same local network.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - "Turn on/off the lights"
 - "Dim the living room lights"
@@ -55,9 +63,9 @@ First run requires pressing the button on your Hue Bridge to pair. The bridge mu
 - Controlling specific Hue rooms, zones, or individual bulbs
 - Adjusting brightness, color, or color temperature
 
-## Common Commands
+## Common Commands {#common-commands}
 
-### List Resources
+### List Resources {#list-resources}
 
 ```bash
 openhue get light       # List all lights
@@ -65,7 +73,7 @@ openhue get room        # List all rooms
 openhue get scene       # List all scenes
 ```
 
-### Control Lights
+### Control Lights {#control-lights}
 
 ```bash
 # Turn on/off
@@ -83,7 +91,7 @@ openhue set light "Bedroom Lamp" --on --color red
 openhue set light "Bedroom Lamp" --on --rgb "#FF5500"
 ```
 
-### Control Rooms
+### Control Rooms {#control-rooms}
 
 ```bash
 # Turn off entire room
@@ -93,14 +101,14 @@ openhue set room "Bedroom" --off
 openhue set room "Bedroom" --on --brightness 30
 ```
 
-### Scenes
+### Scenes {#scenes}
 
 ```bash
 openhue set scene "Relax" --room "Bedroom"
 openhue set scene "Concentrate" --room "Office"
 ```
 
-## Quick Presets
+## Quick Presets {#quick-presets}
 
 ```bash
 # Bedtime (dim warm)
@@ -118,9 +126,9 @@ openhue set room "Office" --off
 openhue set room "Living Room" --off
 ```
 
-## Notes
+## Notes {#notes}
 
-- Bridge must be on the same local network as the machine running Hermes
+- Bridge must be on the same local network as the machine running {{app-name}}
 - First run requires physically pressing the button on the Hue Bridge to authorize
 - Colors only work on color-capable bulbs (not white-only models)
 - Light and room names are case-sensitive — use `openhue get light` to check exact names

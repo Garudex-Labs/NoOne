@@ -1,11 +1,11 @@
-# Application declarations
+# Application declarations {#application-declarations}
 
-A plugin whose MCP server fronts a desktop application declares which application that is and what the server needs of it. The core evaluates the declaration on the host and gates the server's tools, and any skill that names the application, on the answer. The parser imports only the standard library and `hermes_platform`.
+A plugin whose MCP server fronts a desktop application declares which application that is and what the server needs of it. The core evaluates the declaration on the host and gates the server's tools, and any skill that names the application, on the answer. The parser imports only the standard library and `agent_platform`.
 
-The vocabulary lives in `hermes_platform/declaration.py`. A declaration is data plus policy, parsed from plain mappings (already-decoded YAML, JSON, a dict literal — the parser never touches a file):
+The vocabulary lives in `agent_platform/declaration.py`. A declaration is data plus policy, parsed from plain mappings (already-decoded YAML, JSON, a dict literal — the parser never touches a file):
 
 ```python
-from hermes_platform import declaration
+from agent_platform import declaration
 
 decl = declaration.parse_declaration(
     "my-server",
@@ -20,7 +20,7 @@ declaration.register("my-server", decl)
 
 An unregistered MCP server keeps its connection-only check. A skill that explicitly names an unregistered server is hidden. `clear()` removes every registration and is not a per-plugin unload operation. Registrations are process-wide, not profile-scoped.
 
-## `app` — how to find the application on each OS
+## `app` — how to find the application on each OS {#app--how-to-find-the-application-on-each-os}
 
 ```yaml
 app:
@@ -72,7 +72,7 @@ app:
 | `flatpak` | `linux` | `app_id` | the system, then the per-user flatpak `exports/bin` |
 | `snap` | `linux` | `name` | `/snap/bin` |
 
-Each kind's OS, key, presence and locator are one `LOCATION_KINDS` entry in `hermes_platform/resolver/app.py`; the parser validates against that table, so a new kind is one entry there. The directories behind each kind live in `hermes_platform/resolver/known_dirs.py`.
+Each kind's OS, key, presence and locator are one `LOCATION_KINDS` entry in `agent_platform/resolver/app.py`; the parser validates against that table, so a new kind is one entry there. The directories behind each kind live in `agent_platform/resolver/known_dirs.py`.
 
 | field | type | rule | maps to `AppDef` |
 |---|---|---|---|
@@ -88,7 +88,7 @@ Each kind's OS, key, presence and locator are one `LOCATION_KINDS` entry in `her
 
 When `requires.app` is true, an OS missing from `app:` gives `unsupported_os`.
 
-## `requires` — what the server needs before it is offered
+## `requires` — what the server needs before it is offered {#requires--what-the-server-needs-before-it-is-offered}
 
 ```yaml
 requires:
@@ -100,15 +100,15 @@ requires:
 |---|---|---|
 | `app` | bool | when true, `app:` must exist and the server is gated on presence |
 | `min_version` | str | requires `app: true`; dotted numeric; every `app.win32` and `app.darwin` must declare a real `version.kind`; `app.linux` may omit it (Linux has no version source) and is then gated on presence only, but a Linux-only declaration cannot set a minimum; compared numerically per segment, non-numeric characters in a segment are dropped (`2.3.0.12594` ≥ `2.3.0`; prerelease suffixes are not ordered) |
-| `gpu` | str | `nvidia`; the server is offered only on a host where `hermes_platform.host.facts.gpu_class()` reports that vendor. Independent of `app`: a server with no `app:` block can require a GPU. |
+| `gpu` | str | `nvidia`; the server is offered only on a host where `agent_platform.host.facts.gpu_class()` reports that vendor. Independent of `app`: a server with no `app:` block can require a GPU. |
 
 `requires.app: true` with no `app:` block is a `DeclarationError`.
 
 `gpu` is for an application that has no install location to check, or that needs the hardware whatever is installed. `gpu_class()` reads the registry on Windows, sysfs on Linux and the CPU architecture on macOS, never a subprocess or a driver library. When it cannot read the GPU (`unknown`), the requirement passes: a failed read must not lock out a machine that has the GPU, and the connection check still applies. Only `nvidia` is accepted: `gpu_class()` reports the highest-priority vendor present, which answers "is an NVIDIA GPU here" exactly and would not answer the same question for AMD or Intel on a machine that also has an NVIDIA GPU.
 
-## Availability: the one evaluation every reader uses
+## Availability: the one evaluation every reader uses {#availability-the-one-evaluation-every-reader-uses}
 
-`hermes_platform/resolver/availability.py::availability(decl) -> Availability`
+`agent_platform/resolver/availability.py::availability(decl) -> Availability`
 
 ```
 Availability(
@@ -130,7 +130,7 @@ Availability(
 
 Evaluation uses `locate`, optional version inspection and the cached GPU fact. It never probes a server, launches an application, or connects. The tool registry retains its existing availability cache.
 
-## The two gates
+## The two gates {#the-two-gates}
 
 - **MCP `check_fn`** (`tools/mcp_tool_handlers.py::_make_check_fn`): connection alive AND, when a declaration with `requires.app` is registered for the server, `availability(decl).offerable`. Returns a plain `bool` because the registry caches `bool(fn())`.
 - **Skill `requires_apps:` frontmatter** (`agent/skill_utils.py::skill_matches_apps`): each name resolves through `declaration.lookup`; an unknown name hides the skill (fail closed). Offer-time filter, like `environments:`.

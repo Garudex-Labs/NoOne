@@ -1,6 +1,6 @@
 """Shared mime↔extension dispatch for inbound (downloaded) platform media.
 
-Adapters historically hand-rolled divergent mime→extension maps on purpose (BlueBubbles
+Adapters historically hand-rolled divergent mime→extension maps on purpose (
 coerces ``image/heic`` to ``.jpg`` for vision tools; WhatsApp Cloud pins ``audio/ogg`` to
 ``.ogg`` for the STT extension whitelist). This module owns the agreed-upon union tables
 plus lookup helpers taking per-adapter ``overrides`` (and ``use_defaults``/``use_mimetypes``

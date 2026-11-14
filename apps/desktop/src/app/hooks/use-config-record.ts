@@ -7,17 +7,17 @@ import {
   type ProfileScope,
   profileScopeKey,
   retainConfigReadOrigin
-} from '@/hermes'
+} from '@/agent-client'
 import { queryClient } from '@/lib/query-client'
 import { $activeConnectionId } from '@/store/connections'
-import type { HermesConfigRecord } from '@/types/hermes'
+import type { AgentConfigRecord } from '@/types/agent-client'
 
 // One shared cache for the whole profile config record (`GET /api/config`).
 // Every settings surface (MCP, model, config) reads and writes through this key
 // so a save in one shows in the others, and revisiting a tab paints the cache
 // instead of blanking on a fresh fetch.
 //
-// Distinct from session/hooks/use-hermes-config.ts, which is side-effecting —
+// Distinct from session/hooks/use-agent-config.ts, which is side-effecting —
 // it pushes personality/cwd/voice/… into the session stores for live chat.
 export const HERMES_CONFIG_KEY = ['hermes-config-record'] as const
 
@@ -63,7 +63,7 @@ export const hermesConfigKey = (
 // `profile` scopes both the query key and the fetch. Omitting it still targets
 // the app-wide active profile (`profileScoped(undefined)` fallback), but the
 // cache slot is the active gateway's — not the bare root key.
-export const useHermesConfigRecord = (profile?: ProfileScope) => {
+export const useAgentConfigRecord = (profile?: ProfileScope) => {
   // Reactive read, not a store getter: under the React Compiler a value with
   // no reactive inputs is computed once per component instance, so a
   // getter-based key would freeze on the first gateway and keep serving its
@@ -81,7 +81,7 @@ export const useHermesConfigRecord = (profile?: ProfileScope) => {
       // key. A refetch of the slot we are leaving must not store the new
       // gateway's record there — that is the other machine's config.yaml.
       if (connectionId && $activeConnectionId.get() !== connectionId) {
-        const cached = queryClient.getQueryData<HermesConfigRecord>(hermesConfigKey(profile, connectionId))
+        const cached = queryClient.getQueryData<AgentConfigRecord>(hermesConfigKey(profile, connectionId))
 
         if (cached !== undefined) {
           return cached
@@ -100,7 +100,7 @@ export const useHermesConfigRecord = (profile?: ProfileScope) => {
     // that served the previous GET.
     structuralSharing: (previous: unknown, next: unknown) =>
       retainConfigReadOrigin(
-        replaceEqualDeep(previous as HermesConfigRecord | undefined, next as HermesConfigRecord),
+        replaceEqualDeep(previous as AgentConfigRecord | undefined, next as AgentConfigRecord),
         next as object
       )
   })
@@ -133,9 +133,9 @@ const writeHermesConfigCache =
   (keyFor: () => ReturnType<typeof hermesConfigKey>) =>
   (
     next:
-      HermesConfigRecord | undefined | ((previous: HermesConfigRecord | undefined) => HermesConfigRecord | undefined)
+      AgentConfigRecord | undefined | ((previous: AgentConfigRecord | undefined) => AgentConfigRecord | undefined)
   ) =>
-    void queryClient.setQueryData<HermesConfigRecord>(keyFor(), previous => {
+    void queryClient.setQueryData<AgentConfigRecord>(keyFor(), previous => {
       const record = typeof next === 'function' ? next(previous) : next
 
       // setQueryData also runs the hook's structuralSharing (query.setData →

@@ -1,20 +1,20 @@
 ---
 title: "Memento Flashcards — Spaced-repetition flashcards: create, review, quiz, export"
-sidebar_label: "Memento Flashcards"
+sidebarTitle: "Memento Flashcards"
 description: "Spaced-repetition flashcards: create, review, quiz, export"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Memento Flashcards
+# Memento Flashcards {#memento-flashcards}
 
 Spaced-repetition flashcards: create, review, quiz, export.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/productivity/memento-flashcards` |
+| Source | Optional — install with `noone skills install official/productivity/memento-flashcards` |
 | Path | `optional-skills/productivity/memento-flashcards` |
 | Version | `1.0.0` |
 | Author | Memento AI |
@@ -22,15 +22,23 @@ Spaced-repetition flashcards: create, review, quiz, export.
 | Platforms | macos, linux |
 | Tags | `Education`, `Flashcards`, `Spaced Repetition`, `Learning`, `Quiz`, `YouTube` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Memento Flashcards — Spaced-Repetition Flashcard Skill
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Memento Flashcards — Spaced-Repetition Flashcard Skill {#memento-flashcards--spaced-repetition-flashcard-skill}
+
+## Overview {#overview}
 
 Memento gives you a local, file-based flashcard system with spaced-repetition scheduling.
 Users can chat with their flashcards by answering in free text and having the agent grade the response before scheduling the next review.
@@ -47,7 +55,7 @@ User-facing response style for Memento Flashcards:
 - Use plain text only. Do not use Markdown formatting in replies to the user.
 - Keep review and quiz feedback brief and neutral. Avoid extra praise, pep, or long explanations.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use this skill when the user wants to:
 - Save facts as flashcards for later review
@@ -57,7 +65,7 @@ Use this skill when the user wants to:
 
 Do not use this skill for general Q&A, coding help, or non-memory tasks.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | User intent | Action |
 |---|---|
@@ -72,7 +80,7 @@ Do not use this skill for general Q&A, coding help, or non-memory tasks.
 | "Delete a card" | Call `memento_cards.py delete --id ID` |
 | "Delete a collection" | Call `memento_cards.py delete-collection --collection NAME` |
 
-## Card Storage
+## Card Storage {#card-storage}
 
 Cards are stored in a JSON file at:
 
@@ -84,11 +92,11 @@ Cards are stored in a JSON file at:
 
 The file is created automatically on first use.
 
-## Procedure
+## Procedure {#procedure}
 
-### Creating Cards from Facts
+### Creating Cards from Facts {#creating-cards-from-facts}
 
-### Activation Rules
+### Activation Rules {#activation-rules}
 
 Not every factual statement should become a flashcard. Use this three-tier check:
 
@@ -126,7 +134,7 @@ If the user doesn't specify a collection, use `"General"` as the default.
 
 The script outputs JSON confirming the created card.
 
-### Manual Card Creation
+### Manual Card Creation {#manual-card-creation}
 
 When the user explicitly asks to create a flashcard, ask them for:
 1. The question (front of card)
@@ -135,7 +143,7 @@ When the user explicitly asks to create a flashcard, ask them for:
 
 Then call `memento_cards.py add` as above.
 
-### Reviewing Due Cards
+### Reviewing Due Cards {#reviewing-due-cards}
 
 When the user wants to review, fetch all due cards:
 
@@ -189,7 +197,7 @@ If no cards are due, tell the user: "No cards due for review right now. Check ba
 
 **Retire override:** At any point the user can say "retire this card" to permanently remove it from reviews. Use `--rating retire` for this.
 
-### Spaced Repetition Algorithm
+### Spaced Repetition Algorithm {#spaced-repetition-algorithm}
 
 The rating determines the next review interval:
 
@@ -204,7 +212,7 @@ The rating determines the next review interval:
 - **retired**: card won't appear in reviews (user has mastered it or manually retired it)
 - Three consecutive "easy" ratings automatically retire a card
 
-### YouTube Quiz Generation
+### YouTube Quiz Generation {#youtube-quiz-generation}
 
 When the user sends a YouTube URL and wants a quiz:
 
@@ -219,7 +227,7 @@ python3 ~/.hermes/skills/productivity/memento-flashcards/scripts/youtube_quiz.py
 This returns `{"title": "...", "transcript": "..."}` or an error.
 
 If the script reports `missing_dependency`, use `terminal` with a PM-prepared
-Hermes checkout to prepare the declared `youtube` extra, then reactivate:
+{{app-name}} checkout to prepare the declared `youtube` extra, then reactivate:
 
 ```bash
 python -c "import pm; pm.sync_venv(['youtube'], explicit=True)"
@@ -228,11 +236,11 @@ python -c "import youtube_transcript_api; print(youtube_transcript_api.__file__)
 ```
 
 Follow the isolated development-home setup in
-[Package Management](https://hermes-agent.nousresearch.com/docs/reference/package-management#developer-workflow)
+[Package Management](https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/reference/package-management.md#developer-workflow)
 before preparation. Retry `youtube_quiz.py` with that Python and the actual
 skill directory returned by `skill_view`. For a remote or sandbox terminal,
 prepare an independent helper environment on that host. Never pip-install into
-Hermes's selected environment.
+{{app-name}}'s selected environment.
 
 **Step 3:** Generate 5 quiz questions from the transcript. Use these rules:
 
@@ -286,7 +294,7 @@ python3 ~/.hermes/skills/productivity/memento-flashcards/scripts/memento_cards.p
 ```
 6. Repeat. Every answer MUST receive visible feedback before the next question.
 
-### Export/Import CSV
+### Export/Import CSV {#exportimport-csv}
 
 **Export:**
 ```bash
@@ -305,7 +313,7 @@ python3 ~/.hermes/skills/productivity/memento-flashcards/scripts/memento_cards.p
 
 Reads a CSV with columns: question, answer, and optionally collection (column 3). If the collection column is missing, uses the `--collection` argument.
 
-### Statistics
+### Statistics {#statistics}
 
 ```bash
 python3 ~/.hermes/skills/productivity/memento-flashcards/scripts/memento_cards.py stats
@@ -318,7 +326,7 @@ Returns JSON with:
 - `due_now`: cards due for review right now
 - `collections`: breakdown by collection name
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Never edit `cards.json` directly** — always use the script subcommands to avoid corruption
 - **Transcript failures** — some YouTube videos have no English transcript or have transcripts disabled; inform the user and suggest another video
@@ -326,7 +334,7 @@ Returns JSON with:
 - **Large imports** — CSV imports with thousands of rows work fine but the JSON output may be verbose; summarize the result for the user
 - **Video ID extraction** — support both `youtube.com/watch?v=ID` and `youtu.be/ID` URL formats
 
-## Verification
+## Verification {#verification}
 
 Verify the helper scripts directly:
 

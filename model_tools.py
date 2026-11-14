@@ -125,7 +125,7 @@ def _run_async(coro):
                 worker_loop.close()
 
         pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-        # Carry profile + approval/sudo context so get_hermes_home() resolves correctly.
+        # Carry profile + approval/sudo context so get_agent_home() resolves correctly.
         from tools.thread_context import propagate_context_to_thread
         future = pool.submit(propagate_context_to_thread(_run_in_worker))
         try:
@@ -152,7 +152,7 @@ discover_builtin_tools()
 
 # MCP discovery is deliberately NOT run here: it blocks up to 120 s and the
 # gateway lazy-imports this module inside its event loop; each entry point
-# (gateway/run.py, cli.py, tui_gateway, acp_adapter) runs it at startup.
+# (gateway/run.py, cli.py, agent_backend, acp_adapter) runs it at startup.
 try:  # plugin tool discovery (user/project/pip plugins)
     # MCP tool discovery (external MCP servers from config) used to run here as a module-level side effect.
     # It was removed because discover_mcp_tools() internally uses a blocking future.result(timeout=120)
@@ -160,7 +160,7 @@ try:  # plugin tool discovery (user/project/pip plugins)
     # message — freezing Discord/Telegram heartbeats for up to 120s whenever any configured MCP server was
     # slow or unreachable (#16856). - gateway/run.py            -> start_gateway() uses run_in_executor -
     # acp_adapter/server.py     -> asyncio.to_thread on session init
-    from hermes_cli.plugins import discover_plugins
+    from agent_cli.plugins import discover_plugins
     discover_plugins()
 except Exception as e:
     logger.debug("Plugin discovery failed: %s", e)
@@ -284,8 +284,8 @@ def _tool_defs_cache_key(
     if profile_scope == CHECK_FN_CACHE_BYPASS:
         return None
     try:
-        from hermes_cli.config import get_config_path
-        from hermes_cli.config_backend import config_version
+        from agent_cli.config import get_config_path
+        from agent_cli.config_backend import config_version
         cfg_fp = config_version(get_config_path())
     except (FileNotFoundError, OSError, ImportError):
         cfg_fp = None
@@ -570,12 +570,12 @@ def _compute_tool_definitions(enabled_toolsets: Optional[list[str]] = None, disa
 
 def _active_model_config() -> tuple[str, dict[str, Any]]:
     """(model_id, model section) from config.yaml; model_id is "" when unset."""
-    from hermes_cli.config import load_config
+    from agent_cli.config import load_config
     cfg = load_config() or {}
     model_cfg = cfg.get("model") if isinstance(cfg.get("model"), dict) else {}
     raw_model_id = model_cfg.get("model") or model_cfg.get("default") or ""
     if isinstance(raw_model_id, dict):
-        from hermes_cli.config import split_model_config_default
+        from agent_cli.config import split_model_config_default
         raw_model_id, _ = split_model_config_default(raw_model_id)
     return str(raw_model_id).strip(), model_cfg
 
@@ -605,7 +605,7 @@ def _resolve_active_context_length() -> int:
             # Credential resolution failing (offline, no keys) degrades to a
             # provider+base_url-only lookup so static fallbacks still apply.
             try:
-                from hermes_cli.runtime_provider import resolve_runtime_provider
+                from agent_cli.runtime_provider import resolve_runtime_provider
                 rt = resolve_runtime_provider(requested=provider, target_model=model_id) or {}
                 base_url = str(rt.get("base_url") or base_url or "").strip()
                 api_key = str(rt.get("api_key") or "").strip()
@@ -711,7 +711,7 @@ def _emit_post_tool_call_hook(
     if _post_tool_call_hook_suppressed.get():
         return
     try:
-        from hermes_cli.lifecycle import has_hook, invoke_hook
+        from agent_cli.lifecycle import has_hook, invoke_hook
         if not has_hook("post_tool_call"):
             return
         if status is None:
@@ -760,10 +760,6 @@ def _dispatch_bridge_tool(function_name: str, function_args: dict[str, Any],
     underlying_name, underlying_args, err = ts.resolve_underlying_call(args, ts.session_tool_names(current_defs))
     if err or not underlying_name:
         return tool_error(err or "tool_call could not be resolved"), None
-    if underlying_name == ts.CONNECTOR_BATCH_SENTINEL:
-        if not ts.connections_in_scope(current_defs):
-            return tool_error("Connectors are not available in this session."), None
-        return None, (underlying_name, underlying_args)
     # Defense in depth: resolve_underlying_call only checks the global
     # registry; also require membership in the session-scoped catalog.
     # Session-gated GUI tools fail fast with their real reason (#120413):
@@ -783,7 +779,7 @@ def _apply_request_middleware(
 ) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
     """tool_request middleware: returns (args, original_args, trace); fail-open."""
     try:
-        from hermes_cli.middleware import apply_tool_request_middleware
+        from agent_cli.middleware import apply_tool_request_middleware
         mw = apply_tool_request_middleware(function_name, function_args, **ids.hook_kwargs())
         return mw.payload, mw.original_payload, mw.trace
     except Exception as _mw_err:
@@ -804,7 +800,7 @@ def _pre_dispatch_guards(function_name: str, function_args: dict[str, Any], skip
     if not skip_pre_tool_call_hook:
         block_message: Optional[str] = None
         try:
-            from hermes_cli.plugins import _dispatch_pre_tool_call_hooks
+            from agent_cli.plugins import _dispatch_pre_tool_call_hooks
             block_message, modified_args = _dispatch_pre_tool_call_hooks(
                 function_name, function_args, middleware_trace=list(middleware_trace), **ids.hook_kwargs(),
             )
@@ -862,15 +858,12 @@ def _execute_tool(function_name: str, function_args: dict[str, Any], original_ar
         dispatch_kwargs["user_task"] = user_task
 
     def _dispatch(next_args: dict[str, Any]) -> Any:
-        from tools.connectors import dispatch_connector_call, is_connector_name
-        if is_connector_name(function_name):
-            return dispatch_connector_call(function_name, next_args, ids.tool_call_id, ids.turn_id, ids.task_id)
         return registry.dispatch(function_name, next_args, **dispatch_kwargs)
 
     with _approval_observability(ids):
         if skip_tool_execution_middleware:
             return _dispatch(function_args)
-        from hermes_cli.middleware import run_tool_execution_middleware
+        from agent_cli.middleware import run_tool_execution_middleware
         return run_tool_execution_middleware(function_name, function_args, _dispatch, original_args=original_args,
                                              **ids.hook_kwargs())
 
@@ -883,7 +876,7 @@ def _apply_transform_tool_result_hook(function_name: str, function_args: dict[st
     first string return wins. Gated on has_hook so the no-listener path is cheap.
     """
     try:
-        from hermes_cli.lifecycle import has_hook, invoke_hook
+        from agent_cli.lifecycle import has_hook, invoke_hook
         if has_hook("transform_tool_result"):
             status, error_type, error_message = _tool_result_observer_fields(function_name, result)
             hook_results = invoke_hook("transform_tool_result", tool_name=function_name, args=function_args,
@@ -943,13 +936,6 @@ def handle_function_call(
         result, underlying = bridged
         if underlying is None:
             return _emit(result, duration_ms=_elapsed_ms(start))
-        from tools.connectors import CONNECTOR_BATCH_SENTINEL, dispatch_connector_batch
-        if underlying[0] == CONNECTOR_BATCH_SENTINEL:
-            return _emit(dispatch_connector_batch(
-                underlying[1]["calls"], ids, user_task=user_task,
-                enabled_tools=enabled_tools, middleware_trace=trace,
-                enabled_toolsets=enabled_toolsets, disabled_toolsets=disabled_toolsets,
-            ), duration_ms=_elapsed_ms(start))
         return handle_function_call(
             *underlying, **asdict(ids), user_task=user_task, enabled_tools=enabled_tools,
             skip_pre_tool_call_hook=skip_pre_tool_call_hook, skip_tool_request_middleware=skip_tool_request_middleware,
@@ -957,13 +943,10 @@ def handle_function_call(
             enabled_toolsets=enabled_toolsets, disabled_toolsets=disabled_toolsets,
         )
 
-    from tools.connectors import is_connector_name
     from tools.connectors.gateway.names import parse_connector_name
-    if function_name == "manage_connections" or is_connector_name(function_name):
+    if function_name == 'manage_connections':
         if "manage_connections" not in _select_tool_names(enabled_toolsets, disabled_toolsets, quiet_mode=True):
             return _emit(tool_error("Connectors are not available in this session."))
-        if is_connector_name(function_name) and parse_connector_name(function_name) is None:
-            return _emit(tool_error("Malformed connector tool name; expected connectors__<connector>__{tool}."))
 
     original_args = dict(function_args)
     if not skip_tool_request_middleware:

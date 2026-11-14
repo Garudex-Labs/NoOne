@@ -1,41 +1,49 @@
 ---
 title: "Simple English — Rewrite text to ASD-STE100 Simplified Technical English"
-sidebar_label: "Simple English"
+sidebarTitle: "Simple English"
 description: "Rewrite text to ASD-STE100 Simplified Technical English"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Simple English
+# Simple English {#simple-english}
 
 Rewrite text to ASD-STE100 Simplified Technical English.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/simple-english` |
+| Source | Optional — install with `noone skills install official/creative/simple-english` |
 | Path | `optional-skills/creative/simple-english` |
 | Version | `1.2.0` |
-| Author | AminBlg (https://github.com/AminBlg/SimpleEnglish), ported by Hermes Agent |
+| Author | AminBlg (https://github.com/AminBlg/SimpleEnglish), ported by {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `writing`, `documentation`, `ste`, `asd-ste100`, `technical-writing`, `editing`, `anti-ai-slop` |
 | Related skills | [`humanizer`](../../bundled/creative/creative-humanizer.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Simple English: Write Like an Aerospace Manual
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Simple English: Write Like an Aerospace Manual {#simple-english-write-like-an-aerospace-manual}
 
 Write technical text with the rules of ASD-STE100 Simplified Technical English. STE is the controlled language that aerospace and defense manufacturers use for maintenance documentation. The rules exist so that a tired reader who is not a native English speaker cannot misread an instruction. They remove the usual signs of AI-generated text as a side effect: long sentences, synonym rotation, hedges, filler, and decorative clauses.
 
 Write for that tired reader. Each sentence must survive one read.
 
-## How to use it in Hermes
+## How to use it in {{app-name}} {#how-to-use-it-in-hermes}
 
 The text usually arrives one of three ways:
 
@@ -45,7 +53,7 @@ The text usually arrives one of three ways:
 
 This skill differs from `humanizer`: humanizer restores natural human voice; simple-english enforces a controlled language for technical instructions. For docs, runbooks, and error messages use this skill. For blog posts, essays, and personal writing use humanizer. Do not apply both to the same text.
 
-## Your Task
+## Your Task {#your-task}
 
 When asked to write or rewrite technical text:
 
@@ -58,14 +66,14 @@ When asked to write or rewrite technical text:
 
 When asked to CHECK text instead of writing it, report each violation as: rule number, the offending text, a compliant rewrite. Cite only rule numbers that exist in this file. Do not cite rule numbers from memory: the numbering is unintuitive and models invent it (tested — an agent without this file cited "Rule 3.1: short sentences"; the real Rule 3.1 is about verb forms).
 
-## Two Modes
+## Two Modes {#two-modes}
 
 | Mode | When | What you apply |
 |---|---|---|
 | **Pragmatic** (default) | Docs, READMEs, error messages — the user wants clear text | All structural rules. Domain words stay ("idempotent", "webhook"). |
 | **Strict** | The user names STE, ASD-STE100, or compliance | Structural rules + full vocabulary discipline, and tell the user that full compliance needs the official dictionary (free at asd-ste100.org). |
 
-## Step 1: Classify the Text
+## Step 1: Classify the Text {#step-1-classify-the-text}
 
 | | Procedural (instructions) | Descriptive (explanations) |
 |---|---|---|
@@ -76,11 +84,11 @@ When asked to CHECK text instead of writing it, report each violation as: rule n
 
 Do not mix the two in one passage. A "Getting started" section is procedural. An "Architecture" section is descriptive. A note inside a procedure is descriptive (25-word limit, no imperative).
 
-## THE RULE CATALOG
+## THE RULE CATALOG {#the-rule-catalog}
 
 53 rules in 9 sections, paraphrased from ASD-STE100 Issue 9 with software examples. The official wording is in the free standard at asd-ste100.org.
 
-### Section 1 — Words (Rules 1.1-1.14)
+### Section 1 — Words (Rules 1.1-1.14) {#section-1--words-rules-11-114}
 
 | Rule | Instruction |
 |---|---|
@@ -104,7 +112,7 @@ In pragmatic mode, rules 1.5, 1.8, and 1.12 do the heavy lifting: your domain vo
 **Before:** You can webhook the event, then do a deploy.
 **After:** Send the event to the webhook. Then deploy the service.
 
-### Section 2 — Multi-word nouns (Rules 2.1-2.2)
+### Section 2 — Multi-word nouns (Rules 2.1-2.2) {#section-2--multi-word-nouns-rules-21-22}
 
 | Rule | Instruction |
 |---|---|
@@ -116,7 +124,7 @@ Break long noun chains with prepositions (of, on, in, for):
 **Before:** the connection pool timeout configuration value
 **After:** the timeout value for the connection pool
 
-### Section 3 — Verbs (Rules 3.1-3.7)
+### Section 3 — Verbs (Rules 3.1-3.7) {#section-3--verbs-rules-31-37}
 
 | Rule | Instruction |
 |---|---|
@@ -140,7 +148,7 @@ The standard rejects "could" even for possibility: write "an explosion can occur
 **Before:** The temperature must be adjusted.
 **After:** Adjust the temperature.
 
-### Section 4 — Sentences (Rules 4.1-4.5)
+### Section 4 — Sentences (Rules 4.1-4.5) {#section-4--sentences-rules-41-45}
 
 | Rule | Instruction |
 |---|---|
@@ -155,7 +163,7 @@ Rule 4.2 is the anti-terseness rule. STE is short sentences with complete gramma
 **Wrong shortening:** Ensure file exists before running.
 **STE:** Make sure that the file exists before you run the command.
 
-### Section 5 — Procedural writing (Rules 5.1-5.5)
+### Section 5 — Procedural writing (Rules 5.1-5.5) {#section-5--procedural-writing-rules-51-55}
 
 | Rule | Instruction |
 |---|---|
@@ -168,7 +176,7 @@ Rule 4.2 is the anti-terseness rule. STE is short sentences with complete gramma
 **Before:** You'll want to grab the API key from the dashboard before configuring the client, which you can do under Settings.
 **After:** Get the API key from the dashboard, under Settings. Then configure the client with this key.
 
-### Section 6 — Descriptive writing (Rules 6.1-6.6)
+### Section 6 — Descriptive writing (Rules 6.1-6.6) {#section-6--descriptive-writing-rules-61-66}
 
 | Rule | Instruction |
 |---|---|
@@ -181,7 +189,7 @@ Rule 4.2 is the anti-terseness rule. STE is short sentences with complete gramma
 
 No imperative in descriptive text. Descriptions explain; procedures instruct.
 
-### Section 7 — Safety instructions (Rules 7.1-7.3)
+### Section 7 — Safety instructions (Rules 7.1-7.3) {#section-7--safety-instructions-rules-71-73}
 
 | Rule | Instruction |
 |---|---|
@@ -194,7 +202,7 @@ Never bury the instruction after the explanation. The pattern transfers directly
 **Before:** Note that data loss may occur in some circumstances if the destructive flag happens to be enabled when running against production.
 **After:** CAUTION: Do not use the `--force` flag against production. The flag deletes rows that do not match the source.
 
-### Section 8 — Punctuation and word count (Rules 8.1-8.7)
+### Section 8 — Punctuation and word count (Rules 8.1-8.7) {#section-8--punctuation-and-word-count-rules-81-87}
 
 | Rule | Instruction |
 |---|---|
@@ -208,7 +216,7 @@ Never bury the instruction after the explanation. The pattern transfers directly
 
 Rule 8.6 matters for software text: `sqlpipe run --config sqlpipe.yaml` in backticks is quoted text and counts as one word. Long identifiers do not blow your sentence budget.
 
-### Section 9 — Writing practices (Rules 9.1-9.4, GR-1 to GR-8)
+### Section 9 — Writing practices (Rules 9.1-9.4, GR-1 to GR-8) {#section-9--writing-practices-rules-91-94-gr-1-to-gr-8}
 
 | Rule | Instruction |
 |---|---|
@@ -221,7 +229,7 @@ General recommendations GR-1 to GR-8: keep the conjunction "that", be careful wi
 
 GR-6 for software docs: "e.g." → "for example", "i.e." → "that is", and delete "etc." — name the items or write "and more".
 
-## VOCABULARY DISCIPLINE
+## VOCABULARY DISCIPLINE {#vocabulary-discipline}
 
 The official dictionary (~900 approved words, ~1,200 banned words with alternatives) is copyrighted by ASD and is not reproduced here. Its mechanics apply without it: **one word, one meaning, one part of speech.**
 
@@ -236,7 +244,7 @@ Known part-of-speech rulings, useful as patterns:
 | follow | "To come after" only, never "obey". Write "obey the instructions". |
 | above, below | Physical positions only. For limits write "more than", "less than". |
 
-### The modal ladder
+### The modal ladder {#the-modal-ladder}
 
 | You wrote | STE writes |
 |---|---|
@@ -246,7 +254,7 @@ Known part-of-speech rulings, useful as patterns:
 | may (permission) | can |
 | would (hypothetical) | Restructure: "If X occurs, Y occurs." |
 
-### Slop-to-simple substitutions
+### Slop-to-simple substitutions {#slop-to-simple-substitutions}
 
 This table is ours, not the ASD dictionary. It maps the words AI-generated docs overuse to plain replacements. If the word carries no fact, delete it instead of replacing it.
 
@@ -279,7 +287,7 @@ This table is ours, not the ASD dictionary. It maps the words AI-generated docs 
 | plethora, myriad | many |
 | addresses the issue, tackles | corrects the fault, removes the error |
 
-### Consistency pass
+### Consistency pass {#consistency-pass}
 
 Collapse synonym rotations to one term each (Rules 1.11, 9.4). The two lists below work differently.
 
@@ -303,7 +311,7 @@ Collapse synonym rotations to one term each (Rules 1.11, 9.4). The two lists bel
 | error | Approved noun | Keep it |
 | problem | Approved noun | Keep it |
 
-## Untouchables
+## Untouchables {#untouchables}
 
 These are technical names (Rules 1.5, 8.6). Leave them exact, even when they break vocabulary rules:
 
@@ -312,7 +320,7 @@ These are technical names (Rules 1.5, 8.6). Leave them exact, even when they bre
 - Product names, API endpoint names, config keys
 - Numbers with units — each counts as one word in the sentence limit
 
-## Beyond Documentation
+## Beyond Documentation {#beyond-documentation}
 
 Same rules, different targets. Full adaptations in `references/use-cases.md`:
 
@@ -323,7 +331,7 @@ Same rules, different targets. Full adaptations in `references/use-cases.md`:
 - **Agent instructions (prompts, AGENTS.md)**: a system prompt is a procedure for a reader that cannot ask questions. One instruction per sentence, no "should", condition first.
 - **Translation prep**: STE's original job. One meaning per word plus complete grammar removes most translation ambiguity.
 
-## Self-Check Before You Deliver
+## Self-Check Before You Deliver {#self-check-before-you-deliver}
 
 This step is not optional. Run these four checks on your draft:
 
@@ -334,7 +342,7 @@ This step is not optional. Run these four checks on your draft:
 
 Fix what you find, then deliver. For a full audit, run `references/checklist.md`.
 
-## Full Example
+## Full Example {#full-example}
 
 **Before (real unedited AI output):**
 
@@ -350,13 +358,13 @@ Fix what you find, then deliver. For a full audit, run `references/checklist.md`
 
 What changed: 40-word sentences split under 20; "you're" expanded; "check/confirm" collapsed to "make sure that"; every condition moved before its command; "etc." removed; code and error strings untouched.
 
-## Limits
+## Limits {#limits}
 
 STE is for technical facts and instructions. Do not apply it to marketing copy, blog voice, or brand writing — it deletes persuasion by design. When a user asks for STE on marketing text, say so and offer it for the docs instead.
 
 This skill is an unofficial aid. It is not affiliated with or endorsed by ASD or STEMG, and no tool can guarantee STE compliance. ASD-STE100 is a registered trademark of ASD. The official standard is a free download at asd-ste100.org.
 
-## References
+## References {#references}
 
 - `references/checklist.md` — full verification pass with searchable patterns, for check mode and final audits
 - `references/use-cases.md` — long-form adaptations: error messages, runbooks, incident reports, commits, UI copy, i18n

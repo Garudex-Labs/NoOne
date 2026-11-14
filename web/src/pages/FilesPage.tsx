@@ -1,12 +1,4 @@
 import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type DragEvent as ReactDragEvent,
-} from "react";
-import {
   ArrowUp,
   Download,
   FileIcon,
@@ -17,7 +9,8 @@ import {
   Trash2,
   Unlink,
   Upload,
-} from "lucide-react";
+} from "@noone/ui/icons";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
 import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Card, CardContent } from "@nous-research/ui/ui/components/card";
@@ -32,13 +25,21 @@ import {
 import { Input } from "@nous-research/ui/ui/components/input";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Toast } from "@nous-research/ui/ui/components/toast";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
+import {
+  type DragEvent as ReactDragEvent,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { usePageHeader } from "@/contexts/usePageHeader";
 import { api } from "@/lib/api";
 import type { ManagedFileEntry, ManagedFilesResponse } from "@/lib/api";
-import { PluginSlot } from "@/plugins";
 import { errorMessage } from "@/lib/api-error";
+import { PluginSlot } from "@/plugins";
 
 const DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -122,9 +123,9 @@ export default function FilesPage() {
   useEffect(() => {
     // Existing dashboard data pages fetch from effects; keep this local and explicit
     // until the shared lint profile is updated for async page loaders.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     void load(currentPath);
-  }, [currentPath]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentPath]);  
 
   useLayoutEffect(() => {
     setAfterTitle(

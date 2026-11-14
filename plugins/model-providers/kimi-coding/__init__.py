@@ -5,12 +5,12 @@ from typing import Any
 from urllib.parse import urlparse
 
 from agent.reasoning_effort import KIMI_K3_EFFORTS, KIMI_K3_OVERRIDES, thinking_toggle_extras
-from hermes_cli.version_info import hermes_user_agent
+from agent_cli.version_info import hermes_user_agent
 from providers import register_provider
 from providers.base import OMIT_TEMPERATURE, LazyHeaders, ProviderProfile
 
 _HEADERS = {
-    "HTTP-Referer": "https://hermes-agent.nousresearch.com",
+    "HTTP-Referer": "https://github.com/Garudex-Labs/NoOne/tree/main/website/docs",
     "X-Title": "Hermes Agent",
     "User-Agent": lambda: hermes_user_agent("HermesAgent"),
     # Exclude brotli: httpx's brotlicffi backend has a streaming decode bug on

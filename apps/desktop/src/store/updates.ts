@@ -3,21 +3,21 @@
  * surfaces it as an ambient pill, and orchestrates the apply flow.
  */
 
-import { updateDebt } from '@hermes/shared'
+import { updateDebt } from '@noone/shared'
 import { atom } from 'nanostores'
 
+import { checkHermesUpdate, getActionStatus, updateHermes } from '@/agent-client'
 import { CANONICAL_GATEWAY_PROTOCOL } from '@/api/canonical-protocol'
 import { $apiRequestScope, connectionScoped, profileScoped } from '@/api/client'
 import type {
+  AgentConnection,
   DesktopUpdateApplyOptions,
   DesktopUpdateApplyResult,
   DesktopUpdateProgress,
   DesktopUpdateStage,
   DesktopUpdateStatus,
-  DesktopVersionInfo,
-  HermesConnection
+  DesktopVersionInfo
 } from '@/global'
-import { checkHermesUpdate, getActionStatus, updateHermes } from '@/hermes'
 import { translateNow } from '@/i18n'
 import { persistString, storedString } from '@/lib/storage'
 import { cloudOwnsUpdates, updateTargetFor } from '@/store/cloud-updates'
@@ -25,7 +25,7 @@ import { $connectionsRegistry, refreshConnectionsRegistry } from '@/store/connec
 import { reconnectGateway } from '@/store/gateway-reconnect'
 import { dismissNotification, notify } from '@/store/notifications'
 import { $connection } from '@/store/session'
-import type { BackendUpdateCheckResponse, UpdateReceiptSummary } from '@/types/hermes'
+import type { BackendUpdateCheckResponse, UpdateReceiptSummary } from '@/types/agent-client'
 
 /** Keyed per retired-channel revision: a new retirement (or a revision bump on
  *  the same channel) re-shows the notice, a plain re-check never does. */
@@ -104,7 +104,7 @@ function isUpdateToastSnoozed(): boolean {
   return Number.isFinite(until) && Date.now() < until
 }
 
-// Must match tui_gateway's DESKTOP_BACKEND_CONTRACT that this build was written
+// Must match agent_backend's DESKTOP_BACKEND_CONTRACT that this build was written
 // against. Legacy backends report their own value in session runtime info; a
 // lower value (or none — a pre-GUI checkout) means the backend is older than
 // this GUI, a higher value means this GUI is older than the backend. Both
@@ -770,15 +770,15 @@ export async function applyUpdates(opts: DesktopUpdateApplyOptions = {}): Promis
     const result = await bridge.apply(opts)
 
     // CLI install with no staged updater: not an error — the user just runs
-    // `hermes update` themselves. Land on a dedicated manual state so the
+    // `noone update` themselves. Land on a dedicated manual state so the
     // overlay shows the command + copy button instead of a dead retry loop.
     if (result?.manual) {
       $updateApply.set({
         ...IDLE,
         applying: false,
         stage: 'manual',
-        message: result.message ?? result.command ?? 'hermes update',
-        command: result.command ?? 'hermes update'
+        message: result.message ?? result.command ?? 'noone update',
+        command: result.command ?? 'noone update'
       })
 
       return result
@@ -1052,7 +1052,7 @@ async function runBackendUpdate(): Promise<DesktopUpdateApplyResult> {
       // An empty update_command is the backend saying "there is no command to
       // run here" (managed container, commit build) — render the message-only
       // view. Only a field absent from an older backend falls back.
-      const command = ((started as { update_command?: string | null }).update_command ?? 'hermes update') || null
+      const command = ((started as { update_command?: string | null }).update_command ?? 'noone update') || null
       $backendUpdateApply.set({ ...IDLE, applying: false, stage: 'manual', message, command })
 
       return { ok: false, error: 'manual', manual: true, message, command: command ?? undefined }
@@ -1374,7 +1374,7 @@ let lastVersionScopeKey: string | undefined
 // the mode doesn't. Pooled profiles share a baseUrl, so the profile joins
 // the key: the update check is profile-scoped (per-profile overrides can
 // pin a different channel/branch).
-function connectionKey(conn: HermesConnection | null): string {
+function connectionKey(conn: AgentConnection | null): string {
   if (conn?.mode !== 'remote') {
     return String(conn?.mode)
   }
@@ -1419,7 +1419,7 @@ export function startUpdatePoller(): void {
   // backend check above sees mode≠remote and no-ops. Re-check once the
   // connection resolves to remote, and again whenever the remote target
   // itself changes (switching between two remote profiles).
-  connectionUnsub = $connection.subscribe((conn: HermesConnection | null): void => {
+  connectionUnsub = $connection.subscribe((conn: AgentConnection | null): void => {
     const key = connectionKey(conn)
 
     if (key === lastConnectionKey) {

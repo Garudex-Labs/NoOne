@@ -16,7 +16,7 @@ import os
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from hermes_time import safe_strftime
+from agent_time import safe_strftime
 
 logger = logging.getLogger(__name__)
 
@@ -38,23 +38,8 @@ def _fmt_usd(value: Optional[float]) -> str:
     return f"${(value or 0.0):,.2f}"
 
 
-def nous_logged_in() -> bool:
-    """Cheap local auth-state check: a Nous access token is present. Fail-closed."""
-    try:
-        from hermes_cli.auth import get_provider_auth_state
-        tok = (get_provider_auth_state("nous") or {}).get("access_token")
-        return isinstance(tok, str) and bool(tok.strip())
-    except Exception:
-        return False
 
 
-def fetch_nous_account(timeout: float):
-    """Wall-clock-bounded fresh portal account fetch. Raises on failure/timeout.
-
-    Shares the one bounded implementation so a stalled portal releases the
-    /billing surface at ``timeout`` too (see ``_fetch_portal_account``)."""
-    from agent.account_usage import _fetch_portal_account
-    return _fetch_portal_account(timeout)
 
 
 def format_renews(value: Optional[str]) -> Optional[str]:

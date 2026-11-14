@@ -18,15 +18,17 @@ import {
   useSortable
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { LOCAL_CONNECTION_ID } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { LOCAL_CONNECTION_ID } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
+import { Loader2 } from '@noone/ui/icons'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
+import { getProfileSoul, updateProfileSoul } from '@/agent-client'
 import type { ProfileScope } from '@/api/client'
 import { CodeEditor } from '@/components/chat/code-editor'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ColorSwatches } from '@/components/ui/color-swatches'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -44,13 +46,11 @@ import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover'
 import { ProfileGlyph } from '@/components/ui/profile-glyph'
 import { Tip, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { DesktopRegistryConnection } from '@/global'
-import { getProfileSoul, updateProfileSoul } from '@/hermes'
 import { useResizeObserver } from '@/hooks/use-resize-observer'
 import { type Translations, useI18n } from '@/i18n'
 import { sortConnectionsForDisplay } from '@/lib/connection-display'
 import { triggerHaptic } from '@/lib/haptics'
 import { hostHas } from '@/lib/host-capabilities'
-import { Loader2 } from '@/lib/icons'
 import { PROFILE_SWATCHES, profileColorSoft, resolveProfileColor } from '@/lib/profile-color'
 import { profileShortLabel } from '@/lib/profile-short-label'
 import {
@@ -94,7 +94,7 @@ import {
   refreshProfileRemoteOverrides
 } from '@/store/profile-remote-override'
 import { runExportProfileFlow, runImportProfileFlow } from '@/store/profile-share'
-import type { ProfileInfo } from '@/types/hermes'
+import type { ProfileInfo } from '@/types/agent-client'
 
 import { CreateProfileDialog } from '../../profiles/create-profile-dialog'
 import { DeleteProfileDialog } from '../../profiles/delete-profile-dialog'
@@ -857,7 +857,7 @@ function AddProfileButton({ label, onClick }: { label: string; onClick: () => vo
         onClick={onClick}
         type="button"
       >
-        <Codicon name="add" size="0.75rem" />
+        <AppIcon name="add" size="0.75rem" />
       </button>
     </Tip>
   )
@@ -875,7 +875,7 @@ function ImportProfileButton({ label }: { label: string }) {
         onClick={() => void runImportProfileFlow()}
         type="button"
       >
-        <Codicon name="cloud-download" size="0.75rem" />
+        <AppIcon name="cloud-download" size="0.75rem" />
       </button>
     </Tip>
   )
@@ -945,16 +945,16 @@ function ProfileDropdown({
               <span className="truncate">{p.title}</span>
             )}
           </span>
-          <Codicon aria-hidden="true" className="shrink-0 opacity-60" name="chevron-down" size="0.875rem" />
+          <AppIcon aria-hidden="true" className="shrink-0 opacity-60" name="chevron-down" size="0.875rem" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-48 max-w-72" collisionPadding={8} side="top">
         <DropdownMenuItem onSelect={onCreate}>
-          <Codicon aria-hidden="true" name="add" size="0.875rem" />
+          <AppIcon aria-hidden="true" name="add" size="0.875rem" />
           <span className="truncate">{p.newProfile}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={onImport}>
-          <Codicon aria-hidden="true" name="cloud-download" size="0.875rem" />
+          <AppIcon aria-hidden="true" name="cloud-download" size="0.875rem" />
           <span className="truncate">{p.importProfile}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -1138,7 +1138,7 @@ function ProfilePill({
         type="button"
         variant="ghost"
       >
-        {pending ? <Loader2 className="animate-spin" /> : <Codicon name={glyph} size="0.875rem" />}
+        {pending ? <Loader2 className="animate-spin" /> : <AppIcon name={glyph} size="0.875rem" />}
         {summary && !active && (
           <span className="absolute -right-0.5 -top-0.5">
             <ProfileStatusDot summary={summary} />
@@ -1360,19 +1360,19 @@ function RestSquare({
         >
           <ProfileLaunchMenuSection connectionId={agent.connectionId} label={label} profile={agent.profile} />
           <ContextMenuItem onSelect={onSelect}>
-            <Codicon name="arrow-right" size="0.875rem" />
+            <AppIcon name="arrow-right" size="0.875rem" />
             <span className="truncate">{p.fleet.switchTo(agent.profile, agent.connectionLabel)}</span>
           </ContextMenuItem>
           <ContextMenuItem onSelect={() => setPickerOpen(true)}>
-            <Codicon name="symbol-color" size="0.875rem" />
+            <AppIcon name="symbol-color" size="0.875rem" />
             <span>{p.color}</span>
           </ContextMenuItem>
           <ContextMenuItem onSelect={onRename}>
-            <Codicon name="text-size" size="0.875rem" />
+            <AppIcon name="text-size" size="0.875rem" />
             <span>{p.renameMenu}</span>
           </ContextMenuItem>
           <ContextMenuItem onSelect={onEditSoul}>
-            <Codicon name="edit" size="0.875rem" />
+            <AppIcon name="edit" size="0.875rem" />
             <span>{p.editSoul}</span>
           </ContextMenuItem>
           <ContextMenuItem
@@ -1380,7 +1380,7 @@ function RestSquare({
             onSelect={onDelete}
             variant="destructive"
           >
-            <Codicon name="trash" size="0.875rem" />
+            <AppIcon name="trash" size="0.875rem" />
             <span>{t.common.delete}</span>
           </ContextMenuItem>
         </ContextMenuContent>
@@ -1575,7 +1575,7 @@ function ProfileSquare({
                         className="absolute -right-0.5 -top-0.5 grid size-2 place-items-center rounded-full bg-(--ui-panel-background)"
                         data-slot="profile-remote-badge"
                       >
-                        <Codicon name="globe" size="0.5rem" />
+                        <AppIcon name="globe" size="0.5rem" />
                       </span>
                     )}
                     {/* The profile's session rollup (#91710): bottom-right so it
@@ -1610,24 +1610,24 @@ function ProfileSquare({
         >
           <ProfileLaunchMenuSection connectionId={connectionId} label={label} profile={name} />
           <ContextMenuItem onSelect={() => setPickerOpen(true)}>
-            <Codicon name="symbol-color" size="0.875rem" />
+            <AppIcon name="symbol-color" size="0.875rem" />
             <span>{p.color}</span>
           </ContextMenuItem>
           <ContextMenuItem onSelect={onRename}>
-            <Codicon name="text-size" size="0.875rem" />
+            <AppIcon name="text-size" size="0.875rem" />
             <span>{p.renameMenu}</span>
           </ContextMenuItem>
           <ContextMenuItem onSelect={onEditSoul}>
-            <Codicon name="edit" size="0.875rem" />
+            <AppIcon name="edit" size="0.875rem" />
             <span>{p.editSoul}</span>
           </ContextMenuItem>
           <ContextMenuItem onSelect={() => void runExportProfileFlow(name)}>
-            <Codicon name="package" size="0.875rem" />
+            <AppIcon name="package" size="0.875rem" />
             <span>{p.exportMenu}</span>
           </ContextMenuItem>
           {onConnectRemote && (
             <ContextMenuItem onSelect={onConnectRemote}>
-              <Codicon name="globe" size="0.875rem" />
+              <AppIcon name="globe" size="0.875rem" />
               <span>{remoteHost ? p.remoteOverride.badge(remoteHost) : p.remoteOverride.menuItem}</span>
             </ContextMenuItem>
           )}
@@ -1636,7 +1636,7 @@ function ProfileSquare({
             onSelect={onDelete}
             variant="destructive"
           >
-            <Codicon name="trash" size="0.875rem" />
+            <AppIcon name="trash" size="0.875rem" />
             <span>{t.common.delete}</span>
           </ContextMenuItem>
         </ContextMenuContent>

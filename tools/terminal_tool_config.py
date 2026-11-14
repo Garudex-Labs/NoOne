@@ -58,11 +58,11 @@ def home_profile_name() -> str:
     Memoized per (home, root) path pair: the lookup resolves three paths and runs on every
     container-key resolution, several times per tool call."""
     try:
-        from hermes_cli.profiles import get_active_profile_name
-        from hermes_constants import get_default_hermes_root, get_hermes_home
+        from agent_cli.profiles import get_active_profile_name
+        from agent_constants import get_default_agent_root, get_agent_home
 
-        home = get_hermes_home()
-        key = (str(home), str(get_default_hermes_root()))
+        home = get_agent_home()
+        key = (str(home), str(get_default_agent_root()))
         if (cached := _HOME_PROFILE_NAMES.get(key)) is not None:
             return cached
         name = get_active_profile_name() or "default"
@@ -208,10 +208,10 @@ def _launch_dirs(home: str, native_home: str) -> frozenset[str]:
     """The lexical launch set for one Hermes home. The root depends on that home and the platform default home
     (``native_home``, which keys the cache too); the install root is fixed per process. Cached: the shared root
     memo holds a single entry and thrashed when called once per command."""
-    from hermes_cli._startup_fast import project_root_str
-    from hermes_constants import get_default_hermes_root
+    from agent_cli._startup_fast import project_root_str
+    from agent_constants import get_default_agent_root
 
-    root = posixpath.normpath(str(get_default_hermes_root(home=home)))
+    root = posixpath.normpath(str(get_default_agent_root(home=home)))
     return frozenset({home, root, posixpath.join(home, "home"), posixpath.join(root, "home"), project_root_str()})
 
 
@@ -221,11 +221,11 @@ def _is_container_launch_dir(path: str) -> bool:
     each, or the install root (``/opt/hermes``, as its real path). Those exist only in the container, never on
     an SSH target. The candidate is compared lexically: a symlink on this machine says nothing about the target.
     On a host they are left alone, since an SSH target may share the layout (``~/.hermes`` on an NFS home)."""
-    from hermes_constants import _get_platform_default_hermes_home, get_hermes_home, is_container
+    from agent_constants import _get_platform_default_hermes_home, get_agent_home, is_container
 
     if not is_container():
         return False
-    home = posixpath.normpath(str(get_hermes_home()))
+    home = posixpath.normpath(str(get_agent_home()))
     return posixpath.normpath(path) in _launch_dirs(home, str(_get_platform_default_hermes_home()))
 
 
@@ -257,7 +257,7 @@ def coerce_ssh_remote_cwd(cwd: str | None, env_type: str | None) -> str | None:
         return text
     if _is_container_launch_dir(text):
         return "~"
-    from hermes_constants import get_real_home, get_subprocess_home
+    from agent_constants import get_real_home, get_subprocess_home
 
     home = get_subprocess_home()
     if not home or posixpath.normpath(home) == posixpath.normpath(get_real_home()):

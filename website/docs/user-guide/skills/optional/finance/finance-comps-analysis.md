@@ -1,43 +1,51 @@
 ---
 title: "Comps Analysis — Build comparable-company valuation workbooks in Excel"
-sidebar_label: "Comps Analysis"
+sidebarTitle: "Comps Analysis"
 description: "Build comparable-company valuation workbooks in Excel"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Comps Analysis
+# Comps Analysis {#comps-analysis}
 
 Build comparable-company valuation workbooks in Excel.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/finance/comps-analysis` |
+| Source | Optional — install with `noone skills install official/finance/comps-analysis` |
 | Path | `optional-skills/finance/comps-analysis` |
 | Version | `1.0.0` |
-| Author | Anthropic (adapted by Nous Research) |
+| Author | Anthropic (adapted by Garudex Labs) |
 | License | Apache-2.0 |
 | Platforms | linux, macos, windows |
 | Tags | `finance`, `valuation`, `comps`, `excel`, `openpyxl`, `modeling`, `investment-banking` |
 | Related skills | [`excel-author`](../../optional/finance/finance-excel-author.md), [`pptx-author`](../../optional/finance/finance-pptx-author.md), [`dcf-model`](../../optional/finance/finance-dcf-model.md), [`lbo-model`](../../optional/finance/finance-lbo-model.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-## Environment
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+## Environment {#environment}
 
 This skill assumes **headless openpyxl** — you are producing an .xlsx file on disk.
 Follow the `excel-author` skill's conventions for cell coloring, formulas, named ranges, and sensitivity tables.
 Recalculate before delivery: `python /path/to/excel-author/scripts/recalc.py ./out/model.xlsx`.
 
-# Comparable Company Analysis
+# Comparable Company Analysis {#comparable-company-analysis}
 
-## ⚠️ CRITICAL: Data Source Priority (READ FIRST)
+## ⚠️ CRITICAL: Data Source Priority (READ FIRST) {#️-critical-data-source-priority-read-first}
 
 **ALWAYS follow this data source hierarchy:**
 
@@ -50,7 +58,7 @@ Recalculate before delivery: `python /path/to/excel-author/scripts/recalc.py ./o
 
 ---
 
-## Overview
+## Overview {#overview}
 This skill teaches the agent to build institutional-grade comparable company analyses that combine operating metrics, valuation multiples, and statistical benchmarking. The output is a structured Excel/spreadsheet that enables informed investment decisions through peer comparison.
 
 **Reference Material & Contextualization:**
@@ -83,14 +91,14 @@ An example comparable company analysis is provided in `examples/comps_example.xl
 
 User-provided examples and explicit preferences always take precedence over defaults.
 
-## Core Philosophy
+## Core Philosophy {#core-philosophy}
 **"Build the right structure first, then let the data tell the story."**
 
 Start with headers that force strategic thinking about what matters, input clean data, build transparent formulas, and let statistics emerge automatically. A good comp should be immediately readable by someone who didn't build it.
 
 ---
 
-## ⚠️ CRITICAL: Formulas Over Hardcodes + Step-by-Step Verification
+## ⚠️ CRITICAL: Formulas Over Hardcodes + Step-by-Step Verification {#️-critical-formulas-over-hardcodes--step-by-step-verification}
 
 **Formulas, not hardcodes:**
 - Every derived value (margin, multiple, statistic) MUST be an Excel formula referencing input cells — never a pre-computed number pasted in
@@ -107,9 +115,9 @@ Start with headers that force strategic thinking about what matters, input clean
 
 ---
 
-## Section 1: Document Structure & Setup
+## Section 1: Document Structure & Setup {#section-1-document-structure--setup}
 
-### Header Block (Rows 1-3)
+### Header Block (Rows 1-3) {#header-block-rows-1-3}
 ```
 Row 1: [ANALYSIS TITLE] - COMPARABLE COMPANY ANALYSIS
 Row 2: [List of Companies with Tickers] • [Company 1 (TICK1)] • [Company 2 (TICK2)] • [Company 3 (TICK3)]
@@ -118,7 +126,7 @@ Row 3: As of [Period] | All figures in [USD Millions/Billions] except per-share 
 
 **Why this matters:** Establishes context immediately. Anyone opening this file knows what they're looking at, when it was created, and how to interpret the numbers.
 
-### Visual Convention Standards (OPTIONAL - User preferences and uploaded templates always override)
+### Visual Convention Standards (OPTIONAL - User preferences and uploaded templates always override) {#visual-convention-standards-optional---user-preferences-and-uploaded-templates-always-override}
 
 **IMPORTANT: These are suggested defaults only. Always prioritize:**
 1. User's explicit formatting preferences
@@ -163,9 +171,9 @@ Row 3: As of [Period] | All figures in [USD Millions/Billions] except per-share 
 
 ---
 
-## Section 2: Operating Statistics & Financial Metrics
+## Section 2: Operating Statistics & Financial Metrics {#section-2-operating-statistics--financial-metrics}
 
-### Core Columns (Start with these)
+### Core Columns (Start with these) {#core-columns-start-with-these}
 1. **Company** - Names with consistent formatting
 2. **Revenue** - Size metric (can be LTM, quarterly, or annual depending on context)
 3. **Revenue Growth** - Year-over-year percentage change
@@ -174,7 +182,7 @@ Row 3: As of [Period] | All figures in [USD Millions/Billions] except per-share 
 6. **EBITDA** - Earnings before interest, tax, depreciation, amortization
 7. **EBITDA Margin** - EBITDA/Revenue (operating efficiency)
 
-### Optional Additions (Choose based on industry/purpose)
+### Optional Additions (Choose based on industry/purpose) {#optional-additions-choose-based-on-industrypurpose}
 - **Quarterly vs LTM** - Include both if seasonality matters
 - **Free Cash Flow** - For capital-intensive or SaaS businesses
 - **FCF Margin** - FCF/Revenue (cash generation efficiency)
@@ -184,7 +192,7 @@ Row 3: As of [Period] | All figures in [USD Millions/Billions] except per-share 
 - **Rule of 40** - Specifically for SaaS (Growth % + Margin %)
 - **FCF Conversion** - For quality of earnings analysis (advanced)
 
-### Formula Examples (Using Row 7 as example)
+### Formula Examples (Using Row 7 as example) {#formula-examples-using-row-7-as-example}
 ```excel
 // Core ratios - these are always calculated
 Gross Margin (F7): =E7/C7
@@ -198,7 +206,7 @@ Rule of 40: =[Growth %]+[FCF Margin %]
 
 **Golden Rule:** Every ratio should be [Something] / [Revenue] or [Something] / [Something from this sheet]. Keep it simple.
 
-### Statistics Block (After company data)
+### Statistics Block (After company data) {#statistics-block-after-company-data}
 
 **CRITICAL: Add statistics formulas for all comparable metrics (ratios, margins, growth rates, multiples).**
 
@@ -225,9 +233,9 @@ Rule of 40: =[Growth %]+[FCF Margin %]
 
 ---
 
-## Section 3: Valuation Multiples & Investment Metrics
+## Section 3: Valuation Multiples & Investment Metrics {#section-3-valuation-multiples--investment-metrics}
 
-### Core Valuation Columns (Start with these)
+### Core Valuation Columns (Start with these) {#core-valuation-columns-start-with-these}
 1. **Company** - Same order as operating section
 2. **Market Cap** - Current market valuation
 3. **Enterprise Value** - Market Cap ± Net Debt/Cash
@@ -235,7 +243,7 @@ Rule of 40: =[Growth %]+[FCF Margin %]
 5. **EV/EBITDA** - How much market pays per dollar of earnings
 6. **P/E Ratio** - Price relative to net earnings
 
-### Optional Valuation Metrics (Choose based on context)
+### Optional Valuation Metrics (Choose based on context) {#optional-valuation-metrics-choose-based-on-context}
 - **FCF Yield** - FCF/Market Cap (for cash-focused analysis)
 - **PEG Ratio** - P/E/Growth Rate (for growth companies)
 - **Price/Book** - Market value vs. book value (for asset-heavy businesses)
@@ -246,7 +254,7 @@ Rule of 40: =[Growth %]+[FCF Margin %]
 
 **Key Principle:** Include 3-5 core multiples that matter for your industry. Don't include every possible metric just because you can.
 
-### Formula Examples
+### Formula Examples {#formula-examples}
 ```excel
 // Core multiples - always include these
 EV/Revenue: =[Enterprise Value]/[LTM Revenue]
@@ -258,17 +266,17 @@ FCF Yield: =[LTM FCF]/[Market Cap]
 PEG Ratio: =[P/E]/[Growth Rate %]
 ```
 
-### Cross-Reference Rule
+### Cross-Reference Rule {#cross-reference-rule}
 **CRITICAL:** Valuation multiples MUST reference the operating metrics section. Never input the same raw data twice. If revenue is in C7, then EV/Revenue formula should reference C7.
 
-### Statistics Block
+### Statistics Block {#statistics-block}
 Same structure as operating section: Max, 75th, Median, 25th, Min for every metric. Add one blank row for visual separation between company data and statistics. Do NOT add a "VALUATION STATISTICS" header row.
 
 ---
 
-## Section 4: Notes & Methodology Documentation
+## Section 4: Notes & Methodology Documentation {#section-4-notes--methodology-documentation}
 
-### Required Components
+### Required Components {#required-components}
 
 **Data Sources & Quality:**
 - Where did the data come from? (S&P Kensho MCP, FactSet MCP, Daloopa MCP, Bloomberg, SEC filings)
@@ -294,9 +302,9 @@ Same structure as operating section: Max, 75th, Median, 25th, Min for every metr
 
 ---
 
-## Section 5: Choosing the Right Metrics (Decision Framework)
+## Section 5: Choosing the Right Metrics (Decision Framework) {#section-5-choosing-the-right-metrics-decision-framework}
 
-### Start with "What question am I answering?"
+### Start with "What question am I answering?" {#start-with-what-question-am-i-answering}
 
 **"Which company is undervalued?"**
 → Focus on: EV/Revenue, EV/EBITDA, P/E, Market Cap
@@ -314,7 +322,7 @@ Same structure as operating section: Max, 75th, Median, 25th, Min for every metr
 → Focus on: FCF, FCF Margin, FCF Conversion, CapEx intensity
 → Skip: EBITDA, P/E ratios
 
-### Industry-Specific Metric Selection
+### Industry-Specific Metric Selection {#industry-specific-metric-selection}
 
 **Software/SaaS:**
 Must have: Revenue Growth, Gross Margin, Rule of 40
@@ -336,7 +344,7 @@ Must have: Revenue Growth, Gross Margin, Inventory Turnover
 Optional: Same-Store Sales, Customer Acquisition Cost
 Skip: Heavy R&D or CapEx metrics
 
-### The "5-10 Rule"
+### The "5-10 Rule" {#the-5-10-rule}
 
 **5 operating metrics** - Revenue, Growth, 2-3 margins/efficiency metrics
 **5 valuation metrics** - Market Cap, EV, 3 multiples
@@ -346,15 +354,15 @@ If you have more than 15 metrics, you're probably including noise. Edit ruthless
 
 ---
 
-## Section 6: Best Practices & Quality Checks
+## Section 6: Best Practices & Quality Checks {#section-6-best-practices--quality-checks}
 
-### Before You Start
+### Before You Start {#before-you-start}
 1. **Define the peer group** - Companies must be truly comparable (similar business model, scale, geography)
 2. **Choose the right period** - LTM smooths seasonality; quarterly shows trends
 3. **Standardize units upfront** - Millions vs. billions decision affects everything
 4. **Map data sources** - Know where each number comes from
 
-### As You Build
+### As You Build {#as-you-build}
 1. **Input all raw data first** - Complete the blue text before writing formulas
 2. **Add cell comments to ALL hard-coded inputs** - Right-click cell → Insert Comment → Document source OR assumption
 
@@ -375,7 +383,7 @@ If you have more than 15 metrics, you're probably including noise. Edit ruthless
 5. **Format consistently** - Percentages as percentages, not decimals
 6. **Add conditional formatting** - Highlight outliers automatically
 
-### Sanity Checks
+### Sanity Checks {#sanity-checks}
 - **Margin test**: Gross margin > EBITDA margin > Net margin (always true by definition)
 - **Multiple reasonableness**: 
   - EV/Revenue: typically 0.5-20x (varies widely by industry)
@@ -384,7 +392,7 @@ If you have more than 15 metrics, you're probably including noise. Edit ruthless
 - **Growth-multiple correlation**: Higher growth usually means higher multiples
 - **Size-efficiency trade-off**: Larger companies often have better margins (scale benefits)
 
-### Common Mistakes to Avoid
+### Common Mistakes to Avoid {#common-mistakes-to-avoid}
 ❌ Mixing market cap and enterprise value in formulas
 ❌ Using different time periods for numerator and denominator (LTM vs quarterly)
 ❌ Hardcoding numbers into formulas instead of cell references
@@ -397,15 +405,15 @@ If you have more than 15 metrics, you're probably including noise. Edit ruthless
 
 ---
 
-## Section 6: Advanced Features
+## Section 6: Advanced Features {#section-6-advanced-features}
 
-### Dynamic Headers
+### Dynamic Headers {#dynamic-headers}
 For columns showing calculations, use clear unit labels:
 ```
 Revenue Growth (YoY) % | EBITDA Margin | FCF Margin | Rule of 40
 ```
 
-### Quartile Analysis Benefits
+### Quartile Analysis Benefits {#quartile-analysis-benefits}
 Instead of just mean/median, quartiles show:
 - **75th percentile** = "Premium" companies trade here
 - **Median** = Typical market valuation
@@ -413,7 +421,7 @@ Instead of just mean/median, quartiles show:
 
 This helps answer: "Is our target company trading rich or cheap vs. peers?"
 
-### Industry-Specific Modifications
+### Industry-Specific Modifications {#industry-specific-modifications}
 
 **Software/SaaS:**
 - Add: ARR, Net Dollar Retention, CAC Payback Period
@@ -433,9 +441,9 @@ This helps answer: "Is our target company trading rich or cheap vs. peers?"
 
 ---
 
-## Section 7: Workflow & Practical Tips
+## Section 7: Workflow & Practical Tips {#section-7-workflow--practical-tips}
 
-### Step-by-Step Process
+### Step-by-Step Process {#step-by-step-process}
 1. **Set up structure** (30 minutes)
    - Create all headers
    - Format cells (blue for inputs, black for formulas)
@@ -468,14 +476,14 @@ This helps answer: "Is our target company trading rich or cheap vs. peers?"
    - Define methodologies
    - Date-stamp the analysis
 
-### Pro Tips
+### Pro Tips {#pro-tips}
 - **Save templates**: Build once, reuse forever
 - **Color-code outliers**: Conditional formatting for values >2 standard deviations
 - **Link to source files**: Hyperlink to Bloomberg screenshots or SEC filings
 - **Version control**: Save as "Comps_v1_2024-12-15" with clear dating
 - **Collaborative reviews**: Have someone else check your formulas
 
-### Excel Formatting Checklist (Optional - adapt to user preferences)
+### Excel Formatting Checklist (Optional - adapt to user preferences) {#excel-formatting-checklist-optional---adapt-to-user-preferences}
 - [ ] Font set to user's preferred style (default: Times New Roman, 11pt data, 12pt headers)
 - [ ] Section headers formatted per user's template (default: dark blue #17365D with white bold text)
 - [ ] Column headers formatted per user's template (default: light blue/gray #D9E2F3 with black bold text)
@@ -492,10 +500,10 @@ This helps answer: "Is our target company trading rich or cheap vs. peers?"
 
 ---
 
-## Section 8: Example Template Layout
+## Section 8: Example Template Layout {#section-8-example-template-layout}
 
 **Simple Version (Start here):**
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ TECHNOLOGY - COMPARABLE COMPANY ANALYSIS                    │
@@ -528,7 +536,7 @@ This helps answer: "Is our target company trading rich or cheap vs. peers?"
 │ 25th %   │ =QUART   │ =QUART   │ =QUART   │ =QUART    │=QRT│
 └──────────┴──────────┴──────────┴──────────┴───────────┴────┘
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
 **Add complexity only when needed:**
 - Include quarterly AND LTM if seasonality matters
@@ -538,7 +546,7 @@ This helps answer: "Is our target company trading rich or cheap vs. peers?"
 
 ---
 
-## Section 9: Industry-Specific Additions (Optional)
+## Section 9: Industry-Specific Additions (Optional) {#section-9-industry-specific-additions-optional}
 
 Only add these if they're critical to your analysis. Most comps work fine with just core metrics.
 
@@ -559,19 +567,19 @@ Add if relevant: Asset Turnover, Inventory Turns, Backlog
 
 ---
 
-## Section 10: Red Flags & Warning Signs
+## Section 10: Red Flags & Warning Signs {#section-10-red-flags--warning-signs}
 
-### Data Quality Issues
+### Data Quality Issues {#data-quality-issues}
 🚩 Inconsistent time periods (mixing quarterly and annual)  
 🚩 Missing data without explanation  
 🚩 Significant differences between data sources (>10% variance)
 
-### Valuation Red Flags
+### Valuation Red Flags {#valuation-red-flags}
 🚩 Negative EBITDA companies being valued on EBITDA multiples (use revenue multiples instead)  
 🚩 P/E ratios >100x without hypergrowth story  
 🚩 Margins that don't make sense for the industry
 
-### Comparability Issues
+### Comparability Issues {#comparability-issues}
 🚩 Different fiscal year ends (causes timing problems)  
 🚩ixing pure-play and conglomerates  
 🚩 Materially different business models labeled as "comps"
@@ -580,9 +588,9 @@ Add if relevant: Asset Turnover, Inventory Turns, Backlog
 
 ---
 
-## Section 11: Formulas Reference Guide
+## Section 11: Formulas Reference Guide {#section-11-formulas-reference-guide}
 
-### Essential Excel Formulas
+### Essential Excel Formulas {#essential-excel-formulas}
 ```excel
 // Statistical Functions
 =AVERAGE(range)          // Simple mean
@@ -609,7 +617,7 @@ Add if relevant: Asset Turnover, Inventory Turns, Backlog
 =TEXT(C7, "#,##0")       // Thousands separator
 ```
 
-### Common Ratio Formulas
+### Common Ratio Formulas {#common-ratio-formulas}
 ```excel
 Gross Margin = Gross Profit / Revenue
 EBITDA Margin = EBITDA / Revenue
@@ -623,7 +631,7 @@ Debt/Equity = Total Debt / Shareholders' Equity
 
 ---
 
-## Key Principles Summary
+## Key Principles Summary {#key-principles-summary}
 
 1. **Structure drives insight** - Right headers force right thinking
 2. **Less is more** - 5-10 metrics that matter beat 20 that don't
@@ -635,7 +643,7 @@ Debt/Equity = Total Debt / Shareholders' Equity
 
 ---
 
-## Output Checklist
+## Output Checklist {#output-checklist}
 
 Before delivering a comp analysis, verify:
 - [ ] All companies are truly comparable
@@ -653,7 +661,7 @@ Before delivering a comp analysis, verify:
 
 ---
 
-## Continuous Improvement
+## Continuous Improvement {#continuous-improvement}
 
 After completing a comp analysis, ask:
 1. Did the statistics reveal unexpected insights?
@@ -665,11 +673,11 @@ After completing a comp analysis, ask:
 The best comp analyses evolve with each iteration. Save templates, learn from feedback, and refine the structure based on what decision-makers actually use.
 
 
-## Data sources — MCP first, web fallback
+## Data sources — MCP first, web fallback {#data-sources--mcp-first-web-fallback}
 
-Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Those are commercial financial-data MCPs from the original Cowork plugin context. In Hermes:
+Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Those are commercial financial-data MCPs from the original Cowork plugin context. In {{app-name}}:
 
-- **If you have any structured financial-data MCP configured** (Hermes supports MCP — see `native-mcp` skill), prefer it for point-in-time comps, precedent transactions, and filings.
+- **If you have any structured financial-data MCP configured** ({{app-name}} supports MCP — see `native-mcp` skill), prefer it for point-in-time comps, precedent transactions, and filings.
 - **Otherwise**, fall back to:
   - `web_search` / `web_extract` against SEC EDGAR (`https://www.sec.gov/cgi-bin/browse-edgar`) for US filings
   - Company IR pages for press releases, earnings decks
@@ -677,6 +685,6 @@ Many passages below say "use the S&P Kensho MCP / Daloopa MCP / FactSet MCP". Th
   - User-provided data (explicitly ask when the context doesn't have it)
 - **Never fabricate**. If a multiple, precedent, or filing number can't be sourced, flag the cell as `[UNSOURCED]` and surface it to the user.
 
-## Attribution
+## Attribution {#attribution}
 
 This skill is adapted from Anthropic's Claude for Financial Services plugin suite (Apache-2.0). The Office-JS / Cowork live-Excel paths have been removed; this version targets headless openpyxl via the `excel-author` skill's conventions. Original: https://github.com/anthropics/financial-services

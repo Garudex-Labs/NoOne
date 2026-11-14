@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { $desktopOnboarding, type DesktopOnboardingState, type OnboardingContext } from '@/store/onboarding'
 import { makeOAuthProvider } from '@/test/oauth-provider'
-import type { OAuthProvider } from '@/types/hermes'
+import type { OAuthProvider } from '@/types/agent-client'
 
 import { ApiKeyForm, Picker } from '.'
 

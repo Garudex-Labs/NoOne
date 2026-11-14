@@ -2,6 +2,8 @@
 
 import { type ToolCallMessagePartProps, useAuiState } from '@assistant-ui/react'
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertCircle, CheckCircle2 } from '@noone/ui/icons'
 import { motion, useReducedMotion } from 'motion/react'
 import {
   Children,
@@ -34,7 +36,6 @@ import {
   ScaffoldRow
 } from '@/components/chat/scaffold-row'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { CopyButton } from '@/components/ui/copy-button'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import { FadeText } from '@/components/ui/fade-text'
@@ -44,7 +45,6 @@ import { ToolIcon } from '@/components/ui/tool-icon'
 import { useI18n } from '@/i18n'
 import { connectorCalls, mcpTargets } from '@/lib/connector-tools'
 import { PrettyLink, LinkifiedText as SharedLinkifiedText, urlSlugTitleLabel } from '@/lib/external-link'
-import { AlertCircle, CheckCircle2 } from '@/lib/icons'
 import { toolResultRecord } from '@/lib/tool-result-metadata'
 import { useEnterAnimation } from '@/lib/use-enter-animation'
 import { cn } from '@/lib/utils'
@@ -590,7 +590,7 @@ function ToolEntry({ part }: ToolEntryProps) {
       type="button"
       variant="ghost"
     >
-      <Codicon name="close" size="0.75rem" />
+      <AppIcon name="close" size="0.75rem" />
     </Button>
   ) : undefined
 

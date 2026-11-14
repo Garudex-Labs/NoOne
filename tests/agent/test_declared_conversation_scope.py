@@ -21,7 +21,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from agent.portal_tags import (
+from agent.conversation_scope import (
     get_affinity_scope,
     reset_affinity_scope,
     reset_conversation_context,
@@ -34,7 +34,7 @@ from agent.prompt_cache_scope import (
     resolve_prompt_cache_scope,
 )
 from agent.transports.codex import _cache_scope_from_session_id, _content_cache_key
-from hermes_state import SessionDB
+from agent_state import SessionDB
 
 # One room member, two consecutive replies: the Studio group-chat shape
 # (``gc_run_<room>_<profile>_<name>`` truncated to 96 chars + a per-response
@@ -229,7 +229,7 @@ class TestOneIdentityReadPerResolution:
 
     Resolution is memoized per transcript segment, so this was never on the
     per-API-call hot path (#79017) — but reading the same row twice per
-    resolution was one read too many (@teknium1 on #98811), and a ``SessionDB``
+    resolution was one read too many (#98811), and a ``SessionDB``
     that predates the combined view has to keep the path it had.
     """
 

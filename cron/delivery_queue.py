@@ -22,8 +22,8 @@ from typing import Any, Callable, Iterator, Optional
 from agent.deadline import poll_until
 from agent.redact import redact_sensitive_text
 from cron.executions import _owner_is_live, _process_start_time
-from hermes_constants import get_hermes_home
-from hermes_time import now as _hermes_now
+from agent_constants import get_agent_home
+from agent_time import now as _hermes_now
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ def queue_path(home: Optional[Path] = None) -> Path:
     """The queue file of ``home`` (the active home when None); a test override wins."""
     if DELIVERY_DB is not None:
         return DELIVERY_DB
-    root = Path(home) if home is not None else get_hermes_home()
+    root = Path(home) if home is not None else get_agent_home()
     return root.resolve() / "cron" / "deliveries.db"
 
 
@@ -87,60 +87,15 @@ def _path() -> Path:
 
 
 def _initialize_schema(conn: sqlite3.Connection) -> None:
-    from hermes_cli.sqlite_util import add_column_if_missing
-
-    # SQLite cannot widen a CHECK in place. Preserve all old rows atomically,
-    # including claimed sends, while admitting a distinct never-sent disposition.
-    for table in ("deliveries", "delivery_tombstones"):
-        row = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone()
-        if row and "'suppressed'" not in row[0]:
-            conn.execute("SAVEPOINT notification_disposition")
-            try:
-                conn.execute(f"ALTER TABLE {table} RENAME TO {table}_old")
-                conn.execute(row[0].replace("'unknown'", "'unknown','suppressed'"))
-                conn.execute(f"INSERT INTO {table} SELECT * FROM {table}_old")
-                conn.execute(f"DROP TABLE {table}_old")
-                conn.execute("RELEASE notification_disposition")
-            except BaseException:
-                conn.execute("ROLLBACK TO notification_disposition")
-                conn.execute("RELEASE notification_disposition")
-                raise
-
-    conn.execute(
-        """CREATE TABLE IF NOT EXISTS deliveries (
-             execution_id TEXT PRIMARY KEY,
-             job_json TEXT NOT NULL,
-             content TEXT NOT NULL,
-             for_failure INTEGER NOT NULL DEFAULT 0,
-             status TEXT NOT NULL CHECK(status IN
-               ('pending','delivering','delivered','failed','unknown','suppressed')),
-             owner_process_id TEXT,
-             owner_pid INTEGER,
-             owner_started_at INTEGER,
-             created_at TEXT NOT NULL,
-             finished_at TEXT,
-             error TEXT
-           )"""
-    )
-    conn.execute(
-        """CREATE TABLE IF NOT EXISTS delivery_tombstones (
-             execution_id TEXT PRIMARY KEY,
-             terminal_status TEXT NOT NULL CHECK(terminal_status IN
-               ('delivered','failed','unknown','suppressed')),
-             finished_at TEXT
-           )"""
-    )
-    add_column_if_missing(
-        conn, "deliveries", "for_failure",
-        "for_failure INTEGER NOT NULL DEFAULT 0",
-    )
+    from agent_cli.database_migrations import initialize_database
+    initialize_database(conn, "cron_delivery")
 
 
 def _connect() -> sqlite3.Connection:
     # Late imports: a scheduler daemon that outlives an on-disk upgrade already has the OLD
-    # ``hermes_cli.sqlite_util`` / ``cron.jobs`` cached, so new names must be resolved at call time,
+    # ``agent_cli.sqlite_util`` / ``cron.jobs`` cached, so new names must be resolved at call time,
     # not at import time (the guarantee cron/ledger.py used to carry, see e24c8499).
-    from hermes_cli.sqlite_util import open_db
+    from agent_cli.sqlite_util import open_db
 
     path = _path()
     conn = open_db(path, db_label="cron/deliveries.db", synchronous_full=True, initialize=_initialize_schema)
@@ -156,7 +111,7 @@ def _transaction() -> Iterator[sqlite3.Connection]:
     # Pruning is done explicitly by the paths that create terminal
     # rows (_finish / recover_abandoned / _terminalize_wait_timeout);
     # read-only polls must not pay for a full-table UPDATE + COUNT.
-    from hermes_cli.sqlite_util import transaction
+    from agent_cli.sqlite_util import transaction
 
     with _lock, transaction(_connect()) as conn:
         yield conn

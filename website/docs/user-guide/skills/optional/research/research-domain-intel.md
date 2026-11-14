@@ -1,39 +1,47 @@
 ---
 title: "Domain Intel — Passive recon of subdomains, SSL certs, WHOIS, and DNS"
-sidebar_label: "Domain Intel"
+sidebarTitle: "Domain Intel"
 description: "Passive recon of subdomains, SSL certs, WHOIS, and DNS"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Domain Intel
+# Domain Intel {#domain-intel}
 
 Passive recon of subdomains, SSL certs, WHOIS, and DNS.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/domain-intel` |
+| Source | Optional — install with `noone skills install official/research/domain-intel` |
 | Path | `optional-skills/research/domain-intel` |
 | Version | `1.0.0` |
-| Author | FurkanL0, Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Domains`, `OSINT`, `DNS`, `Research` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Domain Intelligence — Passive OSINT
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Domain Intelligence — Passive OSINT {#domain-intelligence--passive-osint}
 
 Passive domain reconnaissance using only Python stdlib.
 **Zero dependencies. Zero API keys. Works on Linux, macOS, and Windows.**
 
-## Helper script
+## Helper script {#helper-script}
 
 This skill includes `scripts/domain_intel.py` — a complete CLI tool for all domain intelligence operations.
 
@@ -60,7 +68,7 @@ python SKILL_DIR/scripts/domain_intel.py bulk example.com github.com --checks ss
 
 `SKILL_DIR` is the directory containing this SKILL.md file. All output is structured JSON.
 
-## Available commands
+## Available commands {#available-commands}
 
 | Command | What it does | Data source |
 |---------|-------------|-------------|
@@ -71,7 +79,7 @@ python SKILL_DIR/scripts/domain_intel.py bulk example.com github.com --checks ss
 | `available` | Check if domain is registered | DNS + WHOIS + SSL signals |
 | `bulk` | Run multiple checks on multiple domains | All of the above |
 
-## When to use this vs built-in tools
+## When to use this vs built-in tools {#when-to-use-this-vs-built-in-tools}
 
 - **Use this skill** for infrastructure questions: subdomains, SSL certs, WHOIS, DNS records, availability
 - **Use `web_search`** for general research about what a domain/company does
@@ -89,7 +97,7 @@ python SKILL_DIR/scripts/domain_intel.py bulk example.com github.com --checks ss
 | "Who registered this domain?" | **This skill** | WHOIS data not in web search |
 | "Is coolstartup.io available?" | **This skill** | Passive availability via DNS+WHOIS+SSL |
 
-## Platform compatibility
+## Platform compatibility {#platform-compatibility}
 
 Pure Python stdlib (`socket`, `ssl`, `urllib`, `json`, `concurrent.futures`).
 Works identically on Linux, macOS, and Windows with no dependencies.
@@ -99,7 +107,7 @@ Works identically on Linux, macOS, and Windows with no dependencies.
 - **DNS queries** use Google DoH (HTTPS) for MX/NS/TXT — firewall-friendly
 - **SSL checks** connect to the target on port 443 — the only "active" operation
 
-## Data sources
+## Data sources {#data-sources}
 
 All queries are **passive** — no port scanning, no vulnerability testing:
 
@@ -109,7 +117,7 @@ All queries are **passive** — no port scanning, no vulnerability testing:
 - **System DNS** — A/AAAA record resolution
 - **SSL check** is the only "active" operation (TCP connection to target:443)
 
-## Notes
+## Notes {#notes}
 
 - WHOIS queries use TCP port 43 — may be blocked on restrictive networks
 - Some WHOIS servers redact registrant info (GDPR) — mention this to the user

@@ -1,35 +1,43 @@
 ---
 title: "Grill Me — Adversarial plan interview before implementation"
-sidebar_label: "Grill Me"
+sidebarTitle: "Grill Me"
 description: "Adversarial plan interview before implementation"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Grill Me
+# Grill Me {#grill-me}
 
 Adversarial plan interview before implementation.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/software-development/grill-me` |
+| Source | Optional — install with `noone skills install official/software-development/grill-me` |
 | Path | `optional-skills/software-development/grill-me` |
 | Version | `2.0.0` |
-| Author | Rafael Zendron (rafaumeu) + Matt Pocock (mattpocock/skills, grilling) + Hermes Agent |
+| Author | Rafael Zendron (rafaumeu) + Matt Pocock (mattpocock/skills, grilling) + {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `planning`, `adversarial`, `interview`, `decision-tree`, `pre-implementation`, `review`, `alignment` |
 | Related skills | [`requesting-code-review`](../../bundled/software-development/software-development-requesting-code-review.md), [`subagent-driven-development`](../../optional/software-development/software-development-subagent-driven-development.md), [`test-driven-development`](../../bundled/software-development/software-development-test-driven-development.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Grill Me
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Grill Me {#grill-me-1}
 
 Stress-tests a plan through structured adversarial questioning before any
 code is written. Models the plan as a **design tree** — every decision
@@ -39,7 +47,7 @@ rounds until every branch is resolved and nothing is silently assumed.
 Combines the phase discipline of the original with the frontier-rounds
 mechanic from mattpocock/skills' `grilling`.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User says "grill me", "interview my plan", "stress test this idea"
 - Before complex work: auth flows, schema changes, migrations, payments
@@ -49,11 +57,11 @@ mechanic from mattpocock/skills' `grilling`.
 Do NOT use for existing code (use `requesting-code-review`) or simple one-off
 tasks.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 None. The skill works on any plan or raw idea.
 
-## Core Mechanic: Frontier Rounds
+## Core Mechanic: Frontier Rounds {#core-mechanic-frontier-rounds}
 
 Map the plan as a design tree. The **frontier** is every decision whose
 prerequisites are already settled — the questions you can ask NOW without
@@ -85,7 +93,7 @@ subagent via `delegate_task` for a heavy exploration. Never ask the user for
 anything you could look up. Don't block on an exploration: only the questions
 downstream of it wait; ask the rest of the frontier now.
 
-## Question Coverage (work these branches into the tree)
+## Question Coverage (work these branches into the tree) {#question-coverage-work-these-branches-into-the-tree}
 
 **Understanding** — the real goal and boundaries:
 - What is the ACTUAL objective? What is explicitly IN and OUT of scope?
@@ -101,7 +109,7 @@ downstream of it wait; ask the rest of the frontier now.
 - "What happens if the user does Z?" / "What if dependency X goes down?"
 - "What if volume is 100x expected?" / "What are the security implications?"
 
-## Synthesis (when the frontier is empty)
+## Synthesis (when the frontier is empty) {#synthesis-when-the-frontier-is-empty}
 
 1. Summarize ALL decisions in bullet points
 2. List anything left open, and what is explicitly OUT of scope
@@ -109,12 +117,12 @@ downstream of it wait; ask the rest of the frontier now.
 
 Do not act on the plan until the user confirms shared understanding.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 1. **Asking questions out of dependency order.** A question that depends on
    an unanswered question is a guess wearing a question mark. Keep it for a
    later round.
-2. **Skipping the codebase.** Find facts in code with Hermes tools instead of
+2. **Skipping the codebase.** Find facts in code with {{app-name}} tools instead of
    asking the user.
 3. **Accepting "I don't know" as final.** Suggest options, explain
    trade-offs, make a recommendation.
@@ -125,7 +133,7 @@ Do not act on the plan until the user confirms shared understanding.
 6. **Not adapting to the user's language.** Interview in whatever language
    the user speaks.
 
-## Verification
+## Verification {#verification}
 
 - [ ] Every question in a round had all its prerequisites already settled
 - [ ] Provided a recommendation with each question

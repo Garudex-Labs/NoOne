@@ -1,12 +1,12 @@
 <#
-  Smoke test for hermes-update-rehearsal.ps1 (this directory).
+  Smoke test for agent-update-rehearsal.ps1 (this directory).
   Builds a synthetic install in a temp tree and drives pre/post/status for real.
 #>
 [CmdletBinding()]
 param()
 $ErrorActionPreference = 'Stop'
 
-$Script = Join-Path $PSScriptRoot 'hermes-update-rehearsal.ps1'
+$Script = Join-Path $PSScriptRoot 'agent-update-rehearsal.ps1'
 # A python is needed for the sqlite assertions. Prefer an explicit checkout, then
 # a hermes-agent checkout next to this kit (the usual layout while developing).
 $Checkout = $env:HERMES_REHEARSAL_CHECKOUT
@@ -194,7 +194,7 @@ con.close()
   Set-Content -LiteralPath (Join-Path $Install 'module_name.py') -Value 'print(1)'
   & git -C $Install add -A | Out-Null
   & git -C $Install -c commit.gpgsign=false commit -qm initial | Out-Null
-  & git -C $Install remote add origin https://github.com/NousResearch/hermes-agent.git
+  & git -C $Install remote add origin https://github.com/Garudex-Labs/NoOne.git
   New-Item -ItemType Directory -Force -Path (Join-Path $Install '.hermes\bin'), (Join-Path $Install '.hermes-runtime\python') | Out-Null
   Set-Content -LiteralPath (Join-Path $Install '.hermes\bin\hermes.cmd') -Value "@echo off`r`necho hermes 0.0.0"
   Set-Content -LiteralPath (Join-Path $Install '.hermes-runtime\python\interpreter.bin') -Value 'big'
@@ -285,7 +285,7 @@ try {
   Check 'PM store restored' (Test-Path -LiteralPath (Join-Path $Install '.hermes-runtime\python\interpreter.bin'))
   Check 'checkout restored' (Test-Path -LiteralPath (Join-Path $Install '.git'))
   Check 'checkout HEAD restored' (((& git -C $Install rev-parse HEAD | Out-String).Trim()) -eq $HeadSha)
-  Check 'origin remote restored' (((& git -C $Install config --get remote.origin.url | Out-String).Trim()) -eq 'https://github.com/NousResearch/hermes-agent.git')
+  Check 'origin remote restored' (((& git -C $Install config --get remote.origin.url | Out-String).Trim()) -eq 'https://github.com/Garudex-Labs/NoOne.git')
   Check 'userData connection.json restored' (Test-Path -LiteralPath (Join-Path $env:HERMES_DESKTOP_USER_DATA_DIR 'connection.json'))
   $cfg2 = (& git -C $Install config --local --get-regexp 'insteadOf' 2>$null | Out-String)
   if (-not $cfg2) { $cfg2 = '' }

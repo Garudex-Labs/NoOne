@@ -353,7 +353,7 @@ class TestBomHandling:
         # provider path whose pre_content is BOM-STRIPPED (read_file_raw
         # strips before _apply_update forwards it), so it regresses if
         # _file_has_bom ever trusts pre_content instead of probing disk.
-        # Regression for teknium1's review on PR #55661.
+        # Regression for the review on PR #55661.
         target = tmp_path / "bom_v4a.py"
         target.write_bytes(self.BOM.encode("utf-8") + b"print('hello')\n")
         patch = (
@@ -614,7 +614,7 @@ class TestBomHandling:
 class TestProtectedInstructionFiles:
     """Writes to agent-instruction files ALWAYS require approval.
 
-    AGENTS.md / CLAUDE.md / SOUL.md / .cursorrules / project-local .hermes
+    AGENTS.md / CLAUDE.md / SOUL.md / .cursorrules / project-local .noone
     config steer future agent behavior, so a prompt-injected agent writing
     them is a persistence vector. The gate must ask the human every time —
     even under yolo/auto-approve — and fail closed when no human channel
@@ -898,7 +898,7 @@ class TestProtectedInstructionFiles:
         """
         import tools.approval as A
         from tools import approval_context
-        from tui_gateway.server import _approval_request_payload
+        from agent_backend.server import _approval_request_payload
 
         session_key = "protected-files-payload-session"
         token = approval_context.set_current_session_key(session_key)
@@ -969,18 +969,18 @@ class TestProfileHomeExemptsHermesRoot:
         """Under a named profile bound by the per-turn scope (multiplex path), the ROOT's own store is
         not project-local ``.hermes`` config: the write lands with no approval prompt."""
         import tools.file_tools_write_guards as ft
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+        from agent_constants import reset_agent_home_override, set_agent_home_override
 
         root, profile = self._profile_layout(tmp_path)
         monkeypatch.delenv("HERMES_HOME", raising=False)
-        token = set_hermes_home_override(str(profile))
+        token = set_agent_home_override(str(profile))
         try:
             assert os.path.realpath(str(root)) in ft._hermes_exempt_homes()
             for name in ("LEDGER.md", "MEMORY.md", "SOUL.md", "AGENTS.md"):
                 assert ft._protected_instruction_reason(str(root / name)) is None, name
             res = self._write(root / "LEDGER.md", "caliber fixed")
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         assert not res.get("error"), res
         assert (root / "LEDGER.md").read_text(encoding="utf-8") == "caliber fixed"
         assert approvals["calls"] == []
@@ -990,31 +990,31 @@ class TestProfileHomeExemptsHermesRoot:
         protected basenames stay gated (fail-closed, unwritten), and a coincidental
         ``.../profiles/<name>`` tree that is NOT a Hermes root never exempts its parent."""
         import tools.file_tools_write_guards as ft
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+        from agent_constants import reset_agent_home_override, set_agent_home_override
 
         _root, profile = self._profile_layout(tmp_path)
         repo = tmp_path / "repo"
         (repo / ".hermes").mkdir(parents=True)
         monkeypatch.delenv("HERMES_HOME", raising=False)
-        token = set_hermes_home_override(str(profile))
+        token = set_agent_home_override(str(profile))
         try:
             assert ft._protected_instruction_reason(str(repo / ".hermes" / "config.yaml"))
             assert ft._protected_instruction_reason(str(repo / "AGENTS.md")) == "AGENTS.md"
             target = repo / ".hermes" / "config.yaml"
             res = self._write(target, "gate: off\n")
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         assert res.get("error") and "BLOCKED" in res["error"]
         assert not target.exists()
         assert len(approvals["calls"]) == 1
 
         fake_profile = tmp_path / "not-a-hermes-root" / "profiles" / "worker"
         fake_profile.mkdir(parents=True)
-        token = set_hermes_home_override(str(fake_profile))
+        token = set_agent_home_override(str(fake_profile))
         try:
             assert ft._hermes_exempt_homes() == (os.path.realpath(str(fake_profile)),)
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
 
 
 class TestMultiplexProfileWriteGuardsAreProfileScoped:
@@ -1036,45 +1036,45 @@ class TestMultiplexProfileWriteGuardsAreProfileScoped:
 
     def test_home_getter_tracks_active_profile_after_a_prior_scope(self, tmp_path):
         import tools.file_tools_write_guards as ft
-        from hermes_constants import (
-            reset_hermes_home_override,
-            set_hermes_home_override,
+        from agent_constants import (
+            reset_agent_home_override,
+            set_agent_home_override,
         )
 
         a, b = self._profiles(tmp_path)
         # A normal alpha turn resolves (and, on the buggy path, would freeze) home.
-        tok = set_hermes_home_override(str(a))
+        tok = set_agent_home_override(str(a))
         try:
             assert ft._get_real_hermes_home() == os.path.realpath(str(a))
         finally:
-            reset_hermes_home_override(tok)
+            reset_agent_home_override(tok)
         # The next turn is beta — the getter must now return beta's home, not alpha's.
-        tok = set_hermes_home_override(str(b))
+        tok = set_agent_home_override(str(b))
         try:
             assert ft._get_real_hermes_home() == os.path.realpath(str(b))
         finally:
-            reset_hermes_home_override(tok)
+            reset_agent_home_override(tok)
 
     def test_config_hard_block_refuses_beta_config_even_after_alpha_turn(self, tmp_path):
         """End-to-end: the ``config.yaml`` hard-block must fire for beta's own
         config under beta's scope, regardless of alpha having run first."""
         import tools.file_tools_write_guards as ft
-        from hermes_constants import (
-            reset_hermes_home_override,
-            set_hermes_home_override,
+        from agent_constants import (
+            reset_agent_home_override,
+            set_agent_home_override,
         )
 
         a, b = self._profiles(tmp_path)
-        tok = set_hermes_home_override(str(a))
+        tok = set_agent_home_override(str(a))
         try:
             ft._get_hermes_config_resolved()  # warm the (formerly poisoning) alpha lookup
         finally:
-            reset_hermes_home_override(tok)
+            reset_agent_home_override(tok)
 
-        tok = set_hermes_home_override(str(b))
+        tok = set_agent_home_override(str(b))
         try:
             err = ft._check_sensitive_path(str(b / "config.yaml"), "default")
         finally:
-            reset_hermes_home_override(tok)
+            reset_agent_home_override(tok)
         assert err is not None
         assert "Refusing to write to Hermes config file" in err

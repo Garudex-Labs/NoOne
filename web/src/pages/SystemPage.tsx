@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
+import { appText } from '@noone/shared/application-identity';
 import {
   Activity,
   Brain,
@@ -26,53 +25,56 @@ import {
   Trash2,
   Upload,
   X,
-} from "lucide-react";
+} from "@noone/ui/icons";
+import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
 import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { H2 } from "@nous-research/ui/ui/components/typography/h2";
 import { Card, CardContent } from "@nous-research/ui/ui/components/card";
 import { Checkbox } from "@nous-research/ui/ui/components/checkbox";
+import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
 import { Input } from "@nous-research/ui/ui/components/input";
 import { Label } from "@nous-research/ui/ui/components/label";
 import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
 import { Toast } from "@nous-research/ui/ui/components/toast";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
-import { ConfirmDialog } from "@nous-research/ui/ui/components/confirm-dialog";
-import { useModalBehavior } from "@/hooks/useModalBehavior";
+import { H2 } from "@nous-research/ui/ui/components/typography/h2";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router";
+
+import { AgentConsoleModal } from "@/components/AgentConsoleModal";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
-import { HermesConsoleModal } from "@/components/HermesConsoleModal";
-import { cn, themedBody } from "@/lib/utils";
+import { useAppName } from '@/hooks/useAppName';
+import { useModalBehavior } from "@/hooks/useModalBehavior";
 import { useI18n } from "@/i18n";
 import { api } from "@/lib/api";
+import type {
+  CheckpointsResponse,
+  CredentialPoolProvider,
+  CuratorStatus,
+  DebugShareResponse,
+  GatewayMigratePlan,
+  HookEntry,
+  HooksResponse,
+  MemoryProviderInfo,
+  MemoryStatus,
+  PortalStatus,
+  StatusResponse,
+  SystemStats,
+  UpdateCheckResponse,
+} from "@/lib/api";
+import { apiErrorFromResponse, errorMessage } from "@/lib/api-error";
 import { copyTextToClipboard } from "@/lib/clipboard";
 import {
-  gatewayStateNeedsLogs,
-  gatewayStateDescription,
   gatewayActionFailedMessage,
+  gatewayStateDescription,
+  gatewayStateNeedsLogs,
   servedProfileRefusal,
   sharedGatewayProfiles,
   sharedGatewayRestartDescription,
   sharedGatewayRestartedMessage,
 } from "@/lib/shared-gateway";
-import type {
-  StatusResponse,
-  MemoryStatus,
-  MemoryProviderInfo,
-  CredentialPoolProvider,
-  CheckpointsResponse,
-  HooksResponse,
-  HookEntry,
-  SystemStats,
-  UpdateCheckResponse,
-  CuratorStatus,
-  PortalStatus,
-  DebugShareResponse,
-  GatewayMigratePlan,
-} from "@/lib/api";
-import { apiErrorFromResponse, errorMessage } from "@/lib/api-error";
-
+import { cn, themedBody } from "@/lib/utils";
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
@@ -267,8 +269,8 @@ function DebugShareButton({
 }
 
 export default function SystemPage() {
+  const appName = useAppName();
   const { toast, showToast } = useToast();
-
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [memory, setMemory] = useState<MemoryStatus | null>(null);
@@ -302,7 +304,7 @@ export default function SystemPage() {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPath, setImportPath] = useState("");
   // Restore-from-backup is destructive (overwrites the live config) and the
-  // spawned `hermes import` runs non-interactively (stdin is /dev/null), so
+  // spawned `noone import` runs non-interactively (stdin is /dev/null), so
   // its CLI "Continue? [y/N]" prompt would auto-abort. The dashboard owns the
   // consent: confirm here, then call the endpoint with force=true.
   const [importingBackup, setImportingBackup] = useState(false);
@@ -796,11 +798,11 @@ export default function SystemPage() {
         open={canUpdateHermes && updateConfirmOpen}
         onCancel={() => setUpdateConfirmOpen(false)}
         onConfirm={() => void applyUpdate()}
-        title="Update Hermes?"
+        title={appText("Update {app_name}?", appName)}
         description={
           updateInfo && updateInfo.behind && updateInfo.behind > 0
-            ? `This will run 'hermes update' (${updateInfo.update_command}) and pull ${updateInfo.behind} new commit${updateInfo.behind === 1 ? "" : "s"}. The gateway restarts when the update finishes; the current session keeps its prompt cache until then.`
-            : `This will run 'hermes update' (${updateInfo?.update_command ?? "hermes update"}) and restart the gateway when it finishes.`
+            ? `This will run 'noone update' (${updateInfo.update_command}) and pull ${updateInfo.behind} new commit${updateInfo.behind === 1 ? "" : "s"}. The gateway restarts when the update finishes; the current session keeps its prompt cache until then.`
+            : `This will run 'noone update' (${updateInfo?.update_command ?? "noone update"}) and restart the gateway when it finishes.`
         }
         confirmLabel="Update now"
       />
@@ -837,7 +839,7 @@ export default function SystemPage() {
         description="Remove this hook from config and revoke its consent? It stops firing on the next restart."
         loading={hookDelete.isDeleting}
       />
-      <HermesConsoleModal
+      <AgentConsoleModal
         open={consoleOpen}
         onClose={() => setConsoleOpen(false)}
       />
@@ -980,7 +982,7 @@ export default function SystemPage() {
                 <div>{stats?.python_impl} {stats?.python_version}</div>
               </div>
               <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">Hermes</div>
+                <div className="text-xs uppercase tracking-wider text-muted-foreground">{appText("{app_name}", appName)}</div>
                 <div className="flex items-center gap-2">
                   <span>v{stats?.hermes_version}</span>
                   {canUpdateHermes &&
@@ -1127,7 +1129,7 @@ export default function SystemPage() {
             )}
             {!portal?.logged_in && (
               <p className="text-xs text-muted-foreground">
-                Log in with <span className="font-mono">hermes portal</span>.
+                Log in with <span className="font-mono">noone portal</span>.
               </p>
             )}
           </CardContent>
@@ -1436,7 +1438,7 @@ export default function SystemPage() {
             </div>
             <ConfirmDialog
               open={!!importConfirmTarget}
-              title="Restore full Hermes backup?"
+              title={appText("Restore full {app_name} backup?", appName)}
               description={`This will overwrite your current Hermes configuration, skills, sessions, and data with the contents of ${backupImportLabel(importConfirmTarget)}. This cannot be undone.`}
               destructive
               confirmLabel="Restore"
@@ -1462,10 +1464,7 @@ export default function SystemPage() {
                 <div className="flex flex-col">
                   <span className="text-sm font-medium">Share debug report</span>
                   <span className="text-xs text-muted-foreground max-w-prose">
-                    Uploads system info + logs to a public paste service and
-                    returns links to send the Hermes team. Pastes auto-delete
-                    after 6 hours.
-                  </span>
+                    {appText("Uploads system info + logs to a public paste service and\n                    returns links to send the {app_name} team. Pastes auto-delete\n                    after 6 hours.\n                  ", appName)}</span>
                 </div>
               </div>
               <DebugShareButton

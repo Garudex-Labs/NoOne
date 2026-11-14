@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from tests.fakes.fake_llm_provider import FakeLLMServer, Text, ToolCall, write_hermes_home
 
@@ -50,7 +50,7 @@ _PASSTHROUGH_ENV = frozenset({
 
 
 TURN_TIMEOUT = 240.0
-# `hermes gateway stop` waits for the daemon's planned exit (MCP teardown included).
+# `noone gateway stop` waits for the daemon's planned exit (MCP teardown included).
 STOP_TIMEOUT = 120.0
 
 
@@ -108,7 +108,7 @@ class ParityHome:
             "PARITY_TREE_TAG": self.tag,
             # The child's HOME is the fixture home, so its ``~/.hermes/state.db`` IS
             # the tmp HERMES_HOME's db; under a pytest ancestor the live-DB guard
-            # (hermes_state_guard) would refuse it. This is the guard's documented
+            # (agent_state_guard) would refuse it. This is the guard's documented
             # child-process escape hatch; the path is tmp_path by construction.
             "HERMES_STATE_DB_GUARD_BYPASS": "1",
         })
@@ -444,7 +444,7 @@ def kill_tagged(ph: ParityHome) -> None:
 
 
 def hermes_argv(*args: str) -> list[str]:
-    return [sys.executable, "-m", "hermes_cli.main", *args]
+    return [sys.executable, "-m", "agent_cli.main", *args]
 
 
 def terminate(proc: subprocess.Popen, timeout: float = 30.0) -> int | None:
@@ -460,9 +460,9 @@ def terminate(proc: subprocess.Popen, timeout: float = 30.0) -> int | None:
 
 
 def stop_profile_gateway(ph: ParityHome, timeout: float = STOP_TIMEOUT) -> bool:
-    """The normal stop for the profile's ``gateway run`` daemon: ``hermes gateway stop``.
+    """The normal stop for the profile's ``gateway run`` daemon: ``noone gateway stop``.
 
-    ``hermes -z``, ``hermes chat -q``, ``hermes acp`` and ``hermes cron run`` are clients of the
+    ``hermes -z``, ``noone chat -q``, ``hermes acp`` and ``noone cron run`` are clients of the
     unified gateway runtime: their first connect spawns the profile's daemon (``ensure_gateway_runtime``
     → ``spawn_unmanaged_gateway``), the daemon owns the agent — and with it the MCP server tree — and it
     keeps serving after the client exits (cron, messaging, the next client). So the surface's
@@ -474,7 +474,7 @@ def stop_profile_gateway(ph: ParityHome, timeout: float = STOP_TIMEOUT) -> bool:
         hermes_argv("gateway", "stop"), cwd=ph.project, env=ph.env(), capture_output=True, text=True,
         timeout=timeout, stdin=subprocess.DEVNULL, check=False
     )
-    assert proc.returncode == 0, f"hermes gateway stop exited {proc.returncode}: {proc.stderr[-2000:]}"
+    assert proc.returncode == 0, f"noone gateway stop exited {proc.returncode}: {proc.stderr[-2000:]}"
     return "Stopped gateway" in proc.stdout
 
 

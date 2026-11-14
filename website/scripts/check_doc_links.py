@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Keep cross-page links in website/docs resolvable on GitHub AND on the site.
 
-Docusaurus turns a relative Markdown file link (`../user-guide/profiles.md#anchor`)
+The documentation renderer turns a relative Markdown file link (`../user-guide/profiles.md#anchor`)
 into the page route, and GitHub's file viewer follows the same path. A site
 route written as a link (`/user-guide/profiles`, `/docs/user-guide/profiles`)
 only works on the rendered site: GitHub resolves it as a repository path and
@@ -32,7 +32,7 @@ from pathlib import Path
 
 WEBSITE = Path(__file__).resolve().parents[1]
 EN_DOCS = WEBSITE / "docs"
-ZH_DOCS = WEBSITE / "i18n" / "zh-Hans" / "docusaurus-plugin-content-docs" / "current"
+ZH_DOCS = EN_DOCS / "zh-Hans"
 
 # Written by generate-skill-docs.py; edit the generator, never these outputs.
 GENERATED_PREFIXES = ("user-guide/skills/bundled/", "user-guide/skills/optional/")
@@ -60,7 +60,7 @@ def frontmatter_slug(text: str) -> str | None:
 
 
 def route_for(rel: str, text: str) -> str:
-    """Docusaurus route (relative to the docs root) for a source file."""
+    """The documentation renderer route (relative to the docs root) for a source file."""
     slug = frontmatter_slug(text)
     if slug and slug.startswith("/"):
         return slug.rstrip("/") or "/"
@@ -75,6 +75,8 @@ def route_map(docs_root: Path) -> dict[str, Path]:
     routes: dict[str, Path] = {}
     for path in sorted(docs_root.rglob("*.md*")):
         if path.suffix not in (".md", ".mdx"):
+            continue
+        if docs_root == EN_DOCS and path.is_relative_to(ZH_DOCS):
             continue
         rel = path.relative_to(docs_root).as_posix()
         routes[route_for(rel, path.read_text(encoding="utf-8"))] = path
@@ -101,7 +103,7 @@ def relative_link(source: Path, source_root: Path, target: Path, target_root: Pa
 
     zh-Hans pages fall back to the EN file when no translation exists; the
     relative path is computed as if the target sat in the same tree, which is
-    how both Docusaurus (locale content paths) and GitHub (EN files) resolve it.
+    how both The documentation renderer (locale content paths) and GitHub (EN files) resolve it.
     """
     target_rel = target.relative_to(target_root)
     virtual_target = source_root / target_rel
@@ -138,6 +140,8 @@ def process_tree(
     rewritten = 0
     for path in sorted(docs_root.rglob("*.md*")):
         if path.suffix not in (".md", ".mdx"):
+            continue
+        if docs_root == EN_DOCS and path.is_relative_to(ZH_DOCS):
             continue
         rel = path.relative_to(docs_root).as_posix()
         if is_generated(rel) and not include_generated:

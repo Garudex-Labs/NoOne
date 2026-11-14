@@ -1,9 +1,9 @@
+import { Download, Search } from '@noone/ui/icons'
 import type { ReactElement } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
-import { Download, Search } from '@/lib/icons'
-import type { LocalCatalogModel, LocalModelsStatus, LocalRuntimeJob } from '@/types/hermes'
+import type { LocalCatalogModel, LocalModelsStatus, LocalRuntimeJob } from '@/types/agent-client'
 
 import { CatalogModelRow, SideloadedModelRow } from './local-models-model-rows'
 import { ListRow, SettingsSection } from './primitives'

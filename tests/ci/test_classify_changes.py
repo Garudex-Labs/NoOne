@@ -119,7 +119,6 @@ CASES = {
     ),
     "uv.lock → python": (["uv.lock"], _lanes(python=True, uv_lock=True, docker=True, nix=True, e2e_upgrade=True)),
     "ts package → frontend": (["apps/desktop/src/app.tsx"], _lanes(frontend=True)),
-    "ui-tui → frontend": (["ui-tui/src/entry.ts"], _lanes(frontend=True)),
     # Lockfile bump shifts every TS package's tree, but not the Python suite.
     "root lockfile → frontend, not python": (["pnpm-lock.yaml"], _lanes(frontend=True, npm_lock=True, docker=True, nix=True)),
     # The workspace config (overrides, release-age policy) shifts the same trees.
@@ -191,7 +190,7 @@ CASES = {
     "nix + python → both": (["nix/checks.nix", "agent/x.py"], _lanes(python=True, scan=True, nix=True)),
     # Product Python can still break the flake (nine checks run the built
     # binary), but the flake meets it on main, not on the PR.
-    "product python → no nix on the PR": (["hermes_cli/config.py"], _lanes(python=True, scan=True)),
+    "product python → no nix on the PR": (["agent_cli/config.py"], _lanes(python=True, scan=True)),
     # tests/ is not packaged, so the built binary cannot change.
     "tests-only → no nix": (
         ["tests/agent/test_foo.py"],
@@ -206,8 +205,8 @@ CASES = {
     # The Windows desktop-update hand-off is a PowerShell integration surface:
     # its tests spawn the real script and poll its loopback server. They run
     # when the script, the Electron side that launches it, or their own test
-    # files change — not on every hermes_state.py PR. The script runs a real
-    # `hermes update`, and the Windows crash cells that kill it mid-run live in
+    # files change — not on every agent_state.py PR. The script runs a real
+    # `noone update`, and the Windows crash cells that kill it mid-run live in
     # the install + update journey, so it starts e2e_upgrade as well.
     "windows.ps1 → desktop_updater": (
         ["scripts/desktop-update/windows.ps1"],
@@ -302,7 +301,7 @@ CASES = {
         _lanes(python=True),
     ),
     "mcp_catalog.py → python + scan": (
-        ["hermes_cli/mcp_catalog.py"],
+        ["agent_cli/mcp_catalog.py"],
         _lanes(python=True, scan=True),
     ),
     "eslint config → frontend": (
@@ -312,10 +311,6 @@ CASES = {
     "shared eslint config → python": (
         ["eslint.config.shared.mjs"],
         _lanes(python=True),
-    ),
-    "ui-tui eslint config → frontend": (
-        ["ui-tui/eslint.config.mjs"],
-        _lanes(frontend=True),
     ),
     "web eslint config → frontend": (
         ["web/eslint.config.js"],
@@ -343,8 +338,8 @@ CASES = {
         ["scripts/install.sh"],
         _lanes(python=True, bootstrap=True, python_prod=True, e2e_upgrade=True, e2e_desktop_update=True),
     ),
-    "setup-hermes.sh → bootstrap lane": (
-        ["setup-hermes.sh"],
+    "setup-agent.sh → bootstrap lane": (
+        ["setup-agent.sh"],
         _lanes(python=True, bootstrap=True, python_prod=True, e2e_upgrade=True),
     ),
     "tauri installer source → bootstrap + rust": (
@@ -385,13 +380,13 @@ CASES = {
         ["tests/e2e/core/sqlite/test_torture.py"],
         _lanes(python=True, python_prod=False, scan=True, e2e=True),
     ),
-    "state db → e2e": (["hermes_state_wal.py"], _lanes(python=True, scan=True, e2e=True)),
+    "state db → e2e": (["agent_state_wal.py"], _lanes(python=True, scan=True, e2e=True)),
     "upgrade suite → e2e_upgrade, not e2e": (
         ["tests/e2e/core/upgrade/pm/test_pm_lifecycle.py"],
         _lanes(python=True, python_prod=False, scan=True, e2e_upgrade=True),
     ),
     "updater → e2e_upgrade + desktop update": (
-        ["hermes_cli/update_cmd_git.py"],
+        ["agent_cli/update_cmd_git.py"],
         _lanes(python=True, scan=True, e2e_upgrade=True, e2e_desktop_update=True),
     ),
     "PM → e2e_upgrade + docker": (["pm/environments.py"], _lanes(python=True, scan=True, e2e_upgrade=True, docker=True)),
@@ -399,11 +394,11 @@ CASES = {
     # point, launch-time recovery, the gateway restart/pause surface.
     # main.py is also `hermes desktop --build-only`, the update's Desktop rebuild.
     "cmd_update entry → both update suites": (
-        ["hermes_cli/main.py"], _lanes(python=True, scan=True, e2e_upgrade=True, e2e_desktop_update=True),
+        ["agent_cli/main.py"], _lanes(python=True, scan=True, e2e_upgrade=True, e2e_desktop_update=True),
     ),
     "gateway status stamp → e2e_upgrade": (["gateway/status.py"], _lanes(python=True, scan=True, e2e_upgrade=True)),
     "desktop verify → desktop_updater + both update suites": (
-        ["hermes_cli/desktop_update_verify.py"],
+        ["agent_cli/desktop_update_verify.py"],
         _lanes(python=True, scan=True, desktop_updater=True, e2e_upgrade=True, e2e_desktop_update=True),
     ),
     "electron main → desktop update": (
@@ -467,7 +462,7 @@ CASES = {
     "action change → all": ([".github/actions/detect-changes/action.yml"], DEFAULT),
     # Workflows call just recipes, so the recipes are CI config too.
     "justfile change → all": (["justfile"], DEFAULT),
-    "recipe python wrapper → all": (["scripts/hermes-python"], DEFAULT),
+    "recipe python wrapper → all": (["scripts/agent-python"], DEFAULT),
     "empty diff → all": ([], DEFAULT),
     "blank lines → all": (["", "  "], DEFAULT),
 }
@@ -510,36 +505,36 @@ def test_every_slow_lane_path_matches_a_tracked_file():
     assert dead == set()
 
 
-# Every file the `hermes update` pipeline runs on the update path (the step
+# Every file the `noone update` pipeline runs on the update path (the step
 # tables of the updater audit's cli-update and desktop-update code maps). A
 # PR that edits only one of these must start the real-update suite that would
 # catch the regression; before, main.py / _early_recovery.py / relaunch.py /
-# gateway/ / hermes_bootstrap.py skipped both the Linux and Windows journeys.
+# gateway/ / agent_bootstrap.py skipped both the Linux and Windows journeys.
 _UPDATE_PATH_FILES = (
-    "hermes_cli/main.py",
-    "hermes_cli/main_dashboard.py",
-    "hermes_cli/main_desktop.py",
-    "hermes_cli/_early_recovery.py",
-    "hermes_cli/venv_sync.py",
-    "hermes_cli/update_lock.py",
-    "hermes_cli/update_cmd.py",
-    "hermes_cli/update_completion.py",
-    "hermes_cli/update_cmd_windows.py",
-    "hermes_cli/update_cmd_zip.py",
-    "hermes_cli/_update_takeover.py",
-    "hermes_cli/source_completion.py",
-    "hermes_cli/source_build.py",
-    "hermes_cli/source_releases.py",
-    "hermes_cli/_launchers.py",
-    "hermes_cli/gitlock.py",
-    "hermes_cli/process_identity.py",
-    "hermes_cli/relaunch.py",
-    "hermes_cli/gateway.py",
-    "hermes_cli/gateway_windows.py",
-    "hermes_cli/gateway_migrate.py",
-    "hermes_cli/desktop_update_verify.py",
-    "hermes_bootstrap.py",
-    "hermes_constants.py",
+    "agent_cli/main.py",
+    "agent_cli/main_dashboard.py",
+    "agent_cli/main_desktop.py",
+    "agent_cli/_early_recovery.py",
+    "agent_cli/venv_sync.py",
+    "agent_cli/update_lock.py",
+    "agent_cli/update_cmd.py",
+    "agent_cli/update_completion.py",
+    "agent_cli/update_cmd_windows.py",
+    "agent_cli/update_cmd_zip.py",
+    "agent_cli/_update_takeover.py",
+    "agent_cli/source_completion.py",
+    "agent_cli/source_build.py",
+    "agent_cli/source_releases.py",
+    "agent_cli/_launchers.py",
+    "agent_cli/gitlock.py",
+    "agent_cli/process_identity.py",
+    "agent_cli/relaunch.py",
+    "agent_cli/gateway.py",
+    "agent_cli/gateway_windows.py",
+    "agent_cli/gateway_migrate.py",
+    "agent_cli/desktop_update_verify.py",
+    "agent_bootstrap.py",
+    "agent_constants.py",
     "gateway/status.py",
     "gateway/control_socket.py",
     "gateway/code_skew.py",
@@ -558,8 +553,8 @@ _DESKTOP_UPDATE_PATH_FILES = (
     "apps/desktop/electron/local-gateway.ts",
     "scripts/desktop-update/windows.ps1",
     "scripts/desktop-update/posix.sh",
-    "hermes_cli/desktop_update_verify.py",
-    "hermes_cli/main_desktop.py",
+    "agent_cli/desktop_update_verify.py",
+    "agent_cli/main_desktop.py",
 )
 
 
@@ -579,7 +574,7 @@ _REPO = Path(__file__).resolve().parents[2]
 
 
 def _yaml(rel: str) -> dict:
-    yaml = pytest.importorskip("hermes_yaml")
+    yaml = pytest.importorskip("agent_yaml")
     return yaml.safe_load((_REPO / rel).read_text(encoding="utf-8-sig"))
 
 
@@ -694,20 +689,20 @@ def _write_event(tmp_path, number: int | None = 88442) -> Path:
 
 def test_pull_request_changed_files_skips_non_pr_events(monkeypatch):
     monkeypatch.setenv("EVENT_NAME", "push")
-    monkeypatch.setenv("REPO", "NousResearch/hermes-agent")
+    monkeypatch.setenv("REPO", "Garudex-Labs/NoOne")
     assert pull_request_changed_files() == []
 
 
 def test_pull_request_changed_files_skips_without_pr_number(tmp_path, monkeypatch):
     monkeypatch.setenv("EVENT_NAME", "pull_request")
-    monkeypatch.setenv("REPO", "NousResearch/hermes-agent")
+    monkeypatch.setenv("REPO", "Garudex-Labs/NoOne")
     monkeypatch.setenv("GITHUB_EVENT_PATH", str(_write_event(tmp_path, number=None)))
     assert pull_request_changed_files() == []
 
 
 def test_pull_request_changed_files_parses_gh_output(tmp_path, monkeypatch):
     monkeypatch.setenv("EVENT_NAME", "pull_request")
-    monkeypatch.setenv("REPO", "NousResearch/hermes-agent")
+    monkeypatch.setenv("REPO", "Garudex-Labs/NoOne")
     monkeypatch.setenv("GITHUB_EVENT_PATH", str(_write_event(tmp_path)))
 
     def fake_run(*args, **kwargs):
@@ -727,7 +722,7 @@ def test_pull_request_changed_files_parses_gh_output(tmp_path, monkeypatch):
 
 def test_pull_request_changed_files_returns_empty_when_gh_fails(tmp_path, monkeypatch):
     monkeypatch.setenv("EVENT_NAME", "pull_request")
-    monkeypatch.setenv("REPO", "NousResearch/hermes-agent")
+    monkeypatch.setenv("REPO", "Garudex-Labs/NoOne")
     monkeypatch.setenv("GITHUB_EVENT_PATH", str(_write_event(tmp_path)))
 
     def fake_run(*args, **kwargs):
@@ -779,7 +774,7 @@ def test_pull_request_labels_prefers_the_live_labels_over_the_replayed_event(tmp
     event = tmp_path / "event.json"
     event.write_text(json.dumps({"pull_request": {"number": 7, "labels": []}}), encoding="utf-8")
     monkeypatch.setenv("EVENT_NAME", "pull_request")
-    monkeypatch.setenv("REPO", "NousResearch/hermes-agent")
+    monkeypatch.setenv("REPO", "Garudex-Labs/NoOne")
     monkeypatch.setenv("GITHUB_EVENT_PATH", str(event))
 
     live = subprocess.CompletedProcess([], 0, stdout="run-e2e\n", stderr="")
@@ -800,7 +795,7 @@ def test_catalog_lane_runs_every_test_that_reads_the_shipped_catalog():
     spec.loader.exec_module(mod)
     files = set(mod.catalog_test_files())
     for must in (
-        "tests/hermes_cli/test_plugin_catalog.py",
+        "tests/agent_cli/test_plugin_catalog.py",
         "tests/scripts/test_validate_plugin_catalog.py",
         "tests/scripts/test_contributor_map.py",
         "tests/website/test_extract_plugins.py",

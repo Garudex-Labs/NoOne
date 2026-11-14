@@ -1,7 +1,7 @@
 """Core NeMo Relay adapters for physical Hermes provider attempts."""
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import asyncio
 import contextlib
 import contextvars
@@ -737,7 +737,7 @@ def _complete_logical(
             )
         except Exception:
             # Provider result is authoritative; retain the handle so turn finalization can retry.
-            logger.warning("Hermes Relay logical LLM finalization failed", exc_info=True)
+            logger.warning(app_text("{app_name} Relay logical LLM finalization failed"), exc_info=True)
             return
         if popped is False:
             # A call running beside the turn (title generation) finishes under the turn's own

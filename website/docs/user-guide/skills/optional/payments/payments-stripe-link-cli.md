@@ -1,41 +1,49 @@
 ---
 title: "Stripe Link Cli — Agent payments via Stripe Link — cards, SPT, approvals"
-sidebar_label: "Stripe Link Cli"
+sidebarTitle: "Stripe Link Cli"
 description: "Agent payments via Stripe Link — cards, SPT, approvals"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Stripe Link Cli
+# Stripe Link Cli {#stripe-link-cli}
 
 Agent payments via Stripe Link — cards, SPT, approvals.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/payments/stripe-link-cli` |
+| Source | Optional — install with `noone skills install official/payments/stripe-link-cli` |
 | Path | `optional-skills/payments/stripe-link-cli` |
 | Version | `0.1.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `Payments`, `Stripe`, `Link`, `Checkout`, `MPP` |
 | Related skills | [`stripe-projects`](../../optional/payments/payments-stripe-projects.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Stripe Link CLI Skill
+<div className="doc-callout-title">
 
-Wraps [@stripe/link-cli](https://github.com/stripe/link-cli) so Hermes can complete purchases on the user's behalf using one-time-use virtual cards or Shared Payment Tokens (SPT). Every spend is gated by an in-app approval in the Link mobile/web app — Hermes cannot self-approve.
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Stripe Link CLI Skill {#stripe-link-cli-skill}
+
+Wraps [@stripe/link-cli](https://github.com/stripe/link-cli) so {{app-name}} can complete purchases on the user's behalf using one-time-use virtual cards or Shared Payment Tokens (SPT). Every spend is gated by an in-app approval in the Link mobile/web app — {{app-name}} cannot self-approve.
 
 US-only at the moment (Link account requirement). Windows is not supported by the upstream CLI — this skill is gated `[linux, macos]`.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Trigger phrases:
 
@@ -44,14 +52,14 @@ Trigger phrases:
 - "log in to Link", "connect my Link wallet"
 - HTTP 402 response from a merchant API with `www-authenticate: ... method="stripe"`
 
-If the user wants a paid API call (HTTP 402, no checkout form), the `card` path is wrong — use SPT via this same skill, or install the `pay` plugin (`hermes plugins install pay`) for x402/MPP payments.
+If the user wants a paid API call (HTTP 402, no checkout form), the `card` path is wrong — use SPT via this same skill, or install the `pay` plugin (`noone plugins install pay`) for x402/MPP payments.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Node.js 20+ available on `PATH` (`node --version`)
 - US-based (Link account requirement)
 
-The Link account, payment method, and spend-approval app do NOT need to be set up before Hermes attempts to pay — the CLI walks the user through them on first run:
+The Link account, payment method, and spend-approval app do NOT need to be set up before {{app-name}} attempts to pay — the CLI walks the user through them on first run:
 
 - A Link account at https://app.link.com — created/linked during first `link-cli` auth
 - At least one payment method — added during first run at https://app.link.com/wallet
@@ -59,7 +67,7 @@ The Link account, payment method, and spend-approval app do NOT need to be set u
 
 No env vars required — auth state is stored locally by the CLI under its own config directory.
 
-## Install
+## Install {#install}
 
 Install once, globally:
 
@@ -69,16 +77,16 @@ npm install -g @stripe/link-cli
 
 Or invoke ad-hoc via `npx @stripe/link-cli`. The skill below uses the installed `link-cli` form.
 
-## How to Run
+## How to Run {#how-to-run}
 
 All commands run through the `terminal` tool. The CLI auto-detects non-TTY callers and emits compact `toon` output by default — fine for the model. Pass `--format json` if a step needs structured fields.
 
 Discover commands: `link-cli --llms-full`.
 Get a command's schema before invoking: `link-cli <command> --schema`.
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. Check / establish auth
+### 1. Check / establish auth {#1-check--establish-auth}
 
 ```
 link-cli auth status
@@ -94,7 +102,7 @@ The `--interval`/`--timeout` form polls inline so the agent doesn't need to mana
 
 **Do not proceed past this step until `auth status` confirms login.**
 
-### 2. Evaluate the merchant before creating a spend request
+### 2. Evaluate the merchant before creating a spend request {#2-evaluate-the-merchant-before-creating-a-spend-request}
 
 Decide the credential type:
 
@@ -112,7 +120,7 @@ link-cli mpp decode --challenge '<full WWW-Authenticate header>'
 
 This validates the challenge and extracts the network ID + decoded request body.
 
-### 3. List payment methods + shipping
+### 3. List payment methods + shipping {#3-list-payment-methods--shipping}
 
 ```
 link-cli payment-methods list
@@ -121,7 +129,7 @@ link-cli shipping-address list
 
 Use the first entry unless the user specifies otherwise. The `id` from `payment-methods list` is the `--payment-method-id` in the next step.
 
-### 4. Create the spend request
+### 4. Create the spend request {#4-create-the-spend-request}
 
 Confirm the final total with the user before issuing this command. Amounts are in cents.
 
@@ -141,7 +149,7 @@ For MPP merchants add `--credential-type shared_payment_token`.
 
 `--request-approval` pings the user's Link app and polls until they approve or deny. The CLI exits non-zero on deny / timeout.
 
-### 5. Retrieve the credential — SECURELY
+### 5. Retrieve the credential — SECURELY {#5-retrieve-the-credential--securely}
 
 **Do not print card details to stdout.** Use `--output-file` so the PAN never enters the agent's transcript or logs:
 
@@ -154,7 +162,7 @@ link-cli spend-request retrieve <lsrq_id> \
 
 The file is written with `0600` perms; stdout shows only redacted fields (brand, last4, expiry) plus a `card_output_file` path.
 
-### 6. Use the credential
+### 6. Use the credential {#6-use-the-credential}
 
 - For web checkout: hand the file path to the user, OR pass it to a browser-driving tool that fills the form directly from disk. Never `read_file` or `cat` the card file into the agent's reasoning context.
 - For MPP merchants:
@@ -166,7 +174,7 @@ The file is written with `0600` perms; stdout shows only redacted fields (brand,
     --data '<json body>'
   ```
 
-### 7. Clean up
+### 7. Clean up {#7-clean-up}
 
 Delete the card file as soon as the purchase is done:
 
@@ -174,9 +182,9 @@ Delete the card file as soon as the purchase is done:
 rm -f ~/.hermes/cache/scratch/link-card.json
 ```
 
-## Optional: run as an MCP server instead
+## Optional: run as an MCP server instead {#optional-run-as-an-mcp-server-instead}
 
-`@stripe/link-cli --mcp` exposes the same commands as MCP tools over stdio. To register it with Hermes' native MCP:
+`@stripe/link-cli --mcp` exposes the same commands as MCP tools over stdio. To register it with {{app-name}}' native MCP:
 
 ```
 hermes mcp add stripe-link --command "npx" --args "@stripe/link-cli --mcp"
@@ -184,7 +192,7 @@ hermes mcp add stripe-link --command "npx" --args "@stripe/link-cli --mcp"
 
 Then `hermes mcp list` should show `stripe-link`. The same approval rules apply — MCP doesn't bypass the Link app approval step.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **US-only.** Outside the US, `auth login` will fail. Tell the user, don't keep retrying.
 - **Card PAN must never enter agent context.** Use `--output-file` every time. If you've already retrieved without it, immediately `link-cli auth logout` is not enough — the card is one-time-use but rotate hygiene matters.
@@ -193,7 +201,7 @@ Then `hermes mcp list` should show `stripe-link`. The same approval rules apply 
 - **Output format defaults to `toon`** in non-TTY mode. Fine for prose, but if a downstream step needs to parse a specific field, pass `--format json`.
 - **Don't default to `card`.** The merchant-evaluation step (Section 2) exists because picking the wrong credential type fails the purchase silently or leaks more data than needed.
 
-## Verification
+## Verification {#verification}
 
 ```
 link-cli --version && link-cli auth status

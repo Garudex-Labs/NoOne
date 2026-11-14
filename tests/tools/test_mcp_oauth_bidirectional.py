@@ -56,7 +56,7 @@ async def test_hermes_provider_forwards_401_triggers_refresh(tmp_path, monkeypat
     from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata, OAuthToken
     from pydantic import AnyUrl
 
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
     from tools.mcp_oauth_manager import _HERMES_PROVIDER_CLS, reset_manager_for_tests
 
     assert _HERMES_PROVIDER_CLS is not None
@@ -64,7 +64,7 @@ async def test_hermes_provider_forwards_401_triggers_refresh(tmp_path, monkeypat
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
     reset_manager_for_tests()
 
-    storage = HermesTokenStorage("srv")
+    storage = AgentTokenStorage("srv")
     await storage.set_tokens(
         OAuthToken(
             access_token="old_access",
@@ -141,7 +141,7 @@ async def test_long_lived_resource_request_does_not_block_concurrent_post(
     from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata, OAuthToken
     from pydantic import AnyUrl
 
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
     from tools.mcp_oauth_manager import _HERMES_PROVIDER_CLS, reset_manager_for_tests
 
     assert _HERMES_PROVIDER_CLS is not None
@@ -149,7 +149,7 @@ async def test_long_lived_resource_request_does_not_block_concurrent_post(
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
     reset_manager_for_tests()
 
-    storage = HermesTokenStorage("srv")
+    storage = AgentTokenStorage("srv")
     await storage.set_tokens(
         OAuthToken(
             access_token="access-token",
@@ -259,7 +259,7 @@ async def test_fabricated_dcr_registration_rejected_before_network(tmp_path, mon
     from mcp.shared.auth import OAuthClientMetadata
     from pydantic import AnyUrl
 
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
     from tools.mcp_oauth_manager import _HERMES_PROVIDER_CLS, reset_manager_for_tests
 
     assert _HERMES_PROVIDER_CLS is not None, "SDK OAuth types must be available"
@@ -270,7 +270,7 @@ async def test_fabricated_dcr_registration_rejected_before_network(tmp_path, mon
     # Empty storage: no tokens, no client_info — the SDK's 401 branch must
     # take the registration path (this is the cold gateway state for a
     # provider whose cached client is gone).
-    storage = HermesTokenStorage("srv")
+    storage = AgentTokenStorage("srv")
 
     metadata = OAuthClientMetadata(
         redirect_uris=[AnyUrl("http://127.0.0.1:12345/callback")],
@@ -364,7 +364,7 @@ async def test_advertised_registration_endpoint_passes_through(tmp_path, monkeyp
     from mcp.shared.auth import OAuthClientMetadata
     from pydantic import AnyUrl
 
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
     from tools.mcp_oauth_manager import _HERMES_PROVIDER_CLS, reset_manager_for_tests
 
     assert _HERMES_PROVIDER_CLS is not None, "SDK OAuth types must be available"
@@ -372,7 +372,7 @@ async def test_advertised_registration_endpoint_passes_through(tmp_path, monkeyp
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
     reset_manager_for_tests()
 
-    storage = HermesTokenStorage("srv")
+    storage = AgentTokenStorage("srv")
     metadata = OAuthClientMetadata(
         redirect_uris=[AnyUrl("http://127.0.0.1:12345/callback")],
         client_name="Hermes Agent",
@@ -459,7 +459,7 @@ async def test_guard_ignores_non_fabricated_post_paths(tmp_path, monkeypatch):
     from mcp.shared.auth import OAuthClientMetadata, OAuthMetadata
     from pydantic import AnyUrl
 
-    from tools.mcp_oauth import HermesTokenStorage
+    from tools.mcp_oauth import AgentTokenStorage
     from tools.mcp_oauth_manager import _HERMES_PROVIDER_CLS, reset_manager_for_tests
 
     assert _HERMES_PROVIDER_CLS is not None, "SDK OAuth types must be available"
@@ -474,7 +474,7 @@ async def test_guard_ignores_non_fabricated_post_paths(tmp_path, monkeypatch):
             redirect_uris=[AnyUrl("http://127.0.0.1:12345/callback")],
             client_name="Hermes Agent",
         ),
-        storage=HermesTokenStorage("srv"),
+        storage=AgentTokenStorage("srv"),
         redirect_handler=_noop_redirect,
         callback_handler=_noop_callback,
     )

@@ -2,7 +2,7 @@ import {
   atom, Button, createBudgetedLoop, GlyphSpinner, icons, Popover, PopoverContent, PopoverTrigger, randomUuid,
   RowButton, SearchField, STATUSBAR_AREAS, Tip, usePluginI18n,
   useQuery, useValue
-} from '@hermes/plugin-sdk'
+} from '@noone/plugin-sdk'
 import { useEffect, useRef, useState } from 'react'
 import { jsx, jsxs } from 'react/jsx-runtime'
 
@@ -35,9 +35,21 @@ const EN = {
 }
 const LOCALES = {
   en: EN,
+  ko: EN,
+  hi: {
+    radio: 'रेडियो', browse: 'स्टेशन चुनें', play: 'रेडियो चलाएँ', pause: 'रेडियो रोकें', next: 'अगला स्टेशन',
+    live: 'लाइव', paused: 'रुका हुआ', connecting: 'जुड़ रहा है', error: 'स्ट्रीम उपलब्ध नहीं', retry: 'फिर कोशिश करें',
+    search: 'स्टेशन खोजें…', volume: 'आवाज़', audioOnly: 'ऑडियो चल रहा है · दृश्य उपलब्ध नहीं', mute: 'रेडियो की आवाज़ बंद करें', unmute: 'रेडियो की आवाज़ चालू करें',
+    save: 'स्टेशन पिन करें', unsave: 'स्टेशन का पिन हटाएँ', visit: 'स्टेशन की वेबसाइट खोलें', artistProfile: 'कलाकार की प्रोफ़ाइल खोलें',
+    noResults: 'कोई स्टेशन नहीं मिला', searchHint: 'स्टेशन के नाम से खोजें। jazz, ambient या house आज़माएँ।', searchError: 'स्टेशन की खोज उपलब्ध नहीं है। आपके पहले से चुने स्टेशन अब भी चलेंगे।',
+    searching: 'स्टेशन खोजे जा रहे हैं', directory: 'खोज Radio Browser द्वारा', note: 'लाइव रेडियो · अगला दबाने पर स्टेशन बदलता है',
+    streamError: 'यह स्ट्रीम जुड़ नहीं सकी। फिर कोशिश करें या दूसरा स्टेशन चुनें।', close: 'रेडियो बंद करें', nowPlaying: 'अभी चल रहा है', elsewhere: 'रुका हुआ — दूसरी विंडो में चल रहा है',
+    chillsynthDescription: 'सहज एकाग्रता · गर्माहट भरी सिंथ धुनें', nightrideDescription: 'सिंथवेव · देर रात की धुनें', darksynthDescription: 'गहरे इलेक्ट्रॉनिक स्वर · भरपूर ऊर्जा',
+    spacesynthDescription: 'अंतरिक्ष की सिंथ धुनें · पुराने अंदाज़ का भविष्य', 'paradise-mainDescription': 'विविध शैलियाँ · लोगों का चयन', 'paradise-mellowDescription': 'धीमी, सुकून भरी रफ़्तार',
+    'eve-radioDescription': 'GamingNow · EVE समुदाय का रेडियो'
+  },
   ja: { ...EN, artistProfile: 'アーティストのプロフィールを開く', audioOnly: '再生中 · 波形を表示できません', radio: 'ラジオ', browse: 'ステーションを選択', play: 'ラジオを再生', pause: 'ラジオを一時停止', next: '次のステーション', live: 'ライブ', paused: '一時停止', connecting: '接続中', error: '再生できません', retry: '再試行', search: 'ステーションを検索…', volume: '音量', mute: 'ミュート', unmute: 'ミュート解除', save: 'ステーションを固定', unsave: '固定を解除', visit: '公式サイトを開く', noResults: '見つかりませんでした', searchHint: '名前で検索。jazz、ambient、house など。', searchError: '検索できません。おすすめは再生できます。', searching: '検索中', directory: 'Radio Browser による検索', note: 'ライブ放送 · 次へでステーションを切り替え', streamError: '接続できませんでした。再試行するか別のステーションを選んでください。', close: 'ラジオを閉じる', nowPlaying: '再生中', elsewhere: '別のウィンドウで再生中', 'chillsynthDescription': 'やさしい集中 · 暖かなシンセ', 'nightrideDescription': 'シンセウェーブ · 深夜', 'darksynthDescription': 'ダークな電子音 · 高揚感', 'spacesynthDescription': '宇宙的シンセ · レトロな未来', 'paradise-mainDescription': '多彩な選曲 · 人がキュレーション', 'paradise-mellowDescription': 'ゆったりした時間' },
   zh: { ...EN, artistProfile: '访问艺人主页', audioOnly: '正在播放 · 无法显示波形', radio: '电台', browse: '选择电台', play: '播放电台', pause: '暂停电台', next: '下一个电台', live: '直播', paused: '已暂停', connecting: '正在连接', error: '无法播放', retry: '重试', search: '搜索电台…', volume: '音量', mute: '静音', unmute: '取消静音', save: '置顶电台', unsave: '取消置顶', visit: '访问电台网站', noResults: '没有找到电台', searchHint: '按名称搜索，例如 jazz、ambient 或 house。', searchError: '暂时无法搜索，精选电台仍可使用。', searching: '正在搜索', directory: '搜索由 Radio Browser 提供', note: '直播电台 · 下一首将切换电台', streamError: '无法连接，请重试或选择其他电台。', close: '关闭电台', nowPlaying: '正在播放', elsewhere: '已暂停，正在其他窗口播放', 'chillsynthDescription': '轻松专注 · 温暖合成器', 'nightrideDescription': '合成器浪潮 · 深夜', 'darksynthDescription': '暗黑电子 · 充满能量', 'spacesynthDescription': '宇宙合成器 · 复古未来', 'paradise-mainDescription': '多元风格 · 人工精选', 'paradise-mellowDescription': '放慢节奏' },
-  'zh-hant': { ...EN, artistProfile: '造訪藝人主頁', audioOnly: '播放中 · 無法顯示波形', radio: '電台', browse: '選擇電台', play: '播放電台', pause: '暫停電台', next: '下一個電台', live: '直播', paused: '已暫停', connecting: '正在連線', error: '無法播放', retry: '重試', search: '搜尋電台…', volume: '音量', mute: '靜音', unmute: '取消靜音', save: '釘選電台', unsave: '取消釘選', visit: '造訪電台網站', noResults: '找不到電台', searchHint: '按名稱搜尋，例如 jazz、ambient 或 house。', searchError: '暫時無法搜尋，精選電台仍可使用。', searching: '正在搜尋', directory: '搜尋由 Radio Browser 提供', note: '直播電台 · 下一首會切換電台', streamError: '無法連線，請重試或選擇其他電台。', close: '關閉電台', nowPlaying: '正在播放', elsewhere: '已暫停，正在其他視窗播放', 'chillsynthDescription': '輕鬆專注 · 溫暖合成器', 'nightrideDescription': '合成器浪潮 · 深夜', 'darksynthDescription': '暗黑電子 · 充滿能量', 'spacesynthDescription': '宇宙合成器 · 復古未來', 'paradise-mainDescription': '多元風格 · 人工精選', 'paradise-mellowDescription': '放慢節奏' }
 }
 
 // Disk plugins are not scanned by Tailwind. Only plugin layout lives here;
@@ -461,7 +473,7 @@ async function artistRequest(path, signal, ctx) {
     ctx.storage.set('local.artistRequestAt', Date.now())
     const response = await fetch(`https://musicbrainz.org/ws/2/${path}`, {
       signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]), credentials: 'omit',
-      headers: { 'User-Agent': 'HermesRadio/1.0 (https://github.com/NousResearch/hermes-agent)' }
+      headers: { 'User-Agent': 'HermesRadio/1.0 (https://github.com/Garudex-Labs/NoOne)' }
     })
     if (!response.ok) throw new Error(`Artist lookup: HTTP ${response.status}`)
     return response.json()

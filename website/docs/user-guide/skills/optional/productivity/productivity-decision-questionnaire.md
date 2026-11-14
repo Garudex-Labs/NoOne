@@ -1,35 +1,43 @@
 ---
 title: "Decision Questionnaire — Turn an unanswerable decision into a questionnaire doc"
-sidebar_label: "Decision Questionnaire"
+sidebarTitle: "Decision Questionnaire"
 description: "Turn an unanswerable decision into a questionnaire doc"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Decision Questionnaire
+# Decision Questionnaire {#decision-questionnaire}
 
 Turn an unanswerable decision into a questionnaire doc.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/productivity/decision-questionnaire` |
+| Source | Optional — install with `noone skills install official/productivity/decision-questionnaire` |
 | Path | `optional-skills/productivity/decision-questionnaire` |
 | Version | `1.0.0` |
-| Author | Matt Pocock (mattpocock/skills, to-questionnaire) + Hermes Agent |
+| Author | Matt Pocock (mattpocock/skills, to-questionnaire) + {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `questionnaire`, `decision`, `async`, `stakeholder`, `discovery`, `communication` |
 | Related skills | [`meeting-action-items`](../../bundled/productivity/productivity-meeting-action-items.md), [`document-to-action-items`](../../bundled/productivity/productivity-document-to-action-items.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Decision Questionnaire
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Decision Questionnaire {#decision-questionnaire-1}
 
 Turns something the user can't answer alone into a **questionnaire**: a
 Markdown document they hand to one person to fill in async, or fill out
@@ -38,7 +46,7 @@ questionnaire pulls it out of them.
 
 Ported from mattpocock/skills' MIT-licensed `to-questionnaire` skill.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - A decision blocks on facts or judgment held by someone else (a domain
   expert, a stakeholder, a vendor contact, ops)
@@ -49,7 +57,7 @@ Ported from mattpocock/skills' MIT-licensed `to-questionnaire` skill.
 Do NOT use when the answer is discoverable from the environment (codebase,
 docs, web) — find it yourself first.
 
-## Core Principle: Interview the Send, Not the Subject
+## Core Principle: Interview the Send, Not the Subject {#core-principle-interview-the-send-not-the-subject}
 
 The user cannot answer the subject-matter questions (that's the point), but
 they can ALWAYS answer questions about the send. Interview them only about
@@ -69,7 +77,7 @@ below. Write it to `decision-questionnaire-<slug>.md` in the current
 directory (slug from the topic) and report the absolute path. Done when the
 file exists and every item from step 2 is covered by a question.
 
-## Document Structure
+## Document Structure {#document-structure}
 
 Frame it as a **discovery questionnaire**: the user lacks context, the
 recipient holds it. Order questions most-important-first (async means you
@@ -112,7 +120,7 @@ A closing catch-all: anything we didn't ask that we should know?
 
 Every question gets an answer stub (`>`) directly beneath it.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 1. **Grilling the user about the subject.** They can't answer it — that's
    why the document exists. Only interview the send.
@@ -124,7 +132,7 @@ Every question gets an answer stub (`>`) directly beneath it.
    what turns a throwaway answer into a useful one — but don't add it to
    questions that are already unambiguous.
 
-## Verification
+## Verification {#verification}
 
 - [ ] Recipient's role/knowledge and the needed outcomes captured in two
       exchanges before drafting

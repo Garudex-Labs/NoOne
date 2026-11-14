@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any, Dict
 
 from gateway.hosted_room_peer import MAX_STATUS_GRANT_TTL_SECONDS
-from hermes_cli.sqlite_util import add_column_if_missing
 
 
 # Keep the extracted store's log records on the API server logger.
@@ -32,11 +31,6 @@ _EXTEND_RETENTION_BY_RUN = (
     "UPDATE run_idempotency SET retention_until=MAX(retention_until, ?) "
     "WHERE scope=? AND run_id=?")
 # Columns added after the first schema shipped; applied when missing.
-_MIGRATIONS = {
-    "owner_pid": "INTEGER NOT NULL DEFAULT 0",
-    "owner_started": "INTEGER NOT NULL DEFAULT 0",
-    "retention_until": "REAL NOT NULL DEFAULT 0",
-    "acknowledged_at": "REAL"}
 
 
 def _encode_status(status: dict[str, Any]) -> str:
@@ -69,8 +63,8 @@ class RunIdempotencyStore:
     def __init__(self, db_path: str | None = None):
         if db_path is None:
             try:
-                from hermes_cli.config import get_hermes_home
-                db_path = str(get_hermes_home() / "runs_idempotency.db")
+                from agent_cli.config import get_agent_home
+                db_path = str(get_agent_home() / "runs_idempotency.db")
             except Exception:
                 db_path = ":memory:"
         self._db_path = None if db_path == ":memory:" else db_path
@@ -86,30 +80,14 @@ class RunIdempotencyStore:
                 "process memory, so replay will not survive a restart: %s", exc)
             self._conn = sqlite3.connect(":memory:", check_same_thread=False)
             self._db_path = None
-        from hermes_state_wal import apply_wal_with_fallback
+        from agent_state_wal import apply_wal_with_fallback
         apply_wal_with_fallback(self._conn, db_label="runs_idempotency.db")
-        self._conn.execute(
-            """CREATE TABLE IF NOT EXISTS run_idempotency (
-                scope TEXT NOT NULL,
-                idempotency_key TEXT NOT NULL,
-                fingerprint TEXT NOT NULL,
-                run_id TEXT NOT NULL,
-                status_json TEXT NOT NULL,
-                owner_pid INTEGER NOT NULL DEFAULT 0,
-                owner_started INTEGER NOT NULL DEFAULT 0,
-                retention_until REAL NOT NULL DEFAULT 0,
-                acknowledged_at REAL,
-                created_at REAL NOT NULL,
-                updated_at REAL NOT NULL,
-                PRIMARY KEY (scope, idempotency_key)
-            )"""
-        )
-        columns = {str(row[1]) for row in self._conn.execute("PRAGMA table_info(run_idempotency)")}
-        for column, ddl in _MIGRATIONS.items():
-            if column not in columns:
-                add_column_if_missing(self._conn, "run_idempotency", column, f"{column} {ddl}")
-        self._conn.execute(
-            "CREATE UNIQUE INDEX IF NOT EXISTS run_idempotency_run_id ON run_idempotency(run_id)")
+        from agent_cli.database_migrations import initialize_database
+        try:
+            initialize_database(self._conn, "run_idempotency")
+        except BaseException:
+            self._conn.close()
+            raise
         self._conn.commit()
         self._lock = threading.Lock()
         self._tighten_permissions()

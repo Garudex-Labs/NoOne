@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesConnection } from '@/global'
+import type { AgentConnection } from '@/global'
 
 import { $activeGatewayProfile } from './profile'
 import { $selectedStoredSessionId, setConnection } from './session'
@@ -13,21 +13,21 @@ const local = {
   connectionId: 'local',
   mode: 'local',
   profile
-} as unknown as HermesConnection
+} as unknown as AgentConnection
 
 const remote = {
   baseUrl: 'https://homelab.example:8443',
   connectionId: 'homelab',
   mode: 'remote',
   profile
-} as unknown as HermesConnection
+} as unknown as AgentConnection
 
 const otherRemote = {
   baseUrl: 'https://other.example:8443',
   connectionId: 'other-remote',
   mode: 'remote',
   profile
-} as unknown as HermesConnection
+} as unknown as AgentConnection
 
 beforeEach(() => {
   window.localStorage.clear()

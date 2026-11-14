@@ -1,14 +1,16 @@
+import { appText } from '@noone/shared/application-identity'
+
+import { hermesApi } from '@/agent-client'
 import { hermesApiAs } from '@/api/client'
 import type {
-  HermesGitBaseBranch,
-  HermesGitBranch,
-  HermesGitWorktree,
-  HermesRepoPullRequests,
-  HermesRepoStatus,
-  HermesReviewList,
-  HermesReviewShipInfo
+  AgentGitBaseBranch,
+  AgentGitBranch,
+  AgentGitWorktree,
+  AgentRepoPullRequests,
+  AgentRepoStatus,
+  AgentReviewList,
+  AgentReviewShipInfo
 } from '@/global'
-import { hermesApi } from '@/hermes'
 
 import { desktopFsProfile, isDesktopFsRemoteMode } from './desktop-fs'
 
@@ -30,7 +32,7 @@ export interface GitOwnerRoute {
 
 const windowApi: GitApi = <T>(path: string, body?: Record<string, unknown>) => {
   if (!window.hermesDesktop) {
-    throw new Error('Hermes Desktop bridge is unavailable')
+    throw new Error(appText('{app_name} Desktop bridge is unavailable'))
   }
 
   return hermesApi<T>(
@@ -60,7 +62,7 @@ function remoteGitVia(api: GitApi): GitBridge {
 
   return {
     worktreeList: async repoPath =>
-      (await gitGet<{ worktrees: HermesGitWorktree[] }>('worktrees', { path: repoPath })).worktrees,
+      (await gitGet<{ worktrees: AgentGitWorktree[] }>('worktrees', { path: repoPath })).worktrees,
 
     worktreeAdd: (repoPath, options) => gitPost('worktree/add', { path: repoPath, ...options }),
 
@@ -70,19 +72,19 @@ function remoteGitVia(api: GitApi): GitBridge {
     branchSwitch: (repoPath, branch) => gitPost('branch/switch', { branch, path: repoPath }),
 
     branchList: async repoPath =>
-      (await gitGet<{ branches: HermesGitBranch[] }>('branches', { path: repoPath })).branches,
+      (await gitGet<{ branches: AgentGitBranch[] }>('branches', { path: repoPath })).branches,
 
     baseBranchList: async repoPath =>
-      (await gitGet<{ branches: HermesGitBaseBranch[] }>('base-branches', { path: repoPath })).branches,
+      (await gitGet<{ branches: AgentGitBaseBranch[] }>('base-branches', { path: repoPath })).branches,
 
-    repoStatus: repoPath => gitGet<HermesRepoStatus | null>('status', { path: repoPath }),
+    repoStatus: repoPath => gitGet<AgentRepoStatus | null>('status', { path: repoPath }),
 
     fileDiff: async (repoPath, filePath) =>
       (await gitGet<{ diff: string }>('file-diff', { file: filePath, path: repoPath })).diff,
 
     review: {
       list: (repoPath, scope, baseRef) =>
-        gitGet<HermesReviewList>('review/list', { base: baseRef, path: repoPath, scope }),
+        gitGet<AgentReviewList>('review/list', { base: baseRef, path: repoPath, scope }),
 
       diff: async (repoPath, filePath, scope, baseRef, staged) =>
         (
@@ -110,10 +112,10 @@ function remoteGitVia(api: GitApi): GitBridge {
 
       push: repoPath => gitPost('review/push', { path: repoPath }),
 
-      shipInfo: repoPath => gitGet<HermesReviewShipInfo>('review/ship-info', { path: repoPath }),
+      shipInfo: repoPath => gitGet<AgentReviewShipInfo>('review/ship-info', { path: repoPath }),
 
       prList: (repoPath, branches, numbers) =>
-        gitPost<HermesRepoPullRequests>('review/pr-list', { branches, numbers: numbers ?? [], path: repoPath }),
+        gitPost<AgentRepoPullRequests>('review/pr-list', { branches, numbers: numbers ?? [], path: repoPath }),
 
       createPr: repoPath => gitPost('review/create-pr', { path: repoPath })
     },

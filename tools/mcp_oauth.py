@@ -2,7 +2,7 @@
 """MCP OAuth 2.1 client support: browser authorization-code flow with PKCE.
 
 The SDK's ``OAuthClientProvider`` does discovery, client identification, PKCE, exchange and
-refresh; this module supplies ``HermesTokenStorage`` (on-disk persistence), the localhost callback
+refresh; this module supplies ``AgentTokenStorage`` (on-disk persistence), the localhost callback
 listener and ``build_oauth_auth()`` (legacy entry point). client_id is Hermes' Client ID Metadata
 Document URL (CIMD) when the server supports it, else RFC 7591 DCR. ``mcp_servers.<name>.oauth`` keys
 (all optional): client_id, client_secret, scope, redirect_port, redirect_uri (proxy callback),
@@ -42,7 +42,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qs, urlparse
 
-from hermes_constants import secure_parent_dir
+from agent_constants import secure_parent_dir
 from utils import atomic_json_write
 from tools.mcp_dashboard_oauth import contextvar_set as _contextvar_set, get_dashboard_oauth_flow
 
@@ -109,9 +109,9 @@ async def acquire_refresh_fence(path: Path, *, timeout: float = _REFRESH_FENCE_T
     """
     lock_path = _refresh_lock_path(path)
     try:
-        from hermes_constants import mkdir_under_hermes_home
+        from agent_constants import mkdir_under_agent_home
 
-        mkdir_under_hermes_home(lock_path.parent)
+        mkdir_under_agent_home(lock_path.parent)
         secure_parent_dir(lock_path)
         fd = os.open(lock_path, os.O_RDWR | os.O_CREAT, 0o600)
     except OSError as exc:
@@ -228,9 +228,9 @@ _USER_SKIPPED_SENTINEL = "__hermes_user_skipped__"
 
 def _get_token_dir(hermes_home: str | Path | None = None) -> Path:
     """``HERMES_HOME/mcp-tokens/`` — per-profile token directory."""
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
-    return Path(hermes_home if hermes_home is not None else get_hermes_home()) / "mcp-tokens"
+    return Path(hermes_home if hermes_home is not None else get_agent_home()) / "mcp-tokens"
 
 
 def _safe_filename(name: str) -> str:
@@ -275,7 +275,7 @@ def _reserve_callback_port() -> int:
     return _bind_reserved(0)  # type: ignore[return-value]  # port 0 never returns None
 
 
-def _cached_client_info(storage: "HermesTokenStorage | None") -> dict | None:
+def _cached_client_info(storage: "AgentTokenStorage | None") -> dict | None:
     """The on-disk client registration for *storage*, or None."""
     try:
         info = _read_json(storage._client_info_path()) if storage is not None else None
@@ -286,7 +286,7 @@ def _cached_client_info(storage: "HermesTokenStorage | None") -> dict | None:
     return info if isinstance(info, dict) else None
 
 
-def _cached_redirect(storage: "HermesTokenStorage | None") -> tuple[str | None, int | None]:
+def _cached_redirect(storage: "AgentTokenStorage | None") -> tuple[str | None, int | None]:
     """``(https proxy URI, loopback callback port)`` from the cached client registration (None when
     absent): a DCR ``client_id`` is bound to its registered redirect URI, so a new random port under
     it gets ``redirect_uri does not match any registered URIs``."""
@@ -397,9 +397,9 @@ def _read_json(path: Path) -> dict | None:
 def _write_json(path: Path, data: dict) -> None:
     """OAuth tokens/client info at 0600 from creation, parent tightened to 0700 (``secure_parent_dir``
     refuses ``/``, top-level dirs and the install tree — #25821, #93050)."""
-    from hermes_constants import mkdir_under_hermes_home
+    from agent_constants import mkdir_under_agent_home
 
-    mkdir_under_hermes_home(path.parent)
+    mkdir_under_agent_home(path.parent)
     secure_parent_dir(path)
     atomic_json_write(path, data, mode=0o600, default=str)
 
@@ -409,7 +409,7 @@ def _model_json(model: Any) -> dict:
     return model.model_dump(mode="json", exclude_none=True)
 
 
-class HermesTokenStorage:
+class AgentTokenStorage:
     """Persist OAuth state as ``HERMES_HOME/mcp-tokens/<server_name>`` + ``.json`` (tokens),
     ``.client.json`` (client info), ``.meta.json`` (server metadata), ``.cimd-off`` (CIMD refused)."""
 
@@ -574,9 +574,9 @@ class HermesTokenStorage:
         the refused client_id. Cleared by ``remove()`` so a fixed document gets a retry."""
         path = self._cimd_rejected_path()
         try:
-            from hermes_constants import mkdir_under_hermes_home
+            from agent_constants import mkdir_under_agent_home
 
-            mkdir_under_hermes_home(path.parent)
+            mkdir_under_agent_home(path.parent)
             path.touch()
         except OSError as exc:  # non-fatal — worst case we retry CIMD later
             logger.debug("Could not record CIMD rejection at %s: %s", path, exc)
@@ -613,9 +613,9 @@ class HermesTokenStorage:
         if not snapshot:
             return
         token_dir = _get_token_dir(self._hermes_home)
-        from hermes_constants import mkdir_under_hermes_home
+        from agent_constants import mkdir_under_agent_home
 
-        mkdir_under_hermes_home(token_dir)
+        mkdir_under_agent_home(token_dir)
         for fname, data in snapshot.items():
             try:
                 fd = os.open(str(token_dir / fname), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, stat.S_IRUSR | stat.S_IWUSR)
@@ -771,7 +771,7 @@ _SSH_HINT_LOOPBACK = (
     "         ssh -N -L {port}:127.0.0.1:{port} <user>@<this-host>\n"
     "       then open the URL above and let it redirect normally.\n"
     "\n"
-    "  See: https://hermes-agent.nousresearch.com/docs/guides/oauth-over-ssh\n")
+    "  See: https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/guides/oauth-over-ssh.md\n")
 
 
 def _announce_authorization_url(
@@ -928,15 +928,14 @@ HermesOAuthClientProvider: Any = None
 
 def remove_oauth_tokens(server_name: str, *, hermes_home: str | Path | None = None) -> None:
     """Delete stored OAuth tokens and client info for a server."""
-    HermesTokenStorage(server_name, hermes_home=hermes_home).remove()
+    AgentTokenStorage(server_name, hermes_home=hermes_home).remove()
     logger.info("OAuth tokens removed for '%s'", server_name)
 
 
 # CIMD (OAuth Client ID Metadata Documents): the client_id IS an HTTPS URL the server fetches for our
 # name/logo/redirect URIs, replacing per-install DCR. The SDK does the protocol; Hermes only decides
-# eligibility. Published from ``website/static/oauth/client-metadata.json``; the github.io origin is
+# eligibility. Published from ``website/docs/oauth/client-metadata.json``; the github.io origin is
 # deliberate — servers MUST NOT follow redirects when fetching it, and hermes-agent.nousresearch.com/docs/* 301s here.
-_CIMD_CLIENT_METADATA_URL = "https://nousresearch.github.io/hermes-agent/docs/oauth/client-metadata.json"
 # Loopback ports/hosts declared in that document (exact match, so no ephemeral port under CIMD);
 # below Linux's 32768 ephemeral floor. tests/tools/test_mcp_cimd.py keeps them in sync.
 _CIMD_PORTS = (27890, 27891, 27892, 27893, 27894)
@@ -982,7 +981,7 @@ def _pick_cimd_port() -> int | None:
     return _assigned_cimd_ports[0] if _assigned_cimd_ports else None
 
 
-def _server_declined_cimd(storage: HermesTokenStorage | None) -> bool:
+def _server_declined_cimd(storage: AgentTokenStorage | None) -> bool:
     """True when cached metadata shows this server doesn't advertise CIMD. The SDK decides CIMD vs DCR
     in its 401 branch — after Hermes must fix the redirect URI — so cached metadata closes the gap;
     only a genuinely unknown server pays the optimistic pin."""
@@ -993,11 +992,11 @@ def _server_declined_cimd(storage: HermesTokenStorage | None) -> bool:
     return metadata is not None and getattr(metadata, "client_id_metadata_document_supported", None) is not True
 
 
-def _maybe_use_cimd(cfg: dict, storage: HermesTokenStorage | None = None) -> tuple[str, int] | None:
+def _maybe_use_cimd(cfg: dict, storage: AgentTokenStorage | None = None) -> tuple[str, int] | None:
     """``(client_id URL, pinned callback port)``, or None to use DCR. Each ineligibility case means the
     redirect URI is not one the document declares, the client identity is already settled, or the
     server is known not to want a document — a metadata URL would be rejected."""
-    url = cfg.get("client_metadata_url") or _CIMD_CLIENT_METADATA_URL
+    url = cfg.get("client_metadata_url")
     ineligible = (
         cfg.get("cimd") is False
         or not _is_valid_cimd_url(url)
@@ -1047,7 +1046,7 @@ def login_connect_timeout(config: dict) -> float:
                _seconds(oauth_cfg.get("timeout"), 300.0) + 15.0)
 
 
-def _configure_callback_port(cfg: dict, storage: HermesTokenStorage | None = None) -> int:
+def _configure_callback_port(cfg: dict, storage: AgentTokenStorage | None = None) -> int:
     """Resolve the callback port into ``cfg['_resolved_port']`` (0 = non-loopback URI). Precedence:
     dashboard flow / cached https redirect URI → CIMD pinned port (sets ``cfg['_cimd_url']``) →
     ``oauth.redirect_port`` → cached registration port → fresh ephemeral port (the only parked one).
@@ -1158,7 +1157,7 @@ def _build_client_metadata(cfg: dict) -> "OAuthClientMetadata":
 
 
 def _invalidate_tokens_on_client_change(
-    storage: HermesTokenStorage, new_client_id: str, new_client_secret: str | None) -> None:
+    storage: AgentTokenStorage, new_client_id: str, new_client_secret: str | None) -> None:
     """Drop cached tokens when the configured client identity changes: tokens minted under the old
     ``client_id`` fail refresh with ``invalid_client``, and pre-registered clients are exempt from
     auto-poison, so stale tokens would wedge every request until a manual wipe. Compares on-disk
@@ -1187,7 +1186,7 @@ def _invalidate_tokens_on_client_change(
             storage._server_name, old_client_id, new_client_id, storage._server_name)
 
 
-def _maybe_preregister_client(storage: HermesTokenStorage, cfg: dict, client_metadata: "OAuthClientMetadata") -> None:
+def _maybe_preregister_client(storage: AgentTokenStorage, cfg: dict, client_metadata: "OAuthClientMetadata") -> None:
     """If cfg has a pre-registered client_id, persist it to storage."""
     client_id = cfg.get("client_id")
     if not client_id:

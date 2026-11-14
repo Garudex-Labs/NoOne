@@ -1,34 +1,42 @@
 ---
 title: "Solana — Query Solana wallets, tokens, txs, and NFTs in USD"
-sidebar_label: "Solana"
+sidebarTitle: "Solana"
 description: "Query Solana wallets, tokens, txs, and NFTs in USD"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Solana
+# Solana {#solana}
 
 Query Solana wallets, tokens, txs, and NFTs in USD.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/blockchain/solana` |
+| Source | Optional — install with `noone skills install official/blockchain/solana` |
 | Path | `optional-skills/blockchain/solana` |
 | Version | `0.2.0` |
-| Author | Deniz Alagoz (gizdusum), enhanced by Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Solana`, `Blockchain`, `Crypto`, `Web3`, `RPC`, `DeFi`, `NFT` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Solana Blockchain Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Solana Blockchain Skill {#solana-blockchain-skill}
 
 Query Solana on-chain data enriched with USD pricing via CoinGecko.
 8 commands: wallet portfolio, token info, transactions, activity, NFTs,
@@ -38,7 +46,7 @@ No API key needed. Uses only Python standard library (urllib, json, argparse).
 
 ---
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks for a Solana wallet balance, token holdings, or portfolio value
 - User wants to inspect a specific transaction by signature
@@ -51,7 +59,7 @@ No API key needed. Uses only Python standard library (urllib, json, argparse).
 
 ---
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 The helper script uses only Python standard library (urllib, json, argparse).
 No external packages required.
@@ -61,7 +69,7 @@ to ~10-30 requests/minute). For faster lookups, use `--no-prices` flag.
 
 ---
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 RPC endpoint (default): https://api.mainnet-beta.solana.com
 Override: export SOLANA_RPC_URL=https://your-private-rpc.com
@@ -81,9 +89,9 @@ python solana_client.py price    <mint_or_symbol>
 
 ---
 
-## Procedure
+## Procedure {#procedure}
 
-### 0. Setup Check
+### 0. Setup Check {#0-setup-check}
 
 ```bash
 python --version
@@ -95,7 +103,7 @@ export SOLANA_RPC_URL="https://api.mainnet-beta.solana.com"
 python ~/.hermes/skills/blockchain/solana/scripts/solana_client.py stats
 ```
 
-### 1. Wallet Portfolio
+### 1. Wallet Portfolio {#1-wallet-portfolio}
 
 Get SOL balance, SPL token holdings with USD values, NFT count, and
 portfolio total. Tokens sorted by value, dust filtered, known tokens
@@ -114,7 +122,7 @@ Flags:
 Output includes: SOL balance + USD value, token list with prices sorted
 by value, dust count, NFT summary, total portfolio value in USD.
 
-### 2. Transaction Details
+### 2. Transaction Details {#2-transaction-details}
 
 Inspect a full transaction by its base58 signature. Shows balance changes
 in both SOL and USD.
@@ -127,7 +135,7 @@ python ~/.hermes/skills/blockchain/solana/scripts/solana_client.py \
 Output: slot, timestamp, fee, status, balance changes (SOL + USD),
 program invocations.
 
-### 3. Token Info
+### 3. Token Info {#3-token-info}
 
 Get SPL token metadata, current price, market cap, supply, decimals,
 mint/freeze authorities, and top 5 holders.
@@ -140,7 +148,7 @@ python ~/.hermes/skills/blockchain/solana/scripts/solana_client.py \
 Output: name, symbol, decimals, supply, price, market cap, top 5
 holders with percentages.
 
-### 4. Recent Activity
+### 4. Recent Activity {#4-recent-activity}
 
 List recent transactions for an address (default: last 10, max: 25).
 
@@ -149,7 +157,7 @@ python ~/.hermes/skills/blockchain/solana/scripts/solana_client.py \
   activity 9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM --limit 25
 ```
 
-### 5. NFT Portfolio
+### 5. NFT Portfolio {#5-nft-portfolio}
 
 List NFTs owned by a wallet (heuristic: SPL tokens with amount=1, decimals=0).
 
@@ -160,7 +168,7 @@ python ~/.hermes/skills/blockchain/solana/scripts/solana_client.py \
 
 Note: Compressed NFTs (cNFTs) are not detected by this heuristic.
 
-### 6. Whale Detector
+### 6. Whale Detector {#6-whale-detector}
 
 Scan the most recent block for large SOL transfers with USD values.
 
@@ -171,7 +179,7 @@ python ~/.hermes/skills/blockchain/solana/scripts/solana_client.py \
 
 Note: scans the latest block only — point-in-time snapshot, not historical.
 
-### 7. Network Stats
+### 7. Network Stats {#7-network-stats}
 
 Live Solana network health: current slot, epoch, TPS, supply, validator
 version, SOL price, and market cap.
@@ -180,7 +188,7 @@ version, SOL price, and market cap.
 python ~/.hermes/skills/blockchain/solana/scripts/solana_client.py stats
 ```
 
-### 8. Price Lookup
+### 8. Price Lookup {#8-price-lookup}
 
 Quick price check for any token by mint address or known symbol.
 
@@ -196,7 +204,7 @@ PYTH, HNT, RNDR, WEN, W, TNSR, DRIFT, bSOL, JLP, WIF, MEW, BOME, PENGU.
 
 ---
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **CoinGecko rate-limits** — free tier allows ~10-30 requests/minute.
   Price lookups use 1 request per token. Wallets with many tokens may
@@ -217,7 +225,7 @@ PYTH, HNT, RNDR, WEN, W, TNSR, DRIFT, bSOL, JLP, WIF, MEW, BOME, PENGU.
 
 ---
 
-## Verification
+## Verification {#verification}
 
 ```bash
 # Should print current Solana slot, TPS, and SOL price

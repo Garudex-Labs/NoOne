@@ -1,6 +1,6 @@
 """A user-installed memory provider parked in ``plugins.disabled`` must not load.
 
-The Plugins hub / `hermes plugins disable` write the deny-list; ``plugins/memory`` never read it, so
+The Plugins hub / `noone plugins disable` write the deny-list; ``plugins/memory`` never read it, so
 the UI said "disabled" while the provider kept loading at every agent init.
 """
 
@@ -10,7 +10,7 @@ import contextlib
 
 import pytest
 
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 from plugins.memory import find_provider_dir, load_memory_provider
 
 _PROVIDER = """
@@ -46,11 +46,11 @@ def homes(tmp_path, monkeypatch):
 
 @contextlib.contextmanager
 def _scoped_home(home):
-    token = set_hermes_home_override(home)
+    token = set_agent_home_override(home)
     try:
         yield
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def test_disabled_user_provider_is_found_but_never_loaded(homes):

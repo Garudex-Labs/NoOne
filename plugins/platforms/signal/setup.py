@@ -1,12 +1,12 @@
-"""Interactive ``hermes gateway setup`` wizard for Signal. Helpers resolve late through the
-``hermes_cli.gateway`` facade so the plugin stays importable outside the CLI and the seams tests
+"""Interactive ``noone gateway setup`` wizard for Signal. Helpers resolve late through the
+``agent_cli.gateway`` facade so the plugin stays importable outside the CLI and the seams tests
 patch there keep intercepting."""
 
 import shutil
 
 
 def _gw():
-    from hermes_cli import gateway  # late: CLI-only dependency
+    from agent_cli import gateway  # late: CLI-only dependency
     return gateway
 
 
@@ -20,7 +20,7 @@ def _signal_line_input(prompt_text: str) -> str | None:
 
 
 def interactive_setup() -> None:
-    """``hermes gateway setup`` flow for Signal (registered as the plugin's ``setup_fn``)."""
+    """``noone gateway setup`` flow for Signal (registered as the plugin's ``setup_fn``)."""
     _gw().print_setup_header("📡 Signal")
 
     existing_url = _gw().get_env_value("SIGNAL_HTTP_URL")

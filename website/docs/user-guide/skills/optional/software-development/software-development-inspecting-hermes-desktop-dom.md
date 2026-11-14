@@ -1,37 +1,45 @@
 ---
-title: "Inspecting Hermes Desktop Dom — Read the live Hermes desktop DOM/CSS over CDP"
-sidebar_label: "Inspecting Hermes Desktop Dom"
-description: "Read the live Hermes desktop DOM/CSS over CDP"
+title: "Inspecting the agent Desktop Dom — Read the live the agent desktop DOM/CSS over CDP"
+sidebarTitle: "Inspecting the agent Desktop Dom"
+description: "Read the live the agent desktop DOM/CSS over CDP"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Inspecting Hermes Desktop Dom
+# Inspecting {{app-name}} Desktop Dom {#inspecting-hermes-desktop-dom}
 
-Read the live Hermes desktop DOM/CSS over CDP.
+Read the live {{app-name}} desktop DOM/CSS over CDP.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/software-development/inspecting-hermes-desktop-dom` |
+| Source | Optional — install with `noone skills install official/software-development/inspecting-hermes-desktop-dom` |
 | Path | `optional-skills/software-development/inspecting-hermes-desktop-dom` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `desktop`, `electron`, `cdp`, `dom`, `ui-verification`, `self-inspection` |
 | Related skills | [`node-inspect-debugger`](../../optional/software-development/software-development-node-inspect-debugger.md), [`systematic-debugging`](../../bundled/software-development/software-development-systematic-debugging.md), [`dogfood`](../../bundled/software-development/software-development-dogfood.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Inspecting the live Hermes desktop DOM
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Inspecting the live {{app-name}} desktop DOM {#inspecting-the-live-hermes-desktop-dom}
+
+## Overview {#overview}
 
 When you are developing `apps/desktop` and the user is running that same app
 (`hgui` / `pnpm run dev`), you can read the **live rendered DOM** of the window
@@ -48,7 +56,7 @@ It cannot tell you whether the result looks good. Colour balance, spacing feel,
 and "is this ugly" still need the user's eyes or a screenshot. Answer facts with
 CDP; hand aesthetics to the user.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - Verifying a UI change actually took effect in the running app
 - "Why is this element still X?" — find the winning rule before editing anything
@@ -60,7 +68,7 @@ CDP; hand aesthetics to the user.
 `debugging-hermes-desktop`), or anything where the real question is "does this
 look right".
 
-## The port
+## The port {#the-port}
 
 Open on `127.0.0.1:9222` for any dev-server run. Closed in exactly two cases
 (`apps/desktop/electron/dev-cdp.ts`):
@@ -82,7 +90,7 @@ Empty → no port. Do not guess another port silently.
 **Never relaunch the user's app to get a port.** That destroys their session and
 their state. Launch your own isolated instance instead (below).
 
-## Reading the DOM
+## Reading the DOM {#reading-the-dom}
 
 `apps/desktop/scripts/eval.mjs` is the one-liner:
 
@@ -110,7 +118,7 @@ cdp.close()
 them over inventing a `querySelector` — they are updated as a unit when
 components move.
 
-## The question this is best at: which rule won?
+## The question this is best at: which rule won? {#the-question-this-is-best-at-which-rule-won}
 
 Editing every call site because a style "isn't applying" is the classic waste.
 Read the real node first:
@@ -134,7 +142,7 @@ call sites will not fix it, and you need the ancestor rule. A plugin stylesheet
 (e.g. `@tailwindcss/typography`'s `prose a { font-weight: 500 }`) routinely beats
 a utility class; override on the shared class, not at each usage.
 
-## Your own isolated instance
+## Your own isolated instance {#your-own-isolated-instance}
 
 When there is no port, or you must not disturb the user's window:
 
@@ -154,7 +162,7 @@ the background and kill it when done.
 `pnpm run perf:serve` does the same with a temp `HERMES_HOME` baked in, if you
 also want the perf harness.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Never kill the user's dev server or app to "free" anything.** A mid-serve
   kill nukes Chromium's socket pool, and the resulting `ERR_NETWORK_CHANGED`

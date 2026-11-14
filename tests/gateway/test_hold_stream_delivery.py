@@ -57,7 +57,7 @@ class _Chat(BasePlatformAdapter):
 
 
 class _NativeStreamChat(_Chat):
-    """WeCom's shape: no edits, a native cumulative stream that opens with an empty seed frame."""
+    """A native transport: no edits, a native cumulative stream that opens with an empty seed frame."""
 
     SUPPORTS_NATIVE_STREAMING = True
 
@@ -98,7 +98,7 @@ CHATS = {
 
 async def _deliver(chat, *, hold, monkeypatch):
     import gateway.run as gateway_run
-    from hermes_cli import plugins
+    from agent_cli import plugins
 
     home = Path(os.environ["HERMES_HOME"])
     platform = Platform.SLACK if chat.platform == Platform.RELAY else Platform.TELEGRAM

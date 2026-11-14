@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 from gateway.whatsapp_identity import expand_whatsapp_aliases, normalize_whatsapp_identifier
-from hermes_constants import get_default_hermes_root, get_hermes_dir, get_hermes_home
+from agent_constants import get_default_agent_root, get_agent_dir, get_agent_home
 from utils import atomic_json_write, file_cache_version
 
 logger = logging.getLogger(__name__)
@@ -47,16 +47,16 @@ PAIRING_DIR = None
 # eagerly: this module is imported once by the long-lived gateway process at container/process boot, and
 # computing the path eagerly freezes it to whatever HERMES_HOME/profile context existed at that exact import
 # moment for the rest of the process's lifetime -- even if a context-local override (see
-# hermes_constants.set_hermes_home_override) is established afterward. A freshly-started, short-lived
+# agent_constants.set_agent_home_override) is established afterward. A freshly-started, short-lived
 # process (e.g. the ``hermes pairing`` CLI) re-imports this module later with the final environment already
 # in place, so it never observes the stale value -- the resulting asymmetry is what made pending pairing
 # codes issued by the gateway unrecoverable while CLI-side writes to the same directory kept working
-# (NousResearch/hermes-agent#93449). ``_default_pairing_dir()`` below resolves this fresh on every call in
+# (Garudex-Labs/NoOne#93449). ``_default_pairing_dir()`` below resolves this fresh on every call in
 # production. Tests patch this attribute directly to a concrete path for isolation (e.g.
 # ``patch("gateway.pairing.PAIRING_DIR", tmp_path)``); that continues to work unchanged, since a patched
 # (non-``None``) value takes precedence over recomputing.
 def _default_pairing_dir() -> Path:
-    return PAIRING_DIR if PAIRING_DIR is not None else get_hermes_dir("platforms/pairing", "pairing")
+    return PAIRING_DIR if PAIRING_DIR is not None else get_agent_dir("platforms/pairing", "pairing")
 
 
 def _allowlist_env_for_platform(platform: str) -> Optional[str]:
@@ -69,7 +69,7 @@ def _allowlist_env_for_platform(platform: str) -> Optional[str]:
     have loaded them yet."""
     platform = (platform or "").lower().strip()
     with contextlib.suppress(Exception):
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
         discover_plugins()  # idempotent
     with contextlib.suppress(Exception):
         from gateway.platform_env import authz_field
@@ -146,7 +146,7 @@ def _configured_allowlist(platform: str):
 def _write_allowlist_env(env_var: str, ids: list) -> None:
     """Best-effort persist (empty list removes the key); the pairing store grant still authorizes via the union."""
     with contextlib.suppress(Exception):
-        from hermes_cli.config import save_env_value, remove_env_value
+        from agent_cli.config import save_env_value, remove_env_value
         save_env_value(env_var, ",".join(ids)) if ids else remove_env_value(env_var)
 
 
@@ -296,7 +296,7 @@ def _migrate_split_pairing_dirs(*, home: Optional[Path] = None, active: Optional
     If both exist, approved users in the inactive location must not be silently
     ignored (they would be asked for a fresh code). Active data wins on key conflict.
     """
-    home = home or get_hermes_home()
+    home = home or get_agent_home()
     old_dir = home / "pairing"
     active = active if active is not None else _default_pairing_dir()
     alternate = home / "platforms" / "pairing" if active.resolve() == old_dir.resolve() else old_dir
@@ -345,9 +345,9 @@ class PairingStore:
     def __init__(self, profile: Optional[str] = None):
         profile_home = None
         if profile:
-            root = get_default_hermes_root()
+            root = get_default_agent_root()
             profile_home = root if profile == "default" else root / "profiles" / profile
-        self._dir = get_hermes_dir("platforms/pairing", "pairing", home=profile_home) if profile else _default_pairing_dir()
+        self._dir = get_agent_dir("platforms/pairing", "pairing", home=profile_home) if profile else _default_pairing_dir()
         self._dir.mkdir(parents=True, exist_ok=True)
         # Merge the alternate old/new layout so upgrades cannot split approvals.
         _migrate_split_pairing_dirs(home=profile_home, active=self._dir)
@@ -391,7 +391,7 @@ class PairingStore:
         The file lock is taken FIRST: ``is_approved`` runs on the gateway event loop under
         ``self._lock``, so holding it while waiting (up to 10 s) on another process would stall
         every chat on that loop. ``is_approved`` never takes the file lock, so the order is safe."""
-        from hermes_cli.auth import _file_lock
+        from agent_cli.auth import _file_lock
         with _file_lock(
             self._dir / ".lock", _dir_lock_holder(self._dir), 10.0,
             f"Timed out waiting for the pairing store lock ({self._dir})",

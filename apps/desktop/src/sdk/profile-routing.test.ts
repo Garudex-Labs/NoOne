@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { ProfileInfo } from '@/types/hermes'
+import type { ProfileInfo } from '@/types/agent-client'
 
 vi.mock('@/app/chat/session-view', async () => {
   const { atom } = await import('nanostores')
@@ -22,7 +22,7 @@ vi.mock('@/components/pane-shell/tree/store', async () => {
   }
 })
 vi.mock('@/contrib/events', () => ({ onGatewayEvent: vi.fn() }))
-vi.mock('@/hermes', () => ({ deleteProfile: vi.fn(), getLogs: vi.fn(), getStatus: vi.fn(), hermesApi: vi.fn() }))
+vi.mock('@/agent-client', () => ({ deleteProfile: vi.fn(), getLogs: vi.fn(), getStatus: vi.fn(), hermesApi: vi.fn() }))
 vi.mock('@/store/notifications', () => ({ notify: vi.fn(), notifyError: vi.fn() }))
 vi.mock('@/store/system-actions', () => ({ runGatewayRestart: vi.fn() }))
 vi.mock('@/store/session', async () => {
@@ -140,7 +140,7 @@ vi.mock('@/store/gateway', async () => {
 const { HYDRATION_SYNC_BADGE_TIMEOUT_MS, host } = await import('./index')
 
 const { openSession: openSessionCore } = await import('@/app/open-session')
-const { deleteProfile, hermesApi } = await import('@/hermes')
+const { deleteProfile, hermesApi } = await import('@/agent-client')
 
 const {
   activeGatewayConnectionId,

@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { $changeEventsAvailable, $pairingChangeTick, $platformsChangeTick } from '@/store/live-sync'
 import { $settingsScopeOverride } from '@/store/settings-scope'
-import type { MessagingPlatformInfo } from '@/types/hermes'
+import type { MessagingPlatformInfo } from '@/types/agent-client'
 
 import { MessagingView } from './index'
 
@@ -28,7 +28,7 @@ const getTelegramOnboardingStatus = vi.fn()
 const applyTelegramOnboarding = vi.fn()
 const notify = vi.fn()
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   approvePairing: (platformId: string, requestId: string, profile?: null | string) =>
     approvePairing(platformId, requestId, profile),
   getMessagingPlatforms: (profile?: null | string) => getMessagingPlatforms(profile),
@@ -312,7 +312,7 @@ describe('MessagingView setup-guide link', () => {
   })
 
   it('opens a real docs URL through the validated external opener', async () => {
-    const docsUrl = 'https://hermes-agent.nousresearch.com/docs/user-guide/messaging/teams'
+    const docsUrl = 'https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/teams.md'
     getMessagingPlatforms.mockResolvedValue({ platforms: [platform({ docs_url: docsUrl })] })
 
     await renderMessaging()

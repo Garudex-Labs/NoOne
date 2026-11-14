@@ -5,8 +5,7 @@
 export const gatewayTextEn = {
   canonical: {
     launch: {
-      noTuiPolicy: 'gateway does not support tui session policy; update/restart the gateway',
-      unsupportedOptions: (options: string) => `gateway does not support TUI launch options: ${options}`,
+      unsupportedOptions: (options: string) => `gateway does not support session launch options: ${options}`,
       // The same refusals for a client that launches with another source or names itself.
       /** {0} = session source */
       noSourcePolicy: (source: string) => `gateway does not support ${source} session policy; update/restart the gateway`,

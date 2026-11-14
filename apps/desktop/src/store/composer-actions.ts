@@ -16,7 +16,7 @@ export interface ComposerAction {
   /** Stable within a session; also the render key. */
   id: string
   label: string
-  /** Codicon name rendered before the label. */
+  /** AppIcon name rendered before the label. */
   icon?: string
   disabled?: boolean
   /** What the badge does. Anything: submit a prompt, open a pane, call the

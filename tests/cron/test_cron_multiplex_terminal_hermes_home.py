@@ -40,7 +40,7 @@ def two_profiles(tmp_path, monkeypatch):
 def _install_agent(monkeypatch, seen):
     import cron.scheduler as sched
     from cron import scheduler_delivery as sched_delivery
-    from hermes_cli import runtime_provider as rtp
+    from agent_cli import runtime_provider as rtp
 
     class TerminalAgent:
         def __init__(self, **_kw):
@@ -70,7 +70,7 @@ def _fire(home: Path, job_id: str):
     """Run one job through the owner bridge for *home*'s authority."""
     from gateway.session_contract import SessionRef
     from gateway.session_cron import execute
-    from hermes_state_registry import acquire, release
+    from agent_state_registry import acquire, release
 
     job = {"id": job_id, "name": job_id, "schedule_display": "manual", "model": "test-model"}
     ref = SessionRef(home.name, f"cron-{job_id}")

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./styles.module.css";
+import { docUrl } from "../DocLink";
 
 interface BlueprintField {
   name: string;
@@ -84,7 +85,7 @@ export default function AutomationBlueprintsCatalog(): React.JSX.Element {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(INDEX_URL)
+    fetch(docUrl(INDEX_URL))
       .then((r) => r.json())
       .then((data: Blueprint[]) => {
         if (!cancelled) setBlueprints(data);

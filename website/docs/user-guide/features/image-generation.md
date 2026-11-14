@@ -1,15 +1,14 @@
 ---
 title: Image Generation
-description: Generate images via FAL.ai — 11 models including FLUX 2, GPT Image (1.5 & 2), Nano Banana Pro, Ideogram, Recraft V4 Pro, Krea 2, and more, selectable via `hermes tools`.
-sidebar_label: Image Generation
-sidebar_position: 6
+description: Generate images via FAL.ai — 11 models including FLUX 2, GPT Image (1.5 & 2), Nano Banana Pro, Ideogram, Recraft V4 Pro, Krea 2, and more, selectable via `noone tools`.
+sidebarTitle: Image Generation
 ---
 
-# Image Generation
+# Image Generation {#image-generation}
 
-Hermes Agent generates images from text prompts via FAL.ai. Eleven models are supported out of the box, each with different speed, quality, and cost tradeoffs. The active model is user-configurable via `hermes tools` and persists in `config.yaml`.
+{{app-name}} generates images from text prompts via FAL.ai. Eleven models are supported out of the box, each with different speed, quality, and cost tradeoffs. The active model is user-configurable via `noone tools` and persists in `config.yaml`.
 
-## Supported Models
+## Supported Models {#supported-models}
 
 | Model | Speed | Strengths | Price |
 |---|---|---|---|
@@ -27,27 +26,35 @@ Hermes Agent generates images from text prompts via FAL.ai. Eleven models are su
 
 Prices are FAL's pricing at time of writing; check [fal.ai](https://fal.ai/) for current numbers.
 
-## Setup
+## Setup {#setup}
 
-:::tip Nous Subscribers
-If you have a paid [Nous Portal](https://portal.nousresearch.com) subscription, you can use image generation through the **[Tool Gateway](tool-gateway.md)** without a FAL API key. Your model selection persists across both paths. New installs can run `hermes setup --portal` to log in and turn on every gateway tool at once; existing installs can pick **Nous Subscription** as the image-gen backend via `hermes tools`.
+<Tip>
+
+<div className="doc-callout-title">
+
+Nous Subscribers
+
+</div>
+
+If you have a paid [Nous Portal](https://portal.nousresearch.com) subscription, you can use image generation through the **[Tool Gateway](tool-gateway.md)** without a FAL API key. Your model selection persists across both paths. New installs can run `noone setup --portal` to log in and turn on every gateway tool at once; existing installs can pick **Nous Subscription** as the image-gen backend via `noone tools`.
 
 The **Nous Subscription** row is the only managed row. Its model picker spans every gateway the subscription runs — the FAL catalog above, native **Krea 3** (`krea-3`) and **Krea 2** (`krea-2-medium`, `krea-2-large`, `krea-2-medium-turbo`) and any Nous Portal image models — each model listed once, and the model you pick decides which gateway serves the request. Free tool-pool accounts see the FAL models only; Krea and Portal models are paid-subscription. With Krea 3 selected, `image_url` is a picture to edit (up to 4 reference images in total; an edit keeps the picture's own framing) and `image_generate` offers `thinking` (`fast` or `high`) and `resolution` (`1K` or `2K`). With a Krea 2 model selected, it offers Krea's `creativity` setting and its `intensity`, `complexity` and `movement` sliders (-100 to 100) instead.
 
-If the managed gateway returns `HTTP 4xx` for a specific model, that model isn't yet proxied on the portal side — the agent will tell you so, with remediation steps (switch to FAL.ai in `hermes tools` with your own `FAL_KEY` for direct access, or pick a different model).
-:::
+If the managed gateway returns `HTTP 4xx` for a specific model, that model isn't yet proxied on the portal side — the agent will tell you so, with remediation steps (switch to FAL.ai in `noone tools` with your own `FAL_KEY` for direct access, or pick a different model).
 
-### Get a FAL API Key
+</Tip>
+
+### Get a FAL API Key {#get-a-fal-api-key}
 
 1. Sign up at [fal.ai](https://fal.ai/)
 2. Generate an API key from your dashboard
 
-### Configure and Pick a Model
+### Configure and Pick a Model {#configure-and-pick-a-model}
 
 Run the tools command:
 
 ```bash
-hermes tools
+noone tools
 ```
 
 Navigate to **🎨 Image Generation**, pick your backend (Nous Subscription or FAL.ai), then the picker shows all supported models in a column-aligned table — arrow keys to navigate, Enter to select:
@@ -69,13 +76,13 @@ image_gen:
   max_parallel_requests: 4      # concurrent images in one tool-call batch
 ```
 
-`image_gen.provider` is the single selection key: `nous` routes through the managed Tool Gateway; a vendor name (`fal`, `openai`, `xai`, `krea`, ...) goes direct with your own key. The runtime always follows this stored selection — a `FAL_KEY` in `.env` is ignored while `provider: nous`, and `provider: fal` without `FAL_KEY` errors with `image_gen is configured to use fal (set via hermes tools), but FAL_KEY is not set. Run 'hermes tools' to change it.` rather than silently rerouting. Change providers via `hermes tools`, not by adding/removing keys. (The old `use_gateway` boolean is legacy — still read as `nous` when `true`, but never written anymore.)
+`image_gen.provider` is the single selection key: `nous` routes through the managed Tool Gateway; a vendor name (`fal`, `openai`, `xai`, `krea`, ...) goes direct with your own key. The runtime always follows this stored selection — a `FAL_KEY` in `.env` is ignored while `provider: nous`, and `provider: fal` without `FAL_KEY` errors with `image_gen is configured to use fal (set via noone tools), but FAL_KEY is not set. Run 'noone tools' to change it.` rather than silently rerouting. Change providers via `noone tools`, not by adding/removing keys. (The old `use_gateway` boolean is legacy — still read as `nous` when `true`, but never written anymore.)
 
-`max_parallel_requests` defaults to `4`. Hermes clamps it to at least one and
+`max_parallel_requests` defaults to `4`. {{app-name}} clamps it to at least one and
 to the global tool-worker limit, so image providers receive bounded parallel
 requests without allowing an image batch to bypass the agent's concurrency cap.
 
-### OpenRouter: the full Image API catalog
+### OpenRouter: the full Image API catalog {#openrouter-the-full-image-api-catalog}
 
 With `image_gen.provider: openrouter`, the model picker lists OpenRouter's
 entire live image catalog — the dedicated
@@ -83,7 +90,7 @@ entire live image catalog — the dedicated
 models (Seedream, FLUX.2, Recraft, Qwen Image, MAI, Krea, Riverflow, Grok
 Imagine, and more — 40+ ids) merged with the chat-completions image models.
 The catalog is fetched live from `GET /images/models` and `GET /models`, so
-new models appear in the picker as soon as OpenRouter serves them; no Hermes
+new models appear in the picker as soon as OpenRouter serves them; no {{app-name}}
 update needed. Generation routes each model to the surface that serves it
 (dedicated `POST /images/generations` vs chat-completions) automatically.
 Nous Portal proxies the chat-completions protocol only, so its picker offers
@@ -102,11 +109,11 @@ image_gen:
     output_format: png
 ```
 
-### GPT-Image Quality
+### GPT-Image Quality {#gpt-image-quality}
 
 The `fal-ai/gpt-image-1.5` and `fal-ai/gpt-image-2` request quality is pinned to `medium` (~$0.034–$0.06/image at 1024×1024). We don't expose the `low` / `high` tiers as a user-facing option so that Nous Portal billing stays predictable across all users — the cost spread between tiers is 3–22×. If you want a cheaper option, pick Klein 9B or Z-Image Turbo; if you want higher quality, use Nano Banana Pro or Recraft V4 Pro.
 
-### Meta Model API: Muse Image
+### Meta Model API: Muse Image {#meta-model-api-muse-image}
 
 With `image_gen.provider: meta-ai`, images are generated through the
 [Meta Model API](https://api.meta.ai) (`https://api.meta.ai/v1`), the same
@@ -128,10 +135,10 @@ Auth reuses the same env vars as the Meta chat provider — `MODEL_API_KEY`
 as aliases. Set `META_BASE_URL` to point at a proxy or alternate host. Text-to-image
 only for now; responses are saved to `$HERMES_HOME/cache/images/`.
 
-## FAL: GPT Image 2.5
+## FAL: GPT Image 2.5 {#fal-gpt-image-25}
 
 Select **GPT Image 2.5 Flare** or **GPT Image 2.5 Sunburst** under
-`hermes tools` → Image Generation → FAL.ai. The model IDs are:
+`noone tools` → Image Generation → FAL.ai. The model IDs are:
 
 - `openai/gpt-image-2.5/flare/text-to-image`
 - `openai/gpt-image-2.5/sunburst/text-to-image`
@@ -139,13 +146,13 @@ Select **GPT Image 2.5 Flare** or **GPT Image 2.5 Sunburst** under
 For example:
 
 ```bash
-hermes config set image_gen.provider fal
-hermes config set image_gen.model openai/gpt-image-2.5/flare/text-to-image
+noone config set image_gen.provider fal
+noone config set image_gen.model openai/gpt-image-2.5/flare/text-to-image
 ```
 
 Providing `image_url` or reference images automatically selects the corresponding
 `openai/gpt-image-2.5/flare/edit` or `openai/gpt-image-2.5/sunburst/edit` endpoint.
-Both accept up to 16 source images. Hermes pins quality to `medium`, matching its
+Both accept up to 16 source images. {{app-name}} pins quality to `medium`, matching its
 existing FAL GPT Image policy rather than FAL's higher-cost `high` default.
 Landscape and portrait use 4:3 presets to satisfy the minimum pixel count;
 square uses `square_hd`. Upscaling remains off unless requested.
@@ -159,15 +166,15 @@ pages. Direct FAL requires a funded `FAL_KEY`; managed-gateway availability
 depends on that gateway's endpoint allowlist and is not implied by FAL availability.
 Existing provider and model defaults are unchanged.
 
-## OpenAI API: GPT Image 2.5
+## OpenAI API: GPT Image 2.5 {#openai-api-gpt-image-25}
 
 The **OpenAI** provider supports GPT Image 2.5 Flare (fast everyday creation)
 and Sunburst (precision generation and editing), using `OPENAI_API_KEY`.
-Select them through `hermes tools` → Image Generation → OpenAI, or set:
+Select them through `noone tools` → Image Generation → OpenAI, or set:
 
 ```bash
-hermes config set image_gen.provider openai
-hermes config set image_gen.openai.model gpt-image-2.5-flare
+noone config set image_gen.provider openai
+noone config set image_gen.openai.model gpt-image-2.5-flare
 ```
 
 `gpt-image-2.5-flare` and `gpt-image-2.5-sunburst` use automatic quality.
@@ -189,7 +196,7 @@ accepts any `model` value (including nonexistent ids) and generates with its
 own server-managed engine, so a "selected" Flare or Sunburst tier would be a
 label with no effect. Pick the direct OpenAI API provider or FAL for 2.5.
 
-### Custom OpenAI-compatible image endpoint
+### Custom OpenAI-compatible image endpoint {#custom-openai-compatible-image-endpoint}
 
 The **OpenAI** provider can point at any OpenAI-compatible `/v1/images/generations`
 endpoint (a local gateway, a task-scoped proxy, a third-party API gateway),
@@ -207,7 +214,7 @@ image_gen:
 Only the variable *name* is stored in `config.yaml`; the secret stays in `.env`
 or the process environment. Availability checks and
 generation use the same resolution, so a configured `key_env` is enough — no
-`OPENAI_API_KEY` is required. Requests go through Hermes' own HTTP client, which
+`OPENAI_API_KEY` is required. Requests go through {{app-name}}' own HTTP client, which
 honours `HTTP(S)_PROXY`/`NO_PROXY` but ignores macOS system proxies (whose
 exception list is invisible to Python), so `localhost` endpoints connect directly.
 The `OpenAI-Project` header is sent blank on image requests: an `OPENAI_PROJECT_ID`
@@ -247,7 +254,7 @@ named endpoint's `api_key`/`key_env` → `OPENAI_API_KEY`; an explicit `base_url
 or `key_env` next to `provider` therefore overrides that part of the endpoint. A
 name that matches no `providers:` entry is logged as a warning and ignored.
 
-## Usage
+## Usage {#usage}
 
 The agent-facing schema is intentionally minimal — the model picks up whatever you've configured:
 
@@ -263,7 +270,7 @@ Create a square portrait of a wise old owl — use the typography model
 Make me a futuristic cityscape, landscape orientation
 ```
 
-## Image-to-Image / Editing
+## Image-to-Image / Editing {#image-to-image--editing}
 
 The same `image_generate` tool also **edits existing images** when the active
 model supports it — pass a source image and the backend routes to its editing
@@ -283,7 +290,7 @@ Two inputs drive the edit:
 - **`image_url`** — the primary source image to edit/transform (public URL or local path).
 - **`reference_image_urls`** — additional style/composition references (capped per-model).
 
-### Which backends support editing
+### Which backends support editing {#which-backends-support-editing}
 
 | Backend | Image-to-image | Reference cap | How |
 |---|---|---|---|
@@ -301,9 +308,16 @@ FAL models with an editing endpoint: `flux-2/klein/9b`, `flux-2-pro`,
 `krea/*`) reject image inputs with a clear error pointing you at an
 edit-capable model.
 
-:::note OpenAI (Codex auth): the backend decides quality and size
+<Note>
 
-Hermes posts straight to the Codex backend's native
+<div className="doc-callout-title">
+
+OpenAI (Codex auth): the backend decides quality and size
+
+</div>
+
+
+{{app-name}} posts straight to the Codex backend's native
 `images/generations` / `images/edits` endpoints (the same route the official
 Codex client uses), so no chat model is involved and the call does not depend
 on which chat models your ChatGPT plan currently has. The backend, however,
@@ -314,13 +328,14 @@ square). The result carries `reported_quality`, `reported_size` and
 OpenAI support. For exact control over quality and size, configure the
 **OpenAI** (API key), **FAL**, or **xAI** backend instead.
 
-:::
+
+</Note>
 
 The active model's editing capability is surfaced in the tool description at
 runtime, so the agent knows whether `image_url` will be honored before it
 calls the tool.
 
-## Aspect Ratios
+## Aspect Ratios {#aspect-ratios}
 
 Every model accepts the same three aspect ratios from the agent's perspective. Internally, each model's native size spec is filled in automatically:
 
@@ -334,16 +349,16 @@ GPT Image 2 maps to 4:3 presets rather than 16:9 because its minimum pixel count
 
 This translation happens in `_build_fal_payload()` — agent code never has to know about per-model schema differences.
 
-## Upscaling
+## Upscaling {#upscaling}
 
-### Opt-in only
+### Opt-in only {#opt-in-only}
 
 No model upscales by default. Modern image models emit their best quality
 natively, and the available upscalers are *creative* enhancers (diffusion
 passes) that can subtly redraw content — degrading rendered text, faces, and
 fine detail. Upscaling only runs when the agent explicitly requests it.
 
-### The `upscale` parameter (per-call opt-in)
+### The `upscale` parameter (per-call opt-in) {#the-upscale-parameter-per-call-opt-in}
 
 - `upscale: true` — chain a high-resolution pass after generation:
 
@@ -371,7 +386,7 @@ When the FAL image pass runs, it uses these settings:
 
 If upscaling fails (network issue, rate limit), the original image is returned automatically. The response reports `upscaled: true/false` so the agent knows which resolution it got.
 
-## How It Works Internally
+## How It Works Internally {#how-it-works-internally}
 
 1. **Model resolution** — `_resolve_fal_model()` reads `image_gen.model` from `config.yaml`, falls back to the `FAL_IMAGE_MODEL` env var, then to `fal-ai/flux-2/klein/9b`.
 2. **Payload building** — `_build_fal_payload()` translates your `aspect_ratio` into the model's native format (preset enum, aspect-ratio enum, or GPT literal), merges the model's default params, applies any caller overrides, then filters to the model's `supports` whitelist so unsupported keys are never sent.
@@ -380,7 +395,7 @@ If upscaling fails (network issue, rate limit), the original image is returned a
 5. **Delivery** — final image URL returned to the agent, which emits a `MEDIA:<url>` tag that platform adapters convert to native media.
 6. **Usage accounting** — token-billed image models (OpenRouter chat-image and Image API models such as `google/gemini-3.1-flash-lite-image`, OpenAI `gpt-image`) return real token counts, so each call is recorded in `session_model_usage` as task `image_generation` under the billing provider and model, and shows up in `hermes insights` and the dashboard's Usage analytics alongside other model calls. Per-image backends (FAL, xAI, Krea, ...) return no token usage and are not recorded there.
 
-## Debugging
+## Debugging {#debugging}
 
 Enable debug logging:
 
@@ -390,7 +405,7 @@ export IMAGE_TOOLS_DEBUG=true
 
 Debug logs go to `./logs/image_tools_debug_<session_id>.json` with per-call details (model, parameters, timing, errors).
 
-## Platform Delivery
+## Platform Delivery {#platform-delivery}
 
 | Platform | Delivery |
 |---|---|
@@ -401,9 +416,9 @@ Debug logs go to `./logs/image_tools_debug_<session_id>.json` with per-call deta
 | **WhatsApp** | Media message |
 | **Others** | URL in plain text |
 
-## Limitations
+## Limitations {#limitations}
 
 - **Requires credentials** for the active backend (FAL `FAL_KEY` / Nous Subscription, `OPENAI_API_KEY`, xAI OAuth, `KREA_API_KEY`)
 - **Editing is model-dependent** — image-to-image works only on edit-capable models (see the table above); text-to-image-only models reject image inputs with a clear error
-- **Temporary URLs** — backends return hosted URLs that expire after hours/days; Hermes materializes them to the local cache so delivery still works after expiry
+- **Temporary URLs** — backends return hosted URLs that expire after hours/days; {{app-name}} materializes them to the local cache so delivery still works after expiry
 - **Per-model constraints** — some models don't support `seed`, `num_inference_steps`, etc. The `supports` / `edit_supports` filter silently drops unsupported params; this is expected behavior

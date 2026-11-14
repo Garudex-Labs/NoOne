@@ -7,6 +7,11 @@ hermesNpmLib.buildPnpmPackage {
   dirs = [
     "apps/desktop"
     "apps/shared"
+    "apps/ui"
+    "agent_cli/data/ui"
+    "agent_cli/data/application_identity.json"
+    "scripts/build/application-identity.mjs"
+    "scripts/build/application-identity.d.mts"
     "scripts/build/webapp.mjs"
     "scripts/build/node-deps.mjs"
     "scripts/build/node-deps-lock.mjs"
@@ -16,16 +21,13 @@ hermesNpmLib.buildPnpmPackage {
     "scripts/build/freshness.mjs"
     "scripts/build/frontend-common.mjs"
   ];
-  pname = "hermes-webapp";
+  pname = "agent-webapp";
 
   doCheck = false;
 
   buildPhase = ''
     runHook preBuild
-    node --input-type=module -e '
-      import { buildWebapp } from "./scripts/build/webapp.mjs"
-      await buildWebapp({ source: process.cwd(), workspace: process.cwd(), out: `''${process.env.TMPDIR}/webapp-product` })
-    '
+    node scripts/build/webapp.mjs --source "$PWD" --out "$TMPDIR/webapp-product"
     runHook postBuild
   '';
 

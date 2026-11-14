@@ -58,7 +58,7 @@ class TerminalEnvironmentProvider(ProviderBase):
     as an opaque placeholder and Bot Desktop placement refuses a ``supports_streams`` backend.
 
     **Hosted scopes** (``tools/environments/sandbox_scope.py``). With a hosted
-    :class:`hermes_scope.Scope` bound, the sandbox is the agent's: its identity is
+    :class:`agent_scope.Scope` bound, the sandbox is the agent's: its identity is
     ``SandboxIdentity(scope.tenant, scope.agent)`` and nothing else, so one agent has one sandbox
     whatever task or session a tool call carries. :meth:`create_environment` then also receives
     ``scope=`` (the bound scope) and ``sandbox=`` (the identity), and ``task_id`` is the identity's
@@ -127,14 +127,14 @@ class TerminalEnvironmentProvider(ProviderBase):
         return ("ready", "") if self.is_available() else ("needs_setup", f"{self.display_name} is not configured.")
 
     def setup_instructions(self) -> list[str]:
-        """Lines printed by ``hermes setup`` after selection (the wizard persists ``terminal.backend`` itself)."""
+        """Lines printed by ``noone setup`` after selection (the wizard persists ``terminal.backend`` itself)."""
         return []
 
     def post_setup(self) -> None:
-        """Optional interactive hook run by ``hermes setup`` after selection (prompt for tokens, install SDKs)."""
+        """Optional interactive hook run by ``noone setup`` after selection (prompt for tokens, install SDKs)."""
 
     def doctor_checks(self) -> list[tuple[bool, str, str]]:
-        """``hermes doctor`` rows ``(ok, label, detail)``; default reflects :meth:`is_available`."""
+        """``noone doctor`` rows ``(ok, label, detail)``; default reflects :meth:`is_available`."""
         try:
             ok = bool(self.is_available())
         except Exception:

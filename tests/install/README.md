@@ -50,14 +50,14 @@ On Windows, the HEAD leg also takes every `git.exe` directory off PATH and insta
 Each leg with the script drivers has these phases:
 
 1. Stage: make the bare clone, park `main` at the old release.
-2. Install: run the old release's own installer script. Make sure that the checkout is at the old commit and that `hermes --version` works.
+2. Install: run the old release's own installer script. Make sure that the checkout is at the old commit and that `noone --version` works.
 3. Update: move `main` to HEAD. Apply one update method. An app update must produce a new successful receipt or handoff result; a changed checkout alone is not completion.
-4. Verify the installed command and products before running `hermes --version`. Select the command under the installation's `.hermes/bin`; use the old venv only for a source tree without PM. Check PM currency and compiler receipts where supported. Preserve the no-desktop scenario for a plain install. Do not rebuild, remove dependencies, or force-stop an updater during verification. Historical installs without these receipts get artifact-presence checks, not a freshness claim.
+4. Verify the installed command and products before running `noone --version`. Select the command under the installation's `.hermes/bin`; use the old venv only for a source tree without PM. Check PM currency and compiler receipts where supported. Preserve the no-desktop scenario for a plain install. Do not rebuild, remove dependencies, or force-stop an updater during verification. Historical installs without these receipts get artifact-presence checks, not a freshness claim.
 
 The cheap fixture checks are `tests/scripts/test_source_driver.py` and `tests-js/source-update-observer.test.mjs`. They do not run installers or prove native GUI relaunch. The native packaged-update drivers own automatic-relaunch acceptance. A later driver-owned launch checks chat only after the original update/relaunch assertions pass; it cannot repair a failed handoff. The observer does not change source files, products, dependency selections, or facts.
 
 The Windows `desktop-installer@latest` install downloads the published
-`Hermes-Setup.exe` and drives its GUI with AutoHotkey. The selected update
+`NoOne-Setup.exe` and drives its GUI with AutoHotkey. The selected update
 method is a separate axis. App-update methods click the running app's Update
 control; script and CLI methods use their corresponding entry points.
 
@@ -146,7 +146,7 @@ A leg can install a release from months back. The driver must not assume that th
   acceptance](BUNDLED_UPDATES.md) for the manifest and proof contracts.
 - `installer-script`: the platform's one-liner (`curl | bash` on linux and macos, `irm | iex` on windows).
 - `installer-script+desktop`: the same one-liner with its desktop stage opted in (`--include-desktop` / `-IncludeDesktop`). The stage builds the desktop app during the install. On windows it also registers Start Menu and Desktop shortcuts. On linux and macos it builds the app inside the checkout and registers no OS entry point.
-- `desktop-installer@latest`: the published GUI installer (`Hermes-Setup.exe` on windows, `Hermes-Setup.dmg` on macos), driven through the real user flow.
+- `desktop-installer@latest`: the published GUI installer (`NoOne-Setup.exe` on windows, `NoOne-Setup.dmg` on macos), driven through the real user flow.
 
 ## The two app-update variants
 
@@ -256,8 +256,8 @@ re-syncs it), but it may not delete or modify the user's own durable state —
   purpose: the state it defends must be produced by the product through the
   ordinary user path, never hand-written by the harness.
 - `e2e-assets/user-state-actions.sh` produces that state with real commands —
-  `hermes chat -q` (a real turn → `sessions/` + `state.db` rows),
-  `hermes auth add` (→ `auth.json`), `hermes profile create`
+  `noone chat -q` (a real turn → `sessions/` + `state.db` rows),
+  `noone auth add` (→ `auth.json`), `noone profile create`
   (→ `profiles/<name>/`) — after probing `--help` for each flag, per the
   harness's "probe, do not assume" rule. Each action asserts it actually landed,
   so a leg can never "pass" while testing nothing.

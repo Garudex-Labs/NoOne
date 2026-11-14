@@ -79,7 +79,7 @@ except ImportError:  # pragma: no cover - plugin loaded outside package context
 logger = logging.getLogger(__name__)
 
 # User-Agent prefix (``HermesAgent/<version>``) for platform-partner attribution of API calls.
-from hermes_cli.version_info import hermes_user_agent
+from agent_cli.version_info import hermes_user_agent
 
 _SLACK_ERROR_BODY_LIMIT_BYTES = 8 * 1024
 _BOOL_WORDS = frozenset({"1", "0", "true", "false", "yes", "no", "on", "off"})
@@ -416,7 +416,7 @@ def _rewrite_known_bang_command(text: str) -> str:
     if not text.startswith("!"):
         return text
     try:
-        from hermes_cli.commands import is_gateway_known_command
+        from agent_cli.commands import is_gateway_known_command
         first_token = text[1:].split(maxsplit=1)[0]
         cmd_name = first_token.split("@", 1)[0].lower()
         if cmd_name and "/" not in cmd_name and is_gateway_known_command(cmd_name):
@@ -1645,7 +1645,7 @@ class SlackAdapter(SlackSocketLifecycleMixin, BasePlatformAdapter):
         # Every COMMAND_REGISTRY command is a native slash via one regex matcher. Commands must
         # ALSO be declared in the app manifest (`hermes slack manifest`): Socket Mode won't
         # deliver undeclared commands at all.
-        from hermes_cli.commands_platforms import slack_native_slashes
+        from agent_cli.commands_platforms import slack_native_slashes
         _slash_names = [name for name, _d, _h in slack_native_slashes()]
         if _slash_names:
             _slash_pattern = re.compile(
@@ -1680,7 +1680,7 @@ class SlackAdapter(SlackSocketLifecycleMixin, BasePlatformAdapter):
         a ``(action_id, plugin)`` already registered on the live app is skipped, so the late
         re-wire (#87770) never stacks a second listener that would run the callback twice."""
         try:
-            from hermes_cli.plugins import get_plugin_manager
+            from agent_cli.plugins import get_plugin_manager
             _plugin_handlers = get_plugin_manager().get_slack_action_handlers()
         except Exception as e:  # pragma: no cover - defensive
             logger.warning("[Slack] Could not load plugin action handlers: %s", e)
@@ -1831,7 +1831,7 @@ class SlackAdapter(SlackSocketLifecycleMixin, BasePlatformAdapter):
             "gateway.", env_name, env_name)
         self._set_fatal_error(
             f"missing_{env_name.lower()}",
-            f"{env_name} not configured. Use `hermes gateway setup` "
+            f"{env_name} not configured. Use `noone gateway setup` "
             "or add it to your active profile's ~/.hermes/.env file, then restart the gateway.",
             retryable=False)
 
@@ -3845,7 +3845,7 @@ class SlackAdapter(SlackSocketLifecycleMixin, BasePlatformAdapter):
 
     async def _handle_slack_reaction(self, event: dict, removed: bool = False) -> None:
         """Forward reactions as a synthetic ``reaction:<added|removed>:<emoji>`` message
-        (Feishu/Photon convention) from the reactor in the reacted-to thread, so the normal auth
+        (Photon convention) from the reactor in the reacted-to thread, so the normal auth
         gate applies. Hooks fire for every non-self reaction; agent routing is opt-in via
         ``reaction_triggers`` and, without an explicit allowlist, only on the bot's own messages."""
         item = event.get("item") or {}
@@ -5177,7 +5177,7 @@ class SlackAdapter(SlackSocketLifecycleMixin, BasePlatformAdapter):
         provider = next((p for p in providers if p["slug"] == provider_slug), None)
         pname = provider.get("name", provider_slug) if provider else provider_slug
         models = (provider or {}).get("models", [])[:100]
-        from hermes_cli.model_picker_usage import picker_row_suffix
+        from agent_cli.model_picker_usage import picker_row_suffix
         options = []
         for idx, model_id in enumerate(models):
             short = model_id.split("/")[-1] if "/" in model_id else model_id
@@ -5250,7 +5250,7 @@ class SlackAdapter(SlackSocketLifecycleMixin, BasePlatformAdapter):
             thread_ts = self._resolve_thread_ts(None, metadata)
 
             try:
-                from hermes_cli.providers import get_label
+                from agent_cli.providers import get_label
                 provider_label = get_label(current_provider)
             except Exception:
                 provider_label = current_provider
@@ -5423,7 +5423,7 @@ class SlackAdapter(SlackSocketLifecycleMixin, BasePlatformAdapter):
             state["stage"] = "provider"
             state["selected_provider_slug"] = ""
             try:
-                from hermes_cli.providers import get_label
+                from agent_cli.providers import get_label
                 provider_label = get_label(
                     state.get("current_provider", "")
                 )
@@ -6223,7 +6223,7 @@ class SlackAdapter(SlackSocketLifecycleMixin, BasePlatformAdapter):
         # must carry the same names as a message here or the next message flips them. A command
         # that interrupts, unblocks or pauses work starts no turn of its own, and a slow
         # users.info must not hold /stop or /pause back while the worker keeps running.
-        from hermes_cli.commands import resolve_command
+        from agent_cli.commands import resolve_command
         cmd = resolve_command(event.get_command() or "")
         controls_running_turn = cmd is not None and (
             cmd.busy_policy == "interrupt_then_dispatch" or cmd.name in ("approve", "deny", "pause"))
@@ -6623,7 +6623,7 @@ class SlackAdapter(SlackSocketLifecycleMixin, BasePlatformAdapter):
 # ``interactive_setup``, ``_apply_yaml_config``, ``_is_connected``) that replace the
 # per-platform core touchpoints (the ``Platform.SLACK`` elif in ``gateway/run.py``, the ``slack_cfg``
 # YAML→env block in ``gateway/config.py``, the ``_setup_slack`` wizard + ``_PLATFORMS["slack"]`` static dict
-# in ``hermes_cli/{setup,gateway}.py``, and the ``_send_slack`` dispatch in ``tools/send_message_tool.py``).
+# in ``agent_cli/{setup,gateway}.py``, and the ``_send_slack`` dispatch in ``tools/send_message_tool.py``).
 # ──────────────────────────────────────────────────────────────────────────
 _slack_dm_cache: dict[str, str] = {}
 _SLACK_DM_CACHE_MAX = 5000
@@ -6647,8 +6647,8 @@ def _load_slack_bot_tokens(raw_token: str, *, quiet: bool) -> list[str]:
     order). ``quiet`` (standalone): no permission warning / per-token INFO; failures swallowed."""
     tokens = [t.strip() for t in raw_token.split(",") if t.strip()]
     try:
-        from hermes_constants import get_hermes_home
-        tokens_file = get_hermes_home() / "slack_tokens.json"
+        from agent_constants import get_agent_home
+        tokens_file = get_agent_home() / "slack_tokens.json"
         present = tokens_file.exists()
     except Exception:
         if quiet:
@@ -6936,13 +6936,13 @@ _SETUP_HOME_CHANNEL_HELP = (
 
 def _write_slack_manifest_and_instruct() -> None:
     """Write the manifest under HERMES_HOME and print paste instructions; non-fatal."""
-    from hermes_cli.cli_output import print_info, print_success, print_warning
+    from agent_cli.cli_output import print_info, print_success, print_warning
     try:
-        from hermes_cli.slack_cli import _build_full_manifest
-        from hermes_constants import get_hermes_home
+        from agent_cli.slack_cli import _build_full_manifest
+        from agent_constants import get_agent_home
         manifest = _build_full_manifest(
             bot_name="Hermes", bot_description="Your Hermes agent on Slack")
-        target = _Path(get_hermes_home()) / "slack-manifest.json"
+        target = _Path(get_agent_home()) / "slack-manifest.json"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(
             json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -6961,23 +6961,23 @@ def _write_slack_manifest_and_instruct() -> None:
 def interactive_setup() -> None:
     """Guide the user through Slack bot setup (manifest, tokens, allowlist, home channel).
     CLI helpers are lazy-imported to keep the plugin's import surface small."""
-    from hermes_cli.config import remove_env_value, save_env_value
-    from hermes_cli.cli_output import (
+    from agent_cli.config import remove_env_value, save_env_value
+    from agent_cli.cli_output import (
         prompt, prompt_yes_no, print_header, print_info, print_success, print_warning)
-    from hermes_cli.setup_platforms import declines_reconfigure
+    from agent_cli.setup_platforms import declines_reconfigure
 
     print_header("Slack")
     if declines_reconfigure("Slack", "Reconfigure Slack?", "SLACK_BOT_TOKEN"):
         # Still offer a manifest refresh so new commands get registered.
         if prompt_yes_no(
             "Regenerate the Slack app manifest with the latest command "
-            "list? (recommended after `hermes update`)", True):
+            "list? (recommended after `noone update`)", True):
             _write_slack_manifest_and_instruct()
         return
     for line in _SETUP_STEPS:
         print_info(line)
     print()
-    print_info("   Full guide: https://hermes-agent.nousresearch.com/docs/user-guide/messaging/slack/")
+    print_info("   Full guide: https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/messaging/slack.md")
     print()
     # Write the manifest up-front for the "Create from manifest" flow.
     _write_slack_manifest_and_instruct()
@@ -7053,7 +7053,7 @@ def register(ctx) -> None:
         ensure_deps_fn=check_slack_requirements,
         is_connected=_is_connected,
         required_env=["SLACK_BOT_TOKEN", "SLACK_APP_TOKEN"],
-        install_hint="Run `hermes setup` to install Slack support.",
+        install_hint="Run `noone setup` to install Slack support.",
         setup_fn=interactive_setup,
         # YAML→env config bridge — owns the translation of config.yaml slack: keys (require_mention,
         # strict_mention, ignore_other_user_mentions, thread_require_mention, allow_bots,

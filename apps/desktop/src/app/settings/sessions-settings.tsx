@@ -1,10 +1,7 @@
 import { useStore } from '@nanostores/react'
+import { Archive, ArchiveOff, FolderOpen, Loader2, Trash2 } from '@noone/ui/icons'
 import { useCallback, useEffect, useState } from 'react'
 
-import { restoreListedSession } from '@/app/session/hooks/use-session-actions/utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Tip } from '@/components/ui/tooltip'
 import {
   deleteSession,
   getHermesConfigRecord,
@@ -12,14 +9,17 @@ import {
   retainConfigReadOrigin,
   saveHermesConfig,
   setSessionArchived
-} from '@/hermes'
+} from '@/agent-client'
+import { restoreListedSession } from '@/app/session/hooks/use-session-actions/utils'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { sessionTitle } from '@/lib/chat-runtime'
 import { selectDesktopPaths } from '@/lib/desktop-fs'
 import { pathLeaf } from '@/lib/display-path'
 import { triggerHaptic } from '@/lib/haptics'
 import { hostHas } from '@/lib/host-capabilities'
-import { Archive, ArchiveOff, FolderOpen, Loader2, Trash2 } from '@/lib/icons'
 import { purgeInFlightTurnJournals } from '@/lib/inflight-turn-journal'
 import { formatCombo } from '@/lib/keybinds/combo'
 import { confirm } from '@/store/confirm'
@@ -29,7 +29,7 @@ import { $connection, applyConfiguredDefaultProjectDir, ensureDefaultWorkspaceCw
 import { untombstoneSessions } from '@/store/session-removal'
 import { forgetSessionUnread } from '@/store/session-unread'
 import { listEveryArchivedSession } from '@/store/sidebar-archive'
-import type { HermesConfigRecord, SessionInfo } from '@/types/hermes'
+import type { AgentConfigRecord, SessionInfo } from '@/types/agent-client'
 
 import { EmptyState, ListRow, SectionHeading, SettingsContent, SettingsSkeleton, ToggleRow } from './primitives'
 import { SETTING_IDS, settingElementId } from './settings-manifest'
@@ -229,7 +229,7 @@ function ArchivedSessionsSettings({ includeDefaultDirectory }: { includeDefaultD
 function AutoArchiveSetting() {
   const { t } = useI18n()
   const s = t.settings.sessions
-  const [config, setConfig] = useState<HermesConfigRecord | null>(null)
+  const [config, setConfig] = useState<AgentConfigRecord | null>(null)
   const [enabled, setEnabled] = useState(false)
   const [days, setDays] = useState(DEFAULT_AUTO_ARCHIVE_DAYS)
 

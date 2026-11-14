@@ -27,9 +27,9 @@ def test_stop_is_session_scoped_and_global_verbs_keep_the_owner_refusal(tmp_path
     assert receipt['exited'] == [True, True, False, False], receipt
     assert receipt['sessionless_stop'] == 4001, receipt
     assert receipt['exited_after_sessionless'] == [True, True, False, False], receipt
-    # delegation.pause is the owner's own verb now (session_tui_ops.py): main's operator kill switch.
+    # delegation.pause is the owner's own verb now (session_display_ops.py): main's operator kill switch.
     assert receipt['pause'] is None and receipt['spawn_paused'] is True, receipt
-    # The owner serves reload.env for one controlled session only (session_tui_ops.py); a bare frame
+    # The owner serves reload.env for one controlled session only (session_display_ops.py); a bare frame
     # is refused before it can rewrite the shared environ.
     assert receipt['reload_env'] == 4001 and receipt['environ_rewritten'] is False, receipt
     # reload.mcp is now served by the owner, profile-scoped (test_desktop_process_verbs.py).

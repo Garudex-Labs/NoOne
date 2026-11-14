@@ -4,14 +4,14 @@ Two operator/agent-facing name lookups must stay inside the thing they name:
 
 * ``/memory`` and ``/skills`` ``approve|reject|diff <id>`` (#119997): the id names a record staged under
   ``<HERMES_HOME>/pending/<subsystem>/``. A ``../`` or absolute id must not read, delete or apply any
-  file outside that directory. Driven through the real ``tui_gateway`` stdio backend (``slash.exec``),
+  file outside that directory. Driven through the real ``agent_backend`` stdio backend (``slash.exec``),
   after real staged writes: the fake model calls the ``memory`` and ``skill_manage`` tools with
   ``memory.write_approval`` / ``skills.write_approval`` on, so the store directories exist exactly as
   they do for a user.
 * ``skill_manage delete`` (#120528) must refuse a pinned skill and the essential ``hermes-agent`` skill
   whatever spelling names it: bare (``my-skill``) or categorized (``research/my-skill``). The pin is set
   with the real ``hermes curator pin`` CLI; the deletes are real tool calls in real agent turns on the
-  same backend (``hermes chat -q`` does not offer ``skill_manage``: one-shot runs hide it).
+  same backend (``noone chat -q`` does not offer ``skill_manage``: one-shot runs hide it).
 
 Every breach asserts on disk (victim bytes, skill dir, MEMORY.md) and on the command output.
 """

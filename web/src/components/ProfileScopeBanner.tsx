@@ -1,4 +1,5 @@
-import { Users } from "lucide-react";
+import { Users } from "@noone/ui/icons";
+
 import { useProfileScope } from "@/contexts/useProfileScope";
 import { useI18n } from "@/i18n";
 

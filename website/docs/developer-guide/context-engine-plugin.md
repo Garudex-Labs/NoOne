@@ -1,14 +1,13 @@
 ---
-sidebar_position: 9
 title: "Context Engine Plugins"
 description: "How to build a context engine plugin that replaces the built-in ContextCompressor"
 ---
 
-# Building a Context Engine Plugin
+# Building a Context Engine Plugin {#building-a-context-engine-plugin}
 
 Context engine plugins replace the built-in `ContextCompressor` with an alternative strategy for managing conversation context. For example, a Lossless Context Management (LCM) engine that builds a knowledge DAG instead of lossy summarization.
 
-## How it works
+## How it works {#how-it-works}
 
 The agent's context management is built on the `ContextEngine` ABC (`agent/context_engine.py`). The built-in `ContextCompressor` is the default implementation. Plugin engines must implement the same interface.
 
@@ -23,7 +22,7 @@ context:
 
 Plugin engines are **never auto-activated** — the user must explicitly set `context.engine` to the plugin's name.
 
-## Directory structure
+## Directory structure {#directory-structure}
 
 Each context engine lives in `plugins/context_engine/<name>/`:
 
@@ -34,7 +33,7 @@ plugins/context_engine/lcm/
 └── ...              # any other modules your engine needs
 ```
 
-## The ContextEngine ABC
+## The ContextEngine ABC {#the-contextengine-abc}
 
 Your engine must implement these **required** methods:
 
@@ -70,7 +69,7 @@ class LCMEngine(ContextEngine):
         """
 ```
 
-### Class attributes your engine must maintain
+### Class attributes your engine must maintain {#class-attributes-your-engine-must-maintain}
 
 The agent reads these directly for display and logging:
 
@@ -83,7 +82,7 @@ context_length: int = 0          # model's full context window
 compression_count: int = 0       # how many times compress() has run
 ```
 
-### Optional methods
+### Optional methods {#optional-methods}
 
 These have sensible defaults in the ABC. Override as needed:
 
@@ -101,7 +100,7 @@ These have sensible defaults in the ABC. Override as needed:
 | `on_turn_complete(messages, usage=None, **kwargs)` | No-op | You ingest/index/observe the finished turn — see below |
 | `clone_for_agent()` | `copy.deepcopy(self)` | Your engine holds uncopyable state (locks, SQLite/DB connections) — see [Via general plugin system](#via-general-plugin-system) |
 
-## Per-turn context selection and observation
+## Per-turn context selection and observation {#per-turn-context-selection-and-observation}
 
 `compress()` answers "context is too long → make it shorter". Two optional,
 no-op-default hooks cover the orthogonal *selection / observation* axis, so an
@@ -135,7 +134,7 @@ Contract:
 - **Ordering / cache stability.** The hook runs **before** prompt cache-control and every request sanitizer, so (a) a replacement still passes the same validation as any request, and (b) the no-op default leaves the request byte-identical — prompt-cache behaviour is unchanged for non-implementing engines. An engine that replaces the list changes only its own cache prefix. Evaluated per provider request (re-runs on retries).
 - **`on_turn_complete()`** is post-turn observation only; treat `messages` as read-only. **Coverage is best-effort:** it fires from the standard turn-finalization seam. Some abnormal early-return paths in the loop (e.g. a content-policy block or a provider terminal failure) persist and return without routing through finalization, so they do not currently emit this hook — treat it as a best-effort observation for completed turns, not a guaranteed callback for every early exit. Unifying all terminal paths behind one finalization seam is a separate follow-up.
 
-### Stable message identity: `message_uid`
+### Stable message identity: `message_uid` {#stable-message-identity-message_uid}
 
 Every message the host has persisted carries `message_uid`: a 32-hex id
 (`uuid4().hex`) minted once, at the row's first insert, and stored in
@@ -150,7 +149,7 @@ What the host guarantees:
 - **Present on every engine surface** once a row exists: the `compress()`
   input list, `on_turn_complete()` clones, `post_llm_call`'s
   `conversation_history`, `on_session_end()` messages, and every restored
-  history (CLI, TUI, ACP, gateway, compression's durable-snapshot adoption). It
+  history (CLI, ACP, gateway, compression's durable-snapshot adoption). It
   is restored unconditionally, unlike `_row_id`. The one exception is a row
   written before the column existed: on a large store the upgrade mints those
   over the next few opens, so a legacy row can briefly arrive without one.
@@ -191,7 +190,7 @@ What the host guarantees:
   Never assume per-row uniqueness in the active set; key your own state on
   the uid and treat the later row as the current version.
 - **Tool calls get per-occurrence ids too.** Provider tool-call ids repeat
-  (Hermes mints deterministic `call_<12hex>` ids for identical calls, and models
+  ({{app-name}} mints deterministic `call_<12hex>` ids for identical calls, and models
   reuse ids), so an assistant message carries `_tool_call_uids`, a
   `{tool_call_id: uid}` map for its `tool_calls`, and each tool-result message
   carries the matching `_tool_call_uid`. Calls that repeat a provider id inside
@@ -217,7 +216,7 @@ What the host guarantees:
   and an insert trigger mints one for any row an older build writes into a
   v31 store afterwards (that build's live dicts still lack it until restored).
 
-### When to use these hooks — and when NOT to
+### When to use these hooks — and when NOT to {#when-to-use-these-hooks--and-when-not-to}
 
 - **Implement `select_context()` only when your engine must *replace* the
   per-request context** — retrieval-augmented selection, topic/branch routing,
@@ -242,7 +241,7 @@ What the host guarantees:
   differs; a selection that shuffles per turn silently forfeits cache reuse
   every turn.
 
-## Engine tools
+## Engine tools {#engine-tools}
 
 Context engines can expose tools the agent calls directly. Return schemas from `get_tool_schemas()` and handle calls in `handle_tool_call()`:
 
@@ -269,13 +268,13 @@ def handle_tool_call(self, name, args, **kwargs):
 
 Engine tools are injected into the agent's tool list at startup and dispatched automatically — no registry registration needed.
 
-## Registration
+## Registration {#registration}
 
-### Via directory (recommended)
+### Via directory (recommended) {#via-directory-recommended}
 
 Place your engine in `plugins/context_engine/<name>/` (bundled) or `~/.hermes/plugins/<name>/` (user-installed; `$HERMES_HOME/plugins/<name>/`). The `__init__.py` must export a `ContextEngine` subclass or a `register(ctx)` that calls `ctx.register_context_engine(...)`. Setting `context.engine: <name>` is the activation — a user-installed engine does not need a `plugins.enabled` entry. Bundled names win on collision.
 
-### Via general plugin system
+### Via general plugin system {#via-general-plugin-system}
 
 A general plugin can also register a context engine:
 
@@ -289,7 +288,7 @@ Only one engine can be registered. A second plugin attempting to register is rej
 
 The registered instance is shared process-wide, but every `AIAgent` (parent, subagents, gateway
 sessions) needs its own engine so a child's `update_model()` cannot mutate the parent's budget.
-Hermes therefore calls `engine.clone_for_agent()` on the registered instance at each agent init.
+{{app-name}} therefore calls `engine.clone_for_agent()` on the registered instance at each agent init.
 The default is `copy.deepcopy(self)`; override it when the engine holds state that cannot be
 deep-copied (locks, SQLite or HTTP connections) and return a fresh engine sharing the durable
 backend while copying only the mutable budget fields. If the clone raises, the agent falls back to
@@ -302,7 +301,7 @@ def clone_for_agent(self):
     return clone
 ```
 
-## Lifecycle
+## Lifecycle {#lifecycle}
 
 ```
 1. Engine instantiated (plugin load or directory discovery)
@@ -315,16 +314,16 @@ def clone_for_agent(self):
 
 `on_session_reset()` is called on `/new` or `/reset` to clear per-session state without a full shutdown.
 
-Manual `/compress` on every surface (classic CLI, TUI, Desktop, messaging, ACP) calls your
+Manual `/compress` on every surface (classic CLI, Desktop, messaging, ACP) calls your
 engine's `compress()` with `force=True` and the optional focus topic, never the built-in
 compressor. Once the compacted history is committed, the engine receives
 `on_session_start(session_id, boundary_reason="compression", old_session_id=...)` (the same id
 twice for in-place compaction). A session with no live agent may get a fresh engine instance
 for that compression, which then also receives `on_session_end()`.
 
-## Configuration
+## Configuration {#configuration}
 
-Users select your engine via `hermes plugins` → Provider Plugins → Context Engine, or by editing `config.yaml`:
+Users select your engine via `noone plugins` → Provider Plugins → Context Engine, or by editing `config.yaml`:
 
 ```yaml
 context:
@@ -333,7 +332,7 @@ context:
 
 The `compression` config block (`compression.threshold`, `compression.protect_last_n`, etc.) is specific to the built-in `ContextCompressor`, with one explicit exception: `compression.model_thresholds` (per-model threshold overrides) is part of the context-engine contract. The host assigns the resolved map to `engine.model_thresholds` *before* the initial `update_model()` call, and the base-class `update_model()` applies it (longest substring match, falling back to the engine's configured threshold). Engines that override `update_model()` own their own compaction policy and may honor or ignore the map — `from agent.context_compressor import resolve_model_threshold` to reuse the same resolution logic. For everything else, your engine should define its own config format if needed, reading from `config.yaml` during initialization.
 
-## Testing
+## Testing {#testing}
 
 ```python
 from agent.context_engine import ContextEngine
@@ -353,9 +352,9 @@ def test_compress_returns_valid_messages():
 
 See `tests/agent/test_context_engine.py` for the full ABC contract test suite.
 
-## Thread safety
+## Thread safety {#thread-safety}
 
-When `compression.context_timeout_seconds > 0` (the default), Hermes runs the
+When `compression.context_timeout_seconds > 0` (the default), {{app-name}} runs the
 whole compression pass — including your engine's `compress()` and boundary
 callbacks, and any memory provider's `on_pre_compress` /
 `on_session_switch` — on a pooled daemon thread with a host-side timeout.
@@ -370,7 +369,7 @@ Your engine must therefore assume:
 - Passes for *different* sessions can run concurrently on pool siblings; a
   single engine/provider instance shared across sessions must be thread-safe.
 
-## See also
+## See also {#see-also}
 
 - [Context Compression and Caching](./context-compression-and-caching.md) — how the built-in compressor works
 - [Memory Provider Plugins](./memory-provider-plugin.md) — analogous single-select plugin system for memory

@@ -2,16 +2,16 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { setSessionArchived } from '@/hermes'
+import { setSessionArchived } from '@/agent-client'
 import { en } from '@/i18n/en'
 import { $messagingSessions, $sessions, setMessagingSessions, setSessions } from '@/store/session'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 import { SessionsSettings } from './sessions-settings'
 
 vi.mock('@/i18n', () => ({ useI18n: () => ({ t: en }) }))
 
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   getHermesConfigRecord: vi.fn().mockResolvedValue({ config: {} }),
   setSessionArchived: vi.fn().mockResolvedValue(undefined)
@@ -33,10 +33,10 @@ vi.mock('@/lib/desktop-fs', async importOriginal => ({
   selectDesktopPaths
 }))
 
-const archivedMatrixSession = {
+const archivedSlackSession = {
   archived: true,
   ended_at: null,
-  id: 'matrix-1',
+  id: 'slack-1',
   input_tokens: 0,
   is_active: false,
   last_active: 1,
@@ -44,7 +44,7 @@ const archivedMatrixSession = {
   model: null,
   output_tokens: 0,
   preview: null,
-  source: 'matrix',
+  source: 'slack',
   started_at: 1,
   title: 'archived room',
   tool_call_count: 0
@@ -53,7 +53,7 @@ const archivedMatrixSession = {
 beforeEach(() => {
   setSessions([])
   setMessagingSessions([])
-  listEveryArchivedSession.mockReset().mockResolvedValue([archivedMatrixSession])
+  listEveryArchivedSession.mockReset().mockResolvedValue([archivedSlackSession])
 })
 
 afterEach(() => {
@@ -67,8 +67,8 @@ describe('SessionsSettings unarchive', () => {
 
     await act(async () => fireEvent.click(button))
 
-    await waitFor(() => expect(setSessionArchived).toHaveBeenCalledWith('matrix-1', false, undefined))
-    expect($messagingSessions.get().map(session => session.id)).toEqual(['matrix-1'])
+    await waitFor(() => expect(setSessionArchived).toHaveBeenCalledWith('slack-1', false, undefined))
+    expect($messagingSessions.get().map(session => session.id)).toEqual(['slack-1'])
     expect($messagingSessions.get()[0]?.archived).toBe(false)
     expect($sessions.get()).toEqual([])
   })

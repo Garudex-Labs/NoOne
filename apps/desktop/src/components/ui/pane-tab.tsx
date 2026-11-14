@@ -1,8 +1,8 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import * as React from 'react'
 
 import { type MenuKit, renderActionItem } from '@/components/ui/actions-menu'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { translateNow } from '@/i18n'
 import { isMetaClose, middleClickHandlers } from '@/lib/middle-click'
@@ -223,7 +223,7 @@ export const PaneTab = React.forwardRef<HTMLDivElement, PaneTabProps>(function P
             tabIndex={-1}
             type="button"
           >
-            <Codicon name="close" size="0.6875rem" />
+            <AppIcon name="close" size="0.6875rem" />
           </button>
         </span>
       )}

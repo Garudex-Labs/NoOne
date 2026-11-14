@@ -1,12 +1,12 @@
-import { type GatewayEvent, registryBackendScopeKey } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { type GatewayEvent, registryBackendScopeKey } from '@noone/shared'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { useEffect, useMemo, useRef } from 'react'
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 
+import { getSession } from '@/agent-client'
 import { createSessionRpcDispatcher } from '@/app/contrib/session-rpc-dispatcher'
 import { prepareDefaultNewSession } from '@/app/session/new-session-route'
-import { getSession } from '@/hermes'
 import { $defaultProfileRoute } from '@/store/default-profile'
 import {
   activeGateway,
@@ -47,7 +47,7 @@ import {
 } from '@/store/session'
 import { foregroundSessionScopes } from '@/store/session-states'
 import { deferred } from '@/test/deferred'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 import type { ClientSessionState } from '../../types'
 
@@ -156,9 +156,9 @@ function answer(socket: MockGateway, method: string, params: Record<string, unkn
   return {}
 }
 
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  HermesGateway: class {
+  AgentGateway: class {
     connectUrl: null | string = null
     connectionState = 'closed'
     eventListeners = new Set<(event: GatewayEvent) => void>()
@@ -450,7 +450,7 @@ describe('profile rail: a fresh Omar chat keeps its exact registry owner across 
     await waitFor(() => expect(activeGatewayProfileKey()).toBe('omar'))
     expect(activeGatewayConnectionId()).toBe(SOURCE_ID)
 
-    // The socket the registry dialed for homelab::omar (mocked HermesGateway
+    // The socket the registry dialed for homelab::omar (mocked AgentGateway
     // instances register themselves on construction).
     expect(sockets.length).toBeGreaterThan(0)
     const omarSocket = sockets.find(socket => socket.connectUrl?.includes(`:${OMAR_PORT}`))

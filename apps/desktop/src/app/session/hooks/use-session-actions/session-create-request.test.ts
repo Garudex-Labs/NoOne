@@ -1,4 +1,4 @@
-import { JsonRpcGatewayError } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@noone/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const requestGatewayForAgent = vi.fn()
@@ -9,14 +9,14 @@ vi.mock('@/store/gateway', () => ({
 
 import { createGatewaySession } from './session-create-request'
 
-// Verbatim admission rejections from older backends (tui_gateway/contracts/registry.py).
+// Verbatim admission rejections from older backends (agent_backend/contracts/registry.py).
 const rejection = (field: string, suffix = '') =>
   new JsonRpcGatewayError(`invalid params for session.create: ${field}: Extra inputs are not permitted${suffix}`, {
     code: 4000
   })
 
 const OUT_OF_SYNC =
-  ' — the client and the Hermes backend are out of sync (different versions); run `hermes update` and restart both'
+  ' — the client and the Hermes backend are out of sync (different versions); run `noone update` and restart both'
 
 const PRE_122899_REJECTION = rejection('cwd_explicit', OUT_OF_SYNC) // v0.21.4 – v0.21.5 wording
 const V0213_REJECTION = rejection('cwd_explicit') // v0.21.3 wording, no out-of-sync suffix

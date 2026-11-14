@@ -1,20 +1,20 @@
 ---
 title: "Modal — Serverless GPU cloud for ML jobs and model APIs"
-sidebar_label: "Modal"
+sidebarTitle: "Modal"
 description: "Serverless GPU cloud for ML jobs and model APIs"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Modal
+# Modal {#modal}
 
 Serverless GPU cloud for ML jobs and model APIs.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/modal` |
+| Source | Optional — install with `noone skills install official/mlops/modal` |
 | Path | `optional-skills/mlops/modal` |
 | Version | `1.0.1` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ Serverless GPU cloud for ML jobs and model APIs.
 | Platforms | linux, macos, windows |
 | Tags | `Infrastructure`, `Serverless`, `GPU`, `Cloud`, `Deployment`, `Modal` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Modal Serverless GPU
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Modal Serverless GPU {#modal-serverless-gpu}
 
 Guide to running ML workloads on Modal's serverless GPU cloud platform.
 
-## When to use Modal
+## When to use Modal {#when-to-use-modal}
 
 **Use Modal when:**
 - Running GPU-intensive ML workloads without managing infrastructure
@@ -57,16 +65,16 @@ Guide to running ML workloads on Modal's serverless GPU cloud platform.
 - **SkyPilot**: For multi-cloud orchestration and cost optimization
 - **Kubernetes**: For complex multi-service architectures
 
-## Quick start
+## Quick start {#quick-start}
 
-### Installation
+### Installation {#installation}
 
 ```bash
 pip install modal
 modal setup  # Opens browser for authentication
 ```
 
-### Hello World with GPU
+### Hello World with GPU {#hello-world-with-gpu}
 
 ```python
 import modal
@@ -85,7 +93,7 @@ def main():
 
 Run: `modal run hello_gpu.py`
 
-### Basic inference endpoint
+### Basic inference endpoint {#basic-inference-endpoint}
 
 ```python
 import modal
@@ -109,9 +117,9 @@ def main():
     print(TextGenerator().generate.remote("Hello, world"))
 ```
 
-## Core concepts
+## Core concepts {#core-concepts}
 
-### Key components
+### Key components {#key-components}
 
 | Component | Purpose |
 |-----------|---------|
@@ -122,7 +130,7 @@ def main():
 | `Volume` | Persistent storage for models/data |
 | `Secret` | Secure credential storage |
 
-### Execution modes
+### Execution modes {#execution-modes}
 
 | Command | Description |
 |---------|-------------|
@@ -130,9 +138,9 @@ def main():
 | `modal serve script.py` | Development with live reload |
 | `modal deploy script.py` | Persistent cloud deployment |
 
-## GPU configuration
+## GPU configuration {#gpu-configuration}
 
-### Available GPUs
+### Available GPUs {#available-gpus}
 
 | GPU | VRAM | Best For |
 |-----|------|----------|
@@ -146,7 +154,7 @@ def main():
 | `H200` | 141GB | Auto-upgrade from H100, 4.8TB/s bandwidth |
 | `B200` | Latest | Blackwell architecture |
 
-### GPU specification patterns
+### GPU specification patterns {#gpu-specification-patterns}
 
 ```python
 # Single GPU
@@ -165,7 +173,7 @@ def main():
 @app.function(gpu="any")
 ```
 
-## Container images
+## Container images {#container-images}
 
 ```python
 # Basic image with pip
@@ -183,7 +191,7 @@ image = modal.Image.from_registry(
 image = modal.Image.debian_slim().apt_install("git", "ffmpeg").pip_install("whisper")
 ```
 
-## Persistent storage
+## Persistent storage {#persistent-storage}
 
 ```python
 volume = modal.Volume.from_name("model-cache", create_if_missing=True)
@@ -199,9 +207,9 @@ def load_model():
     return load_from_path(model_path)
 ```
 
-## Web endpoints
+## Web endpoints {#web-endpoints}
 
-### FastAPI endpoint decorator
+### FastAPI endpoint decorator {#fastapi-endpoint-decorator}
 
 ```python
 @app.function()
@@ -210,7 +218,7 @@ def predict(text: str) -> dict:
     return {"result": model.predict(text)}
 ```
 
-### Full ASGI app
+### Full ASGI app {#full-asgi-app}
 
 ```python
 from fastapi import FastAPI
@@ -226,7 +234,7 @@ def fastapi_app():
     return web_app
 ```
 
-### Web endpoint types
+### Web endpoint types {#web-endpoint-types}
 
 | Decorator | Use Case |
 |-----------|----------|
@@ -235,7 +243,7 @@ def fastapi_app():
 | `@modal.wsgi_app()` | Django/Flask apps |
 | `@modal.web_server(port)` | Arbitrary HTTP servers |
 
-## Dynamic batching
+## Dynamic batching {#dynamic-batching}
 
 ```python
 @app.function()
@@ -244,7 +252,7 @@ async def batch_predict(inputs: list[str]) -> list[dict]:
     # Inputs automatically batched
     return model.batch_predict(inputs)
 ```
-## Secrets management
+## Secrets management {#secrets-management}
 
 ```bash
 # Create secret
@@ -258,7 +266,7 @@ def download_model():
     token = os.environ["HF_TOKEN"]
 ```
 
-## Scheduling
+## Scheduling {#scheduling}
 
 ```python
 @app.function(schedule=modal.Cron("0 0 * * *"))  # Daily midnight
@@ -270,9 +278,9 @@ def hourly_job():
     pass
 ```
 
-## Performance optimization
+## Performance optimization {#performance-optimization}
 
-### Cold start mitigation
+### Cold start mitigation {#cold-start-mitigation}
 
 ```python
 # Modal 1.0 autoscaler params: scaledown_window (was container_idle_timeout).
@@ -283,7 +291,7 @@ def inference():
     pass
 ```
 
-### Model loading best practices
+### Model loading best practices {#model-loading-best-practices}
 
 ```python
 @app.cls(gpu="A100")
@@ -297,7 +305,7 @@ class Model:
         return self.model(x)
 ```
 
-## Parallel processing
+## Parallel processing {#parallel-processing}
 
 ```python
 @app.function()
@@ -312,7 +320,7 @@ def run_parallel():
     return results
 ```
 
-## Common configuration
+## Common configuration {#common-configuration}
 
 ```python
 @app.function(
@@ -335,7 +343,7 @@ def my_function():
 > - `keep_warm` → `min_containers`
 > - `allow_concurrent_inputs=N` → the `@modal.concurrent(max_inputs=N)` decorator
 
-## Debugging
+## Debugging {#debugging}
 
 ```python
 # Test locally
@@ -346,7 +354,7 @@ if __name__ == "__main__":
 # modal app logs my-app
 ```
 
-## Common issues
+## Common issues {#common-issues}
 
 | Issue | Solution |
 |-------|----------|
@@ -355,12 +363,12 @@ if __name__ == "__main__":
 | Image build fails | Pin dependency versions, check CUDA compatibility |
 | Timeout errors | Increase `timeout`, add checkpointing |
 
-## References
+## References {#references}
 
-- **[Advanced Usage](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/modal/references/advanced-usage.md)** - Multi-GPU, distributed training, cost optimization
-- **[Troubleshooting](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/modal/references/troubleshooting.md)** - Common issues and solutions
+- **[Advanced Usage](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/modal/references/advanced-usage.md)** - Multi-GPU, distributed training, cost optimization
+- **[Troubleshooting](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/modal/references/troubleshooting.md)** - Common issues and solutions
 
-## Resources
+## Resources {#resources}
 
 - **Documentation**: https://modal.com/docs
 - **Examples**: https://github.com/modal-labs/modal-examples

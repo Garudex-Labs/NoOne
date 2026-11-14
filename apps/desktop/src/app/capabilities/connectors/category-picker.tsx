@@ -1,6 +1,6 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { useRef, useState } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import {
   Command,
   CommandEmpty,
@@ -50,7 +50,7 @@ export function CategoryPicker({ categories, onChange, value }: CategoryPickerPr
           <span className="truncate">
             {selected ? labelFor(selected.value) : copy.tools.categorySelect(categories.length)}
           </span>
-          <Codicon className="shrink-0 opacity-60" name="chevron-down" size="0.875rem" />
+          <AppIcon className="shrink-0 opacity-60" name="chevron-down" size="0.875rem" />
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="min-w-(--radix-popover-trigger-width)" variant="menu">

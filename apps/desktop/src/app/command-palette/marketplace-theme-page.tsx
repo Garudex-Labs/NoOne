@@ -9,6 +9,7 @@
  */
 
 import { useStore } from '@nanostores/react'
+import { Check, Download, Loader2, Palette } from '@noone/ui/icons'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
@@ -18,7 +19,6 @@ import { useDebounced } from '@/app/hooks/use-debounced'
 import type { DesktopMarketplaceSearchItem } from '@/global'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { Check, Download, Loader2, Palette } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { installVscodeThemeFromMarketplace } from '@/themes/install'
 import { $marketplaceInstalls } from '@/themes/user-themes'

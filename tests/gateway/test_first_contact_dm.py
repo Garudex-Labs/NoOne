@@ -2,7 +2,7 @@
 
 from unittest.mock import AsyncMock
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 import pytest
 
 from gateway.config import GatewayConfig, Platform

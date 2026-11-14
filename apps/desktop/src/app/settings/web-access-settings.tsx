@@ -1,12 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { Globe, Loader2, Network } from '@noone/ui/icons'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { type ReactElement, useEffect, useState } from 'react'
 
-import { $apiRequestScope } from '@/api/client'
-import { formatElapsed, useElapsedSeconds } from '@/components/chat/activity-timer'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { SegmentedControl } from '@/components/ui/segmented-control'
 import {
   getWebAccessStatus,
   restartWebAccess,
@@ -16,13 +12,17 @@ import {
   type WebAccessMode,
   type WebAccessStartProgress,
   type WebAccessStatus
-} from '@/hermes'
+} from '@/agent-client'
+import { $apiRequestScope } from '@/api/client'
+import { formatElapsed, useElapsedSeconds } from '@/components/chat/activity-timer'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { SegmentedControl } from '@/components/ui/segmented-control'
 import { useViewedInterval } from '@/hooks/use-viewed-interval'
 import { useI18n } from '@/i18n'
 import type { WebAccessTranslations } from '@/i18n/types_gateway_host'
 import { ExternalLink } from '@/lib/external-link'
 import { hostHas } from '@/lib/host-capabilities'
-import { Globe, Loader2, Network } from '@/lib/icons'
 import { notify, notifyError } from '@/store/notifications'
 import { $connection } from '@/store/session'
 
@@ -31,7 +31,7 @@ import { ListRow, Pill, SectionHeading, SettingsContent, SettingsSection, Settin
 
 const RESTART_POLL_MS = 1500
 const RESTART_TIMEOUT_MS = 90_000
-// `hermes config set webapp.*` and a gateway restarted elsewhere change the status behind the pane's
+// `noone config set webapp.*` and a gateway restarted elsewhere change the status behind the pane's
 // back: re-read it when the window regains focus or comes back into view, and on a slow poll while
 // it is visible (react-query pauses the interval in the background).
 const STATUS_POLL_MS = 10_000

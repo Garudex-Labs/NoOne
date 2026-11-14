@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Drive the Hermes-Setup dmg bootstrap through its first-run GUI.
+# Drive the NoOne-Setup dmg bootstrap through its first-run GUI.
 #
 # The Setup app is Tauri (Rust + system webview), so Playwright/Electron
 # attach never works. Launch the binary bare in the background (it inherits
@@ -164,7 +164,7 @@ while :; do
     sleep 5
     install_complete && continue
     shot "ERROR-setup-exited"
-    log "Hermes-Setup exited (pid $SETUP_PID) before the install landed"
+    log "NoOne-Setup exited (pid $SETUP_PID) before the install landed"
     exit 1
   fi
   err="$(bootstrap_error)"

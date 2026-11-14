@@ -1,8 +1,11 @@
 import React from "react";
-import Link from "@docusaurus/Link";
+
+import Icon from "../../components/Icon";
+import { DocLink as Link } from "../DocLink";
+
 import {
-  type CatalogPlugin,
   cardSummary,
+  type CatalogPlugin,
   categoryOf,
   formatStars,
   pluginPagePath,
@@ -20,14 +23,14 @@ export default function MiniCard({ plugin }: { plugin: CatalogPlugin }) {
       <span className={styles.miniAccent} style={{ background: tier.color }} />
       <div className={styles.miniTop}>
         <span className={styles.miniIcon} aria-hidden="true" title={category.label}>
-          {category.icon}
+          <Icon name={category.icon} />
         </span>
         <span className={styles.miniName}>{plugin.name}</span>
         <span
           className={styles.tierPill}
           style={{ color: tier.color, background: tier.bg, borderColor: tier.border }}
         >
-          {tier.icon} {tier.label}
+          <Icon name={tier.icon} /> {tier.label}
         </span>
         {typeof plugin.stars === "number" && (
           <span className={styles.miniStars} title={`${plugin.stars.toLocaleString()} GitHub stars on ${repoUrl(plugin)}`}>

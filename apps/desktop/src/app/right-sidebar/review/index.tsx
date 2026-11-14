@@ -1,9 +1,9 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 
 import { FileDiffPanel } from '@/components/chat/diff-lines'
 import { DiffSkeleton, TreeSkeleton } from '@/components/chat/skeletons'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { DiffCount } from '@/components/ui/diff-count'
 import { Tip } from '@/components/ui/tooltip'
@@ -99,7 +99,7 @@ export function ReviewPane() {
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name={treeMode === 'tree' ? 'list-flat' : 'list-tree'} size="0.8125rem" />
+              <AppIcon name={treeMode === 'tree' ? 'list-flat' : 'list-tree'} size="0.8125rem" />
             </Button>
           </Tip>
           <Tip label={c.stageAll}>
@@ -111,7 +111,7 @@ export function ReviewPane() {
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name="add" size="0.8125rem" />
+              <AppIcon name="add" size="0.8125rem" />
             </Button>
           </Tip>
           <Tip label={c.revertAll}>
@@ -123,7 +123,7 @@ export function ReviewPane() {
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name="discard" size="0.8125rem" />
+              <AppIcon name="discard" size="0.8125rem" />
             </Button>
           </Tip>
           <Tip label={t.rightSidebar.refreshTree}>
@@ -134,11 +134,11 @@ export function ReviewPane() {
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name="refresh" size="0.8125rem" spinning={loading} />
+              <AppIcon name="refresh" size="0.8125rem" spinning={loading} />
             </Button>
           </Tip>
           <Button aria-label={c.close} className={ACTION_BTN} onClick={closeReview} size="icon-xs" variant="ghost">
-            <Codicon name="close" size="0.8125rem" />
+            <AppIcon name="close" size="0.8125rem" />
           </Button>
         </RightSidebarSectionHeader>
       )}
@@ -184,7 +184,7 @@ export function ReviewPane() {
                   size="icon-xs"
                   variant="ghost"
                 >
-                  <Codicon name={selectedFile.staged ? 'remove' : 'add'} size="0.8rem" />
+                  <AppIcon name={selectedFile.staged ? 'remove' : 'add'} size="0.8rem" />
                 </Button>
               </Tip>
             )}
@@ -195,7 +195,7 @@ export function ReviewPane() {
               size="icon-xs"
               variant="ghost"
             >
-              <Codicon name="close" size="0.8rem" />
+              <AppIcon name="close" size="0.8rem" />
             </Button>
           </div>
           <div className="min-h-0 flex-1 overflow-auto px-1 pb-1">

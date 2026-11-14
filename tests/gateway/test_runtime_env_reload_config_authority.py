@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from gateway import run as gateway_run
 
@@ -47,7 +47,7 @@ def test_reload_runtime_env_preserves_config_terminal_backend(
     gateway starts on the bridged local backend, works for hours, then a
     later turn's reload re-loads .env with override=True and every terminal /
     execute_code / read_file call starts trying Docker — while
-    ``hermes config get terminal.backend`` still says local.
+    ``noone config get terminal.backend`` still says local.
     """
     hermes_home = tmp_path / ".hermes"
     hermes_home.mkdir()

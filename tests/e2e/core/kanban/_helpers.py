@@ -1,5 +1,5 @@
 """Real-process Kanban board harness: a scratch HOME/HERMES_HOME, the recording fake provider, and
-the real ``hermes kanban`` CLI (dispatcher ticks spawn real ``hermes chat -q`` workers).
+the real ``noone kanban`` CLI (dispatcher ticks spawn real ``noone chat -q`` workers).
 
 Nothing below imports the dispatcher: every board mutation goes through a child process and every
 verdict is read back from ``kanban.db`` (tasks / task_runs / task_events rows) or the files on disk.
@@ -88,7 +88,7 @@ class Board:
         self.hermes_bin = self.root / "hermes-bin"
         self.hermes_bin.write_text(
             "#!/bin/sh\n"
-            f"PYTHONPATH={REPO} exec {PY} -m hermes_cli.main \"$@\"\n", encoding="utf-8")
+            f"PYTHONPATH={REPO} exec {PY} -m agent_cli.main \"$@\"\n", encoding="utf-8")
         self.hermes_bin.chmod(0o755)
 
     # env / processes -------------------------------------------------------
@@ -111,7 +111,7 @@ class Board:
 
     def cli(self, *args: str, timeout: float = 90.0, check: bool = True) -> subprocess.CompletedProcess:
         proc = subprocess.run(
-            [PY, "-m", "hermes_cli.main", "kanban", *args], cwd=str(self.root), env=self.env(),
+            [PY, "-m", "agent_cli.main", "kanban", *args], cwd=str(self.root), env=self.env(),
             capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL,
             check=False,
         )

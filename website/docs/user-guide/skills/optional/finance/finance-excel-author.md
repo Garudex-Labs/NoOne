@@ -1,59 +1,67 @@
 ---
 title: "Excel Author — Build auditable financial workbooks headless via openpyxl"
-sidebar_label: "Excel Author"
+sidebarTitle: "Excel Author"
 description: "Build auditable financial workbooks headless via openpyxl"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Excel Author
+# Excel Author {#excel-author}
 
 Build auditable financial workbooks headless via openpyxl.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/finance/excel-author` |
+| Source | Optional — install with `noone skills install official/finance/excel-author` |
 | Path | `optional-skills/finance/excel-author` |
 | Version | `1.0.0` |
-| Author | Anthropic (adapted by Nous Research) |
+| Author | Anthropic (adapted by Garudex Labs) |
 | License | Apache-2.0 |
 | Platforms | linux, macos, windows |
 | Tags | `excel`, `openpyxl`, `finance`, `spreadsheet`, `modeling` |
 | Related skills | [`microsoft-office`](../../bundled/productivity/productivity-microsoft-office.md), [`pptx-author`](../../optional/finance/finance-pptx-author.md), [`dcf-model`](../../optional/finance/finance-dcf-model.md), [`comps-analysis`](../../optional/finance/finance-comps-analysis.md), [`lbo-model`](../../optional/finance/finance-lbo-model.md), [`3-statement-model`](../../optional/finance/finance-3-statement-model.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# excel-author
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# excel-author {#excel-author-1}
 
 Produce an .xlsx file on disk using `openpyxl`. Follow the banker-grade conventions below so the model is auditable, flexible, and reviewable by someone other than the person who built it.
 
 Adapted from Anthropic's `xlsx-author` and `audit-xls` skills in the [anthropics/financial-services](https://github.com/anthropics/financial-services) repo. The MCP / Office-JS / Cowork-specific branches of the originals are dropped — this skill assumes headless Python.
 
-## Output contract
+## Output contract {#output-contract}
 
 - Write to `./out/<name>.xlsx`. Create `./out/` if it does not exist.
 - Return the relative path in your final message so downstream tools can pick it up.
 - One logical model per file. Do not append to an existing workbook unless explicitly asked.
 
-## Setup
+## Setup {#setup}
 
-Use `python` when it already imports `openpyxl` (the Hermes Docker image ships
-it). Otherwise, when `hermes` is on PATH, let Hermes build its shared, pinned
-documents environment under the Hermes home (safe to run from several agents
-at once); in a Docker sandbox without Hermes the block builds a venv in the
+Use `python` when it already imports `openpyxl` (the {{app-name}} Docker image ships
+it). Otherwise, when `hermes` is on PATH, let {{app-name}} build its shared, pinned
+documents environment under the {{app-name}} home (safe to run from several agents
+at once); in a Docker sandbox without {{app-name}} the block builds a venv in the
 sandbox home with the same pinned versions. It is the same block as the
 microsoft-office/pdf skills. Never `pip install` into the interpreter that
-runs Hermes:
+runs {{app-name}}:
 
 ```bash
 python -c "import openpyxl" 2>/dev/null && PY=python || if command -v hermes >/dev/null 2>&1; then
-  PY="$(hermes pm environment documents --extra documents --extra documents-pdf)"
+  PY="$(noone pm environment documents --extra documents --extra documents-pdf)"
 else
   PY="$HOME/.cache/hermes-docs-venv/bin/python"
   "$PY" -c "import docx, openpyxl, pptx, reportlab, pypdf, pdfplumber, pypdfium2" 2>/dev/null || (
@@ -78,16 +86,16 @@ export PY
 
 Run the model-building Python with `"$PY"`.
 
-## Core conventions (non-negotiable)
+## Core conventions (non-negotiable) {#core-conventions-non-negotiable}
 
-### Blue / black / green cell color
+### Blue / black / green cell color {#blue--black--green-cell-color}
 - **Blue** (`Font(color="0000FF")`) — hardcoded input a human entered. Revenue drivers, WACC inputs, terminal growth, market data.
 - **Black** (default) — formula. Every derived cell is a live Excel formula.
 - **Green** (`Font(color="006100")`) — link to another sheet or external file.
 
 A reviewer can then scan the sheet and immediately see what's an assumption vs. what's computed.
 
-### Formulas over hardcodes
+### Formulas over hardcodes {#formulas-over-hardcodes}
 Every calculation cell MUST be a formula string, never a number computed in Python and pasted as a value.
 
 ```python
@@ -105,7 +113,7 @@ The only hardcoded numbers permitted:
 
 If you catch yourself computing a value in Python and writing the result, stop.
 
-### Named ranges for cross-sheet references
+### Named ranges for cross-sheet references {#named-ranges-for-cross-sheet-references}
 Use named ranges for any figure referenced from another sheet, a deck, or a memo.
 
 ```python
@@ -115,7 +123,7 @@ wb.defined_names["WACC"] = DefinedName("WACC", attr_text="Inputs!$C$8")
 calc["D30"] = "=D29/WACC"
 ```
 
-### Balance checks tab
+### Balance checks tab {#balance-checks-tab}
 Include a `Checks` tab that ties everything and surfaces TRUE/FALSE:
 - Balance sheet balances (assets = liabilities + equity)
 - Cash flow ties to period-over-period cash change on the BS
@@ -130,7 +138,7 @@ checks["B2"] = "=IS!D20-IS!D21-IS!D22"
 checks["C2"] = "=ABS(B2)<0.01"  # TRUE/FALSE
 ```
 
-### Cell comments on every hardcoded input
+### Cell comments on every hardcoded input {#cell-comments-on-every-hardcoded-input}
 Add the comment AS you create the cell, not later.
 
 ```python
@@ -144,7 +152,7 @@ Format: `Source: [System/Document], [Date], [Reference], [URL if applicable]`.
 
 Never defer sourcing. Never write `TODO: add source`.
 
-## Skeleton: typical financial model
+## Skeleton: typical financial model {#skeleton-typical-financial-model}
 
 ```python
 from openpyxl import Workbook
@@ -193,7 +201,7 @@ Path("./out").mkdir(exist_ok=True)
 wb.save("./out/model.xlsx")
 ```
 
-## Section headers with merged cells
+## Section headers with merged cells {#section-headers-with-merged-cells}
 
 openpyxl quirk: when you merge, set the value on the top-left cell and style the full range separately.
 
@@ -205,7 +213,7 @@ for col in range(1, 9):  # A..H
     ws.cell(row=7, column=col).fill = HEADER_FILL
 ```
 
-## Sensitivity tables
+## Sensitivity tables {#sensitivity-tables}
 
 Build with loops, not hardcoded formulas per cell. Rules:
 
@@ -247,7 +255,7 @@ center.fill = PatternFill("solid", fgColor="BDD7EE")
 center.font = BOLD
 ```
 
-## Recalculating before delivery
+## Recalculating before delivery {#recalculating-before-delivery}
 
 openpyxl writes formula strings but does not compute them. Excel recalculates on open, but downstream consumers (auto-check scripts, CI) need computed values.
 
@@ -260,7 +268,7 @@ libreoffice --headless --calc --convert-to xlsx ./out/model.xlsx --outdir ./out/
 
 Or use a Python recalc helper (see `scripts/recalc.py` in this skill).
 
-## Model layout planning
+## Model layout planning {#model-layout-planning}
 
 Before writing any formula:
 1. Define ALL section row positions
@@ -270,7 +278,7 @@ Before writing any formula:
 
 This prevents the cascading-formula-breakage pattern where inserting a header row after formulas are written shifts every downstream reference.
 
-## Verify step-by-step with the user
+## Verify step-by-step with the user {#verify-step-by-step-with-the-user}
 
 For large models (DCFs, 3-statement, LBO), stop and show the user intermediate artifacts before continuing. Catching a wrong margin assumption before you've built downstream sensitivity tables saves an hour.
 
@@ -282,12 +290,12 @@ Checkpoint pattern:
 - After valuation → confirm the equity bridge
 - THEN build sensitivity tables
 
-## When NOT to use this skill
+## When NOT to use this skill {#when-not-to-use-this-skill}
 
 - Users in a live Excel session with an Office MCP available — drive their live workbook instead.
 - Pure tabular data export with no formulas — `csv` or `pandas.to_excel` is simpler.
 - Dashboards / charts with heavy interactivity — use a real BI tool.
 
-## Attribution
+## Attribution {#attribution}
 
 Conventions (blue/black/green, formulas-over-hardcodes, named ranges, sensitivity rules) adapted from Anthropic's Claude for Financial Services plugin suite, Apache-2.0 licensed. Original: https://github.com/anthropics/financial-services/tree/main/plugins/vertical-plugins/financial-analysis/skills/xlsx-author

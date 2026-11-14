@@ -13,7 +13,7 @@ from typing import Any, Optional
 
 from gateway.platforms.base import BasePlatformAdapter as _BasePlatformAdapter
 from gateway.stream_consumer_fences import ensure_closed_code_fences
-from hermes_cli.observability.shared_metrics_gateway import stops_reply_clock
+from agent_cli.observability.shared_metrics_gateway import stops_reply_clock
 
 logger = logging.getLogger("gateway.stream_consumer")
 
@@ -421,16 +421,14 @@ class StreamTransportMixin:
             logger.info("[latency] Re-opened native stream after boundary "
                         "(turn=%s, waited for first delta)", self._turn_id)
 
-        # WeCom renders each finalize as a separate bubble: only the turn-final and
+        # Some native transports render each finalize as a separate bubble: only the turn-final and
         # boundaries close the stream, not segment breaks.
         finalize = finalize and is_turn_final
         if not finalize and text == self._last_sent_text:
             return True  # unchanged — skip
 
-        # Mark a finalize frame delivered OPTIMISTICALLY, before the ack wait: WeCom
-        # renders the bytes before the ack, so a gateway join-cancel mid-wait must not
-        # strand final_content_delivered=False and duplicate the send (docs/rca-wecom-
-        # stream-final-ack-timeout-duplicate.md).  A definitive failure rolls it back.
+        # Mark a finalize frame delivered OPTIMISTICALLY, before the ack wait: the transport renders the bytes before the ack, so a gateway join-cancel mid-wait must not
+        # strand final_content_delivered=False and duplicate the send.  A definitive failure rolls it back.
         if finalize:
             self._mark_final_delivered(record=text)  # recorded: stale frame can't suppress
         if await self._try_frame(self._send_frame(text, finalize=finalize),
@@ -453,7 +451,7 @@ class StreamTransportMixin:
         self._use_native_streaming = False
         # Best-effort close of an opened bubble (the seed frame has zero length but
         # still opens it).  DO NOT mark delivered: the frame closes the bubble but
-        # WeCom may not render the content (errcode 6000 race).
+        # the transport may not render the content after a close race.
         if self._native_stream_opened:
             try:
                 await self._send_frame(text, finalize=True)

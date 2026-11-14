@@ -1,74 +1,31 @@
 import {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-  useCallback,
-  useRef,
-} from "react";
-import { useNavigate } from "react-router";
-import {
   AlertTriangle,
+  Archive,
+  Check,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Database,
-  ListFilter,
-  Search,
-  Trash2,
   Clock,
-  Terminal,
-  Globe,
-  X,
-  Play,
-  Eraser,
+  Database,
   Download,
-  Upload,
+  Eraser,
+  Globe,
+  ListFilter,
   Pencil,
-  Check,
-  Archive,
-} from "lucide-react";
-import { api } from "@/lib/api";
-import { formatSessionPruneResult } from "@/lib/session-prune";
-import { shouldRefreshSessions } from "@/lib/session-refresh";
-import {
-  importSummary,
-  parseImportSessions,
-} from "@/lib/session-import";
-import type {
-  SessionInfo,
-  SessionMessage,
-  SessionSearchResult,
-  SessionStoreStats,
-  StatusResponse,
-} from "@/lib/api";
-import { timeAgo } from "@/lib/utils";
-import { Markdown } from "@/components/Markdown";
-import {
-  AUTOMATION_SESSION_SOURCES,
-  NO_MATCHING_SESSION_SOURCE,
-  SOURCE_CONFIG,
-  type SessionFilterCategory,
-  type SourceSelectionsByCategory,
-  isAutomationSource,
-  sourceBelongsToCategory,
-  sourceLabel,
-} from "./SessionsPage_sources";
-import { StructuredReasoning } from "@/components/StructuredReasoning";
-import { PlatformsCard } from "@/components/PlatformsCard";
-import { shouldRenderStructuredReasoning } from "@/lib/reasoning-markup";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Checkbox } from "@nous-research/ui/ui/components/checkbox";
-import { ListItem } from "@nous-research/ui/ui/components/list-item";
-import { Segmented } from "@nous-research/ui/ui/components/segmented";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { Badge } from "@nous-research/ui/ui/components/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
-import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+  Play,
+  Search,
+  Terminal,
+  Trash2,
+  Upload,
+  X,
+} from "@noone/ui/icons";
 import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
-import { Input } from "@nous-research/ui/ui/components/input";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
+import { Badge } from "@nous-research/ui/ui/components/badge";
+import { Button } from "@nous-research/ui/ui/components/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
+import { Checkbox } from "@nous-research/ui/ui/components/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -77,13 +34,58 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@nous-research/ui/ui/components/dialog";
-import { useSystemActions } from "@/contexts/useSystemActions";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { useI18n } from "@/i18n";
+import { Input } from "@nous-research/ui/ui/components/input";
+import { ListItem } from "@nous-research/ui/ui/components/list-item";
+import { Segmented } from "@nous-research/ui/ui/components/segmented";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Toast } from "@nous-research/ui/ui/components/toast";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useNavigate } from "react-router";
+
+import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+import { Markdown } from "@/components/Markdown";
+import { PlatformsCard } from "@/components/PlatformsCard";
+import { StructuredReasoning } from "@/components/StructuredReasoning";
 import { usePageHeader } from "@/contexts/usePageHeader";
-import { PluginSlot } from "@/plugins";
-import { isDashboardEmbeddedChatEnabled } from "@/lib/dashboard-flags";
+import { useSystemActions } from "@/contexts/useSystemActions";
+import { useI18n } from "@/i18n";
+import { api } from "@/lib/api";
+import type {
+  SessionInfo,
+  SessionMessage,
+  SessionSearchResult,
+  SessionStoreStats,
+  StatusResponse,
+} from "@/lib/api";
 import { apiErrorFromResponse, errorMessage } from "@/lib/api-error";
+import { isDashboardEmbeddedChatEnabled } from "@/lib/dashboard-flags";
+import { shouldRenderStructuredReasoning } from "@/lib/reasoning-markup";
+import {
+  importSummary,
+  parseImportSessions,
+} from "@/lib/session-import";
+import { formatSessionPruneResult } from "@/lib/session-prune";
+import { shouldRefreshSessions } from "@/lib/session-refresh";
+import { timeAgo } from "@/lib/utils";
+import { PluginSlot } from "@/plugins";
+
+import {
+  AUTOMATION_SESSION_SOURCES,
+  isAutomationSource,
+  NO_MATCHING_SESSION_SOURCE,
+  type SessionFilterCategory,
+  SOURCE_CONFIG,
+  sourceBelongsToCategory,
+  sourceLabel,
+  type SourceSelectionsByCategory,
+} from "./SessionsPage_sources";
 
 
 /** Render an FTS5 snippet with highlighted matches.

@@ -1,9 +1,9 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { Square } from '@noone/ui/icons'
 import type * as React from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
-import { Square } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 interface GenerateButtonProps extends Omit<React.ComponentProps<typeof Button>, 'children' | 'onClick'> {
@@ -54,7 +54,7 @@ export function GenerateButton({
         {cancellable ? (
           <Square className="fill-current" size={11} />
         ) : (
-          <Codicon name="sparkle" size={iconSize} spinning={generating} />
+          <AppIcon name="sparkle" size={iconSize} spinning={generating} />
         )}
       </Button>
     </Tip>

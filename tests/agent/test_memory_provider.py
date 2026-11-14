@@ -173,7 +173,7 @@ class TestMemoryManager:
 
     @staticmethod
     def _set_spill_config(monkeypatch, tmp_path, *, max_chars):
-        from hermes_cli.config import atomic_config_write
+        from agent_cli.config import atomic_config_write
 
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         atomic_config_write(tmp_path / "config.yaml", {
@@ -218,7 +218,7 @@ class TestMemoryManager:
     ):
         """Provider-ranked recall stays intact unless both spill switches permit it (#130974)."""
         from agent.turn_context import _collect_pre_llm_call_context
-        from hermes_cli.config import atomic_config_write
+        from agent_cli.config import atomic_config_write
         from tools.hook_output_spill import DEFAULT_MAX_CHARS
 
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
@@ -236,7 +236,7 @@ class TestMemoryManager:
         assert not (tmp_path / "hook_outputs").exists()
 
         # Exercise the independent plugin-hook consumer, not just the spill helper.
-        monkeypatch.setattr("hermes_cli.lifecycle.invoke_hook", lambda *a, **kw: [{"context": text}])
+        monkeypatch.setattr("agent_cli.lifecycle.invoke_hook", lambda *a, **kw: [{"context": text}])
         result = _collect_pre_llm_call_context(
             SimpleNamespace(session_id="hook", model="test"), effective_task_id="task",
             turn_id="turn", original_user_message="recall", messages=[], conversation_history=[],
@@ -258,7 +258,7 @@ class TestMemoryManager:
 
     def test_runaway_recall_still_spills_without_opt_in(self, tmp_path, monkeypatch):
         """Opt-out keeps normal recall whole but still caps a runaway provider at the ceiling."""
-        from hermes_cli.config import atomic_config_write
+        from agent_cli.config import atomic_config_write
 
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         atomic_config_write(tmp_path / "config.yaml", {"memory": {}})
@@ -277,8 +277,8 @@ class TestMemoryManager:
         from agent.secret_scope import (
             is_multiplex_active, reset_secret_scope, set_multiplex_active, set_secret_scope,
         )
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
-        from hermes_cli.config import atomic_config_write
+        from agent_constants import reset_agent_home_override, set_agent_home_override
+        from agent_cli.config import atomic_config_write
 
         a, b = tmp_path / "a", tmp_path / "b"
         a.mkdir()
@@ -297,7 +297,7 @@ class TestMemoryManager:
         set_multiplex_active(True)
         try:
             for home in (a, b, a):
-                home_token = set_hermes_home_override(home)
+                home_token = set_agent_home_override(home)
                 secret_token = set_secret_scope({}, profile_home=str(home))
                 try:
                     if home not in managers:
@@ -325,8 +325,8 @@ class TestMemoryManager:
                     })
                 finally:
                     reset_secret_scope(secret_token)
-                    reset_hermes_home_override(home_token)
-            home_token = set_hermes_home_override(a)
+                    reset_agent_home_override(home_token)
+            home_token = set_agent_home_override(a)
             secret_token = set_secret_scope({}, profile_home=str(a))
             try:
                 fresh = MemoryManager()
@@ -337,7 +337,7 @@ class TestMemoryManager:
                 assert not (a / "recall" / "fresh").exists()
             finally:
                 reset_secret_scope(secret_token)
-                reset_hermes_home_override(home_token)
+                reset_agent_home_override(home_token)
         finally:
             set_multiplex_active(was_multiplex)
 
@@ -502,7 +502,7 @@ class TestMemoryManager:
         is keyed per Hermes home: another profile's same-named provider still recalls.
         """
         import agent.memory_manager as mm
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+        from agent_constants import reset_agent_home_override, set_agent_home_override
 
         monkeypatch.setattr(mm, "_PROBE_INTERVAL_S", 1e9)
         stuck = mm._MAX_STUCK_CALLS
@@ -522,11 +522,11 @@ class TestMemoryManager:
 
             other_profile = FakeMemoryProvider("cross-manager-stuck")
             other_profile._prefetch_result = "profile b memory"
-            token = set_hermes_home_override(tmp_path / "profile-b")
+            token = set_agent_home_override(tmp_path / "profile-b")
             try:
                 mgr_b = MemoryManager(external_prefetch_timeout=1.0)
             finally:
-                reset_hermes_home_override(token)
+                reset_agent_home_override(token)
             mgr_b.add_provider(other_profile)
             assert mgr_b._prefetch_provider(other_profile, "q", session_id="b") == "profile b memory"
 
@@ -810,7 +810,7 @@ class TestEntryPointMemoryProviderDiscovery:
         def __init__(self, name, module, exposure="register"):
             self.name = name
             self.value = f"{module}:{exposure}"
-            self.group = "hermes_agent.memory_providers"
+            self.group = "agent_compat.memory_providers"
             self._module = module
             self._exposure = exposure
 
@@ -938,7 +938,7 @@ class TestEntryPointMemoryProviderDiscovery:
     def test_inactive_entry_point_load_does_not_register_skill(
         self, tmp_path, monkeypatch
     ):
-        from hermes_cli.plugins import get_plugin_manager
+        from agent_cli.plugins import get_plugin_manager
         from plugins.memory import load_memory_provider
         import plugins.memory as memory_plugins
 
@@ -970,7 +970,7 @@ class TestEntryPointMemoryProviderDiscovery:
     def test_switching_provider_prunes_registered_entry_point_skill(
         self, tmp_path, monkeypatch
     ):
-        from hermes_cli.plugins import get_plugin_manager
+        from agent_cli.plugins import get_plugin_manager
         from tools.skills_tool import skill_view
         import plugins.memory as memory_plugins
 

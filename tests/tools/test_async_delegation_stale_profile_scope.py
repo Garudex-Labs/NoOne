@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 from tools import async_delegation as ad
 from tools.process_registry import process_registry
 
@@ -43,7 +43,7 @@ def test_stale_monitor_force_finalize_updates_origin_profile_ledger(tmp_path, mo
     Normal async workers carry the dispatching ContextVars via
     ``propagate_context_to_thread``.  The single stale-monitor thread does not:
     Python starts it with an empty Context, so a forced finalization must not
-    re-resolve ``get_hermes_home()`` to the process launch profile.
+    re-resolve ``get_agent_home()`` to the process launch profile.
     """
     launch_home = tmp_path / "launch"
     profile_home = launch_home / "profiles" / "secondary"
@@ -62,7 +62,7 @@ def test_stale_monitor_force_finalize_updates_origin_profile_ledger(tmp_path, mo
         gate.wait(timeout=30)
         return {"status": "completed", "summary": "late runner result"}
 
-    token = set_hermes_home_override(profile_home)
+    token = set_agent_home_override(profile_home)
     try:
         handle = ad.dispatch_async_delegation(
             goal="profile-owned stalled task",
@@ -76,7 +76,7 @@ def test_stale_monitor_force_finalize_updates_origin_profile_ledger(tmp_path, mo
             progress_fn=lambda: ("frozen", False),
         )
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
     delegation_id = handle["delegation_id"]
     profile_db = profile_home / "state.db"

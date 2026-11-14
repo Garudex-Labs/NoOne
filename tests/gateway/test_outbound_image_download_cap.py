@@ -57,10 +57,10 @@ class _ChunkedImage(BaseHTTPRequestHandler):
 
 @pytest.fixture
 def image_host():
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     from tools import url_safety
 
-    (get_hermes_home() / "config.yaml").write_text(
+    (get_agent_home() / "config.yaml").write_text(
         f"gateway:\n  max_inbound_media_bytes: {CAP}\nsecurity:\n  allow_private_urls: true\n")
     url_safety._reset_allow_private_cache()
     srv = ThreadingHTTPServer(("127.0.0.1", 0), _ChunkedImage)
@@ -119,17 +119,6 @@ def _telegram(uploaded):
     return a
 
 
-def _feishu(uploaded):
-    from plugins.platforms.feishu.adapter import FeishuAdapter
-    a = FeishuAdapter(PlatformConfig())
-    a.send = _ok
-
-    async def _send_file(chat_id, file_path=None, image_path=None, **_kwargs):
-        uploaded.append(Path(file_path or image_path).stat().st_size)
-        return SendResult(success=True, message_id="1")
-
-    a.send_document = a.send_image_file = _send_file
-    return a
 
 
 def _mattermost(uploaded):
@@ -170,7 +159,6 @@ SENDS = {
     "slack-send_image": (_slack, lambda a, url: a.send_image("C1", url)),
     "slack-send_multiple_images": (_slack, lambda a, url: a.send_multiple_images("C1", [(url, "")])),
     "telegram-send_image": (_telegram, lambda a, url: a.send_image("42", url)),
-    "feishu-send_animation": (_feishu, lambda a, url: a.send_animation("oc_1", url)),
     "mattermost-send_image": (_mattermost, lambda a, url: a.send_image("ch", url)),
     "mattermost-send_multiple_images": (
         _mattermost, lambda a, url: a.send_multiple_images("ch", [(url, "")])),

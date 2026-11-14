@@ -1,10 +1,10 @@
 ---
-sidebar_position: 5
+
 ---
 
-# Connecting Desktop to Many Hermes Instances
+# Connecting Desktop to Many {{app-name}} Instances {#connecting-desktop-to-many-hermes-instances}
 
-Register every Hermes backend you own — the local runtime, remote gateways on
+Register every {{app-name}} backend you own — the local runtime, remote gateways on
 your LAN or VPS, SSH hosts, and Hermes Cloud instances — in one desktop app,
 and use the agents on all of them side by side. Every registered gateway is
 connected all the time: Desktop dials each one when it starts, keeps its
@@ -16,7 +16,7 @@ This is the desktop-side complement to
 about hosting several gateways on one machine; this one is about one desktop
 app talking to several machines.
 
-## Where to find it
+## Where to find it {#where-to-find-it}
 
 Everything lives on the unified **Settings → Gateways** page (older builds had
 separate **Gateway** and **Connections** pages; legacy Connections deep links
@@ -26,24 +26,24 @@ redirect there). Three doors lead to it:
   **Gateways** in the settings nav). The connections registry is a section
   of that page, below the machine-level connection-mode controls.
 - **The sidebar profile rail** — the plug button at the right end of the rail
-  (tooltip: **"Connect another Hermes gateway…"**) deep-links straight to
+  (tooltip: **"Connect another {{app-name}} gateway…"**) deep-links straight to
   the Gateways page. It is always visible, even before you have created
   a second profile or a second connection.
 - **The command palette** — **Cmd/Ctrl+K**, then type *Gateways* (also
   matches *connections*, *add gateway*, *remote*, *ssh*, *instances*).
 
-## The gateway registry
+## The gateway registry {#the-gateway-registry}
 
 The **Registered gateways** section of **Settings → Gateways** manages a named
-list of Hermes gateways. Its intro says it plainly: *"Manage this device and
-every Hermes gateway it can reach through remote, SSH, or Cloud connections."*
+list of {{app-name}} gateways. Its intro says it plainly: *"Manage this device and
+every {{app-name}} gateway it can reach through remote, SSH, or Cloud connections."*
 Each entry is a *connection*:
 
 | Kind | What it is | Auth |
 |---|---|---|
-| **Local** | "The Hermes runtime managed by this app." | automatic |
-| **Remote gateway** | "A Hermes gateway reachable over HTTP(S) — LAN, Tailscale, or the internet." | session token or OAuth |
-| **SSH** | "A Hermes install reached over SSH." The app opens the tunnel and starts the dashboard for you | SSH key + adopted token |
+| **Local** | "The {{app-name}} runtime managed by this app." | automatic |
+| **Remote gateway** | "A {{app-name}} gateway reachable over HTTP(S) — LAN, Tailscale, or the internet." | session token or OAuth |
+| **SSH** | "A {{app-name}} install reached over SSH." The app opens the tunnel and starts the dashboard for you | SSH key + adopted token |
 | **Hermes Cloud** | "A hosted instance discovered through your Hermes Cloud account." | portal sign-in |
 
 Rules worth knowing:
@@ -68,7 +68,7 @@ Rules worth knowing:
   (the *"Reachable"* toast) means chat will actually work — not just that the
   host pinged. In the Webapp, **Test** on an SSH row opens the same managed
   tunnel the gateway uses to reach that host, which starts (or reuses)
-  `hermes serve` on the remote machine without cleaning it up afterwards. It
+  `noone serve` on the remote machine without cleaning it up afterwards. It
   stops when you remove the connection or stop the gateway, or on its own after
   the remote idle timeout (`dashboard.ssh_isolated_idle_grace_s`, 15 minutes by
   default) while no client is connected and no work is running.
@@ -88,7 +88,7 @@ own gateway; the app-managed window backend is still chosen by the
 connection-mode controls above. **Primary** is the registry fallback and does
 not change the current workspace.
 
-## Organizing session groups
+## Organizing session groups {#organizing-session-groups}
 
 In the Sessions sidebar's view menu, choose **Gateway & profile** while viewing
 all profiles. Each gateway gets its own collapsible section, with profile
@@ -113,7 +113,7 @@ one. Adding a new instance uses its friendly Cloud name, while existing custom
 connection names are preserved. Saved connections still need valid gateway
 authentication; manage sign-in from the registered connection controls.
 
-## Adding a connection, step by step
+## Adding a connection, step by step {#adding-a-connection-step-by-step}
 
 1. Open **Settings → Gateways** and scroll to the connections registry (or
    click the plug in the profile rail).
@@ -126,7 +126,7 @@ authentication; manage sign-in from the registered connection controls.
    - **Name** — required, unique; the "device name" shown everywhere this
      instance appears (placeholder: `Homelab`). Max 64 characters.
    - *Remote gateway only:*
-     - **Gateway URL** — the base URL of a running `hermes serve` backend,
+     - **Gateway URL** — the base URL of a running `noone serve` backend,
        e.g. `http://homelab.lan:9119`. Reverse-proxy path prefixes work.
      - **Authentication** — choose **Session token** or **OAuth**:
        - **Session token** — paste the dashboard session token from the
@@ -141,10 +141,10 @@ authentication; manage sign-in from the registered connection controls.
        shell; on a `zsh` login shell the probe watchdog cannot kill the whole
        process group, so a hung probe's grandchildren may linger on the remote
        (bash/sh remotes reap them).
-     - **Hermes path (optional)** — full path to the `hermes` executable on
+     - **{{app-name}} path (optional)** — full path to the `hermes` executable on
        the remote (for example `/opt/hermes/bin/hermes`). Leave blank to
        auto-detect. Set it when the remote's non-interactive shell does not
-       have `hermes` on its `PATH` and **Test** reports *"Hermes is not
+       have `hermes` on its `PATH` and **Test** reports *"{{app-name}} is not
        installed on the remote host"*; clearing the field restores
        auto-detection.
 5. Click **Save connection** (or **Cancel**).
@@ -154,7 +154,14 @@ Edit any non-local entry later with the pencil button, or remove it with the
 trash button — removal asks for confirmation and reminds you that *"The
 instance itself is not touched — you can add it again any time."*
 
-:::info The remote backend is a running `hermes serve` process
+<Info>
+
+<div className="doc-callout-title">
+
+The remote backend is a running `noone serve` process
+
+</div>
+
 Nothing here works unless the backend is actually up and reachable on the
 other machine. The desktop app attaches to it; it does not start it for you
 (except for SSH connections, where the app opens the tunnel and starts the
@@ -162,9 +169,10 @@ dashboard when Desktop launches, since every gateway stays connected). See
 [Connecting to a remote backend](./desktop.md#connecting-to-a-remote-backend)
 for backend-side setup — auth providers, binding to a non-loopback address,
 and Tailscale guidance.
-:::
 
-### Migrating from the single-connection settings
+</Info>
+
+### Migrating from the single-connection settings {#migrating-from-the-single-connection-settings}
 
 The first launch of a registry-capable build imports your existing settings
 automatically: the global connection mode and any legacy per-profile
@@ -176,7 +184,7 @@ The legacy settings file is left untouched, so older builds on the same
 machine keep working. If a migrated name collided, it was suffixed
 (`Homelab 2`).
 
-## Agents across gateways
+## Agents across gateways {#agents-across-gateways}
 
 Every [profile](./profiles.md) on every registered connection is an *agent*.
 The union roster is what multi-gateway surfaces (and the built-in
@@ -190,7 +198,7 @@ The union roster is what multi-gateway surfaces (and the built-in
   stays connected: its default profile holds one open connection for the life
   of the window and is redialed every 30 seconds while it is down. An
   unreachable gateway reports per-row instead of breaking the roster. With a
-  remote primary, **This device** is kept connected too when Hermes is
+  remote primary, **This device** is kept connected too when {{app-name}} is
   installed here, so its local gateway starts with Desktop. Terminals and
   running work on a gateway keep going when you pick another one.
 - Opening an agent dials **its own gateway** — chats, sessions, and memory
@@ -201,11 +209,11 @@ Each `(connection, profile)` pair gets its own socket, and Desktop caches the
 gateway descriptor it dialed so the next open joins the same connection —
 background agents keep streaming while you look at another gateway. Desktop
 never spawns or reaps a *remote* gateway; each one owns its own lifetime. For a
-**local** profile, the first open runs `hermes gateway ensure`, which attaches
+**local** profile, the first open runs `noone gateway ensure`, which attaches
 to that profile's running gateway or, when there is none, installs and starts a
 persistent per-profile gateway (a systemd/launchd service where one exists,
 otherwise a detached daemon). That gateway keeps running after you close the
-app — it has no idle shutdown — until you stop it with `hermes gateway stop`.
+app — it has no idle shutdown — until you stop it with `noone gateway stop`.
 
 Approval buttons route back to the session's owning backend, not whichever
 profile is currently selected. For a local secondary profile, Desktop can use
@@ -214,10 +222,10 @@ missing. Saved session ownership still takes precedence, and deleting or
 renaming that local profile clears this temporary route rather than reconnecting
 an obsolete backend.
 
-### Gateways, profiles and scope
+### Gateways, profiles and scope {#gateways-profiles-and-scope}
 
 The sidebar foot follows one hierarchy: **gateway → profile → sessions**.
-Gateways are machines or hosted backends; profiles are isolated Hermes agents
+Gateways are machines or hosted backends; profiles are isolated {{app-name}} agents
 that live on one gateway.
 
 - With one registered gateway, no gateway control is added. Local-only Desktop
@@ -249,7 +257,7 @@ that live on one gateway.
   square offers **Open**, **Color**, **Rename**, **Edit SOUL.md** and
   **Delete**, all executed on the square's own gateway; the delete
   confirmation names the machine. Picking **This device** asks for
-  confirmation only when Hermes is not installed on this computer yet.
+  confirmation only when {{app-name}} is not installed on this computer yet.
 - A gateway the last enumeration could not reach keeps its squares, marked
   with an amber dot on its glyph — a sleeping box is still yours. Two
   registrations of one backend collapse to a single group. Past thirteen
@@ -292,7 +300,7 @@ Add, test, rename, or remove gateways in **Settings → Gateways**. The plug
 button beside the profile actions is a shortcut to that single management
 home, not a second add flow.
 
-### Sessions and Bot Mode
+### Sessions and Bot Mode {#sessions-and-bot-mode}
 
 With **All profiles** selected, the Sessions list shows the sessions of every
 registered gateway at once; group it by **Gateway & profile** to give each
@@ -308,10 +316,10 @@ backend boundary changes filesystem, credentials, tools, and trust context, so
 cross-gateway execution should be an explicit bridge rather than an accidental
 side effect of sharing one Desktop window.
 
-## Updating every instance at once
+## Updating every instance at once {#updating-every-instance-at-once}
 
 **Settings → Gateways → Update all instances** (shown once more than one
-connection is registered) dispatches `hermes update` to every eligible
+connection is registered) dispatches `noone update` to every eligible
 connection in parallel:
 
 - **Local** updates through the app's own update pipeline (the same flow as
@@ -327,15 +335,15 @@ with their own message, per row.
 
 You rarely need the Settings button, though: once more than one update target
 exists, the app's regular update affordances (**Update now** on the About
-panel, ⌘K **Update Hermes**, the update-ready toast) run the same fan-out
+panel, ⌘K **Update {{app-name}}**, the update-ready toast) run the same fan-out
 automatically — active backend first, then every other eligible gateway, then
 the desktop app itself last. See
 [Updating](./desktop.md#updating) in the desktop guide.
 
-## Security notes
+## Security notes {#security-notes}
 
 - **Where connections and tokens live.** The saved list is
-  `gateway-connections.json` in your Hermes home (beside `ui-preferences.json`):
+  `gateway-connections.json` in your {{app-name}} home (beside `ui-preferences.json`):
   labels, URLs, SSH hosts, and each connection's session token and extra
   headers. Sign-in (OAuth) credentials, keyed by connection, are in
   `gateway-connection-tokens.json` next to it. Both are owner-only (0600)
@@ -356,7 +364,7 @@ the desktop app itself last. See
 - The plugin SDK's `host.connections()` deliberately returns labels, kinds,
   and the primary id — never token material.
 
-## For plugin authors
+## For plugin authors {#for-plugin-authors}
 
 The Desktop [plugin SDK](../developer-guide/desktop-plugin-sdk.md) exposes the
 multi-gateway surface directly:
@@ -374,10 +382,10 @@ All four are feature-detected: on an older Desktop build they're absent and a
 plugin should fall back to the single-gateway `profiles.list` flow. Bot Mode's
 multi-gateway roster is the reference consumer.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 - **"Connection test failed"** — the backend isn't reachable at that URL from
-  this machine. Check that `hermes serve` is running on the remote host, the
+  this machine. Check that `noone serve` is running on the remote host, the
   port is open, and (for token auth) the token is current. Re-run **Test**
   after fixing.
 - **An agent shows but won't open** — run **Test** on its connection. The
@@ -386,7 +394,7 @@ multi-gateway roster is the reference consumer.
 - **A remote gateway is missing from the roster** — its backend is down or
   unreachable; the roster lists it under gateways with the error, and Desktop
   keeps redialing it in the background.
-- **"Update Hermes Desktop to chat with agents on other connections"** — the
+- **"Update {{app-name}} Desktop to chat with agents on other connections"** — the
   app predates the multi-connection stack; update the desktop app itself.
 - **Duplicate device names** — not possible; names are enforced unique at
   save time. If a migrated name collided, it was suffixed (`Homelab 2`).

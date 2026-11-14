@@ -1,14 +1,14 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertCircle, FileText, FolderOpen, ImageIcon, Link, Loader2, Terminal } from '@noone/ui/icons'
 import { useState } from 'react'
 
 import { useSessionView } from '@/app/chat/session-view'
 import { ImageLightbox } from '@/components/chat/zoomable-image'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { useImageDownload } from '@/hooks/use-image-download'
 import { useI18n } from '@/i18n'
 import { readDesktopFileDataUrlLocalFirst } from '@/lib/desktop-fs'
-import { AlertCircle, FileText, FolderOpen, ImageIcon, Link, Loader2, Terminal } from '@/lib/icons'
 import { normalizeOrLocalPreviewTarget } from '@/lib/local-preview'
 import { cn } from '@/lib/utils'
 import type { ComposerAttachment } from '@/store/composer'
@@ -204,7 +204,7 @@ function AttachmentPill({ attachment, onRemove }: { attachment: ComposerAttachme
               onClick={() => onRemove(attachment.id)}
               type="button"
             >
-              <Codicon name="close" size="0.625rem" />
+              <AppIcon name="close" size="0.625rem" />
             </button>
           )}
         </div>

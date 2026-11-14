@@ -43,7 +43,7 @@ def _make_agent_stub(agent_cls):
     agent._COMBINED_REVIEW_PROMPT = "review both"
     # Non-None so the test catches a missing-kwarg regression.
     agent.enabled_toolsets = ["memory", "skills", "terminal"]
-    agent.disabled_toolsets = ["spotify", "feishu_doc"]
+    agent.disabled_toolsets = ["spotify", "video"]
     # Non-None so the test catches reasoning_config NOT being inherited —
     # which would put the fork into a different Anthropic cache namespace.
     agent.reasoning_config = {"enabled": True, "effort": "medium"}
@@ -493,7 +493,7 @@ def test_same_model_fork_inherits_parent_cache_scope_gateway_key(tmp_path):
         declared_conversation_scope,
         resolve_prompt_cache_scope,
     )
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
 
     db = SessionDB(db_path=tmp_path / "state.db")
     try:
@@ -532,7 +532,7 @@ def test_same_model_fork_inherits_parent_cache_scope_rotated_lineage(tmp_path):
     import run_agent
     from agent.background_review import build_cache_parity_fork
     from agent.prompt_cache_scope import declared_conversation_scope, resolve_prompt_cache_scope
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
 
     db = SessionDB(db_path=tmp_path / "state.db")
     try:

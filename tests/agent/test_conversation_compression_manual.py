@@ -55,7 +55,7 @@ def test_every_surface_honours_preview_without_compressing(surface, monkeypatch)
     agent, history = _agent(), _history()
     frozen = copy.deepcopy(history)
     if surface == "cli":
-        from hermes_cli.cli_session_mixin import CLISessionMixin
+        from agent_cli.cli_session_mixin import CLISessionMixin
         cli = CLISessionMixin.__new__(CLISessionMixin)
         cli.agent, cli.conversation_history = agent, history
         cli._manual_compress("/compress --preview")
@@ -73,7 +73,7 @@ def test_every_surface_honours_preview_without_compressing(surface, monkeypatch)
         reply = asyncio.run(gw._handle_compress_command_inner(event))
         assert "Preview" in reply
     elif surface == "tui":
-        from tui_gateway.server import _compress_session_history
+        from agent_backend.server import _compress_session_history
         session = {"agent": agent, "history": history, "history_lock": threading.Lock(), "history_version": 3}
         assert _compress_session_history(session, "--preview")[0] == 0
         assert session["history"] == frozen and session["history_version"] == 3
@@ -115,7 +115,7 @@ def _coro(value):
 
 @pytest.fixture
 def session_db(tmp_path):
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
     db = SessionDB(db_path=tmp_path / "state.db")
     yield db
     db.close()

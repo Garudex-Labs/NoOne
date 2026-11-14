@@ -2,7 +2,7 @@
 name: scrapling
 description: Scrape sites with stealth browsing and Cloudflare bypass.
 version: 1.0.0
-author: FEUAZUR
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

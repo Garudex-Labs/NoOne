@@ -78,8 +78,8 @@ describe('artifact version identity', (): void => {
     })
   })
 
-  it('keeps source installs on their runtime version without a fixed package channel', (): void => {
-    expect(appVersionInfo(null, '9.9.9-runtime', '1.2.3')).toMatchObject({ appVersion: '9.9.9-runtime' })
+  it('keeps the app version separate from a connected runtime without a fixed package channel', (): void => {
+    expect(appVersionInfo(null, '9.9.9-runtime', '1.2.3')).toMatchObject({ appVersion: '1.2.3' })
     expect((): void => assertSourceUpdateChannel(null)).not.toThrow()
   })
 

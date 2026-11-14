@@ -131,7 +131,7 @@ def _open_child_session_db(parent_agent) -> Any:
     # and can be closed while a fire-and-forget background child is still flushing on a daemon thread —
     # every subsequent flush then hits the closed handle and the child's transcript is silently dropped
     # (#81267). It MUST point at the same database FILE as the parent's handle: parents can hold non-default
-    # per-profile handles (tui_gateway opens SessionDB(db_path=<profile>/ state.db) for non-launch
+    # per-profile handles (agent_backend opens SessionDB(db_path=<profile>/ state.db) for non-launch
     # profiles), and a bare SessionDB() would write the child's transcript into the launch profile's db,
     # breaking parent_session_id lineage and session_search. AsyncSessionDB wrappers (gateway) forward
     # .db_path via __getattr__, so this works through them.
@@ -147,7 +147,7 @@ def _open_child_session_db(parent_agent) -> Any:
     if parent_session_db is None:
         return None
     with _quiet("subagent: failed to open dedicated SessionDB; child persistence disabled", exc_info=True):
-        from hermes_state_registry import acquire
+        from agent_state_registry import acquire
         _parent_db_path = getattr(parent_session_db, "db_path", None)
         return acquire(_parent_db_path) if _parent_db_path is not None else acquire()
     return None
@@ -332,7 +332,7 @@ def _build_child_agent(
                 # No child close() will ever run: release the dedicated handle here.
                 if child_session_db is not None:
                     with _quiet(None):
-                        from hermes_state_registry import release_or_close
+                        from agent_state_registry import release_or_close
                         release_or_close(child_session_db)
                 raise
         # Shared pool lets children rotate credentials on rate limits. A profile child loads ITS profile's pool
@@ -385,7 +385,7 @@ def _build_child_agent(
     # saturated — then the subagent_start lifecycle hook.
     _safe_progress(child_progress_cb, "subagent.spawn_requested", preview=goal)
     with _quiet("subagent_start hook invocation failed", exc_info=True):
-        from hermes_cli.lifecycle import invoke_hook as _invoke_hook
+        from agent_cli.lifecycle import invoke_hook as _invoke_hook
         _invoke_hook(
             "subagent_start", parent_session_id=parent_sid,
             parent_turn_id=getattr(parent_agent, "_current_turn_id", "") or "", parent_subagent_id=parent_subagent_id,
@@ -692,7 +692,7 @@ def delegate_task(
     #
     # The transcripts' profile home is resolved from stable parent-owned
     # state (the parent's per-profile SessionDB path), NOT ambient
-    # get_hermes_dir(): this thread may have crossed a raw threading.Thread
+    # get_agent_dir(): this thread may have crossed a raw threading.Thread
     # boundary that dropped the session's _HERMES_HOME_OVERRIDE ContextVar,
     # and process-wide HERMES_HOME is unstable under concurrent
     # multi-profile workers — either way transcripts could land in the

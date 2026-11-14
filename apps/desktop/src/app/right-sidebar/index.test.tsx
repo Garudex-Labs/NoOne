@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { $activeTreeGroup, $layoutTree } from '@/components/pane-shell/tree/store'
-import type { HermesReadDirResult } from '@/global'
+import type { AgentReadDirResult } from '@/global'
 import { $connection, $selectedStoredSessionId, $sessions, $workspaceCwdOwner, setCurrentCwd } from '@/store/session'
 import { $sessionTiles } from '@/store/session-states'
 
@@ -10,7 +10,7 @@ import { resetProjectTreeState } from './files/use-project-tree'
 
 import { RightSidebarPane } from './index'
 
-const readDir = vi.fn<(path: string) => Promise<HermesReadDirResult>>()
+const readDir = vi.fn<(path: string) => Promise<AgentReadDirResult>>()
 const repoStatus = vi.fn<(cwd: string) => Promise<null>>()
 
 function installBridge() {
@@ -138,7 +138,7 @@ describe('RightSidebarPane', () => {
   // #55358: the collapse-all glyph must be the symmetric three-line one from
   // the codicon vocabulary. `collapse-all` draws two offset rounded squares —
   // at 13px its top edge reads as an asymmetric hamburger line. The header
-  // action group must also stay on the shared Codicon primitive (DESIGN.md
+  // action group must also stay on the shared AppIcon primitive (DESIGN.md
   // iconography: no third icon set / hand-rolled SVGs inside a control group).
   it('renders the collapse-all affordance with the symmetric three-bars glyph', async () => {
     setCurrentCwd('/repo')

@@ -26,8 +26,8 @@ def _seed(monkeypatch):
 @pytest.mark.parametrize("builder", [
     pytest.param(lambda: local._make_run_env({}), id="terminal"),
     pytest.param(lambda: local.build_subprocess_env(scrub_secrets=True), id="background"),
-    pytest.param(lambda: local.hermes_subprocess_env(), id="helper"),
-    pytest.param(lambda: local.hermes_subprocess_env(inherit_credentials=True), id="inherit_credentials"),
+    pytest.param(lambda: local.agent_subprocess_env(), id="helper"),
+    pytest.param(lambda: local.agent_subprocess_env(inherit_credentials=True), id="inherit_credentials"),
 ])
 @pytest.mark.usefixtures("child_env")
 def test_vault_bootstrap_tokens_never_reach_spawned_children(monkeypatch, builder):
@@ -60,12 +60,12 @@ def test_launch_home_credentialed_children_keep_the_token(monkeypatch, tmp_path)
 
     from agent.command_token_source import _mint
     from agent.secret_scope import reset_secret_scope, set_secret_scope
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
     _seed(monkeypatch)
     other = tmp_path / "hermes" / "profiles" / "other"
     other.mkdir(parents=True)
-    own = local.served_profile_child_env(target_home=str(get_hermes_home()), inherit_credentials=True)
+    own = local.served_profile_child_env(target_home=str(get_agent_home()), inherit_credentials=True)
     routed = local.served_profile_child_env(target_home=str(other), inherit_credentials=True)
     token = set_secret_scope({}, profile_home=str(other))  # a served profile's scope, no target
     try:

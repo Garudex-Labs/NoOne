@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Iterable
 from urllib.parse import unquote, urlsplit
 
-from hermes_cli.update_channel import STABLE_TAG_RE
+from agent_cli.update_channel import STABLE_TAG_RE
+from agent_cli.version_info import is_project_release_commit
 from scripts.releases import lanes as lane_set
 from scripts.releases.desktop_targets import MANIFEST_TARGETS
 from scripts.releases.draft_warning import strip_draft_warning
@@ -54,11 +55,11 @@ def release_line_contains(commit: str, remote_prefix: str) -> list[str]:
             *(f"refs/remotes/{remote_prefix}/{branch}" for branch in RELEASE_LINE_BRANCHES)]
 
 
-def admit_claim(tag: str, commit: str, *, on_main) -> dict:
+def admit_claim(tag: str, commit: str, *, on_main, root: Path | None = None) -> dict:
     """Admit a release from its attempt ref. The checkout version is not read.
 
-    ``main`` carries ``0.0.0`` on purpose, so the version and the attempt come
-    from ``rc.<N>-vX.Y.Z`` and the only question about the commit is whether
+    The version and attempt come from ``rc.<N>-vX.Y.Z``. The release entrypoint
+    verifies committed canonical metadata; this admission also checks whether
     it is on a release line: ``main`` or a ``release/*`` branch. ``on_main`` is
     that predicate; the name predates release branches.
     """
@@ -70,6 +71,16 @@ def admit_claim(tag: str, commit: str, *, on_main) -> dict:
     version, attempt = parsed
     if not on_main(commit):
         raise ValueError(f"{commit} is not on main or a release/* branch")
+    from agent_cli.version_info import release_history_start
+
+    root = root if root is not None else Path.cwd()
+    if release_history_start(root) is not None:
+        if not is_project_release_commit(commit, root):
+            raise ValueError("Claim is outside this project's release history")
+        raw = subprocess.check_output(["git", "show", f"{commit}:pyproject.toml"], cwd=root,
+                                      text=True, timeout=3)
+        if tomllib.loads(raw)["project"]["version"] != version:
+            raise ValueError("Claim version differs from committed project metadata")
     return {"claim_tag": tag, "tag": f"v{version}", "version": version, "attempt": attempt,
             "commit": commit}
 
@@ -669,7 +680,7 @@ def summary(text: str, env: dict) -> None:
 
 
 def admit(env: dict) -> None:
-    """Admit the claim. The checkout carries 0.0.0, so the tag is the version."""
+    """Admit the claim and its committed canonical version metadata."""
     admitted = check_claim(env)
     repository = env["GITHUB_REPOSITORY"]
     release = json.loads(output([
@@ -732,6 +743,8 @@ def _published_baseline(env: dict, base: str) -> dict | None:
             raise
         if env.get("BASELINE_MANIFEST_URL"):
             raise ValueError("The supplied baseline-manifest does not exist") from error
+        return None
+    if not env.get("BASELINE_MANIFEST_URL") and not is_project_release_commit(previous["commit"]):
         return None
     published = json.loads(output(["gh", "release", "view", previous["tag"], "--repo", env["GITHUB_REPOSITORY"], "--json", "tagName,isDraft,isPrerelease"]))
     if published["tagName"] != previous["tag"] or published["isDraft"] or published["isPrerelease"]:

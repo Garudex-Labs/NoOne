@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { saveHermesConfig } from '@/agent-client'
 import { Button } from '@/components/ui/button'
-import { saveHermesConfig } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { notifyError } from '@/store/notifications'
 import {
@@ -10,9 +10,9 @@ import {
   resolveChatFontFamily,
   setChatFontFamilyFromConfig
 } from '@/themes/chat-font'
-import type { HermesConfigRecord } from '@/types/hermes'
+import type { AgentConfigRecord } from '@/types/agent-client'
 
-import { setHermesConfigCache, useHermesConfigRecord } from '../hooks/use-config-record'
+import { setHermesConfigCache, useAgentConfigRecord } from '../hooks/use-config-record'
 import { useOnProfileSwitch } from '../hooks/use-on-profile-switch'
 import { useProfileSwitchLatch } from '../hooks/use-profile-switch-latch'
 
@@ -23,7 +23,7 @@ import { ListRow } from './primitives'
 const AUTOSAVE_DELAY_MS = 550
 const CONFIG_PATH = 'desktop.font_family'
 
-function fontFamilyFromConfig(config: HermesConfigRecord): string {
+function fontFamilyFromConfig(config: AgentConfigRecord): string {
   return normalizeChatFontFamily(getNested(config, CONFIG_PATH))
 }
 
@@ -35,7 +35,7 @@ function fontFamilyFromConfig(config: HermesConfigRecord): string {
 export function ChatFontSetting() {
   const { t } = useI18n()
   const copy = t.settings.appearance
-  const { data: loadedConfig, dataUpdatedAt, writeScope } = useHermesConfigRecord()
+  const { data: loadedConfig, dataUpdatedAt, writeScope } = useAgentConfigRecord()
   const [draft, setDraft] = useState<string | null>(null)
   // The seed effect refuses to reseed while the query still carries the
   // previous profile's stamp. A structurally-shared refetch keeps the object

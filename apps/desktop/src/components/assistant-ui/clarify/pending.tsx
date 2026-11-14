@@ -1,12 +1,12 @@
 'use client'
 
 import { useStore } from '@nanostores/react'
+import { MessageQuestion } from '@noone/ui/icons'
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Loader } from '@/components/ui/loader'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { MessageQuestion } from '@/lib/icons'
 import {
   bareChoice,
   type ClarifyQuestion,
@@ -141,7 +141,7 @@ export function ClarifyToolPending({
 
       return next
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by the replay map only
+     
   }, [request?.lockedAnswers])
 
   const stageFor = (qid: string) => staged[qid] ?? emptyStage

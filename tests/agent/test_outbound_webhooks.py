@@ -39,7 +39,7 @@ def _strip_outbound_callbacks():
     keeps previously-registered callbacks; without this, a target registered
     in one test would fire (real network!) in every later test in this file.
     """
-    from hermes_cli.plugins import get_plugin_manager
+    from agent_cli.plugins import get_plugin_manager
 
     manager = get_plugin_manager()
     for event, callbacks in list(manager._hooks.items()):
@@ -322,16 +322,16 @@ class TestPayload:
     def test_profile_field_reflects_bound_profile_home(self, tmp_path, monkeypatch):
         """Receivers behind a multiplexed gateway need to know which profile
         fired (#92674): ``profile`` follows the bound home at fire time."""
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+        from agent_constants import reset_agent_home_override, set_agent_home_override
 
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         profile_home = tmp_path / "profiles" / "b"
         profile_home.mkdir(parents=True)
-        token = set_hermes_home_override(profile_home)
+        token = set_agent_home_override(profile_home)
         try:
             body = outbound_webhooks._serialize_payload("on_session_end", {}, "did_1")
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
         assert json.loads(body)["profile"] == "b"
         body = outbound_webhooks._serialize_payload("on_session_end", {}, "did_2")
         assert json.loads(body)["profile"] == "default"
@@ -380,7 +380,7 @@ class TestRegistration:
         cfg = _cfg({"url": _url(http_server), "events": ["pre_tool_call"]})
         outbound_webhooks.register_from_config(cfg)
 
-        from hermes_cli.plugins import get_plugin_manager
+        from agent_cli.plugins import get_plugin_manager
 
         results = get_plugin_manager().invoke_hook(
             "pre_tool_call", tool_name="terminal", args={"command": "ls"},
@@ -402,10 +402,10 @@ class TestForceReloadHomeScoping:
     def test_force_reload_restores_webhook_and_fires_once(
         self, monkeypatch, http_server,
     ):
-        from hermes_cli import plugins
+        from agent_cli import plugins
 
         cfg = _cfg({"url": _url(http_server), "events": ["on_session_end"]})
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda: cfg)
+        monkeypatch.setattr("agent_cli.config.load_config", lambda: cfg)
 
         monkeypatch.setenv("HERMES_HOME", "/tmp/profile-b-webhook")
         mgr_b = plugins.PluginManager()
@@ -448,7 +448,7 @@ class TestDelivery:
         registered = outbound_webhooks.register_from_config(cfg)
         assert len(registered) == 1
 
-        from hermes_cli.plugins import get_plugin_manager
+        from agent_cli.plugins import get_plugin_manager
 
         get_plugin_manager().invoke_hook(
             "on_session_end",
@@ -480,7 +480,7 @@ class TestDelivery:
         cfg = _cfg({"url": _url(http_server), "events": ["on_session_end"]})
         outbound_webhooks.register_from_config(cfg)
 
-        from hermes_cli.plugins import get_plugin_manager
+        from agent_cli.plugins import get_plugin_manager
 
         get_plugin_manager().invoke_hook("on_session_end", session_id="s")
         assert outbound_webhooks.flush()
@@ -498,7 +498,7 @@ class TestDelivery:
         )
         outbound_webhooks.register_from_config(cfg)
 
-        from hermes_cli.plugins import get_plugin_manager
+        from agent_cli.plugins import get_plugin_manager
 
         manager = get_plugin_manager()
         manager.invoke_hook(
@@ -561,7 +561,7 @@ class TestDelivery:
         )
         outbound_webhooks.register_from_config(cfg)
 
-        from hermes_cli.plugins import get_plugin_manager
+        from agent_cli.plugins import get_plugin_manager
 
         get_plugin_manager().invoke_hook("on_session_end", session_id="s1")
         assert outbound_webhooks.flush()
@@ -584,7 +584,7 @@ class TestDelivery:
         outbound_webhooks._deliver(delivery)
 
     def test_events_enqueued_at_exit_still_delivered(self, http_server, tmp_path):
-        """A short-lived process (`hermes chat -q`, cron) exits right after
+        """A short-lived process (`noone chat -q`, cron) exits right after
         firing on_session_end.  The delivery worker is a daemon thread, so
         without the atexit flush the final event is silently dropped."""
         import subprocess
@@ -598,7 +598,7 @@ class TestDelivery:
             "import sys\n"
             f"sys.path.insert(0, {str(Path(outbound_webhooks.__file__).resolve().parents[1])!r})\n"
             "from agent import outbound_webhooks\n"
-            "from hermes_cli.plugins import get_plugin_manager\n"
+            "from agent_cli.plugins import get_plugin_manager\n"
             f"cfg = {cfg!r}\n"
             "outbound_webhooks.register_from_config(cfg)\n"
             "get_plugin_manager().invoke_hook('on_session_end', session_id='exit_test')\n"

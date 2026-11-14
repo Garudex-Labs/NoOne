@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
   save: vi.fn()
 }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   saveHermesConfig: (config: Record<string, unknown>) => mocks.save(config)
 }))
 
@@ -42,7 +42,7 @@ vi.mock('@/store/notifications', () => ({
 
 vi.mock('../hooks/use-config-record', () => ({
   setHermesConfigCache: (config: Record<string, unknown>) => mocks.cache(config),
-  useHermesConfigRecord: () => ({ data: mocks.loadedConfig, dataUpdatedAt: mocks.configUpdatedAt })
+  useAgentConfigRecord: () => ({ data: mocks.loadedConfig, dataUpdatedAt: mocks.configUpdatedAt })
 }))
 
 vi.mock('../hooks/use-on-profile-switch', () => ({

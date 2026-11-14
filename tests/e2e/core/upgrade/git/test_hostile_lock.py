@@ -1,7 +1,7 @@
-"""Hostile-concurrency cells for the update lock, with real ``hermes update`` processes.
+"""Hostile-concurrency cells for the update lock, with real ``noone update`` processes.
 
 A real git checkout (a clone of the commit under test, served by a local bare origin) is updated
-by real ``python -m hermes_cli.main update`` processes inside the bwrap sandbox. A ``git`` shim
+by real ``python -m agent_cli.main update`` processes inside the bwrap sandbox. A ``git`` shim
 parks every ``fetch`` while a hold file exists and logs which home reached it, so "an update got
 past the lock" is observed directly: the fetch is the first step after the lock.
 
@@ -43,12 +43,12 @@ from pathlib import Path
 
 root, checkout, mode = Path(sys.argv[1]), sys.argv[2], sys.argv[3]
 envs = json.loads((root / "envs.json").read_text(encoding="utf-8"))
-ARGV = [sys.executable, "-m", "hermes_cli.main", "update", "--yes", "--branch", "main", "--no-gateway-restart"]
+ARGV = [sys.executable, "-m", "agent_cli.main", "update", "--yes", "--branch", "main", "--no-gateway-restart"]
 # A running server's "is an update in flight" probe, in a fresh process of another home.
 READER = """
 import json, sys
 sys.path.insert(0, sys.argv[1])
-from hermes_cli.web_server_skew_exit import _update_in_progress
+from agent_cli.web_server_skew_exit import _update_in_progress
 print(json.dumps({"skew_reader": _update_in_progress()}))
 """
 
@@ -175,7 +175,7 @@ class Rig:
 
     def update(self, name: str) -> subprocess.Popen:
         env = self.env(name)
-        argv = H.sandbox_argv([sys.executable, "-m", "hermes_cli.main", "update", "--yes", "--branch", "main",
+        argv = H.sandbox_argv([sys.executable, "-m", "agent_cli.main", "update", "--yes", "--branch", "main",
                                "--no-gateway-restart"], writable=[self.root])
         return subprocess.Popen(argv, env=env, cwd=self.checkout, stdin=subprocess.DEVNULL,
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -237,7 +237,7 @@ def test_reused_pid_marker_is_reclaimed(rig):
 
 
 def test_killed_owner_keeps_the_checkout_locked_while_its_tree_runs(rig):
-    """(d) SIGKILL `hermes update` while its completion child runs: the child inherited the locked
+    """(d) SIGKILL `noone update` while its completion child runs: the child inherited the locked
     fd, so a new update (any home) is refused until the child exits; never starts mid-mutation."""
     r = rig.driver("kill-mid-completion", timeout=600)
     assert r["child_seen"] and r["child_alive_before"], f"no completion child outlived the owner: {r}"
@@ -247,7 +247,7 @@ def test_killed_owner_keeps_the_checkout_locked_while_its_tree_runs(rig):
 
 
 def test_orphaned_update_tree_reads_as_in_progress(rig):
-    """(e) SIGKILL `hermes update` mid-completion and lose its marker: the completion child still
+    """(e) SIGKILL `noone update` mid-completion and lose its marker: the completion child still
     holds the checkout lock, so every "is an update running" reader must still say yes."""
     r = rig.driver("orphan-reader", timeout=600)
     assert r["child_seen"] and r["child_alive_after"], f"premise: no completion child outlived the owner: {r}"

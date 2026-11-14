@@ -1,39 +1,54 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
-  type CronTriggerController,
   createCronTriggerController,
-} from "@hermes/shared";
-import { Clock, Pause, Pencil, Play, Trash2, X, Zap } from "lucide-react";
+  type CronTriggerController,
+} from "@noone/shared";
+import { Clock, Pause, Pencil, Play, Trash2, X, Zap } from "@noone/ui/icons";
+import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
+import { useToast } from "@nous-research/ui/hooks/use-toast";
 import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
+import { Card, CardContent } from "@nous-research/ui/ui/components/card";
+import { Input } from "@nous-research/ui/ui/components/input";
+import { Label } from "@nous-research/ui/ui/components/label";
+import { Segmented } from "@nous-research/ui/ui/components/segmented";
 import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Toast } from "@nous-research/ui/ui/components/toast";
 import { H2 } from "@nous-research/ui/ui/components/typography/h2";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+
+import { AutomationBlueprints } from "@/components/AutomationBlueprints";
+import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
+import { LoadErrorNotice } from "@/components/LoadErrorNotice";
+import {
+  DEFAULT_SCHEDULE_STATE,
+  ScheduleBuilder,
+} from "@/components/ScheduleBuilder";
+import { usePageHeader } from "@/contexts/usePageHeader";
+import { useModalBehavior } from "@/hooks/useModalBehavior";
+import { useI18n } from "@/i18n";
+import { en } from "@/i18n/en";
 import { api } from "@/lib/api";
 import type {
-  CronJob,
   CronDeliveryTarget,
+  CronJob,
   ModelOptionsResult,
   ProfileInfo,
   SkillInfo,
   ToolsetInfo,
 } from "@/lib/api";
+import { errorMessage } from "@/lib/api-error";
 import {
   buildCronJobPayload,
-  cronJobHasExecutionContent,
   cronAgoLabel,
+  cronJobFormFromJob,
+  type CronJobFormState,
+  cronJobHasExecutionContent,
+  cronLastResult,
   cronNextRunOverdueMs,
   cronSchedulerStaleAgeS,
-  cronJobFormFromJob,
-  cronLastResult,
   focusCronField,
-  type CronJobFormState,
 } from "@/lib/cron-job";
-import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
-import {
-  DEFAULT_SCHEDULE_STATE,
-  ScheduleBuilder,
-} from "@/components/ScheduleBuilder";
 import {
   buildScheduleString,
   describeSchedule,
@@ -42,22 +57,8 @@ import {
   type ScheduleBuilderState,
   type ScheduleDescribeStrings,
 } from "@/lib/schedule";
-import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { useConfirmDelete } from "@nous-research/ui/hooks/use-confirm-delete";
-import { useModalBehavior } from "@/hooks/useModalBehavior";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { Card, CardContent } from "@nous-research/ui/ui/components/card";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Label } from "@nous-research/ui/ui/components/label";
-import { useI18n } from "@/i18n";
-import { en } from "@/i18n/en";
-import { usePageHeader } from "@/contexts/usePageHeader";
-import { PluginSlot } from "@/plugins";
-import { LoadErrorNotice } from "@/components/LoadErrorNotice";
-import { Segmented } from "@nous-research/ui/ui/components/segmented";
-import { AutomationBlueprints } from "@/components/AutomationBlueprints";
 import { cn, themedBody } from "@/lib/utils";
-import { errorMessage } from "@/lib/api-error";
+import { PluginSlot } from "@/plugins";
 
 function formatTime(iso?: string | null): string {
   if (!iso) return "—";
@@ -607,7 +608,7 @@ export default function CronPage() {
   });
 
   // Skills installed in the profile a job will run under, for the
-  // attach-skill selector (parity with `hermes cron edit --add-skill`).
+  // attach-skill selector (parity with `noone cron edit --add-skill`).
   // Keyed on the create-modal profile; the edit modal reuses the list —
   // a job's current skills are always shown even if not in it.
   const [availableSkills, setAvailableSkills] = useState<SkillInfo[]>([]);

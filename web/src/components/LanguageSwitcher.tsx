@@ -1,13 +1,14 @@
-import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { Check } from "lucide-react";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { BottomSheet } from "@nous-research/ui/ui/components/bottom-sheet";
-import { Typography } from "@nous-research/ui/ui/components/typography/index";
+import { Check } from "@noone/ui/icons";
 import { useBelowBreakpoint } from "@nous-research/ui/hooks/use-below-breakpoint";
-import { useI18n } from "@/i18n/context";
+import { BottomSheet } from "@nous-research/ui/ui/components/bottom-sheet";
+import { Button } from "@nous-research/ui/ui/components/button";
+import { Typography } from "@nous-research/ui/ui/components/typography/index";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { LOCALE_META } from "@/i18n";
 import type { Locale } from "@/i18n";
+import { useI18n } from "@/i18n/context";
 import { cn } from "@/lib/utils";
 
 /**
@@ -15,12 +16,12 @@ import { cn } from "@/lib/utils";
  * of all supported locales when clicked.  Persists choice to localStorage via
  * the I18n context.
  *
- * Replaces the older two-state EN↔ZH toggle now that we ship 16 locales
- * (en, zh, zh-hant, ja, de, es, fr, tr, uk, af, ko, it, ga, pt, ru, hu).
+ * Replaces the older two-state EN↔ZH toggle now that we ship 9 locales
+ * (en, zh, ja, de, es, fr, ko, ar, hi).
  *
  * No country flags by design — languages aren't countries, and flag pairings
  * inevitably create political mismappings (e.g. Mandarin variants ≠ any single
- * jurisdiction, English ≠ GB, Portuguese ≠ PT). Endonyms are unambiguous.
+ * jurisdiction, English ≠ GB, Hindi ≠ IN). Endonyms are unambiguous.
  *
  * When placed at the bottom of the sidebar (next to ThemeSwitcher), pass
  * `dropUp` so the list opens above the trigger and avoids clipping below the

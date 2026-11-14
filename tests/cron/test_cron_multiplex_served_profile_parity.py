@@ -13,7 +13,7 @@ import pytest
 from agent.secret_scope import (
     build_profile_secret_scope, reset_secret_scope, set_multiplex_active, set_secret_scope,
 )
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 
 @pytest.fixture
@@ -33,11 +33,11 @@ def two_homes(tmp_path, monkeypatch):
                      ("HERMES_LANGUAGE", "en")):
         monkeypatch.setenv(key, val)
     set_multiplex_active(True)
-    home_token = set_hermes_home_override(str(alpha))
+    home_token = set_agent_home_override(str(alpha))
     try:
         yield root, alpha
     finally:
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
         set_multiplex_active(False)
 
 
@@ -55,7 +55,7 @@ def test_cron_env_settings_resolve_from_the_served_profile(two_homes):
         captured.update(kw)
         return {}
 
-    import hermes_cli.runtime_provider as rp
+    import agent_cli.runtime_provider as rp
     original = rp.resolve_runtime_provider
     rp.resolve_runtime_provider = fake_resolve
     try:
@@ -94,12 +94,12 @@ def test_child_env_for_served_profile_drops_launch_profile_settings(two_homes):
     assert "PATH" in env
 
     # No-op when the scope IS the launch profile (standalone / default profile's own children).
-    reset_hermes_home_override(set_hermes_home_override(None))
-    home_token = set_hermes_home_override(str(root))
+    reset_agent_home_override(set_agent_home_override(None))
+    home_token = set_agent_home_override(str(root))
     try:
         env = strip_launch_profile_env(build_subprocess_env(scrub_secrets=True, inherit_profile_home=True))
     finally:
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
     assert env["TERMINAL_ENV"] == "docker"
     assert env["HERMES_MODEL"] == "default-model"
 

@@ -1,5 +1,6 @@
-import type { CatalogInstallTranslations } from './types_catalog_install'
+import { appText } from '@noone/shared/application-identity'
 
+import type { CatalogInstallTranslations } from './types_catalog_install'
 export const enCatalogInstall: CatalogInstallTranslations = {
   preparing: 'Preparing the install…',
   install: 'Install',
@@ -21,7 +22,7 @@ export const enCatalogInstall: CatalogInstallTranslations = {
   securityHeading: 'Security',
   scan: { passed: 'Scan passed', warnings: 'Scan found warnings', failed: 'Scan failed' },
   requirementsLabel: 'Requires',
-  requiresHermes: range => `Hermes ${range}`,
+  requiresHermes: range => `${appText('{app_name}')} ${range}`,
   envVar: name => `${name} environment variable`,
   credentialsHeading: 'Credentials',
   phase: {

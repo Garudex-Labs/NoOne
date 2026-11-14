@@ -1,4 +1,4 @@
-"""Drive a real ``hermes`` CLI / Ink TUI process under a real PTY, rendered through :mod:`._vt`.
+"""Drive a real ``noone`` CLI process under a real PTY, rendered through :mod:`._vt`.
 
 The child runs with an isolated HOME/HERMES_HOME (only the fake LLM provider configured, no
 inherited credentials) as the session leader of its own PTY, so SIGWINCH from a resize reaches the
@@ -114,8 +114,8 @@ def cmdline(pid: int) -> str:
         return "?"
 
 
-class PtyHermes:
-    """One interactive ``hermes`` process on a PTY with an emulated screen."""
+class PtyAgent:
+    """One interactive ``noone`` process on a PTY with an emulated screen."""
 
     def __init__(self, root: Path, argv_tail: list[str], llm: FakeLLMServer | None, *, rows: int, cols: int,
                  extra_config: str = "") -> None:
@@ -140,22 +140,12 @@ class PtyHermes:
             TMPDIR=str(root / "tmp"), TERM="xterm-256color", COLORTERM="truecolor",
             PYTHONUNBUFFERED="1", HERMES_STATE_DB_GUARD_BYPASS="1",
         )
-        if "--tui" in argv_tail:
-            # The prebuilt-bundle launch, as tui_pty does. A checkout launch first asks whether
-            # ui-tui/dist is current, which only PM's node may answer; the sandbox home has no PM
-            # store, so it rebuilds from source and lazily downloads python/node/pnpm before the UI
-            # can take the terminal (on CI that download stalled past wait_ready's 120s).
-            from tests.e2e.core.tui_pty._helpers import private_tui_dir
-            env["HERMES_TUI_DIR"] = str(private_tui_dir(root))
-            node = shutil.which("node")
-            if node:  # the runner's node, so the launcher never lazily installs one into the sandbox
-                env["HERMES_NODE"] = node
         master, slave = os.openpty()
         self._set_winsize(master, rows, cols)
         self.master = master
         self.pts = os.ttyname(slave)
         self.proc = subprocess.Popen(
-            [sys.executable, "-c", _SESSION_LEADER, sys.executable, "-m", "hermes_cli.main", *argv_tail],
+            [sys.executable, "-c", _SESSION_LEADER, sys.executable, "-m", "agent_cli.main", *argv_tail],
             stdin=slave, stdout=slave, stderr=slave, cwd=str(root / "work"), env=env,
             start_new_session=True, close_fds=True)
         os.close(slave)
@@ -310,13 +300,13 @@ class PtyHermes:
     def leftover_processes(self, timeout: float = 15.0) -> list[str]:
         """Processes still alive in the child's session, or seen as its descendants, after exit.
 
-        The profile's ``gateway run`` is not a leftover: ``hermes chat`` attaches to it and it
+        The profile's ``gateway run`` is not a leftover: ``noone chat`` attaches to it and it
         keeps serving (cron, messaging, the next client) after the client exits; ``close()`` still
         tears it down with the rest of this harness's tree. Neither is that gateway's owner-death
         supervisor while the gateway lives: it belongs to the gateway, and after the gateway's last
         owned command it stays for an idle grace on purpose (``_SUPERVISOR_IDLE_EXIT_S``)."""
         from gateway.status import looks_like_gateway_command_line
-        from hermes_cli.process_identity import is_owner_death_supervisor
+        from agent_cli.process_identity import is_owner_death_supervisor
 
         def alive() -> list[int]:
             pids = set(session_members(self.sid))

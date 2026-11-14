@@ -1,10 +1,10 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useEffect, useId } from 'react'
 
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { StatusRow } from '@/components/chat/status-row'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 import { recordFriction } from '@/store/desktop-metrics'
 import { ackFreeTierNotice, claimFreeTierNotice, freeTierNoticeClaim, releaseFreeTierNotice } from '@/store/free-tier'
@@ -60,7 +60,7 @@ export function FreeTierNoticeStrip() {
 
   return (
     <StatusRow
-      leading={<Codicon aria-hidden className="text-(--ui-text-tertiary)" name="account" size="0.8rem" />}
+      leading={<AppIcon aria-hidden className="text-(--ui-text-tertiary)" name="account" size="0.8rem" />}
       trailing={
         <>
           <Button

@@ -1,73 +1,52 @@
 {
   "name": "website",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "docusaurus": "docusaurus",
-    "prestart": "node scripts/prebuild.mjs",
-    "start": "docusaurus start",
-    "prebuild": "node scripts/prebuild.mjs",
-    "build": "docusaurus build",
-    "build:fast": "docusaurus build --locale en",
-    "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy",
-    "clear": "docusaurus clear",
-    "serve": "docusaurus serve",
-    "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids",
+    "prestart": "node scripts/prepare-docs.mjs",
+    "start": "node scripts/docs-cli.mjs dev --no-open --disable-prefetch",
+    "prebuild": "node scripts/prepare-docs.mjs",
+    "build": "node scripts/docs-cli.mjs validate",
+    "build:fast": "npm run build",
+    "validate": "node scripts/docs-cli.mjs validate",
+    "check:links": "node scripts/docs-cli.mjs broken-links --check-anchors --check-snippets --check-redirects",
     "typecheck": "tsc -p . --noEmit",
-    "lint:diagrams": "ascii-guard lint --exclude-code-blocks docs"
+    "lint:diagrams": "ascii-guard lint --exclude-code-blocks docs",
+    "preexport": "node scripts/prepare-docs.mjs",
+    "export": "node scripts/export-docs.mjs",
+    "test": "node --test scripts/tests/*.test.mjs",
+    "prerelease:source": "node scripts/prepare-docs.mjs",
+    "release:source": "node scripts/release-source.mjs"
   },
-  "dependencies": {
-    "@docusaurus/core": "3.10.2",
-    "@docusaurus/plugin-client-redirects": "3.10.2",
-    "@docusaurus/preset-classic": "3.10.2",
-    "@docusaurus/theme-mermaid": "3.10.2",
-    "@mdx-js/react": "3.1.1",
-    "@mermaid-js/layout-elk": "0.1.9",
-    "clsx": "2.1.1",
-    "prism-react-renderer": "2.4.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.10.2",
-    "@docusaurus/tsconfig": "3.10.2",
-    "@docusaurus/types": "3.10.2",
-    "typescript": "6.0.3"
-  },
-  "overrides": {
-    "serialize-javascript": "7.1.2",
-    "uuid": "14.0.2",
-    "minimatch": "10.2.6",
-    "nanoid": "3.3.20",
+    "mint": "4.2.1176",
+    "esbuild": "0.28.2",
+    "@mdx-js/mdx": "3.1.1",
+    "remark-gfm": "4.0.1",
+    "remark-frontmatter": "5.0.0",
+    "remark-directive": "4.0.0",
+    "remark-parse": "11.0.0",
+    "remark-rehype": "11.1.2",
+    "unified": "11.0.5",
+    "typescript": "6.0.3",
+    "@types/react": "19.2.14",
     "js-yaml": "4.3.2",
-    "dompurify": "3.4.17",
-    "katex": "0.19.0",
-    "mermaid": "11.17.2",
-    "image-size": "npm:@nous-research/image-size@2.0.3",
-    "tar": "7.5.22",
-    "tinypool": "2.2.0",
-    "postcss-selector-parser": "7.1.6"
-  },
-  "browserslist": {
-    "production": [
-      ">0.5%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 3 chrome version",
-      "last 3 firefox version",
-      "last 5 safari version"
-    ]
+    "react": "19.2.3",
+    "github-slugger": "2.0.0",
+    "mdast-util-to-string": "4.0.0",
+    "@mintlify/common": "1.0.1328",
+    "react-dom": "19.2.3",
+    "@mintlify/previewing": "4.0.1584",
+    "@mintlify/prebuild": "1.0.1500",
+    "express": "4.22.0"
   },
   "engines": {
     "node": ">=26.0",
     "npm": ">=11.17.0"
   },
-  "allowScripts": {
-    "core-js@3.50.0": true,
-    "fsevents@2.3.3": true
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   }
 }

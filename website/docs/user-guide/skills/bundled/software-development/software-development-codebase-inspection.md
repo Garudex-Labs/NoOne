@@ -1,39 +1,47 @@
 ---
 title: "Codebase Inspection — Inspect codebases w/ pygount: LOC, languages, ratios"
-sidebar_label: "Codebase Inspection"
+sidebarTitle: "Codebase Inspection"
 description: "Inspect codebases w/ pygount: LOC, languages, ratios"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Codebase Inspection
+# Codebase Inspection {#codebase-inspection}
 
 Inspect codebases w/ pygount: LOC, languages, ratios.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/software-development/codebase-inspection` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `LOC`, `Code Analysis`, `pygount`, `Codebase`, `Metrics`, `Repository` |
 | Related skills | [`github`](../../bundled/software-development/software-development-github.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Codebase Inspection with pygount
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Codebase Inspection with pygount {#codebase-inspection-with-pygount}
 
 Analyze repositories for lines of code, language breakdown, file counts, and code-vs-comment ratios using `pygount`.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks for LOC (lines of code) count
 - User wants a language breakdown of a repo
@@ -41,13 +49,13 @@ Analyze repositories for lines of code, language breakdown, file counts, and cod
 - User wants code-vs-comment ratios
 - General "how big is this repo" questions
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 ```bash
 pip install --break-system-packages pygount 2>/dev/null || pip install pygount
 ```
 
-## 1. Basic Summary (Most Common)
+## 1. Basic Summary (Most Common) {#1-basic-summary-most-common}
 
 Get a full language breakdown with file counts, code lines, and comment lines:
 
@@ -60,7 +68,7 @@ pygount --format=summary \
 
 **IMPORTANT:** Always use `--folders-to-skip` to exclude dependency/build directories, otherwise pygount will crawl them and take a very long time or hang.
 
-## 2. Common Folder Exclusions
+## 2. Common Folder Exclusions {#2-common-folder-exclusions}
 
 Adjust based on the project type:
 
@@ -75,7 +83,7 @@ Adjust based on the project type:
 --folders-to-skip=".git,node_modules,venv,.venv,__pycache__,.cache,dist,build,.next,.tox,vendor,third_party"
 ```
 
-## 3. Filter by Specific Language
+## 3. Filter by Specific Language {#3-filter-by-specific-language}
 
 ```bash
 # Only count Python files
@@ -85,7 +93,7 @@ pygount --suffix=py --format=summary .
 pygount --suffix=py,yaml,yml --format=summary .
 ```
 
-## 4. Detailed File-by-File Output
+## 4. Detailed File-by-File Output {#4-detailed-file-by-file-output}
 
 ```bash
 # Default format shows per-file breakdown
@@ -95,7 +103,7 @@ pygount --folders-to-skip=".git,node_modules,venv" .
 pygount --folders-to-skip=".git,node_modules,venv" . | sort -t$'\t' -k1 -nr | head -20
 ```
 
-## 5. Output Formats
+## 5. Output Formats {#5-output-formats}
 
 ```bash
 # Summary table (default recommendation)
@@ -108,7 +116,7 @@ pygount --format=json .
 pygount --format=summary . 2>/dev/null
 ```
 
-## 6. Interpreting Results
+## 6. Interpreting Results {#6-interpreting-results}
 
 The summary table columns:
 - **Language** — detected programming language
@@ -124,7 +132,7 @@ Special pseudo-languages:
 - `__duplicate__` — files with identical content
 - `__unknown__` — unrecognized file types
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 1. **Always exclude .git, node_modules, venv** — without `--folders-to-skip`, pygount will crawl everything and may take minutes or hang on large dependency trees.
 2. **Markdown shows 0 code lines** — pygount classifies all Markdown content as comments, not code. This is expected behavior.

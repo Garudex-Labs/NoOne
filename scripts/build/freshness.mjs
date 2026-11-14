@@ -6,9 +6,9 @@ import { parseArgs } from 'node:util'
 import { isMain } from './frontend-common.mjs'
 
 const receiptName = 'hermes-build.json'
-// What `hermes update` leaves in a product it could not rebuild (STALE_MARKER in hermes_cli/webapp.py).
+// What `noone update` leaves in a product it could not rebuild (STALE_MARKER in agent_cli/webapp.py).
 const staleMarker = '.hermes-stale'
-const workspaces = { tui: 'ui-tui', web: 'web', desktop: 'apps/desktop' }
+const workspaces = { web: 'web', desktop: 'apps/desktop' }
 // Another product's output under a workspace is never this product's input.
 const generated = new Set(['node_modules', 'dist', 'dist-webapp', 'build', 'release', '.cache', '.git', 'coverage', 'test-results', 'playwright-report'])
 
@@ -16,40 +16,30 @@ const generated = new Set(['node_modules', 'dist', 'dist-webapp', 'build', 'rele
 // tree (source, output or a prepared dir) the moment the checkout is opened in
 // Finder or Explorer mid-build — .DS_Store, AppleDouble ._* sidecars and
 // .localized on macOS, Thumbs.db and Desktop.ini on Windows. Skip it everywhere
-// so it can't flip a freshness hash and abort `hermes update` (#122632, #122803).
+// so it can't flip a freshness hash and abort `noone update` (#122632, #122803).
 const osMetadata = name => {
   const base = name.split('/').pop()
   return base === '.DS_Store' || base === '.localized'
     || base === 'Thumbs.db' || base === 'Desktop.ini' || base.startsWith('._')
 }
 
-// buildTui bundles these source roots (including the Ink source alias), not
-// the workspaces' documentation, test runners or other product recipes.
-const tuiInputs = [
-  ...['ui-tui', 'ui-tui/packages/hermes-ink', 'apps/shared'].flatMap(root => [
-    `${root}/src`, `${root}/package.json`, `${root}/tsconfig.json`,
-  ]),
-  'tsconfig.json', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.npmrc', 'pm/lock.json',
-  'scripts/build/tui.mjs', 'scripts/build/frontend-common.mjs', 'scripts/build/freshness.mjs',
-  'ui-tui/scripts/gateway_bootstrap.py', 'ui-tui/scripts/clipboard_image.py',
-]
-
 // The browser renderer compiles Desktop and its shared package in a prepared
 // workspace. Release metadata (pyproject.toml, uv.lock, icons) is not its input.
 const webappInputs = [
-  'apps/desktop', 'apps/shared', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.npmrc', 'pm/lock.json',
+  'apps/desktop', 'apps/shared', 'apps/ui', 'agent_cli/data/ui', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.npmrc', 'pm/lock.json',
+  'agent_cli/data/application_identity.json', 'scripts/build/application-identity.mjs', 'scripts/build/application-identity.d.mts',
   'scripts/build/webapp.mjs', 'scripts/build/node-deps.mjs', 'scripts/build/node-deps-lock.mjs',
   'scripts/build/node-deps-heartbeat.mjs', 'scripts/build/node-deps-watcher.mjs', 'scripts/build/node-deps-relay.mjs',
   'scripts/build/frontend-common.mjs', 'scripts/build/freshness.mjs',
 ]
 
 function productInputs(product) {
-  if (product === 'tui') return tuiInputs
   if (product === 'webapp') return webappInputs
   const workspace = workspaces[product]
   if (!workspace) throw new Error(`Unknown frontend product: ${product}`)
   return [
-    workspace, 'apps/shared', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.npmrc', 'pm/lock.json',
+    workspace, 'apps/shared', 'apps/ui', 'agent_cli/data/ui', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.npmrc', 'pm/lock.json',
+    'agent_cli/data/application_identity.json',
     'scripts/build',
     'scripts/generate-icons.mjs', 'scripts/generate_icons.py',
     // The root install-stamp.json is runtime identity rewritten after every install; desktop's
@@ -63,7 +53,6 @@ function skipInput(product) {
     // Build scripts are inputs; workspace build directories are outputs.
     const parts = name.split('/')
     return (!name.startsWith('scripts/') && parts.some(part => generated.has(part)))
-      || (product === 'tui' && (parts.includes('__tests__') || /\.(test|spec)(-d)?\.[cm]?[jt]sx?$/.test(name)))
       || parts.some(part => part.startsWith('.dist-') || part.startsWith('.staging-') || part === '__pycache__')
       || name.endsWith('.tsbuildinfo') || name.endsWith('.pyc')
   }
@@ -192,7 +181,7 @@ function preparedPaths(inputs) {
 // the clock it read at bundleElectronMain: re-reading the stamp here would record
 // a restamp that landed in between as the baked value, and productCurrent would
 // then certify a product whose packaged clock disagrees with electron-main.mjs.
-// Undefined (tui/web, which have no stamp) is dropped from the receipt, which is
+// Undefined (web, which have no stamp) is dropped from the receipt, which is
 // exactly the "predates this" shape productCurrent already tolerates.
 export function recordProduct({ source, product, out, inputs, stampClock }) {
   if (JSON.stringify(buildInputs(source, product, preparedPaths(inputs))) !== JSON.stringify(inputs)) {
@@ -205,7 +194,7 @@ export function recordProduct({ source, product, out, inputs, stampClock }) {
 }
 
 /** Validate output bytes against their receipt, independently of current inputs or host, and of
- *  the marker ``hermes update`` leaves in a product it could not rebuild (hermes_cli/webapp.py),
+ *  the marker ``noone update`` leaves in a product it could not rebuild (agent_cli/webapp.py),
  *  which still fails productCurrent. */
 export function outputIntact(out, product) {
   try {

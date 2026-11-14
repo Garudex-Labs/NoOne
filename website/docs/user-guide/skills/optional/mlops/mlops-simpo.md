@@ -1,20 +1,20 @@
 ---
 title: "Simpo — Reference-free preference alignment, simpler than DPO"
-sidebar_label: "Simpo"
+sidebarTitle: "Simpo"
 description: "Reference-free preference alignment, simpler than DPO"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Simpo
+# Simpo {#simpo}
 
 Reference-free preference alignment, simpler than DPO.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/simpo` |
+| Source | Optional — install with `noone skills install official/mlops/simpo` |
 | Path | `optional-skills/mlops/simpo` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,15 +23,23 @@ Reference-free preference alignment, simpler than DPO.
 | Platforms | linux, macos, windows |
 | Tags | `Post-Training`, `SimPO`, `Preference Optimization`, `Alignment`, `DPO Alternative`, `Reference-Free`, `LLM Alignment`, `Efficient Training` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# SimPO - Simple Preference Optimization
+<div className="doc-callout-title">
 
-## Quick start
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# SimPO - Simple Preference Optimization {#simpo---simple-preference-optimization}
+
+## Quick start {#quick-start}
 
 SimPO is a reference-free preference optimization method that outperforms DPO without needing a reference model.
 
@@ -60,9 +68,9 @@ ACCELERATE_LOG_LEVEL=info accelerate launch \
   training_configs/mistral-7b-base-simpo.yaml
 ```
 
-## Common workflows
+## Common workflows {#common-workflows}
 
-### Workflow 1: Train from base model (Mistral 7B)
+### Workflow 1: Train from base model (Mistral 7B) {#workflow-1-train-from-base-model-mistral-7b}
 
 **Config** (`mistral-7b-base-simpo.yaml`):
 ```yaml
@@ -99,7 +107,7 @@ accelerate launch --config_file accelerate_configs/deepspeed_zero3.yaml \
   scripts/run_simpo.py training_configs/mistral-7b-base-simpo.yaml
 ```
 
-### Workflow 2: Fine-tune instruct model (Llama 3 8B)
+### Workflow 2: Fine-tune instruct model (Llama 3 8B) {#workflow-2-fine-tune-instruct-model-llama-3-8b}
 
 **Config** (`llama3-8b-instruct-simpo.yaml`):
 ```yaml
@@ -125,7 +133,7 @@ accelerate launch --config_file accelerate_configs/deepspeed_zero3.yaml \
   scripts/run_simpo.py training_configs/llama3-8b-instruct-simpo.yaml
 ```
 
-### Workflow 3: Reasoning-intensive tasks (lower LR)
+### Workflow 3: Reasoning-intensive tasks (lower LR) {#workflow-3-reasoning-intensive-tasks-lower-lr}
 
 **For math/code tasks**:
 ```yaml
@@ -144,7 +152,7 @@ per_device_train_batch_size: 1
 gradient_accumulation_steps: 16
 ```
 
-## When to use vs alternatives
+## When to use vs alternatives {#when-to-use-vs-alternatives}
 
 **Use SimPO when**:
 - Want simpler training than DPO (no reference model)
@@ -164,7 +172,7 @@ gradient_accumulation_steps: 16
 - **TRL**: Need multiple methods in one framework
 - **DPO**: Established baseline comparison
 
-## Common issues
+## Common issues {#common-issues}
 
 **Issue: Loss divergence**
 
@@ -206,15 +214,15 @@ Enable gradient checkpointing:
 gradient_checkpointing: true
 ```
 
-## Advanced topics
+## Advanced topics {#advanced-topics}
 
-**Loss functions**: See [references/loss-functions.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/simpo/references/loss-functions.md) for sigmoid vs hinge loss, mathematical formulations, and when to use each.
+**Loss functions**: See [references/loss-functions.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/simpo/references/loss-functions.md) for sigmoid vs hinge loss, mathematical formulations, and when to use each.
 
-**Hyperparameter tuning**: See [references/hyperparameters.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/simpo/references/hyperparameters.md) for beta, gamma, learning rate selection guide, and model-size-specific recommendations.
+**Hyperparameter tuning**: See [references/hyperparameters.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/simpo/references/hyperparameters.md) for beta, gamma, learning rate selection guide, and model-size-specific recommendations.
 
-**Dataset preparation**: See [references/datasets.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/simpo/references/datasets.md) for preference data formats, quality filtering, and custom dataset creation.
+**Dataset preparation**: See [references/datasets.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/simpo/references/datasets.md) for preference data formats, quality filtering, and custom dataset creation.
 
-## Hardware requirements
+## Hardware requirements {#hardware-requirements}
 
 - **GPU**: NVIDIA A100/H100 recommended
 - **VRAM**:
@@ -229,7 +237,7 @@ gradient_checkpointing: true
 - Gradient checkpointing
 - Flash Attention 2
 
-## Resources
+## Resources {#resources}
 
 - Paper: https://arxiv.org/abs/2405.14734 (NeurIPS 2024)
 - GitHub: https://github.com/princeton-nlp/SimPO

@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
-import hermes_yaml
+import agent_yaml
 import pytest
 
 from tests.ci.desktop_release_roles import (
@@ -20,7 +20,7 @@ from tests.scripts.test_release_r2 import r2_server
 
 
 def smoke_workflow():
-    return hermes_yaml.safe_load((ROOT / '.github/workflows/desktop-bundle-smoke.yml').read_text(encoding='utf-8-sig'))
+    return agent_yaml.safe_load((ROOT / '.github/workflows/desktop-bundle-smoke.yml').read_text(encoding='utf-8-sig'))
 
 
 def smoke_fetch_script():

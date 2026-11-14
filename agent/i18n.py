@@ -31,34 +31,21 @@ logger = logging.getLogger(__name__)
 # Bundled catalogs (compat: tests and the parity check iterate this). ``supported_languages()`` is the
 # live set including overlay and pack languages.
 SUPPORTED_LANGUAGES: tuple[str, ...] = (
-    "en", "zh", "zh-hant", "ja", "de", "es", "fr", "tr", "uk",
-    "af", "ko", "it", "ga", "pt", "ru", "hu", "ar",
+    "en", "zh", "ja", "de", "es", "fr", "ko", "ar", "hi",
 )
 DEFAULT_LANGUAGE = "en"
 
-# Natural aliases so "chinese" / "zh-CN" / "jp" hit the right catalog instead of
-# silently falling back to English. Bare "chinese" defaults to Simplified;
-# Taiwan/HK/Macau tags route to the distinct Traditional catalog. pt-br shares
-# the pt catalog unless a pack supplies a real pt-br one (a supplied id always wins over an alias).
+# Natural names and regional aliases resolve to shipped catalogs. A pack-supplied id
+# always takes precedence over an alias. Chinese scripts require an explicit alias.
 _LANGUAGE_ALIASES: dict[str, str] = {
     "english": "en", "en-us": "en", "en-gb": "en",
     "chinese": "zh", "mandarin": "zh", "zh-cn": "zh", "zh-hans": "zh", "zh-sg": "zh",
-    "traditional-chinese": "zh-hant", "traditional_chinese": "zh-hant",
-    "zh-tw": "zh-hant", "zh-hk": "zh-hant", "zh-mo": "zh-hant",
     "japanese": "ja", "jp": "ja", "ja-jp": "ja",
     "german": "de", "deutsch": "de", "de-de": "de", "de-at": "de", "de-ch": "de",
     "spanish": "es", "español": "es", "espanol": "es", "es-es": "es", "es-mx": "es", "es-ar": "es",
     "french": "fr", "français": "fr", "france": "fr", "fr-fr": "fr", "fr-be": "fr", "fr-ca": "fr", "fr-ch": "fr",
-    "ukrainian": "uk", "ukrainisch": "uk", "українська": "uk", "uk-ua": "uk", "ua": "uk",
-    "turkish": "tr", "türkçe": "tr", "tr-tr": "tr",
-    "afrikaans": "af", "af-za": "af",
     "korean": "ko", "한국어": "ko", "ko-kr": "ko",
-    "italian": "it", "italiano": "it", "it-it": "it", "it-ch": "it",
-    "irish": "ga", "gaeilge": "ga", "ga-ie": "ga",
-    "portuguese": "pt", "português": "pt", "portugues": "pt",
-    "pt-pt": "pt", "pt-br": "pt", "brazilian": "pt", "brasileiro": "pt",
-    "russian": "ru", "русский": "ru", "ru-ru": "ru",
-    "hungarian": "hu", "magyar": "hu", "hu-hu": "hu",
+    "hindi": "hi", "हिन्दी": "hi", "हिंदी": "hi", "hi-in": "hi",
     "arabic": "ar", "العربية": "ar",
     "ar-sa": "ar", "ar-eg": "ar", "ar-ae": "ar", "ar-ma": "ar", "ar-dz": "ar",
 }
@@ -87,8 +74,8 @@ def _locales_dir() -> Path:
 
 
 def _current_home() -> str:
-    from hermes_constants import get_hermes_home
-    return str(get_hermes_home())
+    from agent_constants import get_agent_home
+    return str(get_agent_home())
 
 
 def supported_languages(home: str | None = None) -> tuple[str, ...]:
@@ -131,7 +118,7 @@ def language_surfaces(home: str | None = None) -> dict[str, tuple[str, ...]]:
 
 def resolve_language_id(value: Any, home: str | None = None) -> str | None:
     """Canonical supported id for a user-supplied value (code, alias, regional tag), or ``None`` when no
-    layer supplies it — the validation ``hermes config set display.language`` runs."""
+    layer supplies it — the validation ``noone config set display.language`` runs."""
     key = i18n_layers.normalize_language_id(value)
     if not key:
         return None
@@ -142,6 +129,10 @@ def resolve_language_id(value: Any, home: str | None = None) -> str | None:
     if alias in supported:
         return alias
     base = key.split("-", 1)[0]  # strip region suffix
+    if base == "zh":
+        # Keep explicit Simplified script/region prefixes, never substitute an unknown script.
+        alias = _LANGUAGE_ALIASES.get("-".join(key.split("-")[:2]))
+        return alias if alias in supported else None
     return base if base in supported else None
 
 
@@ -204,7 +195,7 @@ def _config_language_cached(hermes_home: str) -> str | None:
     Keyed by home so a multiplexed gateway serving several profiles doesn't freeze the first
     profile's language for every other profile."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
         lang = (load_config_readonly().get("display") or {}).get("language")
         return _normalize_lang(lang, hermes_home) if lang else None
     except Exception as exc:
@@ -258,13 +249,14 @@ def t(key: str, lang: str | None = None, **format_kwargs: Any) -> str:
     if value is None:
         logger.debug("i18n miss: key=%r lang=%r", key, target)
         value = key
-    if not format_kwargs:
-        return value
-    try:
-        return value.format(**format_kwargs)
-    except (KeyError, IndexError, ValueError) as exc:
-        logger.warning("i18n format failed for key=%r lang=%r kwargs=%r: %s", key, target, format_kwargs, exc)
-        return value
+    from agent_cli.application_identity import app_text, get_app_name
+    if format_kwargs:
+        try:
+            kwargs = {**format_kwargs, "app_name": get_app_name()} if "{app_name}" in value else format_kwargs
+            return value.format(**kwargs)
+        except (KeyError, IndexError, ValueError) as exc:
+            logger.warning("i18n format failed for key=%r lang=%r kwargs=%r: %s", key, target, format_kwargs, exc)
+    return app_text(value)
 
 
 __all__ = [

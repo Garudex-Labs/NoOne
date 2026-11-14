@@ -1,11 +1,11 @@
-import { skillInvocationText } from '@hermes/shared'
-import { mergeUsage, parseCommandDispatch, parseSlashCommand, randomUuid } from '@hermes/shared'
+import { skillInvocationText } from '@noone/shared'
+import { mergeUsage, parseCommandDispatch, parseSlashCommand, randomUuid } from '@noone/shared'
 import { type MutableRefObject, useCallback, useRef } from 'react'
 
+import { getProfiles } from '@/agent-client'
 import { mergeOlderTranscriptPage } from '@/app/chat/transcript-backfill'
 import { prepareDefaultNewSession } from '@/app/session/new-session-route'
 import { invalidateContextBreakdown } from '@/app/shell/hooks/use-context-breakdown'
-import { getProfiles } from '@/hermes'
 import type { Translations } from '@/i18n'
 import { translateNow } from '@/i18n/runtime'
 import { type ChatMessage, toChatMessages } from '@/lib/chat-messages'
@@ -90,7 +90,7 @@ import {
 // Manual compression is LLM-bound and routinely outlives the desktop's 30s
 // default WS request timeout on large sessions. The gateway blocks its own
 // compute-host wait for up to compression.context_total_ceiling_seconds + 30s
-// (capped at 630s, tui_gateway/server.py _COMPUTE_HOST_COMPRESS_WAIT_CAP_SECS)
+// (capped at 630s, agent_backend/server.py _COMPUTE_HOST_COMPRESS_WAIT_CAP_SECS)
 // and then answers `status: 'pending'` rather than an error, so this budget
 // must sit above that cap or the desktop reports a false timeout while the
 // host is still compressing (#97948).
@@ -752,7 +752,7 @@ export function useSlashCommand(deps: SlashCommandDeps) {
         // /background (alias /bg) starts a detached background turn via the
         // gateway's prompt.background RPC — the TUI's path
         // (ui-tui/src/app/slash/commands/session.ts). It must NOT go through
-        // runExec: the slash worker's HermesCLI prints the completion from a
+        // runExec: the slash worker's AgentCLI prints the completion from a
         // fire-and-forget thread after process_command already returned, past
         // the worker's stdout capture window, so the result never reached the
         // conversation that started the task (#97635, #57444). The RPC replies
@@ -1065,7 +1065,7 @@ export function useSlashCommand(deps: SlashCommandDeps) {
           }
         },
         // /wake must stay in the gateway process that owns the Desktop wake
-        // lease. Sending it through slash.exec creates a separate HermesCLI in
+        // lease. Sending it through slash.exec creates a separate AgentCLI in
         // the slash worker, which can claim the machine-wide microphone lock
         // while the Desktop UI still reports the GUI listener as off.
         wake: async ctx => {

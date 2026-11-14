@@ -1,6 +1,6 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import * as React from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
 
@@ -64,7 +64,7 @@ function PaginationPrevious({ className, ...props }: React.ComponentProps<'butto
       type="button"
       {...props}
     >
-      <Codicon name="chevron-left" size="0.75rem" />
+      <AppIcon name="chevron-left" size="0.75rem" />
       <span>{t.ui.pagination.previous}</span>
     </button>
   )
@@ -85,7 +85,7 @@ function PaginationNext({ className, ...props }: React.ComponentProps<'button'>)
       {...props}
     >
       <span>{t.ui.pagination.next}</span>
-      <Codicon name="chevron-right" size="0.75rem" />
+      <AppIcon name="chevron-right" size="0.75rem" />
     </button>
   )
 }
@@ -98,7 +98,7 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'
       data-slot="pagination-ellipsis"
       {...props}
     >
-      <Codicon name="ellipsis" size="0.75rem" />
+      <AppIcon name="ellipsis" size="0.75rem" />
     </span>
   )
 }

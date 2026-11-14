@@ -1,10 +1,4 @@
-"""Stable admission reads the version and the attempt from the attempt ref, not from the checkout.
-
-``main`` carries ``0.0.0`` by design, so comparing the tag against
-``pyproject.toml`` would refuse every release. The attempt ref
-``rc.<N>-vX.Y.Z`` names the version and the attempt, and the only question
-about the commit is whether it is on ``main``.
-"""
+"""Stable claims preserve grammar and source-line admission; marked projects also verify canonical metadata."""
 import json
 import subprocess
 
@@ -19,11 +13,11 @@ yR4zgvmhXTUJgyPe+zMgM=
 -----END SSH SIGNATURE-----"""
 
 
-def test_admission_reads_the_version_and_attempt_from_the_attempt_ref():
+def test_admission_reads_the_version_and_attempt_from_the_attempt_ref(tmp_path):
     from scripts.releases.stable import admit_claim
 
     commit = "a" * 40
-    admitted = admit_claim("rc.2-v0.21.5", commit, on_main=lambda sha: sha == commit)
+    admitted = admit_claim("rc.2-v0.21.5", commit, on_main=lambda sha: sha == commit, root=tmp_path)
 
     assert admitted == {
         "claim_tag": "rc.2-v0.21.5", "tag": "v0.21.5",

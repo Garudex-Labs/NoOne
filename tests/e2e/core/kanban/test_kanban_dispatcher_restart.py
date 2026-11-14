@@ -1,8 +1,8 @@
 """Dispatcher SIGKILLed mid-tick and restarted: the board keeps every real task row (#119003 class).
 
-A real ``hermes kanban dispatch`` process is SIGKILLed at three points of a tick — right after it
+A real ``noone kanban dispatch`` process is SIGKILLed at three points of a tick — right after it
 claimed a card (before the spawn), right after it spawned a worker, and immediately after launch —
-then plain ticks run until the board drains. Workers are real ``hermes chat -q`` processes (they
+then plain ticks run until the board drains. Workers are real ``noone chat -q`` processes (they
 survive the dispatcher: own session) and the model is the recording fake.
 
 Invariants, read from kanban.db and the provider's request log:
@@ -70,7 +70,7 @@ def _kill_dispatcher_after(board: Board, kind: str | None) -> None:
     """Launch one real dispatch tick and SIGKILL it once a new ``kind`` event lands (None: at once)."""
     before = _event_count(board, kind) if kind else 0
     proc = subprocess.Popen(
-        [PY, "-m", "hermes_cli.main", "kanban", "dispatch", "--json"], cwd=str(board.root),
+        [PY, "-m", "agent_cli.main", "kanban", "dispatch", "--json"], cwd=str(board.root),
         env=board.env(), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
     try:

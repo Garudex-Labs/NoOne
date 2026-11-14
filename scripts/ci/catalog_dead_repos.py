@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Find plugin-catalog entries whose repository is gone or whose pinned commit no longer exists.
 
-An entry like that can no longer be installed: ``hermes plugins install`` clones the repo and checks
+An entry like that can no longer be installed: ``noone plugins install`` clones the repo and checks
 out the pin. The weekly ``catalog-dead-repos.yml`` workflow delists them (deletes the entry file,
 per plugin-catalog/README.md; never ``removed.yaml``, which is the security blocklist) in one PR.
 

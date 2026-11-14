@@ -17,7 +17,7 @@ import uuid
 from functools import partial
 
 from gateway.session_contract import SessionRef
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ def _onboarding_connection(connection):
 
 
 async def start(connection, ref, params):
-    from tui_gateway.contracts.profiles_vault_complete_foreign_subagents import OnboardingStartParams
+    from agent_backend.contracts.profiles_vault_complete_foreign_subagents import OnboardingStartParams
     from pydantic import ValidationError
     try:
         request = OnboardingStartParams.model_validate(params)
@@ -82,9 +82,6 @@ async def start(connection, ref, params):
                                           retire)
         finally:
             discards.ids.difference_update(plan['replaced'])
-        if plan['claimed'] is not None:
-            from hermes_cli import free_tier_bootstrap
-            await asyncio.to_thread(free_tier_bootstrap.refresh_record)
         _withdraw_setup_cards(authority, [sid for sid in plan['replaced'] if sid not in deleted])
         chat = SessionRef(authority.profile_id, stored)
         await connection.resume(chat, {})
@@ -104,7 +101,7 @@ def _choose_run(authority, request):
     from agent.onboarding_flow import Facts
     from agent.onboarding_record import load, open_session_ids
     from agent.onboarding_text import opening_prompt
-    from hermes_cli.auth_constants import AuthError
+    from agent_cli.auth_constants import AuthError
     db = authority.db
     open_ids = open_session_ids(db)
     stored = None if request.rerun or request.fresh_launch else next(iter(open_ids), None)
@@ -119,7 +116,7 @@ def _choose_run(authority, request):
     plan['facts'] = read_facts(facts_source=request.facts_source.value, locale=request.locale)
     if not request.rerun:
         try:
-            plan['claimed'] = _claim_before_run(assume_fresh=request.assume_fresh)
+            _prepare_first_run(assume_fresh=request.assume_fresh)
         except AuthError as exc:
             logger.info('onboarding.start: welcome trial not claimed: %s', exc)
             raise OnboardingRefusal(5079, str(exc)) from exc
@@ -129,28 +126,22 @@ def _choose_run(authority, request):
     return plan
 
 
-def _claim_before_run(*, assume_fresh):
-    """``onboarding.run: true`` on disk before the welcome-trial claim, so a crash after the claim still
-    opens onboarding next launch."""
-    from hermes_cli import anon_auth
-    from hermes_cli.onboarding_run import set_run
-    from hermes_cli.welcome_trial import claim_desktop_free_tier, provider_configured
-    if not anon_auth.on_local_desktop_backend():
-        # A CLI or TUI holds a native ticket too: its start schedules nothing. A rerun (Settings, any
-        # Desktop) never claims and never reaches here.
+def _prepare_first_run(*, assume_fresh):
+    from agent_cli.process_identity import serves_local_desktop_now
+    from agent_cli.onboarding_run import set_run
+    from agent_cli.setup_inventory import provider_configured
+    if not serves_local_desktop_now():
         raise _NoModelForTheRun('First-run onboarding starts only in the Desktop app on this machine.')
+    if not provider_configured():
+        raise _NoModelForTheRun('Configure a local or external provider before running onboarding.')
     set_run(True)
-    claimed = claim_desktop_free_tier(assume_fresh=assume_fresh)
-    if claimed is None and not (anon_auth.free_inference_active() or provider_configured()):
-        raise _NoModelForTheRun('The welcome trial is not available here, and no provider is set up.')
-    return claimed
 
 
 async def _create_chat(connection):
     from gateway.session_local import stage_local_session
     from gateway.session_local_recovery import restore_local_session
     from gateway.session_runtime_workers import tracked_write
-    from hermes_state_local import commit_local_session
+    from agent_state_local import commit_local_session
     authority = connection.authority
     staged = stage_local_session(authority, connection.actor, {'source': 'gui', 'request_id': uuid.uuid4().hex},
                                  client_local=connection.native_owner,
@@ -287,7 +278,7 @@ async def skip(connection, ref, params):
     from gateway.session_runtime_workers import tracked_write
     from gateway.session_server_requests import withdraw
     from pydantic import ValidationError
-    from tui_gateway.contracts.profiles_vault_complete_foreign_subagents import OnboardingSkipParams
+    from agent_backend.contracts.profiles_vault_complete_foreign_subagents import OnboardingSkipParams
     try:
         request = OnboardingSkipParams.model_validate(params)
     except ValidationError as exc:

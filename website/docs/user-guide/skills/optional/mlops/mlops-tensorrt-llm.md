@@ -1,20 +1,20 @@
 ---
 title: "Tensorrt Llm — High-throughput LLM inference on NVIDIA GPUs"
-sidebar_label: "Tensorrt Llm"
+sidebarTitle: "Tensorrt Llm"
 description: "High-throughput LLM inference on NVIDIA GPUs"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Tensorrt Llm
+# Tensorrt Llm {#tensorrt-llm}
 
 High-throughput LLM inference on NVIDIA GPUs.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/tensorrt-llm` |
+| Source | Optional — install with `noone skills install official/mlops/tensorrt-llm` |
 | Path | `optional-skills/mlops/tensorrt-llm` |
 | Version | `1.0.1` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ High-throughput LLM inference on NVIDIA GPUs.
 | Platforms | linux |
 | Tags | `Inference Serving`, `TensorRT-LLM`, `NVIDIA`, `Inference Optimization`, `High Throughput`, `Low Latency`, `Production`, `FP8`, `INT4`, `In-Flight Batching`, `Multi-GPU` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# TensorRT-LLM
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# TensorRT-LLM {#tensorrt-llm-1}
 
 NVIDIA's open-source library for optimizing LLM inference with high performance on NVIDIA GPUs.
 
-## When to use TensorRT-LLM
+## When to use TensorRT-LLM {#when-to-use-tensorrt-llm}
 
 **Use TensorRT-LLM when:**
 - Deploying on NVIDIA GPUs (A100, H100, GB200)
@@ -52,9 +60,9 @@ NVIDIA's open-source library for optimizing LLM inference with high performance 
 - Need edge deployment without NVIDIA GPUs
 - Want simpler GGUF quantization format
 
-## Quick start
+## Quick start {#quick-start}
 
-### Installation
+### Installation {#installation}
 
 ```bash
 # Docker (recommended) — images are on NGC (nvcr.io), not Docker Hub.
@@ -68,7 +76,7 @@ pip install tensorrt_llm
 # Requires CUDA 13.2.1, TensorRT 10.x, Python 3.10-3.12
 ```
 
-### Basic inference
+### Basic inference {#basic-inference}
 
 ```python
 from tensorrt_llm import LLM, SamplingParams
@@ -91,7 +99,7 @@ for output in outputs:
     print(output.text)
 ```
 
-### Serving with trtllm-serve
+### Serving with trtllm-serve {#serving-with-trtllm-serve}
 
 ```bash
 # Start server (automatic model download and compilation)
@@ -112,29 +120,29 @@ curl -X POST http://localhost:8000/v1/chat/completions \
   }'
 ```
 
-## Key features
+## Key features {#key-features}
 
-### Performance optimizations
+### Performance optimizations {#performance-optimizations}
 - **In-flight batching**: Dynamic batching during generation
 - **Paged KV cache**: Efficient memory management
 - **Flash Attention**: Optimized attention kernels
 - **Quantization**: FP8, INT4, FP4 for 2-4× faster inference
 - **CUDA graphs**: Reduced kernel launch overhead
 
-### Parallelism
+### Parallelism {#parallelism}
 - **Tensor parallelism (TP)**: Split model across GPUs
 - **Pipeline parallelism (PP)**: Layer-wise distribution
 - **Expert parallelism**: For Mixture-of-Experts models
 - **Multi-node**: Scale beyond single machine
 
-### Advanced features
+### Advanced features {#advanced-features}
 - **Speculative decoding**: Faster generation with draft models
 - **LoRA serving**: Efficient multi-adapter deployment
 - **Disaggregated serving**: Separate prefill and generation
 
-## Common patterns
+## Common patterns {#common-patterns}
 
-### Quantized model (FP8)
+### Quantized model (FP8) {#quantized-model-fp8}
 
 ```python
 from tensorrt_llm import LLM
@@ -150,7 +158,7 @@ llm = LLM(
 outputs = llm.generate(["Summarize this article..."])
 ```
 
-### Multi-GPU deployment
+### Multi-GPU deployment {#multi-gpu-deployment}
 
 ```python
 # Tensor parallelism across 8 GPUs
@@ -161,7 +169,7 @@ llm = LLM(
 )
 ```
 
-### Batch inference
+### Batch inference {#batch-inference}
 
 ```python
 # Process 100 prompts efficiently
@@ -175,7 +183,7 @@ outputs = llm.generate(
 # Automatic in-flight batching for maximum throughput
 ```
 
-## Performance benchmarks
+## Performance benchmarks {#performance-benchmarks}
 
 **Meta Llama 3-8B** (H100 GPU):
 - Throughput: 24,000 tokens/sec
@@ -186,7 +194,7 @@ outputs = llm.generate(
 - FP8 quantization: 2× faster than FP16
 - Memory: 50% reduction with FP8
 
-## Supported models
+## Supported models {#supported-models}
 
 - **LLaMA family**: Llama 2, Llama 3, CodeLlama
 - **GPT family**: GPT-2, GPT-J, GPT-NeoX
@@ -196,13 +204,13 @@ outputs = llm.generate(
 - **Vision**: LLaVA, Phi-3-vision
 - **100+ models** on HuggingFace
 
-## References
+## References {#references}
 
-- **[Optimization Guide](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/tensorrt-llm/references/optimization.md)** - Quantization, batching, KV cache tuning
-- **[Multi-GPU Setup](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/tensorrt-llm/references/multi-gpu.md)** - Tensor/pipeline parallelism, multi-node
-- **[Serving Guide](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/tensorrt-llm/references/serving.md)** - Production deployment, monitoring, autoscaling
+- **[Optimization Guide](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/tensorrt-llm/references/optimization.md)** - Quantization, batching, KV cache tuning
+- **[Multi-GPU Setup](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/tensorrt-llm/references/multi-gpu.md)** - Tensor/pipeline parallelism, multi-node
+- **[Serving Guide](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/tensorrt-llm/references/serving.md)** - Production deployment, monitoring, autoscaling
 
-## Resources
+## Resources {#resources}
 
 - **Docs**: https://nvidia.github.io/TensorRT-LLM/
 - **GitHub**: https://github.com/NVIDIA/TensorRT-LLM

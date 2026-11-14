@@ -1,3 +1,5 @@
+import { appText } from '@noone/shared/application-identity'
+
 import type { DesktopBootProgress, DesktopBootstrapState } from '@/global'
 
 function noopUnsubscribe(): () => void {
@@ -8,7 +10,7 @@ function readyBootProgress(): DesktopBootProgress {
   return {
     error: null,
     fakeMode: false,
-    message: 'Hermes browser-hosted desktop is ready',
+    message: appText('{app_name} browser-hosted desktop is ready'),
     phase: 'runtime.ready',
     progress: 100,
     running: false,
@@ -126,8 +128,8 @@ export const BROWSER_BRIDGE_STUBS = {
     startAnyway: async () => ({ ok: false })
   },
   updates: {
-    apply: async () => ({ command: 'hermes update', manual: true, message: 'Run `hermes update` on the server host', ok: false }),
-    check: async () => ({ message: 'Use `hermes update` on the server host', reason: 'browser-hosted', supported: false }),
+    apply: async () => ({ command: 'noone update', manual: true, message: 'Run `noone update` on the server host', ok: false }),
+    check: async () => ({ message: 'Use `noone update` on the server host', reason: 'browser-hosted', supported: false }),
     onProgress: noopUnsubscribe
   },
   watchPreviewFile: async (url: string) => ({ id: `browser:${url}`, path: url })

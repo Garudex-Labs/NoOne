@@ -17,7 +17,8 @@ from agent.context_compressor import (
     _MERGED_SUMMARY_DELIMITER,
     _SUMMARY_END_MARKER,
 )
-from hermes_state import SessionDB
+from agent_cli.application_identity import get_app_name
+from agent_state import SessionDB
 from gateway.config import GatewayConfig, HomeChannel, Platform, PlatformConfig
 from gateway.platforms.event import MessageEvent
 from gateway.session import SessionEntry, SessionSource, build_session_key
@@ -129,7 +130,7 @@ def _make_runner(session_db=None):
     runner._pending_model_notes = {}
     # Gateway holds the async facade; the slash handlers await it.
     if session_db is not None:
-        from hermes_state import AsyncSessionDB
+        from agent_state import AsyncSessionDB
         session_db = AsyncSessionDB(session_db)
     runner._session_db = session_db
     runner._reasoning_config = None
@@ -240,7 +241,7 @@ async def test_topic_restore_quote_never_exposes_compaction_scaffolding(tmp_path
         "restorable",
     )
 
-    assert "Last Hermes message:\nreal completed answer" in result
+    assert f"Last {get_app_name()} message:\nreal completed answer" in result
     assert "CONTEXT COMPACTION" not in result
     assert "Historical Task Snapshot" not in result
     db.close()
@@ -271,7 +272,7 @@ async def test_topic_restore_quote_unwraps_merged_assistant_carrier(tmp_path):
         "restorable",
     )
 
-    assert "Last Hermes message:\nreal completed answer" in result
+    assert f"Last {get_app_name()} message:\nreal completed answer" in result
     assert "PRIOR CONTEXT" not in result
     assert "CONTEXT COMPACTION" not in result
     db.close()
@@ -419,11 +420,11 @@ async def test_group_new_keeps_existing_reset_semantics_when_dm_topic_mode_enabl
     monkeypatch.setattr(
         gateway_run, "_resolve_runtime_agent_kwargs", lambda: {"api_key": "***"}
     )
-    # /new appends a random tip from hermes_cli.tips; one tip's text contains
+    # /new appends a random tip from agent_cli.tips; one tip's text contains
     # the phrase "parallel work", which collides with the negative assertion
     # below (observed as a 1-in-N CI flake). Pin the tip.
     monkeypatch.setattr(
-        "hermes_cli.tips.get_random_tip", lambda: "pinned tip for test"
+        "agent_cli.tips.get_random_tip", lambda: "pinned tip for test"
     )
 
     result = await runner._handle_message(_make_group_event("/new", thread_id="555"))
@@ -938,7 +939,6 @@ async def test_handoff_into_bound_dm_topic_rebinds_the_topic(tmp_path):
 @pytest.mark.asyncio
 async def test_auto_generated_title_renames_bound_telegram_topic(tmp_path):
     db = SessionDB(db_path=tmp_path / "state.db")
-    db.apply_telegram_topic_migration()
     db.create_session("sess-topic", source="telegram", user_id="208214988")
     db.bind_telegram_topic(
         chat_id="208214988",
@@ -979,14 +979,11 @@ async def test_topic_refuses_unauthorized_user(tmp_path, monkeypatch):
     result = await runner._handle_topic_command(_make_event("/topic"))
 
     assert "not authorized" in result.lower()
-    # Tables must not be created for an unauthorized caller.
-    tables = {
-        row[0]
-        for row in db._conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'telegram_dm%'"
-        ).fetchall()
-    }
-    assert tables == set()
+    # The base includes topic tables, but refusing a caller must not enable or bind topics.
+    assert db._conn.execute("SELECT * FROM telegram_dm_topic_mode").fetchall() == []
+    assert db._conn.execute("SELECT * FROM telegram_dm_topic_bindings").fetchall() == []
+    assert not db.is_telegram_topic_mode_enabled(chat_id="208214988", user_id="208214988")
+    db.close()
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -1040,17 +1037,12 @@ def test_recover_preserves_unknown_thread_id_for_new_topic(tmp_path):
 
 
 
-def test_list_telegram_topic_bindings_for_chat_no_table(tmp_path):
-    # Missing topic-mode tables → [] without auto-migrating.
+def test_list_telegram_topic_bindings_for_chat_empty_current_store(tmp_path):
     db = SessionDB(db_path=tmp_path / "state.db")
+    before = list(db._conn.iterdump())
     assert db.list_telegram_topic_bindings_for_chat(chat_id="208214988") == []
-    tables = {
-        row[0]
-        for row in db._conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'telegram_dm%'"
-        ).fetchall()
-    }
-    assert tables == set()
+    assert list(db._conn.iterdump()) == before
+    db.close()
 
 
 # ---------------------------------------------------------------------------

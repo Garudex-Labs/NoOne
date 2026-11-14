@@ -1,8 +1,8 @@
-import { resolveGatewayWsUrl } from '@hermes/shared'
+import { resolveGatewayWsUrl } from '@noone/shared'
 
+import { getApiRequestConnection, getApiRequestProfile, speakText } from '@/agent-client'
 import { openGatewaySocket } from '@/api/canonical-protocol'
 import type { OwnerScope } from '@/api/client'
-import { getApiRequestConnection, getApiRequestProfile, speakText } from '@/hermes'
 import { directTtsConfig, type DirectTtsConfig, synthesizeSpeechClientDirect } from '@/lib/voice-client-direct'
 import { RECONNECT_ATTEMPT_TIMEOUT_MS, withTimeout } from '@/lib/with-timeout'
 import {

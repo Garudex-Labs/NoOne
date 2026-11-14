@@ -19,14 +19,14 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from plugins.google_meet._jsonfile import say_queue_lock
 
 from utils import atomic_json_write
 
 
 def _root() -> Path:
-    return Path(get_hermes_home()) / "workspace" / "meetings"
+    return Path(get_agent_home()) / "workspace" / "meetings"
 
 
 def _active_file() -> Path:

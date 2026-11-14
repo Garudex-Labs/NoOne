@@ -9,9 +9,9 @@ from gateway.platforms.event import MessageEvent, ProcessingOutcome
 from gateway.session_envelope import restore_native
 from gateway.session_producer_lifecycle import (
     close_observed_turn, close_producer_turn, close_settled_turn, producer_turn)
-from hermes_cli.observability.shared_metrics_busy import (
+from agent_cli.observability.shared_metrics_busy import (
     busy_turn_started, note_busy_admitted, note_busy_parked, settle_busy_arrival)
-from hermes_state_runtime import RuntimeStoreError
+from agent_state_runtime import RuntimeStoreError
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ async def admit_message(authority, event):
         adopters[receipt.admission_id] = event
     # A drain already running can claim, run and settle the row before this caller resumes; one
     # that settled it already sent (or owes) the reply itself and resolves no waiter registered now.
-    from hermes_state_runtime import get_session_admission
+    from agent_state_runtime import get_session_admission
     row = get_session_admission(authority.db, admission_id=receipt.admission_id)
     status = 'terminal' if row is None else row['status']  # None: deleted with its chat, nothing owed
     note_busy_admitted(event, receipt.admission_id, status, None if row is None else row.get('outcome'))
@@ -410,7 +410,7 @@ def _launch_body_if_launch_owner(authority):
     owner = Path(str(authority.profile_id))
     if not owner.is_absolute() or not _is_process_home(owner):
         return nullcontext()
-    from tui_gateway.launch_profile_policy import launch_body
+    from agent_backend.launch_profile_policy import launch_body
     return launch_body()
 
 
@@ -504,7 +504,7 @@ async def deliver_response(adapter, event, session_key, response):
 
 
 async def dispatch_shared_busy(adapter, event, session_key, *, durable=False):
-    """Serial receive loops (IRC, Signal) await this before reading their next frame, so return
+    """Serial receive loops (Signal) await this before reading their next frame, so return
     once the follow-up is committed to the FIFO, or queued behind an earlier input of its chat still
     capturing (its position is then fixed; acceptance still waits for the commit); a tracked
     observer delivers its one reply. *durable*: return only once the row is committed (or the input

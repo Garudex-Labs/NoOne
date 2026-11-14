@@ -1,34 +1,42 @@
 ---
 title: "Scrollcraft — Premium scroll-driven landing pages; scroll = timeline"
-sidebar_label: "Scrollcraft"
+sidebarTitle: "Scrollcraft"
 description: "Premium scroll-driven landing pages; scroll = timeline"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Scrollcraft
+# Scrollcraft {#scrollcraft}
 
 Premium scroll-driven landing pages; scroll = timeline.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/web-development/scrollcraft` |
+| Source | Optional — install with `noone skills install official/web-development/scrollcraft` |
 | Path | `optional-skills/web-development/scrollcraft` |
 | Version | `1.0.0` |
-| Author | nateherkai (upstream scroll-craft), ported by Hermes Agent |
+| Author | nateherkai (upstream scroll-craft), ported by NoOne |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `web-development`, `landing-page`, `scrollytelling`, `animation`, `design`, `frontend` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# scrollcraft
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# scrollcraft {#scrollcraft-1}
 
 Scroll is the only input every visitor already knows. This skill treats it as a
 timeline: the wheel is a scrubber, the page is a film with real text on top,
@@ -44,21 +52,21 @@ plays a video", "Apple-style landing page", "3D scroll world", "make my brand a
 scroll experience", "this looks like a template", or any request for a site
 that should feel like an experience rather than a document.
 
-## What this is not
+## What this is not {#what-this-is-not}
 
 It is not "generate a flythrough and drop text on it." That produces one device
 applied to a whole page, recognisable at a glance. Four spine rules:
 
 1. **Variety is the product.** At least four device families, never the same
-   device twice in a row. Read [references/devices.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/devices.md).
+   device twice in a row. Read [references/devices.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/devices.md).
 2. **The world is photographic** unless the brand is genuinely illustrated.
-   Clay/low-poly diorama is banned as a default. Read [references/worlds.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/worlds.md).
+   Clay/low-poly diorama is banned as a default. Read [references/worlds.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/worlds.md).
 3. **No continuous chain** unless the brief is literally "one continuous
-   journey" (then see [references/worldflight.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/worldflight.md)).
+   journey" (then see [references/worldflight.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/worldflight.md)).
 4. **A different world is not a different page.** Structure is a separate axis;
-   decide it deliberately. Read [references/uniqueness.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/uniqueness.md).
+   decide it deliberately. Read [references/uniqueness.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/uniqueness.md).
 
-## Step 0: The interview
+## Step 0: The interview {#step-0-the-interview}
 
 **Always ask the user in chat before building anything.** Real questions, asked
 and answered in the conversation, written down — not a brief inferred from the
@@ -70,11 +78,11 @@ brand name. Eight questions in one pass:
 3. **The energy curve** — where calm, where intense.
 4. **How should someone feel while scrolling, stage by stage, and what is the
    ONE moment they should remember?** Becomes the feeling curve and the peak.
-   See [references/feel.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/feel.md).
+   See [references/feel.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/feel.md).
 5. **One thing this site should do that no site they have seen does** — the
    seed of the signature move.
 6. **How far from premium-minimal?** Offer the range in
-   [references/uniqueness.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/uniqueness.md) §5: brutalist,
+   [references/uniqueness.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/uniqueness.md) §5: brutalist,
    maximalist, playful, retro, dense, editorial, premium-minimal.
 7. **One unbroken world, or distinct scenes?** The biggest structural fork, and
    it is their call.
@@ -89,7 +97,7 @@ ___" sentence, and any authored silence. If the user is genuinely unreachable
 in a fully autonomous run, self-author BRIEF.md, mark it
 `Self-authored, not interviewed`, and say so in the report.
 
-## Bootstrap
+## Bootstrap {#bootstrap}
 
 Run the preflight rather than checking by hand (it catches a stripped ffmpeg
 that reports missing filters as syntax errors):
@@ -103,7 +111,7 @@ Workspace resolution order: `SCROLLCRAFT_HOME` env var; nearest
 `.scrollcraft.json` (`{ "workspace": "..." }`) walking up from cwd;
 `<project root>/scrollcraft`. Builds live at `<workspace>/builds/<name>/`, the
 fingerprint registry at `<workspace>/FINGERPRINTS.md` (seeded from
-[templates/FINGERPRINTS.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/templates/FINGERPRINTS.md), starts empty — the gate
+[templates/FINGERPRINTS.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/templates/FINGERPRINTS.md), starts empty — the gate
 stops you repeating *yourself*).
 
 Copy `engine/scrollcraft.js` and `engine/scrollcraft.css` into the build
@@ -111,19 +119,19 @@ folder. **Never edit the engine per-project.** Theme with tokens; write your
 own markup. Bespoke behaviour is bespoke JS in the page, driven off `--sc-p`
 and your own `data-sc-*` attributes.
 
-## Step 1: The brief, journey first
+## Step 1: The brief, journey first {#step-1-the-brief-journey-first}
 
 Ask the subject open, in plain prose. Then ask only what Step 0 did not cover:
 what is this and who is it for; the one sentence the page installs; the one
 next action (one label, used everywhere); what they already have; art
-direction from [references/worlds.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/worlds.md). Then write the
+direction from [references/worlds.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/worlds.md). Then write the
 **journey**: four to seven beats, each a shift in what the visitor knows or
 feels. Beats are the spine; a section serving no beat is cut. Confirm the
 journey with the user before generating assets — assets are the expensive part.
 
-## Step 2: Grammar, gate, then score
+## Step 2: Grammar, gate, then score {#step-2-grammar-gate-then-score}
 
-Full detail in [references/uniqueness.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/uniqueness.md).
+Full detail in [references/uniqueness.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/uniqueness.md).
 
 - **Pick a grammar.** Eight, mutually exclusive. Choosing filmic one-shot means
   saying in the report why the other seven lost. Nav, hero and close follow
@@ -135,7 +143,7 @@ Full detail in [references/uniqueness.md](https://github.com/NousResearch/hermes
   treatment, hero device, act-sequence shape, close pattern, signature move.
   If it fails, change the plan, not the log.
 - **Write the feeling curve before the score table** (method:
-  [references/feel.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/feel.md)). Then assign each beat a device in
+  [references/feel.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/feel.md)). Then assign each beat a device in
   a written table (beat / device / why).
 
 Checks before building: grammar bans hold; 4+ device families; no device
@@ -143,9 +151,9 @@ twice in a row; at most two `scrub` acts; no two adjacent acts with the same
 feeling; one peak with the largest span; total page length 8–14
 viewport-heights.
 
-## Step 3: Assets
+## Step 3: Assets {#step-3-assets}
 
-Full pipeline, prompt scaffolds and model notes: [references/assets.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/assets.md).
+Full pipeline, prompt scaffolds and model notes: [references/assets.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/assets.md).
 
 **Hermes-native paths first:**
 
@@ -156,7 +164,7 @@ Full pipeline, prompt scaffolds and model notes: [references/assets.md](https://
   asset (vision_analyze) before use; rerolling beats shipping a bad frame.
 
 **Optional upstream path — kie.ai** (vendored verbatim as
-[scripts/kie.mjs](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/scripts/kie.mjs)): photoreal stills and camera-move clips.
+[scripts/kie.mjs](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/scripts/kie.mjs)): photoreal stills and camera-move clips.
 Requires the `KIE_AI_API_KEY` environment variable (export it in your shell;
 there is no bundled env file in this port). Check balance with
 `node <skill>/scripts/kie.mjs probe`; a still costs cents, a 5s clip more.
@@ -172,13 +180,13 @@ bash  <skill>/scripts/encode.sh out/01.mp4 assets/01-m.mp4 mobile
 seeking walks from the previous keyframe; a normal web encode scrubs like mud.
 It also strips audio.
 
-## Step 4: Build the page
+## Step 4: Build the page {#step-4-build-the-page}
 
 Write real HTML — real `<h1>`, real `<p>`, real reading order. The engine reads
 `data-sc-*` attributes off your markup and drives it; it never generates DOM.
-Start from [references/template.html](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/template.html). Device
-patterns: [references/devices.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/devices.md). Spacing, type, depth,
-colour: [references/taste.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/taste.md) — read it before writing
+Start from [references/template.html](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/template.html). Device
+patterns: [references/devices.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/devices.md). Spacing, type, depth,
+colour: [references/taste.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/taste.md) — read it before writing
 markup. Theme by overriding tokens, six values and two fonts:
 
 ```css
@@ -191,10 +199,10 @@ markup. Theme by overriding tokens, six values and two fonts:
 }
 ```
 
-## Step 5: Verify by scrolling it
+## Step 5: Verify by scrolling it {#step-5-verify-by-scrolling-it}
 
 Not optional. Every scroll position is a different frame; failures live between
-the two you looked at. Full procedure: [references/verify.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/verify.md).
+the two you looked at. Full procedure: [references/verify.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/verify.md).
 
 ```bash
 cd <build project> && npm i playwright-core     # once
@@ -208,16 +216,16 @@ The harness walks each act at six positions, waits for scrub video to settle,
 reports dead scroll, cues that never reach full opacity, and composited
 contrast; it writes a contact sheet. Then read `sheet.png` yourself
 (vision_analyze) — the harness proves a clip advances, not that the page means
-anything. Run the feel check ([references/feel.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/feel.md) §6):
+anything. Run the feel check ([references/feel.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/feel.md) §6):
 scroll cold, one word per act, diff against BRIEF.md. Where they disagree the
 page is wrong, not the brief.
 
 A green run does not cover a real phone (video decoder, autoplay policy, Low
 Power Mode). On any reported mobile defect, deploy
-[references/device-diag.html](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/web-development/scrollcraft/references/device-diag.html) beside the site on
+[references/device-diag.html](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/web-development/scrollcraft/references/device-diag.html) beside the site on
 the first round and let the device answer.
 
-## Hard rules (ship-blockers)
+## Hard rules (ship-blockers) {#hard-rules-ship-blockers}
 
 No clay diorama default; no "scroll to explore" cues or animated mouse icons;
 no `01 / 06` section counters; at most one eyebrow per three sections; no
@@ -231,7 +239,7 @@ animating width/height/top/left (`transform`/`opacity`; `clip-path` for
 wipes); no gradient text or neon glow; no audio on scrub clips; never ship
 without Step 5.
 
-## Output
+## Output {#output}
 
 The build folder including BRIEF.md, then a short report: grammar and why the
 other seven lost, signature move, fingerprint gate result per row, journey,
@@ -239,10 +247,10 @@ feeling curve and peak, feel-check diff, score table, what you generated, what
 you verified with screenshots, and what you could not verify. Append the
 build's row to `<workspace>/FINGERPRINTS.md`.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - `scripts/shoot.mjs` needs Playwright (`npm install playwright` or
-  `playwright-core` plus a Chrome install). Hermes' `browser_exec` tool is the
+  `playwright-core` plus a Chrome install). {{app-name}}' `browser_exec` tool is the
   lighter alternative for scroll-screenshot verification: serve the build,
   scroll in steps, capture screenshots, and inspect them yourself.
 - `scripts/kie.mjs` needs `KIE_AI_API_KEY` and paid credit; prefer

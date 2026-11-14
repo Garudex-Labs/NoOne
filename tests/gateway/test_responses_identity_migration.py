@@ -1,4 +1,4 @@
-"""Identities migrated from a store that predates settlement tracking join the bounded lifecycle."""
+"""Current terminal identities remain bounded after reopening; live identities survive."""
 import asyncio
 
 import pytest
@@ -8,20 +8,14 @@ from aiohttp.test_utils import TestClient, TestServer
 from tests.gateway.test_responses_identity_retention import _app
 
 
-def _to_pre_settlement_schema(store):
-    """The on-disk layout an older release left behind: no settlement columns, and the
-    replay records of finished requests already evicted by its body LRU."""
+def _evict_terminal_bodies(store):
     conn = store._conn
-    conn.execute('DROP INDEX response_keys_settled')
-    conn.execute('DROP INDEX response_keys_response')
-    conn.execute('ALTER TABLE response_keys DROP COLUMN settled_at')
-    conn.execute('ALTER TABLE response_keys DROP COLUMN response_id')
     conn.execute("DELETE FROM responses WHERE response_id LIKE 'idem:%'")
     conn.commit()
 
 
 @pytest.mark.asyncio
-async def test_migrated_terminal_identities_age_out_but_a_live_one_is_kept(api, owner):
+async def test_reopened_terminal_identities_age_out_but_a_live_one_is_kept(api, owner):
     from gateway.platforms.api_server_response_store import ResponseStore
     calls, gate = [], (asyncio.Event(), asyncio.Event())
     path = api._response_store._db_path
@@ -34,7 +28,7 @@ async def test_migrated_terminal_identities_age_out_but_a_live_one_is_kept(api, 
                                                headers={'Idempotency-Key': 'live'}))
         try:
             await asyncio.wait_for(gate[0].wait(), 10)
-            _to_pre_settlement_schema(api._response_store)
+            _evict_terminal_bodies(api._response_store)
             api._response_store.close()
             # The upgraded release reopens the same file with a small identity bound.
             api._response_store = ResponseStore(db_path=path, max_size=1, max_identities=3)

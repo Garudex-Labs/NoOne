@@ -7,7 +7,7 @@ import http.client
 import secrets
 import uuid
 
-from hermes_cli.release_channels import (
+from agent_cli.release_channels import (
     ChannelError, ChannelNotFound, ChannelReader, artifact_key, build_prefix,
     canonical_json, channel_key, decode_json, package_versions, public_base as validate_public_base,
     validate_name, validate_record, validate_repository, validate_request, validate_manifest, require_sha256,
@@ -99,6 +99,22 @@ def preview_identity(name: str, token: str) -> dict:
             "appId": f"ai.hermes.channel.h{token}", "appNamePascal": pascal,
             "artifactNamePascal": pascal, "cliName": f"hermes-{name}",
             "windowsExecutableName": pascal, "msixAppIdWithOrg": f"NousResearch.{pascal}"}
+
+
+def _source_version_increases(request: dict, previous: dict, policy: str) -> bool:
+    from agent_cli.update_channel import canary_timestamp
+    from agent_cli.version_info import is_project_release_commit, project_release_membership
+    from scripts.releases.semver import compare
+
+    if not is_project_release_commit(request["commit"]):
+        return False
+    if policy == "canary-release":
+        current_stamp = canary_timestamp(request["releaseTag"])
+        previous_stamp = canary_timestamp(previous["releaseTag"])
+        return current_stamp is not None and previous_stamp is not None and current_stamp > previous_stamp
+    # A new numbering epoch is not a rollback; native versions and CAS still increase.
+    return (compare(request["version"], previous["version"]) > 0
+            or project_release_membership(previous["commit"]) is False)
 
 
 class ChannelPublisher:
@@ -392,25 +408,19 @@ class ChannelPublisher:
                     self.reader.read_bytes(key, head["sha256"])
                     return record
                 raise ChannelError("A newer build is published; stale completion refused")
+            if policy is not None and record["head"] is None:
+                from agent_cli.version_info import is_project_release_commit
+
+                if not is_project_release_commit(request["commit"]):
+                    raise ChannelError("Protected publication is outside this project's release history")
             if policy is not None and record["head"] is not None:
-                from scripts.releases.semver import compare
                 from scripts.releases.stable import windows_version
-                from hermes_cli.update_channel import canary_timestamp
                 previous_head = record["head"]
                 previous = self.store.get(previous_head["manifestKey"])
                 if previous is None or hashlib.sha256(previous[0]).hexdigest() != previous_head["sha256"]:
                     raise ChannelError("Previous protected manifest is unavailable or changed")
                 previous_request = validate_manifest(decode_json(previous[0]), record, self.public_base)["request"]
-                if policy == "canary-release":
-                    current_stamp = canary_timestamp(request["releaseTag"])
-                    previous_stamp = canary_timestamp(previous_request["releaseTag"])
-                    source_increases = (
-                        current_stamp is not None
-                        and previous_stamp is not None
-                        and current_stamp > previous_stamp
-                    )
-                else:
-                    source_increases = compare(request["version"], previous_request["version"]) > 0
+                source_increases = _source_version_increases(request, previous_request, policy)
                 if (not source_increases
                         or windows_version(request["windowsVersion"]) <= windows_version(previous_request["windowsVersion"])):
                     raise ChannelError("Protected native versions must increase; stale completion refused")

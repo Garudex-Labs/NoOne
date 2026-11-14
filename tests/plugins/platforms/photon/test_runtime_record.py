@@ -1,7 +1,7 @@
 """Sidecar runtime-record persistence tests (issue #69960).
 
 The sidecar token is generated at spawn and used to exist only in the
-gateway process memory + sidecar child env — so cron/`hermes send`
+gateway process memory + sidecar child env — so cron/`noone send`
 standalone sends structurally could not authenticate. The adapter now
 persists ``<hermes-home>/photon-sidecar.json`` after the sidecar
 passes its /healthz readiness check, deletes it on stop/failed-start, and
@@ -70,9 +70,9 @@ def test_write_read_delete_roundtrip(record_path: Path) -> None:
 
 
 def test_record_lives_at_the_top_of_the_profile_home() -> None:
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
-    assert photon_adapter._runtime_record_path() == get_hermes_home() / "photon-sidecar.json"
+    assert photon_adapter._runtime_record_path() == get_agent_home() / "photon-sidecar.json"
 
 
 def test_read_deletes_a_previous_record_unread(record_path: Path) -> None:

@@ -1,12 +1,11 @@
 @import 'tailwindcss';
+@import '@noone/ui/fonts.css';
 @plugin '@tailwindcss/typography';
 @import 'tw-shimmer';
 @import 'katex/dist/katex.min.css';
-@import '@vscode/codicons/dist/codicon.css';
 
-/* Titlebar clusters: 24×24 hit targets, 13.9px glyphs. codicon.css is
-   unlayered (`font: 16px/1`); Tailwind utilities in @layer lose that fight. */
-.titlebar-icon-button .codicon[class*='codicon-'] {
+/* Titlebar glyph dimensions remain independent of their hit targets. */
+.titlebar-icon-button .noone-icon {
   font-size: var(--titlebar-icon-size);
 }
 
@@ -92,38 +91,7 @@
    (this variant) flatten everything into one shared scroll. See ChatSidebar. */
 @custom-variant compact (@media (max-height: 768px));
 
-@font-face {
-  font-family: 'Collapse';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('@nous-research/ui/fonts/Collapse-Bold.woff2') format('woff2');
-}
-
-/* JetBrains Mono — bundled terminal font (Apache-2.0) so bold/italic share the
-   regular face's metrics instead of squeezing against a system fallback. */
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('./fonts/JetBrainsMono-Regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('./fonts/JetBrainsMono-Bold.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url('./fonts/JetBrainsMono-Italic.woff2') format('woff2');
-}
-
+/* Shared local faces keep terminal/code metrics stable across themes. */
 @theme inline {
   --color-background: var(--dt-background);
   --color-foreground: var(--dt-foreground);
@@ -149,6 +117,12 @@
   --color-midground-foreground: var(--dt-midground-foreground);
 
   --font-sans: var(--dt-font-sans);
+  --text-xs: var(--noone-text-caption);
+  --text-sm: var(--noone-text-label);
+  --text-base: var(--noone-text-body);
+  --text-xl: var(--noone-text-section);
+  --text-2xl: var(--noone-text-page);
+  --text-3xl: var(--noone-text-display);
   --font-mono: var(--dt-font-mono);
 
   --spacing-mul: var(--dt-spacing-mul, 1);
@@ -473,21 +447,16 @@
     --dt-user-bubble: color-mix(in srgb, var(--ui-chat-bubble-background) var(--user-bubble-keep, 100%), transparent);
     --dt-user-bubble-border: var(--ui-stroke-tertiary);
 
-    --dt-font-sans:
-      'Segoe WPC', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif,
-      'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', emoji;
+    --dt-font-sans: var(--noone-font-sans);
     /* Key caps always use the native UI face — never theme typography overrides. */
-    --dt-font-kbd: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+    --dt-font-kbd: var(--noone-font-sans);
     /* JetBrains Mono first — the face we bundle (@font-face above) and the
        terminal's primary — so code/diff match the terminal on every platform
        instead of drifting to a system Cascadia Code where it's installed. The
        extra Linux mono fallbacks preserve Latin Extended glyphs (#61392:
        Vietnamese and other non-Latin diacritics) as monospace when a theme
        display font does not cover them. */
-    --dt-font-mono:
-      'JetBrains Mono', 'Cascadia Code', 'Cascadia Mono', 'DejaVu Sans Mono', 'Liberation Mono', 'Noto Sans Mono',
-      'Noto Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace, 'Apple Color Emoji', 'Segoe UI Emoji',
-      'Segoe UI Symbol', 'Noto Color Emoji', emoji;
+    --dt-font-mono: var(--noone-font-mono);
     --dt-base-size: 1rem;
     --dt-line-height: 1.5;
     --dt-letter-spacing: 0;
@@ -977,7 +946,7 @@
    text-node label still matches `:only-child` — which is exactly how every
    chip lost its spacer. Icon-only users take the hue via `[data-ref]` instead
    of this class. */
-.ref > :where(svg, i.codicon) {
+.ref > :where(svg, svg.noone-icon) {
   margin-inline-end: 0.25em;
   opacity: 0.8;
 }
@@ -989,7 +958,7 @@
   vertical-align: -0.1em;
 }
 
-.ref > i.codicon {
+.ref > svg.noone-icon {
   font-size: 0.875em;
 }
 
@@ -1876,8 +1845,8 @@ body.guest-pointer-lock :is(webview, iframe) {
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', var(--dt-font-sans);
 }
 
-[data-slot='composer-rich-input']:lang(zh-hant) {
-  font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', var(--dt-font-sans);
+[data-slot='composer-rich-input']:lang(hi) {
+  font-family: 'Noto Sans Devanagari', 'Kohinoor Devanagari', 'Nirmala UI', var(--dt-font-sans);
 }
 
 [data-slot='composer-rich-input']:lang(ja) {
@@ -2020,7 +1989,7 @@ body.guest-pointer-lock :is(webview, iframe) {
    something a class-merge or a missed scan can quietly drop, leaving the
    wordmark rendered in body text. */
 .wordmark {
-  font-family: 'Collapse', var(--font-sans);
+  font-family: var(--font-sans);
   font-weight: 700;
   line-height: 0.9;
   text-transform: uppercase;

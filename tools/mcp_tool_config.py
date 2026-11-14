@@ -14,7 +14,7 @@ import sys
 import threading
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
-from hermes_cli.stderr_timestamp import stamp_line, timestamp
+from agent_cli.stderr_timestamp import stamp_line, timestamp
 from tools.mcp_tool_common import _env_ref_name, _prepend_path
 
 logger = logging.getLogger("tools.mcp_tool")
@@ -27,14 +27,14 @@ def _get_mcp_stderr_log() -> Any:
     """Shared append-mode handle for MCP subprocess stderr, cached until shutdown PER PROFILE HOME (a
     multiplexed gateway's secondary profile must log under ITS ``logs/``, not the launch profile's). Must
     expose a real fd (asyncio wires the child's stderr to it); falls back to ``/dev/null``, then real stderr."""
-    from hermes_constants import get_hermes_home, hermes_home_key, mkdir_under_hermes_home
-    home_key = hermes_home_key()
+    from agent_constants import get_agent_home, agent_home_key, mkdir_under_agent_home
+    home_key = agent_home_key()
     with _mcp_stderr_log_lock:
         fh = _mcp_stderr_log_fh.get(home_key)
         if fh is None or fh.closed:
             try:
-                log_dir = get_hermes_home() / "logs"
-                mkdir_under_hermes_home(log_dir)
+                log_dir = get_agent_home() / "logs"
+                mkdir_under_agent_home(log_dir)
                 # Line-buffered so output lands promptly; errors="replace" tolerates garbled binary.
                 fh = open(log_dir / "mcp-stderr.log", "a", encoding="utf-8", errors="replace", buffering=1)
                 fh.fileno()  # confirm a real fd before committing
@@ -108,7 +108,7 @@ class _StderrTee:
 
 def _write_stderr_log_header(server_name: str) -> None:
     """Session marker so operators can find each server's output in the shared log; it leads with the
-    same stamp as every server line (``_StderrTee``) so ``hermes logs mcp --since`` can filter it."""
+    same stamp as every server line (``_StderrTee``) so ``noone logs mcp --since`` can filter it."""
     fh = _get_mcp_stderr_log()
     try:
         fh.write(f"\n{timestamp()} ===== starting MCP server '{server_name}' =====\n")
@@ -201,7 +201,7 @@ def _build_safe_env(user_env: Optional[dict]) -> dict:
     keys, ``XDG_*``, vars injected by an external secret source (users configured that backend
     precisely so subprocesses can consume them), plus the server config's own ``env``."""
     from agent.secret_scope import get_secret
-    from hermes_cli.env_loader import secret_source_names
+    from agent_cli.env_loader import secret_source_names
     from tools.environments.local_env_policy import hermes_consumed_credentials
     env = {
         key: value for key, value in os.environ.items()
@@ -226,12 +226,12 @@ def _build_safe_env(user_env: Optional[dict]) -> dict:
     # platform-default home (issue #18594). Without it a child spawned by a multiplexed host
     # or a dashboard/desktop backend serving ``--open-profile`` resolves HERMES_HOME to the
     # LAUNCH profile's home (or the platform default) and writes to the wrong profile — and a
-    # Python child that imports hermes_constants trips the ``_warn_profile_fallback_once``
-    # guard. Resolve at call time: ``get_hermes_home()`` honours the served-profile
+    # Python child that imports agent_constants trips the ``_warn_profile_fallback_once``
+    # guard. Resolve at call time: ``get_agent_home()`` honours the served-profile
     # contextvar, which does not cross the process boundary, while ``os.environ`` holds only
     # the launch profile's home. An explicit server ``env.HERMES_HOME`` still wins below.
-    from hermes_constants import get_hermes_home
-    env["HERMES_HOME"] = str(get_hermes_home())
+    from agent_constants import get_agent_home
+    env["HERMES_HOME"] = str(get_agent_home())
     if user_env:
         # An entry rendered from one whole ``${VAR}`` that is unset (or empty) counts as absent, so
         # a plugin can forward an optional var without the child seeing the literal placeholder.
@@ -292,12 +292,12 @@ def _managed_launcher(command: str) -> Optional[tuple[str, list[str]]]:
         launcher = pm.uv_launcher(command)
         dirs = [str(launcher.parent)] if launcher is not None else []
     else:
-        from hermes_constants import with_hermes_node_path
+        from agent_constants import with_agent_node_path
 
-        dirs = [d for d in with_hermes_node_path({"PATH": ""})["PATH"].split(os.pathsep) if d]
+        dirs = [d for d in with_agent_node_path({"PATH": ""})["PATH"].split(os.pathsep) if d]
     executable = shutil.which(command, path=os.pathsep.join(dirs)) if dirs else None
     if executable is None:
-        raise RuntimeError(f"Hermes-managed {command} is not installed; run `hermes pm install {package}`")
+        raise RuntimeError(f"Hermes-managed {command} is not installed; run `noone pm install {package}`")
     return executable, dirs
 
 
@@ -325,9 +325,9 @@ def _is_hermes_managed_bin_dir(directory: str) -> bool:
         return False
     if resolved == Path(sys.executable).resolve().parent:
         return True
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     try:
-        home = Path(get_hermes_home()).resolve()
+        home = Path(get_agent_home()).resolve()
     except Exception:
         return False
     return resolved == home / "bin" or home in resolved.parents
@@ -428,7 +428,7 @@ def _npx_bin_candidates(bin_dir: str, name: str, *, windows: Optional[bool] = No
     """Launcher paths to try for *name* inside an npx cache's ``.bin``, in order. On Windows that
     directory holds the extensionless sh script plus ``<name>.cmd``/``<name>.ps1``; the sh one
     cannot be spawned there and ``os.access(X_OK)`` is only an existence check, so select by
-    extension (same precedence as ``hermes_constants._candidate_node_command_names``). ``windows``
+    extension (same precedence as ``agent_constants._candidate_node_command_names``). ``windows``
     is injectable so the branch is testable without patching ``os.name`` process-wide."""
     is_windows = os.name == "nt" if windows is None else windows
     if is_windows:
@@ -538,9 +538,9 @@ def _packaged_npx_entry(command: str, args: list) -> Optional[tuple]:
     scope, _, bare = spec.rpartition("/") if spec.startswith("@") else ("", "", spec)
     base, _, version = bare.partition("@")
     name = (f"{scope}/" if scope else "") + base
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
 
-    prefix = Path(get_hermes_home()) / "cache" / "mcp-npx" / hashlib.sha256(spec.encode()).hexdigest()[:16]
+    prefix = Path(get_agent_home()) / "cache" / "mcp-npx" / hashlib.sha256(spec.encode()).hexdigest()[:16]
     manifest = prefix / "node_modules" / name / "package.json"
     exact = re.fullmatch(r"\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.+-]+)?", version) is not None
     if not (exact and manifest.is_file()):
@@ -660,7 +660,7 @@ def _malformed_cost_table(name: str, cfg: Any) -> Optional[str]:
 def _filter_suspicious_mcp_servers(servers: dict[str, dict]) -> dict[str, dict]:
     """Drop exfiltration-shaped MCP configs, and servers with a malformed cost table, before any stdio spawn path."""
     try:
-        from hermes_cli.mcp_security import validate_mcp_server_entry
+        from agent_cli.mcp_security import validate_mcp_server_entry
     except Exception:
         validate_mcp_server_entry = None
     safe_servers = {}
@@ -684,7 +684,7 @@ def _portable_mcp_servers(safe_servers: dict[str, dict], rejected: frozenset[str
     from agent.secret_scope import UnscopedSecretError
     from tools.mcp_tool_costs import CONFIG_KEYS
     try:
-        from hermes_cli.plugins import discover_plugins, get_plugin_manager
+        from agent_cli.plugins import discover_plugins, get_plugin_manager
         discover_plugins()
         portable = get_plugin_manager().get_portable_mcp_servers()
         for name, cfg in _filter_suspicious_mcp_servers(portable).items():
@@ -719,14 +719,14 @@ def _load_mcp_config() -> dict[str, dict]:
     if safe_worker_enabled():
         return {}
     try:
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         from utils import env_var_enabled as _env_enabled
         if _env_enabled("HERMES_SAFE_MODE"):
             return {}
         servers = load_config().get("mcp_servers")
         try:  # ensure .env vars are available for interpolation
-            from hermes_cli.env_loader import load_hermes_dotenv
-            load_hermes_dotenv()
+            from agent_cli.env_loader import load_agent_dotenv
+            load_agent_dotenv()
         except Exception:
             pass
         safe_servers: dict[str, dict] = {}

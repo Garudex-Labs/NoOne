@@ -1,4 +1,4 @@
-"""``hermes profile create`` through a live gateway process (real ``gateway.run``).
+"""``noone profile create`` through a live gateway process (real ``gateway.run``).
 
 * local: the CLI on the gateway's own home has the profile made by the gateway (this process's
   ``provision_profile`` is made to fail, so only the gateway can have made it), and a refused request (an
@@ -27,7 +27,7 @@ def _create(home: Path, user: Path, *argv, env=None):
     base = {k: os.environ[k] for k in ("PATH", "LANG", "TZ") if k in os.environ}
     base.update(HOME=str(user), USERPROFILE=str(user), HERMES_HOME=str(home), PYTHONPATH=str(ROOT),
                 PYTHONUNBUFFERED="1", **(env or {}))
-    return subprocess.run([sys.executable, "-m", "hermes_cli.main", "profile", "create", *argv, "--no-alias"],
+    return subprocess.run([sys.executable, "-m", "agent_cli.main", "profile", "create", *argv, "--no-alias"],
                           cwd=ROOT, env=base, capture_output=True, text=True, timeout=240, check=False)
 
 
@@ -40,8 +40,8 @@ def test_cli_creates_through_a_live_gateway_local_and_by_url(tmp_path, monkeypat
         monkeypatch.setenv("HERMES_HOME", str(home))
         monkeypatch.setenv("HOME", str(user))
         monkeypatch.delenv("HERMES_TUI_GATEWAY_URL", raising=False)
-        from hermes_cli import profile_cmd, profile_provision
-        from hermes_cli.subcommands.profile import build_profile_parser
+        from agent_cli import profile_cmd, profile_provision
+        from agent_cli.subcommands.profile import build_profile_parser
         import argparse
 
         def refuse(*a, **k):
@@ -114,10 +114,10 @@ def _create_on_profile(home: Path, user: Path, profile: str, *argv, env=None):
     """``hermes -p <profile> profile create ...`` in a process that cannot create locally."""
     code = ("import sys\n"
             f"sys.argv = ['hermes', '-p', {profile!r}, 'profile', 'create', *{list(argv)!r}, '--no-alias']\n"
-            "import hermes_cli.profile_provision as provision\n"
+            "import agent_cli.profile_provision as provision\n"
             "def local(request): raise SystemExit('created in the CLI process, not by the gateway')\n"
             "provision.provision_profile = local\n"
-            "from hermes_cli.main import main\n"
+            "from agent_cli.main import main\n"
             "main()\n")
     base = {k: os.environ[k] for k in ("PATH", "LANG", "TZ") if k in os.environ}
     base.update(HOME=str(user), USERPROFILE=str(user), HERMES_HOME=str(home), PYTHONPATH=str(ROOT),

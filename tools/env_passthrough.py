@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from typing import Iterable
-from hermes_cli.config import cfg_get, read_raw_config
+from agent_cli.config import cfg_get, read_raw_config
 
 logger = logging.getLogger(__name__)
 
@@ -99,10 +99,10 @@ def _load_config_passthrough() -> frozenset[str]:
     """Load ``tools.env_passthrough`` from config.yaml (cached). Same credential
     filter as register_env_passthrough: operator config must not tunnel provider
     credentials into sandbox children either (GHSA-rhgp-j443-p4rf)."""
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
 
     try:
-        home_key = hermes_home_key()
+        home_key = agent_home_key()
     except (RuntimeError, OSError):
         # No resolvable home (stripped environ in a sandbox child): nothing to scope by.
         home_key = ""
@@ -165,7 +165,7 @@ def resolve_passthrough_value(name: str, fallback: str | None = None) -> str | N
 def scoped_passthrough_additions(present: Iterable[str]) -> dict[str, str]:
     """Declared passthrough names the bound profile secret scope supplies but the env being
     filtered (*present*) lacks. A routed profile's ``.env`` and hydrated sources never enter
-    ``os.environ`` (``load_hermes_dotenv`` skips the process-global load for a routed home), so a
+    ``os.environ`` (``load_agent_dotenv`` skips the process-global load for a routed home), so a
     name-by-name filter over the process env can only forward a declared name the LAUNCH profile
     also happens to define — the served profile's own value has no way in (#114209). Reads the
     bound scope alone: never ``os.environ``, never another profile. Empty without a scope, so

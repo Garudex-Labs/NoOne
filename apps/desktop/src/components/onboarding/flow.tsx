@@ -1,15 +1,15 @@
+import { ExternalLink, Loader2 } from '@noone/ui/icons'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { getGlobalModelOptions, profileScopeKey } from '@/agent-client'
 import { HandoffResult } from '@/components/free-tier/sign-in-dialog'
 import { ModelPickerDialog } from '@/components/model-picker'
 import { Button } from '@/components/ui/button'
 import { ErrorIcon } from '@/components/ui/error-state'
 import { Input } from '@/components/ui/input'
 import { Loader } from '@/components/ui/loader'
-import { getGlobalModelOptions, profileScopeKey } from '@/hermes'
 import { useI18n } from '@/i18n'
-import { ExternalLink, Loader2 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import {
   cancelOnboardingFlow,

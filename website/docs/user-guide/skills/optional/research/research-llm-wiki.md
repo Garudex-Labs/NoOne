@@ -1,35 +1,43 @@
 ---
 title: "Llm Wiki — Karpathy's LLM Wiki: build/query interlinked markdown KB"
-sidebar_label: "Llm Wiki"
+sidebarTitle: "Llm Wiki"
 description: "Karpathy's LLM Wiki: build/query interlinked markdown KB"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Llm Wiki
+# Llm Wiki {#llm-wiki}
 
 Karpathy's LLM Wiki: build/query interlinked markdown KB.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/llm-wiki` |
+| Source | Optional — install with `noone skills install official/research/llm-wiki` |
 | Path | `optional-skills/research/llm-wiki` |
 | Version | `2.1.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `wiki`, `knowledge-base`, `research`, `notes`, `markdown`, `rag-alternative` |
 | Related skills | [`obsidian`](../../bundled/note-taking/note-taking-obsidian.md), [`arxiv`](../../bundled/research/research-arxiv.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Karpathy's LLM Wiki
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Karpathy's LLM Wiki {#karpathys-llm-wiki}
 
 Build and maintain a persistent, compounding knowledge base as interlinked markdown files.
 Based on [Andrej Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
@@ -41,7 +49,7 @@ Contradictions have already been flagged. Synthesis reflects everything ingested
 **Division of labor:** The human curates sources and directs analysis. The agent
 summarizes, cross-references, files, and maintains consistency.
 
-## When This Skill Activates
+## When This Skill Activates {#when-this-skill-activates}
 
 Use this skill when the user:
 - Asks to create, build, or start a wiki or knowledge base
@@ -50,7 +58,7 @@ Use this skill when the user:
 - Asks to lint, audit, or health-check their wiki
 - References their wiki, knowledge base, or "notes" in a research context
 
-## Wiki Location
+## Wiki Location {#wiki-location}
 
 **Location:** Set via `WIKI_PATH` environment variable (e.g. in `${HERMES_HOME:-~/.hermes}/.env`).
 
@@ -63,9 +71,9 @@ WIKI="${WIKI_PATH:-$HOME/wiki}"
 The wiki is just a directory of markdown files — open it in Obsidian, VS Code, or
 any editor. No database, no special tooling required.
 
-## Architecture: Three Layers
+## Architecture: Three Layers {#architecture-three-layers}
 
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```
 wiki/
 ├── SCHEMA.md           # Conventions, structure rules, domain config
@@ -81,14 +89,14 @@ wiki/
 ├── comparisons/        # Layer 2: Side-by-side analyses
 └── queries/            # Layer 2: Filed query results worth keeping
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
 **Layer 1 — Raw Sources:** Immutable. The agent reads but never modifies these.
 **Layer 2 — The Wiki:** Agent-owned markdown files. Created, updated, and
 cross-referenced by the agent.
 **Layer 3 — The Schema:** `SCHEMA.md` defines structure, conventions, and tag taxonomy.
 
-## Resuming an Existing Wiki (CRITICAL — do this every session)
+## Resuming an Existing Wiki (CRITICAL — do this every session) {#resuming-an-existing-wiki-critical--do-this-every-session}
 
 When the user has an existing wiki, **always orient yourself before doing anything**:
 
@@ -113,7 +121,7 @@ Only after orientation should you ingest, query, or lint. This prevents:
 For large wikis (100+ pages), also run a quick `search_files` for the topic
 at hand before creating anything new.
 
-## Initializing a New Wiki
+## Initializing a New Wiki {#initializing-a-new-wiki}
 
 When the user asks to create or start a wiki:
 
@@ -125,7 +133,7 @@ When the user asks to create or start a wiki:
 6. Write initial `log.md` with creation entry
 7. Confirm the wiki is ready and suggest first sources to ingest
 
-### SCHEMA.md Template
+### SCHEMA.md Template {#schemamd-template}
 
 Adapt to the user's domain. The schema constrains agent behavior and ensures consistency:
 
@@ -167,7 +175,7 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
 topics. Lint surfaces `contested: true` and `confidence: low` pages for review so weak claims
 don't silently harden into accepted wiki fact.
 
-### raw/ Frontmatter
+### raw/ Frontmatter {#raw-frontmatter}
 
 Raw sources ALSO get a small frontmatter block so re-ingests can detect drift:
 
@@ -183,7 +191,7 @@ The `sha256:` lets a future re-ingest of the same URL skip processing when conte
 and flag drift when it has changed. Compute over the body only (everything after the closing
 `---`), not the frontmatter itself.
 
-## Tag Taxonomy
+## Tag Taxonomy {#tag-taxonomy}
 [Define 10-20 top-level tags for the domain. Add new tags here BEFORE using them.]
 
 Example for AI/ML:
@@ -195,35 +203,35 @@ Example for AI/ML:
 Rule: every tag on a page must appear in this taxonomy. If a new tag is needed,
 add it here first, then use it. This prevents tag sprawl.
 
-## Page Thresholds
+## Page Thresholds {#page-thresholds}
 - **Create a page** when an entity/concept appears in 2+ sources OR is central to one source
 - **Add to existing page** when a source mentions something already covered
 - **DON'T create a page** for passing mentions, minor details, or things outside the domain
 - **Split a page** when it exceeds ~200 lines — break into sub-topics with cross-links
 - **Archive a page** when its content is fully superseded — move to `_archive/`, remove from index
 
-## Entity Pages
+## Entity Pages {#entity-pages}
 One page per notable entity. Include:
 - Overview / what it is
 - Key facts and dates
 - Relationships to other entities ([[wikilinks]])
 - Source references
 
-## Concept Pages
+## Concept Pages {#concept-pages}
 One page per concept or topic. Include:
 - Definition / explanation
 - Current state of knowledge
 - Open questions or debates
 - Related concepts ([[wikilinks]])
 
-## Comparison Pages
+## Comparison Pages {#comparison-pages}
 Side-by-side analyses. Include:
 - What is being compared and why
 - Dimensions of comparison (table format preferred)
 - Verdict or synthesis
 - Sources
 
-## Update Policy
+## Update Policy {#update-policy}
 When new information conflicts with existing content:
 1. Check the dates — newer sources generally supersede older ones
 2. If genuinely contradictory, note both positions with dates and sources
@@ -256,7 +264,7 @@ The index is sectioned by type. Each entry is one line: wikilink + summary.
 by first letter or sub-domain. When the index exceeds 200 entries total, create
 a `_meta/topic-map.md` that groups pages by theme for faster navigation.
 
-### log.md Template
+### log.md Template {#logmd-template}
 
 ```markdown
 # Wiki Log
@@ -271,9 +279,9 @@ a `_meta/topic-map.md` that groups pages by theme for faster navigation.
 - Structure created with SCHEMA.md, index.md, log.md
 ```
 
-## Core Operations
+## Core Operations {#core-operations}
 
-### 1. Ingest
+### 1. Ingest {#1-ingest}
 
 When the user provides a source (URL, file, paste), integrate it into the wiki:
 
@@ -319,7 +327,7 @@ When the user provides a source (URL, file, paste), integrate it into the wiki:
 A single source can trigger updates across 5-15 wiki pages. This is normal
 and desired — it's the compounding effect.
 
-### 2. Query
+### 2. Query {#2-query}
 
 When the user asks a question about the wiki's domain:
 
@@ -334,7 +342,7 @@ When the user asks a question about the wiki's domain:
    Don't file trivial lookups — only answers that would be painful to re-derive.
 ⑥ **Update log.md** with the query and whether it was filed.
 
-### 3. Lint
+### 3. Lint {#3-lint}
 
 When the user asks to lint, health-check, or audit the wiki:
 
@@ -384,9 +392,9 @@ wiki = "<WIKI_PATH>"
 
 ⑬ **Append to log.md:** `## [YYYY-MM-DD] lint | N issues found`
 
-## Working with the Wiki
+## Working with the Wiki {#working-with-the-wiki}
 
-### Searching
+### Searching {#searching}
 
 ```bash
 # Find pages by content
@@ -402,7 +410,7 @@ search_files "tags:.*alignment" path="$WIKI" file_glob="*.md"
 read_file "$WIKI/log.md" offset=<last 20 lines>
 ```
 
-### Bulk Ingest
+### Bulk Ingest {#bulk-ingest}
 
 When ingesting multiple sources at once, batch the updates:
 1. Read all sources first
@@ -412,7 +420,7 @@ When ingesting multiple sources at once, batch the updates:
 5. Update index.md once at the end
 6. Write a single log entry covering the batch
 
-### Archiving
+### Archiving {#archiving}
 
 When content is fully superseded or the domain scope changes:
 1. Create `_archive/` directory if it doesn't exist
@@ -421,7 +429,7 @@ When content is fully superseded or the domain scope changes:
 4. Update any pages that linked to it — replace wikilink with plain text + "(archived)"
 5. Log the archive action
 
-### Obsidian Integration
+### Obsidian Integration {#obsidian-integration}
 
 The wiki directory works as an Obsidian vault out of the box:
 - `[[wikilinks]]` render as clickable links
@@ -437,7 +445,7 @@ For best results:
 If using the Obsidian skill alongside this one, set `OBSIDIAN_VAULT_PATH` to the
 same directory as the wiki path.
 
-### Obsidian Headless (servers and headless machines)
+### Obsidian Headless (servers and headless machines) {#obsidian-headless-servers-and-headless-machines}
 
 On machines without a display, use `obsidian-headless` instead of the desktop app.
 It syncs vaults via Obsidian Sync without a GUI — perfect for agents running on
@@ -493,7 +501,7 @@ sudo loginctl enable-linger $USER
 This lets the agent write to `~/wiki` on a server while you browse the same
 vault in Obsidian on your laptop/phone — changes appear within seconds.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **Never modify files in `raw/`** — sources are immutable. Corrections go in wiki pages.
 - **Always orient first** — read SCHEMA + index + recent log before any operation in a new session.
@@ -516,7 +524,7 @@ vault in Obsidian on your laptop/phone — changes appear within seconds.
 - **Handle contradictions explicitly** — don't silently overwrite. Note both claims with dates,
   mark in frontmatter, flag for user review.
 
-## Related Tools
+## Related Tools {#related-tools}
 
 [llm-wiki-compiler](https://github.com/atomicmemory/llm-wiki-compiler) is a Node.js CLI that
 compiles sources into a concept wiki with the same Karpathy inspiration. It's Obsidian-compatible,

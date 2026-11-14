@@ -10,7 +10,7 @@
 * DeepSeek-style ``reasoning_content`` is echoed on the assistant tool-call message,
   within the turn and after ``--resume``.
 * A long Nous Portal session replays every earlier turn's ``reasoning_details`` verbatim
-  and keeps answering, driven through one long-lived ``tui_gateway`` backend.
+  and keeps answering, driven through one long-lived ``agent_backend`` backend.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ from tests.e2e.core.providers._openai_helpers import (
     db_messages,
     oneshot,
 )
-from tests.e2e.core.providers._openai_tui import TuiGateway
+from tests.e2e.core.providers._openai_backend import TuiGateway
 from tests.fakes.providers.chat_variants import CText, CTools, FakeChatVariantServer
 
 pytestmark = pytest.mark.skipif(not sys.platform.startswith("linux"), reason="subprocess harness is Linux-gated")

@@ -4,7 +4,7 @@
 ``/tmp`` is not portable: Termux has no ``/tmp`` at all, native Windows has no such directory,
 macOS aliases it to ``/private/tmp`` (breaking naive path comparisons), and on most Linux
 distributions it is a RAM-backed tmpfs that fills under Hermes load. Hermes resolves scratch
-space through one helper (``hermes_constants.get_scratch_dir()`` → ``HERMES_HOME/cache/scratch``,
+space through one helper (``agent_constants.get_scratch_dir()`` → ``HERMES_HOME/cache/scratch``,
 which every Hermes process also exports as ``TMPDIR``/``TMP``/``TEMP``), and prompts + skills
 must steer the model the same way, because a literal ``/tmp`` in a SKILL.md or system prompt
 becomes a literal ``/tmp`` in the model's shell commands on every platform.
@@ -71,7 +71,7 @@ SKIP_DIRS = {
 # Pruned only directly under the repo root.
 ROOT_SKIP_DIRS = {".github"}
 # Pruned as repo-relative paths.
-SKIP_REL_DIRS = {Path("website/i18n"), Path("website/build"), Path("website/node_modules")}
+SKIP_REL_DIRS = {Path("website/docs/zh-Hans"), Path("website/docs/plugins"), Path("website/build"), Path("website/node_modules")}
 
 SKIP_FILE_NAMES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "uv.lock", "poetry.lock"}
 SKIP_FILE_PATTERNS = (
@@ -273,7 +273,7 @@ def main(argv: list[str] | None = None) -> int:
     print("\n".join(problems))
     print(
         f"\n{total} literal /tmp path(s) flagged. Resolve scratch space through "
-        f"hermes_constants.get_scratch_dir() (or $TMPDIR / tempfile, which Hermes points there), tell the "
+        f"agent_constants.get_scratch_dir() (or $TMPDIR / tempfile, which Hermes points there), tell the "
         f"model to do the same in skills and prompts, or mark a deliberate line with `{MARKER} — <why>` (same line or the line above). "
         f"See scripts/check_no_tmp_literals.py."
     )

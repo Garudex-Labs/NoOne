@@ -24,7 +24,7 @@ from cron.jobs import _ensure_cron_dir
 from pathlib import Path
 from typing import Any, Callable, Optional, TYPE_CHECKING
 
-from hermes_cli._subprocess_compat import windows_hide_flags
+from agent_cli._subprocess_compat import windows_hide_flags
 
 if TYPE_CHECKING:
     from cron.cancellation import _CancelEventLike
@@ -158,9 +158,9 @@ def _posix_cron_script_argv(script: Path) -> tuple[list[str], dict[str, str]]:
     script spawns would inherit it and a foreign interpreter would load the store's compiled
     extensions (#123440). The venv resolves Hermes from its generation's workspace snapshot,
     rebuilt only on a dependency change, so the bootstrap puts the live checkout first.
-    Lazy installs are off for the script's process tree: a script importing ``hermes_bootstrap``
+    Lazy installs are off for the script's process tree: a script importing ``agent_bootstrap``
     could otherwise complete a source update and ``execv`` itself onto the bare store Python."""
-    from hermes_cli._launchers import resolve_store_python
+    from agent_cli._launchers import resolve_store_python
     from pm.environments import project_python
 
     repo = Path(__file__).resolve().parents[1]
@@ -192,7 +192,7 @@ def _windows_cron_python_invocation(python_exe: str) -> tuple[str, dict[str, str
         if sibling.exists():
             interpreter = sibling
 
-    from hermes_cli._launchers import resolve_store_python
+    from agent_cli._launchers import resolve_store_python
     from pm.environments import committed_venv, site_packages as dependency_site
 
     repo = Path(__file__).resolve().parents[1]
@@ -372,7 +372,7 @@ def _resolve_script_path(script_path: str) -> tuple[Optional[Path], Optional[str
         return None, (
             f"Script not found: {path}. Cron scripts are looked up only in this profile's folder "
             f"({scripts_dir_resolved}); if the job was copied from another profile, copy the script "
-            f"there too, or edit the job with `hermes cron edit`."
+            f"there too, or edit the job with `noone cron edit`."
         )
     if not path.is_file():
         return None, f"Script path is not a file: {path}"

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Generate llms.txt and llms-full.txt for the Hermes docs site.
+"""Generate llms.txt and llms-full.txt from the maintained documentation source.
 
 Outputs:
-  website/static/llms.txt        — index of the docs, one link per page, grouped by
+  website/docs/llms.txt        — index of the docs, one link per page, grouped by
                                     section. Conforms to https://llmstxt.org.
-  website/static/llms-full.txt   — every doc under `website/docs/` concatenated,
+  website/docs/llms-full.txt   — every doc under `website/docs/` concatenated,
                                     with `# <title>` headings and `<!-- source: … -->`
                                     comments separating files.
 
@@ -14,32 +14,35 @@ gets indexed, under the section its path belongs to. That distinction is the
 reason this file was rewritten — when the section list also decided membership,
 it silently drifted to 53% coverage, and Bot Mode, the desktop app, computer
 use, web search, and 22 messaging platforms were absent from the index every
-LLM reads to learn what Hermes does.
+LLM reads to learn what the agent does.
 
 Both publish at:
-  https://hermes-agent.nousresearch.com/docs/llms.txt
-  https://hermes-agent.nousresearch.com/docs/llms-full.txt
+  https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/llms.txt
+  https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/llms-full.txt
 
-The `/docs/` prefix is not a mistake — Docusaurus serves `website/static/`
+The `/docs/` prefix is not a mistake — The documentation site serves `website/docs/`
 at the `docs/` base path. Clients and IDE plugins that probe the classic
 `/llms.txt` root will miss these. Document the canonical URLs in the docs
 index and in the repo README.
 
-Called from `website/scripts/prebuild.mjs` on every `npm run start` /
-`npm run build` so the output stays in sync with the docs tree.
+Refreshed explicitly by `just docs-generate-data` and by the publication workflow.
 """
 
 from __future__ import annotations
 
 import re
+import json
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 WEBSITE = SCRIPT_DIR.parent
 DOCS = WEBSITE / "docs"
-STATIC = WEBSITE / "static"
+STATIC = DOCS
+APPLICATION_NAME = json.loads(
+    (WEBSITE.parent / "agent_cli/data/application_identity.json").read_text(encoding="utf-8-sig")
+)["default_name"]
 
-SITE_BASE = "https://hermes-agent.nousresearch.com/docs"
+SITE_BASE = "https://github.com/Garudex-Labs/NoOne/tree/main/website/docs"
 
 # The product story: which pages lead, and in what order. Everything not named
 # here is still indexed — ABSORB decides where it lands — so this list is safe
@@ -54,9 +57,8 @@ SECTIONS: list[tuple[str, list[tuple[str, str, str | None]]]] = [
         ("getting-started/updating", "Updating", None),
         ("getting-started/nix-setup", "Nix Setup", None),
     ]),
-    ("Using Hermes", [
+    ("Using {{app-name}}", [
         ("user-guide/cli", "CLI", None),
-        ("user-guide/tui", "TUI (Ink terminal UI)", None),
         ("user-guide/configuration", "Configuration", None),
         ("user-guide/configuring-models", "Configuring Models", None),
         ("user-guide/sessions", "Sessions", None),
@@ -105,7 +107,6 @@ SECTIONS: list[tuple[str, list[tuple[str, str, str | None]]]] = [
         ("user-guide/messaging/signal", "Signal", None),
         ("user-guide/messaging/email", "Email", None),
         ("user-guide/messaging/sms", "SMS", None),
-        ("user-guide/messaging/matrix", "Matrix", None),
         ("user-guide/messaging/mattermost", "Mattermost", None),
         ("user-guide/messaging/homeassistant", "Home Assistant", None),
         ("user-guide/messaging/webhooks", "Webhooks", None),
@@ -126,10 +127,10 @@ SECTIONS: list[tuple[str, list[tuple[str, str, str | None]]]] = [
         ("guides/local-llm-on-mac", "Local LLMs on Mac", None),
         ("guides/daily-briefing-bot", "Daily Briefing Bot", None),
         ("guides/team-telegram-assistant", "Team Telegram Assistant", None),
-        ("guides/python-library", "Use Hermes as a Python Library", None),
-        ("guides/use-mcp-with-hermes", "Use MCP with Hermes", None),
-        ("guides/use-voice-mode-with-hermes", "Use Voice Mode with Hermes", None),
-        ("guides/use-soul-with-hermes", "Use SOUL.md with Hermes", None),
+        ("guides/python-library", "Use {{app-name}} as a Python Library", None),
+        ("guides/use-mcp-with-agent", "Use MCP with {{app-name}}", None),
+        ("guides/use-voice-mode-with-agent", "Use Voice Mode with {{app-name}}", None),
+        ("guides/use-soul-with-agent", "Use SOUL.md with {{app-name}}", None),
         ("guides/automate-with-cron", "Automate with Cron", None),
         ("guides/work-with-skills", "Work with Skills", None),
         ("guides/delegation-patterns", "Delegation Patterns", None),
@@ -159,7 +160,7 @@ SECTIONS: list[tuple[str, list[tuple[str, str, str | None]]]] = [
         ("reference/toolsets-reference", "Toolsets Reference", None),
         ("reference/mcp-config-reference", "MCP Config Reference", None),
         ("reference/model-catalog", "Model Catalog", None),
-        ("reference/skills-catalog", "Bundled Skills Catalog", "Table of all ~90 skills bundled with Hermes"),
+        ("reference/skills-catalog", "Bundled Skills Catalog", "Table of all ~90 skills bundled with {{app-name}}"),
         ("reference/optional-skills-catalog", "Optional Skills Catalog", "Table of ~60 additional installable skills"),
         ("reference/faq", "FAQ & Troubleshooting", None),
     ]),
@@ -180,7 +181,7 @@ ABSORB: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("Getting Started", ("getting-started",)),
     ("Messaging Platforms", ("user-guide/messaging",)),
     ("Core Features", ("user-guide/features",)),
-    ("Using Hermes", ("user-guide",)),
+    ("Using {{app-name}}", ("user-guide",)),
     ("Integrations", ("integrations",)),
     ("Guides & Tutorials", ("guides",)),
     ("Developer Guide", ("developer-guide",)),
@@ -217,7 +218,8 @@ def read_frontmatter(path: Path) -> tuple[dict[str, str], str]:
                 meta[key] = _unquote(found.group(1))
     if path.suffix == ".mdx":
         body = MDX_IMPORT_RE.sub("", body)
-    return meta, body
+    return ({key: value.replace("{{app-name}}", APPLICATION_NAME) for key, value in meta.items()},
+            body.replace("{{app-name}}", APPLICATION_NAME))
 
 
 def slug_for(path: Path) -> str:
@@ -246,6 +248,8 @@ def iter_docs() -> list[str]:
     slugs = set()
     for ext in DOC_EXTS:
         for path in DOCS.rglob(f"*{ext}"):
+            if path.is_relative_to(DOCS / "zh-Hans") or path.is_relative_to(DOCS / "plugins"):
+                continue
             slug = slug_for(path)
             # The docs landing page is this index's subject, not an entry in it.
             if slug and not slug.startswith(SKILL_CATALOG):
@@ -279,7 +283,10 @@ def resolve_desc(slug: str, provided: str | None) -> str:
 
 
 def _entry(slug: str, title: str, desc: str) -> str:
-    url = f"{SITE_BASE}/{slug}"
+    path = doc_path(slug)
+    if path is None:
+        raise ValueError(f"No retained documentation source for {slug!r}")
+    url = f"{SITE_BASE}/{path.relative_to(DOCS).as_posix()}"
     return f"- [{title}]({url}): {desc}" if desc else f"- [{title}]({url})"
 
 
@@ -292,25 +299,24 @@ def emit_llms_index() -> str:
             absorbed.setdefault(section_for(slug), []).append(slug)
 
     lines: list[str] = []
-    lines.append("# Hermes Agent")
+    lines.append(f"# {APPLICATION_NAME}")
     lines.append("")
     lines.append(
-        "> The self-improving AI agent built by Nous Research. A terminal-native "
+        "> The self-improving AI agent built by Garudex Labs. A terminal-native "
         "autonomous coding and task agent with persistent memory, agent-created skills, "
-        "and a messaging gateway that lives on 21+ messaging platforms — 19 native to "
-        "the gateway plus IRC and Microsoft Teams via plugins (Telegram, Discord, Slack, "
-        "SMS, Matrix, ...). Runs on local, Docker, SSH, Daytona, Modal, Vercel Sandbox or plugin "
+        "and a plugin-extensible messaging gateway (Telegram, Discord, Slack, and more). "
+        "Runs on local, Docker, SSH, Daytona, Modal, Vercel Sandbox or plugin "
         "backends. Works with Nous Portal, OpenRouter, OpenAI, Anthropic, Google, or any "
         "OpenAI-compatible endpoint."
     )
     lines.append("")
     lines.append(
-        "Install: `curl -fsSL https://raw.githubusercontent.com/NousResearch/"
-        "hermes-agent/main/scripts/install.sh | bash`  "
+        "Install: `curl -fsSL https://raw.githubusercontent.com/Garudex-Labs/"
+        "NoOne/main/scripts/install.sh | bash`  "
         "(Linux, macOS, WSL2)"
     )
     lines.append("")
-    lines.append("Repo: https://github.com/NousResearch/hermes-agent")
+    lines.append("Repo: https://github.com/Garudex-Labs/NoOne")
     lines.append("")
 
     for section, items in SECTIONS:
@@ -330,22 +336,22 @@ def emit_llms_index() -> str:
         for slug in slugs:
             lines.append(_entry(slug, *resolve_meta(slug)))
         lines.append("")
-    return "\n".join(lines).rstrip() + "\n"
+    return "\n".join(lines).replace("{{app-name}}", APPLICATION_NAME).rstrip() + "\n"
 
 
 def emit_llms_full() -> str:
     """Concatenate every doc under website/docs/ into a single markdown file."""
     seen: set[Path] = set()
     chunks: list[str] = [
-        "# Hermes Agent — Full Documentation\n",
+        f"# {APPLICATION_NAME} — Full Documentation\n",
         (
-            "This file is the entire Hermes Agent documentation concatenated for LLM "
+            "This file is the entire {{app-name}} documentation concatenated for LLM "
             "context ingestion. Section order reflects docs-site navigation: Getting "
-            "Started, Using Hermes, Features, Messaging, Integrations, Guides, "
+            "Started, Using {{app-name}}, Features, Messaging, Integrations, Guides, "
             "Developer Guide, Reference, then everything else.\n"
         ),
-        "Canonical site: https://hermes-agent.nousresearch.com/docs\n",
-        "Short index: https://hermes-agent.nousresearch.com/docs/llms.txt\n",
+        "Canonical site: https://github.com/Garudex-Labs/NoOne/tree/main/website/docs\n",
+        "Short index: https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/llms.txt\n",
         "\n---\n\n",
     ]
 
@@ -368,7 +374,7 @@ def emit_llms_full() -> str:
     for slug in iter_docs():
         emit_file(slug)
 
-    return "".join(chunks).rstrip() + "\n"
+    return "".join(chunks).replace("{{app-name}}", APPLICATION_NAME).rstrip() + "\n"
 
 
 def main() -> None:

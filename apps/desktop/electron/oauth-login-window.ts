@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 /**
  * The embedded gateway sign-in window (cookie-mode OAuth).
  *
@@ -115,7 +116,7 @@ export function startOauthLoginWindow<S>(
     try {
       win = deps.createWindow({
         session,
-        title: silent ? 'Connecting to Hermes Cloud agent…' : 'Sign in to Hermes gateway',
+        title: silent ? 'Connecting to Hermes Cloud agent…' : appText('Sign in to {app_name} gateway'),
         // Silent windows start hidden: the auto-SSO chain normally finishes
         // in well under a second and never needs to be seen.
         show: !silent && !hiddenRecovery

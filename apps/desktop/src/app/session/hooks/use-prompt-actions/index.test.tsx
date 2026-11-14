@@ -1,10 +1,10 @@
-import { JsonRpcGatewayError } from '@hermes/shared'
-import type { GatewayEventName } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@noone/shared'
+import type { GatewayEventName } from '@noone/shared'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import type { MutableRefObject } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getLatestSessionMessages, getSession } from '@/hermes'
+import { getLatestSessionMessages, getSession } from '@/agent-client'
 import { en } from '@/i18n/en'
 import { textPart } from '@/lib/chat-messages'
 import { createClientSessionState } from '@/lib/chat-runtime'
@@ -49,7 +49,7 @@ beforeEach(() => {
   vi.mocked(getLatestSessionMessages).mockImplementation(async () => ({ messages: [], session_id: 'session' }))
 })
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   getLatestSessionMessages: vi.fn(async () => ({ messages: [], session_id: 'session' })),
   getProfiles: vi.fn(async () => ({ profiles: [] })),
   getSession: vi.fn(),
@@ -193,7 +193,7 @@ describe('durable submit acknowledgement', () => {
   })
 
   it('a legacy backend refusing submission_id as version skew (4000) gets one identityless retry', async () => {
-    // `hermes serve` validates params against a strict contract: an unknown key is refused
+    // `noone serve` validates params against a strict contract: an unknown key is refused
     // as 4000 before any handler ran (surfaced by the remote-topology E2E as "Session unavailable").
     const submits: Array<Record<string, unknown>> = []
 
@@ -622,7 +622,7 @@ describe('usePromptActions slash session targeting', () => {
   })
 
   it('runs /goal status against the ROUTED stored session instead of minting a new one', async () => {
-    // Teknium's report: start a goal in the desktop app, then `/goal status`
+    // Regression report: start a goal in the desktop app, then `/goal status`
     // says there is no goal. `/goal` state lives per-session in SessionDB
     // (`goal:<session_id>`), and slash.ts used to resolve its target with a
     // bare `hint || activeRef || createSession()`. With the runtime binding

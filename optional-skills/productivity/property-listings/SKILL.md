@@ -2,7 +2,7 @@
 name: property-listings
 description: Present property and rental listings as desktop cards.
 version: 0.1.0
-author: Teknium (teknium1), Hermes Agent
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
@@ -34,7 +34,7 @@ This is a presentation recipe, not a listing search service or an investment val
 Install this optional skill through the Skills catalog, or use `terminal`:
 
 ```text
-hermes skills install official/productivity/property-listings
+noone skills install official/productivity/property-listings
 ```
 
 Load it with `skill_view(name="property-listings")` when presenting listings.

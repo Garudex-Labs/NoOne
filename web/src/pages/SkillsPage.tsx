@@ -1,56 +1,37 @@
-import { useEffect, useLayoutEffect, useState, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router";
+import { appText } from '@noone/shared/application-identity';
 import {
-  Package,
-  Search,
-  Wrench,
-  X,
-  Cpu,
-  Globe,
-  Shield,
-  ShieldCheck,
-  ShieldAlert,
-  ShieldQuestion,
-  Eye,
-  Paintbrush,
-  Brain,
-  Blocks,
-  Code,
-  Zap,
-  Filter,
-  Download,
-  RefreshCw,
-  FileText,
-  ExternalLink,
-  CheckCircle2,
   AlertTriangle,
-  Sparkles,
+  Blocks,
+  Brain,
+  CheckCircle2,
+  Code,
+  Cpu,
+  Download,
+  ExternalLink,
+  Eye,
+  FileText,
+  Filter,
+  Globe,
   Loader2,
+  Package,
+  Paintbrush,
   Pencil,
   Plus,
-} from "lucide-react";
-import { api } from "@/lib/api";
-import type {
-  SkillInfo,
-  ToolsetInfo,
-  SkillHubResult,
-  SkillHubSource,
-  SkillHubInstalledEntry,
-  SkillHubPreview,
-  SkillHubScan,
-} from "@/lib/api";
-import { useProfileScope } from "@/contexts/useProfileScope";
-import { ToolsetConfigDrawer } from "@/components/ToolsetConfigDrawer";
-import { SkillEditorDialog } from "@/components/SkillEditorDialog";
-import { LoadErrorNotice } from "@/components/LoadErrorNotice";
+  RefreshCw,
+  Search,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  ShieldQuestion,
+  Sparkles,
+  Wrench,
+  X,
+  Zap,
+} from "@noone/ui/icons";
 import { useToast } from "@nous-research/ui/hooks/use-toast";
-import { Toast } from "@nous-research/ui/ui/components/toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
 import { Badge } from "@nous-research/ui/ui/components/badge";
 import { Button } from "@nous-research/ui/ui/components/button";
-import { ListItem } from "@nous-research/ui/ui/components/list-item";
-import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { Switch } from "@nous-research/ui/ui/components/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@nous-research/ui/ui/components/card";
 import {
   Dialog,
   DialogContent,
@@ -58,15 +39,37 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@nous-research/ui/ui/components/dialog";
-import { cn } from "@/lib/utils";
 import { Input } from "@nous-research/ui/ui/components/input";
+import { ListItem } from "@nous-research/ui/ui/components/list-item";
+import { Spinner } from "@nous-research/ui/ui/components/spinner";
+import { Switch } from "@nous-research/ui/ui/components/switch";
+import { Toast } from "@nous-research/ui/ui/components/toast";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
+
+import { LoadErrorNotice } from "@/components/LoadErrorNotice";
+import { SkillEditorDialog } from "@/components/SkillEditorDialog";
+import { ToolsetConfigDrawer } from "@/components/ToolsetConfigDrawer";
+import { usePageHeader } from "@/contexts/usePageHeader";
+import { useProfileScope } from "@/contexts/useProfileScope";
+import { useAppName } from '@/hooks/useAppName';
 import { useI18n } from "@/i18n";
 import { en } from "@/i18n/en";
-import { usePageHeader } from "@/contexts/usePageHeader";
-import { PluginSlot } from "@/plugins";
+import { pluralSuffix } from '@/i18n/plural';
+import { api } from "@/lib/api";
+import type {
+  SkillHubInstalledEntry,
+  SkillHubPreview,
+  SkillHubResult,
+  SkillHubScan,
+  SkillHubSource,
+  SkillInfo,
+  ToolsetInfo,
+} from "@/lib/api";
 import { errorMessage } from "@/lib/api-error";
 import { installedHubEntry } from "@/lib/skill-hub-installed";
-
+import { cn } from "@/lib/utils";
+import { PluginSlot } from "@/plugins";
 /* ------------------------------------------------------------------ */
 /*  Types & helpers                                                    */
 /* ------------------------------------------------------------------ */
@@ -146,7 +149,7 @@ export default function SkillsPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSkill, setEditorSkill] = useState<string | null>(null);
   const { toast, showToast } = useToast();
-  const { t } = useI18n();
+  const { appName, t, locale } = useI18n();
   const { setAfterTitle, setEnd } = usePageHeader();
 
   // ── Profile scoping ──
@@ -498,7 +501,7 @@ export default function SkillsPage() {
                       .replace("{count}", String(searchMatchedSkills.length))
                       .replace(
                         "{s}",
-                        searchMatchedSkills.length !== 1 ? "s" : "",
+                        pluralSuffix(locale, searchMatchedSkills.length),
                       )}
                   </Badge>
                 </div>
@@ -542,7 +545,7 @@ export default function SkillsPage() {
                     <Badge tone="secondary" className="text-xs">
                       {t.skills.skillCount
                         .replace("{count}", String(activeSkills.length))
-                        .replace("{s}", activeSkills.length !== 1 ? "s" : "")}
+                        .replace("{s}", pluralSuffix(locale, activeSkills.length))}
                     </Badge>
                     <Button
                       size="sm"
@@ -707,10 +710,7 @@ export default function SkillsPage() {
           <DialogHeader>
             <DialogTitle>Learn a skill</DialogTitle>
             <DialogDescription>
-              Point Hermes at anything and it will distill a reusable skill —
-              following the house authoring standards. Fill in any combination
-              below; the agent gathers the sources and writes the skill in chat.
-            </DialogDescription>
+              {appText("Point {app_name} at anything and it will distill a reusable skill —\n              following the house authoring standards. Fill in any combination\n              below; the agent gathers the sources and writes the skill in chat.\n            ", appName)}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-3 py-2">
             <div className="grid gap-1.5">
@@ -895,6 +895,7 @@ function HubBrowser({
   /** Optional profile scoping installs + installed-state badges. */
   profile?: string;
 }) {
+  const appName = useAppName();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SkillHubResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -902,7 +903,6 @@ function HubBrowser({
   const [sourceCounts, setSourceCounts] = useState<Record<string, number>>({});
   const [timedOut, setTimedOut] = useState<string[]>([]);
   const [searchMs, setSearchMs] = useState<number | null>(null);
-
   // Landing state: which hubs are wired up + featured skills.
   const [sources, setSources] = useState<SkillHubSource[]>([]);
   const [featured, setFeatured] = useState<SkillHubResult[]>([]);
@@ -1118,8 +1118,7 @@ function HubBrowser({
                   Featured skills
                 </span>
                 <span className="text-xs text-text-tertiary">
-                  from the Hermes index — search above for thousands more
-                </span>
+                  {appText("from the {app_name} index — search above for thousands more\n                ", appName)}</span>
               </div>
               {featured.map((r) => (
                 <HubResultCard
@@ -1209,7 +1208,7 @@ function ConnectedHubs({
     return (
       <p className="text-xs text-muted-foreground">
         Results come from the same sources as{" "}
-        <span className="font-mono">hermes skills search</span>.
+        <span className="font-mono">noone skills search</span>.
       </p>
     );
   }

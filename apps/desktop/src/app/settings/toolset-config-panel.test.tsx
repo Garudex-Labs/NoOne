@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router'
 import type * as ReactRouterDom from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { ToolsetConfig, WebCapability } from '@/types/hermes'
+import type { ToolsetConfig, WebCapability } from '@/types/agent-client'
 
 // Collect the component graph before the behavioral test deadline starts.
 import { ToolsetConfigPanel } from './toolset-config-panel'
@@ -48,8 +48,8 @@ const saveHermesConfig = vi.fn()
 const saveHermesConfigRecord = vi.fn()
 const getElevenLabsVoices = vi.fn()
 
-vi.mock('@/hermes', () => ({
-  // useHermesConfigRecord (via VoiceProviderFields) reads these from the barrel.
+vi.mock('@/agent-client', () => ({
+  // useAgentConfigRecord (via VoiceProviderFields) reads these from the barrel.
   peekConfigReadOrigin: () => undefined,
   retainConfigReadOrigin: (next: unknown) => next,
   getToolsetConfig: (name: string) => getToolsetConfig(name),

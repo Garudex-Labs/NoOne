@@ -1,34 +1,42 @@
 ---
 title: "Oss Forensics — GitHub supply-chain forensics: recovery, IOCs, reporting"
-sidebar_label: "Oss Forensics"
+sidebarTitle: "Oss Forensics"
 description: "GitHub supply-chain forensics: recovery, IOCs, reporting"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Oss Forensics
+# Oss Forensics {#oss-forensics}
 
 GitHub supply-chain forensics: recovery, IOCs, reporting.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/security/oss-forensics` |
+| Source | Optional — install with `noone skills install official/security/oss-forensics` |
 | Path | `optional-skills/security/oss-forensics` |
 | Version | `1.0.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Security`, `Forensics`, `GitHub`, `Supply-Chain` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# OSS Security Forensics Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# OSS Security Forensics Skill {#oss-security-forensics-skill}
 
 A 7-phase multi-agent investigation framework for researching open-source supply chain attacks.
 Adapted from RAPTOR's forensics system. Covers GitHub Archive, Wayback Machine, GitHub API,
@@ -37,7 +45,7 @@ and final forensic report generation.
 
 ---
 
-## ⚠️ Anti-Hallucination Guardrails
+## ⚠️ Anti-Hallucination Guardrails {#️-anti-hallucination-guardrails}
 
 Read these before every investigation step. Violating them invalidates the report.
 
@@ -52,7 +60,7 @@ Read these before every investigation step. Violating them invalidates the repor
 
 ---
 
-## Example Scenarios
+## Example Scenarios {#example-scenarios}
 
 - **Scenario A: Dependency Confusion**: A malicious package `internal-lib-v2` is uploaded to NPM with a higher version than the internal one. The investigator must track when this package was first seen and if any PushEvents in the target repo updated `package.json` to this version.
 - **Scenario B: Maintainer Takeover**: A long-term contributor's account is used to push a backdoored `.github/workflows/build.yml`. The investigator looks for PushEvents from this user after a long period of inactivity or from a new IP/location (if detectable via BigQuery).
@@ -65,7 +73,7 @@ Read these before every investigation step. Violating them invalidates the repor
 > resolve `SKILL_DIR` to the actual path — e.g. `~/.hermes/skills/security/oss-forensics/`
 > or the `optional-skills/` equivalent. All script and template references are relative to it.
 
-## Phase 0: Initialization
+## Phase 0: Initialization {#phase-0-initialization}
 
 1. Create investigation working directory:
    ```bash
@@ -85,7 +93,7 @@ Read these before every investigation step. Violating them invalidates the repor
 
 ---
 
-## Phase 1: Prompt Parsing and IOC Extraction
+## Phase 1: Prompt Parsing and IOC Extraction {#phase-1-prompt-parsing-and-ioc-extraction}
 
 **Goal**: Extract all structured investigative targets from the user's request.
 
@@ -104,11 +112,11 @@ Read these before every investigation step. Violating them invalidates the repor
 - Value
 - Source (user-provided, inferred)
 
-**Reference**: See [evidence-types.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/evidence-types.md) for IOC taxonomy.
+**Reference**: See [evidence-types.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/evidence-types.md) for IOC taxonomy.
 
 ---
 
-## Phase 2: Parallel Evidence Collection
+## Phase 2: Parallel Evidence Collection {#phase-2-parallel-evidence-collection}
 
 Spawn up to 5 specialist investigator sub-agents using `delegate_task` (batch mode, max 3 concurrent). Each investigator has a **single data source** and must not mix sources.
 
@@ -116,7 +124,7 @@ Spawn up to 5 specialist investigator sub-agents using `delegate_task` (batch mo
 
 ---
 
-### Investigator 1: Local Git Investigator
+### Investigator 1: Local Git Investigator {#investigator-1-local-git-investigator}
 
 **ROLE BOUNDARY**: You query the LOCAL GIT REPOSITORY ONLY. Do not call any external APIs.
 
@@ -150,11 +158,11 @@ git log --show-signature --format="%H %ai %aN" > ../signature_check.txt 2>&1
 - Unsigned commits from verified contributors → type: `git`
 - Suspicious binary file additions → type: `git`
 
-**Reference**: See [recovery-techniques.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/recovery-techniques.md) for accessing force-pushed commits.
+**Reference**: See [recovery-techniques.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/recovery-techniques.md) for accessing force-pushed commits.
 
 ---
 
-### Investigator 2: GitHub API Investigator
+### Investigator 2: GitHub API Investigator {#investigator-2-github-api-investigator}
 
 **ROLE BOUNDARY**: You query the GITHUB REST API ONLY. Do not run git commands locally.
 
@@ -190,11 +198,11 @@ curl -s "https://api.github.com/repos/OWNER/REPO/commits/SHA" | jq .sha
 - Contributor in archive events but not in contributors list → evidence of permission revocation
 - Commit in archive PushEvents but not in API commit list → evidence of force-push/deletion
 
-**Reference**: See [evidence-types.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/evidence-types.md) for GH event types.
+**Reference**: See [evidence-types.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/evidence-types.md) for GH event types.
 
 ---
 
-### Investigator 3: Wayback Machine Investigator
+### Investigator 3: Wayback Machine Investigator {#investigator-3-wayback-machine-investigator}
 
 **ROLE BOUNDARY**: You query the WAYBACK MACHINE CDX API ONLY. Do not use the GitHub API.
 
@@ -227,11 +235,11 @@ curl -s "https://web.archive.org/cdx/search/cdx?url=github.com/OWNER/REPO/wiki/*
 - Historical README versions showing changes
 - Evidence of content present in archive but missing from current GitHub state
 
-**Reference**: See [github-archive-guide.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/github-archive-guide.md) for CDX API parameters.
+**Reference**: See [github-archive-guide.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/github-archive-guide.md) for CDX API parameters.
 
 ---
 
-### Investigator 4: GH Archive / BigQuery Investigator
+### Investigator 4: GH Archive / BigQuery Investigator {#investigator-4-gh-archive--bigquery-investigator}
 
 **ROLE BOUNDARY**: You query GITHUB ARCHIVE via BIGQUERY ONLY. This is a tamper-proof record of all public GitHub events.
 
@@ -276,11 +284,11 @@ LIMIT 200
 - WorkflowRunEvents for suspicious CI/CD automation
 - PushEvents that precede a "gap" in the git log (evidence of rewrite)
 
-**Reference**: See [github-archive-guide.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/github-archive-guide.md) for all 12 event types and query patterns.
+**Reference**: See [github-archive-guide.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/github-archive-guide.md) for all 12 event types and query patterns.
 
 ---
 
-### Investigator 5: IOC Enrichment Investigator
+### Investigator 5: IOC Enrichment Investigator {#investigator-5-ioc-enrichment-investigator}
 
 **ROLE BOUNDARY**: You enrich EXISTING IOCs from Phase 1 using passive public sources ONLY. Do not execute any code from the target repository.
 
@@ -289,11 +297,11 @@ LIMIT 200
 - For each domain/IP: check passive DNS, WHOIS records (via `web_extract` on public WHOIS services)
 - For each package name: check npm/PyPI for matching malicious package reports
 - For each actor username: check GitHub profile, contribution history, account age
-- Recover force-pushed commits using 3 methods (see [recovery-techniques.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/recovery-techniques.md))
+- Recover force-pushed commits using 3 methods (see [recovery-techniques.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/recovery-techniques.md))
 
 ---
 
-## Phase 3: Evidence Consolidation
+## Phase 3: Evidence Consolidation {#phase-3-evidence-consolidation}
 
 After all investigators complete:
 
@@ -308,7 +316,7 @@ After all investigators complete:
 
 ---
 
-## Phase 4: Hypothesis Formation
+## Phase 4: Hypothesis Formation {#phase-4-hypothesis-formation}
 
 A hypothesis must:
 - State a specific claim (e.g., "Actor X force-pushed to BRANCH on DATE to erase commit SHA")
@@ -316,7 +324,7 @@ A hypothesis must:
 - Identify what evidence would disprove it
 - Be labeled `[HYPOTHESIS]` until validated
 
-**Common hypothesis templates** (see [investigation-templates.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/investigation-templates.md)):
+**Common hypothesis templates** (see [investigation-templates.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/investigation-templates.md)):
 - Maintainer Compromise: legitimate account used post-takeover to inject malicious code
 - Dependency Confusion: package name squatting to intercept installs
 - CI/CD Injection: malicious workflow changes to run code during builds
@@ -327,7 +335,7 @@ For each hypothesis, spawn a `delegate_task` sub-agent to attempt to find discon
 
 ---
 
-## Phase 5: Hypothesis Validation
+## Phase 5: Hypothesis Validation {#phase-5-hypothesis-validation}
 
 The validator sub-agent MUST mechanically check:
 
@@ -346,9 +354,9 @@ Rejected hypotheses feed back into Phase 4 for refinement (max 3 iterations).
 
 ---
 
-## Phase 6: Final Report Generation
+## Phase 6: Final Report Generation {#phase-6-final-report-generation}
 
-Populate `investigation-report.md` using the template in [forensic-report.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/templates/forensic-report.md).
+Populate `investigation-report.md` using the template in [forensic-report.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/templates/forensic-report.md).
 
 **Mandatory sections**:
 - Executive Summary: one-paragraph verdict (Compromised / Clean / Inconclusive) with confidence level
@@ -366,7 +374,7 @@ Populate `investigation-report.md` using the template in [forensic-report.md](ht
 
 ---
 
-## Phase 7: Completion
+## Phase 7: Completion {#phase-7-completion}
 
 1. Run final evidence count: `python SKILL_DIR/scripts/evidence-store.py --store evidence.json list`
 2. Archive the full investigation directory.
@@ -378,7 +386,7 @@ Populate `investigation-report.md` using the template in [forensic-report.md](ht
 
 ---
 
-## Ethical Use Guidelines
+## Ethical Use Guidelines {#ethical-use-guidelines}
 
 This skill is designed for **defensive security investigation** — protecting open-source software from supply chain attacks. It must not be used for:
 
@@ -397,7 +405,7 @@ If the investigation reveals a genuine compromise, follow the coordinated vulner
 
 ---
 
-## API Rate Limiting
+## API Rate Limiting {#api-rate-limiting}
 
 GitHub REST API enforces rate limits that will interrupt large investigations if not managed.
 
@@ -416,11 +424,11 @@ If rate-limited mid-investigation, record the partial results in the evidence st
 
 ---
 
-## Reference Materials
+## Reference Materials {#reference-materials}
 
-- [github-archive-guide.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/github-archive-guide.md) — BigQuery queries, CDX API, 12 event types
-- [evidence-types.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/evidence-types.md) — IOC taxonomy, evidence source types, observation types
-- [recovery-techniques.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/recovery-techniques.md) — Recovering deleted commits, PRs, issues
-- [investigation-templates.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/references/investigation-templates.md) — Pre-built hypothesis templates per attack type
-- [evidence-store.py](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/scripts/evidence-store.py) — CLI tool for managing the evidence JSON store
-- [forensic-report.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/security/oss-forensics/templates/forensic-report.md) — Structured report template
+- [github-archive-guide.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/github-archive-guide.md) — BigQuery queries, CDX API, 12 event types
+- [evidence-types.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/evidence-types.md) — IOC taxonomy, evidence source types, observation types
+- [recovery-techniques.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/recovery-techniques.md) — Recovering deleted commits, PRs, issues
+- [investigation-templates.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/references/investigation-templates.md) — Pre-built hypothesis templates per attack type
+- [evidence-store.py](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/scripts/evidence-store.py) — CLI tool for managing the evidence JSON store
+- [forensic-report.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/security/oss-forensics/templates/forensic-report.md) — Structured report template

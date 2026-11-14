@@ -1,19 +1,19 @@
 """The shared owner's ``config.set`` refuses a key the administrator's managed scope pins, like
-``hermes config set``; before, it wrote the pinned key and answered success while the managed value
+``noone config set``; before, it wrote the pinned key and answered success while the managed value
 kept winning on every read. A managed scope that pins something else must not block other keys.
 """
 from types import SimpleNamespace
 
 import pytest
-import hermes_yaml as yaml
-from hermes_state_runtime import RuntimeStoreError
+import agent_yaml as yaml
+from agent_state_runtime import RuntimeStoreError
 
-from gateway.session_tui_config import _set_display, _write_profile_config
+from gateway.session_display_config import _set_display, _write_profile_config
 
 
 @pytest.fixture
 def home(tmp_path, monkeypatch):
-    from hermes_cli import managed_scope
+    from agent_cli import managed_scope
     home, managed = tmp_path / "home", tmp_path / "managed"
     home.mkdir()
     managed.mkdir()
@@ -56,7 +56,7 @@ def test_owner_config_set_still_writes_a_key_the_scope_does_not_pin(home):
     ("focus", "status", {"value": "off", "tool_progress": "all"}),  # read-only: sets no leaf, even a pinned one
 ])
 def test_owner_config_set_runs_its_edit_once(home, monkeypatch, managed, key, value, expected):
-    from hermes_cli import managed_scope
+    from agent_cli import managed_scope
     if managed:
         (home.parent / "managed" / "config.yaml").write_text("display:\n  focus_view: true\n")
     else:
@@ -72,8 +72,8 @@ def test_owner_global_reasoning_level_is_refused_before_anything_changes(home, m
     """``config.set reasoning <level> scope=global`` saves agent.reasoning_effort: a pinned one is refused
     before the session's level is committed or config.yaml is written. A session level writes no config key."""
     import asyncio
-    from gateway import session_setting_commands, session_tui_config
-    from hermes_cli import managed_scope
+    from gateway import session_setting_commands, session_display_config
+    from agent_cli import managed_scope
     if pins_effort:
         (home.parent / "managed" / "config.yaml").write_text("agent:\n  reasoning_effort: low\n")
         managed_scope.invalidate_managed_cache()
@@ -81,7 +81,7 @@ def test_owner_global_reasoning_level_is_refused_before_anything_changes(home, m
 
     async def commit(authority, actor, ref, value, persist_global):
         calls.append(("commit", persist_global))
-    monkeypatch.setattr(session_tui_config, "_authorize_write", lambda *a: None)
+    monkeypatch.setattr(session_display_config, "_authorize_write", lambda *a: None)
     monkeypatch.setattr(session_setting_commands, "commit_reasoning_command", commit)
     runner = SimpleNamespace(_apply_reasoning_selection=lambda route, platform, value, persist_global: calls.append(
         ("apply", persist_global)))
@@ -91,7 +91,7 @@ def test_owner_global_reasoning_level_is_refused_before_anything_changes(home, m
     params = {"session_id": "s", "key": "reasoning", "value": "high", "scope": scope}
 
     def run():
-        return asyncio.run(session_tui_config._set_command_setting(connection, SimpleNamespace(session_id="s"), params))
+        return asyncio.run(session_display_config._set_command_setting(connection, SimpleNamespace(session_id="s"), params))
     if scope == "global" and pins_effort:
         with pytest.raises(RuntimeStoreError) as refused:
             run()
@@ -106,8 +106,8 @@ def test_owner_global_reasoning_level_is_refused_before_anything_changes(home, m
 def test_owner_approval_mode_refusal_names_a_pinned_key(home, monkeypatch, pins_mode):
     """A refused ``approvals.mode`` write reports ``permission_denied`` naming the key when the managed
     scope pins it; any other refusal keeps ``storage_unavailable``. Nothing is written either way."""
-    from gateway import session_tui_config
-    from hermes_cli import approval_mode, managed_scope
+    from gateway import session_display_config
+    from agent_cli import approval_mode, managed_scope
     if pins_mode:
         (home.parent / "managed" / "config.yaml").write_text("approvals:\n  mode: manual\n")
         managed_scope.invalidate_managed_cache()
@@ -116,7 +116,7 @@ def test_owner_approval_mode_refusal_names_a_pinned_key(home, monkeypatch, pins_
                             lambda mode: SimpleNamespace(ok=False, mode="manual"))
     connection = SimpleNamespace(authority=SimpleNamespace(profile_id=str(home)))
     with pytest.raises(RuntimeStoreError) as refused:
-        session_tui_config._set_approval_mode(connection, "off")
+        session_display_config._set_approval_mode(connection, "off")
     expected = ("permission_denied", "approvals.mode") if pins_mode else ("storage_unavailable", None)
     assert (refused.value.reason, refused.value.field) == expected
     assert yaml.safe_load((home / "config.yaml").read_text()) == {"display": {"tui_theme": "dark"}}

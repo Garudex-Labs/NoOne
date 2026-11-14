@@ -64,7 +64,7 @@ def _wsl_windows_path_to_posix(path: str) -> str:
     if not re.match(r"^[A-Za-z]:[\\/]", path):
         return path
     try:
-        from hermes_constants import is_wsl
+        from agent_constants import is_wsl
         wsl = is_wsl()
     except Exception:
         wsl = False
@@ -90,7 +90,7 @@ def cua_driver_binary_available() -> bool:
 
 def cua_driver_install_hint() -> str:
     return ("cua-driver is not installed. Install the pinned driver with:\n  hermes computer-use install\n"
-            "Or run `hermes tools` and enable the Computer Use toolset to install it automatically.")
+            "Or run `noone tools` and enable the Computer Use toolset to install it automatically.")
 
 def _mcp_args_with_overlay_flag(args: list[str], driver_cmd: str = _CUA_DRIVER_DEFAULT_CMD) -> list[str]:
     """Return *args* with ``--no-overlay`` appended when configured and supported."""
@@ -113,7 +113,7 @@ def _resolve_mcp_invocation(driver_cmd: str, *, timeout: float = 6.0) -> tuple[s
     on older drivers or any discovery failure — the wrapper must not refuse to start over a failed discovery hop.
     ``--no-overlay`` appended when allowed.
 
-    Surface 8 of NousResearch/hermes-agent#47072: instead of hardcoding ``["mcp"]`` we ask the driver itself
+    Surface 8 of Garudex-Labs/NoOne#47072: instead of hardcoding ``["mcp"]`` we ask the driver itself
     via ``cua-driver manifest`` (trycua/cua#1961). The manifest carries a stable ``mcp_invocation`` pointer
     with both ``command`` and ``args``, so a future cua-driver that renames or relocates the subcommand
     keeps working without a Hermes patch.

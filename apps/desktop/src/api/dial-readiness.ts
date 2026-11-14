@@ -1,8 +1,9 @@
-// Session-wire readiness for HermesGateway's dials. A native dial is canonical by provenance and
+// Session-wire readiness for AgentGateway's dials. A native dial is canonical by provenance and
 // ready at once; a public dial is ready at the first `gateway.ready` its own socket delivers. The
 // gate owns each dial's settle, its timeout, the `open` it holds back from state subscribers, and
-// a request's cancellable wait; HermesGateway connects it to its transport events.
-import type { ConnectionState } from '@hermes/shared'
+// a request's cancellable wait; AgentGateway connects it to its transport events.
+import type { ConnectionState } from '@noone/shared'
+import { appText } from '@noone/shared/application-identity'
 
 import { TimeoutError } from '@/lib/with-timeout'
 
@@ -53,7 +54,7 @@ export function remainingRequestBudget(deadline: number, signal?: AbortSignal): 
   if (deadline === Number.POSITIVE_INFINITY) { return 0 }
   const remaining = deadline - Date.now()
 
-  if (remaining <= 0) { throw new Error('Hermes gateway request timed out') }
+  if (remaining <= 0) { throw new Error(appText('{app_name} gateway request timed out')) }
 
   return remaining
 }
@@ -110,7 +111,7 @@ export class DialReadiness {
   fail(): void {
     const dial = this.dial
 
-    this.settle(dial, new Error(dial.opened ? 'Hermes gateway connection closed before protocol readiness' : GATEWAY_NOT_CONNECTED_MESSAGE))
+    this.settle(dial, new Error(dial.opened ? appText('{app_name} gateway connection closed before protocol readiness') : GATEWAY_NOT_CONNECTED_MESSAGE))
   }
 
   /** Fail the dial `promise` belongs to (a connect() whose transport rejected). */

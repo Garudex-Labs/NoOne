@@ -21,8 +21,8 @@ from gateway.session_prompt_pin import SessionPromptPinMixin, sanitize_prompt_pi
 from gateway.session_recovery import SessionRecoveryMixin
 from gateway.session_lifecycle import SessionLifecycleMixin, _iso, _new_session_id, _now, _parse_iso
 from gateway.session_transcript import SessionTranscriptMixin
-# Inverse of _session_key_namespace, defined storage-side (hermes_state must not import gateway).
-from hermes_state_keys import profile_from_session_key_namespace
+# Inverse of _session_key_namespace, defined storage-side (agent_state must not import gateway).
+from agent_state_keys import profile_from_session_key_namespace
 
 logger = logging.getLogger(__name__)
 
@@ -77,10 +77,10 @@ class SessionSource:
     user_name: Optional[str] = None
     thread_id: Optional[str] = None  # forum topics, Discord threads, etc.
     chat_topic: Optional[str] = None  # channel topic/description (Discord, Slack)
-    user_id_alt: Optional[str] = None  # platform-specific stable alt ID (Signal UUID, Feishu union_id)
+    user_id_alt: Optional[str] = None  # platform-specific stable alt ID (Signal UUID)
     chat_id_alt: Optional[str] = None  # Signal group internal ID
     is_bot: bool = False  # message author is a bot/webhook (Discord)
-    # Platform-neutral SCOPE discriminator (Discord guild / Slack workspace / Matrix server) driving
+    # Platform-neutral SCOPE discriminator (Discord guild / Slack workspace) driving
     # isolation. ``guild_id`` is a deprecated alias: both written, ``scope_id`` wins on read.
     scope_id: Optional[str] = None
     guild_id: Optional[str] = None
@@ -206,7 +206,7 @@ class SessionContext:
 # Platforms where user IDs can be redacted: no ``<@user_id>``-style mention
 # system that needs raw IDs (which is why Discord is excluded).
 _PII_SAFE_PLATFORMS = frozenset({
-    Platform.WHATSAPP, Platform.SIGNAL, Platform.TELEGRAM, Platform.BLUEBUBBLES,
+    Platform.WHATSAPP, Platform.SIGNAL, Platform.TELEGRAM,
 })
 
 
@@ -254,8 +254,8 @@ def _slack_tools_loaded() -> bool:
     try:
         # Read-only loader: this runs per turn via _ephemeral_change_key, and _get_platform_tools
         # only reads the config. load_config()'s defensive deepcopy is ~half this probe's cost.
-        from hermes_cli.config import load_config_readonly
-        from hermes_cli.tools_config import _get_platform_tools
+        from agent_cli.config import load_config_readonly
+        from agent_cli.tools_config import _get_platform_tools
         # include_default_mcp_servers defaults True so a default-enabled Slack MCP counts too.
         return "slack" in _get_platform_tools(load_config_readonly(), "slack")
     except Exception:
@@ -269,8 +269,8 @@ def _discord_tools_loaded() -> bool:
         from agent.secret_scope import get_secret
         # Read-only loader: this runs per turn via _ephemeral_change_key, and _get_platform_tools
         # only reads the config. load_config()'s defensive deepcopy is ~half this probe's cost.
-        from hermes_cli.config import load_config_readonly
-        from hermes_cli.tools_config import _get_platform_tools
+        from agent_cli.config import load_config_readonly
+        from agent_cli.tools_config import _get_platform_tools
 
         if not (get_secret("DISCORD_BOT_TOKEN", "") or "").strip():
             return False
@@ -368,22 +368,11 @@ def _discord_platform_notes(context: SessionContext) -> list[str]:
     return lines
 
 
-_STATIC_PLATFORM_NOTES = {
-    Platform.BLUEBUBBLES: (
-        "**Platform notes:** You are responding via iMessage. Keep responses short and "
-        "conversational — think texts, not essays. Structure longer replies as separate short "
-        "thoughts, each separated by a blank line (double newline). Each block between blank lines "
-        "will be delivered as its own iMessage bubble, so write accordingly: one idea per bubble, "
-        "1–3 sentences each. If the user needs a detailed answer, give the short version first and "
-        "offer to elaborate."
-    ),
-}
 
 # Platform -> extra "Platform notes" lines for the session-context prompt.
 _PLATFORM_NOTES = {
     Platform.SLACK: _slack_platform_notes,
     Platform.DISCORD: _discord_platform_notes,
-    **{p: (lambda ctx, note=note: ["", note]) for p, note in _STATIC_PLATFORM_NOTES.items()},
 }
 
 
@@ -419,19 +408,6 @@ def build_session_context_prompt(context: SessionContext, *, redact_pii: bool = 
     if src.chat_topic:
         lines.append(f"**Channel Topic:** {_format_untrusted_prompt_value(src.chat_topic)}")
 
-    if src.platform == Platform.MATRIX:
-        lines += [
-            "",
-            f"**Matrix Room:** {_format_untrusted_prompt_value(src.chat_name or src.chat_id)}",
-            f"**Matrix Room ID:** {_chat_label(src.chat_id)}",
-        ]
-        if src.thread_id:
-            lines.append(f"**Matrix Thread:** {_chat_label(src.thread_id)}")
-        lines.append(
-            "**Matrix room boundary:** Treat this turn as scoped to the current Matrix room/thread "
-            "only. Do not assume unresolved references are about other Matrix rooms or projects "
-            "unless the user explicitly says so."
-        )
 
     # Shared multi-user sessions: never pin one user name in the system prompt (changes per turn ->
     # busts the prompt cache); sender names are prefixed on each user message instead.
@@ -461,14 +437,14 @@ def build_session_context_prompt(context: SessionContext, *, redact_pii: bool = 
             lines.append(f"  - {platform.value}: {safe_name} (ID: {safe_id})")
 
     lines += ["", "**Delivery options for scheduled tasks:**"]
-    from hermes_constants import display_hermes_home
+    from agent_constants import display_agent_home
     if src.platform == Platform.LOCAL:
         lines.append("- `\"origin\"` → Local output (saved to files)")
     else:
         _origin_label = _format_untrusted_prompt_value(src.chat_name or _chat_label(src.chat_id))
         lines.append(f"- `\"origin\"` → Back to this chat ({_origin_label})")
 
-    lines.append(f"- `\"local\"` → Save to local files only ({display_hermes_home()}/cron/output/)")
+    lines.append(f"- `\"local\"` → Save to local files only ({display_agent_home()}/cron/output/)")
     for platform, home in context.home_channels.items():
         home_name = _format_untrusted_prompt_value(home.name)
         lines.append(f"- `\"{platform.value}\"` → Home channel ({home_name})")
@@ -871,7 +847,7 @@ class SessionStore(
         # Initialize SQLite session database. A multiplexed gateway serves every profile from a SINGLE
         # process, so a handle bound during __init__ is frozen to the process's own root home; every
         # profile's rows then land in the root state.db even though ``_profile_runtime_scope`` has already
-        # redirected ``get_hermes_home()`` for the turn (its docstring lists "sessions" among what it
+        # redirected ``get_agent_home()`` for the turn (its docstring lists "sessions" among what it
         # scopes). The row still carries the right ``profile_name``, so the damage is invisible in the data
         # and shows up only as the desktop listing a profile's session under the default bot --
         # ``_open_session_db_for_profile`` reads ``profiles/<name>/state.db``, which never received the
@@ -896,9 +872,9 @@ class SessionStore(
         # The routing index needs exactly one home for its lifetime: the gateway's own, captured
         # before any profile scope exists (see ``_routing_db``).
         try:
-            from hermes_constants import get_hermes_home
+            from agent_constants import get_agent_home
 
-            self._routing_home: Optional[Path] = Path(get_hermes_home())
+            self._routing_home: Optional[Path] = Path(get_agent_home())
         except Exception:
             self._routing_home = None
         self._open_session_db_for_active_scope()

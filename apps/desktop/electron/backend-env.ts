@@ -128,7 +128,7 @@ function readTextOrEmpty(fsModule, file) {
 }
 
 /**
- * Parent env for a local `hermes serve` child of `profile` (#68367).
+ * Parent env for a local `noone serve` child of `profile` (#68367).
  *
  * `hermes desktop` loads its launch profile's `.env`/`.op.env` into os.environ
  * before exec'ing Electron, so `process.env` carries that profile's platform
@@ -141,7 +141,7 @@ function readTextOrEmpty(fsModule, file) {
  * declared pass through everywhere.
  *
  * `profile` null/empty means no `--profile` flag: the child follows the sticky
- * `active_profile` like a bare `hermes serve` (`_apply_profile_override`).
+ * `active_profile` like a bare `noone serve` (`_apply_profile_override`).
  */
 function profileBackendParentEnv({
   hermesHome,
@@ -235,7 +235,7 @@ function buildDesktopBackendEnv({
     PYTHONHOME: '',
     // Force PEP 540 UTF-8 mode in the spawned Python backend so its stdio and
     // subprocess defaults are UTF-8 even on non-UTF-8 Windows locales (GBK,
-    // cp1252, ...). hermes_bootstrap sets this inside the child too, but only
+    // cp1252, ...). agent_bootstrap sets this inside the child too, but only
     // after import — anything emitted earlier (interpreter startup errors,
     // pre-bootstrap tracebacks) still decodes with the locale default without
     // this. User's explicit setting wins. Re-port of PR #56499 (echoriver89).

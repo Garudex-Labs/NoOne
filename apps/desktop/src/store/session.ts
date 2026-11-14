@@ -1,10 +1,10 @@
-import type { ConnectionState } from '@hermes/shared'
+import type { ConnectionState } from '@noone/shared'
 import { atom, computed } from 'nanostores'
 
 import { setApiRequestLocalMode } from '@/api/client'
 import { lastVisibleMessageIsUser } from '@/app/chat/thread-loading'
 import type { ContextSuggestion } from '@/app/types'
-import type { HermesConnection } from '@/global'
+import type { AgentConnection } from '@/global'
 import { browserFolderBasePath, readBrowserDefaultProjectDir } from '@/lib/browser-settings'
 import type { ChatMessage } from '@/lib/chat-messages'
 import {
@@ -24,7 +24,7 @@ import {
   storedString,
   writeJson
 } from '@/lib/storage'
-import type { SessionInfo, UsageStats } from '@/types/hermes'
+import type { SessionInfo, UsageStats } from '@/types/agent-client'
 
 import { $removedSessionIds, isSessionRemovalPending, tombstoneRowIds } from './session-removal'
 import type { SessionOwnerRoute, SessionOwnerScope } from './session-request-router'
@@ -60,7 +60,7 @@ const COMPOSER_SERVICE_TIER_KEY = 'hermes.desktop.composer.service-tier'
 // paint, but must not be written through the previous backend's storage key.
 let composerSelectionScope: string | null = ''
 
-function composerScopeForConnection(connection: HermesConnection | null): string | null {
+function composerScopeForConnection(connection: AgentConnection | null): string | null {
   if (!connection) {
     return null
   }
@@ -344,7 +344,7 @@ export function setRememberedRoute(path: null | string, profile: string): void {
 
 let configuredDefaultProjectDir = ''
 
-function workspaceCwdKey(connection: HermesConnection | null = $connection.get()): string {
+function workspaceCwdKey(connection: AgentConnection | null = $connection.get()): string {
   const profile = connection?.profile?.trim() || 'default'
 
   if (connection?.mode !== 'remote') {
@@ -977,7 +977,7 @@ export function applySessionTitle(storedSessionId: string | null | undefined, ti
   setUnlistedSessionOwnerRows(patch)
 }
 
-export const $connection = atom<HermesConnection | null>(null)
+export const $connection = atom<AgentConnection | null>(null)
 export const $gatewayState = atom<ConnectionState>('idle')
 export const $sessions = atom<SessionInfo[]>([])
 // Cron-job sessions (source === 'cron') are fetched as their own list so the
@@ -1488,7 +1488,7 @@ function rescopeComposerSelection(nextScope: string | null): void {
 
 /** Publish an exact registry route before active-profile effects can persist a
  * forced default. A registry id is authority even while its descriptive
- * HermesConnection lookup is unavailable. */
+ * AgentConnection lookup is unavailable. */
 /** The composer storage scope of the (connection, profile) owner. */
 export const composerScopeForOwner = (connectionId: string, profile: string): string =>
   `.registry.${encodeURIComponent(connectionId)}.${encodeURIComponent(profile.trim() || 'default')}`
@@ -1502,7 +1502,7 @@ export function clearComposerSelectionOwner(): void {
   rescopeComposerSelection(null)
 }
 
-export const setConnection = (next: Updater<HermesConnection | null>) => {
+export const setConnection = (next: Updater<AgentConnection | null>) => {
   updateAtom($connection, next)
   // Repoint connection-scoped persistence (pins, manual session order,
   // remembered navigation) at the new backend's storage scope before any
@@ -1839,7 +1839,7 @@ export const setCurrentReasoningEffortWire = (next: string) => {
 // The profile's `agent.reasoning_effort`, mirrored from config so surfaces that
 // need to render or apply "the default" resolve the user's configured level
 // instead of assuming DEFAULT_REASONING_EFFORT (lib/reasoning-effort). Empty
-// until config loads, and re-seeded on every profile switch by useHermesConfig.
+// until config loads, and re-seeded on every profile switch by useAgentConfig.
 export const $defaultReasoningEffort = atom('')
 
 export const setDefaultReasoningEffort = (next: string) => updateAtom($defaultReasoningEffort, next)

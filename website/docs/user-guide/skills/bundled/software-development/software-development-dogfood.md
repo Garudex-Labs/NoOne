@@ -1,65 +1,73 @@
 ---
 title: "Dogfood — Exploratory QA of web apps: find bugs, evidence, reports"
-sidebar_label: "Dogfood"
+sidebarTitle: "Dogfood"
 description: "Exploratory QA of web apps: find bugs, evidence, reports"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Dogfood
+# Dogfood {#dogfood}
 
 Exploratory QA of web apps: find bugs, evidence, reports.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
 | Source | Bundled (installed by default) |
 | Path | `skills/software-development/dogfood` |
 | Version | `1.0.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `qa`, `testing`, `browser`, `web`, `dogfood` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Dogfood: Systematic Web Application QA Testing
+<div className="doc-callout-title">
 
-## Overview
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Dogfood: Systematic Web Application QA Testing {#dogfood-systematic-web-application-qa-testing}
+
+## Overview {#overview}
 
 This skill guides you through systematic exploratory QA testing of web applications with `browser_exec`. You will navigate the application, interact with elements, capture evidence of issues, and produce a structured bug report.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - The `browser` toolset must be enabled (`browser_exec`). `browser_exec` runs Python with pre-imported helpers (`new_tab`, `goto_url`, `wait_for_load`, `page_info`, `js`, `fill_input`, `click_at_xy`, `capture_screenshot`, `cdp`); browser state persists across calls, Python variables do not.
 - A target URL and testing scope from the user
 
-## Inputs
+## Inputs {#inputs}
 
 The user provides:
 1. **Target URL** — the entry point for testing
 2. **Scope** — what areas/features to focus on (or "full site" for comprehensive testing)
 3. **Output directory** (optional) — where to save screenshots and the report (default: `./dogfood-output`)
 
-## Workflow
+## Workflow {#workflow}
 
 Follow this 5-phase systematic workflow:
 
-### Phase 1: Plan
+### Phase 1: Plan {#phase-1-plan}
 
 1. Create the output directory structure:
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
    ```
    {output_dir}/
    ├── screenshots/       # Evidence screenshots
    └── report.md          # Final report (generated in Phase 5)
    ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 2. Identify the testing scope based on user input.
 3. Build a rough sitemap by planning which pages and features to test:
    - Landing/home page
@@ -68,7 +76,7 @@ Follow this 5-phase systematic workflow:
    - Forms and interactive elements
    - Edge cases (empty states, error pages, 404s)
 
-### Phase 2: Explore
+### Phase 2: Explore {#phase-2-explore}
 
 Batch each step's actions into one `browser_exec` call. For each page or feature in your plan:
 
@@ -114,7 +122,7 @@ Batch each step's actions into one `browser_exec` call. For each page or feature
    - Visual changes: `capture_screenshot()` and compare with the previous one
    - Expected vs actual behavior (`page_info()`, or `js()` reading the relevant element)
 
-### Phase 3: Collect Evidence
+### Phase 3: Collect Evidence {#phase-3-collect-evidence}
 
 For every issue found:
 
@@ -132,7 +140,7 @@ For every issue found:
    - Severity: Critical / High / Medium / Low
    - Category: Functional / Visual / Accessibility / Console / UX / Content
 
-### Phase 4: Categorize
+### Phase 4: Categorize {#phase-4-categorize}
 
 1. Review all collected issues.
 2. De-duplicate — merge issues that are the same bug manifesting in different places.
@@ -140,7 +148,7 @@ For every issue found:
 4. Sort by severity (Critical first, then High, Medium, Low).
 5. Count issues by severity and category for the executive summary.
 
-### Phase 5: Report
+### Phase 5: Report {#phase-5-report}
 
 Generate the final report using the template at `templates/dogfood-report-template.md`.
 
@@ -160,7 +168,7 @@ The report must include:
 
 Save the report to `{output_dir}/report.md`.
 
-## Tools Reference
+## Tools Reference {#tools-reference}
 
 All browser actions are `browser_exec` calls; these are the helpers and idioms used above.
 
@@ -177,7 +185,7 @@ All browser actions are `browser_exec` calls; these are the helpers and idioms u
 | Screenshot | `capture_screenshot()` (image attached to the result; text-only models use `vision_analyze` on the path) |
 | JS console errors | hook via `cdp('Page.addScriptToEvaluateOnNewDocument', source=HOOK)`, read with `js('window.__qa_errors || []')` |
 
-## Tips
+## Tips {#tips}
 
 - **Always read `window.__qa_errors` after navigating and after significant interactions.** Silent JS errors are among the most valuable findings.
 - **Batch each sub-procedure into one `browser_exec` call** (navigate, wait, extract, act, check errors) — fewer round-trips, and the hook stays in place.

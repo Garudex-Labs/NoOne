@@ -59,9 +59,9 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path, PurePosixPath
-from hermes_constants import get_hermes_home
-from hermes_cli._subprocess_compat import selected_git_env, windows_hide_flags
-from hermes_cli.gitlock import clear_stale_tmp_packs
+from agent_constants import get_agent_home
+from agent_cli._subprocess_compat import selected_git_env, windows_hide_flags
+from agent_cli.gitlock import clear_stale_tmp_packs
 from typing import Dict, List, Optional, Set, Tuple
 
 from utils import env_int, rmtree_readonly
@@ -72,7 +72,7 @@ logger = logging.getLogger(__name__)
 # Constants
 # ---------------------------------------------------------------------------
 
-CHECKPOINT_BASE = get_hermes_home() / "checkpoints"
+CHECKPOINT_BASE = get_agent_home() / "checkpoints"
 _CHECKPOINT_BASE_AT_IMPORT = CHECKPOINT_BASE
 
 
@@ -81,7 +81,7 @@ def _resolve_checkpoint_base() -> Path:
     changed it, else live profile-scoped HERMES_HOME — under the multiplexed gateway one process
     serves every profile, so the import-time constant would write every profile's code-edit
     checkpoints into the launch profile's store."""
-    return CHECKPOINT_BASE if CHECKPOINT_BASE != _CHECKPOINT_BASE_AT_IMPORT else get_hermes_home() / "checkpoints"
+    return CHECKPOINT_BASE if CHECKPOINT_BASE != _CHECKPOINT_BASE_AT_IMPORT else get_agent_home() / "checkpoints"
 
 # Single shared store directory under CHECKPOINT_BASE.
 _STORE_DIRNAME = "store"

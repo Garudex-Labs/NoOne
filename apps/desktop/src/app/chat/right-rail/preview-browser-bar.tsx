@@ -14,9 +14,9 @@
  * buttons, so a glyph here and a glyph on the strip are still the same button.
  */
 
+import { AppIcon } from '@noone/ui/app-icon'
 import { useEffect, useState } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Input } from '@/components/ui/input'
 import { PaneStripGlyph } from '@/components/ui/pane-tab'
@@ -163,18 +163,18 @@ export function PreviewBrowserBar({
     <div className="flex min-h-(--titlebar-height) shrink-0 items-center gap-1 border-b border-border/60 bg-background px-1.5 py-1">
       <PaneStripGlyph
         disabled={!canGoBack}
-        icon={<Codicon name="arrow-left" size="0.8125rem" />}
+        icon={<AppIcon name="arrow-left" size="0.8125rem" />}
         label={copy.goBack}
         onSelect={onBack}
       />
       <PaneStripGlyph
         disabled={!canGoForward}
-        icon={<Codicon name="arrow-right" size="0.8125rem" />}
+        icon={<AppIcon name="arrow-right" size="0.8125rem" />}
         label={copy.goForward}
         onSelect={onForward}
       />
       <PaneStripGlyph
-        icon={<Codicon name="refresh" size="0.8125rem" spinning={loading} />}
+        icon={<AppIcon name="refresh" size="0.8125rem" spinning={loading} />}
         label={copy.reload}
         onSelect={onReload}
       />
@@ -187,7 +187,7 @@ export function PreviewBrowserBar({
             the reload glyph also spins, but it sits in a row of four and
             reads as chrome rather than as this page's state. */}
         {loading && (
-          <Codicon
+          <AppIcon
             className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
             name="loading"
             size="0.75rem"
@@ -234,7 +234,7 @@ export function PreviewBrowserBar({
       {onToggleAnnotate ? (
         <PaneStripGlyph
           active={annotateMode}
-          icon={<Codicon name="comment" size="0.8125rem" />}
+          icon={<AppIcon name="comment" size="0.8125rem" />}
           label={annotateMode ? copy.annotateOn : copy.annotate}
           onSelect={onToggleAnnotate}
         />
@@ -260,32 +260,32 @@ export function PreviewBrowserBar({
       ) : null}
       {onPopIn ? (
         <PaneStripGlyph
-          icon={<Codicon name="screen-normal" size="0.8125rem" />}
+          icon={<AppIcon name="screen-normal" size="0.8125rem" />}
           label={t.preview.popIn}
           onSelect={onPopIn}
         />
       ) : onPopOut ? (
         <PaneStripGlyph
-          icon={<Codicon name="empty-window" size="0.8125rem" />}
+          icon={<AppIcon name="empty-window" size="0.8125rem" />}
           label={t.preview.popOut}
           onSelect={onPopOut}
         />
       ) : onOpenExternal ? (
         <PaneStripGlyph
-          icon={<Codicon name="link-external" size="0.8125rem" />}
+          icon={<AppIcon name="link-external" size="0.8125rem" />}
           label={t.preview.openInBrowser}
           onSelect={onOpenExternal}
         />
       ) : null}
       <PaneStripGlyph
         active={consoleOpen}
-        icon={<Codicon name="terminal" size="0.8125rem" />}
+        icon={<AppIcon name="terminal" size="0.8125rem" />}
         label={consoleOpen ? copy.hideConsole : copy.showConsole}
         onSelect={onToggleConsole}
       />
       <PaneStripGlyph
         active={devToolsOpen}
-        icon={<Codicon name="bug" size="0.8125rem" />}
+        icon={<AppIcon name="bug" size="0.8125rem" />}
         label={devToolsOpen ? copy.hideDevTools : copy.openDevTools}
         onSelect={onToggleDevTools}
       />
@@ -293,7 +293,7 @@ export function PreviewBrowserBar({
           no strip ✕ in reach, and the only other close is asking the agent
           (#92500). Same verb the tab carries — the pane routes it. */}
       {onClose && (
-        <PaneStripGlyph icon={<Codicon name="close" size="0.8125rem" />} label={t.common.close} onSelect={onClose} />
+        <PaneStripGlyph icon={<AppIcon name="close" size="0.8125rem" />} label={t.common.close} onSelect={onClose} />
       )}
     </div>
   )

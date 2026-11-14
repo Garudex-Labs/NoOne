@@ -29,9 +29,9 @@ async def test_overflowed_subscriber_is_detached_and_told_to_resume(tmp_path):
     from gateway.session_authority import LiveSession, SessionAuthority
     from gateway.session_contract import SessionRef
     from gateway.session_controls import AuthorityConnection
-    from hermes_state import SessionDB
-    from hermes_state_runtime import begin_runtime_epoch
-    from tui_gateway.transport import FanoutTransport
+    from agent_state import SessionDB
+    from agent_state_runtime import begin_runtime_epoch
+    from agent_backend.transport import FanoutTransport
 
     with SessionDB(db_path=tmp_path / 'state.db') as db:
         db.create_session('s', source='test')

@@ -3,13 +3,13 @@ title: "Chronos Managed-Cron Contract"
 description: "Agent ↔ NAS wire contract for the Chronos cron provider"
 ---
 
-# Chronos managed-cron — agent ↔ NAS wire contract
+# Chronos managed-cron — agent ↔ NAS wire contract {#chronos-managed-cron--agent--nas-wire-contract}
 
 **Status:** authoritative wire spec for the Chronos cron provider.
 **Audience:** the NAS-side implementer of the `agent-cron` endpoints
 (`nous-account-service`) and anyone debugging the managed-cron path.
 
-Chronos lets a hosted Hermes gateway **scale to zero** while idle and still
+Chronos lets a hosted {{app-name}} gateway **scale to zero** while idle and still
 fire cron jobs. Instead of an in-process 60-second ticker, the agent asks NAS
 to arm exactly **one external one-shot per job at that job's real next-fire
 time**. NAS calls the agent back at fire time over an authenticated webhook;
@@ -41,7 +41,7 @@ NAS mints a short-lived agent-audience JWT (purpose=cron_fire)
 agent verifies the NAS JWT → store CAS claim → run_one_job → re-arm next one-shot
 ```
 
-## Trust model (read this first)
+## Trust model (read this first) {#trust-model-read-this-first}
 
 | Hop | Who calls whom | Auth mechanism | Verified by |
 |---|---|---|---|
@@ -72,7 +72,7 @@ already performs.
 
 ---
 
-## Endpoint 1 — `POST /api/agent-cron/provision`  (agent → NAS)
+## Endpoint 1 — `POST /api/agent-cron/provision`  (agent → NAS) {#endpoint-1--post-apiagent-cronprovision--agent--nas}
 
 Arm (or re-arm, idempotently) exactly one one-shot for a job.
 
@@ -101,7 +101,7 @@ Arm (or re-arm, idempotently) exactly one one-shot for a job.
   agent_callback_url)`.
 - **Response:** `200 {"schedule_id": "<opaque>"}`.
 
-## Endpoint 2 — `POST /api/agent-cron/cancel`  (agent → NAS)
+## Endpoint 2 — `POST /api/agent-cron/cancel`  (agent → NAS) {#endpoint-2--post-apiagent-croncancel--agent--nas}
 
 - **Auth:** same as Endpoint 1.
 - **Body:** `{"job_id": "ab12cd34"}`.
@@ -109,7 +109,7 @@ Arm (or re-arm, idempotently) exactly one one-shot for a job.
   row. Idempotent — cancelling an unknown job is a 200 no-op.
 - **Response:** `200 {"ok": true}`.
 
-## Endpoint 3 — `POST /api/agent-cron/relay`  (scheduler → NAS, the fire relay)
+## Endpoint 3 — `POST /api/agent-cron/relay`  (scheduler → NAS, the fire relay) {#endpoint-3--post-apiagent-cronrelay--scheduler--nas-the-fire-relay}
 
 - **Auth:** the scheduler's request **signature**, verified by NAS with the
   signature path it already has. This is the trust boundary for the fire — a
@@ -129,12 +129,12 @@ Arm (or re-arm, idempotently) exactly one one-shot for a job.
 
 ---
 
-## Inbound `POST /api/cron/fire`  (NAS → agent) — agent side, already implemented
+## Inbound `POST /api/cron/fire`  (NAS → agent) — agent side, already implemented {#inbound-post-apicronfire--nas--agent--agent-side-already-implemented}
 
 This is the agent endpoint NAS calls in Endpoint 3 step 3. Two hops on hosted
 deployments:
 
-1. **Dashboard app** (`hermes_cli/web_server.py`) — the agent's only public
+1. **Dashboard app** (`agent_cli/web_server.py`) — the agent's only public
    HTTP surface (the Fly proxy exposes exactly one port, the dashboard's). It
    is in `PUBLIC_API_PATHS` so the dashboard cookie gate lets the bearer-JWT
    callback through to the verifier. The dashboard verifies the JWT, resolves
@@ -180,7 +180,7 @@ There is deliberately no in-dashboard execution fallback. The verifier is
 
 ---
 
-## At-most-once & re-arm semantics
+## At-most-once & re-arm semantics {#at-most-once--re-arm-semantics}
 
 - **Recurring (cron/interval):** on fire, the agent advances `next_run_at`
   (under its store lock) as part of the claim, runs the job, then re-provisions
@@ -195,7 +195,7 @@ There is deliberately no in-dashboard execution fallback. The verifier is
   gateway replicas sharing one `HERMES_HOME` — exactly one replica runs each
   fire.
 
-## Reconcile (self-healing)
+## Reconcile (self-healing) {#reconcile-self-healing}
 
 The agent reconciles desired (`jobs.json`) vs armed on:
 - `start()` (gateway boot / wake),
@@ -206,7 +206,7 @@ Reconcile arms missing/changed-time jobs and cancels orphans. A missed
 provision (transient NAS error) self-heals on the next reconcile. There is **no
 periodic wake** of a sleeping agent — that would negate scale-to-zero.
 
-## Config (agent side)
+## Config (agent side) {#config-agent-side}
 
 All non-secret (`cron.chronos.*` in `config.yaml`); the agent holds no scheduler
 credentials. For hosted agents NAS sets these at provision time:
@@ -229,7 +229,7 @@ maps to a provisioned instance (hop 1 above). When `provision` answers 403
 `invalid_client` — the token in `auth.json` is a plain `hermes-cli` user login
 rather than the `hermes-cli-vps` bootstrap session or an `agent:*` client — the
 rejection is deterministic for the life of that credential: every arm, re-arm
-and `list` would fail the same way, and a `hermes auth` re-login makes it
+and `list` would fail the same way, and a `noone auth` re-login makes it
 permanent (it *replaces* the bootstrap session; only NAS can re-mint one). The
 provider therefore logs ONE warning naming that remedy, stops calling NAS, and
 starts the built-in ticker for the rest of the process so jobs keep firing on
@@ -237,7 +237,7 @@ time instead of only through the late misfire sweep
 (`cron.misfire_grace_minutes`). Transient failures (5xx, transport) do not
 degrade; the next reconcile retries them.
 
-## Escape hatch (not default)
+## Escape hatch (not default) {#escape-hatch-not-default}
 
 The inbound `/api/cron/fire` verifier is pluggable (`get_fire_verifier()`). If
 relay volume through NAS ever saturates, a direct scheduler→agent mode with a

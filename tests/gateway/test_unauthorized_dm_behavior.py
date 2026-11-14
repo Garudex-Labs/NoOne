@@ -22,9 +22,8 @@ def _clear_auth_env(monkeypatch) -> None:
         "EMAIL_ALLOWED_USERS",
         "SMS_ALLOWED_USERS",
         "MATTERMOST_ALLOWED_USERS",
-        "MATRIX_ALLOWED_USERS",
-        "DINGTALK_ALLOWED_USERS", "FEISHU_ALLOWED_USERS", "WECOM_ALLOWED_USERS",
-        "QQ_ALLOWED_USERS", "QQ_GROUP_ALLOWED_USERS",
+
+
         "GATEWAY_ALLOWED_USERS",
         "TELEGRAM_ALLOW_ALL_USERS",
         "DISCORD_ALLOW_ALL_USERS",
@@ -34,9 +33,7 @@ def _clear_auth_env(monkeypatch) -> None:
         "EMAIL_ALLOW_ALL_USERS",
         "SMS_ALLOW_ALL_USERS",
         "MATTERMOST_ALLOW_ALL_USERS",
-        "MATRIX_ALLOW_ALL_USERS",
-        "DINGTALK_ALLOW_ALL_USERS", "FEISHU_ALLOW_ALL_USERS", "WECOM_ALLOW_ALL_USERS",
-        "QQ_ALLOW_ALL_USERS",
+
         "GATEWAY_ALLOW_ALL_USERS",
     ):
         monkeypatch.delenv(key, raising=False)
@@ -119,46 +116,6 @@ def test_whatsapp_lid_user_matches_phone_allowlist_via_modern_session_mapping(
     assert runner._is_user_authorized(source) is True
 
 
-@pytest.mark.parametrize(
-    "allowlist, expected",
-    [
-        # Display names are attacker-controlled: another contact can take the
-        # same name, so matching user_name would bypass the allowlist (#44729).
-        ("hujikuji", False),
-        # The stable numeric contactId is the one form a contact cannot forge.
-        ("4", True),
-    ],
-)
-def test_simplex_allowlist_matches_contact_id_not_display_name(monkeypatch, allowlist, expected):
-    """SIMPLEX_ALLOWED_USERS matches only the numeric contactId (user_id),
-    never the contact's display name (user_name)."""
-    _clear_auth_env(monkeypatch)
-    monkeypatch.setenv("SIMPLEX_ALLOWED_USERS", allowlist)
-
-    from gateway.platform_registry import platform_registry, PlatformEntry
-    platform_registry.register(PlatformEntry(
-        name="simplex",
-        label="SimpleX Chat",
-        adapter_factory=lambda cfg: None,
-        check_fn=lambda: True,
-        allowed_users_env="SIMPLEX_ALLOWED_USERS",
-        allow_all_env="SIMPLEX_ALLOW_ALL_USERS",
-    ))
-
-    simplex = Platform("simplex")
-    runner, _adapter = _make_runner(
-        simplex,
-        GatewayConfig(platforms={simplex: PlatformConfig(enabled=True)}),
-    )
-
-    source = SessionSource(
-        platform=simplex,
-        user_id="4",            # adapter sets this to the numeric contactId
-        chat_id="hujikuji",
-        user_name="hujikuji",   # adapter sets this to displayName
-        chat_type="dm",
-    )
-    assert runner._is_user_authorized(source) is expected
 
 
 def test_telegram_group_users_legacy_chat_ids_still_authorize(monkeypatch):
@@ -399,24 +356,6 @@ def test_get_unauthorized_dm_behavior_email_no_allowlist_returns_ignore(monkeypa
     assert behavior == "ignore"
 
 
-def test_qqbot_with_allowlist_ignores_unauthorized_dm(monkeypatch):
-    """QQBOT is included in the allowlist-aware default (QQ_ALLOWED_USERS).
-
-    Regression guard: the initial #9337 fix omitted QQBOT from the env map
-    inside _get_unauthorized_dm_behavior, even though _is_user_authorized
-    mapped it to QQ_ALLOWED_USERS.  Without QQBOT here, a QQ operator with a
-    strict user allowlist would still get pairing codes sent to strangers.
-    """
-    _clear_auth_env(monkeypatch)
-    monkeypatch.setenv("QQ_ALLOWED_USERS", "allowed-openid-1")
-
-    config = GatewayConfig(
-        platforms={Platform.QQBOT: PlatformConfig(enabled=True)},
-    )
-    runner, _adapter = _make_runner(Platform.QQBOT, config)
-
-    behavior = runner._get_unauthorized_dm_behavior(Platform.QQBOT)
-    assert behavior == "ignore"
 
 
 # ---------------------------------------------------------------------------
@@ -472,7 +411,7 @@ def test_decline_config_and_stamp_roundtrip(monkeypatch, tmp_path):
         "    unauthorized_dm_behavior: decline\n",
         encoding="utf-8",
     )
-    with _patch("gateway.config.get_hermes_home", return_value=tmp_path):
+    with _patch("gateway.config.get_agent_home", return_value=tmp_path):
         config = load_gateway_config()
     assert config.unauthorized_dm_behavior == "decline"
     assert config.unauthorized_dm_decline_message == "custom text"

@@ -1,4 +1,5 @@
-import type { ModelOptionProvider, ModelOptionsResult, ModelPricing } from '@hermes/shared'
+import { useStore } from '@nanostores/react'
+import type { ModelOptionProvider, ModelOptionsResult, ModelPricing } from '@noone/shared'
 import {
   DEFAULT_REASONING_EFFORT,
   planBlocks,
@@ -6,8 +7,8 @@ import {
   splitRecommended,
   usageLevel,
   usageTag
-} from '@hermes/shared'
-import { useStore } from '@nanostores/react'
+} from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useQuery } from '@tanstack/react-query'
 import {
   createContext,
@@ -21,10 +22,10 @@ import {
   useState
 } from 'react'
 
+import type { AgentGateway } from '@/agent-client'
 import { PlanLimitLine, UsageLevelTag } from '@/components/model-picker'
 import { ProviderStatusChip } from '@/components/provider-status-chip'
 import { Badge } from '@/components/ui/badge'
-import { Codicon } from '@/components/ui/codicon'
 import { DisclosureCaret } from '@/components/ui/disclosure-caret'
 import {
   DropdownMenuGroup,
@@ -40,7 +41,6 @@ import {
 import { HighlightMatches } from '@/components/ui/highlight-matches'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tip, TipHintLabel } from '@/components/ui/tooltip'
-import type { HermesGateway } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import { isSubmitEnter } from '@/lib/ime'
@@ -73,7 +73,7 @@ import {
 } from '@/store/model-visibility'
 import { $collapsedProviders, toggleCollapsedProvider } from '@/store/provider-collapse'
 import { $defaultReasoningEffort } from '@/store/session'
-import type { LocalModelLoadProgress, LocalRuntimeJob } from '@/types/hermes'
+import type { LocalModelLoadProgress, LocalRuntimeJob } from '@/types/agent-client'
 
 import { type DaybreakControl, type FastControl, ModelEditSubmenu, resolveFastControl } from './model-edit-submenu'
 import { ModelMenuRowIcon, useModelMenuRowDecoration } from './model-menu-row-decorations'
@@ -184,7 +184,7 @@ interface ModelCatalogMenuProps {
   footer?: ReactNode
   /** Rows above the search, outside the keyboard list (the local-setup offer). */
   header?: ReactNode
-  gateway?: HermesGateway
+  gateway?: AgentGateway
   /** Owner-routed RPC for catalog reads. Preferred over `gateway.request` so
    *  a tile's menu queries the session owner's backend, not chrome's. */
   request?: <T>(method: string, params?: Record<string, unknown>) => Promise<T>
@@ -887,7 +887,7 @@ export function ModelCatalogMenu({
                 <span className="min-w-0 flex-1 truncate">
                   MoA: <HighlightMatches foldSeparators query={search} text={preset} />
                 </span>
-                {isCurrentMoa ? <Codicon className="ml-auto text-foreground" name="check" size="0.75rem" /> : null}
+                {isCurrentMoa ? <AppIcon className="ml-auto text-foreground" name="check" size="0.75rem" /> : null}
               </DropdownMenuItem>
             )
           })}
@@ -935,14 +935,14 @@ export function ModelCatalogMenu({
           window.setTimeout(() => searchRef.current?.focus(), 0)
         }}
       >
-        <Codicon name="add" size="0.75rem" />
+        <AppIcon name="add" size="0.75rem" />
         {copyPicker.addCustomModelAction}
       </DropdownMenuItem>
       <DropdownMenuItem
         className={cn(dropdownMenuRow, 'text-(--ui-text-tertiary)')}
         onSelect={() => setModelVisibilityOpen(true)}
       >
-        <Codicon name="settings-gear" size="0.75rem" />
+        <AppIcon name="settings-gear" size="0.75rem" />
         {copy.editModels}
       </DropdownMenuItem>
     </>
@@ -1163,7 +1163,7 @@ function ModelFamilyRow({
             tabIndex={-1}
             type="button"
           >
-            <Codicon name={favorite ? 'star-full' : 'star-empty'} size="0.75rem" />
+            <AppIcon name={favorite ? 'star-full' : 'star-empty'} size="0.75rem" />
           </button>
         </Tip>
         <span className={cn('flex min-w-0 flex-1 items-center gap-1.5', limit.tone)}>
@@ -1197,7 +1197,7 @@ function ModelFamilyRow({
             {setting}
           </ModelChip>
         ))}
-        {isCurrent ? <Codicon className="text-foreground" name="check" size="0.75rem" /> : null}
+        {isCurrent ? <AppIcon className="text-foreground" name="check" size="0.75rem" /> : null}
       </DropdownMenuSubTrigger>
       <ModelEditSubmenu
         canDisableReasoning={caps?.can_disable_reasoning ?? undefined}

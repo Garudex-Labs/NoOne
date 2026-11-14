@@ -1,5 +1,6 @@
-import type { PluginPreviewAccessTranslations } from './types_plugin_preview_access'
+import { appText } from '@noone/shared/application-identity'
 
+import type { PluginPreviewAccessTranslations } from './types_plugin_preview_access'
 /** Copy for the preview-script consent prompt and the per-plugin grant list (Capabilities ▸ Plugins). */
 export const enPluginPreviewAccess: PluginPreviewAccessTranslations = {
   previewScriptPromptTitle: (plugin: string) => `Let ${plugin} run scripts on this page?`,
@@ -14,5 +15,5 @@ export const enPluginPreviewAccess: PluginPreviewAccessTranslations = {
   previewScriptRevoke: (origin: string) => `Revoke access to ${origin}`,
   previewScriptRevoked: (plugin: string, origin: string) => `${plugin} can no longer run scripts on ${origin}.`,
   previewScriptRevokeUnsaved: (plugin: string, origin: string) =>
-    `Couldn't save that change, so it lasts only until Hermes restarts. ${plugin} is blocked on ${origin} for now.`
+    `Couldn't save that change, so it lasts only until ${appText('{app_name}')} restarts. ${plugin} is blocked on ${origin} for now.`
 }

@@ -1,12 +1,12 @@
-# Trajectory Format
+# Trajectory Format {#trajectory-format}
 
-Hermes Agent saves conversation trajectories in ShareGPT-compatible JSONL format
+{{app-name}} saves conversation trajectories in ShareGPT-compatible JSONL format
 for use as training data, debugging artifacts, and reinforcement learning datasets.
 
 Source files: `agent/trajectory.py`, `agent/session_persistence.py` (search for `_save_trajectory`), `batch_runner.py`
 
 
-## File Naming Convention
+## File Naming Convention {#file-naming-convention}
 
 Trajectories are written to files in the current working directory:
 
@@ -21,11 +21,11 @@ The batch runner (`batch_runner.py`) writes to a custom output file per batch
 You can override the filename via the `filename` parameter in `save_trajectory()`.
 
 
-## JSONL Entry Format
+## JSONL Entry Format {#jsonl-entry-format}
 
 Each line in the file is a self-contained JSON object. There are two variants:
 
-### CLI/Interactive Format (from `_save_trajectory`)
+### CLI/Interactive Format (from `_save_trajectory`) {#cliinteractive-format-from-_save_trajectory}
 
 ```json
 {
@@ -36,7 +36,7 @@ Each line in the file is a self-contained JSON object. There are two variants:
 }
 ```
 
-### Batch Runner Format (from `batch_runner.py`)
+### Batch Runner Format (from `batch_runner.py`) {#batch-runner-format-from-batch_runnerpy}
 
 ```json
 {
@@ -65,7 +65,7 @@ ALL possible tools (from `model_tools.TOOL_TO_TOOLSET_MAP`) with zero defaults,
 ensuring consistent schema across entries for HuggingFace dataset loading.
 
 
-## Conversations Array (ShareGPT Format)
+## Conversations Array (ShareGPT Format) {#conversations-array-sharegpt-format}
 
 The `conversations` array uses ShareGPT role conventions:
 
@@ -76,7 +76,7 @@ The `conversations` array uses ShareGPT role conventions:
 | assistant | `"gpt"` |
 | tool | `"tool"` |
 
-### Complete Example
+### Complete Example {#complete-example}
 
 ```json
 {
@@ -109,9 +109,9 @@ The `conversations` array uses ShareGPT role conventions:
 ```
 
 
-## Normalization Rules
+## Normalization Rules {#normalization-rules}
 
-### Reasoning Content Markup
+### Reasoning Content Markup {#reasoning-content-markup}
 
 The trajectory converter normalizes ALL reasoning into `<think>` tags, regardless
 of how the model originally produced it:
@@ -128,7 +128,7 @@ of how the model originally produced it:
    block. If no reasoning was produced, an empty block is inserted:
    `<think>\n</think>\n` — this ensures consistent format for training data.
 
-### Tool Call Normalization
+### Tool Call Normalization {#tool-call-normalization}
 
 Tool calls from the API format (with `tool_call_id`, function name, arguments as
 JSON string) are converted to XML-wrapped JSON:
@@ -145,7 +145,7 @@ JSON string) are converted to XML-wrapped JSON:
 - Multiple tool calls in one assistant turn produce multiple `<tool_call>` blocks
   in a single `gpt` message
 
-### Tool Response Normalization
+### Tool Response Normalization {#tool-response-normalization}
 
 All tool results following an assistant message are grouped into a single `tool`
 turn with XML-wrapped JSON responses:
@@ -162,10 +162,10 @@ turn with XML-wrapped JSON responses:
 - The tool name is matched by position against the parent assistant's `tool_calls`
   array
 
-### System Message
+### System Message {#system-message}
 
 The system message is generated at save time (not taken from the conversation).
-It follows the Hermes function-calling prompt template with:
+It follows the {{app-name}} function-calling prompt template with:
 
 - Preamble explaining the function-calling protocol
 - `<tools>` XML block containing the JSON tool definitions
@@ -176,7 +176,7 @@ Tool definitions include `name`, `description`, `parameters`, and `required`
 (set to `null` to match the canonical format).
 
 
-## Loading Trajectories
+## Loading Trajectories {#loading-trajectories}
 
 Trajectories are standard JSONL — load with any JSON-lines reader:
 
@@ -201,7 +201,7 @@ successful = [e for e in load_trajectories("trajectory_samples.jsonl")
 training_data = [e["conversations"] for e in successful]
 ```
 
-### Loading for HuggingFace Datasets
+### Loading for HuggingFace Datasets {#loading-for-huggingface-datasets}
 
 ```python
 from datasets import load_dataset
@@ -213,7 +213,7 @@ The normalized `tool_stats` schema ensures all entries have the same columns,
 preventing Arrow schema mismatch errors during dataset loading.
 
 
-## Controlling Trajectory Saving
+## Controlling Trajectory Saving {#controlling-trajectory-saving}
 
 Trajectory saving is a `run_agent.py` / library-level switch — the `hermes` CLI
 does not expose a config key or flag for it:

@@ -1,6 +1,6 @@
-import { LOCAL_CONNECTION_ID } from '@hermes/shared'
+import { LOCAL_CONNECTION_ID } from '@noone/shared'
 
-import type { DesktopOauthLoginOptions, HermesApiRequest, HermesConnection } from '@/global'
+import type { AgentApiRequest, AgentConnection, DesktopOauthLoginOptions } from '@/global'
 import { webappSignInRequired } from '@/lib/browser-launch-session'
 import { signInSavedConnection, signOutSavedConnection } from '@/lib/browser-saved-connection-oauth'
 import type { BrowserSavedConnections } from '@/lib/browser-saved-connections'
@@ -39,7 +39,7 @@ function connectionFor(
   bootstrap: BrowserBootstrap,
   profile: null | string | undefined,
   servedHere: boolean
-): HermesConnection {
+): AgentConnection {
   if (!bootstrap.authRequired && !bootstrap.token) {
     throw webappSignInRequired()
   }
@@ -89,7 +89,7 @@ function browserConnectionConfig(bootstrap: BrowserBootstrap, profile?: null | s
 }
 
 interface BrowserConnectionOptions {
-  api: <T>(request: HermesApiRequest) => Promise<T>
+  api: <T>(request: AgentApiRequest) => Promise<T>
   bootstrap: BrowserBootstrap
   /** This machine's saved gateway connections, reached through the serving gateway
    *  (`browser-saved-connections.ts`). Absent: only the serving gateway. */

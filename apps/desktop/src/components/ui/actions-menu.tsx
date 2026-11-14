@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import type * as React from 'react'
 import { useState } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -92,7 +92,7 @@ export function renderActionItem(
       onSelect={onSelect}
       variant={variant}
     >
-      {iconNode ?? (icon ? <Codicon name={icon} size="0.875rem" /> : null)}
+      {iconNode ?? (icon ? <AppIcon name={icon} size="0.875rem" /> : null)}
       {typeof label === 'string' ? <span>{label}</span> : label}
     </kit.Item>
   )

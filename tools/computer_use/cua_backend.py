@@ -17,8 +17,8 @@ import uuid
 from pathlib import PureWindowsPath
 from typing import Any, Dict, List, Optional, Tuple
 
-from hermes_cli._subprocess_compat import windows_hide_flags
-from hermes_platform.host.runtime import is_wsl
+from agent_cli._subprocess_compat import windows_hide_flags
+from agent_platform.host.runtime import is_wsl
 from tools.computer_use.backend import ActionResult, ComputerUseBackend
 from tools.computer_use.cua_backend_capture import _CaptureMixin
 from tools.computer_use.cua_backend_daemon import _EmbeddedCuaDaemon
@@ -38,7 +38,7 @@ _CUA_NATIVE_WAYLAND_ENV_VAR = "CUA_DRIVER_RS_ENABLE_WAYLAND"
 def _computer_use_cfg() -> dict[str, Any]:
     """The ``computer_use`` config block, or ``{}`` when config is unreadable."""
     with contextlib.suppress(Exception):
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         return (load_config() or {}).get("computer_use") or {}
     return {}
 
@@ -104,7 +104,7 @@ def _manifest_is_mode_independent(path: str) -> bool:
     mode. Unreadable / unparseable -> False (forwarding one would turn a working session into a hard startup
     failure; bounded forwards unconditionally anyway)."""
     try:
-        import hermes_yaml as yaml
+        import agent_yaml as yaml
 
         with open(path, "r", encoding="utf-8-sig") as handle:
             parsed = yaml.safe_load(handle)
@@ -359,7 +359,7 @@ class CuaDriverBackend(_CaptureMixin, _InputMixin, ComputerUseBackend):
     def _clear_active_target(self) -> None:
         """Forget a capture/focus target so a failed lookup cannot misroute input."""
         self._active_pid = self._active_window_id = self._last_app = self._last_target = None
-        # Surface 6 of NousResearch/hermes-agent#47072: per-snapshot `element_index -> element_token` map
+        # Surface 6 of Garudex-Labs/NoOne#47072: per-snapshot `element_index -> element_token` map
         # populated on capture(). Action tools (click/scroll/set_value/...) attach the matching token
         # alongside `element_index` so cua-driver detects "stale" explicitly instead of silently
         # re-resolving to a different element. Cleared whenever a fresh capture overwrites the snapshot

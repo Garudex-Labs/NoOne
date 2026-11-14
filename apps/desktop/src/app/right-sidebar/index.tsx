@@ -1,10 +1,10 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { type ComponentProps, useCallback, useEffect } from 'react'
 
 import { TreeSkeleton } from '@/components/chat/skeletons'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { useDelayedTrue } from '@/hooks/use-delayed-true'
 import { useI18n } from '@/i18n'
@@ -175,7 +175,7 @@ function FilesystemTab({
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 px-4 text-center">
         <SidebarPanelLabel className="pl-0 text-(--ui-text-quaternary)">{r.noProjectOpen}</SidebarPanelLabel>
         <Button className="h-7 gap-1.5 text-xs" onClick={() => void openFolderAsProject()} size="sm" variant="outline">
-          <Codicon name="folder-opened" size="0.8125rem" />
+          <AppIcon name="folder-opened" size="0.8125rem" />
           {r.openFolder}
         </Button>
       </div>
@@ -199,7 +199,7 @@ function FilesystemTab({
             size="icon-xs"
             variant="ghost"
           >
-            <Codicon name={showIgnored ? 'eye' : 'eye-closed'} size="0.8125rem" />
+            <AppIcon name={showIgnored ? 'eye' : 'eye-closed'} size="0.8125rem" />
           </Button>
         </Tip>
         <Tip label={r.refreshTree}>
@@ -211,7 +211,7 @@ function FilesystemTab({
             size="icon-xs"
             variant="ghost"
           >
-            <Codicon name="refresh" size="0.8125rem" spinning={loading} />
+            <AppIcon name="refresh" size="0.8125rem" spinning={loading} />
           </Button>
         </Tip>
         <Tip label={r.collapseAll}>
@@ -227,7 +227,7 @@ function FilesystemTab({
                 13px its top edge reads as an asymmetric hamburger line.
                 `three-bars` is the symmetric three-line glyph from the same
                 codicon vocabulary, matching the eye/refresh siblings. */}
-            <Codicon name="three-bars" size="0.8125rem" />
+            <AppIcon name="three-bars" size="0.8125rem" />
           </Button>
         </Tip>
       </RightSidebarSectionHeader>

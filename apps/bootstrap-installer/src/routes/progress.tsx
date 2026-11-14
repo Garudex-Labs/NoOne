@@ -1,8 +1,9 @@
 import { useStore } from '@nanostores/react'
+import { Check, ChevronRight, FileText, X } from '@noone/ui/icons'
 import clsx from 'clsx'
-import { Check, ChevronRight, FileText, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
+import { appText } from '../application-identity'
 import { BrandMark } from '../components/brand-mark'
 import { Button } from '../components/button'
 import { Loader } from '../components/loader'
@@ -51,11 +52,11 @@ export default function ProgressScreen({ bootstrap }: ProgressProps) {
   }, [bootstrap.status])
 
   const isUpdate = mode === 'update'
-  const title = bootstrap.status === 'completed' ? 'Done' : isUpdate ? 'Updating Hermes' : 'Setting up Hermes Agent'
+  const title = bootstrap.status === 'completed' ? 'Done' : isUpdate ? appText('Updating {app_name}') : appText('Setting up {app_name}')
 
   const description = isUpdate
-    ? 'Hermes is updating to the latest version — this only takes a moment.'
-    : 'This is a one-time setup. The Hermes installer is downloading dependencies and configuring your machine. Subsequent launches will skip this step.'
+    ? appText('{app_name} is updating to the latest version — this only takes a moment.')
+    : appText('This is a one-time setup. The {app_name} installer is downloading dependencies and configuring your machine. Subsequent launches will skip this step.')
 
   const pct = Math.round(progress.fraction * 100)
 

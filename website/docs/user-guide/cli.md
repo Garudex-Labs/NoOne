@@ -1,83 +1,97 @@
 ---
-sidebar_position: 1
 title: "CLI Interface"
-description: "Master the Hermes Agent terminal interface — commands, keybindings, personalities, and more"
+description: "Master the the agent terminal interface — commands, keybindings, personalities, and more"
 ---
 
-# CLI Interface
+# CLI Interface {#cli-interface}
 
-Hermes Agent's CLI is a full terminal user interface (TUI) — not a web UI. It features multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, and streaming tool output. Built for people who live in the terminal.
+{{app-name}}'s CLI is a full terminal user interface (TUI) — not a web UI. It features multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, and streaming tool output. Built for people who live in the terminal.
 
-:::tip First-time setup
-One command — `hermes setup --portal` — and you're ready to `hermes chat`. See [Nous Portal](../integrations/nous-portal.md).
-:::
+<Tip>
 
-:::tip
-Hermes also ships a modern TUI with modal overlays, mouse selection, and non-blocking input. Launch it with `hermes --tui` — see the [TUI](tui.md) guide.
-:::
+<div className="doc-callout-title">
 
-## Running the CLI
+First-time setup
+
+</div>
+
+One command — `noone setup --portal` — and you're ready to `noone chat`. See [Nous Portal](../integrations/nous-portal.md).
+
+</Tip>
+
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+
+</Tip>
+
+## Running the CLI {#running-the-cli}
 
 ```bash
 # Start an interactive session (default)
 hermes
 
 # Single query mode (non-interactive)
-hermes chat -q "Hello"
+noone chat -q "Hello"
 
 # Single query from a file or stdin — nothing is shell-interpreted, so
 # arbitrary text (quotes, $(...), backticks) arrives verbatim
-hermes chat --query-file prompt.txt
-hermes chat --query-file - < prompt.txt
+noone chat --query-file prompt.txt
+noone chat --query-file - < prompt.txt
 
 # With a specific model
-hermes chat --model "anthropic/claude-sonnet-4"
+noone chat --model "anthropic/claude-sonnet-4"
 
 # With a specific provider
-hermes chat --provider nous        # Use Nous Portal
-hermes chat --provider openrouter  # Force OpenRouter
+noone chat --provider nous        # Use Nous Portal
+noone chat --provider openrouter  # Force OpenRouter
 
 # With specific toolsets
-hermes chat --toolsets "web,terminal,skills"
+noone chat --toolsets "web,terminal,skills"
 
 # Start with one or more skills preloaded (rendered once into the session's prompt)
-hermes chat -s hermes-agent-dev,github-auth
+noone chat -s hermes-agent-dev,github-auth
 
 # Resume previous sessions
-hermes --resume <session_id>  # Resume a specific session by ID (-r)
-hermes --resume "my thread"   # Resume by title (latest "#N" continuation in the lineage)
+noone --resume <session_id>  # Resume a specific session by ID (-r)
+noone --resume "my thread"   # Resume by title (latest "#N" continuation in the lineage)
 hermes -c "my thread" --create-if-missing  # Resume that titled session, creating it if absent
-hermes --continue             # Resume the most recent session (bare -c)
-hermes --resume latest        # Same as bare -c
-hermes --resume latest --in ./dir  # Resume ./dir's latest session, staying in ./dir
+noone --continue             # Resume the most recent session (bare -c)
+noone --resume latest        # Same as bare -c
+noone --resume latest --in ./dir  # Resume ./dir's latest session, staying in ./dir
 
 # Verbose mode (debug output)
-hermes chat --verbose
+noone chat --verbose
 
 # Isolated git worktree (for running multiple agents in parallel)
 hermes -w                         # Interactive mode in worktree
 hermes -w -z "Fix issue #123"     # Single query in worktree
 ```
 
-### Worktree cleanup
+### Worktree cleanup {#worktree-cleanup}
 
-`hermes -w` sessions create disposable worktrees under `<repo>/.worktrees/`.
-With `hermes --tui -w`, closing the terminal detaches from the gateway-owned
+`noone -w` sessions create disposable worktrees under `<repo>/.worktrees/`.
+With `noone --cli -w`, closing the terminal detaches from the gateway-owned
 session. A clean worktree is removed with its branch on quit unless something
 still needs it. It is retained when it has uncommitted changes or unpushed
 commits, when the gateway still has a turn queued or running there, when a
 session in it has an active `/loop`, `/heartbeat` or `/goal`, when an enabled
 cron job runs in it or is bound to such a session, or when another viewer (a
 Desktop window, say) still holds that session. Resuming a session uses its
-working directory: if quit removed the worktree, `hermes --tui --resume <id>`,
-`hermes --tui -c` and the classic `hermes --resume`/`-c` recreate it at the same
+working directory: if quit removed the worktree, `noone --cli --resume <id>`,
+`noone --cli -c` and the classic `noone --resume`/`-c` recreate it at the same
 path before attaching (on its branch if that still exists, else on a new branch
 of the same name from the repo's current `HEAD`). Only worktrees that
-`hermes --tui -w` itself created are recreated. The quit-time check reads the
+`noone --cli -w` itself created are recreated. The quit-time check reads the
 session store and then removes the tree; a viewer that attaches and submits in
 the moment between the two is not seen, so that turn can find its directory
 gone.
-A sweep runs automatically at `hermes -w` startup and every 6 hours from the
+A sweep runs automatically at `noone -w` startup and every 6 hours from the
 cron ticker: idle clean+merged trees are removed, and idle trees with
 uncommitted changes or unpushed commits are **archived, then removed**
 (restorable with `hermes worktree restore <name>`; see
@@ -145,46 +159,54 @@ Safety guarantees (all modes, any age):
 
 The same sweep also runs from the cron scheduler (at most once every 6 hours
 per profile, in the background) over every repository the profile created a
-worktree in, so gateway-only machines — where nobody launches `hermes -w` for
+worktree in, so gateway-only machines — where nobody launches `noone -w` for
 days — no longer accumulate scratch trees between CLI sessions.
 
 When `.worktrees/` grows past 10 trees or 5 GB, startup prints a one-line
 notice pointing at these commands.
 
-### Plugin management
+### Plugin management {#plugin-management}
 
-The `hermes plugins` commands manage native Hermes plugins and portable Agent
+The `noone plugins` commands manage native {{app-name}} plugins and portable Agent
 Plugins v1 packages through the same opt-in workflow:
 
 ```bash
-hermes plugins install owner/repository --no-enable
-hermes plugins list
-hermes plugins enable <plugin-name>
-hermes plugins disable <plugin-name>
-hermes plugins update <plugin-name>
-hermes plugins remove <plugin-name>
+noone plugins install owner/repository --no-enable
+noone plugins list
+noone plugins enable <plugin-name>
+noone plugins disable <plugin-name>
+noone plugins update <plugin-name>
+noone plugins remove <plugin-name>
 ```
 
-Portable packages remain disabled until explicitly enabled. Hermes currently
+Portable packages remain disabled until explicitly enabled. {{app-name}} currently
 loads portable Agent Skills and stdio MCP entries. See the
 [plugin developer guide](../developer-guide/plugins/index.md#portable-agent-plugins-v1-packages)
 for the exact supported subset and trust boundary.
 
-## Interface Layout
+## Interface Layout {#interface-layout}
 
-:::info The classic CLI is a gateway client
-`hermes chat` (and the bare `hermes` prompt when `display.interface` is `cli`) no longer runs the agent inside your terminal process. It discovers or starts the profile's gateway (`hermes gateway ensure`), creates or resumes the session there, and attaches over the gateway's local WebSocket — the same session a Desktop window, the TUI, or a Telegram topic can open at the same time. Closing the terminal detaches (`Detached; accepted work continues at the gateway.`); it does not cancel the turn. A lost terminal (closed tab, dropped SSH or VS Code remote link, SIGHUP/SIGTERM) is a disconnect: the session's background subagents keep running and their results still reach the session. `/exit`, `/quit`, `/new` and Ctrl+D close the chat and stop them. Your working directory, `--model`, `--provider`, `--reasoning`, `--toolsets`, `--max-turns`, `--skills`, `--checkpoints`, `--yolo`, `--accept-hooks`, `--pass-session-id`, `--ignore-rules`, `--base-url`/`--api-key`, and `--safe-mode`/`--ignore-user-config` are frozen into the session at creation; `--resume` may repeat the same values but cannot change them. `--resume <id-or-title>` and `-c <title>` name the session; the gateway resolves the title (exact id first, then the latest `"<title> #N"` continuation, followed to its live tip) among the sessions you may read, and reports `No session found matching '…'` (exit 1) otherwise. Bare `-c` and `--resume latest` resume this workspace's most recent CLI session through the gateway. `-c <title> --create-if-missing` creates a session with that title when none exists and resumes it when one does, so programmatic callers (Bot Mode's `Bot Chat` turns) get a deterministic thread. Options that only make sense for an in-process agent — `--image`, `--worktree`/`-w`, `--no-restore-cwd`, `--run-budget`, `--verbose`/`-v`, `--compact`, and `--create-if-missing` without `-c <name>` — are refused up front (`Unsupported gateway CLI options: …`, exit 2); the refusal lists, per flag, where that capability lives now (the TUI flag, the `config.yaml` key, or the `hermes` subcommand), and nothing falls back to a local agent. A `--safe-mode` / `--ignore-user-config` launch reads no profile default model, so it must name one; the refusal prints a complete example such as `hermes chat --safe-mode --provider openrouter --model anthropic/claude-sonnet-4 -q "hello"`. In this mode the slash surface is `/stop`, `/approve <id> <choice>`, `/answer <id> <text>`, `/discard <admission_id>`, `/branch [title]`, `/model <model> [--provider name]`, `/compress [here [N] | <focus>] [--preview]`, `/yolo [on|off]`, `/help` and `/quit`; other slash commands print `Unsupported gateway CLI command; use /help.` Use the TUI (`hermes --tui`) for the full slash registry.
-:::
+<Info>
+
+<div className="doc-callout-title">
+
+The classic CLI is a gateway client
+
+</div>
+
+`noone chat` (and the bare `hermes` prompt when `display.interface` is `cli`) no longer runs the agent inside your terminal process. It discovers or starts the profile's gateway (`noone gateway ensure`), creates or resumes the session there, and attaches over the gateway's local WebSocket — the same session a Desktop window, the TUI, or a Telegram topic can open at the same time. Closing the terminal detaches (`Detached; accepted work continues at the gateway.`); it does not cancel the turn. A lost terminal (closed tab, dropped SSH or VS Code remote link, SIGHUP/SIGTERM) is a disconnect: the session's background subagents keep running and their results still reach the session. `/exit`, `/quit`, `/new` and Ctrl+D close the chat and stop them. Your working directory, `--model`, `--provider`, `--reasoning`, `--toolsets`, `--max-turns`, `--skills`, `--checkpoints`, `--yolo`, `--accept-hooks`, `--pass-session-id`, `--ignore-rules`, `--base-url`/`--api-key`, and `--safe-mode`/`--ignore-user-config` are frozen into the session at creation; `--resume` may repeat the same values but cannot change them. `--resume <id-or-title>` and `-c <title>` name the session; the gateway resolves the title (exact id first, then the latest `"<title> #N"` continuation, followed to its live tip) among the sessions you may read, and reports `No session found matching '…'` (exit 1) otherwise. Bare `-c` and `--resume latest` resume this workspace's most recent CLI session through the gateway. `-c <title> --create-if-missing` creates a session with that title when none exists and resumes it when one does, so programmatic callers (Bot Mode's `Bot Chat` turns) get a deterministic thread. Options that only make sense for an in-process agent — `--image`, `--worktree`/`-w`, `--no-restore-cwd`, `--run-budget`, `--verbose`/`-v`, `--compact`, and `--create-if-missing` without `-c <name>` — are refused up front (`Unsupported gateway CLI options: …`, exit 2); the refusal lists, per flag, where that capability lives now (the TUI flag, the `config.yaml` key, or the `hermes` subcommand), and nothing falls back to a local agent. A `--safe-mode` / `--ignore-user-config` launch reads no profile default model, so it must name one; the refusal prints a complete example such as `noone chat --safe-mode --provider openrouter --model anthropic/claude-sonnet-4 -q "hello"`. In this mode the slash surface is `/stop`, `/approve <id> <choice>`, `/answer <id> <text>`, `/discard <admission_id>`, `/branch [title]`, `/model <model> [--provider name]`, `/compress [here [N] | <focus>] [--preview]`, `/yolo [on|off]`, `/help` and `/quit`; other slash commands print `Unsupported gateway CLI command; use /help.` Use the TUI (`noone --cli`) for the full slash registry.
+
+</Info>
 
 If a running turn loses its owner while your finite CLI query is queued, the CLI
 exits with code `3`. Your accepted input stays queued. Resume the printed session
 interactively, inspect the unknown turn, and use `/discard <admission_id>` to
 acknowledge it before continuing. Do not resend the queued input.
 
-<img className="docs-terminal-figure" src="/docs/img/docs/cli-layout.svg" alt="Stylized preview of the Hermes CLI layout showing the banner, conversation area, and fixed input prompt." />
-<p className="docs-figure-caption">The Hermes CLI banner, conversation stream, and fixed input prompt rendered as a stable docs figure instead of fragile text art.</p>
+<img className="docs-terminal-figure" src="/img/docs/cli-layout.svg" alt="Stylized preview of the {{app-name}} CLI layout showing the banner, conversation area, and fixed input prompt." />
+<p className="docs-figure-caption">The {{app-name}} CLI banner, conversation stream, and fixed input prompt rendered as a stable docs figure instead of fragile text art.</p>
 
-### Layout styles
+### Layout styles {#layout-styles}
 
 `display.cli_layout` picks how the classic CLI draws. The default, `modern`, prints everything in the scrollback as plain rows that start with one glyph and never depend on the terminal width, so resizing the window can't garble earlier output:
 
@@ -216,7 +238,7 @@ Set `display.cli_layout: classic` to keep the boxed reasoning and answer panels 
 
 The welcome banner shows your model, terminal backend, working directory, available tools, and installed skills at a glance.
 
-### Status Bar
+### Status Bar {#status-bar}
 
 In the `classic` layout a persistent status bar sits above the input area, updating in real time (the `modern` layout's status line under the composer reads the same data; an explicit `display.status_bar.fields` list chooses its left side too):
 
@@ -229,12 +251,12 @@ In the `classic` layout a persistent status bar sits above the input area, updat
 | Model name | Current model (truncated if longer than 26 chars) |
 | Token count | Context tokens used / max context window; `~` marks an estimate |
 | Context bar | Visual fill indicator with color-coded thresholds |
-| Cost | Estimated session cost (or `n/a` for unknown/zero-priced models). Rates come from Hermes' bundled official price table, then the provider's `/models` listing; on a direct first-party API (OpenAI, xAI, Anthropic, Google, DeepSeek, Xiaomi) a model missing from both is priced at the vendor's list price from models.dev. Proxies, relays and custom endpoints serving the same model id stay `n/a` rather than inherit that price. |
+| Cost | Estimated session cost (or `n/a` for unknown/zero-priced models). Rates come from {{app-name}}' bundled official price table, then the provider's `/models` listing; on a direct first-party API (OpenAI, xAI, Anthropic, Google, DeepSeek, Xiaomi) a model missing from both is priced at the vendor's list price from models.dev. Proxies, relays and custom endpoints serving the same model id stay `n/a` rather than inherit that price. |
 | 🗜️ N | **Context compression count** — how many times the running session has been auto-compressed. Appears once the first compression fires. |
 | ▶ N | **Active background tasks** — how many `/bg` prompts are still running in the current session. Appears whenever at least one task is in flight. |
 | Duration | Elapsed session time |
 | Session title | Once the session has a title, it appears as a gold badge pinned to the far-right edge. Long titles truncate before displacing the essential model and context fields. |
-| ⚠ YOLO | **YOLO mode warning** — shown whenever `HERMES_YOLO_MODE` is on (either `hermes --yolo` at launch or `/yolo` toggled mid-session). Mirrors the banner-line warning so you can't forget you're in auto-approve mode. |
+| ⚠ YOLO | **YOLO mode warning** — shown whenever `HERMES_YOLO_MODE` is on (either `noone --yolo` at launch or `/yolo` toggled mid-session). Mirrors the banner-line warning so you can't forget you're in auto-approve mode. |
 
 A `~` before a context count or percentage means it includes a local estimate. This also applies to gateway `/status` and `/context`, the TUI, and the Desktop context gauge. An unchanged provider-usage reading has no `~`; a provider anchor plus unpriced new messages does. `/context` reports the selected source. Category, free-space, skill, and toolset breakdowns are always local estimates, even when the overall occupancy comes from provider usage. These display labels do not change compaction decisions or make extra provider requests.
 
@@ -251,13 +273,13 @@ The bar adapts to terminal width — full layout at ≥ 76 columns, compact at 5
 
 Use `/usage` for a detailed breakdown including per-category costs (input vs output tokens).
 
-On the `openai-codex` provider, `/usage` also shows any banked usage-limit resets on your ChatGPT account ("You have N resets banked - use /usage reset to activate"). `/usage reset` redeems one banked reset, fully restoring your 5-hour and weekly limits. Hermes refuses to redeem while your limits aren't exhausted (a banked reset restores the full allowance, so spending it early wastes it) — pass `/usage reset --force` to redeem anyway.
+On the `openai-codex` provider, `/usage` also shows any banked usage-limit resets on your ChatGPT account ("You have N resets banked - use /usage reset to activate"). `/usage reset` redeems one banked reset, fully restoring your 5-hour and weekly limits. {{app-name}} refuses to redeem while your limits aren't exhausted (a banked reset restores the full allowance, so spending it early wastes it) — pass `/usage reset --force` to redeem anyway.
 
-### Session Resume Display
+### Session Resume Display {#session-resume-display}
 
-When resuming a previous session (`hermes -c` or `hermes --resume <id>`), a "Previous Conversation" panel appears between the banner and the input prompt, showing a compact recap of the conversation history. See [Sessions — Conversation Recap on Resume](sessions.md#conversation-recap-on-resume) for details and configuration.
+When resuming a previous session (`noone -c` or `noone --resume <id>`), a "Previous Conversation" panel appears between the banner and the input prompt, showing a compact recap of the conversation history. See [Sessions — Conversation Recap on Resume](sessions.md#conversation-recap-on-resume) for details and configuration.
 
-## Keybindings
+## Keybindings {#keybindings}
 
 On macOS, `F6`/`F7` mean the physical function keys, not the media/system controls shown on the top row. Hold **Fn** (the **globe** key on newer keyboards) while pressing the function key, or enable **Use F1, F2, etc. keys as standard function keys** in **System Settings → Keyboard → Keyboard Shortcuts → Function Keys**. The reliable terminal fallbacks are **Ctrl+T** for `F6` and **Ctrl+R** for `F7`.
 
@@ -275,26 +297,26 @@ On macOS, `F6`/`F7` mean the physical function keys, not the media/system contro
 | `Esc`, `Esc` | **Backtrack** (same as `/rewind`). On an idle, empty prompt the first `Esc` shows `esc again to edit previous message` (it waits for you; any other key cancels it and acts normally), the second opens a **transcript browser**: every prompt (`›`) and reply (`•`) of the session in a panel sized to the screen, the latest prompt selected in reverse video. `←`/`h` and `→`/`l` pick an older/newer prompt, `↑`/`↓` (`k`/`j`) scroll a row and `PgUp`/`PgDn` a page; `Enter` puts the selected prompt back in the composer for editing, and sending the edit cuts the session back to just before it (nothing is removed until you send; cancel with `Esc Esc`, `Ctrl+C` or an empty submit); `f` forks a new session from just before that prompt with it prefilled, leaving the original untouched; `Esc` or `q` closes, and any other key closes the browser and types normally. With a draft, `Esc Esc` discards it instead (Up recalls it). |
 | `Ctrl+T` / `F6` | Open the full-screen live work monitor (subagents and background processes) without losing the composer draft. The live dock appears automatically above the status bar; arrows select a worker or process, `Enter` shows its recent log, `s` steers a worker, and `x` requests stop with confirmation. See [Monitoring subagents](./features/delegation.md#monitoring-running-subagents-agents). |
 | `Ctrl+R` / `F7` | Toggle the live work dock between its multi-row preview and a single summary line without moving composer focus. `Ctrl+R` is the reliable fallback when macOS reserves the function-key row. Besides subagents and background processes, the dock shows a standing `/goal` (active, parked or paused, with turns used) on its top row and the prompts waiting in `/queue` on its bottom rows. |
-| `Ctrl+D` | Exit (on an empty prompt; with text it deletes under the cursor). While the gateway runs a turn, it exits and leaves the turn running: the gateway finishes it, ends the session afterwards, and `hermes --resume` shows the reply. A turn that asks a question (approval or clarify) meanwhile waits for its timeout or for you to resume. Use `Ctrl+C` to stop the turn instead. |
-| `Ctrl+Z` | Suspend Hermes to background (Unix only). Run `fg` in the shell to resume. |
+| `Ctrl+D` | Exit (on an empty prompt; with text it deletes under the cursor). While the gateway runs a turn, it exits and leaves the turn running: the gateway finishes it, ends the session afterwards, and `noone --resume` shows the reply. A turn that asks a question (approval or clarify) meanwhile waits for its timeout or for you to resume. Use `Ctrl+C` to stop the turn instead. |
+| `Ctrl+Z` | Suspend {{app-name}} to background (Unix only). Run `fg` in the shell to resume. |
 | `Tab` | Accept auto-suggestion (ghost text) or autocomplete slash commands. While the agent is working in the `modern` layout, `Tab` on a typed message queues it for the next turn |
 | `!<command>` | **Shell mode** — run a shell command yourself without spending a model turn (e.g. `!git status`, `!pytest -x`). See below. |
 
 **Multiline paste preview.** When you paste a multi-line block, the CLI echoes a compact single-line preview (`[pasted: 47 lines, 1,842 chars — press Enter to send]`) instead of dumping the whole payload into the scrollback. The full content is still what gets sent; this is just display polish.
 
-### `!` Shell Mode
+### `!` Shell Mode {#-shell-mode}
 
 Start a line with `!` to run it as a shell command instead of sending it to the agent:
 
 ```
 > !git status
 > !ls -la
-> !pytest -x tests/hermes_cli
+> !pytest -x tests/agent_cli
 ```
 
 - **Zero cost.** The model is never invoked — no API call, no tokens, no latency.
 - **Nothing enters the conversation.** The command and its output are not added to history, so your context stays clean and the prompt cache is untouched.
-- **Runs on your machine, in the session working directory.** With the default local terminal backend `!pwd` matches what the agent would see. A remote or sandboxed `terminal.backend` (`ssh`, `docker`, …) is **not** used for `!` commands — they always run on the host where Hermes itself runs, so `!hostname` names your machine while the agent's `terminal` tool names the backend. Ask the agent (or open a shell on the target) to run something *inside* the backend. Path completion in the composer, by contrast, does follow the configured backend and lists the target's filesystem.
+- **Runs on your machine, in the session working directory.** With the default local terminal backend `!pwd` matches what the agent would see. A remote or sandboxed `terminal.backend` (`ssh`, `docker`, …) is **not** used for `!` commands — they always run on the host where {{app-name}} itself runs, so `!hostname` names your machine while the agent's `terminal` tool names the backend. Ask the agent (or open a shell on the target) to run something *inside* the backend. Path completion in the composer, by contrast, does follow the configured backend and lists the target's filesystem.
 - **Approvals still apply.** A dangerous command (`rm -rf`, writes to `~/.hermes/config.yaml`, etc.) goes through the same approval prompt the agent's `terminal` tool uses. `!` is a cost/latency shortcut, not a security bypass.
 - **Non-zero exits are shown.** A failing command prints `! exited <code>` after its output.
 - `!` on its own prints a one-line usage reminder.
@@ -303,9 +325,9 @@ Shell mode is CLI-only. Gateway platforms (Discord, Telegram, Slack) and cron ru
 
 **Markdown stripping in final responses.** The CLI strips the most verbose markdown fences and `**bold**` / `*italic*` wrappers from *final* agent replies so they render as readable terminal prose rather than raw source. Code blocks and lists are preserved. This does not affect gateway platforms or tool results — they keep their markdown for native rendering.
 
-## Slash Commands
+## Slash Commands {#slash-commands}
 
-Type `/` to see the autocomplete dropdown. Hermes supports a large set of CLI slash commands, dynamic skill commands, and user-defined quick commands.
+Type `/` to see the autocomplete dropdown. {{app-name}} supports a large set of CLI slash commands, dynamic skill commands, and user-defined quick commands.
 
 Common examples:
 
@@ -319,7 +341,7 @@ Common examples:
 | `/btw <question>` | Ask a side question about the current conversation without interrupting it |
 | `/skin` | Show or switch the active CLI skin |
 | `/voice on` | Enable CLI voice mode (press `Ctrl+B` to record) |
-| `/voice tts` | Toggle spoken playback for Hermes replies |
+| `/voice tts` | Toggle spoken playback for {{app-name}} replies |
 | `/reasoning high` | Increase reasoning effort |
 | `/title My Session` | Name the current session |
 | `/status` | Show session info — model/profile/tokens/duration — followed by a local **Session recap** block (recent turn counts, top tools used, files touched, latest user prompt + assistant reply). Pure local compute; no LLM call. |
@@ -330,11 +352,19 @@ For the full built-in CLI and messaging lists, see [Slash Commands Reference](..
 
 For setup, providers, silence tuning, and messaging/Discord voice usage, see [Voice Mode](features/voice-mode.md).
 
-:::tip
-Commands are case-insensitive — `/HELP` works the same as `/help`. Installed skills also become slash commands automatically.
-:::
+<Tip>
 
-## Quick Commands
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+Commands are case-insensitive — `/HELP` works the same as `/help`. Installed skills also become slash commands automatically.
+
+</Tip>
+
+## Quick Commands {#quick-commands}
 
 You can define custom commands that run shell commands instantly without invoking the LLM. These work in both the CLI and messaging platforms (Telegram, Discord, etc.).
 
@@ -354,20 +384,20 @@ quick_commands:
 
 Then type `/status`, `/gpu`, or `/restart` in any chat. See the [Configuration guide](./configuration.md#quick-commands) for more examples.
 
-## Preloading Skills at Launch
+## Preloading Skills at Launch {#preloading-skills-at-launch}
 
 If you already know which skills you want active for the session, pass them at launch time:
 
 ```bash
 hermes -s hermes-agent-dev,github-auth
-hermes chat -s github-pr-workflow -s github-auth
+noone chat -s github-pr-workflow -s github-auth
 ```
 
-Hermes loads each named skill into the session prompt before the first turn. The same flag works in interactive mode and single-query mode.
+{{app-name}} loads each named skill into the session prompt before the first turn. The same flag works in interactive mode and single-query mode.
 
-### Persistent auto-load via config
+### Persistent auto-load via config {#persistent-auto-load-via-config}
 
-To have the same skills active at the start of **every** new session — CLI, TUI, gateway, cron and API sessions alike — set `skills.auto_load` in `config.yaml`:
+To have the same skills active at the start of **every** new session — CLI, gateway, cron and API sessions alike — set `skills.auto_load` in `config.yaml`:
 
 ```yaml
 skills:
@@ -380,7 +410,7 @@ Each entry is a skill name. The list is resolved once when a session's system pr
 
 `--ignore-rules` (equivalently `HERMES_IGNORE_RULES=1`) skips auto-load together with AGENTS.md, SOUL.md, `.cursorrules` and memory injection; explicit `-s` skills still load. The setting is profile-scoped: each profile's `config.yaml` controls its own list.
 
-## Skill Slash Commands
+## Skill Slash Commands {#skill-slash-commands}
 
 Every installed skill in `~/.hermes/skills/` is automatically registered as a slash command. The skill name becomes the command:
 
@@ -393,7 +423,7 @@ Every installed skill in `~/.hermes/skills/` is automatically registered as a sl
 /excalidraw
 ```
 
-## Personalities
+## Personalities {#personalities}
 
 Set a predefined personality to change the agent's tone:
 
@@ -417,7 +447,7 @@ personalities:
   # Add your own!
 ```
 
-## Multi-line Input
+## Multi-line Input {#multi-line-input}
 
 There are two ways to enter multi-line messages:
 
@@ -430,7 +460,7 @@ There are two ways to enter multi-line messages:
   2. Returns the sum
 ```
 
-`Ctrl+J` and backslash continuation are enabled by default, matching Claude Code / Codex / OpenCode multiline shortcuts. On supported terminals such as iTerm2, Hermes also requests extended key reporting so `Shift+Enter` arrives as a distinct newline key. If your terminal sends LF for plain `Enter` and you need the legacy `Ctrl+J`-as-submit fallback, opt out:
+`Ctrl+J` and backslash continuation are enabled by default, matching Claude Code / Codex / OpenCode multiline shortcuts. On supported terminals such as iTerm2, {{app-name}} also requests extended key reporting so `Shift+Enter` arrives as a distinct newline key. If your terminal sends LF for plain `Enter` and you need the legacy `Ctrl+J`-as-submit fallback, opt out:
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -438,15 +468,23 @@ display:
   cli_multiline_shortcuts: false
 ```
 
-:::info
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
 Pasting multi-line text is supported — use any of the newline keys above, or simply paste content directly.
 
 In terminals using the Kitty keyboard protocol, `Alt+Enter` on the numeric keypad also inserts a newline, including next to a collapsed paste. Modified keypad navigation keys follow their non-keypad equivalents.
-:::
 
-### Shift+Enter compatibility
+</Info>
 
-Most terminals send the same byte sequence for `Enter` and `Shift+Enter` by default, so applications cannot distinguish them. Hermes recognises `Shift+Enter` only when the terminal sends a distinct sequence via the [Kitty keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/) or xterm's `modifyOtherKeys` mode.
+### Shift+Enter compatibility {#shiftenter-compatibility}
+
+Most terminals send the same byte sequence for `Enter` and `Shift+Enter` by default, so applications cannot distinguish them. {{app-name}} recognises `Shift+Enter` only when the terminal sends a distinct sequence via the [Kitty keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/) or xterm's `modifyOtherKeys` mode.
 
 | Terminal | Status |
 |---|---|
@@ -455,9 +493,9 @@ Most terminals send the same byte sequence for `Enter` and `Shift+Enter` by defa
 | Windows Terminal Preview 1.25+ | Supported once the Kitty protocol is enabled in settings |
 | macOS Terminal.app, stock Windows Terminal (stable) | Not supported — `Shift+Enter` is indistinguishable from `Enter` |
 
-Where the terminal cannot distinguish them, `Alt+Enter` and `Ctrl+J` continue to work by default. **On Windows Terminal specifically, `Alt+Enter` is captured by the terminal (toggles fullscreen) and never reaches Hermes — use `Ctrl+Enter` (delivered as `Ctrl+J`) or `Ctrl+J` directly for a newline.**
+Where the terminal cannot distinguish them, `Alt+Enter` and `Ctrl+J` continue to work by default. **On Windows Terminal specifically, `Alt+Enter` is captured by the terminal (toggles fullscreen) and never reaches {{app-name}} — use `Ctrl+Enter` (delivered as `Ctrl+J`) or `Ctrl+J` directly for a newline.**
 
-## Redirecting the Agent Mid-Turn
+## Redirecting the Agent Mid-Turn {#redirecting-the-agent-mid-turn}
 
 While the agent is working, you can send a correction without starting a new turn:
 
@@ -466,7 +504,7 @@ While the agent is working, you can send a correction without starting a new tur
 - Completed tool work and reasoning already shown stay in context
 - A running tool reaches its safe boundary before the correction is applied
 
-### Busy Input Mode
+### Busy Input Mode {#busy-input-mode}
 
 The `display.busy_input_mode` config key controls what happens when you press Enter while the agent is working:
 
@@ -499,21 +537,29 @@ You can also change it inside the CLI:
 /busy status
 ```
 
-:::tip First-touch hint
-The first time you press Enter while Hermes is working, Hermes prints a one-line reminder explaining the `/busy` knob. It only fires once per install; `onboarding.seen.busy_input_prompt` in `config.yaml` records that it was shown. Delete that key to see the tip again.
-:::
+<Tip>
 
-### Suspending to Background
+<div className="doc-callout-title">
 
-On Unix systems, press **`Ctrl+Z`** to suspend Hermes to the background — just like any terminal process. The shell prints a confirmation:
+First-touch hint
+
+</div>
+
+The first time you press Enter while {{app-name}} is working, {{app-name}} prints a one-line reminder explaining the `/busy` knob. It only fires once per install; `onboarding.seen.busy_input_prompt` in `config.yaml` records that it was shown. Delete that key to see the tip again.
+
+</Tip>
+
+### Suspending to Background {#suspending-to-background}
+
+On Unix systems, press **`Ctrl+Z`** to suspend {{app-name}} to the background — just like any terminal process. The shell prints a confirmation:
 
 ```
-Hermes Agent has been suspended. Run `fg` to bring Hermes Agent back.
+NoOne has been suspended. Run `fg` to bring NoOne back.
 ```
 
 Type `fg` in your shell to resume the session exactly where you left off. This is not supported on Windows.
 
-## Tool Progress Display
+## Tool Progress Display {#tool-progress-display}
 
 The CLI shows animated feedback as the agent works:
 
@@ -533,7 +579,7 @@ The CLI shows animated feedback as the agent works:
 
 Cycle through display modes with `/verbose`: `off → new → all → verbose`. This command can also be enabled for messaging platforms — see [configuration](./configuration.md#display-settings).
 
-### Tool Preview Length
+### Tool Preview Length {#tool-preview-length}
 
 The `display.tool_preview_length` config key controls the maximum number of characters shown in tool call preview lines (e.g. file paths, terminal commands). The default is `0`, which means no limit — full paths and commands are shown.
 
@@ -545,9 +591,8 @@ display:
 
 This is useful on narrow terminals or when tool arguments contain very long file paths.
 
-### Inline Images
+### Inline Images {#inline-images}
 
-Images show up right in the transcript: the ones you attach (`/paste`, `/image`, drag-and-drop) under your message, and the local image a successful tool call produced or looked at (`vision_analyze`, `image_generate`, a browser or computer-use screenshot) under that tool's line. `read_file` cannot read images, so it shows none. The same setting drives the [TUI](./tui.md).
 
 ```yaml
 # ~/.hermes/config.yaml
@@ -565,15 +610,15 @@ Only local files are drawn; remote image URLs are not fetched. Sixel terminals g
 
 After a terminal resize the CLI redraws its transcript. kitty and half-block images come back in the redraw; iTerm2-protocol images (iTerm2, WezTerm, Konsole) leave blank rows in the redrawn screen and stay visible only in the scrollback above it.
 
-## Session Management
+## Session Management {#session-management}
 
-### Resuming Sessions
+### Resuming Sessions {#resuming-sessions}
 
 When you exit a CLI session, a resume command is printed:
 
 ```
 Resume this session with:
-  hermes --resume 20260225_143052_a1b2c3
+  noone --resume 20260225_143052_a1b2c3
 
 Session:        20260225_143052_a1b2c3
 Duration:       12m 34s
@@ -583,24 +628,24 @@ Messages:       28 (5 user, 18 tool calls)
 Resume options:
 
 ```bash
-hermes --continue                          # Resume the most recent CLI session
+noone --continue                          # Resume the most recent CLI session
 hermes -c                                  # Short form
 hermes -c "my project"                     # Resume a named session (latest in lineage)
 hermes -c "my project" --create-if-missing # Same, creating the titled session if none exists
-hermes --resume 20260225_143052_a1b2c3     # Resume a specific session by ID
-hermes --resume "refactoring auth"         # Resume by title
-hermes --resume latest                     # Resume the most recent session (same as -c)
-hermes --resume latest --in ./my-project   # Latest session for ./my-project's workspace
+noone --resume 20260225_143052_a1b2c3     # Resume a specific session by ID
+noone --resume "refactoring auth"         # Resume by title
+noone --resume latest                     # Resume the most recent session (same as -c)
+noone --resume latest --in ./my-project   # Latest session for ./my-project's workspace
 hermes -r 20260225_143052_a1b2c3           # Short form
 ```
 
 Resuming restores the full conversation history from SQLite. The agent sees all previous messages, tool calls, and responses — just as if you never left.
 
-Use `/title My Session Name` inside a chat to name the current session, or `hermes sessions rename <id> <title>` from the command line. Use `hermes sessions list` to browse past sessions.
+Use `/title My Session Name` inside a chat to name the current session, or `noone sessions rename <id> <title>` from the command line. Use `noone sessions list` to browse past sessions.
 
-### Session Storage
+### Session Storage {#session-storage}
 
-CLI sessions are stored in Hermes's SQLite state database under `~/.hermes/state.db`. The database keeps:
+CLI sessions are stored in {{app-name}}'s SQLite state database under `~/.hermes/state.db`. The database keeps:
 
 - session metadata (ID, title, timestamps, token counters)
 - message history
@@ -609,7 +654,7 @@ CLI sessions are stored in Hermes's SQLite state database under `~/.hermes/state
 
 Some messaging adapters also keep per-platform transcript files alongside the database, but the CLI itself resumes from the SQLite session store.
 
-### Context Compression
+### Context Compression {#context-compression}
 
 Long conversations are automatically summarized when approaching context limits:
 
@@ -627,7 +672,7 @@ auxiliary:
 
 When compression triggers, middle turns are summarized while the first 3 and last 20 turns are always preserved.
 
-## Background Sessions
+## Background Sessions {#background-sessions}
 
 Run a prompt in a separate background session while continuing to use the CLI for other work:
 
@@ -635,14 +680,14 @@ Run a prompt in a separate background session while continuing to use the CLI fo
 /bg Analyze the logs in /var/log and summarize any errors from today
 ```
 
-Hermes immediately confirms the task and gives you back the prompt:
+{{app-name}} immediately confirms the task and gives you back the prompt:
 
 ```
 🔄 Background task #1 started: "Analyze the logs in /var/log and summarize..."
    Task ID: bg_143022_a1b2c3
 ```
 
-### How It Works
+### How It Works {#how-it-works}
 
 Each `/bg` prompt spawns a **completely separate agent session** in a daemon thread:
 
@@ -651,7 +696,7 @@ Each `/bg` prompt spawns a **completely separate agent session** in a daemon thr
 - **Non-blocking** — your foreground session stays fully interactive. You can chat, run commands, or even start more background tasks.
 - **Multiple tasks** — you can run several background tasks simultaneously. Each gets a numbered ID.
 
-### Results
+### Results {#results}
 
 When a background task finishes, the result appears as a panel in your terminal:
 
@@ -666,17 +711,25 @@ When a background task finishes, the result appears as a panel in your terminal:
 
 If the task fails, you'll see an error notification instead. If `display.bell_on_complete` is enabled in your config, the terminal bell rings when the task finishes.
 
-### Use Cases
+### Use Cases {#use-cases}
 
 - **Long-running research** — "/bg research the latest developments in quantum error correction" while you work on code
 - **File processing** — "/bg analyze all Python files in this repo and list any security issues" while you continue a conversation
 - **Parallel investigations** — start multiple background tasks to explore different angles simultaneously
 
-:::info
-Background sessions do not appear in your main conversation history. They are standalone sessions with their own task ID (e.g., `bg_143022_a1b2c3`).
-:::
+<Info>
 
-## Quiet Mode
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+Background sessions do not appear in your main conversation history. They are standalone sessions with their own task ID (e.g., `bg_143022_a1b2c3`).
+
+</Info>
+
+## Quiet Mode {#quiet-mode}
 
 By default, the CLI runs in quiet mode which:
 - Suppresses verbose logging from tools
@@ -685,5 +738,5 @@ By default, the CLI runs in quiet mode which:
 
 For debug output:
 ```bash
-hermes chat --verbose
+noone chat --verbose
 ```

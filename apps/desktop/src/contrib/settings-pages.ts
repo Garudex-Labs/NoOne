@@ -49,7 +49,7 @@ export interface PluginSettingsPage {
   id: string
   /** Rail label and breadcrumb. */
   title: string
-  /** Codicon name for the rail (e.g. `'cloud'`); a plug when omitted. */
+  /** AppIcon name for the rail (e.g. `'cloud'`); a plug when omitted. */
   icon?: string
   /** Ascending; ties sort alphabetically by title. */
   order?: number

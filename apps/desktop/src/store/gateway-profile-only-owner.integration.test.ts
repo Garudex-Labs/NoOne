@@ -10,10 +10,10 @@ const gatewayMocks = vi.hoisted(() => {
   return { instances }
 })
 
-vi.mock('@/hermes', async importActual => ({
+vi.mock('@/agent-client', async importActual => ({
   ...(await importActual<Record<string, unknown>>()),
   setApiRequestConnection: vi.fn(),
-  HermesGateway: class {
+  AgentGateway: class {
     connectionState = 'closed'
     private eventHandlers = new Set<
       (event: { payload?: Record<string, unknown>; session_id?: string; type: string }) => void

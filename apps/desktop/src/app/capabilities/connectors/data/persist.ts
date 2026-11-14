@@ -1,4 +1,4 @@
-import { type ProfileScope, profileScopeKey } from '@/hermes'
+import { type ProfileScope, profileScopeKey } from '@/agent-client'
 import { queryClient } from '@/lib/query-client'
 import { readJson, writeJson } from '@/lib/storage'
 import { $freeTierStatus } from '@/store/free-tier'

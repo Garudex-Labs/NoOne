@@ -53,8 +53,8 @@ def request_target_profile(_api_request_profile) -> str:
     """The served profile this request runs as: its ``/p/<profile>/`` prefix, else the listener's
     own profile (``default`` on a multiplexed host, the launch profile of a single-profile one)."""
     from gateway.session_authorities import served_profile_name
-    from hermes_constants import get_hermes_home
-    return _api_request_profile.get() or served_profile_name(get_hermes_home())
+    from agent_constants import get_agent_home
+    return _api_request_profile.get() or served_profile_name(get_agent_home())
 
 
 def _local_target(claims: dict[str, Any] | None, _api_request_profile) -> tuple[str, str]:

@@ -3,7 +3,7 @@
 // existing protocol; wire negotiation never changes the transport's auth credentials.
 // Unsupported explicit semantics fail before network admission.
 
-import { randomUuid } from '@hermes/shared'
+import { randomUuid } from '@noone/shared'
 
 export const CANONICAL_GATEWAY_PROTOCOL = 'hermes-gateway-v1'
 
@@ -55,7 +55,7 @@ export const canonicalOwnerProfile = (value: object): string | undefined => cano
 
 export const recordCanonicalOwner = (value: object, profile: string): void => { canonicalOwners.set(value, profile) }
 
-// Mirrors hermes_cli/gateway_mutations.slash_mutation: the typed directives
+// Mirrors agent_cli/gateway_mutations.slash_mutation: the typed directives
 // that are canonical mutations, not gateway-executed slash commands. `--provider`
 // (and `--session`) map onto the model mutation like the picker's value; other
 // model flags (--global/--once/--refresh) have no canonical mutation and stay on
@@ -137,7 +137,7 @@ const RELAY_HANDLE = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/
 const RELAY_SENDER_STAMP = /^(Message from 🤖 [\s\S]+? \(@)[A-Za-z0-9_-]+(\): )/u
 
 // The canonical `bot_relay.deliver` is a closed key set without the legacy `from_*` sender
-// fields. Translate them as the legacy bridge did (tui_gateway/methods_bot_relay.py): a bot
+// fields. Translate them as the legacy bridge did (agent_backend/methods_bot_relay.py): a bot
 // author keyed by the sender's connection (`delivery_turn_author`), and the message's
 // `(@handle)` stamp qualified with that connection so a reply never lands on the recipient's
 // own same-named bot (#103731; `<handle>@<connection>` always resolves there).
@@ -187,8 +187,8 @@ const OWNER_CONNECTION_VERBS = new Set([
   'connectors.connect'
 ])
 
-// `config.set` keys the owner serves (tui_gateway/contracts/canonical_projections.py::CanonicalConfigSetParams;
-// gateway/session_tui_config.py), with the keys that take a `scope` (`reasoning --global`, the
+// `config.set` keys the owner serves (agent_backend/contracts/canonical_projections.py::CanonicalConfigSetParams;
+// gateway/session_display_config.py), with the keys that take a `scope` (`reasoning --global`, the
 // Shift+click global yolo zap).
 const CANONICAL_CONFIG_KEYS = new Set([
   'busy', 'verbose', 'yolo', 'model', 'reasoning', 'fast', 'daybreak', 'personality', 'approvals.mode', 'voice.voice_chat_mode',
@@ -222,7 +222,7 @@ function canonicalProducerFrame(method: string, params: Record<string, unknown>)
   return method === 'bot_relay.deliver' ? canonicalBotDelivery(params) : params
 }
 
-// The levels `hermes_constants.parse_reasoning_effort` accepts: a session `/reasoning <level>` is the
+// The levels `agent_constants.parse_reasoning_effort` accepts: a session `/reasoning <level>` is the
 // owner's `reasoning` mutation; the display words (show/hide/full/clamp) are config.yaml writes.
 const REASONING_EFFORTS = new Set(['none', 'false', 'disabled', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra'])
 

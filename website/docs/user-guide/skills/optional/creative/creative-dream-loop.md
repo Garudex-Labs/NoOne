@@ -1,35 +1,43 @@
 ---
 title: "Dream Loop — Build stunning 3D scenes via a concept-art fidelity loop"
-sidebar_label: "Dream Loop"
+sidebarTitle: "Dream Loop"
 description: "Build stunning 3D scenes via a concept-art fidelity loop"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Dream Loop
+# Dream Loop {#dream-loop}
 
 Build stunning 3D scenes via a concept-art fidelity loop.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/dream-loop` |
+| Source | Optional — install with `noone skills install official/creative/dream-loop` |
 | Path | `optional-skills/creative/dream-loop` |
 | Version | `1.0.0` |
-| Author | Anshu Chimala (adapted by Nous Research) |
+| Author | Anshu Chimala (adapted by Garudex Labs) |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `3d`, `games`, `webgl`, `threejs`, `image-generation`, `visual-fidelity`, `creative` |
 | Related skills | [`p5js`](../../bundled/creative/creative-p5js.md), [`claude-design`](../../bundled/creative/creative-claude-design.md), [`manim-video`](../../bundled/creative/creative-manim-video.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Dream Loop Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Dream Loop Skill {#dream-loop-skill}
 
 An autonomous process for building extremely impressive visuals, especially 3D
 scenes (games, apps, usually browser three.js/WebGL): generate photorealistic
@@ -41,14 +49,14 @@ rate for the target platform (e.g. 60 fps browser, 120 fps modern mobile).
 This skill does NOT cover general web-app functionality, 2D UI design, or
 non-visual quality — only the visual-fidelity loop.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User says "dream loop" or asks for a game/scene/app built to a very high
   level of graphical fidelity.
 - Follow-up refinement passes on an existing visual product (see Follow-up
   loops below).
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **Concept art**: the `image_generate` tool. If unavailable, stop and ask the
   user for a concept image (or an image-generation API to connect to).
@@ -63,7 +71,7 @@ non-visual quality — only the visual-fidelity loop.
 If you don't have the tools needed for the full loop, flag that to the user
 early and stop.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Stage | What happens | Artifacts (`.dream-loop/`) |
 |---|---|---|
@@ -76,9 +84,9 @@ early and stop.
 | 7. Judge | Ladder-scored comparison, actionable directives | verdict log |
 | 8. Iterate/Exit | Address directives or exit per criteria | — |
 
-## Procedure
+## Procedure {#procedure}
 
-### 1. The target concept
+### 1. The target concept {#1-the-target-concept}
 
 If the user provided a description of a game, scene, or app, proceed — don't
 ask for clarification unless it's too vague to generate concept art from. If
@@ -87,7 +95,7 @@ they didn't, ask for it.
 Put working context/files in `.dream-loop/` and gitignore it (unless told
 otherwise).
 
-### 2. Concept art
+### 2. Concept art {#2-concept-art}
 
 The concept is a realistic, high-quality, impressive target: the look of a
 current AAA game running in real time. Physically plausible materials (wet
@@ -118,7 +126,7 @@ the issue. Save it as `.dream-loop/concept.png`.
 If you generated the art (the user didn't supply it), pause and confirm it
 matches the user's vision before starting the build loop.
 
-### 3. Time budget
+### 3. Time budget {#3-time-budget}
 
 If the user gives a time budget, record the start time and check the clock
 between rounds. Don't degrade visual fidelity to hit the budget — strive for
@@ -130,7 +138,7 @@ meaningful, beautiful progress than with something broadly complete but ugly.
 If no time budget is given, run until an exit criterion — but warn upfront
 that this may consume a lot of tokens.
 
-### 4. Build loop
+### 4. Build loop {#4-build-loop}
 
 Look at the concept art and implement it in one go, making that first pass
 count across every tier of the score ladder: composition, textures, lighting,
@@ -149,7 +157,7 @@ style calls for it. Write intermediate files/plans to `.dream-loop/`.
 - Use `image_generate` for textures, normal maps, skyboxes, etc. — better
   looking and faster than procedural ones.
 
-### 5. Screenshot
+### 5. Screenshot {#5-screenshot}
 
 Serve the build (e.g. `python3 -m http.server` in the build dir), then via
 `browser_exec`: `new_tab('http://localhost:8000')`, `wait_for_load()`, allow
@@ -157,7 +165,7 @@ the scene to settle, `capture_screenshot()`. Target the same resolution and
 aspect ratio as the concept art so the comparison is fair. Save as
 `.dream-loop/round-N.png`.
 
-### 6. Self-check before judging
+### 6. Self-check before judging {#6-self-check-before-judging}
 
 Each time, review the candidate screenshot yourself before submitting. Do not
 submit half-baked work. Compare screenshot and concept side by side and log an
@@ -168,7 +176,7 @@ stuff (rendering glitches, flat untextured surfaces, ugly lighting, poor
 contrast, washed-out or oversaturated color, speckles, ugly shadows). Scan
 surface by surface, object by object, and list findings.
 
-### 7. Judge
+### 7. Judge {#7-judge}
 
 Judging should ideally be done by a fresh subagent with a clean context each
 round (`delegate_task`), to keep it objective and cheap. Give the judge the
@@ -235,7 +243,7 @@ Judge prompt:
 > causes. Every directive must be actionable this round. Don't round up: if a
 > gate isn't fully passed, the cap holds.
 
-### 8. Exit criteria
+### 8. Exit criteria {#8-exit-criteria}
 
 - **Score >= 8 and target FPS acceptable**: done. Show the user the latest
   screenshot; ask if they want more iterations.
@@ -259,7 +267,7 @@ Judge prompt:
   throws out good changes with bad. If one change clearly regressed, undo
   just that change. Loop.
 
-## Follow-up loops
+## Follow-up loops {#follow-up-loops}
 
 When building on an existing product (or the user re-invokes the skill for
 refinements), don't create new concept art in a vacuum — it may diverge from
@@ -269,7 +277,7 @@ screenshot → AAA-graphics version of the same shot), then use that as the
 target. Multiple screens can run parallel judge loops if asked, at higher
 token cost.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Overbaked or oversimplified concept art (see failure modes) — fix the
   concept before building against it.
@@ -283,7 +291,7 @@ token cost.
 - Screenshotting before the scene loads/settles — add a wait after
   `wait_for_load()` for asset streaming and animation warm-up.
 
-## Verification
+## Verification {#verification}
 
 - `.dream-loop/concept.png` exists and passed the failure-mode review (and
   user confirmation, if generated).

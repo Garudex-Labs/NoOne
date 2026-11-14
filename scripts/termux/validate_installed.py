@@ -38,7 +38,7 @@ def stop_child_tree(child: subprocess.Popen) -> None:
         raise RuntimeError(f"TUI children still alive: {[p.pid for p in descendants]}")
 
 
-def tui_smoke(launcher: Path, env: dict[str, str], cwd: Path) -> None:
+def cli_smoke(launcher: Path, env: dict[str, str], cwd: Path) -> None:
     import fcntl
     import pty
     import termios
@@ -46,7 +46,7 @@ def tui_smoke(launcher: Path, env: dict[str, str], cwd: Path) -> None:
     master, slave = pty.openpty()
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 40, 120, 0, 0))
     child = subprocess.Popen(
-        [str(launcher), "--tui"], stdin=slave, stdout=slave, stderr=slave,
+        [str(launcher), "--cli"], stdin=slave, stdout=slave, stderr=slave,
         cwd=cwd, env={**env, "TERM": "xterm-256color"}, start_new_session=True,
     )
     os.close(slave)
@@ -80,7 +80,7 @@ def tui_smoke(launcher: Path, env: dict[str, str], cwd: Path) -> None:
 
 
 def validate_update_refusal(project_root: Path, result: subprocess.CompletedProcess) -> None:
-    from hermes_cli.update_contract import COMMIT_BUILD_UPDATE_MESSAGE, is_commit_build
+    from agent_cli.update_contract import COMMIT_BUILD_UPDATE_MESSAGE, is_commit_build
 
     # Commit artifacts have no update channel, even when installed through dpkg.
     commit_build = is_commit_build(project_root)
@@ -116,8 +116,8 @@ def main() -> None:
         run([
             str(python), "-c",
             "import ctypes, ssl, sqlite3, bz2, lzma, zlib, hashlib, readline; "
-            "import cli, run_agent, tui_gateway.server; "
-            "from hermes_cli.config import detect_install_method; "
+            "import cli, run_agent, agent_backend.server; "
+            "from agent_cli.config import detect_install_method; "
             "assert detect_install_method() == 'apt'; "
             "print('CLI_AND_STDLIB_IMPORTS_OK')",
         ], env, home)
@@ -144,7 +144,7 @@ def main() -> None:
         ], env, home)
         result = subprocess.run([str(launcher), "update"], env=env, cwd=home, capture_output=True, text=True, encoding="utf-8", timeout=60, check=False)
         validate_update_refusal(root / "app", result)
-        tui_smoke(launcher, env, home)
+        cli_smoke(launcher, env, home)
         print("INSTALLED_BUNDLE_VALIDATION_OK", flush=True)
 
 

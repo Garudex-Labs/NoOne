@@ -1,16 +1,16 @@
 ---
 title: "Relay ↔ Connector Contract"
-description: "Wire contract between the Hermes gateway relay adapter and external connectors (experimental)"
+description: "Wire contract between the the agent gateway relay adapter and external connectors (experimental)"
 ---
 
-# Relay ↔ Connector Contract (v1, EXPERIMENTAL)
+# Relay ↔ Connector Contract (v1, EXPERIMENTAL) {#relay--connector-contract-v1-experimental}
 
 > **Status:** EXPERIMENTAL. This contract MAY CHANGE without a deprecation
 > cycle until at least two real Class-1 platforms (Discord + Telegram) have
 > validated it. Evolution during the experimental phase is **additive-only**,
 > gated by `contract_version`. A breaking change updates both repos in lockstep.
 
-This document is the formal interface between the **Hermes gateway** (Python,
+This document is the formal interface between the **{{app-name}} gateway** (Python,
 `gateway/relay/`) and the **connector** (Node/TypeScript,
 `NousResearch/gateway-gateway`). The connector implementer's first action is to
 read this file.
@@ -23,7 +23,7 @@ connector owns all platform-specific socket/identity logic.
 
 ---
 
-## 1. Handshake
+## 1. Handshake {#1-handshake}
 
 1. Gateway opens the transport (`connect`).
 2. Gateway calls `handshake()`; connector returns a `CapabilityDescriptor`
@@ -38,7 +38,7 @@ fields from defaults.
 
 ---
 
-## 2. CapabilityDescriptor (handshake payload)
+## 2. CapabilityDescriptor (handshake payload) {#2-capabilitydescriptor-handshake-payload}
 
 JSON object. Source of truth: `gateway/relay/descriptor.py`.
 
@@ -56,7 +56,7 @@ JSON object. Source of truth: `gateway/relay/descriptor.py`.
 | `emoji` | string | no | Display emoji (default 🔌). |
 | `platform_hint` | string | no | System-prompt platform hint. |
 | `pii_safe` | bool | no | Redact PII in session descriptions. |
-| `supports_context` | bool | no | Whether the connector can supply surrounding channel/group **context** for an addressed turn on this platform (Model A on-demand history fetch — Discord/Slack/Matrix; Model B passive buffer — Telegram/Signal/WhatsApp). Default false ⇒ no `context` is attached to inbound events. See §3. |
+| `supports_context` | bool | no | Whether the connector can supply surrounding channel/group **context** for an addressed turn on this platform (Model A on-demand history fetch — Discord/Slack; Model B passive buffer — Telegram/Signal/WhatsApp). Default false ⇒ no `context` is attached to inbound events. See §3. |
 | `supports_inchannel_continuable` | bool | no | Whether the platform can host a **flat continuable cron surface** (native Slack's `cron_continuable_surface: in_channel`): the brief posts top-level in the channel/DM and a plain reply continues the job via the flat `(platform, chat_id, None)` session. Default false ⇒ the gateway's scheduler fails safe to thread mode (D6 gate), so an older connector keeps today's thread behavior. |
 | `supports_block_formatting` | bool | no | Whether this platform's sender renders **block-level formatting** from raw markdown when the gateway stamps `metadata.format_hints` on `send`/`edit` frames (Slack: native `markdown` block for tables/lists/code, mrkdwn text kept as fallback). Default false ⇒ the gateway never stamps hints, so an older connector never receives the metadata. |
 | `supported_ops` | string[] | no | Op-level capability discovery: the outbound op names the connector's sender for this platform actually implements (e.g. `["send", "edit", "typing", "follow_up", "get_chat_info"]`). Absent/empty ⇒ the connector predates the field and the gateway assumes the legacy op set (`send`/`edit`/`typing`/`follow_up`); a NEW op is used only when explicitly advertised. |
@@ -67,7 +67,7 @@ live platform adapter's capability methods.
 
 ---
 
-## 3. Inbound: `MessageEvent` envelope
+## 3. Inbound: `MessageEvent` envelope {#3-inbound-messageevent-envelope}
 
 The connector normalizes each platform wire event into a `MessageEvent`
 (`gateway/platforms/base.py`) and delivers it to the gateway. **Inbound is
@@ -77,7 +77,7 @@ gateway already dialed. The gateway keys the session via `build_session_key()`
 from the embedded `SessionSource` — so populating the right discriminators is
 the single highest-correctness responsibility of the connector.
 
-### Inbound transport (WS back-channel, not HTTP)
+### Inbound transport (WS back-channel, not HTTP) {#inbound-transport-ws-back-channel-not-http}
 
 The gateway dials **out** to the connector's `/relay` WebSocket for the
 handshake + outbound actions (§4) + its own `/stop` egress (§5). Inbound rides
@@ -153,7 +153,7 @@ old HTTP path needed). The relay-bus hop is inside the connector trust domain
 > `passthrough_forward` frame above), so a hosted gateway needs zero public
 > inbound surface and `gatewayEndpoint` is retired once the cutover lands.
 
-### 3.1 Passthrough-plane forward (§5.1)
+### 3.1 Passthrough-plane forward (§5.1) {#31-passthrough-plane-forward-51}
 
 The passthrough plane answers the provider's latency-critical ACK at the
 connector EDGE (e.g. Discord's deferred interaction response within ~3s), then
@@ -178,7 +178,7 @@ gateway acks it after durable handoff.
 
 
 
-### SessionSource fields (the wire surface)
+### SessionSource fields (the wire surface) {#sessionsource-fields-the-wire-surface}
 
 Source of truth: `SessionSource.to_dict()` in `gateway/session.py`. These are
 every key the gateway accepts on the wire. `platform`, `chat_id`, `chat_type`,
@@ -195,9 +195,9 @@ present (may be `null`); the rest are included only when set.
 | `user_name` | string\|null | yes | Author display name. |
 | `thread_id` | string\|null | yes | Thread/forum-topic id when in a thread. Session-key discriminator. |
 | `chat_topic` | string\|null | yes | Channel topic/description (Discord, Slack). |
-| `user_id_alt` | string | no | Platform-specific stable alt id (Signal UUID, Feishu union_id). |
+| `user_id_alt` | string | no | Platform-specific stable alt id (Signal UUID). |
 | `chat_id_alt` | string | no | Alternate chat id (e.g. Signal group internal id). |
-| `scope_id` | string | no | Platform-neutral **scope** discriminator: Discord guild / Slack workspace / Matrix server. **REQUIRED for Discord/Slack scope isolation.** Session-key discriminator. (Canonical name as of the D-Q2.5 wire migration.) |
+| `scope_id` | string | no | Platform-neutral **scope** discriminator: Discord guild / Slack workspace. **REQUIRED for Discord/Slack scope isolation.** Session-key discriminator. (Canonical name as of the D-Q2.5 wire migration.) |
 | `guild_id` | string | no | **Legacy alias, no longer read by the connector.** As of D-Q2.5c the connector reads and writes only `scope_id`; the gateway's agent-wide `SessionSource.to_dict()` still emits `guild_id` (mirrored to `scope_id`) for non-relay session persistence, so it may still appear on the wire but the connector ignores it. Do not depend on it. |
 | `parent_chat_id` | string | no | Parent channel when `chat_id` refers to a thread. |
 | `message_id` | string | no | Id of the triggering message (for pin/reply/react). |
@@ -207,7 +207,7 @@ present (may be `null`); the rest are included only when set.
 > `to_dict()`. Do not add it to the connector's `SessionSource` until it is
 > first added here and to `to_dict()` (additive bump).
 
-### SessionSource discriminators per platform
+### SessionSource discriminators per platform {#sessionsource-discriminators-per-platform}
 
 | Platform | chat_id | chat_type | user_id | thread_id | scope_id |
 | --- | --- | --- | --- | --- | --- |
@@ -220,7 +220,7 @@ conformance oracle: for a given `SessionSource`, the connector's normalization
 must produce the same key the Python adapter would. (The Phase-1 stub tests
 assert known-input → known-key.)
 
-### Bot identity vs tenant (single-bot consolidation, Appendix A)
+### Bot identity vs tenant (single-bot consolidation, Appendix A) {#bot-identity-vs-tenant-single-bot-consolidation-appendix-a}
 
 The envelope carries the **originating bot identity** as a field **distinct from
 tenant**. Tenant is resolved from the event's own discriminator (Discord
@@ -228,7 +228,7 @@ tenant**. Tenant is resolved from the event's own discriminator (Discord
 token/socket/process delivered it. This keeps one shared bot able to front many
 tenants (Phase 6) without overloading an existing field.
 
-### Author-first resolution + the account-link (DM) path (Phase 7)
+### Author-first resolution + the account-link (DM) path (Phase 7) {#author-first-resolution--the-account-link-dm-path-phase-7}
 
 Phase 7 adds **self-serve, per-user onboarding to a shared bot**, which changes
 *which* discriminator resolves the instance for a routed inbound message — and
@@ -278,7 +278,7 @@ terminal revocation: it stops reconnecting and reports the relay platform as
 **disabled** (not a retryable error). A 4401 *before* any successful handshake
 stays retryable (a cold-start / not-yet-provisioned race, not a revocation).
 
-### 3.2 Going-idle / buffered-flip primitive (§5.3)
+### 3.2 Going-idle / buffered-flip primitive (§5.3) {#32-going-idle--buffered-flip-primitive-53}
 
 A scale-to-zero PRIMITIVE (not the behaviour — nothing here decides to sleep or
 suspends a machine; a later workstream consumes these frames). It lets a gateway
@@ -317,7 +317,7 @@ only flip/drain ITS OWN instance.
 > primitive is "when the gateway drains, relay flips to buffered + replays on
 > reconnect, with no loss/dup"; WHAT triggers the drain is out of scope.
 
-### 3.3 Wake poke (§5.2)
+### 3.3 Wake poke (§5.2) {#33-wake-poke-52}
 
 The other half of the sleep/wake loop: how a SUSPENDED gateway finds out it has
 buffered work waiting. A PRIMITIVE — nothing here suspends a machine; it wires
@@ -326,7 +326,7 @@ the wake SIGNAL so a future scale-to-zero behaviour layer can rely on "buffered
 
 - **Registration.** The gateway registers a **wake URL** at enroll/provision —
   any reachable URL the connector can GET to wake it (a Fly autostart hostname,
-  a dashboard host). Self-hosted: `hermes gateway enroll --wake-url <url>` (or
+  a dashboard host). Self-hosted: `noone gateway enroll --wake-url <url>` (or
   `GATEWAY_RELAY_WAKE_URL` / `gateway.relay_wake_url`). Managed/NAS: stamped into
   the container env beside `GATEWAY_RELAY_URL`. Forwarded in the
   `/relay/provision` body as `wakeUrl` and stored per-instance on the connector's
@@ -351,7 +351,7 @@ the wake SIGNAL so a future scale-to-zero behaviour layer can rely on "buffered
 > primitive is "buffered event for a sleeping instance ⇒ its wakeUrl gets poked";
 > WHAT makes the instance sleep (and wake-to-serve) is the behaviour layer.
 
-### 3.4 Obligations on a future scale-to-zero behaviour layer
+### 3.4 Obligations on a future scale-to-zero behaviour layer {#34-obligations-on-a-future-scale-to-zero-behaviour-layer}
 
 §3.2 and §3.3 ship the **primitives**; this section is the **contract a separate
 scale-to-zero behaviour workstream must honour to consume them safely.** It owns
@@ -398,7 +398,7 @@ primitives assume:
    on `going_idle`.
 7. **Suspend only while every messaging connection is relay-fronted — and
    re-check that at suspend time, not just at boot.** A directly connected
-   platform (Photon iMessage's gRPC stream, BlueBubbles, a bot token dialled from
+   platform (Photon iMessage's gRPC stream, a bot token dialled from
    the gateway itself) holds a socket the connector cannot buffer or poke for, so
    a suspend with one live loses its inbound and never wakes. The gate counts the
    enabled launch-profile platforms AND the live adapters of every served
@@ -413,7 +413,7 @@ first buffered event for a flipped instance).
 
 ---
 
-## 4. Outbound: action set
+## 4. Outbound: action set {#4-outbound-action-set}
 
 The gateway calls the transport with action dicts. Source of truth:
 `gateway/relay/transport.py` + `gateway/relay/adapter.py`.
@@ -440,7 +440,7 @@ as proof when that command fits one message (`max_message_length`); a longer one
 
 **`metadata.profile` (multiplex round-trip).** Every chat-addressed outbound
 frame's `metadata` carries the tenant discriminators the gateway captured from
-the inbound (`scope_id`, `user_id`) and, on a multiplexed gateway, the Hermes
+the inbound (`scope_id`, `user_id`) and, on a multiplexed gateway, the {{app-name}}
 `profile` the connector routed that chat's inbound to; `follow_up` frames carry
 the profile encoded in their `session_key` namespace. The connector MUST stamp
 the same `profile` on the next `passthrough_forward` / `inbound` for that chat or
@@ -601,7 +601,7 @@ gateway holds zero capability material). Source of truth:
 
 ---
 
-## 5. Interrupt (`/stop`) routing
+## 5. Interrupt (`/stop`) routing {#5-interrupt-stop-routing}
 
 - **Gateway → connector:** `send_interrupt(session_key, reason?)` egresses a
   mid-turn `/stop` over the outbound WS. The connector MUST forward it to the
@@ -619,12 +619,12 @@ back-channel as a normalized event.
 
 ---
 
-## 6. Trust boundary & signed-body handling (A2)
+## 6. Trust boundary & signed-body handling (A2) {#6-trust-boundary--signed-body-handling-a2}
 
 **The connector is the sole crypto/identity boundary. The gateway re-validates
 nothing.**
 
-Webhook signatures (Discord ed25519, Twilio HMAC, WeCom BizMsgCrypt) are
+Webhook signatures (Discord ed25519, Twilio HMAC) are
 computed over exact raw bytes, and some payloads are *encrypted* with a shared
 secret. The connector fronts a **shared** bot for many tenants and holds every
 tenant's platform secrets, so it:
@@ -643,12 +643,9 @@ package imports/calls no platform-crypto).
 **Why not "forward the signed body byte-for-byte so the gateway re-validates"?**
 That earlier model is incoherent under an untrusted, disposable tenant gateway:
 
-- Re-validating Twilio HMAC / WeCom crypto would require handing the gateway the
+- Re-validating Twilio HMAC would require handing the gateway the
   **shared signing secret** — which is itself the leak, and on a shared bot it's
   a *cross-tenant* leak.
-- WeCom payloads are encrypted with the shared secret; the connector must decrypt
-  at the edge just to route, so forwarding ciphertext would again require giving
-  the gateway the secret.
 - A Discord interaction token lives **inside** the signed JSON body — you cannot
   both preserve the bytes and strip the credential; they are the same bytes.
 
@@ -658,12 +655,12 @@ relay planes — both are "verify at the edge → emit a normalized event," diff
 only in transport. See `docs/capability-trust-boundary.md` (connector repo:
 `gateway-gateway`) for the full A2 rationale and the connector-side vault.
 
-### 6.1 Channel authentication (the connector⇄gateway link itself)
+### 6.1 Channel authentication (the connector⇄gateway link itself) {#61-channel-authentication-the-connectorgateway-link-itself}
 
 A2 makes the connector the sole holder of platform secrets while the gateway may
 be **customer-managed and internet-exposed**, so the connector⇄gateway channel
 is itself authenticated. The gateway holds an enrollment- or provision-issued
-**per-gateway secret** (`hermes gateway enroll` → connector `/relay/enroll`, or
+**per-gateway secret** (`noone gateway enroll` → connector `/relay/enroll`, or
 managed self-provision → `/relay/provision`) that authenticates its outbound WS
 upgrade. It is an HMAC-SHA256 scheme with a multi-secret rotation verify list
 (gateway side: `gateway/relay/auth.py`; connector side:
@@ -682,7 +679,7 @@ enrollment/rotation/kill-switch design: `docs/connector-gateway-auth-design.md`
 
 ---
 
-## 7. Per-instance delivery & the management plane (Phase 6)
+## 7. Per-instance delivery & the management plane (Phase 6) {#7-per-instance-delivery--the-management-plane-phase-6}
 
 Phases 1–5 treat the connector as a single-tenant front: inbound events for a
 tenant fan out to that tenant's gateway socket(s). **Phase 6 makes delivery
@@ -692,7 +689,7 @@ Discord guild, one Telegram bot) without cross-delivery — and adds a small
 and what's-relevant. All of this lives **connector-side**; the gateway's only new
 responsibility is to **declare its relevance policy** at boot (§7.3).
 
-### 7.1 The delivery gate (connector-side, informational)
+### 7.1 The delivery gate (connector-side, informational) {#71-the-delivery-gate-connector-side-informational}
 
 For each inbound event the connector decides which instances receive it by
 composing three AND-ed filters. The gateway does not implement these — they run
@@ -711,7 +708,7 @@ A message authored by an unbound user reaches no instance (fail-closed). The
 full design + invariants live in the connector repo
 (`NousResearch/gateway-gateway`); this section is the gateway-facing summary.
 
-### 7.2 Management routes (connector-side, authenticated)
+### 7.2 Management routes (connector-side, authenticated) {#72-management-routes-connector-side-authenticated}
 
 The connector mounts authenticated management routes. They share the **same
 dual-auth** as the WS upgrade: either a managed NAS-signed `aud=agent:{instanceId}`
@@ -732,7 +729,7 @@ These are connector-owned (the management plane is not part of the gateway's
 agent path); the gateway only calls `POST /relay/policy` (§7.3). The others are
 driven by the managed Portal / `hermes` CLI.
 
-### 7.3 Relevance-policy declaration (the gateway's responsibility)
+### 7.3 Relevance-policy declaration (the gateway's responsibility) {#73-relevance-policy-declaration-the-gateways-responsibility}
 
 The relevance layer (§7.1) is the per-tenant parity for the gateway's own
 behaviour knobs (`require_mention`, `free_response_channels`,
@@ -765,7 +762,7 @@ per-gateway secret and the same host as `/relay/provision`.
 
 ---
 
-## 8. Gateway-side platform behavior controls (enterprise)
+## 8. Gateway-side platform behavior controls (enterprise) {#8-gateway-side-platform-behavior-controls-enterprise}
 
 Enterprise deployments configure fronted-platform behavior on the GATEWAY
 side, under `platforms.relay.extra.<platform>` — a supported subset of that
@@ -814,7 +811,7 @@ Changes take effect on gateway restart; no connector involvement.
 
 ---
 
-## 9. Versioning policy
+## 9. Versioning policy {#9-versioning-policy}
 
 - `contract_version` is an int; bump **only** for additive changes during the
   experimental phase (new optional fields, new `op`s).

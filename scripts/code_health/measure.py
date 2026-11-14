@@ -119,6 +119,9 @@ class Measurer:
             if in_scope(path):
                 text = read_file(self.repo, tree, path)
                 if text is not None:
+                    if path.endswith(".py"):
+                        from scripts.code_health.identity_names import canonical_python
+                        text = canonical_python(text)
                     contents[path] = text
         if tree is None:
             return self._measure_in(self.repo, contents)
@@ -170,11 +173,12 @@ class Measurer:
         self._regex(fm, scopes, text, tree)
 
     def _regex(self, fm: FileMeasure, scopes, text: str, tree: ast.Module) -> None:
+        from scripts.code_health.identity_names import canonical_path
         code_lines: list[str] | None = None
         for rule_id, pattern, path_re in self.regex_rules:
             if not rule_applies(RULES_BY_ID[rule_id], fm.path):
                 continue
-            if path_re and not path_re.search(fm.path):
+            if path_re and not path_re.search(canonical_path(fm.path)):
                 continue
             if code_lines is None:
                 code_lines = _executable_lines(text, tree)

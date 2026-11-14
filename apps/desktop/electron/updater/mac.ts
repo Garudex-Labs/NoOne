@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 import type { AppUpdater } from 'electron-updater'
 
 import { applyPackagedHandoff } from './packaged-handoff'
@@ -61,7 +62,7 @@ export class MacStrategy implements UpdaterStrategy {
     this.applying = true
 
     const progress = ({ percent }: { percent: number }): void => {
-      this.deps.emitProgress({ stage: 'fetch', message: 'Downloading the Hermes update.', percent })
+      this.deps.emitProgress({ stage: 'fetch', message: appText('Downloading the {app_name} update.'), percent })
     }
 
     this.deps.updater.on('download-progress', progress)
@@ -87,7 +88,7 @@ export class MacStrategy implements UpdaterStrategy {
           await stop()
           this.deps.emitProgress({
             stage: 'restart',
-            message: 'Restarting Hermes to install the update.',
+            message: appText('Restarting {app_name} to install the update.'),
             percent: 100
           })
           this.deps.updater.quitAndInstall()

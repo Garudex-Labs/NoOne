@@ -2,7 +2,7 @@
 name: auteur
 description: Design and build cinematic, award-level web pages.
 version: 1.3.1
-author: agiwhitelist (https://github.com/agiwhitelist, upstream agiwhitelist/auteur), ported by Hermes Agent
+author: agiwhitelist (https://github.com/agiwhitelist, upstream agiwhitelist/auteur), ported by NoOne
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

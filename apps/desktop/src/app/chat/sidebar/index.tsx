@@ -1,13 +1,14 @@
 import { KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import type * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
 
+import { type SessionInfo, type SessionSearchResult } from '@/agent-client'
 import { PlatformAvatar } from '@/app/messaging/platform-icon'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { KbdGroup } from '@/components/ui/kbd'
@@ -23,7 +24,6 @@ import {
 } from '@/components/ui/sidebar'
 import { Tip, TipKeybindLabel } from '@/components/ui/tooltip'
 import { useContributions } from '@/contrib/react/use-contributions'
-import { type SessionInfo, type SessionSearchResult } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { comboTokens } from '@/lib/keybinds/combo'
 import { sessionMatchesSearch } from '@/lib/session-search'
@@ -213,21 +213,21 @@ const SIDEBAR_NAV: SidebarNavItem[] = [
   {
     id: 'new-session',
     label: '',
-    icon: props => <Codicon name="robot" {...props} />,
+    icon: props => <AppIcon name="robot" {...props} />,
     action: 'new-session',
     keybindActionId: 'session.new'
   },
   {
     id: 'capabilities',
     label: '',
-    icon: props => <Codicon name="symbol-misc" {...props} />,
+    icon: props => <AppIcon name="symbol-misc" {...props} />,
     route: CAPABILITIES_ROUTE,
     keybindActionId: 'nav.capabilities'
   },
   {
     id: 'messaging',
     label: '',
-    icon: props => <Codicon name="comment" {...props} />,
+    icon: props => <AppIcon name="comment" {...props} />,
     route: MESSAGING_ROUTE,
     keybindActionId: 'nav.messaging'
   },
@@ -236,7 +236,7 @@ const SIDEBAR_NAV: SidebarNavItem[] = [
   {
     id: 'artifacts',
     label: '',
-    icon: props => <Codicon name="files" {...props} />,
+    icon: props => <AppIcon name="files" {...props} />,
     route: ARTIFACTS_ROUTE,
     keybindActionId: 'nav.artifacts',
     tier: 'advanced'
@@ -244,7 +244,7 @@ const SIDEBAR_NAV: SidebarNavItem[] = [
   {
     id: 'cron',
     label: '',
-    icon: props => <Codicon name="watch" {...props} />,
+    icon: props => <AppIcon name="watch" {...props} />,
     route: CRON_ROUTE,
     keybindActionId: 'nav.cron',
     tier: 'advanced'
@@ -287,7 +287,7 @@ const HEADER_NAV_BTN =
 // by id; the snippet stands in for the preview).
 
 // The backend's FTS layer wraps matched terms in literal '>>>' / '<<<'
-// highlight markers (sqlite snippet() delimiters — see hermes_state_search.py).
+// highlight markers (sqlite snippet() delimiters — see agent_state_search.py).
 // The sidebar renders the snippet as plain text, so the markers must be
 // stripped or a search for "foo" paints rows titled ">>>foo<<<".
 // Exported for tests.
@@ -433,7 +433,7 @@ export function ChatSidebar({
           {
             id: c.id,
             label: data.label,
-            icon: (props: { className?: string }) => <Codicon name={codicon} {...props} />,
+            icon: (props: { className?: string }) => <AppIcon name={codicon} {...props} />,
             route: data.path,
             tier: data.tier
           }
@@ -889,7 +889,7 @@ export function ChatSidebar({
     return byRepo
     // prBranchOverrides is what `sessionPrKey` reads through — a recovered PR
     // has to re-ask with the key it just learned.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [prDataWanted, scopedSessions, prBranchOverrides])
 
   // A stable identity for "the same question as last time", so a re-render that
@@ -1866,7 +1866,7 @@ export function ChatSidebar({
                           size="icon-xs"
                           variant="ghost"
                         >
-                          <Codicon name="check-all" size="0.75rem" />
+                          <AppIcon name="check-all" size="0.75rem" />
                         </Button>
                       </Tip>
                     )}
@@ -1894,7 +1894,7 @@ export function ChatSidebar({
                               size="icon-xs"
                               variant="ghost"
                             >
-                              <Codicon name="list-unordered" size="0.75rem" />
+                              <AppIcon name="list-unordered" size="0.75rem" />
                             </Button>
                           </Tip>
                         </div>

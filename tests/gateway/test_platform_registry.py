@@ -7,7 +7,7 @@ import pytest
 
 from gateway.platform_registry import PlatformRegistry, PlatformEntry
 from gateway.config import Platform, GatewayConfig
-from hermes_cli import plugins_loader
+from agent_cli import plugins_loader
 
 
 # ── Platform enum dynamic members ─────────────────────────────────────────
@@ -20,10 +20,10 @@ class TestPlatformEnumDynamic:
 
     def test_dynamic_member_case_normalised(self):
         """Mixed case normalised to lowercase."""
-        a = Platform("IRC")
-        b = Platform("irc")
+        a = Platform("LINE")
+        b = Platform("line")
         assert a is b
-        assert a.value == "irc"
+        assert a.value == "line"
 
     def test_dynamic_member_with_hyphens(self):
         """Registered plugin platforms with hyphens work once registered."""
@@ -291,7 +291,7 @@ class TestPlatformsMerge:
 
 
     def test_get_all_platforms_includes_plugin(self):
-        from hermes_cli.platforms import get_all_platforms
+        from agent_cli.platforms import get_all_platforms
         from gateway.platform_registry import platform_registry as _reg
 
         _reg.register(PlatformEntry(
@@ -654,18 +654,17 @@ class TestMigratedPlatformWiring:
 
     _LAZY_INSTALLABLE = (
         "teams", "telegram", "discord", "slack",
-        "matrix", "dingtalk", "feishu", "wecom_callback",
+
         "google_chat",
     )
 
     def test_lazy_installable_platforms_have_split_wiring(self):
-        from hermes_cli.plugins import discover_plugins
+        from agent_cli.plugins import discover_plugins
 
         discover_plugins()
         from gateway.platform_registry import platform_registry
 
-        # Materialize deferred loaders (wecom_callback is registered by the
-        # "wecom" manifest's loader; a cold get() by its own name misses).
+        # Materialize the deferred platform loaders.
         platform_registry.plugin_entries()
         for platform_name in self._LAZY_INSTALLABLE:
             entry = platform_registry.get(platform_name)

@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_constants import get_default_hermes_root
+from agent_constants import get_default_agent_root
 from pm import packages
 from pm import paths
 
@@ -39,7 +39,7 @@ def payload_cache(tmp_path, monkeypatch):
     store = payload / "tools"
     store.mkdir()
     monkeypatch.setattr(paths, "store_root", lambda: store)
-    return get_default_hermes_root() / "cache" / "uv"
+    return get_default_agent_root() / "cache" / "uv"
 
 
 @pytest.fixture

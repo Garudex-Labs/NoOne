@@ -126,7 +126,7 @@ vi.mock('@/components/remote-setup/first-run', () => ({
   FirstRunRemoteSetup: () => 'Connect to existing Hermes'
 }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   getProfileSoul: vi.fn().mockResolvedValue({ content: '' }),
   updateProfileSoul: vi.fn()
 }))

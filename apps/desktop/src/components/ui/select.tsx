@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { Select as SelectPrimitive } from 'radix-ui'
 import * as React from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import { type ControlVariantProps, controlVariants } from '@/components/ui/control'
 import { usePopoverPortalContainer } from '@/components/ui/dialog-portal-context'
 import {
@@ -35,7 +35,7 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <Codicon className="opacity-60" name="chevron-down" size="1rem" />
+        <AppIcon className="opacity-60" name="chevron-down" size="1rem" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -110,7 +110,7 @@ function SelectItem({ className, children, ...props }: React.ComponentProps<type
     >
       <span className="absolute right-2 flex size-3.5 items-center justify-center text-foreground">
         <SelectPrimitive.ItemIndicator>
-          <Codicon name="check" size="0.75rem" />
+          <AppIcon name="check" size="0.75rem" />
         </SelectPrimitive.ItemIndicator>
       </span>
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

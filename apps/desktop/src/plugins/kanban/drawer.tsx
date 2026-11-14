@@ -6,10 +6,10 @@
  */
 
 import {
+  AppIcon,
   Badge,
   Button,
   cn,
-  Codicon,
   compactNumber,
   CopyButton,
   Dialog,
@@ -35,7 +35,7 @@ import {
   useQueryClient,
   useValue,
   writeClipboardText
-} from '@hermes/plugin-sdk'
+} from '@noone/plugin-sdk'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 import {
@@ -282,7 +282,7 @@ function Diagnostics({
                     size="xs"
                     variant={action.suggested ? 'secondary' : 'outline'}
                   >
-                    {action.kind === 'cli_hint' && <Codicon name="copy" size="0.7rem" />}
+                    {action.kind === 'cli_hint' && <AppIcon name="copy" size="0.7rem" />}
                     {action.label}
                   </Button>
                 ))}
@@ -324,7 +324,7 @@ function AssigneeMenu({
           ) : (
             <span className="text-(--ui-text-quaternary)">{k.unassigned}</span>
           )}
-          <Codicon className="shrink-0 text-(--ui-text-quaternary)" name="chevron-down" size="0.65rem" />
+          <AppIcon className="shrink-0 text-(--ui-text-quaternary)" name="chevron-down" size="0.65rem" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
@@ -332,7 +332,7 @@ function AssigneeMenu({
           <DropdownMenuItem key={profile.name} onSelect={() => onReassign(profile.name)}>
             <Avatar name={profile.name} size="0.875rem" />
             {profile.name}
-            {profile.name === current && <Codicon className="ml-auto" name="check" size="0.8rem" />}
+            {profile.name === current && <AppIcon className="ml-auto" name="check" size="0.8rem" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
@@ -412,7 +412,7 @@ function CommentComposer({
             type="button"
             variant="ghost"
           >
-            <Codicon name="arrow-up" size="0.85rem" />
+            <AppIcon name="arrow-up" size="0.85rem" />
           </Button>
         </Tip>
       </div>
@@ -420,7 +420,7 @@ function CommentComposer({
         <div className="flex items-center justify-between gap-2">
           <span className="text-[0.625rem] leading-tight text-(--ui-text-quaternary)">{k.deliveredLive}</span>
           <Button className="shrink-0" disabled={empty} onClick={requeue} size="xs" variant="outline">
-            <Codicon name="debug-restart" size="0.7rem" />
+            <AppIcon name="debug-restart" size="0.7rem" />
             {k.requeueWithNote}
           </Button>
         </div>
@@ -446,7 +446,7 @@ function DescriptionSection({ body, onSave }: { body: null | string | undefined;
           size="icon-xs"
           variant="ghost"
         >
-          <Codicon name={editing ? 'close' : 'edit'} size="0.75rem" />
+          <AppIcon name={editing ? 'close' : 'edit'} size="0.75rem" />
         </Button>
       }
       label={k.description}
@@ -511,7 +511,7 @@ function AttachmentDownload({
         size="inline"
         variant="text"
       >
-        <Codicon name={download.isPending ? 'sync' : 'cloud-download'} size="0.75rem" spinning={download.isPending} />
+        <AppIcon name={download.isPending ? 'sync' : 'cloud-download'} size="0.75rem" spinning={download.isPending} />
         <span className="truncate">{attachment.filename}</span>
       </Button>
     </Tip>
@@ -557,7 +557,7 @@ function AttachmentsSection({
             size="icon-xs"
             variant="ghost"
           >
-            <Codicon name={pending ? 'sync' : 'cloud-upload'} size="0.8rem" spinning={pending} />
+            <AppIcon name={pending ? 'sync' : 'cloud-upload'} size="0.8rem" spinning={pending} />
           </Button>
         </>
       }
@@ -624,7 +624,7 @@ function EstimateSection({ id }: { id: string }) {
                 size="icon-xs"
                 variant="ghost"
               >
-                <Codicon name="refresh" size="0.75rem" spinning={est.isPending} />
+                <AppIcon name="refresh" size="0.75rem" spinning={est.isPending} />
               </Button>
             </Tip>
           </div>
@@ -635,7 +635,7 @@ function EstimateSection({ id }: { id: string }) {
       ) : (
         <div className="flex items-center gap-2">
           <Button disabled={est.isPending} onClick={() => est.mutate()} size="xs" variant="outline">
-            <Codicon name={est.isPending ? 'loading' : 'dashboard'} size="0.75rem" spinning={est.isPending} />
+            <AppIcon name={est.isPending ? 'loading' : 'dashboard'} size="0.75rem" spinning={est.isPending} />
             {est.isPending ? k.estimating : k.estimateEffort}
           </Button>
           <Tip label={k.estimateTipLong}>
@@ -720,7 +720,7 @@ function FeedTabs({
   const help = (
     <Tip label={running ? k.commentsHelpRunning : k.commentsHelp}>
       <span className="grid size-5 place-items-center rounded text-(--ui-text-quaternary) hover:text-(--ui-text-secondary)">
-        <Codicon name="question" size="0.8rem" />
+        <AppIcon name="question" size="0.8rem" />
       </span>
     </Tip>
   )
@@ -991,7 +991,7 @@ export function TaskDrawer({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button aria-label={k.taskActions} size="icon-xs" variant="ghost">
-                      <Codicon name="ellipsis" />
+                      <AppIcon name="ellipsis" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -1001,7 +1001,7 @@ export function TaskDrawer({
                         host.notify({ kind: 'info', message: k.copiedId(task.id) })
                       }}
                     >
-                      <Codicon name="copy" size="0.85rem" />
+                      <AppIcon name="copy" size="0.85rem" />
                       {k.copyTaskId}
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -1010,26 +1010,26 @@ export function TaskDrawer({
                         host.notify({ kind: 'info', message: k.copiedTitle })
                       }}
                     >
-                      <Codicon name="copy" size="0.85rem" />
+                      <AppIcon name="copy" size="0.85rem" />
                       {k.copyTitle}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onSelect={mutate(() => patchTask(task.id, { status: 'archived' }), onClose)}>
-                      <Codicon name="archive" size="0.85rem" />
+                      <AppIcon name="archive" size="0.85rem" />
                       {k.archive}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive"
                       onSelect={mutate(() => deleteTask(task.id), onClose)}
                     >
-                      <Codicon name="trash" size="0.85rem" />
+                      <AppIcon name="trash" size="0.85rem" />
                       {k.delete}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
               <Button aria-label={k.close} onClick={onClose} size="icon-xs" variant="ghost">
-                <Codicon name="close" />
+                <AppIcon name="close" />
               </Button>
             </div>
           </div>

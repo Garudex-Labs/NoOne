@@ -2,7 +2,7 @@
 name: siyuan
 description: Query and edit a SiYuan knowledge base via its API.
 version: 1.0.0
-author: FEUAZUR
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-; Drive the REAL Hermes-Setup.exe (Tauri bootstrap installer) window:
+; Drive the REAL NoOne-Setup.exe (Tauri bootstrap installer) window:
 ; click Install, wait for the install to finish, click Launch, and wait for
 ; the real Hermes.exe (Electron desktop) window to appear.
 ;
@@ -27,7 +27,7 @@
 ; Args: [1] log path  [2] setup exe name  [3] bootstrap-installer.log path
 
 logPath := A_Args.Length >= 1 ? A_Args[1] : "ahk.log"
-setupExe := A_Args.Length >= 2 ? A_Args[2] : "Hermes-Setup.exe"
+setupExe := A_Args.Length >= 2 ? A_Args[2] : "NoOne-Setup.exe"
 bootstrapLog := A_Args.Length >= 3 ? A_Args[3] : ""
 
 Log(text) {

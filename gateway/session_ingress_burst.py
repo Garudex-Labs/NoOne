@@ -6,7 +6,7 @@ turn. The authority FIFO admits each input as it arrives, so the burst is held h
 bounded window first, then committed once through ``dispatch_shared_busy``. Every absorbed caller
 returns only after that commit, with its acceptance copied from it (committed before ACK), and
 input that arrives later never commits before the burst. An adapter declaring
-``serial_receive_loop`` (Signal, IRC, ...) delivers a chat's next input only after this returns, and
+``serial_receive_loop`` (Signal, ...) delivers a chat's next input only after this returns, and
 returning triggers no acknowledgement, so its caller returns once the input is held, as main
 returned once merged. Its reader still never runs ahead of what it returned on: a chat holds at
 most one uncommitted burst (the next one waits for that commit, main's backpressure), and a
@@ -19,7 +19,7 @@ import logging
 import time
 
 from gateway.platforms.event import MessageEvent, MessageType
-from hermes_cli.observability.shared_metrics_busy import note_busy_merged, settle_busy_arrival, stamp_busy_arrival
+from agent_cli.observability.shared_metrics_busy import note_busy_merged, settle_busy_arrival, stamp_busy_arrival
 
 logger = logging.getLogger(__name__)
 
@@ -182,7 +182,7 @@ def _undurable(adapter):
 
 async def when_returned_inputs_durable(adapter, persist):
     """Run ``persist()`` once every input a serial reader returned on is committed: a reader that
-    saves its own receive cursor after the call returns (Buzz) must not advance it past a held burst,
+    saves its own receive cursor after the call returns must not advance it past a held burst,
     or a restart in the hold window loses it. Inline when nothing is pending; otherwise one tracked
     task per adapter, so the reader reads on (a lost cursor write only replays inputs admission
     already holds). ``persist`` carries the cursor as of this call; while that task waits, a newer

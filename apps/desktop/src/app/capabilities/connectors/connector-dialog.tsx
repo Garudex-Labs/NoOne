@@ -1,14 +1,14 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { X } from '@noone/ui/icons'
 import { type ReactNode, type RefObject, useRef } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ConnectorLogo } from '@/components/ui/connector-logo'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { useI18n } from '@/i18n'
 import { connectorIconUrl } from '@/lib/connector-tools'
-import { X } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { CatalogMark } from './catalog-mark'
@@ -393,7 +393,7 @@ function LocalFoot({ advanced, cost }: PartProps) {
       {advanced ? (
         <details className="group grid gap-2">
           <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs font-medium text-(--ui-text-primary)">
-            <Codicon
+            <AppIcon
               className={cn('shrink-0 transition-transform duration-100 group-open:rotate-90')}
               name="chevron-right"
               size="0.75rem"

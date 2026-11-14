@@ -2,7 +2,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 
-import type { MessagingPlatformInfo } from '@/types/hermes'
+import type { MessagingPlatformInfo } from '@/types/agent-client'
 
 import { RelayLinkSetup } from './relay-link'
 
@@ -12,7 +12,7 @@ const notify = vi.fn()
 const noAccounts = { platforms: [{ platform: 'telegram', accounts: [], bot_url: null }] }
 const getRelayLinks = vi.fn(async (): Promise<unknown> => noAccounts)
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   getRelayLinks: () => getRelayLinks(),
   getRelayLinkState: (code: string) => getRelayLinkState(code),
   requestRelayLink: (platform: string) => requestRelayLink(platform),

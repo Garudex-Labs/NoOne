@@ -1,5 +1,6 @@
-import type { PluginPreviewAccessTranslations } from './types_plugin_preview_access'
+import { appText } from '@noone/shared/application-identity'
 
+import type { PluginPreviewAccessTranslations } from './types_plugin_preview_access'
 /** Copy for the preview-script consent prompt and the per-plugin grant list (Capabilities ▸ Plugins). */
 export const frPluginPreviewAccess: PluginPreviewAccessTranslations = {
   previewScriptPromptTitle: (plugin: string) => `Autoriser ${plugin} à exécuter des scripts sur cette page ?`,
@@ -14,5 +15,5 @@ export const frPluginPreviewAccess: PluginPreviewAccessTranslations = {
   previewScriptRevoke: (origin: string) => `Révoquer l’accès à ${origin}`,
   previewScriptRevoked: (plugin: string, origin: string) => `${plugin} ne peut plus exécuter de scripts sur ${origin}.`,
   previewScriptRevokeUnsaved: (plugin: string, origin: string) =>
-    `Impossible d’enregistrer la modification : elle ne vaut que jusqu’au redémarrage de Hermes. ${plugin} est bloqué sur ${origin} pour l’instant.`
+    `Impossible d’enregistrer la modification : elle ne vaut que jusqu’au redémarrage de ${appText('{app_name}')}. ${plugin} est bloqué sur ${origin} pour l’instant.`
 }

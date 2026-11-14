@@ -10,10 +10,10 @@ from typing import TYPE_CHECKING, Any, Callable, Optional
 import httpx
 
 from agent.anthropic_credentials import _is_oauth_token, resolve_anthropic_token
-from hermes_cli.auth import AuthError, _read_codex_tokens, resolve_codex_runtime_credentials
-from hermes_cli.auth_codex import _codex_pool_route_base_url
-from hermes_cli.runtime_provider import resolve_runtime_provider
-from hermes_time import safe_strftime
+from agent_cli.auth import AuthError, _read_codex_tokens, resolve_codex_runtime_credentials
+from agent_cli.auth_codex import _codex_pool_route_base_url
+from agent_cli.runtime_provider import resolve_runtime_provider
+from agent_time import safe_strftime
 
 from agent.usage_gauges import BP_FULL
 
@@ -116,7 +116,7 @@ def _reset_phrase(dt: Optional[datetime]) -> str:
     if not dt:
         return "resets soon"
     try:
-        from hermes_cli.model_picker_usage import format_resets_in
+        from agent_cli.model_picker_usage import format_resets_in
         return format_resets_in(int(dt.timestamp() * 1000))
     except Exception:
         logger.debug("Reset phrase formatting failed", exc_info=True)
@@ -163,7 +163,7 @@ def _render_usage_window_lines(snapshot: AccountUsageSnapshot) -> list[str]:
         else:
             used = max(0.0, min(100.0, float(window.used_percent))) / 100.0
             try:
-                from hermes_cli.model_picker_usage import format_percent_used, render_bar
+                from agent_cli.model_picker_usage import format_percent_used, render_bar
                 bar, pct = render_bar(used), format_percent_used(used)
             except Exception:
                 logger.debug("Usage bar rendering failed", exc_info=True)
@@ -193,12 +193,6 @@ def _is_finite_num(v: Any) -> TypeGuard[float]:
     return _is_num(v) and not isinstance(v, bool) and math.isfinite(v)
 
 
-def _nous_snapshot(windows: list, details: list, tail: list, *, source: str, plan: Optional[str] = None,
-                   usage_window: bool = False) -> Optional[AccountUsageSnapshot]:
-    """Nous snapshot with *tail* lines appended, or None when there is nothing to show."""
-    if not windows and not details:
-        return None
-    return _snapshot("nous", source, windows, details + tail, title="Nous credits", plan=plan, usage_window=usage_window)
 
 
 def _bp_window(label: str, used_bp: Any, resets_at_ms: Any) -> Optional[AccountUsageWindow]:
@@ -260,76 +254,8 @@ def _usage_window_rows(gauges: Any, *, paused_reason: Any,
     return out, lines
 
 
-def build_nous_credits_snapshot(account_info) -> Optional[AccountUsageSnapshot]:
-    """NousPortalAccountInfo → /usage snapshot: dollar magnitudes + renewal date + portal CTA, plus a ``% used``
-    gauge when the portal supplies ``monthly_credits``. A usage-window account (``usage_window`` present) shows
-    its allowances as percent used, the large-model line and its top-up balance instead. Fail-open → None."""
-    try:
-        from hermes_cli.nous_account import nous_portal_topup_url
-        if account_info is None or not getattr(account_info, "logged_in", False):
-            return None
-        access = getattr(account_info, "paid_service_access_info", None)
-        sub = getattr(account_info, "subscription", None)
-        windows: list[AccountUsageWindow] = []
-        details: list[str] = []
-        uw = getattr(account_info, "usage_window", None)
-        if uw is not None:
-            windows, window_lines = _usage_window_rows(
-                getattr(uw, "gauges", None), paused_reason=getattr(uw, "paused_reason", None),
-                keep_going_on_credits=getattr(uw, "keep_going_on_credits", None),
-            )
-        if windows:  # usage-window account: percents, plus the top-up balance
-            details.extend(window_lines)
-            topup = getattr(access, "purchased_credits_remaining", None) if access is not None else None
-            if _is_finite_num(topup):
-                details.append(f"Top-up credits: {_fmt_usd(topup)}")
-            if getattr(account_info, "paid_service_access", None) is False and not window_lines:
-                details.append(_DEPLETED_LINE)
-            if sub is not None and (period_end := getattr(sub, "current_period_end", None)):
-                from agent.billing_usage import format_renews
-                details.append(f"Renews: {format_renews(period_end) or period_end}")
-            return _nous_snapshot(windows, details, ["Top up via /topup"], source="portal-account",
-                                  plan=getattr(sub, "plan", None) if sub is not None else None, usage_window=True)
-        # Gauge needs a positive cap AND a finite remaining <= cap (numeric fields, NOT a server *_usd); used =
-        # cap - remaining clamped [0,100] so debt reads 100%. NaN/Inf (json.loads accepts bare NaN → "$nan") and
-        # remaining > cap (rollover makes the cap a meaningless denominator) fall back to the magnitudes lines.
-        if sub is not None:
-            cap = getattr(sub, "monthly_credits", None)
-            sub_remaining = getattr(sub, "credits_remaining", None)
-            if _is_finite_num(cap) and cap > 0 and _is_finite_num(sub_remaining) and sub_remaining <= cap:
-                windows.append(AccountUsageWindow(
-                    label="Subscription", used_percent=max(0.0, min(100.0, (cap - sub_remaining) / cap * 100.0)),
-                    detail=f"{_fmt_usd(sub_remaining)} of {_fmt_usd(cap)} left",
-                ))
-        if access is not None:
-            for attr, label in (("subscription_credits_remaining", "Subscription credits"),
-                                ("purchased_credits_remaining", "Top-up credits"), ("total_usable_credits", "Total usable")):
-                value = getattr(access, attr, None)
-                if _is_finite_num(value):
-                    details.append(f"{label}: {_fmt_usd(value)}")
-        if sub is not None:
-            rollover = getattr(sub, "rollover_credits", None)
-            if _is_finite_num(rollover) and rollover > 0:
-                details.append(f"Rollover: {_fmt_usd(rollover)}")
-            period_end = getattr(sub, "current_period_end", None)
-            if period_end:
-                details.append(f"Renews: {period_end}")
-        if getattr(account_info, "paid_service_access", None) is False:
-            details.append(_DEPLETED_LINE)
-        return _nous_snapshot(windows, details, [f"Top up: {nous_portal_topup_url(account_info)}", "(or run /topup)"],
-                              source="portal-account", plan=getattr(sub, "plan", None) if sub is not None else None)
-    except (AttributeError, TypeError):
-        return None
 
 
-def _nous_logged_in() -> bool:
-    """Cheap local auth-state check: a Nous access token is present. Fail-open False."""
-    try:
-        from hermes_cli.auth import get_provider_auth_state
-        tok = (get_provider_auth_state("nous") or {}).get("access_token")
-        return isinstance(tok, str) and bool(tok.strip())
-    except Exception:
-        return False
 
 
 def _fetch_portal_account(timeout: float):
@@ -342,7 +268,6 @@ def _fetch_portal_account(timeout: float):
     and never blocks the caller or process exit; its eventual exception is
     drained so GC never logs "exception was never retrieved"."""
     import contextvars
-    from hermes_cli.nous_account import get_nous_portal_account_info
     from tools.daemon_pool import DaemonThreadPoolExecutor
 
     context = contextvars.copy_context()
@@ -400,48 +325,10 @@ def apply_header_gauge(snapshot: Optional[AccountUsageSnapshot], credits_state: 
     return replace(snapshot, windows=tuple(windows), details=details)
 
 
-def nous_credits_lines(*, markdown: bool = False, timeout: float = 10.0, credits_state: Any = None) -> list[str]:
-    """Rendered Nous-credits /usage lines, or [] when there's nothing to show. Independent of any live agent
-    (logged-in gate, then a bounded portal fetch); shared by CLI ``_show_usage`` and the TUI ``session.usage`` RPC.
-    Fail-open: any hiccup or timeout → []. HERMES_DEV_CREDITS_FIXTURE renders from the fixture instead of the portal.
-    ``credits_state`` is the last response's header gauge; when it is ahead of the portal, the bars use it."""
-    return nous_credits_view(markdown=markdown, timeout=timeout, credits_state=credits_state)[0]
 
 
-def nous_credits_view(*, markdown: bool = False, timeout: float = 10.0, credits_state: Any = None) -> tuple[list[str], bool]:
-    """``nous_credits_lines`` plus whether they are the usage-window layout (callers keep today's
-    presentation for everyone else). Fail-open → ``([], False)``."""
-    try:
-        from agent.credits_tracker import dev_fixture_credits_state
-        fixture = dev_fixture_credits_state()
-    except Exception:
-        logger.debug("Dev credits fixture unavailable", exc_info=True)
-        fixture = None
-    if fixture is not None:
-        snapshot = _snapshot_from_credits_state(fixture)
-        return render_account_usage_lines(snapshot, markdown=markdown), bool(snapshot and snapshot.usage_window)
-    if not _nous_logged_in():
-        return [], False
-    try:
-        snapshot = apply_header_gauge(
-            build_nous_credits_snapshot(_fetch_portal_account(timeout)), credits_state,
-        )
-        return render_account_usage_lines(snapshot, markdown=markdown), bool(snapshot and snapshot.usage_window)
-    except Exception:
-        # Fail-open; breadcrumb so a dead /usage credits block is diagnosable.
-        logger.debug("credits ▸ /usage portal fetch/render failed (fail-open)", exc_info=True)
-        return [], False
 
 
-def nous_credits_usage_fields(agent: Any = None) -> dict[str, Any]:
-    """The ``session.usage`` fields for the Nous credits block: ``credits_lines`` (when there are any) and
-    ``credits_usage_window`` for the usage-window layout. Reads *agent*'s live credits headers. Never raises."""
-    try:
-        lines, is_window = nous_credits_view(credits_state=getattr(agent, "_credits_state", None) if agent else None)
-    except Exception:
-        logger.debug("credits ▸ /usage fields unavailable", exc_info=True)
-        return {}
-    return ({"credits_lines": lines} | ({"credits_usage_window": True} if is_window else {})) if lines else {}
 
 
 def _snapshot_from_credits_state(state) -> Optional[AccountUsageSnapshot]:
@@ -509,7 +396,6 @@ def build_credits_view(*, markdown: bool = False, timeout: float = 10.0) -> Cred
         return not_logged_in
     if account is None or not getattr(account, "logged_in", False):
         return not_logged_in
-    from hermes_cli.nous_account import nous_portal_topup_url
     balance_lines = [
         line
         for line in render_account_usage_lines(build_nous_credits_snapshot(account), markdown=markdown)
@@ -777,7 +663,7 @@ def _codex_reset_outcome(body: dict, available: int) -> CodexResetRedeemResult:
         # Quota is restored upstream — lift persisted pool cooldowns so the credential isn't frozen behind a
         # stale ``last_error_reset_at``.
         try:
-            from hermes_cli.auth import clear_codex_pool_quota_cooldowns
+            from agent_cli.auth import clear_codex_pool_quota_cooldowns
             clear_codex_pool_quota_cooldowns()
         except Exception:
             logger.debug("Failed to clear Codex pool cooldowns after reset redemption", exc_info=True)
@@ -798,7 +684,7 @@ def redeem_codex_reset_credit(
     try:
         token, resolved_base_url, account_id = _resolve_codex_usage_credentials(base_url, api_key)
     except Exception:
-        return _unavailable("No Codex credentials available. Run `hermes auth` to sign in with your ChatGPT account.")
+        return _unavailable("No Codex credentials available. Run `noone auth` to sign in with your ChatGPT account.")
     redeem_request_id = str(uuid.uuid4())
     try:
         for attempt in range(2):
@@ -834,7 +720,7 @@ def redeem_codex_reset_credit(
         code = exc.response.status_code
         if code in (401, 403):
             return _unavailable(f"Codex backend rejected the request (HTTP {code}). Reset credits require ChatGPT-account "
-                                "(OAuth) auth — run `hermes auth` and sign in with your ChatGPT account.")
+                                "(OAuth) auth — run `noone auth` and sign in with your ChatGPT account.")
         return _unavailable(f"Codex backend error (HTTP {code}) — try again shortly.")
     except Exception as exc:
         return _unavailable(f"Could not reach the Codex backend: {exc}")

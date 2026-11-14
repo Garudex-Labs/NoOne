@@ -1,6 +1,8 @@
 import http from 'node:http'
 import https from 'node:https'
 
+import { appText } from '@noone/shared/application-identity'
+
 import { downloadAgentFor } from './api-transport'
 import type {
   GatewayDownloadResponse,
@@ -32,7 +34,7 @@ function downloadUrl(url: string): URL {
   }
 
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-    throw new Error(`Unsupported Hermes backend URL protocol: ${parsed.protocol}`)
+    throw new Error(appText(`Unsupported {app_name} backend URL protocol: ${parsed.protocol}`))
   }
 
   return parsed
@@ -77,7 +79,7 @@ export function downloadViaTokenToFile(
 
     request.on('error', reject)
     request.setTimeout(timeoutMs, (): void => {
-      request.destroy(new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`))
+      request.destroy(new Error(appText(`Timed out connecting to {app_name} backend after ${timeoutMs}ms`)))
     })
     request.end()
   })
@@ -136,7 +138,7 @@ export function downloadViaOauthSessionToFile<S>(
 
       settled = true
       request.abort()
-      reject(new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`))
+      reject(new Error(appText(`Timed out connecting to {app_name} backend after ${timeoutMs}ms`)))
     }, timeoutMs)
 
     request.on('response', (response: GatewayDownloadResponse): void => {

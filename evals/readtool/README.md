@@ -10,7 +10,7 @@ blocklist). This eval tests the failure shapes for real, through the real
 
 ## What it measures
 
-Every task runs the full Hermes agent (file + terminal + search toolsets)
+Every task runs the full NoOne agent (file + terminal + search toolsets)
 against a deterministic hostile workspace:
 
 | fixture | shape | tasks |

@@ -1,4 +1,4 @@
-import { AlertCircle, RotateCcw } from "lucide-react";
+import { AlertCircle, RotateCcw } from "@noone/ui/icons";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { Card } from "@nous-research/ui/ui/components/card";
 

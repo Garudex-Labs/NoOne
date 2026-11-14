@@ -1,5 +1,5 @@
 """``browser.*`` reads go through the effective user config: the managed overlay wins over the profile's
-file and ``${VAR}`` references expand, as for every other runtime reader (hermes_cli/AGENTS.md, Three
+file and ``${VAR}`` references expand, as for every other runtime reader (agent_cli/AGENTS.md, Three
 loaders). A raw read would launch Chromium on a literal ``${HOME}/...`` dir under HERMES_HOME, or ignore
 an administrator's pinned profile and flags."""
 
@@ -24,8 +24,8 @@ def homes(tmp_path, monkeypatch):
 
 
 def _reset():
-    import hermes_cli.config as cfg
-    from hermes_cli import config_effective, managed_scope
+    import agent_cli.config as cfg
+    from agent_cli import config_effective, managed_scope
     from tools import browser_session_cloud
 
     cfg._LOAD_CONFIG_CACHE.clear()
@@ -113,7 +113,7 @@ def test_browser_exec_cloud_routing_reads_the_managed_gateway_selection(homes):
 def test_real_profile_pin_follows_the_managed_overlay(homes):
     """The real-profile copy's source pin is a ``browser.*`` read too: a managed pin decides which identity
     the agent gets."""
-    from hermes_cli.browser_connect import _real_profile_pin
+    from agent_cli.browser_connect import _real_profile_pin
 
     home, managed = homes
     _write(home / "config.yaml", """
@@ -129,7 +129,7 @@ def test_real_profile_pin_follows_the_managed_overlay(homes):
 
 def test_browser_status_reports_the_cdp_url_the_browser_tool_reads(homes, monkeypatch):
     """``/browser status`` shows what the next browser call connects to: the managed ``browser.cdp_url``."""
-    from tui_gateway import server
+    from agent_backend import server
 
     home, managed = homes
     monkeypatch.delenv("BROWSER_CDP_URL", raising=False)

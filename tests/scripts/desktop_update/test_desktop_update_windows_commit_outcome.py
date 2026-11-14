@@ -1,7 +1,7 @@
 """Post-commit outcomes (contract C3) on the real Windows hand-off script.
 
 A real ``windows.ps1`` drives a real published launcher whose ``hermes``
-application is a scripted stand-in: once ``hermes update`` exits 0 the install
+application is a scripted stand-in: once ``noone update`` exits 0 the install
 is on the new version, so nothing afterwards may report "still on the previous
 version", and the hand-off's own supervision (watchdog, probes, marker
 release) must not turn healthy work into a failure.
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 def _handoff(tmp_path: Path, *args: str, verify: str = 'pass\n', timeout: int = 150, prepare=None, **env: str):
     install = tmp_path / 'checkout'
     publish_fixture_launcher(install, CLI)
-    (install / 'hermes_cli/desktop_update_verify.py').write_text(verify, encoding='utf-8')
+    (install / 'agent_cli/desktop_update_verify.py').write_text(verify, encoding='utf-8')
     home = tmp_path / 'home'; home.mkdir()
     if prepare is not None:
         prepare(home, install)
@@ -137,7 +137,7 @@ def test_a_result_that_cannot_be_published_leaves_no_tmp_file(tmp_path: Path) ->
 @pytest.mark.parametrize(('receipt', 'ok'), [('interrupted', True), ('partial', True), ('interrupted,another-run', False),
                                              ('failed', False)])
 def test_nonzero_exit_after_the_commit_point_is_installed_with_a_followup(tmp_path: Path, receipt: str, ok: bool) -> None:
-    # Contract C3: `hermes update` exits 130 / 1 AFTER its commit point (Ctrl-C after the code
+    # Contract C3: `noone update` exits 130 / 1 AFTER its commit point (Ctrl-C after the code
     # moved, a parked autostash). Its own receipt (matched by the correlation id) says so: the
     # result must report the update installed with an owed follow-up, never "update failed".
     code, out, argv, result, _ = _handoff(tmp_path, HANDOFF_RECEIPT=receipt, HANDOFF_EXIT='130')
@@ -156,7 +156,7 @@ _TIMED_CHECKOUT_HOLDER = """
 import msvcrt, os, sys, time
 fd = os.open(sys.argv[1], os.O_RDWR | os.O_CREAT | os.O_BINARY, 0o644)
 os.lseek(fd, 1 << 20, os.SEEK_SET)
-msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)   # hermes_cli/update_lock.py::_try_lock's byte
+msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)   # agent_cli/update_lock.py::_try_lock's byte
 time.sleep(float(sys.argv[2]))
 """
 

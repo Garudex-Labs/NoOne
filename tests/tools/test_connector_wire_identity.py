@@ -7,7 +7,7 @@ import logging
 import pytest
 
 from gateway.session_context import clear_session_vars, set_session_vars
-from hermes_cli.config import get_config_path
+from agent_cli.config import get_config_path
 from tools.connectors.gateway.client import ConnectorClient
 from tools.managed_gateway_identity import CallRef, connector_headers, user_agent
 
@@ -91,7 +91,7 @@ def test_correlation_ids_go_only_with_send_consent(send):
 
 
 def test_session_header_is_the_conversation_root(monkeypatch):
-    from agent.portal_tags import reset_conversation_context, set_conversation_context
+    from agent.conversation_scope import reset_conversation_context, set_conversation_context
 
     _consent(True)
     token = set_conversation_context("root-session")

@@ -34,9 +34,7 @@ node_modules
 
 # Built artifacts that are regenerated inside the image.  Excluded so local
 # rebuilds on the developer's machine don't invalidate the dependency-install layer
-# that now depends on the full ui-tui/packages/hermes-ink/ tree being present.
-ui-tui/dist/
-ui-tui/packages/hermes-ink/dist/
+# that now depends on the full ui-tui/packages/agent-ink/ tree being present.
 
 # CI/CD
 .github
@@ -114,8 +112,8 @@ website/
 assets/
 !assets/
 assets/*
-!assets/nous-girl-black.svg
-!assets/nous-girl-white.svg
+!assets/icon.png
+!assets/icon.png
 !assets/dmg-volume.png
 !assets/backgrounds/
 !assets/backgrounds/**

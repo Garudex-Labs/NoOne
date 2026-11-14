@@ -26,10 +26,10 @@ logger = logging.getLogger(__name__)
 
 def _process_hermes_home() -> Path:
     """HERMES_HOME for process-level identity files (ignore task overrides)."""
-    from hermes_constants import get_hermes_home, get_process_hermes_home
+    from agent_constants import get_agent_home, get_process_agent_home
 
-    # get_process_hermes_home expands ``~``/``$VAR`` (python -m gateway.run skips the CLI normalizer).
-    return get_process_hermes_home() if os.environ.get("HERMES_HOME", "").strip() else get_hermes_home()
+    # get_process_agent_home expands ``~``/``$VAR`` (python -m gateway.run skips the CLI normalizer).
+    return get_process_agent_home() if os.environ.get("HERMES_HOME", "").strip() else get_agent_home()
 
 
 def _home_path(home: Optional[Path], *relative: str) -> Path:
@@ -87,9 +87,9 @@ def _write_sentinel(payload: dict[str, Any], home: Optional[Path]) -> None:
         from utils import atomic_json_write
 
         path = get_lifecycle_sentinel_path(home)
-        from hermes_constants import mkdir_under_hermes_home
+        from agent_constants import mkdir_under_agent_home
 
-        mkdir_under_hermes_home(path.parent)
+        mkdir_under_agent_home(path.parent)
         atomic_json_write(path, payload, indent=None)
     except Exception:
         logger.debug("Failed to write lifecycle sentinel", exc_info=True)
@@ -99,9 +99,9 @@ def _append_exit_diag(record: dict[str, Any], home: Optional[Path]) -> None:
     """Append a JSON line to gateway-exit-diag.log (same format as the CLI's ``_exit_diag``)."""
     try:
         path = _home_path(home, "logs", "gateway-exit-diag.log")
-        from hermes_constants import mkdir_under_hermes_home
+        from agent_constants import mkdir_under_agent_home
 
-        mkdir_under_hermes_home(path.parent)
+        mkdir_under_agent_home(path.parent)
         with path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(record, default=str) + "\n")
     except OSError:
@@ -128,7 +128,7 @@ def _pid_is_sentinel_owner(pid: Any, start_time: Any, create_time: Any) -> bool:
             return False
     except Exception:
         return False
-    from hermes_cli.process_identity import _process_create_time
+    from agent_cli.process_identity import _process_create_time
 
     actual = _process_create_time(pid_int)
     if actual is None:
@@ -158,7 +158,7 @@ def detect_unclean_exit(home: Optional[Path] = None) -> Optional[dict[str, Any]]
     sentinel = _read_json(get_lifecycle_sentinel_path(home))
     if not sentinel or sentinel.get("phase") != "running":
         return None
-    from hermes_state_pidns import persistent_record_pidns_checkable
+    from agent_state_pidns import persistent_record_pidns_checkable
     if not persistent_record_pidns_checkable(sentinel.get("pidns")):
         # Written in another PID namespace, so its pid means nothing here (#123081). The home's
         # gateway.lock flock does: held by another process = that life is still running.
@@ -218,7 +218,7 @@ def _install_integrity_check_lease(conn: sqlite3.Connection, *, deadline_at: Opt
     caller can bound the scan.  Synchronous by design: no checker worker thread can outlive
     the check.
     """
-    from hermes_startup_watchdog import report_startup_progress
+    from agent_startup_watchdog import report_startup_progress
 
     report_startup_progress(_INTEGRITY_CHECK_LEASE_S, phase=_INTEGRITY_CHECK_LEASE_PHASE)
     last_renew = time.monotonic()
@@ -262,7 +262,7 @@ def check_state_db_integrity(home: Optional[Path] = None, *, deadline_s: Optiona
         except (TypeError, ValueError):
             deadline_at = None
     try:
-        from hermes_cli.sqlite_safe_read import connect_tracked  # tracked: raw byte probes must see this reader
+        from agent_cli.sqlite_safe_read import connect_tracked  # tracked: raw byte probes must see this reader
 
         with closing(connect_tracked(str(path), tracking_path=path)) as conn:
             _install_integrity_check_lease(conn, deadline_at=deadline_at)
@@ -280,8 +280,8 @@ def _state_db_journal_mode(path: Path) -> Optional[str]:
     """On-disk journal mode of ``path`` via one ``PRAGMA journal_mode`` read on a short-lived
     connection (no lock outlives it); ``None`` when undeterminable.  Never raises."""
     try:
-        from hermes_cli.sqlite_safe_read import connect_tracked
-        from hermes_state_wal import _on_disk_journal_mode
+        from agent_cli.sqlite_safe_read import connect_tracked
+        from agent_state_wal import _on_disk_journal_mode
 
         with closing(connect_tracked(str(path), timeout=1.0, tracking_path=path)) as conn:
             return _on_disk_journal_mode(conn) or None
@@ -305,7 +305,7 @@ def _report_unclean_exit(evidence: dict[str, Any], home: Optional[Path], *, defe
         if verdict not in ("ok", "absent"):
             logger.error(
                 "state.db FAILED integrity check after an unclean gateway exit: %s — sessions may read as "
-                "missing until it is repaired. Run `hermes doctor`.",
+                "missing until it is repaired. Run `noone doctor`.",
                 verdict,
             )
     _append_exit_diag({"ts": _now_iso(), "tag": "gateway.previous_unclean_exit", "pid": os.getpid(), **evidence}, home)
@@ -336,12 +336,12 @@ def record_startup(home: Optional[Path] = None, *, defer_integrity_check: bool =
     except Exception:
         logger.debug("Unclean-exit detection failed", exc_info=True)
     try:
-        from hermes_state_pidns import pid_namespace_id
+        from agent_state_pidns import pid_namespace_id
         claim: dict[str, Any] = {"phase": "running", "pid": os.getpid(), "pidns": pid_namespace_id(),
                                  "start_time": time.time(), "started_at": _now_iso()}
         # Process birth (psutil), distinct from ``start_time`` (the ledger claim, seconds later once
         # imports finish): the Windows start attestation binds PIDs to birth time (#110020 review).
-        from hermes_cli.process_identity import _process_create_time
+        from agent_cli.process_identity import _process_create_time
 
         create_time = _process_create_time(os.getpid())
         if create_time is not None:
@@ -398,7 +398,7 @@ def run_deferred_integrity_check(
         if verdict not in ("ok", "absent") and not verdict.startswith("skipped:"):
             logger.error(
                 "state.db FAILED integrity check after an unclean gateway exit: %s — sessions may read as "
-                "missing until it is repaired. Run `hermes doctor`.",
+                "missing until it is repaired. Run `noone doctor`.",
                 verdict,
             )
         record: dict[str, Any] = {

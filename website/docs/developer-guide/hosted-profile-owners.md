@@ -1,4 +1,4 @@
-# Hosted rooms across local profile owners
+# Hosted rooms across local profile owners {#hosted-rooms-across-local-profile-owners}
 
 Hosted room execution uses the canonical session authority. Each profile runs its
 own ordinary gateway process and owns only its own state database. The source

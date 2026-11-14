@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useI18n } from '@/i18n'
 
@@ -51,7 +51,7 @@ export function CatalogDetailDialog({
       size="icon-lg"
       variant="ghost"
     >
-      <Codicon name={delta < 0 ? 'chevron-left' : 'chevron-right'} />
+      <AppIcon name={delta < 0 ? 'chevron-left' : 'chevron-right'} />
     </Button>
   )
 

@@ -1,6 +1,6 @@
 # nix/moduleCommon.nix — the code that the NixOS and Home Manager modules share
 #
-# `services.hermes-agent` is the same option set on both modules. Both modules
+# `services.noone` is the same option set on both modules. Both modules
 # get their options, their renderers for config.yaml, .env and documents, and
 # their state setup from this file. A NixOS example works on Home Manager
 # without a change. An option added here appears on both modules at once.
@@ -10,7 +10,7 @@
 #   nixosModules.nix        the service user and group, stateDir,
 #                           addToSystemPackages, container mode, tmpfiles,
 #                           system.activationScripts, system systemd units
-#   homeManagerModules.nix  hermesHome, programs.hermes-agent (the CLI and
+#   homeManagerModules.nix  hermesHome, programs.noone (the CLI and
 #                           the desktop application), home.activation,
 #                           systemd.user.services, launchd.agents
 #
@@ -241,7 +241,7 @@ let
         type = types.package;
         default = defaultPackage;
         defaultText = defaultPackageText;
-        description = "The hermes-agent package to use.";
+        description = "The noone package to use.";
       };
 
       workingDirectory = mkOption {
@@ -276,7 +276,7 @@ let
 
           The merge into the config.yaml on disk is also a deep merge. These
           keys replace the keys on disk. The module keeps all other keys,
-          which includes the keys that `hermes config set` and the settings
+          which includes the keys that `noone config set` and the settings
           panes of the TUI and the desktop app write at runtime.
         '';
         example = literalExpression ''
@@ -300,7 +300,7 @@ let
           The paths to environment files that contain secrets, for example
           API keys and tokens. Activation adds the contents of these files to
           $HERMES_HOME/.env. Hermes reads that file at each start, with
-          load_hermes_dotenv().
+          load_agent_dotenv().
 
           Each activation writes .env again from the start. Thus a secret
           file cannot go into .env two times.
@@ -420,7 +420,7 @@ let
         type = types.listOf types.package;
         default = [ ];
         description = ''
-          Directory-based plugin packages to symlink into the hermes plugins
+          Directory-based plugin packages to symlink into the noone plugins
           directory. Each package must contain a plugin.yaml and __init__.py
           at its root. Hermes discovers these automatically on startup.
         '';
@@ -446,12 +446,12 @@ let
           hermes_agent.plugins entry-point group. Each package must be built
           with the same Python interpreter as hermes. The interpreter
           major.minor is derived from pm/lock.json by nix/pythonLock.nix —
-          take packages from config.services.hermes-agent.package.python.pkgs so the set always
+          take packages from config.services.noone.package.python.pkgs so the set always
           matches the interpreter hermes was built with.
         '';
         example = literalExpression ''
           [
-            (config.services.hermes-agent.package.python.pkgs.buildPythonPackage {
+            (config.services.noone.package.python.pkgs.buildPythonPackage {
               pname = "rtk-hermes";
               version = "1.0.0";
               src = pkgs.fetchFromGitHub {
@@ -478,7 +478,7 @@ let
           replace them. For a smaller venv pick a smaller `package`
           (`minimal`, `messaging`) or override its defaultDependencyGroups.
 
-          Use this for optional extras already declared in hermes-agent's
+          Use this for optional extras already declared in noone's
           pyproject.toml (e.g. "google-meet").
           Use extraPythonPackages for external packages not in pyproject.toml.
         '';
@@ -489,7 +489,7 @@ let
       extraArgs = mkOption {
         type = types.listOf types.str;
         default = [ ];
-        description = "Extra command-line arguments for `hermes gateway`.";
+        description = "Extra command-line arguments for `noone gateway`.";
       };
 
       restart = mkOption {
@@ -504,16 +504,16 @@ let
         description = "The systemd RestartSec= value. Darwin does not use this option.";
       };
 
-      # ── The backend: `hermes serve` or `hermes dashboard` ──────────────
-      # `hermes serve` and `hermes dashboard` are the same entry point,
-      # hermes_cli.main:cmd_dashboard, with one flag of difference. serve runs
+      # ── The backend: `noone serve` or `noone dashboard` ──────────────
+      # `noone serve` and `noone dashboard` are the same entry point,
+      # agent_cli.main:cmd_dashboard, with one flag of difference. serve runs
       # without a user interface. dashboard also serves the web application.
       # Both give the /api/ws and /api/pty sockets that Hermes Desktop
       # connects to. They are one process, and you can run only one of them.
       # Thus this option is an enum and not two booleans.
       #
       # The backend does not run the messaging gateway. web_server.py only
-      # controls an external gateway, with `hermes gateway restart`. It does
+      # controls an external gateway, with `noone gateway restart`. It does
       # not contain a gateway.
       backend = {
         mode = mkOption {
@@ -669,14 +669,14 @@ let
   installPackageRemovedMessage =
     value:
     ''
-      services.hermes-agent.installPackage was removed. Hermes now
+      services.noone.installPackage was removed. Hermes now
       separates the installation from the services, which is the
       Home Manager convention:
 
-        programs.hermes-agent.enable = ${lib.boolToString (value != false)};  # the hermes CLI, and HERMES_HOME for your shells
-        programs.hermes-agent.desktop.enable = true;  # the desktop application
+        programs.noone.enable = ${lib.boolToString (value != false)};  # the hermes CLI, and HERMES_HOME for your shells
+        programs.noone.desktop.enable = true;  # the desktop application
 
-      `services.hermes-agent` keeps the state, the configuration and
+      `services.noone` keeps the state, the configuration and
       the daemons. Remove `installPackage` and add the line above.
     '';
 
@@ -722,7 +722,7 @@ let
           ''
             HOME=$TMPDIR ${(effectivePackage cfg).hermesVenv}/bin/python3 - "$settingsPath" > $out <<'PY'
             import json, sys
-            from hermes_cli.config_defaults import DEFAULT_CONFIG
+            from agent_cli.config_defaults import DEFAULT_CONFIG
             with open(sys.argv[1]) as f:
                 settings = json.load(f)
             settings.setdefault("_config_version", DEFAULT_CONFIG["_config_version"])
@@ -786,7 +786,7 @@ let
           printf '\n' >> "$dest"
           cat "$file" >> "$dest"
         else
-          echo "hermes-agent: WARNING cannot read environmentFile $file" >&2
+          echo "noone: WARNING cannot read environmentFile $file" >&2
         fi
       done
     '';
@@ -916,7 +916,7 @@ let
       ${run}find ${hermesHome}/plugins -maxdepth 1 -type l -name 'nix-managed-*' -delete 2>/dev/null || true
       ${lib.concatMapStringsSep "\n" (plugin: ''
         if [ ! -f ${plugin}/plugin.yaml ]; then
-          echo "hermes-agent: ERROR extraPlugins entry '${plugin}' has no plugin.yaml" >&2
+          echo "noone: ERROR extraPlugins entry '${plugin}' has no plugin.yaml" >&2
           exit 1
         fi
         ${run}ln -sfn ${plugin} ${hermesHome}/plugins/nix-managed-${lib.getName plugin}

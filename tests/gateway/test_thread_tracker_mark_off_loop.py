@@ -3,13 +3,13 @@
 ``gateway/platforms/helpers.ThreadParticipationTracker._save`` ends in
 ``atomic_json_write`` -> ``os.replace``, whose duration is unbounded under
 filesystem pressure.  Every caller sits on an inbound-message coroutine --
-Matrix ``_resolve_message_context`` and ``create_handoff_thread``, Discord
+Discord
 ``_handle_message`` (x2) and ``_handle_thread_create_slash`` -- so that rename
 was paid inline on the loop, stalling every other adapter's polling and every
 in-flight turn for as long as it took.
 
-The fix is a CHOKE-POINT one rather than five call-site ones: ``mark_async``
-offloads only the persist via ``asyncio.to_thread``, and all five coroutine
+The fix is a CHOKE-POINT one rather than call-site ones: ``mark_async``
+offloads only the persist via ``asyncio.to_thread``, and the coroutine
 call sites await it.  ``mark`` keeps its exact synchronous contract for the
 non-loop callers and tests.
 
@@ -51,11 +51,11 @@ BARRIER = 1.0
 @pytest.fixture()
 def tracker(tmp_path, monkeypatch):
     """A tracker whose state file lives in an isolated directory."""
-    path = tmp_path / "matrix_threads.json"
+    path = tmp_path / "discord_threads.json"
     monkeypatch.setattr(
         ThreadParticipationTracker, "_state_path", lambda self: path, raising=True
     )
-    obj = ThreadParticipationTracker("matrix")
+    obj = ThreadParticipationTracker("discord")
     obj.state_path = path  # convenience for assertions
     return obj
 
@@ -87,8 +87,8 @@ def test_two_concurrent_marks_do_not_lose_an_entry(tracker, monkeypatch):
 
     async def scenario():
         marks = asyncio.gather(
-            tracker.mark_async("!a:example.org"),
-            tracker.mark_async("!b:example.org"),
+            tracker.mark_async("thread-a"),
+            tracker.mark_async("thread-b"),
         )
         # A worker is parked inside the rename. Neither the second mark's
         # in-memory insert nor a membership check may wait for it: both take
@@ -96,7 +96,7 @@ def test_two_concurrent_marks_do_not_lose_an_entry(tracker, monkeypatch):
         # ``os.replace`` stalls the loop for the whole rename.
         started = time.monotonic()
         await asyncio.sleep(0.05)
-        assert "!a:example.org" in tracker
+        assert "thread-a" in tracker
         elapsed = time.monotonic() - started
         assert elapsed < BARRIER / 2, (
             "the loop stalled on the tracker lock while a worker held it "
@@ -107,7 +107,7 @@ def test_two_concurrent_marks_do_not_lose_an_entry(tracker, monkeypatch):
     asyncio.run(scenario())
 
     persisted = json.loads(tracker.state_path.read_text(encoding="utf-8"))
-    assert sorted(persisted) == ["!a:example.org", "!b:example.org"], (
+    assert sorted(persisted) == ["thread-a", "thread-b"], (
         "a concurrent mark was lost from the DURABLE file: "
         f"{persisted!r}. atomic_json_write makes each write atomic; it does "
         "not make check/insert/trim/write atomic."
@@ -117,7 +117,7 @@ def test_two_concurrent_marks_do_not_lose_an_entry(tracker, monkeypatch):
 def test_a_mark_is_visible_in_memory_before_the_persist_completes(tracker, monkeypatch):
     """``thread_id in tracker`` must be true before the persist runs AT ALL.
 
-    Both adapters gate on membership right after marking
+    Adapters gate on membership right after marking
     (``in_bot_thread = bool(thread_id and thread_id in self._threads)``), so
     deferring the in-memory insert to the worker thread alongside the write
     would reopen the mention-gating hole the tracker exists to close -- and
@@ -141,13 +141,13 @@ def test_a_mark_is_visible_in_memory_before_the_persist_completes(tracker, monke
     monkeypatch.setattr(helpers, "_to_thread", _never, raising=True)
 
     async def scenario():
-        mark = asyncio.create_task(tracker.mark_async("!first:example.org"))
+        mark = asyncio.create_task(tracker.mark_async("thread-first"))
         # One loop iteration runs the task up to its first suspension point,
         # which is inside ``_never`` -- no Event handoff, no wall-clock wait.
         await asyncio.sleep(0)
         assert handed_off, "mark_async never reached the to_thread handoff"
         try:
-            assert "!first:example.org" in tracker, (
+            assert "thread-first" in tracker, (
                 "the mark is not in memory once the persist has been handed "
                 "off -- the in-memory insert was deferred onto the worker "
                 "thread, so membership now depends on executor availability "

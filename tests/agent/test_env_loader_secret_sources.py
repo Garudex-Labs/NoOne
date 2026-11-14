@@ -1,6 +1,6 @@
-"""Tests for the secret-source tracking in ``hermes_cli.env_loader``.
+"""Tests for the secret-source tracking in ``agent_cli.env_loader``.
 
-These cover the small public surface that lets `hermes model` / `hermes setup`
+These cover the small public surface that lets `noone model` / `noone setup`
 label detected credentials with their origin ("from Bitwarden") so users
 don't see an unexplained "credentials ✓" line when their .env is empty.
 """
@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from hermes_cli import env_loader
+from agent_cli import env_loader
 
 
 @pytest.fixture(autouse=True)
@@ -158,7 +158,7 @@ def test_single_profile_scoped_load_keeps_override_behavior(tmp_path, monkeypatc
     not on the home override alone -- single-profile ``-p`` runs still load.
     """
     from agent import secret_scope
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     monkeypatch.delenv("HERMES_TEST_SHARED_ADAPTER_CONFIG", raising=False)
     other_home = tmp_path / "other"
@@ -167,12 +167,12 @@ def test_single_profile_scoped_load_keeps_override_behavior(tmp_path, monkeypatc
 
     was_active = secret_scope.is_multiplex_active()
     secret_scope.set_multiplex_active(False)
-    home_token = set_hermes_home_override(other_home)
+    home_token = set_agent_home_override(other_home)
     try:
-        loaded = env_loader.load_hermes_dotenv(hermes_home=other_home)
+        loaded = env_loader.load_agent_dotenv(hermes_home=other_home)
     finally:
         secret_scope.set_multiplex_active(was_active)
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
 
     try:
         assert os.environ.get("HERMES_TEST_SHARED_ADAPTER_CONFIG") == "second"
@@ -188,9 +188,9 @@ def test_multiplex_dotenv_load_hydrates_sources_without_global_env(
     from agent import secret_scope
     import agent.secret_sources.bitwarden as bw_module
     from agent.secret_sources import registry as reg_module
-    from hermes_constants import (
-        reset_hermes_home_override,
-        set_hermes_home_override,
+    from agent_constants import (
+        reset_agent_home_override,
+        set_agent_home_override,
     )
 
     monkeypatch.delenv("BWS_ACCESS_TOKEN", raising=False)
@@ -215,13 +215,13 @@ def test_multiplex_dotenv_load_hydrates_sources_without_global_env(
     reg_module._reset_registry_for_tests()
 
     was_active = secret_scope.is_multiplex_active()
-    home_token = set_hermes_home_override(tmp_path)
+    home_token = set_agent_home_override(tmp_path)
     secret_scope.set_multiplex_active(True)
     try:
-        assert env_loader.load_hermes_dotenv(hermes_home=tmp_path) == []
+        assert env_loader.load_agent_dotenv(hermes_home=tmp_path) == []
     finally:
         secret_scope.set_multiplex_active(was_active)
-        reset_hermes_home_override(home_token)
+        reset_agent_home_override(home_token)
 
     assert env_loader.get_secret_source_values(tmp_path) == {
         "ANTHROPIC_API_KEY": "profile-provider-key"
@@ -233,7 +233,7 @@ def test_multiplex_dotenv_load_hydrates_sources_without_global_env(
 def test_cold_profile_hydration_seeds_op_env_bootstrap(tmp_path, monkeypatch):
     """The .op.env bootstrap file must feed cold-profile hydration.
 
-    load_hermes_dotenv() reads <home>/.op.env for OP_SERVICE_ACCOUNT_TOKEN
+    load_agent_dotenv() reads <home>/.op.env for OP_SERVICE_ACCOUNT_TOKEN
     (the documented gitignored 1Password bootstrap); hydration must mirror
     that or a cold profile using the supported .op.env flow fails 1Password
     resolution (sweeper review on #74549). .env wins on conflict.
@@ -423,8 +423,8 @@ def test_apply_external_secret_sources_noop_when_disabled(tmp_path, monkeypatch)
 
 
 def test_apply_external_secret_sources_dedupes_within_process(tmp_path, monkeypatch):
-    """``load_hermes_dotenv()`` is called at module-import time from several
-    hot modules (cli.py, hermes_cli/main.py, run_agent.py, ...).  The
+    """``load_agent_dotenv()`` is called at module-import time from several
+    hot modules (cli.py, agent_cli/main.py, run_agent.py, ...).  The
     Bitwarden status line previously printed once per call — 3-5x per
     startup.  The applied-home guard must short-circuit subsequent calls
     so the heavy work (config re-parse, Bitwarden lookup, status print)
@@ -458,7 +458,7 @@ def test_apply_external_secret_sources_dedupes_within_process(tmp_path, monkeypa
     reg_module._reset_registry_for_tests()
 
     # Five calls in a row, simulating module-import-time invocations from
-    # cli.py, hermes_cli/main.py, run_agent.py, trajectory_compressor.py,
+    # cli.py, agent_cli/main.py, run_agent.py, trajectory_compressor.py,
     # gateway/run.py.  Only the first should actually call the backend.
     for _ in range(5):
         env_loader._apply_external_secret_sources(tmp_path)
@@ -635,7 +635,7 @@ def test_apply_external_secret_sources_survives_non_dict_section(tmp_path, monke
 
     Both `onepassword: true` (non-dict) and a bad bitwarden section must be
     coerced to empty config instead of raising AttributeError up through
-    load_hermes_dotenv().
+    load_agent_dotenv().
     """
 
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
@@ -726,12 +726,12 @@ def test_env_shadowed_reapply_keeps_home_snapshot(tmp_path, monkeypatch, _fresh_
     monkeypatch.delenv("GLM_API_KEY", raising=False)
     _register_fake_bulk_source(lambda _home: "vault-value")
 
-    env_loader.load_hermes_dotenv(hermes_home=home)
+    env_loader.load_agent_dotenv(hermes_home=home)
     assert env_loader.get_secret_source_values(home) == {"GLM_API_KEY": "vault-value"}
 
     # cron per-fire / plugin-discovery re-pull: reset + reload with the key now shadowing itself.
     env_loader.reset_secret_source_cache()
-    env_loader.load_hermes_dotenv(hermes_home=home)
+    env_loader.load_agent_dotenv(hermes_home=home)
 
     assert str(home.resolve()) in env_loader._APPLIED_HOMES
     assert env_loader.hydrate_profile_secret_sources(home) == {"GLM_API_KEY": "vault-value"}
@@ -750,7 +750,7 @@ def test_home_scoped_reset_preserves_sibling_snapshot(tmp_path, monkeypatch, _fr
     monkeypatch.delenv("GLM_API_KEY", raising=False)
     _register_fake_bulk_source(lambda h: f"vault-{h.name}")
 
-    env_loader.load_hermes_dotenv(hermes_home=home)
+    env_loader.load_agent_dotenv(hermes_home=home)
     assert env_loader.hydrate_profile_secret_sources(sibling) == {"GLM_API_KEY": "vault-b"}
 
     env_loader.reset_secret_source_cache(home)

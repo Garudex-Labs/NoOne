@@ -3,20 +3,20 @@ title: "Multiplexing Gateway Internals"
 description: "Design of the one-gateway-for-all-profiles mode: scope composition, secret scope, inbound routing, persistence"
 ---
 
-# Multiplexing Gateway
+# Multiplexing Gateway {#multiplexing-gateway}
 
 One gateway process can serve every profile in the install. The mode is on by
 default (`gateway.multiplex_profiles`, default `true`), and everything it
 changes reverts the moment the flag is off. An *unset* flag is settled at boot
-by `hermes_cli/gateway_multiplex_mode.py::resolve_multiplex_mode`, which runs
-the `hermes gateway migrate` preflight and keeps the gateway standalone when a
+by `agent_cli/gateway_multiplex_mode.py::resolve_multiplex_mode`, which runs
+the `noone gateway migrate` preflight and keeps the gateway standalone when a
 secondary still runs its own gateway, a blocker exists, or the host cannot be
 migrated (see "The mode flag"). This document is the design rationale
 referenced from `agent/secret_scope.py` ("Workstream A"): what is isolated per
 profile, the mechanism that isolates it, and what deliberately stays
 process-global.
 
-## Overview
+## Overview {#overview}
 
 Without multiplexing, one gateway process serves exactly one profile — its
 `.env`, sessions, skills, and platform adapters — and multi-profile installs
@@ -30,7 +30,7 @@ never observe profile B's state**. Secrets, homes, sessions, and adapter lanes
 are isolated per profile; anything that cannot yet be isolated fails closed or
 is documented as a known limitation at the end of this document.
 
-## The mode flag
+## The mode flag {#the-mode-flag}
 
 - Config: `gateway.multiplex_profiles` (also accepted at top level). Parsed in
   `gateway/config.py` with precedence env > config > unset. `GatewayConfig`
@@ -54,9 +54,9 @@ is documented as a known limitation at the end of this document.
   a plain module global, not a contextvar: it describes the deployment mode,
   not a per-task value. Its only job is to arm the fail-closed behavior in
   `get_secret()`.
-- The dashboard / remote-Desktop backend (`hermes serve`) has no such flag, so
-  `hermes_cli/web_server.py::start_server` calls
-  `tui_gateway.launch_profile_policy.activate_multi_profile_hosting_eagerly()`
+- The dashboard / remote-Desktop backend (`noone serve`) has no such flag, so
+  `agent_cli/web_server.py::start_server` calls
+  `agent_backend.launch_profile_policy.activate_multi_profile_hosting_eagerly()`
   as its LAST boot step: the host arms the guard when the machine has more than
   one servable profile home, instead of waiting for the first
   `?profile=<other>` request. Activation is one-way, and anything the backend
@@ -83,7 +83,7 @@ is documented as a known limitation at the end of this document.
   instead of falling back to the launch profile's. "Whose is this?" with no
   answer is a fail-closed condition, never a borrow.
 
-## Scope composition
+## Scope composition {#scope-composition}
 
 Every inbound event composes the same two context-local scopes before any
 profile-owned code runs:
@@ -96,7 +96,7 @@ profile_routes match ──► served-set check ──► SessionSource.profile 
    │                                           (gateway/profile_routing.py)
    ▼
 _profile_runtime_scope(profile_home)           (gateway/run.py)
-   ├── set_hermes_home_override(home)          config / state.db / skills /
+   ├── set_agent_home_override(home)          config / state.db / skills /
    │                                           memory / sessions resolve here
    └── set_secret_scope(profile .env + secret sources)
    │                                           provider keys, platform tokens
@@ -118,11 +118,11 @@ Both scopes are `contextvars`, so they propagate into executor worker threads
 via `copy_context()` and unwind deterministically — nothing is written to
 `os.environ`, ever.
 
-### One scope value
+### One scope value {#one-scope-value}
 
 The scope, the home override, the secret scope and the terminal policy are one
-immutable value, `hermes_scope.ScopeState`, in a single contextvar. The scope is
-`hermes_scope.Scope(tenant, agent, actor, owner=, can_administer=)`:
+immutable value, `agent_scope.ScopeState`, in a single contextvar. The scope is
+`agent_scope.Scope(tenant, agent, actor, owner=, can_administer=)`:
 
 - `actor` is `Principal(id)` (a person) or `System(reason)` (cron, kanban,
   housekeeping).
@@ -157,7 +157,7 @@ produce, never one profile's home beside another's secrets. Leaving a hosted
 agent by any reset other than the bind that entered it raises
 `ScopeSwitchRefused`.
 
-The legacy setters (`set_hermes_home_override`, `set_secret_scope`,
+The legacy setters (`set_agent_home_override`, `set_secret_scope`,
 `set_terminal_scope`, `install_profile_terminal_scope`) keep working. Inside a
 bound scope, a call naming another profile moves the whole scope in a local
 install and raises `ScopeSwitchRefused` in a hosted one. Clearing one piece of a
@@ -168,7 +168,7 @@ accepts only a policy owned by the bound agent. The code-health rule HX016 block
 through relative imports; existing ones migrate when their function is next
 edited.
 
-## Workstream A: context-local secret scope
+## Workstream A: context-local secret scope {#workstream-a-context-local-secret-scope}
 
 `agent/secret_scope.py` exists because the obvious implementation — union all
 profile `.env` files into `os.environ` — leaks profile A's keys into profile
@@ -199,7 +199,7 @@ B's turns and into every subprocess spawned with `env=dict(os.environ)`.
 Because the per-turn `.env` reload is a no-op under multiplexing, rotated
 credentials are picked up through the profile scope on the next turn — never
 via `os.environ`. This holds at the loader boundary, not just the gateway's
-reload helper: `hermes_cli.env_loader.load_hermes_dotenv` skips the
+reload helper: `agent_cli.env_loader.load_agent_dotenv` skips the
 process-global load whenever multiplexing is active *and* a profile-home
 override is installed (import-time and cron callers hit it mid-turn), while
 still hydrating the profile's external secret sources into its private
@@ -212,18 +212,18 @@ routed turn can reach: `${VAR}` / `${env:VAR}` references in a profile's
 `/pair` grant mirror) update the installed scope mapping instead of the
 process environment (`#88441`).
 
-## The HERMES_HOME override
+## The HERMES_HOME override {#the-hermes_home-override}
 
-`hermes_constants.py` holds a context-local override consulted by
-`get_hermes_home()` before the `HERMES_HOME` env var. Everything that resolves
+`agent_constants.py` holds a context-local override consulted by
+`get_agent_home()` before the `HERMES_HOME` env var. Everything that resolves
 paths through it — config, `state.db`, skills, memory, SOUL, sessions, kanban,
 goals, plugin discovery, MCP startup — follows the active profile
-automatically. `get_process_hermes_home()` exists for the few machine-level
-assets that must not follow the override. `hermes_home_key()` gives
+automatically. `get_process_agent_home()` exists for the few machine-level
+assets that must not follow the override. `agent_home_key()` gives
 per-home registries a stable scope key. A one-shot warning (`#18594`) fires if
 profile-scoped code runs without the override where one is expected.
 
-## Inbound routing
+## Inbound routing {#inbound-routing}
 
 `gateway.profile_routes` maps `(platform, user_id, guild_id, chat_id, thread_id)` to a
 profile; matching is conjunctive, most-specific-first, with parent-chain chat
@@ -232,9 +232,9 @@ matched route whose target is outside the served set is rejected (the event is
 dropped, not misdelivered). Full schema and matching rules:
 [Routing shared-bot chats to profiles](../user-guide/multi-profile-gateways.md#routing-shared-bot-chats-to-profiles-profile_routes).
 
-## Serving selected profiles
+## Serving selected profiles {#serving-selected-profiles}
 
-`profiles_to_serve(multiplex, profile_allowlist)` in `hermes_cli/profiles.py`
+`profiles_to_serve(multiplex, profile_allowlist)` in `agent_cli/profiles.py`
 is the single chokepoint for which profiles a multiplexer serves: default plus
 every valid profile directory, optionally filtered by allowlist. A malformed
 allowlist fails safe to default-only. The served set gates adapter startup,
@@ -242,7 +242,7 @@ cron ticking (`#69377`), `/p/<profile>/` HTTP admission, route eligibility,
 and the runtime status surface. An excluded profile stays installed and can
 still run its own standalone gateway.
 
-## Per-profile persistence
+## Per-profile persistence {#per-profile-persistence}
 
 `SessionStore` binds no database handle at construction (`#88532`). Session
 DB handles are resolved at call time through the active HERMES_HOME override —
@@ -250,7 +250,7 @@ one cached handle per resolved `profiles/<name>/state.db` — so sessions land
 in the owning profile's store even when the store object itself is shared.
 Pairing stores are constructed per served profile.
 
-## Per-bot session lanes
+## Per-bot session lanes {#per-bot-session-lanes}
 
 Session keys are namespaced by profile (`agent:main` for default,
 `agent:<name>` for named profiles). Every inbound event carries ONE frozen
@@ -277,7 +277,7 @@ one WARNING at the first seam it reaches, never keyed into `agent:main`. Copy a
 source with `session_identity.replace_source`, not `dataclasses.replace`, or the
 copy loses its transport and identity.
 
-## Intake vs delivery: which bot acts on an event
+## Intake vs delivery: which bot acts on an event {#intake-vs-delivery-which-bot-acts-on-an-event}
 
 Two runner seams answer the two questions a multiplexed gateway keeps
 conflating (`gateway/authz_mixin.py`):
@@ -307,7 +307,7 @@ conflating (`gateway/authz_mixin.py`):
 Outside multiplexing there is one adapter per platform, so both seams return
 it. `tests/gateway/test_multiplex_transport_matrix.py` asserts every row.
 
-### Restore, relay, callbacks and thread hops
+### Restore, relay, callbacks and thread hops {#restore-relay-callbacks-and-thread-hops}
 
 The routing entry persists `transport_profile` next to the key (and the
 `sessions.transport_profile` column in `state.db`), so after a restart a
@@ -323,16 +323,16 @@ key namespace) tells the connector which profile to stamp on the next
 the same profile. Deferred callbacks (`/model` picker) capture the routed home
 at command time and the gateway's executor hops copy the ContextVar scope.
 
-## Control plane
+## Control plane {#control-plane}
 
 Desktop plugins reach the gateway only through the ws JSON-RPC door, so
 profile enumeration and configuration live in
-`tui_gateway/methods_profiles.py`: `profiles.list`, `profiles.create`,
+`agent_backend/methods_profiles.py`: `profiles.list`, `profiles.create`,
 `profiles.describe`, `profiles.configure`, `profiles.set_asset`,
 `profiles.get_asset`. Reads and writes run under the target profile's
 HERMES_HOME override. Asset writes are atomic, type- and size-capped.
 
-## Failure modes
+## Failure modes {#failure-modes}
 
 - Fatal at startup: multiplex config errors and a secondary profile enabling a
   port-binding platform (`MultiplexConfigError`,
@@ -351,13 +351,13 @@ HERMES_HOME override. Asset writes are atomic, type- and size-capped.
   profile's `.env` or secret source supplies the value. The launch profile's
   mapping still includes its frozen launch env (systemd `Environment=` /
   `op run` credentials resolve); a secondary resolves from its own files only.
-- Scoped platform gates: A2A (`A2A_PORT`) and Buzz enablement are read through
+- Scoped platform gates: A2A (`A2A_PORT`) enablement are read through
   the profile's own scope / `platforms.<name>` section, so a launch-profile
   env var no longer enables an inbound listener in every secondary.
 - Fallback: an external `cron.provider` does not support multiplexing and
   falls back to the built-in ticker with a warning.
 
-## Known limitations
+## Known limitations {#known-limitations}
 
 Process-global state that is not yet profile-scoped:
 
@@ -365,11 +365,11 @@ Process-global state that is not yet profile-scoped:
 | --- | --- |
 | MCP discovery and tool registration | Process-global; the first profile to build an agent wins the discovery slot. Full per-profile MCP registries are tracked in `#67605`. |
 | Terminal / sandbox env (`TERMINAL_*`) | Global by allowlist; tools read it from the process environment. |
-| Built-in tool registry | Built-ins are process-global; plugin-registered tools are overlaid per profile via `hermes_home_key()`. |
+| Built-in tool registry | Built-ins are process-global; plugin-registered tools are overlaid per profile via `agent_home_key()`. |
 | Provider/capability registries | Same hybrid overlay pattern (browser, image-gen, TTS, transcription, video-gen, web-search, secret sources). |
 | HTTP listener, relay ingress, process lock | One per process, owned by the default/active profile. Per-profile `runtime_status.json` is still written. |
 
-## Non-goals
+## Non-goals {#non-goals}
 
 Multiplexing isolates *profiles*; it does not authenticate or authorize *end
 users*. A profile is a configuration, not a person: the gateway trusts its
@@ -377,10 +377,10 @@ transport and its routing table to decide which profile an event belongs to.
 Request-level identity and per-user authorization above the profile layer are
 out of scope for this document.
 
-## Related
+## Related {#related}
 
 - [Multi-profile gateways](../user-guide/multi-profile-gateways.md) — user-facing guide, including `profile_routes`
   and the standalone one-gateway-per-profile alternative.
-- `agent/secret_scope.py`, `hermes_constants.py`, `gateway/profile_routing.py`,
-  `gateway/run.py` (`_profile_runtime_scope`), `hermes_cli/profiles.py`
-  (`profiles_to_serve`), `gateway/session.py`, `tui_gateway/methods_profiles.py`.
+- `agent/secret_scope.py`, `agent_constants.py`, `gateway/profile_routing.py`,
+  `gateway/run.py` (`_profile_runtime_scope`), `agent_cli/profiles.py`
+  (`profiles_to_serve`), `gateway/session.py`, `agent_backend/methods_profiles.py`.

@@ -22,7 +22,7 @@ from gateway.platforms import api_server_runs as _api_runs
 from gateway.platforms.api_server import APIServerAdapter
 from gateway.platforms.api_server_run_idempotency import RunIdempotencyStore
 from gateway.run import _INTERRUPT_REASON_GATEWAY_SHUTDOWN
-from hermes_state import SessionDB
+from agent_state import SessionDB
 from tests.gateway.restart_test_helpers import make_restart_runner
 from tools import browser_session_lifecycle as bt_lifecycle
 
@@ -264,7 +264,7 @@ def _parked_agent(loop, started: asyncio.Event, release: threading.Event) -> Mag
     ``request_hard_interrupt`` falls back to ``agent.interrupt(reason)`` for an
     unspecced ``MagicMock`` — ``inspect.getattr_static`` refuses to invent
     ``hard_interrupt`` on a ``__getattr__`` proxy — which is exactly the ABI
-    teknium1's review asked this regression to verify.
+    the review asked this regression to verify.
     """
     agent = MagicMock()
     agent.session_id = None
@@ -514,7 +514,7 @@ class TestShutdownInterruptReachesEveryApiTurn:
     async def test_chat_completions_turn_is_interrupted(self):
         """A non-``/v1/runs`` API turn, end to end through the real handler.
 
-        This is teknium1's named acceptance criterion on #63963: the drain
+        This is the named acceptance criterion on #63963: the drain
         counts this turn, so the shutdown interrupt must reach it.
         """
         runner, _adapter = make_restart_runner()

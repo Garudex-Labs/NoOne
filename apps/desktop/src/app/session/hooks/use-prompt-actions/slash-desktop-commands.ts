@@ -5,7 +5,7 @@ import { openCommandPalette } from '@/store/command-palette'
 import { $displayTimestamps, setDisplayTimestampsWindowOverride } from '@/store/display-timestamps'
 import { runExportProfileFlow, runImportProfileFlow } from '@/store/profile-share'
 import { $connection } from '@/store/session'
-import type { SessionMessage } from '@/types/hermes'
+import type { SessionMessage } from '@/types/agent-client'
 
 import type { ClientSessionState } from '../../../types'
 
@@ -206,7 +206,7 @@ function formatAgents(subagents: SubagentRow[], processes: ProcessRow[]): string
   return lines.join('\n')
 }
 
-// A standalone `hermes serve` answers config.get key=full with the raw effective config, so the
+// A standalone `noone serve` answers config.get key=full with the raw effective config, so the
 // renderer fails closed: it prints only the sections the canonical owner projects
 // (gateway/session_config.py::_client_config) and omits everything else. Keep in sync.
 const CONFIG_ALLOWED: Record<string, true | readonly string[]> = {
@@ -217,7 +217,7 @@ const CONFIG_ALLOWED: Record<string, true | readonly string[]> = {
   voice: ['record_key', 'submit_mode']
 }
 
-// Leaf rule of hermes_cli/config.py::_is_secret_config_key (+ auth/cookie), applied inside
+// Leaf rule of agent_cli/config.py::_is_secret_config_key (+ auth/cookie), applied inside
 // allowlisted sections (the owner masks these; a legacy server sends them raw).
 const CONFIG_SECRET_KEY =
   /^(api_?key|key|auth|cookie|token|access_token|refresh_token|id_token|secret|client_secret|password|passwd|authorization|private_key|bearer|jwt)$|_(api_key|token|secret|password|key|access_key)$/

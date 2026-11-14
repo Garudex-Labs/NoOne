@@ -107,7 +107,7 @@ export type DesktopUnavailableReason = 'advanced' | 'composer-voice' | 'messagin
  *                  calls it directly with the params built by `buildParams`,
  *                  bypassing `slash.exec` / `command.dispatch`. Reserved for
  *                  commands that have a first-class RPC handler in
- *                  `tui_gateway/server.py` (e.g. `/save` → session.save).
+ *                  `agent_backend/server.py` (e.g. `/save` → session.save).
  * - `exec`       → runs on the backend via slash.exec / command.dispatch and
  *                  renders its text output inline. Only commands WITHOUT a
  *                  dedicated RPC should stay here.
@@ -180,7 +180,7 @@ const unavailable = (reason: DesktopUnavailableReason): DesktopCommandSurface =>
 
 /**
  * Route a command directly to its dedicated gateway RPC. Prefer this over
- * `exec()` whenever `tui_gateway/server.py` exposes a `@method(...)` for the
+ * `exec()` whenever `agent_backend/server.py` exposes a `@method(...)` for the
  * command — bypassing `slash.exec` keeps the path short and the response
  * structured.
  *
@@ -291,7 +291,7 @@ const DESKTOP_COMMAND_SPECS: readonly DesktopCommandSpec[] = [
     argumentMode: 'text'
   },
   // /bg (alias /background) must be an action (prompt.background RPC — the
-  // TUI's path), not exec: the slash worker's HermesCLI prints the completion
+  // TUI's path), not exec: the slash worker's AgentCLI prints the completion
   // from a fire-and-forget thread after process_command already returned,
   // past the worker's stdout capture window, so the result never reached the
   // desktop conversation that started the task (#97635, #57444).
@@ -392,7 +392,7 @@ const DESKTOP_COMMAND_SPECS: readonly DesktopCommandSpec[] = [
 
 /**
  * Offline fallback for the registry's `desktop=` metadata, dumped from
- * `hermes_cli/commands.py::desktop_surface_registry` by
+ * `agent_cli/commands.py::desktop_surface_registry` by
  * `scripts/dump_desktop_slash_registry.py`. The live `commands.catalog` answers
  * first (`specFromCatalog`); this copy only covers the gap before the backend
  * replies. A Python test and `desktop-slash-commands.test.ts` both fail when
@@ -401,20 +401,13 @@ const DESKTOP_COMMAND_SPECS: readonly DesktopCommandSpec[] = [
  */
 const REGISTRY_DESKTOP_SURFACE: Readonly<Record<string, string | null>> = desktopSlashRegistry
 
-/**
- * Commands the Python registry has never heard of, so they cannot ride the
- * dump above. `/density`, `/details`, `/logs`, `/mouse` are Ink-process-local
- * display toggles handled inside `ui-tui/src/app/slash/commands/core.ts`
- * (three are advertised through `tui_gateway/server.py::_TUI_EXTRA`); `/pets`
- * is the plural typo of the desktop's own `/pet` action and points at the
- * sidebar instead of falling through as an unknown skill.
- */
+/** Only native Desktop aliases without a Python command are reserved here. */
 export const TS_ONLY_NO_DESKTOP_SURFACE: Record<DesktopUnavailableReason, readonly string[]> = {
   advanced: [],
   'composer-voice': [],
   messaging: [],
   settings: ['/pets'],
-  terminal: ['/density', '/details', '/logs', '/mouse']
+  terminal: []
 }
 
 const LOCAL_SPEC_NAMES = new Set(DESKTOP_COMMAND_SPECS.flatMap(spec => [spec.name, ...(spec.aliases ?? [])]))

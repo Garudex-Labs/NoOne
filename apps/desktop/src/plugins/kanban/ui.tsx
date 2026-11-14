@@ -2,9 +2,9 @@
  *  section chrome, and the masked scroller. Pure SDK + tokens. */
 
 import {
+  AppIcon,
   atom,
   coarseElapsed,
-  Codicon,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -14,7 +14,7 @@ import {
   profileColorSoft,
   relativeTime,
   useQuery
-} from '@hermes/plugin-sdk'
+} from '@noone/plugin-sdk'
 import { type ReactNode, useEffect, useState } from 'react'
 
 import { fetchOrchestration, orchestrationKey, useKanbanScope } from './api'
@@ -213,7 +213,7 @@ export function StatusMenu({
         >
           <span className="size-1.5 rounded-full" style={{ backgroundColor: meta.tone }} />
           {columnLabel(k, status)}
-          <Codicon name="chevron-down" size="0.7rem" />
+          <AppIcon name="chevron-down" size="0.7rem" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
@@ -223,7 +223,7 @@ export function StatusMenu({
             <DropdownMenuItem key={name} onSelect={() => onMove(name)}>
               <span className="size-2 rounded-full" style={{ backgroundColor: columnMeta(name).tone }} />
               {columnLabel(k, name)}
-              {name === status && <Codicon className="ml-auto" name="check" size="0.8rem" />}
+              {name === status && <AppIcon className="ml-auto" name="check" size="0.8rem" />}
             </DropdownMenuItem>
           ))}
       </DropdownMenuContent>
@@ -240,7 +240,7 @@ export function PriorityGlyph({ priority }: { priority: number }) {
 
   return (
     <span className="inline-flex items-center gap-0.5 text-amber-500">
-      <Codicon name="arrow-up" size="0.7rem" />
+      <AppIcon name="arrow-up" size="0.7rem" />
       {priority}
     </span>
   )
@@ -282,7 +282,7 @@ export function Callout({
       style={{ backgroundColor: `color-mix(in srgb, ${tone} 7%, transparent)`, borderLeft: `2px solid ${tone}` }}
     >
       <div className="flex items-start gap-1.5 text-[0.75rem] font-medium" style={{ color: tone }}>
-        <Codicon className="mt-px shrink-0" name={icon} size="0.8rem" />
+        <AppIcon className="mt-px shrink-0" name={icon} size="0.8rem" />
         <span>{title}</span>
       </div>
       {children}

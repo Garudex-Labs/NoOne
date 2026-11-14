@@ -1,14 +1,13 @@
 ---
-sidebar_position: 3
 title: "Persistent Memory"
-description: "How Hermes Agent remembers across sessions — MEMORY.md, USER.md, and session search"
+description: "How the agent remembers across sessions — MEMORY.md, USER.md, and session search"
 ---
 
-# Persistent Memory
+# Persistent Memory {#persistent-memory}
 
-Hermes Agent has bounded, curated memory that persists across sessions. This lets it remember your preferences, your projects, your environment, and things it has learned.
+{{app-name}} has bounded, curated memory that persists across sessions. This lets it remember your preferences, your projects, your environment, and things it has learned.
 
-## How It Works
+## How It Works {#how-it-works}
 
 Two files make up the agent's memory:
 
@@ -19,11 +18,26 @@ Two files make up the agent's memory:
 
 Both are stored in `~/.hermes/memories/` and are injected into the system prompt as a frozen snapshot at session start. The agent manages its own memory via the `memory` tool — it can add, patch, or remove entries.
 
-:::caution One agent per Hermes home
-Don't point two agent processes at the same Hermes home directory. Memory writes are automatic and load back into the system prompt at session start, so two writers sharing one home will compound each other's entries into state neither of them (nor you) authored. Memory is scoped per [profile](../profiles.md) by design — give a second agent its own profile, and if they need shared memory, use an [external memory provider](./memory-providers.md) instead.
-:::
+<Warning>
 
-:::info
+<div className="doc-callout-title">
+
+One agent per {{app-name}} home
+
+</div>
+
+Don't point two agent processes at the same {{app-name}} home directory. Memory writes are automatic and load back into the system prompt at session start, so two writers sharing one home will compound each other's entries into state neither of them (nor you) authored. Memory is scoped per [profile](../profiles.md) by design — give a second agent its own profile, and if they need shared memory, use an [external memory provider](./memory-providers.md) instead.
+
+</Warning>
+
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
 Character limits keep memory focused. Memory does **not** auto-compact: when a
 write would exceed the limit, the `memory` tool returns an error instead of
 silently dropping entries. The agent then makes room itself — consolidating or
@@ -31,9 +45,10 @@ removing entries in the same turn before retrying (see [What Happens When Memory
 is Full](#what-happens-when-memory-is-full)). Note that `patch` is also bound
 by the limit: a patch that lengthens an entry can still overflow, so the new
 text must be shortened (or another entry removed) to fit.
-:::
 
-## How Memory Appears in the System Prompt
+</Info>
+
+## How Memory Appears in the System Prompt {#how-memory-appears-in-the-system-prompt}
 
 At the start of every session, memory entries are loaded from disk and rendered into the system prompt as a frozen block:
 
@@ -56,7 +71,7 @@ The format includes:
 
 **Frozen snapshot pattern:** The system prompt injection is captured once at session start and never changes mid-session. This is intentional — it preserves the LLM's prefix cache for performance. When the agent adds/removes memory entries during a session, the changes are persisted to disk immediately but won't appear in the system prompt until the next session starts. Tool responses always show the live state.
 
-## Memory Needs Session Boundaries
+## Memory Needs Session Boundaries {#memory-needs-session-boundaries}
 
 The whole memory system is built around the moment a session **ends**: `MEMORY.md` and `USER.md` carry the essentials into the next session, and `session_search` fills the gaps once the old context is gone. Inside a single session none of that machinery has a reason to run — everything important is still in the live context, so the agent rarely consults `session_search` and mostly compacts memory entries instead of curating them.
 
@@ -64,7 +79,7 @@ This matters on messaging platforms (Telegram, Discord, etc.), where a chat is d
 
 **Practice:** run `/new` at natural boundaries — a finished task, a change of topic, the start of a day. Each boundary is when memory pays off: the agent re-reads the updated `MEMORY.md`/`USER.md` snapshot, starts from a cheap short context, and reaches for `session_search` when it actually needs history. On the CLI this mostly takes care of itself (every invocation is a new session); on gateways the boundary is yours to create.
 
-## Troubleshooting: "I told it to remember, and the next session it forgot"
+## Troubleshooting: "I told it to remember, and the next session it forgot" {#troubleshooting-i-told-it-to-remember-and-the-next-session-it-forgot}
 
 The most common report looks like this: you tell the agent where something lives (an Obsidian vault, a project directory, a server), it answers "Done, I'll remember that", and a fresh session has no idea what you mean. Work through these in order — the first one explains the large majority of cases.
 
@@ -79,7 +94,7 @@ The most common report looks like this: you tell the agent where something lives
 
 2. **Check the write wasn't staged.** With `write_approval: true`, writes outside the interactive CLI are held for review and never reach the file until approved — run `/memory pending` and `/memory approve all`. See [Controlling memory writes](#controlling-memory-writes-write_approval).
 
-3. **Check you are reading the same memory you wrote.** Memory is per [profile](../profiles.md): `hermes -p work` (or `work chat` / `work gateway start`) reads `~/.hermes/profiles/work/memories/`, not `~/.hermes/memories/`. A CLI session in the default profile and a Telegram bot on another profile do not share notes. `hermes profile list` shows what exists.
+3. **Check you are reading the same memory you wrote.** Memory is per [profile](../profiles.md): `hermes -p work` (or `work chat` / `work gateway start`) reads `~/.hermes/profiles/work/memories/`, not `~/.hermes/memories/`. A CLI session in the default profile and a Telegram bot on another profile do not share notes. `noone profile list` shows what exists.
 
 4. **Check memory is enabled.** `memory.memory_enabled: false` (or `memory` under `agent.disabled_toolsets`) removes the tool entirely — the model cannot save anything, whatever it says. See [Configuration](#configuration).
 
@@ -87,7 +102,7 @@ The most common report looks like this: you tell the agent where something lives
 
 Two things that do **not** make the agent remember: variables in `.env` (those are credentials and settings, not memory) and facts mentioned in passing without asking for them to be saved. For a location the agent needs on every run of a recurring task, a [skill](./skills.md) is often the better home than a memory entry — it loads only when relevant and does not compete for the 2,200-character budget.
 
-## Memory Tool Actions
+## Memory Tool Actions {#memory-tool-actions}
 
 The agent uses the `memory` tool with these actions:
 
@@ -107,7 +122,7 @@ for the user profile. A batch uses that one target for every operation:
 Missing or null targets, and a target inside an operation that differs from the top-level
 one, return an error before writing or staging approval. Correct the payload and retry; use separate calls to update both stores.
 
-### Substring Matching
+### Substring Matching {#substring-matching}
 
 The `patch` and `remove` actions use short unique substring matching — you don't need the full entry text. The `old_text` parameter just needs to be a unique substring that identifies exactly one entry:
 
@@ -130,9 +145,9 @@ There is no `replace` action. It overwrote the whole matched entry, and models u
 which wiped the other facts in multi-fact entries. A `replace` call now returns an error pointing at `patch`;
 writes staged for approval before this change still apply as staged.
 
-## Two Targets Explained
+## Two Targets Explained {#two-targets-explained}
 
-### `memory` — Agent's Personal Notes
+### `memory` — Agent's Personal Notes {#memory--agents-personal-notes}
 
 For information the agent needs to remember about the environment, workflows, and lessons learned:
 
@@ -142,7 +157,7 @@ For information the agent needs to remember about the environment, workflows, an
 - Completed task diary entries
 - Skills and techniques that worked
 
-### `user` — User Profile
+### `user` — User Profile {#user--user-profile}
 
 For information about the user's identity, preferences, and communication style:
 
@@ -152,9 +167,9 @@ For information about the user's identity, preferences, and communication style:
 - Workflow habits
 - Technical skill level
 
-## What to Save vs Skip
+## What to Save vs Skip {#what-to-save-vs-skip}
 
-### Save These (Proactively)
+### Save These (Proactively) {#save-these-proactively}
 
 The agent saves automatically — you don't need to ask. It saves when it learns:
 
@@ -165,7 +180,7 @@ The agent saves automatically — you don't need to ask. It saves when it learns
 - **Completed work:** "Migrated database from MySQL to PostgreSQL on 2026-01-15" → save to `memory`
 - **Explicit requests:** "Remember that my API key rotation happens monthly" → save to `memory`
 
-### Skip These
+### Skip These {#skip-these}
 
 - **Trivial/obvious info:** "User asked about Python" — too vague to be useful
 - **Easily re-discovered facts:** "Python 3.12 supports f-string nesting" — can web search this
@@ -173,7 +188,7 @@ The agent saves automatically — you don't need to ask. It saves when it learns
 - **Session-specific ephemera:** Temporary file paths, one-off debugging context
 - **Information already in context files:** SOUL.md and AGENTS.md content
 
-## Capacity Management
+## Capacity Management {#capacity-management}
 
 Memory has strict character limits to keep system prompts bounded:
 
@@ -182,7 +197,7 @@ Memory has strict character limits to keep system prompts bounded:
 | memory | 2,200 chars | 8-15 entries |
 | user | 1,375 chars | 5-10 entries |
 
-### What Happens When Memory is Full
+### What Happens When Memory is Full {#what-happens-when-memory-is-full}
 
 When you try to add an entry that would exceed the limit, the tool returns an error:
 
@@ -202,7 +217,7 @@ entry fails the same way, with the entries it most resembles under `closest_entr
 
 **Best practice:** When memory is above 80% capacity (visible in the system prompt header), consolidate entries before adding new ones. For example, merge three separate "project uses X" entries into one comprehensive project description entry.
 
-### Practical Examples of Good Memory Entries
+### Practical Examples of Good Memory Entries {#practical-examples-of-good-memory-entries}
 
 **Compact, information-dense entries work best:**
 
@@ -224,15 +239,15 @@ On January 5th, 2026, the user asked me to look at their project which is
 located at ~/code/api. I discovered it uses Go version 1.22 and...
 ```
 
-## Duplicate Prevention
+## Duplicate Prevention {#duplicate-prevention}
 
 The memory system automatically rejects exact duplicate entries. If you try to add content that already exists, it returns success with a "no duplicate added" message.
 
-## Security Scanning
+## Security Scanning {#security-scanning}
 
 Memory entries are scanned for injection and exfiltration patterns before being accepted, since they're injected into the system prompt. Content matching threat patterns (prompt injection, credential exfiltration, SSH backdoors) or containing invisible Unicode characters is blocked.
 
-## Session Search
+## Session Search {#session-search}
 
 Beyond MEMORY.md and USER.md, the agent can search its past conversations using the `session_search` tool:
 
@@ -247,7 +262,7 @@ hermes sessions list    # Browse past sessions
 
 See [Session Search Tool](../sessions.md#session-search-tool) for the three calling shapes (discovery / scroll / browse) and the response format.
 
-### session_search vs memory
+### session_search vs memory {#session_search-vs-memory}
 
 | Feature | Persistent Memory | Session Search |
 |---------|------------------|----------------|
@@ -260,9 +275,9 @@ See [Session Search Tool](../sessions.md#session-search-tool) for the three call
 
 **Memory** is for critical facts that should always be in context. **Session search** is for "did we discuss X last week?" queries where the agent needs to recall specifics from past conversations.
 
-## Learning Journey (`/journey`)
+## Learning Journey (`/journey`) {#learning-journey-journey}
 
-The learning journey is a timeline view of everything Hermes has learned — saved skills and memory entries plotted over time (oldest at top, newest at bottom), with a playable "constellation" scrubber that replays the build-up. The same graph data drives three surfaces:
+The learning journey is a timeline view of everything {{app-name}} has learned — saved skills and memory entries plotted over time (oldest at top, newest at bottom), with a playable "constellation" scrubber that replays the build-up. The same graph data drives three surfaces:
 
 - **Classic CLI / standalone** — `hermes journey` (aliases: `hermes learning`, `hermes memory-graph`) renders the timeline in the terminal. Flags: `--play` animates the build-up (`--fps` to tune it), `--width`/`--height` override the render size, `--no-color` disables color, and `--json` dumps the raw graph payload.
 - **TUI** — `/journey` (aliases: `/learning`, `/memory-graph`) opens the timeline as an overlay.
@@ -270,7 +285,7 @@ The learning journey is a timeline view of everything Hermes has learned — sav
 
 A skill appears on the timeline as soon as it has a learning signal: it was created in this profile (a `/learn` result or a foreground `skill_manage` create), created by the background review, or used at least once. Bundled skills and hand-written skills that have never been used stay out of the timeline.
 
-Beyond viewing, the journey is also where you **prune and correct** what Hermes has learned:
+Beyond viewing, the journey is also where you **prune and correct** what {{app-name}} has learned:
 
 | Command | What it does |
 |---------|--------------|
@@ -280,7 +295,7 @@ Beyond viewing, the journey is also where you **prune and correct** what Hermes 
 
 The same `list` / `delete <id>` / `edit <id>` subcommands work from the in-chat `/journey` command on the CLI, and the desktop panel offers edit/delete on nodes directly.
 
-## Configuration
+## Configuration {#configuration}
 
 ```yaml
 # In ~/.hermes/config.yaml
@@ -308,7 +323,7 @@ guidance for a narrower profile-only block. The tool schema advertises only the
 `user` target, and direct or staged writes to disabled `MEMORY.md` are rejected.
 The inverse configuration advertises only `memory` and rejects `USER.md` writes.
 
-### External recall size
+### External recall size {#external-recall-size}
 
 External memory providers return their full prefetched context by default,
 up to a safety ceiling of 10× `hooks.output_spill.max_chars` (at least 100,000
@@ -322,11 +337,11 @@ visible to the model. Prefer your provider's own recall budget when available.
 The opt-in uses the shared `hooks.output_spill` threshold, preview lengths, and
 directory; `hooks.output_spill.enabled: false` still disables it. Normal plugin
 hooks continue to spill by default, independently of the memory opt-in. Settings
-are captured at provider registration: restart Hermes after changing them.
+are captured at provider registration: restart {{app-name}} after changing them.
 See [oversized prefetch results](../../developer-guide/memory-provider-plugin.md#oversized-prefetch-results)
 for the configuration details.
 
-## Controlling memory writes (`write_approval`)
+## Controlling memory writes (`write_approval`) {#controlling-memory-writes-write_approval}
 
 By default the agent saves memory freely — including from the background
 self-improvement review that runs after a turn. If you'd rather approve saves
@@ -361,10 +376,10 @@ staged before this pinning existed has no verifiable target and is refused too:
 reject it and recreate the change. `/memory approve` lists the full text of
 every entry it overwrote or removed.
 
-## Background review notifications (`display.memory_notifications`)
+## Background review notifications (`display.memory_notifications`) {#background-review-notifications-displaymemory_notifications}
 
 After a turn, the background self-improvement review may quietly save a memory
-or update a skill. This is Hermes' consent-aware learning loop: repeated
+or update a skill. This is {{app-name}}' consent-aware learning loop: repeated
 corrections and durable workflow lessons become compact memory entries or
 procedural skills, while `write_approval` can stage those writes for review
 before they affect future sessions. By default it surfaces a short
@@ -391,7 +406,7 @@ mode, including supporting-file writes/removals and skill deletion. Staged write
 awaiting approval and rolled-back batches are not reported as completed changes.
 Batch summaries use the applied results rather than assuming requested writes ran.
 
-## Running the review on a cheaper model (`auxiliary.background_review`)
+## Running the review on a cheaper model (`auxiliary.background_review`) {#running-the-review-on-a-cheaper-model-auxiliarybackground_review}
 
 The review runs on your **main chat model** by default, replaying the
 conversation — which is already warm in the prompt cache, so it's cheap cache
@@ -416,7 +431,7 @@ identical and skill capture near-identical to the main-model review.
 Leave it at `auto` (or set it to your main model) and nothing changes — the
 review keeps running on the main model with the full warm-cache replay.
 
-### Same-model review reasoning
+### Same-model review reasoning {#same-model-review-reasoning}
 
 A review using the same model as the parent **always inherits the parent's reasoning effort**. Setting `auxiliary.background_review.reasoning_effort` does not override it, whether the route is `auto` or explicitly selects the parent provider/model.
 
@@ -424,7 +439,7 @@ Reasoning settings, the system prompt, the full conversation snapshot, and tool 
 
 To reduce review work without changing the main conversation's effort, adjust `memory.nudge_interval` / `skills.creation_nudge_interval`, disable automatic reviews as described below, or route reviews to a different model. A different-model route uses a digest and does not share the parent's warm prefix; on that route `auxiliary.background_review.reasoning_effort` IS honored (unset = the routed provider's default). A one-time warning is printed when the key is set but the review stays on the main model. These frequency and routing controls do not decouple same-model reasoning.
 
-### Disabling automatic reviews (`enabled`)
+### Disabling automatic reviews (`enabled`) {#disabling-automatic-reviews-enabled}
 
 The review fork can burn a meaningful share of total tokens on busy hosts.
 Operators can disable it without zeroing nudge intervals:
@@ -438,7 +453,7 @@ auxiliary:
 With `enabled: false`, automatic post-turn forks do not spawn; manual
 `/refine` still works, with or without focus text.
 
-### Capping review cost (`max_input_tokens`)
+### Capping review cost (`max_input_tokens`) {#capping-review-cost-max_input_tokens}
 
 The review loop replays the conversation on every provider request it makes,
 so a single review can multiply input tokens across its tool iterations.
@@ -462,7 +477,7 @@ Fork usage is persisted in `session_model_usage` with `task='background_review'`
 and a completion line is written to `agent.log`
 (`Background review complete: thread=bg-review calls=… in=… out=… result=…`).
 
-### Allowing a narrowly scoped extra review tool (`extra_tools`)
+### Allowing a narrowly scoped extra review tool (`extra_tools`) {#allowing-a-narrowly-scoped-extra-review-tool-extra_tools}
 
 Background review can use memory, skill-management, and read-only file tools
 by default. If a profile provides another tool that is safe for unattended
@@ -481,7 +496,7 @@ and tools not listed here remain denied. Keep the list narrow and prefer tools
 that stage a proposal for human review rather than applying external or
 destructive changes directly. The default is an empty list.
 
-### Local models: reviews wait for an idle GPU (`defer`)
+### Local models: reviews wait for an idle GPU (`defer`) {#local-models-reviews-wait-for-an-idle-gpu-defer}
 
 On a cloud provider the review finishes in seconds and runs alongside
 whatever you do next. When the review's runtime is the **managed local
@@ -513,7 +528,7 @@ never goes idle. Explicit `/refine` always runs immediately. The queue is
 in-memory: reviews still pending when the app exits are dropped, same as an
 in-flight fork would have been.
 
-## Controlling skill writes (`skills.write_approval`)
+## Controlling skill writes (`skills.write_approval`) {#controlling-skill-writes-skillswrite_approval}
 
 Skills use the same on/off gate, but the review UX differs because a
 `SKILL.md` is far too large to read in a chat bubble:
@@ -541,9 +556,9 @@ On a messaging platform, approve a skill from its gist + metadata, or open
 Full details in [Gating agent skill writes](./skills.md#gating-agent-skill-writes-skillswrite_approval).
 
 
-## External Memory Providers
+## External Memory Providers {#external-memory-providers}
 
-For deeper, persistent memory that goes beyond MEMORY.md and USER.md, Hermes ships with 2 external memory provider plugins — RetainDB and ByteRover — and more, such as Honcho, Hindsight, Supermemory, Mem0, OpenViking and Holographic, are available from the [plugin catalog](plugins.md) via `hermes plugins install <name>`.
+For deeper, persistent memory that goes beyond MEMORY.md and USER.md, {{app-name}} ships with 2 external memory provider plugins — RetainDB and ByteRover — and more, such as Honcho, Hindsight, Supermemory, Mem0, OpenViking and Holographic, are available from the [plugin catalog](plugins.md) via `noone plugins install <name>`.
 
 External providers run **alongside** built-in memory (never replacing it) and add capabilities like knowledge graphs, semantic search, automatic fact extraction, and cross-session user modeling.
 

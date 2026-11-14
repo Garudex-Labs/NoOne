@@ -12,12 +12,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
+from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
 
 
 def _probe_home(seen: dict, key: str = "home"):
     def _record(*_args, **_kwargs):
-        seen[key] = get_hermes_home()
+        seen[key] = get_agent_home()
     return _record
 
 
@@ -26,7 +26,7 @@ def _retaindb(seen, tmp_path):
 
     p = retaindb.RetainDBMemoryProvider()
     p._client = MagicMock()
-    p._context_overlay = lambda query: {"context": seen.setdefault("home", get_hermes_home()) and "ctx"}
+    p._context_overlay = lambda query: {"context": seen.setdefault("home", get_agent_home()) and "ctx"}
     p._client.ask_user.return_value = {"answer": ""}
     p._client.get_agent_model.return_value = {}
     p.queue_prefetch("what do you know")
@@ -52,11 +52,11 @@ def test_provider_background_thread_sees_spawner_profile_home(name, tmp_path, mo
     profile_home = tmp_path / "profiles" / "b"
     profile_home.mkdir(parents=True)
     seen: dict = {}
-    token = set_hermes_home_override(profile_home)
+    token = set_agent_home_override(profile_home)
     try:
         threads = _PROVIDERS[name](seen, tmp_path)
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
     for t in threads:
         if t is not None:
             t.join(timeout=10)

@@ -16,27 +16,27 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-from hermes_cli.home_data_layout import SECRET_CACHE_STORES
+from agent_cli.home_data_layout import SECRET_CACHE_STORES
 
 
 def _constants_path(getter_name: str) -> Path:
-    """Call ``hermes_constants.<getter_name>()`` (local import avoids cycles); ``~/.hermes`` on any failure."""
+    """Call ``agent_constants.<getter_name>()`` (local import avoids cycles); ``~/.hermes`` on any failure."""
     try:
-        import hermes_constants
+        import agent_constants
 
-        return getattr(hermes_constants, getter_name)()
+        return getattr(agent_constants, getter_name)()
     except Exception:
         return Path(os.path.expanduser("~/.hermes"))
 
 
 def _hermes_home_path() -> Path:
     """Active HERMES_HOME (profile-aware). Tests monkeypatch this name."""
-    return _constants_path("get_hermes_home")
+    return _constants_path("get_agent_home")
 
 
 def _hermes_root_path() -> Path:
     """Hermes root dir (parent of any profile, never per-profile)."""
-    return _constants_path("get_default_hermes_root")
+    return _constants_path("get_default_agent_root")
 
 
 def _hermes_dirs() -> list[Path]:
@@ -105,7 +105,7 @@ def _guard_homes(path: str = "") -> set[str]:
     account's home, which joins the set so ``~root/.ssh/authorized_keys`` stays denied."""
     homes = {os.path.expanduser("~")}
     with suppress(Exception):
-        from hermes_constants import get_real_home, get_subprocess_home, _profile_home_path
+        from agent_constants import get_real_home, get_subprocess_home, _profile_home_path
 
         for candidate in (get_real_home(), get_subprocess_home(), _profile_home_path()):
             if candidate:
@@ -159,7 +159,7 @@ def _homes_and_resolved(path: str) -> tuple[set[str], str]:
 #   * ``\\\\?\\GLOBALROOT...`` — re-entry into the NT namespace.
 #
 # Plain drive-letter extended-length paths (``\\\\?\\C:\\...``) stay ALLOWED:
-# they are a routine local form (see hermes_cli/windows_ssh_runtime.py) and
+# they are a routine local form (see agent_cli/windows_ssh_runtime.py) and
 # carry no remote-auth trigger. Plain UNC shares (``\\\\server\\share``) are
 # also unchanged here — blocking ordinary UNC reads is a policy question,
 # not part of this namespace-bypass guard.
@@ -273,7 +273,7 @@ def build_write_denied_paths(home: str) -> set[str]:
     return {os.path.realpath(p) for p in paths}
 
 
-# Home-relative credential directories (POSIX paths). Also dropped from profile exports (hermes_cli.profiles).
+# Home-relative credential directories (POSIX paths). Also dropped from profile exports (agent_cli.profiles).
 HOME_CREDENTIAL_DIRS = (".ssh", ".aws", ".gnupg", ".kube", ".docker", ".azure", ".config/gh", ".config/gcloud")
 
 

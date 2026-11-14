@@ -1,6 +1,6 @@
-"""Lane-private harness for the dashboard (``hermes dashboard``) E2E suite.
+"""Lane-private harness for the dashboard (``noone dashboard``) E2E suite.
 
-Every scenario drives the REAL web server as a child process: ``python -m hermes_cli.main dashboard
+Every scenario drives the REAL web server as a child process: ``python -m agent_cli.main dashboard
 --no-open --skip-build --port 0`` with HOME=<tmp>/home and HERMES_HOME=<tmp>/home/.hermes (profiles
 resolve under $HOME, never the real install), every credential env var stripped, the LLM vendor
 replaced by ``tests.fakes.fake_llm_provider.FakeLLMServer``. The client side speaks only what the SPA
@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 import httpx
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from tests.fakes.fake_llm_provider import FakeLLMServer
 
@@ -173,7 +173,7 @@ class Sandbox:
         for home in (self.hermes_home, *sorted((self.hermes_home / "profiles").glob("*"))):
             if (home / "gateway.pid").exists():
                 with contextlib.suppress(Exception):
-                    subprocess.run([sys.executable, "-m", "hermes_cli.main", "gateway", "stop"],
+                    subprocess.run([sys.executable, "-m", "agent_cli.main", "gateway", "stop"],
                                    env=self.env({"HERMES_HOME": str(home)}), cwd=str(self.home),
                                    capture_output=True, timeout=60, check=False)
 
@@ -232,7 +232,7 @@ def make_sandbox(root: Path, names: tuple[str, ...] = ("default",),
 def _assert_profiles_root_under(sb: Sandbox) -> None:
     """The profile root is HOME-anchored: prove it resolves inside the sandbox before any write."""
     probe = subprocess.run(
-        [sys.executable, "-c", "from hermes_cli.profiles import _get_profiles_root as r; print(r())"],
+        [sys.executable, "-c", "from agent_cli.profiles import _get_profiles_root as r; print(r())"],
         env=sb.env(), cwd=str(sb.home), capture_output=True, text=True, timeout=120, stdin=subprocess.DEVNULL,
         check=False,
     )
@@ -252,7 +252,7 @@ def kill_group(proc: subprocess.Popen, sig: int | None = None) -> None:
 
 
 class Dashboard:
-    """``hermes dashboard`` bound to 127.0.0.1:<ephemeral>, token scraped from index.html."""
+    """``noone dashboard`` bound to 127.0.0.1:<ephemeral>, token scraped from index.html."""
 
     def __init__(self, sb: Sandbox, log_path: Path, extra_env: dict[str, str] | None = None,
                  argv: tuple[str, ...] = ()) -> None:
@@ -261,7 +261,7 @@ class Dashboard:
         self._log = open(log_path, "a", encoding="utf-8")
         env = sb.env({"HERMES_WEB_DIST": str(sb.root / "web_dist"), **(extra_env or {})})
         self.proc = subprocess.Popen(
-            [sys.executable, "-m", "hermes_cli.main", "dashboard", "--no-open", "--skip-build",
+            [sys.executable, "-m", "agent_cli.main", "dashboard", "--no-open", "--skip-build",
              "--host", "127.0.0.1", "--port", "0", *argv],
             cwd=str(sb.home), env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True, bufsize=1, start_new_session=True,
@@ -278,8 +278,8 @@ class Dashboard:
                     port_box.append(int(m.group(1)))
         threading.Thread(target=pump, daemon=True, name="dash-stdout").start()
         self.port = poll(lambda: port_box[0] if port_box else (self.proc.poll() is not None and -1), 120,
-                         "hermes dashboard to report its port")
-        assert self.port > 0, f"hermes dashboard exited rc={self.proc.returncode}:\n{self.log_tail()}"
+                         "noone dashboard to report its port")
+        assert self.port > 0, f"noone dashboard exited rc={self.proc.returncode}:\n{self.log_tail()}"
         self.base = f"http://127.0.0.1:{self.port}"
         self.http = httpx.Client(base_url=self.base, timeout=60.0, trust_env=False)
         index = self.http.get("/")
@@ -352,7 +352,7 @@ def run_py(sb: Sandbox, code: str, *args: str, hermes_home: Path | None = None,
 
 SEED_SESSIONS = """
 import sys
-from hermes_state import SessionDB
+from agent_state import SessionDB
 prefix, n = sys.argv[1], int(sys.argv[2])
 db = SessionDB()
 for i in range(n):

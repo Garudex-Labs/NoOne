@@ -5,7 +5,7 @@ JSON ``{"decision"|"action": "block"|"modify", ...}`` / ``{"context": ...}`` via
 Exit code 2 blocks a ``pre_tool_call`` even without JSON (Claude-Code / Cursor). Fail open unless ``fail_closed``."""
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import difflib
 import json
 import logging
@@ -22,14 +22,14 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Tuple
 
 # split_command_line, not shlex: shlex eats Windows path backslashes.
-from hermes_cli._subprocess_compat import IS_WINDOWS, kill_process_tree, split_command_line, windows_hide_flags
+from agent_cli._subprocess_compat import IS_WINDOWS, kill_process_tree, split_command_line, windows_hide_flags
 
 try:
     import fcntl  # POSIX only; Windows falls back to best-effort without flock.
 except ImportError:  # pragma: no cover
     fcntl = None  # type: ignore[assignment]
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from utils import atomic_json_write
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ _skip_logged: set[tuple[str, str, str]] = set()
 
 
 def _home_key() -> str:
-    return str(get_hermes_home().expanduser().resolve())
+    return str(get_agent_home().expanduser().resolve())
 
 
 def _forget_home_registrations(registry: set[tuple], lock: threading.Lock) -> None:
@@ -90,7 +90,7 @@ def _payload_fields(kwargs: dict[str, Any]) -> dict[str, Any]:
         cwd = str(Path.cwd())
     except OSError:
         cwd = ""
-    from hermes_cli.profiles import get_active_profile_name
+    from agent_cli.profiles import get_active_profile_name
     from agent.delegation_context import owned_kanban_task
     extra = {k: v for k, v in kwargs.items() if k not in _TOP_LEVEL_PAYLOAD_KEYS}
     # Resolve in the firing execution before the descendant environment is scrubbed.
@@ -158,13 +158,13 @@ def register_from_config(cfg: Optional[dict[str, Any]], *, accept_hooks: bool = 
 
     ``interactive=True`` lets a hook that is not yet allowlisted ask at the terminal; only a
     foreground CLI command passes it. Every other caller (gateway startup and profile loads, cron
-    and managed workers, tui_gateway, force-reload re-registration) never prompts: ``isatty()``
+    and managed workers, agent_backend, force-reload re-registration) never prompts: ``isatty()``
     cannot tell a hidden console or ``NUL`` from a person, and a prompt there blocks the event loop
     until the liveness watchdog kills the gateway (#120356, #127822)."""
     specs, _complete = _hook_specs(cfg)
     if not specs:
         return []
-    from hermes_cli.plugins import get_plugin_manager  # lazy: avoids import cycle
+    from agent_cli.plugins import get_plugin_manager  # lazy: avoids import cycle
     manager, home_key = get_plugin_manager(), _home_key()
     with _registered_lock:  # an already-wired hook is never re-asked for (main checked this first)
         specs = [spec for spec in specs if _key(home_key, spec) not in _registered]
@@ -192,7 +192,7 @@ def sync_from_config(load_cfg: Callable[[], dict[str, Any]]) -> None:
     (a loader that failed open), a malformed ``hooks:`` entry or an unreadable allowlist must never
     disarm a ``fail_closed`` guard, so each adds but never removes. Config and allowlist are read
     under the same lock as the apply, so the last sync to run always applies the newest state."""
-    from hermes_cli.plugins import get_plugin_manager  # lazy: avoids import cycle
+    from agent_cli.plugins import get_plugin_manager  # lazy: avoids import cycle
     with _sync_lock:
         cfg = load_cfg()
         specs, complete = _hook_specs(cfg)
@@ -265,7 +265,7 @@ def accept_for_launch(cfg: Optional[dict[str, Any]]) -> None:
 
 
 def accept_for_process() -> None:
-    """This process's own ``--accept-hooks`` (``hermes gateway run --accept-hooks``): an opt-in in
+    """This process's own ``--accept-hooks`` (``noone gateway run --accept-hooks``): an opt-in in
     force for its lifetime, as ``HERMES_ACCEPT_HOOKS`` would be, without exporting that variable to
     every tool subprocess."""
     global _process_accept
@@ -350,7 +350,7 @@ def re_register_config_hooks() -> None:
     B's next registration call (#92682 review).
     """
     _forget_home_registrations(_registered, _registered_lock)
-    from hermes_cli.config import load_config
+    from agent_cli.config import load_config
     register_from_config(load_config())
 
 
@@ -374,7 +374,7 @@ def _parse_hooks_block(hooks_cfg: Any) -> list[ShellHookSpec]:
 def _parse_hooks(hooks_cfg: Any) -> tuple[list[ShellHookSpec], bool]:
     """``(specs, complete)``: ``complete`` is False when an entry was dropped as malformed (a typo
     must not read as a deliberate removal); an absent or empty ``hooks:`` is complete."""
-    from hermes_cli.plugins import SHELL_UNSUPPORTED_HOOKS, VALID_HOOKS
+    from agent_cli.plugins import SHELL_UNSUPPORTED_HOOKS, VALID_HOOKS
     if hooks_cfg is None:
         return [], True
     if not isinstance(hooks_cfg, dict):
@@ -707,7 +707,7 @@ def _parse_response(event: str, stdout: str) -> Optional[dict[str, Any]]:
 
 def allowlist_path() -> Path:
     """Path to the per-user shell-hook allowlist file."""
-    return get_hermes_home() / ALLOWLIST_FILENAME
+    return get_agent_home() / ALLOWLIST_FILENAME
 
 
 def _read_allowlist() -> tuple[dict[str, Any], bool]:
@@ -775,7 +775,7 @@ def _prompt_and_record(event: str, command: str, *, accept_hooks: bool) -> bool:
     if not sys.stdin.isatty():
         return False
     print(
-        f"\n⚠ Hermes is about to register a shell hook that will run a\n  command on your behalf.\n\n"
+        f"\n⚠ {app_text('{app_name}')} is about to register a shell hook that will run a\n  command on your behalf.\n\n"
         f"    Event:   {event}\n    Command: {command}\n\n"
         f"  Commands run with your full user credentials.  Only approve\n  commands you trust."
     )

@@ -85,7 +85,7 @@ async def _run_flow(tmp_path, monkeypatch, issuer_doc, advertised=ADVERTISED, is
     from mcp.shared.auth import OAuthClientMetadata
     from pydantic import AnyUrl
 
-    from tools.mcp_oauth import HermesTokenStorage, _authorization_code_result
+    from tools.mcp_oauth import AgentTokenStorage, _authorization_code_result
     from tools.mcp_oauth_manager import _HERMES_PROVIDER_CLS, reset_manager_for_tests
     from tools.mcp_tool import sdk_httpx
 
@@ -101,7 +101,7 @@ async def _run_flow(tmp_path, monkeypatch, issuer_doc, advertised=ADVERTISED, is
     async def callback():
         return _authorization_code_result("code-1", seen["state"], iss=iss)
 
-    storage = HermesTokenStorage("srv")
+    storage = AgentTokenStorage("srv")
     provider = _HERMES_PROVIDER_CLS(
         server_name="srv", server_url=RESOURCE, storage=storage,
         client_metadata=OAuthClientMetadata(redirect_uris=[AnyUrl("http://127.0.0.1:1/cb")], client_name="Hermes Agent"),

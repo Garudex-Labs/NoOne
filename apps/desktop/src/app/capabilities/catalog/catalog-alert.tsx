@@ -1,8 +1,8 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { type ReactNode, useState } from 'react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { useI18n } from '@/i18n'
 
 /** A load failure above the catalog results that keeps what's already shown. */
@@ -24,9 +24,9 @@ export function CatalogAlert({
 
   return (
     <Alert className="mx-6 w-auto shrink-0 pr-12" variant="warning">
-      <Codicon name="warning" />
+      <AppIcon name="warning" />
       <AlertTitle>{title}</AlertTitle>
-      <Button aria-label={t.common.close} className="absolute right-3 top-3" onClick={() => setDismissed(true)} size="icon-xs" variant="ghost"><Codicon name="close" /></Button>
+      <Button aria-label={t.common.close} className="absolute right-3 top-3" onClick={() => setDismissed(true)} size="icon-xs" variant="ghost"><AppIcon name="close" /></Button>
       <AlertDescription>
         {children}
         <Button onClick={onRetry} size="xs" variant="text">

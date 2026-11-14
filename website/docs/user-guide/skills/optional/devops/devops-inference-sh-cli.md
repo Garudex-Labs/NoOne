@@ -1,20 +1,20 @@
 ---
 title: "Inference Sh Cli — Run 150+ AI apps (image, video, LLM) via inference.sh CLI"
-sidebar_label: "Inference Sh Cli"
+sidebarTitle: "Inference Sh Cli"
 description: "Run 150+ AI apps (image, video, LLM) via inference.sh CLI"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Inference Sh Cli
+# Inference Sh Cli {#inference-sh-cli}
 
 Run 150+ AI apps (image, video, LLM) via inference.sh CLI.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/devops/inference-sh-cli` |
+| Source | Optional — install with `noone skills install official/devops/inference-sh-cli` |
 | Path | `optional-skills/devops/inference-sh-cli` |
 | Version | `1.0.0` |
 | Author | okaris |
@@ -22,19 +22,27 @@ Run 150+ AI apps (image, video, LLM) via inference.sh CLI.
 | Platforms | linux, macos, windows |
 | Tags | `AI`, `image-generation`, `video`, `LLM`, `search`, `inference`, `FLUX`, `Veo`, `Claude` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# inference.sh CLI
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# inference.sh CLI {#inferencesh-cli}
 
 Run 150+ AI apps in the cloud with a simple CLI. No GPU required.
 
 All commands use the **terminal tool** to run `infsh` commands.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - User asks to generate images (FLUX, Reve, Seedream, Grok, Gemini image)
 - User asks to generate video (Veo, Wan, Seedance, OmniHuman)
@@ -43,7 +51,7 @@ All commands use the **terminal tool** to run `infsh` commands.
 - User asks for AI-powered search (Tavily, Exa)
 - User needs avatar/lipsync generation
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 The `infsh` CLI must be installed and authenticated. Check with:
 
@@ -60,9 +68,9 @@ infsh login
 
 See `references/authentication.md` for full setup details.
 
-## Workflow
+## Workflow {#workflow}
 
-### 1. Always Search First
+### 1. Always Search First {#1-always-search-first}
 
 Never guess app names — always search to find the correct app ID:
 
@@ -72,7 +80,7 @@ infsh app list --search video
 infsh app list --search image
 ```
 
-### 2. Run an App
+### 2. Run an App {#2-run-an-app}
 
 Use the exact app ID from the search results. Always use `--json` for machine-readable output:
 
@@ -80,13 +88,13 @@ Use the exact app ID from the search results. Always use `--json` for machine-re
 infsh app run <app-id> --input '{"prompt": "your prompt here"}' --json
 ```
 
-### 3. Parse the Output
+### 3. Parse the Output {#3-parse-the-output}
 
 The JSON output contains URLs to generated media. Present these to the user with `MEDIA:<url>` for inline display.
 
-## Common Commands
+## Common Commands {#common-commands}
 
-### Image Generation
+### Image Generation {#image-generation}
 
 ```bash
 # Search for image apps
@@ -105,7 +113,7 @@ infsh app run bytedance/seedream-5-lite --input '{"prompt": "nature scene"}' --j
 infsh app run xai/grok-imagine-image --input '{"prompt": "abstract art"}' --json
 ```
 
-### Video Generation
+### Video Generation {#video-generation}
 
 ```bash
 # Search for video apps
@@ -121,7 +129,7 @@ infsh app run bytedance/seedance-1-5-pro --input '{"prompt": "dancing figure", "
 infsh app run falai/wan-2-5 --input '{"prompt": "person walking through city"}' --json
 ```
 
-### Local File Uploads
+### Local File Uploads {#local-file-uploads}
 
 The CLI automatically uploads local files when you provide a path:
 
@@ -136,7 +144,7 @@ infsh app run falai/wan-2-5-i2v --input '{"image": "/path/to/image.png", "prompt
 infsh app run bytedance/omnihuman-1-5 --input '{"audio": "/path/to/audio.mp3", "image": "/path/to/face.jpg"}' --json
 ```
 
-### Search & Research
+### Search & Research {#search--research}
 
 ```bash
 infsh app list --search search
@@ -144,7 +152,7 @@ infsh app run tavily/tavily-search --input '{"query": "latest AI news"}' --json
 infsh app run exa/exa-search --input '{"query": "machine learning papers"}' --json
 ```
 
-### Other Categories
+### Other Categories {#other-categories}
 
 ```bash
 # 3D generation
@@ -157,7 +165,7 @@ infsh app list --search tts
 infsh app list --search twitter
 ```
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 1. **Never guess app IDs** — always run `infsh app list --search <term>` first. App IDs change and new apps are added frequently.
 2. **Always use `--json`** — raw output is hard to parse. The `--json` flag gives structured output with URLs.
@@ -165,7 +173,7 @@ infsh app list --search twitter
 4. **Long-running apps** — video generation can take 30-120 seconds. The terminal tool timeout should be sufficient, but warn the user it may take a moment.
 5. **Input format** — the `--input` flag takes a JSON string. Make sure to properly escape quotes.
 
-## Reference Docs
+## Reference Docs {#reference-docs}
 
 - `references/authentication.md` — Setup, login, API keys
 - `references/app-discovery.md` — Searching and browsing the app catalog

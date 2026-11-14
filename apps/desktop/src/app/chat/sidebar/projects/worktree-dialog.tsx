@@ -1,8 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   Command,
   CommandEmpty,
@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { SanitizedInput } from '@/components/ui/sanitized-input'
-import type { HermesGitBranch } from '@/global'
+import type { AgentGitBranch } from '@/global'
 import { useI18n } from '@/i18n'
 import type { GitOwnerRoute } from '@/lib/desktop-git'
 import { isSubmitEnter } from '@/lib/ime'
@@ -49,7 +49,7 @@ interface BranchActionCopy {
   branchTrackRemote: string
 }
 
-const branchActionLabel = (branch: HermesGitBranch, copy: BranchActionCopy) => {
+const branchActionLabel = (branch: AgentGitBranch, copy: BranchActionCopy) => {
   if (branch.checkedOut) {
     return copy.branchOpenExisting
   }
@@ -84,7 +84,7 @@ export function WorktreeDialog() {
   const [name, setName] = useState('')
   const [pending, setPending] = useState(false)
   const [convertMode, setConvertMode] = useState(false)
-  const [branches, setBranches] = useState<HermesGitBranch[]>([])
+  const [branches, setBranches] = useState<AgentGitBranch[]>([])
   const [branchesLoading, setBranchesLoading] = useState(false)
   const [selectedBase, setSelectedBase] = useState('')
   // The repo that the dialog targets. It is seeded from the resolved intent.
@@ -198,7 +198,7 @@ export function WorktreeDialog() {
     }
   }
 
-  const convert = async (branch: HermesGitBranch) => {
+  const convert = async (branch: AgentGitBranch) => {
     if (pending || !repoPath || !branch) {
       return
     }
@@ -251,12 +251,12 @@ export function WorktreeDialog() {
                 size="inline"
                 variant="text"
               >
-                <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="folder" size="0.8rem" />
+                <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="folder" size="0.8rem" />
                 <span className="shrink-0">{p.worktreeProjectLabel}</span>
                 <span className="truncate text-primary underline-offset-4 decoration-current/20 group-hover:underline">
                   {activeProjectLabel}
                 </span>
-                <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.75rem" />
+                <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="chevron-down" size="0.75rem" />
               </Button>
             </PopoverTrigger>
             <PopoverContent
@@ -287,7 +287,7 @@ export function WorktreeDialog() {
                         }}
                         value={`${option.label} ${option.path}`}
                       >
-                        <Codicon className="shrink-0 text-(--ui-text-tertiary)" name="repo" size="0.8rem" />
+                        <AppIcon className="shrink-0 text-(--ui-text-tertiary)" name="repo" size="0.8rem" />
                         <span className="truncate">{option.label}</span>
                         <CommandItemCheck checked={option === activeOption} />
                       </CommandItem>
@@ -315,7 +315,7 @@ export function WorktreeDialog() {
                     onSelect={() => void convert(branch)}
                     value={branch.name}
                   >
-                    <Codicon
+                    <AppIcon
                       className="shrink-0 text-(--ui-text-tertiary)"
                       name={branch.isRemote ? 'repo' : 'git-branch'}
                       size="0.8rem"

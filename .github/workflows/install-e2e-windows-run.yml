@@ -6,7 +6,7 @@
 # new job. The driver's phases share state via the workroot, and every leg
 # runs the REAL user surface for its methods:
 #
-#   desktop-installer@latest    the website's Hermes-Setup.exe, downloaded and
+#   desktop-installer@latest    the website's NoOne-Setup.exe, downloaded and
 #                               run headed, AutoHotkey clicks Install ->
 #                               Launch, the real Electron window must appear.
 #   installer-script            the irm | iex one-liner: the install.ps1
@@ -54,7 +54,7 @@ on:
         required: true
         type: string
       update-method:
-        description: 'How the install updates to HEAD. Supported: open-app-update (Update button under Playwright, from a desktop-bearing install), hermes-desktop-app-update (same button, app launched via hermes desktop), hermes-update, installer-script, installer-script+desktop, desktop-installer@latest (re-download Hermes-Setup.exe, AHK clicks Install over the existing install).'
+        description: 'How the install updates to HEAD. Supported: open-app-update (Update button under Playwright, from a desktop-bearing install), hermes-desktop-app-update (same button, app launched via hermes desktop), hermes-update, installer-script, installer-script+desktop, desktop-installer@latest (re-download NoOne-Setup.exe, AHK clicks Install over the existing install).'
         required: true
         type: string
       install-ref:
@@ -253,7 +253,7 @@ jobs:
 
       # Product steps below never see setup-pm's HERMES_RUNTIME_DIR or
       # HERMES_PYTHON: windows-e2e.ps1 drops both on entry, so the installer,
-      # the app, `hermes update` and every chat turn share the leg's one store
+      # the app, `noone update` and every chat turn share the leg's one store
       # (<HERMES_HOME>\tools), as on a user's machine. setup-pm reaches the
       # driver's own tooling only through HERMES_PYTHON (and PATH for older
       # installers' uv/ripgrep).

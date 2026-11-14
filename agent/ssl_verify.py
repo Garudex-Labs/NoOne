@@ -345,10 +345,10 @@ def _platform_store_bundle() -> Optional[str]:
     certs = ctx.get_ca_certs(binary_form=True)
     if not certs:
         return None
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     from utils import atomic_write_text
 
-    path = get_hermes_home() / "cache" / "platform-ca-bundle.pem"
+    path = get_agent_home() / "cache" / "platform-ca-bundle.pem"
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         atomic_write_text(path, "".join(ssl.DER_cert_to_PEM_cert(der) for der in certs))

@@ -8,6 +8,7 @@
  */
 
 import { useStore } from '@nanostores/react'
+import { Check, Egg, Loader2, PawPrint } from '@noone/ui/icons'
 import { useEffect, useMemo } from 'react'
 
 import { StatusRow } from '@/app/command-palette/status-row'
@@ -16,7 +17,6 @@ import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
 import { PetThumb } from '@/components/pet/pet-thumb'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { Check, Egg, Loader2, PawPrint } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import {
   $petBusy,

@@ -2,8 +2,8 @@ import { act, cleanup, render } from '@testing-library/react'
 import { useEffect, useRef } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesConnection } from '@/global'
-import { getLatestSessionMessages, type SessionInfo } from '@/hermes'
+import { getLatestSessionMessages, type SessionInfo } from '@/agent-client'
+import type { AgentConnection } from '@/global'
 import { createClientSessionState } from '@/lib/chat-runtime'
 import * as gateways from '@/store/gateway'
 import { $activeGatewayProfile, $showAllProfiles } from '@/store/profile'
@@ -15,11 +15,11 @@ import type { ClientSessionState } from '../../../types'
 import { useSessionActions } from './index'
 
 vi.mock('@/app/contrib/hooks/use-background-sync', () => ({ resetLiveRuntimeTracking: vi.fn() }))
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   getLatestSessionMessages: vi.fn(async () => ({ messages: [], session_id: 'stored' })),
   getProfiles: vi.fn(async () => ({ profiles: [{ name: 'default' }] })),
-  HermesGateway: class {
+  AgentGateway: class {
     connectionState = 'closed'
     connect = async () => {
       this.connectionState = 'open'
@@ -37,7 +37,7 @@ function rpcResult(method: string) {
   return method === 'session.resume' ? { info: {}, messages: [], resumed: 'stored', session_id: 'runtime' } : {}
 }
 
-function descriptor(connectionId: string, registryScoped = true): HermesConnection {
+function descriptor(connectionId: string, registryScoped = true): AgentConnection {
   return {
     connectionId,
     profile: 'default',
@@ -47,7 +47,7 @@ function descriptor(connectionId: string, registryScoped = true): HermesConnecti
     token: 'test',
     wsUrl: `ws://${connectionId}.invalid/ws`,
     baseUrl: `http://${connectionId}.invalid`
-  } as HermesConnection
+  } as AgentConnection
 }
 
 type Resume = ReturnType<typeof useSessionActions>['resumeSession']

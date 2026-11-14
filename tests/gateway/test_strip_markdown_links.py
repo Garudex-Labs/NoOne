@@ -1,4 +1,4 @@
-"""``strip_markdown`` link handling: the default drops a link target (SMS, IRC, Feishu, QQ rely on it);
+"""``strip_markdown`` link handling: the default drops a link target (SMS relies on it);
 ``keep_link_targets=True`` leaves a bare http(s) URL for platforms whose data detection re-links it."""
 from gateway.platforms.helpers import strip_markdown
 

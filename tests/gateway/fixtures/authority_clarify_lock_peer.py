@@ -1,4 +1,4 @@
-"""#140400 end to end: a `hermes chat`-shaped turn's clarify batch answered from a second viewer.
+"""#140400 end to end: a `noone chat`-shaped turn's clarify batch answered from a second viewer.
 
 Real GatewayRunner + session API WebSocket, a loopback model asking two questions, the real clarify
 tool. Socket A creates a ``cli`` session and submits with ``clarify_batch`` (what GatewayAgent sends);
@@ -56,7 +56,7 @@ async def probe(peer):
     from gateway.run import GatewayRunner
     from gateway.run_api import start_gateway_api, stop_gateway_api
     from gateway.session_authority import initialize_session_authority
-    from hermes_cli import web_server
+    from agent_cli import web_server
 
     runner = GatewayRunner()
     authority = await initialize_session_authority(runner, profile_id=os.environ['HERMES_HOME'], instance_id='lock')

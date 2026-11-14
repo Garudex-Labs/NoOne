@@ -1,20 +1,20 @@
 ---
 title: "Axolotl — Axolotl: YAML LLM fine-tuning (LoRA, DPO, GRPO)"
-sidebar_label: "Axolotl"
+sidebarTitle: "Axolotl"
 description: "Axolotl: YAML LLM fine-tuning (LoRA, DPO, GRPO)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Axolotl
+# Axolotl {#axolotl}
 
 Axolotl: YAML LLM fine-tuning (LoRA, DPO, GRPO).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/axolotl` |
+| Source | Optional — install with `noone skills install official/mlops/axolotl` |
 | Path | `optional-skills/mlops/training/axolotl` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,21 +23,29 @@ Axolotl: YAML LLM fine-tuning (LoRA, DPO, GRPO).
 | Platforms | linux, macos |
 | Tags | `Fine-Tuning`, `Axolotl`, `LLM`, `LoRA`, `QLoRA`, `DPO`, `KTO`, `ORPO`, `GRPO`, `YAML`, `HuggingFace`, `DeepSpeed`, `Multimodal` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Axolotl Skill
+<div className="doc-callout-title">
 
-## What's inside
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Axolotl Skill {#axolotl-skill}
+
+## What's inside {#whats-inside}
 
 Expert guidance for fine-tuning LLMs with Axolotl — YAML configs, 100+ models, LoRA/QLoRA, DPO/KTO/ORPO/GRPO, multimodal support.
 
 Assistance with axolotl development, generated from official documentation.
 
-## When to Use This Skill
+## When to Use This Skill {#when-to-use-this-skill}
 
 This skill should be triggered when:
 - Working with axolotl
@@ -46,9 +54,9 @@ This skill should be triggered when:
 - Debugging axolotl code
 - Learning axolotl best practices
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
-### Common Patterns
+### Common Patterns {#common-patterns}
 
 **Pattern 1:** To validate that acceptable data transfer speeds exist for your training job, running NCCL Tests can help pinpoint bottlenecks, for example:
 
@@ -98,7 +106,7 @@ integrations
 utils.trainer.drop_long_seq(sample, sequence_len=2048, min_sequence_len=2)
 ```
 
-### Example Code Patterns
+### Example Code Patterns {#example-code-patterns}
 
 **Example 1** (python):
 ```python
@@ -131,7 +139,7 @@ core.trainers.base.AxolotlTrainer.log(logs, start_time=None)
 prompt_strategies.input_output.RawInputOutputPrompter()
 ```
 
-## Reference Files
+## Reference Files {#reference-files}
 
 This skill includes comprehensive documentation in `references/`:
 
@@ -141,40 +149,40 @@ This skill includes comprehensive documentation in `references/`:
 
 Use `view` to read specific reference files when detailed information is needed.
 
-## Working with This Skill
+## Working with This Skill {#working-with-this-skill}
 
-### For Beginners
+### For Beginners {#for-beginners}
 Start with the getting_started or tutorials reference files for foundational concepts.
 
-### For Specific Features
+### For Specific Features {#for-specific-features}
 Use the appropriate category reference file (api, guides, etc.) for detailed information.
 
-### For Code Examples
+### For Code Examples {#for-code-examples}
 The quick reference section above contains common patterns extracted from the official docs.
 
-## Resources
+## Resources {#resources}
 
-### references/
+### references/ {#references}
 Organized documentation extracted from official sources. These files contain:
 - Detailed explanations
 - Code examples with language annotations
 - Links to original documentation
 - Table of contents for quick navigation
 
-### scripts/
+### scripts/ {#scripts}
 Add helper scripts here for common automation tasks.
 
-### assets/
+### assets/ {#assets}
 Add templates, boilerplate, or example projects here.
 
-## Notes
+## Notes {#notes}
 
 - This skill was automatically generated from official documentation
 - Reference files preserve the structure and examples from source docs
 - Code examples include language detection for better syntax highlighting
 - Quick reference patterns are extracted from common usage examples in the docs
 
-## Updating
+## Updating {#updating}
 
 To refresh this skill with updated documentation:
 1. Re-run the scraper with the same configuration

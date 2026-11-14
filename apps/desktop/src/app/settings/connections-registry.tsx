@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { Cloud, Globe, Loader2, Monitor, Pencil, Plus, RefreshCw, SearchIcon, Terminal, Trash2 } from '@noone/ui/icons'
 import { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { RemoteSetupFields } from '@/components/remote-setup/fields'
@@ -20,7 +21,6 @@ import {
   sortConnectionsForDisplay
 } from '@/lib/connection-display'
 import { triggerHaptic } from '@/lib/haptics'
-import { Cloud, Globe, Loader2, Monitor, Pencil, Plus, RefreshCw, SearchIcon, Terminal, Trash2 } from '@/lib/icons'
 import { $activeConnectionId, setConnectionsRegistry } from '@/store/connections'
 import { refreshFleetRoster } from '@/store/fleet-roster'
 import { notify, notifyError } from '@/store/notifications'
@@ -521,7 +521,7 @@ export function ConnectionsRegistrySection() {
     [bridge, s.testFailed, s.testOk]
   )
 
-  // Fan out `hermes update` to every eligible source; per-connection results
+  // Fan out `noone update` to every eligible source; per-connection results
   // land as individual toasts so one dead box doesn't hide the others.
   const updateAll = useCallback(async () => {
     if (!bridge?.updateAll) {

@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testin
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { SidebarProvider } from '@/components/ui/sidebar'
-import type { HermesApiRequest } from '@/global'
+import type { AgentApiRequest } from '@/global'
 import { $dismissedWorktreeIds, dismissWorktree } from '@/store/layout'
 import { $startWorkSessionRequest, $worktreeDialog } from '@/store/projects'
 
@@ -38,7 +38,7 @@ function installBridge() {
     worktreeList: vi.fn(async () => [])
   }
 
-  const api = vi.fn(async (request: HermesApiRequest) => {
+  const api = vi.fn(async (request: AgentApiRequest) => {
     if (request.path.startsWith('/api/git/base-branches')) {
       return { branches: [{ isDefault: true, isRemote: true, name: 'origin/main' }] }
     }

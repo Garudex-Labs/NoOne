@@ -6,9 +6,9 @@ definitions from ``cron/blueprint_catalog.py`` and emits a flat JSON array the
 docs page renders into cards (description, schedule, copy-paste slash command,
 and a ``hermes://`` "Send to App" deep-link).
 
-Output: ``website/static/api/automation-blueprints-index.json`` (served at
+Output: ``website/docs/api/automation-blueprints-index.json`` (served at
 ``/docs/api/automation-blueprints-index.json``). Run automatically by
-``website/scripts/prebuild.mjs`` before ``npm start`` / ``npm run build``.
+``website/scripts/prepare-docs.mjs`` before ``npm start`` / ``npm run build``.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-OUTPUT = REPO_ROOT / "website" / "static" / "api" / "automation-blueprints-index.json"
+OUTPUT = REPO_ROOT / "website" / "docs" / "api" / "automation-blueprints-index.json"
 
 
 def build_index() -> list:

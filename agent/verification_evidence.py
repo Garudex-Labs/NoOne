@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone, UTC
 from pathlib import Path
 from typing import Any, Optional
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 
 
 _DB_LOCK = threading.Lock()
@@ -54,44 +54,6 @@ _PYTEST_SPELLINGS = (
     ["python", "-m", "pytest"], ["python3", "-m", "pytest"],
     ["uv", "run", "pytest"], ["poetry", "run", "pytest"], ["pipenv", "run", "pytest"],
 )
-_SCHEMA_DDL = (
-    """
-        CREATE TABLE IF NOT EXISTS meta (
-            key TEXT PRIMARY KEY,
-            value TEXT NOT NULL
-        )
-        """,
-    """
-        CREATE TABLE IF NOT EXISTS verification_events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            created_at TEXT NOT NULL,
-            session_id TEXT NOT NULL,
-            cwd TEXT NOT NULL,
-            root TEXT NOT NULL,
-            command TEXT NOT NULL,
-            canonical_command TEXT NOT NULL,
-            kind TEXT NOT NULL,
-            scope TEXT NOT NULL,
-            status TEXT NOT NULL,
-            exit_code INTEGER NOT NULL,
-            output_summary TEXT NOT NULL
-        )
-        """,
-    """
-        CREATE TABLE IF NOT EXISTS verification_state (
-            session_id TEXT NOT NULL,
-            root TEXT NOT NULL,
-            last_event_id INTEGER,
-            last_edit_at TEXT,
-            changed_paths_json TEXT NOT NULL DEFAULT '[]',
-            PRIMARY KEY (session_id, root)
-        )
-        """,
-    """
-        CREATE INDEX IF NOT EXISTS idx_verification_events_session_root
-        ON verification_events(session_id, root, id DESC)
-        """,
-)
 
 
 @dataclass(frozen=True)
@@ -121,7 +83,7 @@ def _utc_now() -> str:
 
 
 def _db_path() -> Path:
-    return get_hermes_home() / "verification_evidence.db"
+    return get_agent_home() / "verification_evidence.db"
 
 
 def _ledger_enabled() -> bool:
@@ -135,25 +97,20 @@ def _ledger_enabled() -> bool:
 
 
 def _connect() -> sqlite3.Connection:
-    from hermes_cli.sqlite_util import open_db
+    from agent_cli.sqlite_util import open_db
 
     return open_db(_db_path(), db_label="verification_evidence.db", initialize=_ensure_schema)
 
 
 def _transaction():
-    from hermes_cli.sqlite_util import transaction
+    from agent_cli.sqlite_util import transaction
 
     return transaction(_connect())
 
 
 def _ensure_schema(conn: sqlite3.Connection) -> None:
-    for ddl in _SCHEMA_DDL:
-        conn.execute(ddl)
-    conn.execute(
-        "INSERT OR REPLACE INTO meta(key, value) VALUES ('schema_version', ?)",
-        (str(_VERIFY_SCHEMA_VERSION),),
-    )
-    conn.commit()
+    from agent_cli.database_migrations import initialize_database
+    initialize_database(conn, "verification")
 
 
 def _split_shell_segments(command: str, *, posix: bool = True) -> list[_ShellSegment]:

@@ -1,24 +1,23 @@
 ---
-sidebar_position: 8
 title: "Programmatic Integration"
 description: "Three protocols for driving hermes-agent from external programs: ACP, the TUI gateway JSON-RPC, and the OpenAI-compatible HTTP API"
 ---
 
-# Programmatic Integration
+# Programmatic Integration {#programmatic-integration}
 
-Hermes ships three protocols for driving the agent from external programs — IDE plugins, custom UIs, CI pipelines, embedded sub-agents. Pick the one that matches your transport and consumer.
+{{app-name}} ships three protocols for driving the agent from external programs — IDE plugins, custom UIs, CI pipelines, embedded sub-agents. Pick the one that matches your transport and consumer.
 
 | Protocol | Transport | Best for | Defined by |
 |----------|-----------|----------|------------|
 | **ACP** | JSON-RPC over stdio | IDE clients (VS Code, Zed, JetBrains) that already speak the [Agent Client Protocol](https://github.com/zed-industries/agent-client-protocol) | `acp_adapter/` |
-| **TUI gateway** | JSON-RPC over stdio (or WebSocket) | Custom hosts that want fine-grained control of sessions, slash commands, approvals, and streaming events | `tui_gateway/server.py` |
+| **TUI gateway** | JSON-RPC over stdio (or WebSocket) | Custom hosts that want fine-grained control of sessions, slash commands, approvals, and streaming events | `agent_backend/server.py` |
 | **API server** | HTTP + Server-Sent Events | OpenAI-compatible frontends (Open WebUI, LobeChat, LibreChat…) and language-agnostic web clients | `gateway/platforms/api_server.py` |
 
 All three drive the same `AIAgent` core. They differ only in wire format and which set of features they expose.
 
 ---
 
-## ACP (Agent Client Protocol)
+## ACP (Agent Client Protocol) {#acp-agent-client-protocol}
 
 `hermes acp` starts a stdio JSON-RPC server speaking ACP. Used in production by VS Code (Zed Industries' ACP extension), Zed, and any JetBrains IDE with an ACP plugin.
 
@@ -34,22 +33,22 @@ hermes acp --setup          # interactive provider/model setup for ACP terminal 
 
 ---
 
-## TUI Gateway JSON-RPC
+## TUI Gateway JSON-RPC {#tui-gateway-json-rpc}
 
-`tui_gateway/server.py` is the method and event catalog behind the Ink TUI (`hermes --tui`), the Desktop app and the embedded dashboard PTY bridge. The Ink TUI reaches it on the profile's shared gateway over WebSocket (`/api/ws`, protocol `hermes-gateway-v1`, a single-use ticket per connection); any external host can speak the same frames over stdio (`tui_gateway/entry.py`) or a WebSocket (`tui_gateway/ws.py`).
+`agent_backend/server.py` is the method and event catalog behind the Ink TUI (`noone --cli`), the Desktop app and the embedded dashboard PTY bridge. The Ink TUI reaches it on the profile's shared gateway over WebSocket (`/api/ws`, protocol `hermes-gateway-v1`, a single-use ticket per connection); any external host can speak the same frames over stdio (`agent_backend/entry.py`) or a WebSocket (`agent_backend/ws.py`).
 
-### A Node client: `@hermes/shared/gateway-client`
+### A Node client: `@noone/shared/gateway-client` {#a-node-client-hermessharedgateway-client}
 
-The Ink TUI's gateway client lives in `apps/shared` (`@hermes/shared`), so another Node frontend can use it without compiling Ink's source. It dials the owner with a ticket, reads `runtime.describe` before `session.create`, translates requests and results for `hermes-gateway-v1` (`@hermes/shared/gateway-canonical`), reconnects with backoff, re-ensures a gone owner a bounded number of times per minute, and emits typed events (`@hermes/shared/gateway-types`).
+The Ink TUI's gateway client lives in `apps/shared` (`@noone/shared`), so another Node frontend can use it without compiling Ink's source. It dials the owner with a ticket, reads `runtime.describe` before `session.create`, translates requests and results for `hermes-gateway-v1` (`@noone/shared/gateway-canonical`), reconnects with backoff, re-ensures a gone owner a bounded number of times per minute, and emits typed events (`@noone/shared/gateway-types`).
 
-The client does not know where its connection comes from. The caller passes `connect(start, recover)`, which returns `{url, protocols, profile_id, instance_id}` and runs again for every reconnect (tickets are single-use). Ink passes its `gateway_bootstrap.py` helper; any other local client can run [`hermes gateway attach --json`](./gateway-internals.md#hermes-gateway-attach), with `--start` on the first call and `--recover` when asked to recover, and pass its `url` and `protocols`:
+The client does not know where its connection comes from. The caller passes `connect(start, recover)`, which returns `{url, protocols, profile_id, instance_id}` and runs again for every reconnect (tickets are single-use). Ink passes its `gateway_bootstrap.py` helper; any other local client can run [`noone gateway attach --json`](./gateway-internals.md#hermes-gateway-attach), with `--start` on the first call and `--recover` when asked to recover, and pass its `url` and `protocols`:
 
 ```ts
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 
-import { GatewayClient } from '@hermes/shared/gateway-client'
-import type { AnyGatewayEvent } from '@hermes/shared/gateway-types'
+import { GatewayClient } from '@noone/shared/gateway-client'
+import type { AnyGatewayEvent } from '@noone/shared/gateway-types'
 
 const gw = new GatewayClient({
   connect: async (start, recover) => {
@@ -67,9 +66,9 @@ gw.drain()
 const session = await gw.request('session.create', {})
 ```
 
-`hermes gateway attach` exits non-zero with the verdict on stdout when there is no owner to attach, so `execFile` rejects and the client retries on its backoff. Sessions are created with `source: "tui"`, the gateway's terminal-client policy, and `session.create` refuses an owner whose `runtime.describe` does not offer it.
+`noone gateway attach` exits non-zero with the verdict on stdout when there is no owner to attach, so `execFile` rejects and the client retries on its backoff. Sessions are created with `source: "tui"`, the gateway's terminal-client policy, and `session.create` refuses an owner whose `runtime.describe` does not offer it.
 
-Two options say who is launching. `source` picks another policy label from `runtime.describe`'s `session_create.sources` (`session.create` is refused if the owner does not list it). `client` is your client's own name, sent on `session.create` only when the owner lists `client` in `session_create.parameters`; an older owner gets the request without it. `name` is 1-64 characters of `a-z`, `0-9`, `.`, `_` and `-`, starting with a letter or digit (`my-client`, not `My Client` or `@acme/client`), and the optional `version` is 1-64 printable ASCII characters without spaces, with no other keys: an owner that takes `client` refuses `session.create` for anything else. The name is a label for attribution: Hermes never grants anything because of it.
+Two options say who is launching. `source` picks another policy label from `runtime.describe`'s `session_create.sources` (`session.create` is refused if the owner does not list it). `client` is your client's own name, sent on `session.create` only when the owner lists `client` in `session_create.parameters`; an older owner gets the request without it. `name` is 1-64 characters of `a-z`, `0-9`, `.`, `_` and `-`, starting with a letter or digit (`my-client`, not `My Client` or `@acme/client`), and the optional `version` is 1-64 printable ASCII characters without spaces, with no other keys: an owner that takes `client` refuses `session.create` for anything else. The name is a label for attribution: {{app-name}} never grants anything because of it.
 
 ```ts
 const gw = new GatewayClient({
@@ -81,7 +80,7 @@ const gw = new GatewayClient({
 
 Other options (`terminalConnectFailure`, `attachUrl`, `sidecarUrl`, timeouts, `toolProgress`, `onLifecycle`, `text`, `fallbackWebSocket`) are documented on `GatewayClientOptions`. Browser-safe modules stay in `apps/shared/src/`; Node-only ones (the client, `prompt-history`) are in `apps/shared/src/node/`, and `apps/shared/src/node/boundary.test.ts` fails if the package's program ever includes a file from another workspace.
 
-### Method catalog (selected)
+### Method catalog (selected) {#method-catalog-selected}
 
 ```
 prompt.submit           prompt.background       session.steer
@@ -106,11 +105,11 @@ On the shared gateway's `hermes-gateway-v1` socket, a session picker reads store
 
 Within one authenticated gateway, resuming or activating a live session attaches another event subscriber rather than replacing the previous connection. Streaming and terminal events go to all attached clients; disconnecting one client does not end a session another client is viewing. Existing submit exclusivity and configured busy-input policy remain in force. Attached clients can steer the session's subagents. This does not enable independent gateway processes to write the same session, nor does it imply durable prompt admission across an owner restart.
 
-### Model overrides on `session.create`
+### Model overrides on `session.create` {#model-overrides-on-sessioncreate}
 
-`session.create` accepts per-session `model` / `provider` overrides. A pair the provider cannot serve (`model: gpt-5.5` with `provider: anthropic`, or with no `provider` when the profile's configured provider is Anthropic) is refused up front with JSON-RPC code `-32602` instead of minting a session whose first turn fails at the provider; `error.data` carries `model`, `provider` and up to five `suggestions` from that provider's catalog, and `error.message` repeats them. The check is offline and only refuses names Hermes knows belong elsewhere: custom endpoints (`custom`, `custom:<name>`), aggregators (OpenRouter, Nous, …), models in the provider's own family that the curated list has not caught up with, and names no catalog lists are all accepted as before.
+`session.create` accepts per-session `model` / `provider` overrides. A pair the provider cannot serve (`model: gpt-5.5` with `provider: anthropic`, or with no `provider` when the profile's configured provider is Anthropic) is refused up front with JSON-RPC code `-32602` instead of minting a session whose first turn fails at the provider; `error.data` carries `model`, `provider` and up to five `suggestions` from that provider's catalog, and `error.message` repeats them. The check is offline and only refuses names {{app-name}} knows belong elsewhere: custom endpoints (`custom`, `custom:<name>`), aggregators (OpenRouter, Nous, …), models in the provider's own family that the curated list has not caught up with, and names no catalog lists are all accepted as before.
 
-### Rewinding history on `prompt.submit`
+### Rewinding history on `prompt.submit` {#rewinding-history-on-promptsubmit}
 
 A rewind / edit / regenerate is a `prompt.submit` that drops part of the stored transcript before running the new turn. Because that write is a destructive rewrite of the session's durable rows, the gateway honors it only when the client states its intent:
 
@@ -124,15 +123,15 @@ A rewind / edit / regenerate is a `prompt.submit` that drops part of the stored 
 
 A truncation parameter without `confirm_truncate` is refused with code `4004` or `4029` and nothing is written. Hosts that implement rewind must set the flag at the moment the user asks for it, and must never keep truncation parameters in state across ordinary submits. Prefer `truncate_before_row_id` (from resume `row_id` / `_row_id`) over ordinals; keep the ordinal as a back-compat / optimistic-row path only when no durable id is available yet.
 
-A truncating submit is never absorbed by the busy-input policy. While a turn is still running, an ordinary `prompt.submit` is steered, redirected, or queued (`display.busy_input_mode`), but a rewind / edit / regenerate refuses with code `4009` (`session busy`) instead — queueing it would drop the history cut and run the edit as a plain follow-up after the un-edited turn. Hosts call `session.interrupt` and retry the same submit until it lands; the Desktop app does this automatically, so editing a message while Hermes is still thinking stops the live turn and reruns from the edited prompt.
+A truncating submit is never absorbed by the busy-input policy. While a turn is still running, an ordinary `prompt.submit` is steered, redirected, or queued (`display.busy_input_mode`), but a rewind / edit / regenerate refuses with code `4009` (`session busy`) instead — queueing it would drop the history cut and run the edit as a plain follow-up after the un-edited turn. Hosts call `session.interrupt` and retry the same submit until it lands; the Desktop app does this automatically, so editing a message while {{app-name}} is still thinking stops the live turn and reruns from the edited prompt.
 
 On a successful truncating submit against a durable session, the `prompt.submit` result additionally carries `survivor_user_row_ids` — the fresh post-rewrite row IDs of the surviving user turns, in visible-user-ordinal order. The rewrite re-inserts the kept prefix as new rows, so every row ID the host cached before the rewind is stale afterward; rebind cached IDs from this list (a `null` entry means that turn has no durable ID — drop the cached one) or the next rewind targeting an older surviving turn will be refused with `4018`.
 
-### Events streamed back
+### Events streamed back {#events-streamed-back}
 
 `message.delta`, `message.complete`, `tool.start`, `tool.generating`, `tool.complete`, `gateway.ready`, `request.cancel`, plus session lifecycle and error events.
 
-### Server→client requests (questions the agent asks you)
+### Server→client requests (questions the agent asks you) {#serverclient-requests-questions-the-agent-asks-you}
 
 Approvals, clarify questions, sudo/secret prompts, vault unlock, MCP setup and the desktop read/act bridges are **JSON-RPC requests from the gateway to the client**, not events. The frame carries a string id, and the client answers with a normal JSON-RPC response bearing the same id:
 
@@ -147,15 +146,15 @@ Methods: `approval` → `{choice}`; `clarify` → `{answers}` keyed by question 
 
 When the gateway withdraws a question (timeout, interrupt, answered from another surface) it emits `request.cancel` `{ id, method, reason }`; clear only the matching prompt. `session.resume` / `session.activate` results and `session.events.since` carry `open_requests` — the still-open frames — so a reconnecting client re-renders (and can still answer) them.
 
-### Rebuilding the in-flight turn on reconnect
+### Rebuilding the in-flight turn on reconnect {#rebuilding-the-in-flight-turn-on-reconnect}
 
 `session.resume` / `session.activate` results carry `inflight` — the turn still running (or the retained failed one) that history does not hold yet: `user`, `assistant` streamed so far, `streaming`, mid-turn `corrections`, and error fields. When the turn was started by the gateway rather than typed by a person (a background-process completion, an async delegation result, a hidden scaffolding prompt) `inflight` also carries the same `display_kind` / `display_metadata` the persisted `messages` row will get, so a client renders the live prompt exactly as it will render history after the turn lands — a `process_complete` timeline marker with `display_metadata.display_text`, nothing at all for `hidden`. Both fields are absent for genuine user input; never infer origin from the prompt text (a user quoting a marker string is still a user).
 
-### Pi-style RPC mapping
+### Pi-style RPC mapping {#pi-style-rpc-mapping}
 
 Every command in the Pi-mono RPC spec ([issue #360](https://github.com/NousResearch/hermes-agent/issues/360)) has a TUI-gateway equivalent:
 
-| Pi command | Hermes equivalent |
+| Pi command | {{app-name}} equivalent |
 |------------|-------------------|
 | `prompt` | `prompt.submit` (or ACP `session/prompt`) |
 | `steer` | `session.steer` |
@@ -171,7 +170,7 @@ Every command in the Pi-mono RPC spec ([issue #360](https://github.com/NousResea
 
 ---
 
-## OpenAI-Compatible API Server
+## OpenAI-Compatible API Server {#openai-compatible-api-server}
 
 `gateway/platforms/api_server.py` exposes hermes over HTTP for any client that already speaks the OpenAI format. Useful when you want a web frontend, a curl-driven CI runner, or a non-Python consumer.
 
@@ -195,16 +194,16 @@ GET  /health, /health/detailed
 
 Setup, headers (`X-Hermes-Session-Id`, `X-Hermes-Session-Key`), and frontend wiring: [API Server](../user-guide/features/api-server).
 
-The browser-extension controller protocol has been removed; to let Hermes drive a browser you
+The browser-extension controller protocol has been removed; to let {{app-name}} drive a browser you
 already run, use `browser.cdp_url` or `/browser connect` — see [Browser-extension control (removed)](../user-guide/features/api-server#browser-extension-control-removed).
 
-### Model catalog surfaces
+### Model catalog surfaces {#model-catalog-surfaces}
 
 The OpenAI-compatible API intentionally keeps `GET /v1/models` minimal: it is
-the compatibility endpoint frontends expect, not the full Hermes provider/model
+the compatibility endpoint frontends expect, not the full {{app-name}} provider/model
 picker catalog.
 
-If an external control plane needs Hermes' curated provider rows, per-model
+If an external control plane needs {{app-name}}' curated provider rows, per-model
 pricing, or capability hints, use one of the authenticated picker surfaces:
 
 - API server REST: `GET /api/model/options` with the API-server bearer key
@@ -220,15 +219,15 @@ probe policy:
   cache and probe all saved custom providers so live catalogs repopulate fully.
 
 Use `/v1/models` for OpenAI-client compatibility. Use `/api/model/options` or
-`model.options` when you are building a Hermes-aware model picker.
+`model.options` when you are building a {{app-name}}-aware model picker.
 
-`POST /v1/runs/{id}/steer` is the HTTP equivalent of Hermes `/steer`: it does not create a new user turn or immediately rewrite the assistant output already in flight. Instead, the text is appended to the live run and becomes visible to the agent after the next tool boundary, so it can course-correct without discarding the current tool-calling loop.
+`POST /v1/runs/{id}/steer` is the HTTP equivalent of {{app-name}} `/steer`: it does not create a new user turn or immediately rewrite the assistant output already in flight. Instead, the text is appended to the live run and becomes visible to the agent after the next tool boundary, so it can course-correct without discarding the current tool-calling loop.
 
 `/v1/runs/{id}/steer` is only accepted while the run status is `running`. Queued, approval-paused, stopping, cancelled, failed, and completed runs return `409 run_not_accepting_steer`, even if the server still retains internal agent references during cooperative shutdown.
 
 A `200` (and the `run.steered` event) means the text was **queued**, not that the agent consumed it. If a steer lands after the agent's final response — with no later tool boundary to deliver it at — the undelivered text is returned as `pending_steer` on the terminal event (`run.completed`, `run.failed`, or `run.cancelled`) and run status, so the client can replay it as the next user turn instead of losing it.
 
-#### Terminal run status
+#### Terminal run status {#terminal-run-status}
 
 The terminal status of a run is derived from how the agent's turn actually ended, and the terminal event name always matches it (`run.<status>`):
 
@@ -265,29 +264,29 @@ databases, so this endpoint does not provide a global exactly-once guarantee.
 
 ---
 
-## Which one should I use?
+## Which one should I use? {#which-one-should-i-use}
 
 - **You're writing an IDE plugin and the IDE already speaks ACP** → ACP. Zero protocol work on the IDE side.
-- **You're writing a custom desktop / web / TUI host and want every Hermes feature** (slash commands, approvals, clarify, multi-agent, session branching) → TUI gateway JSON-RPC.
+- **You're writing a custom desktop / web / TUI host and want every {{app-name}} feature** (slash commands, approvals, clarify, multi-agent, session branching) → TUI gateway JSON-RPC.
 - **You want any OpenAI-compatible frontend, a language-agnostic HTTP client, or curl-driven automation** → API server.
 - **You want a Python in-process embed without a subprocess** → import `run_agent.AIAgent` directly. See [Agent Loop](./agent-loop).
 - **Your client needs the user's clipboard image** (image paste) → run `hermes clipboard image --out PATH --json` on the user's machine. It is device-local, never a gateway call, because the gateway may be remote. See [`hermes clipboard`](../reference/cli-commands.md#hermes-clipboard).
 
 ---
 
-## Model hot-swapping
+## Model hot-swapping {#model-hot-swapping}
 
 Mid-session model switching works on every surface — it's the `/model` slash command under the hood.
 
-- **CLI / TUI:** `/model claude-sonnet-4` or `/model openrouter:anthropic/claude-sonnet-4.6`
+- **CLI:** `/model claude-sonnet-4` or `/model openrouter:anthropic/claude-sonnet-4.6`
 - **TUI gateway RPC:** `command.dispatch` with `{"command": "/model claude-sonnet-4"}`
 - **ACP:** the IDE sends the slash command as a prompt; the agent dispatches it
 - **API server:** include a `model` field in the request body
 
-Provider-aware resolution (the same model name picks the right format for whatever provider you're on) is built in. See `hermes_cli/model_switch.py`.
+Provider-aware resolution (the same model name picks the right format for whatever provider you're on) is built in. See `agent_cli/model_switch.py`.
 
 ---
 
-## A note on `--mode rpc`
+## A note on `--mode rpc` {#a-note-on---mode-rpc}
 
-Hermes does not have a `--mode rpc` flag. The three protocols above already cover the use cases — ACP for IDE-protocol clients, the TUI gateway for stdio JSON-RPC hosts, and the API server for HTTP. If you find a real gap that none of them fill, open an issue with the concrete consumer you're building.
+{{app-name}} does not have a `--mode rpc` flag. The three protocols above already cover the use cases — ACP for IDE-protocol clients, the TUI gateway for stdio JSON-RPC hosts, and the API server for HTTP. If you find a real gap that none of them fill, open an issue with the concrete consumer you're building.

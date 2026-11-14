@@ -282,7 +282,7 @@ class TestMattermostWebSocketParsing:
             "id": "post_abc",
             "user_id": "user_123",
             "channel_id": "chan_456",
-            "message": "@bot_user_id Hello from Matrix!",
+            "message": "@bot_user_id Hello from Mattermost!",
         }
         event = {
             "event": "posted",
@@ -297,7 +297,7 @@ class TestMattermostWebSocketParsing:
         assert self.adapter.handle_message.called
         msg_event = self.adapter.handle_message.call_args[0][0]
         # @mention is stripped from the message text
-        assert msg_event.text == "Hello from Matrix!"
+        assert msg_event.text == "Hello from Mattermost!"
         assert msg_event.message_id == "post_abc"
 
     @pytest.mark.asyncio
@@ -648,7 +648,7 @@ async def test_mattermost_top_level_channel_post_is_thread_root():
 # profile with its own (different or absent) Mattermost config would
 # silently connect to the default profile's server, or have its
 # mention-gating/channel-allowlist decisions driven by the default
-# profile's settings. Mirrors the LINE/DingTalk/IRC fix for #98738.
+# profile's settings. Mirrors the LINE fix for #98738.
 
 @pytest.fixture
 def multiplex_scope():

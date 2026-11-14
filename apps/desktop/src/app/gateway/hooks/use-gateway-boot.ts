@@ -6,15 +6,16 @@ import {
   JSON_RPC_METHOD_NOT_FOUND,
   JsonRpcGatewayError,
   reconnectBackoffDelayMs
-} from '@hermes/shared'
+} from '@noone/shared'
+import { appText } from '@noone/shared/application-identity'
 import { useEffect, useRef } from 'react'
 
+import { AgentGateway } from '@/agent-client'
 import { canonicalOwnerProfile } from '@/api/canonical-protocol'
 import { createGatewayEventDedupe } from '@/app/gateway/gateway-event-dedupe'
 import { reportStartupLatency } from '@/app/gateway/report-startup-latency'
 import { shouldApplyPostBootProgressError } from '@/components/boot-failure-reauth'
-import type { DesktopBootProgress, HermesConnection, HermesWindowState } from '@/global'
-import { HermesGateway } from '@/hermes'
+import type { AgentConnection, AgentWindowState, DesktopBootProgress } from '@/global'
 import { translateNow } from '@/i18n'
 import { desktopDefaultCwd } from '@/lib/desktop-fs'
 import {
@@ -161,7 +162,7 @@ const BOOT_RETRY_BASE_DELAY_MS = 2_000
 // own connect timeout.
 
 /** Registry identity whose runtimes died with the primary connection. */
-export function primaryRuntimeConnectionId(connection: Pick<HermesConnection, 'connectionId' | 'mode'>): null | string {
+export function primaryRuntimeConnectionId(connection: Pick<AgentConnection, 'connectionId' | 'mode'>): null | string {
   const connectionId = connection.connectionId?.trim()
 
   if (connectionId) {
@@ -264,7 +265,7 @@ interface GatewayBootOptions {
   onConnectionReady: (
     connection: Awaited<ReturnType<NonNullable<typeof window.hermesDesktop>['getConnection']>> | null
   ) => void
-  onGatewayReady: (gateway: HermesGateway | null) => void
+  onGatewayReady: (gateway: AgentGateway | null) => void
   refreshHermesConfig: (force?: boolean, shouldPublish?: () => boolean) => Promise<void>
   refreshSessions: (shouldPublish?: () => boolean) => Promise<void>
 }
@@ -311,9 +312,9 @@ export function useGatewayBoot({
     // chrome state into each descriptor at mint time, so a toggle that happens
     // AFTER the mint but BEFORE the renderer publishes it is newer than the
     // snapshot and would otherwise be lost until the next toggle (#108641).
-    let pendingWindowState: HermesWindowState | null = null
+    let pendingWindowState: AgentWindowState | null = null
 
-    const publish = (next: HermesConnection | null) => {
+    const publish = (next: AgentConnection | null) => {
       if (next && pendingWindowState) {
         next = { ...next, ...pendingWindowState }
         pendingWindowState = null
@@ -354,14 +355,14 @@ export function useGatewayBoot({
     // reconnect with backoff, and we nudge a reconnect on the OS/browser
     // signals that fire around wake (power resume, network online, the window
     // becoming visible).
-    let primaryConnection: HermesConnection | null = null
+    let primaryConnection: AgentConnection | null = null
     // Bumped whenever the primary route is recorded, so a reconnect whose
     // lookup started before a boot/connection apply cannot re-own the primary.
     let primaryRouteRevision = 0
 
     // `profile`: the profile the primary serves on `connection` when the record
     // may re-home it, so the request scope moves to that pair in one frame.
-    const recordPrimaryConnection = (connection: HermesConnection, profile?: string) => {
+    const recordPrimaryConnection = (connection: AgentConnection, profile?: string) => {
       primaryConnection = connection
       primaryRouteRevision += 1
       setPrimaryGatewayConnection(connection, profile)
@@ -745,7 +746,7 @@ export function useGatewayBoot({
     // session id against the wrong backend — the HUD then falls back to the
     // default profile's last session (#82285). The override wins over the
     // stored preference; absent, behavior is unchanged.
-    async function getWindowBackend(startup = false): Promise<HermesConnection> {
+    async function getWindowBackend(startup = false): Promise<AgentConnection> {
       // Webapp: the tab's own socket, whatever profile the tab opens on (openWebappTabProfile).
       if (hostHas('servingOriginConnection')) {
         return desktop.getConnection()
@@ -772,7 +773,7 @@ export function useGatewayBoot({
     // The resolved descriptor reflects the explicit startup default. The
     // legacy profile.get preference only remembers the last workspace used.
     // A Webapp tab's primary is the profile its gateway runs as.
-    function primaryProfileOverride(connection: HermesConnection): null | string | undefined {
+    function primaryProfileOverride(connection: AgentConnection): null | string | undefined {
       return hostHas('servingOriginConnection')
         ? browserLaunchProfile()
         : (windowProfileOverride() ?? connection.profile)
@@ -781,14 +782,14 @@ export function useGatewayBoot({
     // The bare profile `connection`'s primary serves. Looked up BEFORE the
     // connection is recorded, so the request scope never pairs the new machine
     // with the previous primary's profile across the ticket/connect awaits.
-    async function lookupPrimaryProfile(connection: HermesConnection): Promise<string> {
+    async function lookupPrimaryProfile(connection: AgentConnection): Promise<string> {
       const override = primaryProfileOverride(connection)
 
       return normalizeProfileKey(override ?? (await desktop.profile?.get?.())?.profile ?? '')
     }
 
     async function adoptPrimaryProfile(
-      connection: HermesConnection,
+      connection: AgentConnection,
       profileLookup: Promise<string>,
       selectionRevision: number,
       shouldPublish: () => boolean = () => true,
@@ -1078,7 +1079,7 @@ export function useGatewayBoot({
       }
     }
 
-    const gateway = adoptedFromHmr ? survivor!.gateway : new HermesGateway()
+    const gateway = adoptedFromHmr ? survivor!.gateway : new AgentGateway()
 
     // Every socket this window owns (the primary below, every registry
     // secondary via onEvent) funnels through this one gate before any store
@@ -1299,7 +1300,7 @@ export function useGatewayBoot({
         activeGateway()?.close()
 
         if (!(await ensureActiveGatewayOpen({ explicit: true }))) {
-          throw new Error('Hermes gateway is not connected')
+          throw new Error(appText('{app_name} gateway is not connected'))
         }
 
         return

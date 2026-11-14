@@ -15,7 +15,7 @@ zygotes and renderers on SIGTERM, and killing a zygote first turns a clean exit 
 """
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import contextlib
 import hashlib
 import json
@@ -93,7 +93,7 @@ _launching: dict[int, LaunchedBrowser] = {}  # pid -> a spawned Chromium still i
 _key_locks: dict[str, threading.Lock] = {}
 _lock = threading.RLock()
 _autoinstall_attempted = False
-# Profile homes (``hermes_home_key``) this process launched or attached a browser for: the reaper reads
+# Profile homes (``agent_home_key``) this process launched or attached a browser for: the reaper reads
 # each one's records, since one process serves many profiles.
 _served_homes: set[str] = set()
 
@@ -131,18 +131,18 @@ def needs_chromium_sandbox_bypass() -> bool:
 
 
 def _chromium_missing_hint() -> str:
-    from hermes_cli.browser_runtime import chromium_missing_hint
+    from agent_cli.browser_runtime import chromium_missing_hint
     return chromium_missing_hint()
 
 
 def _resolve_executable() -> Optional[str]:
-    from hermes_cli.browser_runtime import chromium_executable
+    from agent_cli.browser_runtime import chromium_executable
     exe = chromium_executable()
     if not exe:
         return None
     if os.path.isfile(exe):
         return exe
-    from hermes_platform.resolver import locate_command
+    from agent_platform.resolver import locate_command
     found = locate_command(exe).command  # a bare command name pinned in browser.executable_path
     return found[0] if found else None
 
@@ -159,8 +159,8 @@ def _maybe_autoinstall_chromium() -> bool:
     if _autoinstall_attempted:
         return False
     _autoinstall_attempted = True
-    from hermes_cli.browser_runtime import chromium_executable
-    from hermes_constants import is_termux
+    from agent_cli.browser_runtime import chromium_executable
+    from agent_constants import is_termux
     if running_in_docker() or is_termux() or _explicit_executable_configured(chromium_executable):
         return False
     from pm import InstallError, ensure, lazy_installs_allowed
@@ -252,7 +252,7 @@ def build_chromium_argv(executable: str, user_data_dir: str, *, packaged: bool, 
 
 def _spawn_kwargs() -> dict[str, Any]:
     if os.name == "nt":
-        from hermes_cli._subprocess_compat import windows_hide_flags
+        from agent_cli._subprocess_compat import windows_hide_flags
         return {"creationflags": windows_hide_flags() | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)}
     # detached-spawn: ok — a shared-profile Chromium outlives its launcher for its other holders (browser_launcher_holders); a crashed owner's throwaway one is reaped from its launch record by the next Hermes
     return {"start_new_session": True}
@@ -569,7 +569,7 @@ def launch_chromium(key: str, *, executable: Optional[str] = None, user_data_dir
     right before a fresh launch, inside the same cross-process step, never when attaching: a profile copy
     written there can neither race another process's copy nor land under a browser that just came up; a
     message it returns is the launch's error, as is."""
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     # Loaded now, not first at teardown: stopping the browser from an atexit hook must not be this module's
     # first import (Python refuses new atexit registrations during shutdown, orphaning the browser). An
     # attacher needs it too: it is the one that stops a shared browser when it is the last holder.
@@ -578,7 +578,7 @@ def launch_chromium(key: str, *, executable: Optional[str] = None, user_data_dir
         existing = get_browser(key)
         if existing is not None:
             return existing, None
-        home_key = hermes_home_key()
+        home_key = agent_home_key()
         with _lock:
             _served_homes.add(home_key)
         packaged = executable is None
@@ -1121,16 +1121,16 @@ def _reclaim_throwaway_dirs(home: str) -> None:
             logger.debug("browser: keeping the throwaway profile %s: a Chromium still runs on it", entry)
             continue
         shutil.rmtree(entry, ignore_errors=True)  # a symlink is refused, never followed
-        logger.info("browser: removed the throwaway profile %s of a Hermes process that is gone", entry)
+        logger.info(app_text("browser: removed the throwaway profile %s of a {app_name} process that is gone", percent_format=True), entry)
 
 
 def _served_home_keys(homes) -> set[str]:
     """The launch profile, every profile this process launched a browser for, and ``homes``."""
-    from hermes_constants import get_process_hermes_home, hermes_home_key
+    from agent_constants import get_process_agent_home, agent_home_key
     with _lock:
         keys = set(_served_homes)
-    keys.add(hermes_home_key(get_process_hermes_home()))
-    keys.update(hermes_home_key(home) for home in homes)
+    keys.add(agent_home_key(get_process_agent_home()))
+    keys.update(agent_home_key(home) for home in homes)
     return keys
 
 

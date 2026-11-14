@@ -1,8 +1,11 @@
-"""Frozen updater surface: pre-PM updaters import these names from here.
+"""Legacy import boundary; implementation lives in agent_cli.runtime_paths.
 
-The implementation moved to ``pm.environments``; in-tree code imports it from there.
+Retained for shipped updater/plugin compatibility, sharing the canonical module.
 """
-from pm.environments import (
+from importlib import import_module
+import sys
+
+from agent_cli.runtime_paths import (
     activation_environment,
     dependency_home_root,
     install_state_dir,
@@ -11,3 +14,6 @@ from pm.environments import (
     site_packages,
     store_root,
 )
+
+_current = import_module('agent_cli.runtime_paths')
+sys.modules[__name__] = _current

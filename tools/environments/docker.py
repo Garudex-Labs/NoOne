@@ -22,7 +22,7 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from tools.environments.base import BaseEnvironment, EnvironmentConnectionError, _SHELL_ENV_NAME_RE, get_sandbox_dir
 from tools.terminal_tool_config import (
     _host_path_key, _is_windows_drive_path, cwd_follows_host_mount, home_profile_name,
@@ -508,7 +508,7 @@ def _ensure_docker_available() -> None:
             "or known install locations. Install Docker Desktop and ensure the CLI is available.",
             error="Docker executable not found in PATH or known install locations. "
                   "Install Docker and ensure the 'docker' command is available.",
-            hint="Install Docker (or fix PATH) and retry, or run `hermes setup terminal` to switch to Local.")
+            hint="Install Docker (or fix PATH) and retry, or run `noone setup terminal` to switch to Local.")
     try:
         result = run_capture([docker_exe, "version"], timeout=5)
     except FileNotFoundError:
@@ -523,7 +523,7 @@ def _ensure_docker_available() -> None:
             docker_exe, exc_info=True,
             error="Docker daemon is not responding. Ensure Docker is running and try again.",
             hint="Start Docker (e.g. `systemctl start docker` or launch Docker Desktop), then retry — "
-                 "or run `hermes setup terminal` to switch to Local.")
+                 "or run `noone setup terminal` to switch to Local.")
     except Exception:
         logger.error("Unexpected error while checking Docker availability.", exc_info=True)
         raise
@@ -533,7 +533,7 @@ def _ensure_docker_available() -> None:
             docker_exe, result.returncode, result.stderr.strip(),
             error="Docker command is available but 'docker version' failed. Check your Docker installation.",
             hint="Start Docker, or add your user to the docker group, then retry — "
-                 "or run `hermes setup terminal` to switch to Local.")
+                 "or run `noone setup terminal` to switch to Local.")
 
 
 def _name_only_env_args(names) -> list[str]:
@@ -763,7 +763,7 @@ class DockerEnvironment(BaseEnvironment):
         if not shared_container_key:
             self._labels[_ENVIRONMENT_LABEL_KEY] = _reuse_environment_fingerprint(
                 image=image, mount_args=[*writable_args, *volume_args],
-                hermes_home=str(get_hermes_home()))
+                hermes_home=str(get_agent_home()))
         # Saved for container recreation on "No such container" recovery.
         self._image = image
         self._image_pinned = image_pinned
@@ -946,7 +946,7 @@ class DockerEnvironment(BaseEnvironment):
             if not self._image_pinned:
                 logger.warning(
                     "Existing container %s runs image %s; the default docker_image is now %s. Keeping "
-                    "the existing sandbox — approve the switch with `hermes config set "
+                    "the existing sandbox — approve the switch with `noone config set "
                     "terminal.docker_image %s` (files in /root and /workspace carry over) or pin the "
                     "current image to stop this notice (task=%s, profile=%s).",
                     container_id[:12], actual_image, self._image, self._image, task_label, profile_name)

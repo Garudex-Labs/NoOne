@@ -92,7 +92,7 @@ def test_prompt_and_wait_use_same_profile_timeout_when_config_changes(monkeypatc
 
 
 def test_gateway_approval_captures_routed_profiles_timeout(tmp_path, monkeypatch):
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     _clear()
     default = tmp_path / "default"
@@ -110,11 +110,11 @@ def test_gateway_approval_captures_routed_profiles_timeout(tmp_path, monkeypatch
 
     monkeypatch.setattr(wait_mod, "_poll_event", poll)
     for home in (default, routed):
-        token = set_hermes_home_override(str(home))
+        token = set_agent_home_override(str(home))
         try:
             wait_mod._await_gateway_decision(SESSION_KEY, lambda data: observed.append(data["timeout_s"]), APPROVAL)
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
     assert observed == [300, 300, 3600, 3600]
 
 

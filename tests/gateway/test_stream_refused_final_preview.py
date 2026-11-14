@@ -126,7 +126,7 @@ async def test_a_first_word_fragment_whose_send_timed_out_is_continued_not_repea
 
 
 class _NoDeleteAdapter:
-    """An edit adapter with no delete API (Discord, Matrix, Mattermost, WhatsApp, DingTalk inherit the
+    """An edit adapter with no delete API (Discord, Mattermost, WhatsApp inherit the
     base ``delete_message``): every edit after the first send is refused."""
 
     MAX_MESSAGE_LENGTH = 4096

@@ -1,9 +1,9 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { memo, useCallback, useState } from 'react'
 
 import { StatusControlRow } from '@/components/chat/status-control-row'
 import { StatusSection } from '@/components/chat/status-section'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import {
   ContextMenu,
@@ -111,19 +111,19 @@ export const SessionControlHeartbeatSection = memo(function SessionControlHeartb
       <>
         {heartbeat.status === 'active' && (
           <Item disabled={isBusy} onSelect={() => void handleAction('heartbeat.pause')}>
-            <Codicon name="debug-pause" size="0.8rem" />
+            <AppIcon name="debug-pause" size="0.8rem" />
             <span>{ctrl.pauseHeartbeat}</span>
           </Item>
         )}
         {heartbeat.status === 'paused' && (
           <Item disabled={isBusy} onSelect={() => void handleAction('heartbeat.resume')}>
-            <Codicon name="play" size="0.8rem" />
+            <AppIcon name="play" size="0.8rem" />
             <span>{ctrl.resumeHeartbeat}</span>
           </Item>
         )}
         <Sep />
         <Item disabled={isBusy} onSelect={confirmClearHeartbeat} variant="destructive">
-          <Codicon name="trash" size="0.8rem" />
+          <AppIcon name="trash" size="0.8rem" />
           <span>{ctrl.clearHeartbeat}</span>
         </Item>
       </>
@@ -162,7 +162,7 @@ export const SessionControlHeartbeatSection = memo(function SessionControlHeartb
                         type="button"
                         variant="ghost"
                       >
-                        <Codicon name="ellipsis" size="0.8rem" />
+                        <AppIcon name="ellipsis" size="0.8rem" />
                       </Button>
                     </DropdownMenuTrigger>
                   </span>
@@ -172,7 +172,7 @@ export const SessionControlHeartbeatSection = memo(function SessionControlHeartb
                 </DropdownMenu>
               }
               defaultCollapsed={true}
-              icon={<Codicon className={iconClass} name="pulse" size="0.8rem" />}
+              icon={<AppIcon className={iconClass} name="pulse" size="0.8rem" />}
               label={headerLabel}
             >
               <div>

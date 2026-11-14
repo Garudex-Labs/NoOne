@@ -1,10 +1,10 @@
 import { useStore } from '@nanostores/react'
+import { RefreshCw } from '@noone/ui/icons'
 import { type ReactElement, useEffect } from 'react'
 
 import { UpdateStatusCard, VersionHero } from '@/components/update-status'
 import { VersionDetails } from '@/components/version-details'
 import { useI18n } from '@/i18n'
-import { RefreshCw } from '@/lib/icons'
 import { $cloudOwnsUpdates } from '@/store/cloud-updates'
 import { $connection } from '@/store/session'
 import { $desktopVersion, checkBackendUpdates, refreshDesktopVersion } from '@/store/updates'

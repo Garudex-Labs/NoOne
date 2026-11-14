@@ -1,18 +1,25 @@
 ---
-sidebar_position: 3
 title: "Android / Termux"
-description: "Install Hermes Agent on Android from its signed Termux APT repository"
+description: "Install the agent on Android from its signed Termux APT repository"
 ---
 
-# Hermes on Android with Termux
+# {{app-name}} on Android with Termux {#hermes-on-android-with-termux}
 
-:::danger Termux is currently broken
+<Danger>
+
+<div className="doc-callout-title">
+
+Termux is currently broken
+
+</div>
+
 The Termux package does not work right now. A fix is in progress and will
 ship soon. Until then, the steps below may fail or install a package that
 does not run.
-:::
 
-The Termux package runs Hermes on **aarch64 (arm64-v8a)** Android devices.
+</Danger>
+
+The Termux package runs {{app-name}} on **aarch64 (arm64-v8a)** Android devices.
 Two APT channels are published under
 `https://hermes-assets.nousresearch.com/releases/termux/<channel>`:
 
@@ -26,14 +33,14 @@ The steps below use `stable`. To follow prereleases, replace `stable` with
 channels are signed with the same key.
 
 The package includes Python, Node.js, npm, uv, ripgrep, ffmpeg, and their runtime libraries.
-The first `hermes dashboard` downloads pnpm and installs the web UI's JavaScript dependencies.
+The first `noone dashboard` downloads pnpm and installs the web UI's JavaScript dependencies.
 CI builds the native Python wheels and the TUI before it creates the package.
 The device does not compile core dependencies or assemble its base Python
 environment during installation. The package uses Python 3.14 with the bionic
 interpreter pin; it does not require the same patch version as desktop CPython.
 The wheel closure is core plus `acp`, not all desktop extras.
 
-## Install
+## Install {#install}
 
 Use the standard [Termux](https://termux.dev/) application.
 The package requires its standard prefix, `/data/data/com.termux/files/usr`.
@@ -78,7 +85,7 @@ Do not use the desktop/server `install.sh` or a glibc Linux archive on this targ
      > "$PREFIX/etc/apt/sources.list.d/hermes-agent.list"
    ```
 
-5. Install Hermes:
+5. Install {{app-name}}:
 
    ```bash
    pkg update
@@ -88,14 +95,14 @@ Do not use the desktop/server `install.sh` or a glibc Linux archive on this targ
 6. Configure a provider, then start the TUI:
 
    ```bash
-   hermes setup
-   hermes --tui
+   noone setup
+   noone --cli
    ```
 
 The `hermes`, `hermes-agent`, and `hermes-acp` commands use the packaged runtimes.
 They do not require Termux's `python` or `nodejs` packages.
 
-## Files and updates
+## Files and updates {#files-and-updates}
 
 | Contents | Location |
 | --- | --- |
@@ -110,35 +117,43 @@ pkg update
 pkg upgrade hermes-agent
 ```
 
-`hermes update` refuses to modify an APT-owned installation.
+`noone update` refuses to modify an APT-owned installation.
 It prints the package-manager command instead.
 Canary versions contain `~canary.<timestamp>` and sort before the corresponding
 stable version. Each suite only lists its own channel's packages; to move
 between channels, edit the channel path and suite in `hermes-agent.list`, then
 `pkg update && pkg upgrade hermes-agent`.
 
-## Gateway
+## Gateway {#gateway}
 
 This APT installation does not use systemd, launchd, or Windows Scheduled Tasks.
 Run the gateway in a Termux session:
 
 ```bash
-hermes gateway run
+noone gateway run
 ```
 
 For a background process:
 
 ```bash
 mkdir -p "${HERMES_HOME:-$HOME/.hermes}/logs"
-nohup hermes gateway run >> "${HERMES_HOME:-$HOME/.hermes}/logs/gateway.log" 2>&1 &
+nohup noone gateway run >> "${HERMES_HOME:-$HOME/.hermes}/logs/gateway.log" 2>&1 &
 ```
 
-:::warning Android process limits
+<Warning>
+
+<div className="doc-callout-title">
+
+Android process limits
+
+</div>
+
 Android can suspend or terminate background Termux processes.
 Battery optimization exemptions and `termux-wake-lock` can help, but do not guarantee persistent operation.
-:::
 
-## Limits
+</Warning>
+
+## Limits {#limits}
 
 The package does not include the `nemo-relay` exporter. Its vendored build
 toolchain does not support this target.
@@ -150,14 +165,14 @@ browsing is unavailable and the browser tool says so. A local Docker daemon is n
 services have their own requirements and connectivity limits.
 
 Phone-native Termux:API microphone and clipboard adapters are not provided by
-this package path. The prebuilt CLI/TUI is not proof of local voice or wake-word
+this package path. The prebuilt CLI is not proof of local voice or wake-word
 support. Optional integrations and third-party plugins can require dependencies
 that do not support Android.
 
 Python 3.14 on this target reports `sys.platform == "android"`. A dependency
 or skill gated only to `linux` is not automatically available on Android.
 
-## Uninstall
+## Uninstall {#uninstall}
 
 ```bash
 pkg uninstall hermes-agent
@@ -165,12 +180,12 @@ pkg uninstall hermes-agent
 
 APT removes the package and its command symlinks. It preserves your configuration, sessions, skills, and memories.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 - **Package not found:** verify the repository entry, then run `pkg update`.
 - **Signature error:** verify the public key fingerprint. Do not use an unsigned repository or bypass the error.
 - **Missing command:** verify that `$PREFIX/bin` is on `PATH`, or reinstall the package.
-- **Missing library or TUI bundle:** report `hermes --version` and the complete error. The core package must not require a local rebuild.
+- **Missing library or TUI bundle:** report `noone --version` and the complete error. The core package must not require a local rebuild.
 - **Gateway stops with the screen off:** review Android's battery and background-process limits.
 
-For general diagnostics, run `hermes doctor`.
+For general diagnostics, run `noone doctor`.

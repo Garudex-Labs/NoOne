@@ -82,8 +82,8 @@ def multiplex_daemon(tmp_path, profiles=('warm', 'cold'), env=None):
 
 
 def desktop_ensure(env, root, profile):
-    """The exact child the Desktop spawns: ``hermes --profile <p> gateway ensure --json``."""
-    result = subprocess.run([sys.executable, '-m', 'hermes_cli.main', '--profile', profile,
+    """The exact child the Desktop spawns: ``noone --profile <p> gateway ensure --json``."""
+    result = subprocess.run([sys.executable, '-m', 'agent_cli.main', '--profile', profile,
                              'gateway', 'ensure', '--json', '--timeout', '30'],
                             cwd=root, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60, check=False)
     payload = json.loads(result.stdout)
@@ -92,7 +92,7 @@ def desktop_ensure(env, root, profile):
 
 
 def native_headers(endpoint):
-    from hermes_cli.gateway_client import _session_ticket
+    from agent_cli.gateway_client import _session_ticket
     ticket = _session_ticket(Path(endpoint['profile_id']), SimpleNamespace(**endpoint), purpose='native-http')
     return {'X-Hermes-Gateway-Ticket': ticket}
 
@@ -100,7 +100,7 @@ def native_headers(endpoint):
 async def create_via_ws(endpoint, request_id, hold=None):
     """Create a GUI session on *endpoint* over the canonical WS; ``hold`` keeps the attachment
     open while awaiting it (the "other profile is active" arm)."""
-    from hermes_cli.gateway_client import _session_ticket
+    from agent_cli.gateway_client import _session_ticket
     ticket = _session_ticket(Path(endpoint['profile_id']), SimpleNamespace(**endpoint), purpose='interactive')
     async with connect(endpoint['api_origin'].replace('http:', 'ws:') + '/api/ws',
                        subprotocols=['hermes-gateway-v1', 'hermes-gateway-ticket.' + ticket]) as ws:

@@ -32,7 +32,7 @@ from typing import Any
 
 import pytest
 
-from hermes_platform.host.facts import native_arch
+from agent_platform.host.facts import native_arch
 from tests.ci import _gha_expr as gha
 from tests.ci import workflow_steps
 
@@ -87,7 +87,7 @@ def _real_classifier(paths: list[str]) -> dict[str, bool]:
 
 @cache
 def _yaml(rel: str) -> dict:
-    yaml = pytest.importorskip("hermes_yaml")
+    yaml = pytest.importorskip("agent_yaml")
     return yaml.safe_load((_REPO / rel).read_text(encoding="utf-8-sig"))
 
 
@@ -288,11 +288,11 @@ def test_every_set_lane_reaches_its_consumer_whatever_the_other_lanes_say(combo)
 _R15_CASES = {
     "scripts/build/desktop.mjs": ("e2e_upgrade", "e2e_desktop_update"),
     "scripts/build/web.mjs": ("e2e_upgrade", "e2e_desktop_update"),
-    "hermes_cli/_subprocess_compat.py": ("e2e_upgrade", "e2e_desktop_update"),
-    "hermes_cli/desktop_build_lock.py": ("e2e_upgrade", "e2e_desktop_update"),
-    "hermes_cli/memory_provider_migration.py": ("e2e_upgrade", "e2e_desktop_update"),
-    "hermes_cli/source_build.py": ("e2e_upgrade", "e2e_desktop_update"),
-    "hermes_cli/source_completion.py": ("e2e_upgrade", "e2e_desktop_update"),
+    "agent_cli/_subprocess_compat.py": ("e2e_upgrade", "e2e_desktop_update"),
+    "agent_cli/desktop_build_lock.py": ("e2e_upgrade", "e2e_desktop_update"),
+    "agent_cli/memory_provider_migration.py": ("e2e_upgrade", "e2e_desktop_update"),
+    "agent_cli/source_build.py": ("e2e_upgrade", "e2e_desktop_update"),
+    "agent_cli/source_completion.py": ("e2e_upgrade", "e2e_desktop_update"),
     "apps/desktop/electron/update-marker.ts": ("desktop_updater", "e2e_desktop_update"),
     "apps/desktop/electron/handoff-result.ts": ("desktop_updater", "e2e_desktop_update"),
 }
@@ -321,7 +321,7 @@ _R6_CASES = {
     # The Tauri updater's marker claim: cargo, the only CI that builds it (review CI3).
     "apps/bootstrap-installer/src-tauri/src/marker.rs": ("rust",),
     # The launchers reach the launch repair: the Desktop update relaunches through them too.
-    "hermes_cli/_launchers.py": ("e2e_upgrade", "e2e_desktop_update"),
+    "agent_cli/_launchers.py": ("e2e_upgrade", "e2e_desktop_update"),
 }
 
 
@@ -341,7 +341,7 @@ def test_update_path_change_selects_every_suite_that_exercises_it(path, lanes):
 # Review CI2/CI3: update-path files the classifier sent to the wrong suites.
 _CI3_CASES = {
     # /api/health `commit`: the Desktop compares it before attaching after an update.
-    "hermes_cli/web_routers/status.py": ("python", "e2e_desktop_update"),
+    "agent_cli/web_routers/status.py": ("python", "e2e_desktop_update"),
     # The SSH remote's marker judge/gate: typecheck/vitest and the marker contract's script tests.
     "apps/desktop/electron/remote-update-marker-programs.ts": ("frontend", "desktop_updater"),
     "apps/desktop/electron/remote-update-marker-programs.test.ts": ("frontend", "desktop_updater"),

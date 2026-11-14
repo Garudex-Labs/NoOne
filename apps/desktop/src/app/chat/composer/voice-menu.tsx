@@ -1,7 +1,8 @@
 import { useStore } from '@nanostores/react'
+import { AppIcon } from '@noone/ui/app-icon'
+import { AudioLines, Ear, EarOff, iconSize, Loader2, Square, Volume2, VolumeX } from '@noone/ui/icons'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -14,7 +15,6 @@ import {
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { AudioLines, Ear, EarOff, iconSize, Loader2, Square, Volume2, VolumeX } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { $wakeWord, toggleWakeWord } from '@/store/wake-word'
 
@@ -96,7 +96,7 @@ export function VoiceMenu({
             ) : wakeListening ? (
               <Ear className={iconSize.sm} />
             ) : (
-              <Codicon name="mic" size="0.875rem" />
+              <AppIcon name="mic" size="0.875rem" />
             )}
           </Button>
         </DropdownMenuTrigger>

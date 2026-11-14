@@ -53,9 +53,9 @@ _PROFILE_REJECTED = object()
 _UNPARSEABLE = object()
 
 _BUILTIN_DELIVER_PLATFORMS = {
-    "telegram", "discord", "slack", "signal", "sms", "whatsapp", "matrix", "mattermost",
-    "email", "dingtalk", "feishu", "wecom", "wecom_callback", "weixin",
-    "bluebubbles", "qqbot"}
+    "telegram", "discord", "slack", "signal", "sms", "whatsapp",  "mattermost",
+    "email",     "weixin",
+     }
 
 # ``None`` → aiohttp binds BOTH address families. "0.0.0.0" is IPv4-only (unreachable on IPv6-only
 # networks such as Fly.io 6PN); "::" becomes IPv6-only where the kernel sets IPV6_V6ONLY=1, breaking
@@ -465,9 +465,9 @@ class WebhookAdapter(BasePlatformAdapter):
         atomic rename, which also gives the file a new inode, so a restored mtime cannot hide a change;
         ``file_cache_version`` also catches a same-tick same-size edit made in place (a hand edit).
         """
-        from hermes_constants import get_hermes_home
+        from agent_constants import get_agent_home
         from utils import file_cache_version
-        subs_path = get_hermes_home() / _DYNAMIC_ROUTES_FILENAME
+        subs_path = get_agent_home() / _DYNAMIC_ROUTES_FILENAME
         try:
             stat_key = file_cache_version(subs_path)
         except FileNotFoundError:
@@ -526,12 +526,12 @@ class WebhookAdapter(BasePlatformAdapter):
             # Only a self-referential prefix may fall through to the bare route; anything else fails
             # closed (silently ignoring the prefix served the owner's routes under another profile's URL).
             with suppress(Exception):
-                from hermes_cli.profiles import profile_matches_home
+                from agent_cli.profiles import profile_matches_home
                 if profile_matches_home(profile):
                     return None
             return _PROFILE_REJECTED
         try:
-            from hermes_cli.profiles import profiles_to_serve
+            from agent_cli.profiles import profiles_to_serve
             served = {name for name, _ in profiles_to_serve(multiplex=True)}
         except Exception:
             return _PROFILE_REJECTED
@@ -551,7 +551,7 @@ class WebhookAdapter(BasePlatformAdapter):
         if not profile or not isinstance(profile, str):
             return nullcontext()
         from gateway.run import _profile_runtime_scope
-        from hermes_cli.profiles import get_profile_dir
+        from agent_cli.profiles import get_profile_dir
         return _profile_runtime_scope(get_profile_dir(profile))
 
     async def _read_authenticated_body(self, request: web.Request, route_name: str,
@@ -864,7 +864,7 @@ class WebhookAdapter(BasePlatformAdapter):
         return "accepted"
 
     async def _finalize_delivery(self, event, authority, receipt):
-        from hermes_state_runtime import get_session_admission
+        from agent_state_runtime import get_session_admission
         try:
             row = get_session_admission(authority.db, admission_id=receipt.admission_id)
             if row['status'] in {'queued', 'started'}:

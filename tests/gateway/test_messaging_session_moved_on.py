@@ -15,7 +15,7 @@ def _home(tmp_path, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_the_control_card_of_a_compressed_messaging_session_reads_its_current_segment(tmp_path):
-    from hermes_cli.goals import GoalState
+    from agent_cli.goals import GoalState
     from gateway.session_ancillary import control_snapshot
     _compressed_lane(tmp_path)
     cold = await _cold(tmp_path)
@@ -87,7 +87,7 @@ async def test_an_old_messaging_conversation_takes_every_other_write(tmp_path):
     renamed = await connection.dispatch({'id': 2, 'method': 'session.mutate', 'params': {
         'session_id': 'old', 'request_id': 'rename-old', 'operation': 'rename', 'payload': {'title': 'x'},
         'expected_revision': resumed['result']['revision']}})
-    assert 'result' in renamed, renamed  # Teknium's ruling: the apps keep a chat's old conversation
+    assert 'result' in renamed, renamed  # the apps keep a chat's old conversation
 
 
 @pytest.mark.asyncio

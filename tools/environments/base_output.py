@@ -14,10 +14,10 @@ from collections import deque
 from pathlib import Path
 from typing import IO, Callable, Protocol
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from tools.environments.fd_wait import open_fd_waiter
 from tools.tool_output_truncate import head_tail_split, truncation_notice
-from hermes_cli._subprocess_compat import windows_hide_flags
+from agent_cli._subprocess_compat import windows_hide_flags
 
 # Sentinel capacity for full-fidelity capture: large enough that the collector
 # never evicts, so bounded and unbounded modes share one code path.
@@ -184,7 +184,7 @@ def _new_output_collector(proc, bounded_capture: bool) -> _BoundedOutputCollecto
     if not host_feature_enabled("tool_host_artifacts"):  # a hosted agent's output is never teed here
         return _BoundedOutputCollector(capture_limit)
     try:
-        spill_dir = get_hermes_home() / "cache" / "terminal-output"
+        spill_dir = get_agent_home() / "cache" / "terminal-output"
         spill_path = spill_dir / f"out-{int(time.time())}-{os.getpid()}-{id(proc) & 0xffff:x}.log"
         if spill_dir.is_dir():
             cutoff = time.time() - _SPILL_MAX_AGE_S

@@ -8,7 +8,7 @@ did and returns a ``CompactionOutcome``. Predicates/estimators that tests patch 
 ``agent.turn_context`` are imported lazily through that module so patches intercept."""
 
 from __future__ import annotations
-
+from agent_cli.application_identity import app_text
 import logging
 import time
 from dataclasses import dataclass
@@ -303,8 +303,8 @@ def _preflight_compression(
             _compress_block_reason = f"cooldown:{_cooldown_secs:.0f}"
     elif _codex_native_auto:
         logger.info(
-            "Skipping Hermes preflight compression for codex app-server "
-            "(mode=%s); Hermes will not start thread compaction here.",
+            app_text("Skipping {app_name} preflight compression for codex app-server "
+            "(mode=%s); {app_name} will not start thread compaction here.", percent_format=True),
             getattr(agent, "codex_app_server_auto_compaction", "native"),
         )
     else:

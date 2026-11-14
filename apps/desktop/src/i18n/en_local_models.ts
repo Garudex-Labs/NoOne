@@ -1,5 +1,6 @@
-import type { Translations } from './types'
+import { appText } from '@noone/shared/application-identity'
 
+import type { Translations } from './types'
 export const enLocalModels: Translations['settings']['localModels'] = {
   connectionChanged: 'Local models connection changed',
   title: 'Local Models',
@@ -8,7 +9,7 @@ export const enLocalModels: Translations['settings']['localModels'] = {
   serverRunning: 'Running',
   runtimeInstalled: 'llama.cpp runtime installed',
   runtimeInstalledDetail: (tag, backend) =>
-    `Build ${tag}, ${backend} backend. Hermes starts and manages the server for you.`,
+    `Build ${tag}, ${backend} backend. ${appText('{app_name}')} starts and manages the server for you.`,
   installTitle: 'Install the local runtime',
   installDetail:
     'Downloads the llama.cpp inference engine (a few hundred MB). Models you download run entirely on this machine — no account, nothing leaves your computer.',
@@ -68,7 +69,7 @@ export const enLocalModels: Translations['settings']['localModels'] = {
   updateDetail: (next, current) =>
     `A newer llama.cpp build (${next}) is ready to install — you're on ${current}. Models keep working during the download.`,
   updateSameBuildDetail: tag =>
-    `Hermes now packages llama.cpp ${tag} with files it needs to run. Updating downloads the engine again; models keep working during the download.`,
+    `${appText('{app_name}')} now packages llama.cpp ${tag} with files it needs to run. Updating downloads the engine again; models keep working during the download.`,
   updateAction: 'Update engine',
   updating: 'Updating engine…',
   upToDateTitle: 'Engine up to date',

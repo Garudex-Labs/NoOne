@@ -39,7 +39,7 @@ description: >-
   by its runs_dir setting, which may sit outside the plugin's own data directory and which the operator
   chooses; a settings.json in its plugin data directory when Hermes's own settings are unavailable; and
   the plugin's settings from Hermes configuration through the read-only helper
-  hermes_cli.config.load_config_readonly, with plugins.plugin_storage.plugin_data_dir for the data path.
+  agent_cli.config.load_config_readonly, with plugins.plugin_storage.plugin_data_dir for the data path.
   Both of those imports are guarded and fall back rather than raise. Record files are opened with
   O_NOFOLLOW, symbolic links in the runs directory are skipped so nothing outside it can be reached
   through one, no value supplied by a client ever reaches the filesystem as a path, a file is never read

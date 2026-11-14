@@ -1,42 +1,50 @@
 ---
 title: "Drug Discovery — Drug discovery: ChEMBL search, drug-likeness, interactions"
-sidebar_label: "Drug Discovery"
+sidebarTitle: "Drug Discovery"
 description: "Drug discovery: ChEMBL search, drug-likeness, interactions"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Drug Discovery
+# Drug Discovery {#drug-discovery}
 
 Drug discovery: ChEMBL search, drug-likeness, interactions.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/drug-discovery` |
+| Source | Optional — install with `noone skills install official/research/drug-discovery` |
 | Path | `optional-skills/research/drug-discovery` |
 | Version | `1.0.0` |
-| Author | bennytimz |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `science`, `chemistry`, `pharmacology`, `research`, `health` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Drug Discovery & Pharmaceutical Research
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Drug Discovery & Pharmaceutical Research {#drug-discovery--pharmaceutical-research}
 
 You are an expert pharmaceutical scientist and medicinal chemist with deep
 knowledge of drug discovery, cheminformatics, and clinical pharmacology.
 Use this skill for all pharma/chemistry research tasks.
 
-## Core Workflows
+## Core Workflows {#core-workflows}
 
-### 1 — Bioactive Compound Search (ChEMBL)
+### 1 — Bioactive Compound Search (ChEMBL) {#1--bioactive-compound-search-chembl}
 
 Search ChEMBL (the world's largest open bioactivity database) for compounds
 by target, activity, or molecule name. No API key required.
@@ -92,7 +100,7 @@ print(f\"QED        : {props.get('qed_weighted','N/A')}\")
 "
 ```
 
-### 2 — Drug-Likeness Calculation (Lipinski Ro5 + Veber)
+### 2 — Drug-Likeness Calculation (Lipinski Ro5 + Veber) {#2--drug-likeness-calculation-lipinski-ro5--veber}
 
 Assess any molecule against established oral bioavailability rules using
 PubChem's free property API — no RDKit install needed.
@@ -126,7 +134,7 @@ print(f'  Both rules met: {\"Yes → good oral absorption predicted\" if tpsa<=1
 "
 ```
 
-### 3 — Drug Interaction & Safety Lookup (OpenFDA)
+### 3 — Drug Interaction & Safety Lookup (OpenFDA) {#3--drug-interaction--safety-lookup-openfda}
 
 ```bash
 DRUG="$1"
@@ -166,7 +174,7 @@ for r in results[:10]:
 "
 ```
 
-### 4 — PubChem Compound Search
+### 4 — PubChem Compound Search {#4--pubchem-compound-search}
 
 ```bash
 COMPOUND="$1"
@@ -183,7 +191,7 @@ print(f\"InChIKey   : {p.get('InChIKey','N/A')}\")
 "
 ```
 
-### 5 — Target & Disease Literature (OpenTargets)
+### 5 — Target & Disease Literature (OpenTargets) {#5--target--disease-literature-opentargets}
 
 ```bash
 GENE="$1"
@@ -206,7 +214,7 @@ for row in assoc.get('rows',[]):
 "
 ```
 
-## Reasoning Guidelines
+## Reasoning Guidelines {#reasoning-guidelines}
 
 When analysing drug-likeness or molecular properties, always:
 
@@ -218,14 +226,14 @@ When analysing drug-likeness or molecular properties, always:
 
 For ADMET questions, reason through Absorption, Distribution, Metabolism, Excretion, Toxicity systematically. See references/ADMET_REFERENCE.md for detailed guidance.
 
-## Important Notes
+## Important Notes {#important-notes}
 
 - All APIs are free, public, require no authentication
 - ChEMBL rate limits: add sleep 1 between batch requests
 - FDA data reflects reported adverse events, not necessarily causation
 - Always recommend consulting a licensed pharmacist or physician for clinical decisions
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Task | API | Endpoint |
 |------|-----|----------|

@@ -267,8 +267,8 @@
   // Docs link — surfaced as a `?` icon next to the board switcher and as
   // `title=` hints on unlabelled controls. Kept in one place so rebrands or
   // path changes are a single edit.
-  const DOCS_URL = "https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban";
-  const DOCS_TUTORIAL_URL = "https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban-tutorial";
+  const DOCS_URL = "https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/features/kanban.md";
+  const DOCS_TUTORIAL_URL = "https://github.com/Garudex-Labs/NoOne/blob/main/website/docs/user-guide/features/kanban-tutorial.md";
 
   // localStorage key for the user's selected board. Independent of the
   // CLI's on-disk ``<root>/kanban/current`` pointer so browser users
@@ -1908,7 +1908,7 @@
     // Mode pill — always visible (collapsed or expanded). One click flips
     // between Auto and Manual. Auto = dispatcher decomposes new triage tasks
     // every tick. Manual = pre-PR behavior, the user clicks ⚗ Decompose on
-    // each triage card (or runs `hermes kanban decompose <id>`) and tasks
+    // each triage card (or runs `noone kanban decompose <id>`) and tasks
     // stay in triage until then.
     const autoOn = !!(settings && settings.auto_decompose);
     const modePillTitle = settings === null
@@ -2802,7 +2802,7 @@
       onDragLeave: handleDragLeave,
       onDrop: handleDrop,
     },
-      h("span", { className: "hermes-kanban-trash-icon" }, "🗑️"),
+      h("span", { className: "hermes-kanban-trash-icon" }, h("span", { "aria-hidden": true, dangerouslySetInnerHTML: { __html: "<!--\ntags: [delete, remove, bin, garbage, rubbish, waste-basket, trash-can, recycle-bin, trash]\ncategory: System\nversion: \"1.0\"\nunicode: \"eb41\"\n-->\n<svg\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M4 7l16 0\" />\n  <path d=\"M10 11l0 6\" />\n  <path d=\"M14 11l0 6\" />\n  <path d=\"M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12\" />\n  <path d=\"M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3\" />\n</svg>" } })),
       h("span", { className: "hermes-kanban-trash-label" },
         tx(t, "trash.dropHint", FALLBACK_TRASH.dropHint)),
     );
@@ -3208,7 +3208,7 @@
               }),
             ),
             h("span", { className: "hermes-kanban-card-id",
-                        title: `Task id: ${t.id}. Use this id with kanban_show, /kanban show, or hermes kanban show.` }, t.id),
+                        title: `Task id: ${t.id}. Use this id with kanban_show, /kanban show, or noone kanban show.` }, t.id),
             t.warnings && t.warnings.count > 0
               ? h("span", {
                   className: cn(
@@ -4169,7 +4169,7 @@
           },
             isDiag
               ? h("div", { className: "hermes-kanban-event-header" },
-                  h("span", { className: "hermes-kanban-event-warning-icon" }, "⚠"),
+                  h("span", { className: "hermes-kanban-event-warning-icon" }, h("span", { "aria-hidden": true, dangerouslySetInnerHTML: { __html: "<!--\ntags: [warning, caution, danger, error, hazard, exclamation, attention, risk, notice, alert, triangle]\ncategory: System\nversion: \"1.0\"\nunicode: \"ea06\"\n-->\n<svg\n  xmlns=\"http://www.w3.org/2000/svg\"\n  width=\"24\"\n  height=\"24\"\n  viewBox=\"0 0 24 24\"\n  fill=\"none\"\n  stroke=\"currentColor\"\n  stroke-width=\"2\"\n  stroke-linecap=\"round\"\n  stroke-linejoin=\"round\"\n>\n  <path d=\"M12 9v4\" />\n  <path d=\"M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0\" />\n  <path d=\"M12 16h.01\" />\n</svg>" } })),
                   h("span", { className: "hermes-kanban-event-warning-label" },
                     getDiagnosticEventLabel(i18n, e.kind) || e.kind),
                   h("span", { className: "hermes-kanban-event-ago" },

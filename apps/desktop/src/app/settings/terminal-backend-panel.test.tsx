@@ -3,13 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ProfileScope } from '@/api/client'
 import { deferred } from '@/test/deferred'
-import type { TerminalBackendsResponse } from '@/types/hermes'
+import type { TerminalBackendsResponse } from '@/types/agent-client'
 
 const getTerminalBackends = vi.fn()
 const selectTerminalBackend = vi.fn()
 const confirmMock = vi.fn()
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   getTerminalBackends: (profile?: ProfileScope) => getTerminalBackends(profile),
   selectTerminalBackend: (backend: string, profile?: ProfileScope) => selectTerminalBackend(backend, profile)
 }))

@@ -178,62 +178,8 @@ async def test_photon_grouped_voice_payload_matches_spoken_wake_word(tmp_path, m
     assert len(cached) == (2 if admitted else 0)
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize("spoken,admitted", [("hermes, what is on today", True), ("lunch?", False)])
-async def test_bluebubbles_group_voice_memo_wakes_on_the_spoken_wake_word(tmp_path, monkeypatch, spoken, admitted):
-    import asyncio
-    import json
-    from plugins.platforms.bluebubbles.adapter import BlueBubblesAdapter
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    adapter = BlueBubblesAdapter(PlatformConfig(enabled=True, extra={
-        "server_url": "http://localhost:1234", "password": "secret", "require_mention": True,
-        "mention_patterns": PATTERNS, "voice_mention_patterns": True, "send_read_receipts": False}))
-    adapter.set_authorization_check(lambda *a, **k: True)  # the runner wires one at startup
-    clip = tmp_path / "memo.ogg"
-    clip.write_bytes(OGG)
-    adapter._download_attachment = AsyncMock(return_value=str(clip))
-    adapter.handle_message = AsyncMock()
-    body = json.dumps({"type": "new-message", "data": {
-        "guid": "m1", "text": "", "handle": {"address": "+15555550100"}, "isFromMe": False, "isGroup": True,
-        "chats": [{"guid": "iMessage;+;group-chat"}], "attachments": [{"guid": "a1", "mimeType": "audio/ogg"}]}}).encode()
-    request = SimpleNamespace(query={"password": "secret"}, headers={}, read=AsyncMock(return_value=body))
-    transcribe, calls = _stt(spoken)
-    with patch("tools.transcription_tools.transcribe_audio", side_effect=transcribe):
-        await adapter._handle_webhook(request)
-        await asyncio.sleep(0)
-
-    assert len(calls) == 1
-    assert adapter.handle_message.await_count == (1 if admitted else 0)
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize("verdict", [False, None])
-async def test_a_bluebubbles_memo_from_an_unauthorized_sender_is_never_fetched_or_transcribed(
-        tmp_path, monkeypatch, verdict):
-    """Only the gateway's explicit True permits the fetch: a refused or unwired sender's memo is
-    neither downloaded nor sent to STT, so the spoken gate drops it even when it says the wake word."""
-    import asyncio
-    import json
-    from plugins.platforms.bluebubbles.adapter import BlueBubblesAdapter
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    adapter = BlueBubblesAdapter(PlatformConfig(enabled=True, extra={
-        "server_url": "http://localhost:1234", "password": "secret", "require_mention": True,
-        "mention_patterns": PATTERNS, "voice_mention_patterns": True, "send_read_receipts": False}))
-    adapter.set_authorization_check(None if verdict is None else (lambda *a, **k: verdict))
-    adapter._download_attachment = AsyncMock(return_value=str(tmp_path / "memo.ogg"))
-    adapter.handle_message = AsyncMock()
-    body = json.dumps({"type": "new-message", "data": {
-        "guid": "m1", "text": "", "handle": {"address": "+155****0100"}, "isFromMe": False, "isGroup": True,
-        "chats": [{"guid": "iMessage;+;group-chat"}], "attachments": [{"guid": "a1", "mimeType": "audio/ogg"}]}}).encode()
-    request = SimpleNamespace(query={"password": "secret"}, headers={}, read=AsyncMock(return_value=body))
-    transcribe, calls = _stt("hermes, what is on today")
-    with patch("tools.transcription_tools.transcribe_audio", side_effect=transcribe):
-        await adapter._handle_webhook(request)
-        await asyncio.sleep(0)
-
-    adapter._download_attachment.assert_not_awaited()
-    assert calls == []
-    assert adapter.handle_message.await_count == 0
 
 
 @pytest.mark.asyncio
@@ -260,7 +206,7 @@ async def test_telegram_gate_transcribes_in_the_routed_profile(tmp_path, monkeyp
     """A shared bot's chat routed to another profile: the gate's STT runs in that profile's scope
     (its ``stt`` config and secrets), the scope the turn enters, never the receiving bot's."""
     import contextlib
-    from hermes_constants import get_hermes_home, reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import get_agent_home, reset_agent_home_override, set_agent_home_override
     launch, routed = tmp_path / "launch", tmp_path / "routed"
     for home, enabled in ((launch, "false"), (routed, "true")):
         home.mkdir()
@@ -271,15 +217,15 @@ async def test_telegram_gate_transcribes_in_the_routed_profile(tmp_path, monkeyp
     @contextlib.asynccontextmanager
     async def scope(source):
         entered.append(source.chat_id)
-        token = set_hermes_home_override(str(routed))
+        token = set_agent_home_override(str(routed))
         try:
             yield
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
     homes = []
 
     def transcribe(path, _model=None, _source=None):
-        homes.append(str(get_hermes_home()))
+        homes.append(str(get_agent_home()))
         return {"success": True, "transcript": "hermes, what is on today", "provider": "fake"}
     adapter = _telegram(True)
     adapter.gateway_runner = SimpleNamespace(_async_profile_scope_for_source=scope,
@@ -355,7 +301,7 @@ async def test_a_gate_transcript_never_crosses_profiles(tmp_path):
     import re
     from gateway.platforms.helpers import spoken_mention_clips
     from gateway.run_inbound_transcription import GatewayInboundTranscriptionMixin
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
     clip = tmp_path / "gate.ogg"
     clip.write_bytes(OGG)
     (tmp_path / "a").mkdir()
@@ -364,16 +310,16 @@ async def test_a_gate_transcript_never_crosses_profiles(tmp_path):
     runner = GatewayInboundTranscriptionMixin()
     runner.config = SimpleNamespace(stt_enabled=True)
     with patch("tools.transcription_tools.transcribe_audio", side_effect=transcribe):
-        token = set_hermes_home_override(str(tmp_path / "a"))
+        token = set_agent_home_override(str(tmp_path / "a"))
         try:
             assert await spoken_mention_clips([str(clip)], [re.compile(p) for p in PATTERNS], keep=frozenset({str(clip)}))
         finally:
-            reset_hermes_home_override(token)
-        token = set_hermes_home_override(str(tmp_path / "b"))
+            reset_agent_home_override(token)
+        token = set_agent_home_override(str(tmp_path / "b"))
         try:
             await runner._enrich_message_with_transcription("", [str(clip)])
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
     assert len(calls) == 2
 
 
@@ -653,41 +599,3 @@ async def test_a_threaded_reply_stop_never_waits_on_an_earlier_voice_check(tmp_p
             assert seen == ["s1"]
     finally:
         release.set()
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("other", [{"mimeType": "application/pdf"}, {"mimeType": "image/png"}])
-@pytest.mark.parametrize("memo", [{"mimeType": "audio/ogg"},
-                                  {"mimeType": "application/octet-stream", "uti": "com.apple.coreaudio-format.caf"}])
-async def test_a_bluebubbles_memo_beside_a_file_sends_only_its_audio_to_stt_and_the_turn(tmp_path, monkeypatch, other, memo):
-    """A group envelope with a voice memo (an audio MIME, or a CAF memo sent as octet-stream) and a PDF
-    or photo: only the memo enters gate STT, and the admitted turn still transcribes it (the file
-    beside it never demotes it to an audio attachment)."""
-    import asyncio
-    import json
-    from gateway.run_inbound import GatewayInboundMixin
-    from plugins.platforms.bluebubbles.adapter import BlueBubblesAdapter
-    monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    adapter = BlueBubblesAdapter(PlatformConfig(enabled=True, extra={
-        "server_url": "http://localhost:1234", "password": "secret", "require_mention": True,
-        "mention_patterns": PATTERNS, "voice_mention_patterns": True, "send_read_receipts": False}))
-    adapter.set_authorization_check(lambda *a, **k: True)  # the runner wires one at startup
-    clip, doc = tmp_path / "memo.ogg", tmp_path / "file.bin"
-    clip.write_bytes(OGG)
-    doc.write_bytes(b"%PDF-1.4")
-    adapter._download_attachment = AsyncMock(side_effect=lambda guid, _att: str(clip if guid == "a1" else doc))
-    adapter.handle_message = AsyncMock()
-    body = json.dumps({"type": "new-message", "data": {
-        "guid": "m1", "text": "", "handle": {"address": "+15555550100"}, "isFromMe": False, "isGroup": True,
-        "chats": [{"guid": "iMessage;+;group-chat"}],
-        "attachments": [{"guid": "a1", **memo}, {"guid": "d1", **other}]}}).encode()
-    request = SimpleNamespace(query={"password": "secret"}, headers={}, read=AsyncMock(return_value=body))
-    transcribe, calls = _stt("hermes, look at this")
-    with patch("tools.transcription_tools.transcribe_audio", side_effect=transcribe):
-        await adapter._handle_webhook(request)
-        await asyncio.sleep(0)
-
-    assert calls == [str(clip)]
-    event = adapter.handle_message.await_args.args[0]
-    _images, stt_paths, _audio_files, _videos = GatewayInboundMixin._classify_inbound_media(event, False)
-    assert stt_paths == [str(clip)]

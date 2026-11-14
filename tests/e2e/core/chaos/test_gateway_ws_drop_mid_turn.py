@@ -1,7 +1,7 @@
 """Network drop mid-turn on the gateway's session WebSocket: the turn finishes, the client comes back.
 
 Refs #145171 (EP-2). Contract: closing a client removes a viewer; it never stops accepted work.
-A real ``hermes gateway run`` in a hermetic home, a loopback model that holds each turn open until
+A real ``noone gateway run`` in a hermetic home, a loopback model that holds each turn open until
 the test releases it (so "mid-turn" is deterministic), and a client on the gateway's ticketed
 ``/api/ws`` that loses its connection with no WebSocket close frame (a FIN, then an RST).
 ``sessions.orphan_end_grace_s`` is 1 s, so the owner's "last viewer vanished" close fires while the
@@ -36,7 +36,7 @@ import pytest
 from websockets.sync.client import connect
 
 from gateway.control_socket import resolve_client_socket_path
-from hermes_state_mutation_retirement import VIEWER_CLOSE_PREFIX
+from agent_state_mutation_retirement import VIEWER_CLOSE_PREFIX
 from tests.e2e.core.chaos._helpers import (
     hermetic_env, kill_tagged, new_tag, persisted_messages, python_exe, write_chaos_home)
 from tests.fakes.fake_llm_provider import FakeLLMServer, Text
@@ -251,7 +251,7 @@ def scenario(tmp_path_factory: pytest.TempPathFactory):
     # Host rendezvous stays inside the tmp root: the developer's live gateway is never seen.
     env.update(HERMES_GATEWAY_LOCK_DIR=str(root / "locks"), HERMES_GATEWAY_MAX_STARTS="0")
     out, viewers, facts = open(log, "wb"), [], {}
-    gateway = subprocess.Popen([python_exe(), "-m", "hermes_cli.main", "gateway", "run", "--quiet"],
+    gateway = subprocess.Popen([python_exe(), "-m", "agent_cli.main", "gateway", "run", "--quiet"],
                                cwd=str(home), env=env, stdin=subprocess.DEVNULL, stdout=out,
                                stderr=subprocess.STDOUT)
 

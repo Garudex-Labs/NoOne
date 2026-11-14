@@ -1,4 +1,6 @@
 import { externalUrlTarget } from "../../../../apps/shared/src/external-url";
+import type { SvgIconName } from "../../../../apps/ui/src/svg";
+import { appText } from "../../application-identity";
 
 // Shared catalog vocabulary for the Plugins grid (src/pages/plugins), the per-plugin pages and the
 // author pages (plugins/plugin-catalog-pages generates their routes). One definition of the entry
@@ -66,7 +68,7 @@ export function desktopInstallLink(name: string): string {
   return `hermes://plugin/install?catalog=${encodeURIComponent(name)}`;
 }
 
-/** Site route of an entry's page (Docusaurus prefixes baseUrl/locale via <Link>). */
+/** Site route of an entry's page (the link helper preserves the site subpath and language via <Link>). */
 export function pluginPagePath(name: string): string {
   return `/plugins/${encodeURIComponent(name)}`;
 }
@@ -96,44 +98,44 @@ export function pinUrl(plugin: Pick<CatalogPlugin, "repo" | "sha" | "subdir">): 
 
 export const TIER_CONFIG: Record<
   string,
-  { label: string; color: string; bg: string; border: string; icon: string }
+  { label: string; color: string; bg: string; border: string; icon: SvgIconName }
 > = {
   official: {
     label: "Official",
     color: "var(--plugin-catalog-official)",
     bg: "var(--plugin-catalog-official-bg)",
     border: "var(--plugin-catalog-official-border)",
-    icon: "\u{2713}",
+    icon: "check",
   },
   verified: {
     label: "Verified",
     color: "var(--plugin-catalog-verified)",
     bg: "var(--plugin-catalog-verified-bg)",
     border: "var(--plugin-catalog-verified-border)",
-    icon: "\u{2714}",
+    icon: "rosette-discount-check",
   },
   community: {
     label: "Community",
     color: "var(--plugin-catalog-community)",
     bg: "var(--plugin-catalog-community-bg)",
     border: "var(--plugin-catalog-community-border)",
-    icon: "\u{2756}",
+    icon: "package",
   },
 };
 
 // Browse taxonomy. Order here is the order of the filter pills and of the
 // grouped sections; keep it in sync with CATALOG_CATEGORIES in
-// hermes_cli/plugin_catalog.py and website/scripts/extract-plugins.py.
-export const CATEGORY_CONFIG: Record<string, { label: string; icon: string; blurb: string }> = {
-  desktop: { label: "Desktop", icon: "\u{1F5A5}\u{FE0F}", blurb: "Panes, tabs and views for Hermes Desktop" },
-  memory: { label: "Memory", icon: "\u{1F9E0}", blurb: "Memory providers and context engines" },
-  platform: { label: "Platforms", icon: "\u{1F4AC}", blurb: "Messaging and channel adapters" },
-  web: { label: "Web & Browser", icon: "\u{1F310}", blurb: "Search backends, extraction and browser control" },
-  tools: { label: "Tools", icon: "\u{1F6E0}\u{FE0F}", blurb: "New tools the agent can call" },
-  voice: { label: "Voice", icon: "\u{1F399}\u{FE0F}", blurb: "Speech, TTS and realtime audio" },
-  automation: { label: "Automation", icon: "\u{23F1}\u{FE0F}", blurb: "Hooks, wake triggers and session automation" },
-  models: { label: "Models", icon: "\u{2728}", blurb: "Model and inference providers" },
-  general: { label: "General", icon: "\u{1F4E6}", blurb: "Plugins that span several areas" },
+// agent_cli/plugin_catalog.py and website/scripts/extract-plugins.py.
+export const CATEGORY_CONFIG: Record<string, { label: string; icon: SvgIconName; blurb: string }> = {
+  desktop: { label: "Desktop", icon: "device-desktop", blurb: appText("Panes, tabs and views for {app_name} Desktop") },
+  memory: { label: "Memory", icon: "brain", blurb: "Memory providers and context engines" },
+  platform: { label: "Platforms", icon: "message", blurb: "Messaging and channel adapters" },
+  web: { label: "Web & Browser", icon: "world", blurb: "Search backends, extraction and browser control" },
+  tools: { label: "Tools", icon: "tool", blurb: "New tools the agent can call" },
+  voice: { label: "Voice", icon: "microphone", blurb: "Speech, TTS and realtime audio" },
+  automation: { label: "Automation", icon: "clock", blurb: "Hooks, wake triggers and session automation" },
+  models: { label: "Models", icon: "sparkles", blurb: "Model and inference providers" },
+  general: { label: "General", icon: "package", blurb: "Plugins that span several areas" },
 };
 export const CATEGORY_ORDER = Object.keys(CATEGORY_CONFIG);
 

@@ -1,7 +1,7 @@
 """An exhausted (402) provider pool must be named as a billing failure at init.
 
 #94785: a Desktop composer pick routed through OpenRouter while the OpenRouter account was out of
-credits hit the generic "No LLM provider configured. Run `hermes model` …" message — actively
+credits hit the generic "No LLM provider configured. Run `noone model` …" message — actively
 misleading, because a *different* provider (the config default) was configured and working and only
 the session's override pool was burned. The ``openrouter`` / ``custom`` branch of
 ``_routed_client_kwargs`` has no provider-specific missing-credentials message, so it fell through to
@@ -78,7 +78,7 @@ def _patch_no_routed_client(monkeypatch):
         "agent.auxiliary_client.resolve_provider_client", lambda *a, **k: (None, None)
     )
     monkeypatch.setattr(
-        "hermes_cli.fallback_config.resolve_entry_api_key", lambda entry: None
+        "agent_cli.fallback_config.resolve_entry_api_key", lambda entry: None
     )
 
 

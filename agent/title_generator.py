@@ -5,6 +5,7 @@ is called, cannot fail), then an **upgrade** from one small-model call (cheap ti
 JSON-constrained). Storage enforces provenance ``derived < llm < user``: stage 2 only replaces stage 1
 and neither replaces a name the user typed."""
 
+from agent_cli.application_identity import app_text
 import json
 import logging
 import os
@@ -15,7 +16,6 @@ import unicodedata
 import weakref
 from contextlib import suppress
 from typing import Any, Callable, Optional
-
 from agent.auxiliary_client import call_llm
 from agent.context_compressor import LEGACY_SUMMARY_PREFIX
 from agent.delegation_context import is_dispatcher_owned_worker_context
@@ -157,9 +157,9 @@ _CONTROL_WRAPPERS = tuple(
 # Hermes' own machine-authored openers: a compaction handoff or resumed session must not be titled after them.
 _MACHINE_PREFIXES = (
     "[CONTEXT COMPACTION", LEGACY_SUMMARY_PREFIX, "[Runtime note:", "[System note:", "[SYSTEM]",
-    # tui_gateway.server._MODEL_SWITCH_MARKER_PREFIX (keep in sync); persisted as role="user" because
+    # agent_backend.server._MODEL_SWITCH_MARKER_PREFIX (keep in sync); persisted as role="user" because
     # strict providers reject a non-first system message.
-    # Model-switch marker from tui_gateway.server._append_model_switch_marker. It is persisted with
+    # Model-switch marker from agent_backend.server._append_model_switch_marker. It is persisted with
     # role="user" (strict OpenAI-compatible providers reject a system message that is not first — #48338),
     # so without this entry it looks like a real opening turn: switching models before the first real
     # message titled the session "[System: The active model for this chat has…" instead of the user's actual
@@ -169,8 +169,8 @@ _MACHINE_PREFIXES = (
 
 
 def _title_config() -> dict:
-    """``auxiliary.title_generation`` (lazy read-only import: no hermes_cli cycle, no migration writes)."""
-    from hermes_cli.config import load_config_readonly
+    """``auxiliary.title_generation`` (lazy read-only import: no agent_cli cycle, no migration writes)."""
+    from agent_cli.config import load_config_readonly
     return ((load_config_readonly() or {}).get("auxiliary") or {}).get("title_generation") or {}
 
 
@@ -235,7 +235,7 @@ def _is_self_hosted_provider(provider: str) -> bool:
 
     Normalised here so the main route and the title pin resolve aliases (``ollama``, ``lm-studio``…) the same way.
     """
-    from hermes_cli.providers import normalize_provider
+    from agent_cli.providers import normalize_provider
     provider = normalize_provider(provider)
     return provider in ("custom", "lmstudio", "local") or provider.startswith("custom:")
 
@@ -246,12 +246,12 @@ def _title_pin_may_share_endpoint(pinned_provider: str, main_provider: str, main
     Hosted pins (``openrouter``…) multiplex and never share the slot. A pin to ``custom``/``lmstudio``/``local``/any
     ``custom:<name>`` is assumed to share until the caller compares ``base_url``, and a bare ``<name>`` /
     display-name pin is the same endpoint when it aliases the main ``custom:<name>`` route
-    (``hermes_cli.providers.custom_provider_aliases`` — the resolver's own identity set) or resolves to a
+    (``agent_cli.providers.custom_provider_aliases`` — the resolver's own identity set) or resolves to a
     configured custom entry serving ``main_base_url`` (a keyed ``providers:`` entry's display name does not
     alias its ``custom:<key>`` id).
     """
-    from hermes_cli.config import get_compatible_custom_providers, load_config_readonly
-    from hermes_cli.providers import custom_provider_aliases, resolve_custom_provider
+    from agent_cli.config import get_compatible_custom_providers, load_config_readonly
+    from agent_cli.providers import custom_provider_aliases, resolve_custom_provider
     if _is_self_hosted_provider(pinned_provider):
         return True
     if custom_provider_aliases(pinned_provider) & custom_provider_aliases(main_provider):
@@ -702,14 +702,14 @@ def auto_title_session(
     """Generate and store the model title (daemon-thread target); skips sessions already carrying an
     ``llm``/``user`` title (a ``derived`` one is expected — upgrading it is the point). Never lets an
     exception escape (the threading excepthook would spray a traceback into the terminal); the canonical
-    trigger is the post-``hermes update`` window where lazy imports read NEW source against OLD modules."""
+    trigger is the post-``noone update`` window where lazy imports read NEW source against OLD modules."""
     try:
         if not session_db or not session_id or _has_upgraded_title(session_db, session_id):
             return
         # This thread starts AFTER the turn's ambient context was reset; republish it so the call carries
         # the same Portal ``conversation=`` tag (root-of-lineage) and bills usage to this session.
         from agent.aux_accounting import set_accounting_context
-        from agent.portal_tags import set_conversation_context
+        from agent.conversation_scope import set_conversation_context
         conversation_id = session_id
         with suppress(Exception):
             conversation_id = session_db.get_conversation_root(session_id) or session_id
@@ -737,7 +737,7 @@ def auto_title_session(
             _notify_title(title_callback, persisted, source, "Auto-title")
     except Exception as e:
         # WARNING so operators see it in agent.log; names the likely cause.
-        logger.warning("Auto-title failed (harmless; if this started after an update, restart the running Hermes process): %s", e)
+        logger.warning(app_text("Auto-title failed (harmless; if this started after an update, restart the running {app_name} process): %s", percent_format=True), e)
         logger.debug("Auto-title traceback", exc_info=True)
         _report_failure(failure_callback, e, "Auto-title")
 
@@ -767,8 +767,8 @@ def _kanban_task_title() -> Optional[str]:
     if not task_id or not is_dispatcher_owned_worker_context():
         return None
     try:
-        from hermes_cli import kanban_db, kanban_db_connect
-        from hermes_state import SessionDB
+        from agent_cli import kanban_db, kanban_db_connect
+        from agent_state import SessionDB
         with kanban_db_connect.connect_closing() as conn:
             task = kanban_db.get_task(conn, task_id)
         title = " ".join((task.title or "").split()) if task is not None else ""

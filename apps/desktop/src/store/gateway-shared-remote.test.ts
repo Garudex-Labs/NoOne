@@ -18,9 +18,9 @@ const gatewayMocks = vi.hoisted(() => ({
   setConnection: vi.fn()
 }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   setApiRequestConnection: vi.fn(),
-  HermesGateway: class {
+  AgentGateway: class {
     connectionState = 'closed'
     connect = async (wsUrl: string): Promise<void> => {
       await gatewayMocks.connect(wsUrl)

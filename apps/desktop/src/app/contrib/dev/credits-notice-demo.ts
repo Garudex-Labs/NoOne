@@ -8,11 +8,11 @@
 // Installed only under `import.meta.env.DEV` (see contrib/wiring.tsx), so none
 // of this ships in a production build.
 
-import type { GatewayEvent } from '@hermes/shared'
+import type { GatewayEvent } from '@noone/shared'
+import { CreditCard } from '@noone/ui/icons'
 
 import { PALETTE_AREA, type PaletteContribution } from '@/app/command-palette/contrib'
 import { registry } from '@/contrib/registry'
-import { CreditCard } from '@/lib/icons'
 import { emitLocalGatewayEvent } from '@/store/gateway'
 import { $activeSessionId } from '@/store/session'
 

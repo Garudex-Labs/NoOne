@@ -6,8 +6,8 @@ Root TypeScript style rules apply.
 ## Desktop local execution belongs to the canonical gateway
 
 Electron + React + nanostores (`@assistant-ui/react`) talks JSON-RPC over the existing
-`@hermes/shared` client. Normal local primary and pooled launches invoke
-`hermes gateway ensure --json`, consume its credential-free endpoint, and authenticate
+`@noone/shared` client. Normal local primary and pooled launches invoke
+`noone gateway ensure --json`, consume its credential-free endpoint, and authenticate
 WebSockets with fresh private control tickets. The app never acquires the gateway PID as
 an owned child. Closing, switching or evicting a Desktop connection disconnects the viewer;
 only explicit gateway lifecycle commands stop the owner.
@@ -19,8 +19,8 @@ scraped or added to the public connection descriptor. SSH/URL intent retains its
 remote resolution and exposure lifecycle; a remote failure must never start a local owner.
 
 The gateway `gateway ensure` attaches to is **one multiplexing owner per home**: `HERMES_DESKTOP=1`
-is not how the app finds it, and no per-profile `hermes serve --port 0` child is spawned. One
-gateway process serves sessions from several homes (`tui_gateway/AGENTS.md` § Profile scope); a
+is not how the app finds it, and no per-profile `noone serve --port 0` child is spawned. One
+gateway process serves sessions from several homes (`agent_backend/AGENTS.md` § Profile scope); a
 served secondary answers through the multiplexer's control socket (`GatewayEndpoint.multiplex_home`).
 Remote connections (SSH, URL+token, Cloud) likewise reach a backend that may serve several profiles
 from one process. Every lifecycle/status/settings REST call carries `?profile=` (or the `profile`
@@ -38,9 +38,9 @@ as CLI, dropping launch options, or falling back to an independent local serve o
 - `src/lib/desktop-slash-commands.ts` is the load-bearing file: `DESKTOP_COMMAND_SPECS` (built-ins
   and their desktop surfaces) + the block-list. A command's desktop disposition (terminal-only /
   messaging-only / settings-owned / advanced / hidden) is authored ONCE, as `desktop=` on its
-  `CommandDef` in `hermes_cli/commands.py`; the live `commands.catalog` carries it, and
+  `CommandDef` in `agent_cli/commands.py`; the live `commands.catalog` carries it, and
   `src/lib/desktop-slash-registry.json` (regenerate with `scripts/dump_desktop_slash_registry.py`;
-  `tests/hermes_cli/test_desktop_slash_registry.py` + the vitest file fail on drift) is the offline
+  `tests/agent_cli/test_desktop_slash_registry.py` + the vitest file fail on drift) is the offline
   fallback. Only names the Python registry has never heard of (`/density`, `/details`, `/logs`,
   `/mouse` — Ink-local; `/pets`) live in `TS_ONLY_NO_DESKTOP_SURFACE`. `isDesktopSlashCommand(name)`
   gates **execution** (true
@@ -60,9 +60,9 @@ user-activated extensions. If you tighten `desktop-slash-commands.ts`, keep
 `isDesktopSlashExtensionCommand` flowing into both paths. Test: from `apps/desktop`,
 `pnpm exec vitest run src/lib/desktop-slash-commands.test.ts` (workspace deps install at the repo root).
 
-## Bot Mode (`src/plugins/hermes-bots/`) — one bot = ONE canonical forever-chat, identified by NAME
+## Bot Mode (`src/plugins/bot-mode/`) — one bot = ONE canonical forever-chat, identified by NAME
 
-Each bot is a Hermes **profile** with a persistent identity. This invariant regressed repeatedly,
+Each bot is a NoOne **profile** with a persistent identity. This invariant regressed repeatedly,
 cost users conversation history each time, and is not open for re-litigation in a routine PR.
 
 The chat's only identity is **(profile, session titled exactly "Bot Chat")**; the state DB's
@@ -91,10 +91,10 @@ target; such reports are about side-chats and the fix belongs in the Sessions si
 The gateway reports the registry row as `canonical_session` on `profiles.list` (resolved server-side
 by title); roster preview, activity signals, and the `/new`→`/compact` guard all read it, so preview
 identity and click identity are the same row by construction. Contract tests:
-in `src/plugins/hermes-bots/`: `canonical-chat-registry.test.ts` (tripwire: the open path never
+in `src/plugins/bot-mode/`: `canonical-chat-registry.test.ts` (tripwire: the open path never
 reads/writes a stored pointer), `canonical-chat-creation.test.ts`, `canonical-chat-adopt-on-conflict.test.ts`,
 `bot-row-opens-canonical-chat.test.ts`, `hide-bot-chats.test.ts`; plus repo-root
-`tests/tui_gateway/test_profiles_list_canonical_session.py`.
+`tests/agent_backend/test_profiles_list_canonical_session.py`.
 
 ### Group chats
 

@@ -1,5 +1,8 @@
 import { type ChildProcess, execFileSync, spawn } from 'node:child_process'
 
+import { appText } from '@noone/shared/application-identity'
+
+import { initialApplicationName, registerApplicationIdentity } from './application-identity'
 import type { GatewayEndpoint } from './local-gateway'
 import { configurePythonGatewayTicketClient, createLocalGatewayDials, createStaleGatewayRestarter, ensureLocalGateway, gatewayOwnerProfile, localGatewayDial, nativeGatewayHttpHeaders, redialLocalGateway, runGatewayEnsure, runGatewayOwnerRestart } from './local-gateway'
 import { closeGatewayTicketBridges, createGatewayTicketResolver } from './local-gateway-python'
@@ -43,6 +46,7 @@ import {
 import type { Session } from 'electron'
 
 import { type ActiveRuntimeState, classifyActiveRuntime } from './active-runtime-state'
+import { isHermesProcess } from './agent-process'
 import { HERMES_API_EXPECTED_404 } from './api-expected-404'
 import {
   destroyKeepaliveAgents,
@@ -251,10 +255,10 @@ import { createAmbientClaimArbiter } from './event-dedupe'
 import { openExternalUrl as externalOpen, type ExternalOpenDeps, reportPreOpenStatFailure } from './external-open'
 import {
   buildTerminalScript,
+  cliResumeArgs,
   resolveTerminalLaunch,
   terminalScriptEnv,
-  terminalScriptExtension,
-  tuiResumeArgs
+  terminalScriptExtension
 } from './external-terminal'
 import { f12ShortcutDecision, toF12KeyboardEventPayload } from './f12-shortcut'
 import { resolveFeatureFlags } from './feature-flags'
@@ -312,7 +316,6 @@ import {
   tightenSecretFileMode,
   writeSecretFileAtomic
 } from './hardening'
-import { isHermesProcess } from './hermes-process'
 import { assertNotPassiveSpawn } from './host-backend-singleton'
 import { HERMES_HUB_FALLBACK_ORIGIN, HERMES_HUB_ORIGIN, isHermesHubClipboardWrite } from './hub-iframe-policy'
 import { requestHudClose } from './hud-close'
@@ -690,8 +693,8 @@ import {
   MIN_WIDTH as WINDOW_MIN_WIDTH,
   windowSize
 } from './window-state'
+import { buildPathExtCandidates, chooseUpdaterArgs, resolveVenvHermesCommand } from './windows-agent-path'
 import { hiddenWindowsChildOptions } from './windows-child-options'
-import { buildPathExtCandidates, chooseUpdaterArgs, resolveVenvHermesCommand } from './windows-hermes-path'
 import {
   connectWindowsRemote,
   detectRemotePlatform,
@@ -1323,7 +1326,7 @@ const VENV_ROOT = path.join(ACTIVE_HERMES_ROOT, 'venv')
 // We deliberately put the marker INSIDE ACTIVE_HERMES_ROOT (not alongside)
 // so that deleting the checkout to start fresh also deletes the marker --
 // avoids the confusing "marker exists but checkout is gone" state.
-const BOOTSTRAP_COMPLETE_MARKER = path.join(ACTIVE_HERMES_ROOT, '.hermes-bootstrap-complete')
+const BOOTSTRAP_COMPLETE_MARKER = path.join(ACTIVE_HERMES_ROOT, '.agent-bootstrap-complete')
 const BOOTSTRAP_MARKER_SCHEMA_VERSION = 1
 
 const DESKTOP_CONNECTION_CONFIG_PATH = path.join(app.getPath('userData'), 'connection.json')
@@ -1333,13 +1336,13 @@ const DESKTOP_WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'window-sta
 const DESKTOP_BACKEND_OWNERSHIP_PATH = path.join(app.getPath('userData'), 'backend-ownership.json')
 const DESKTOP_MANAGED_SSH_RECOVERY_PATH = path.join(app.getPath('userData'), 'managed-ssh-update-recovery.json')
 // active-profile.json records which Hermes profile the desktop launches its
-// local backend as. When set, startHermes() passes `hermes --profile <name>
+// local backend as. When set, startHermes() passes `noone --profile <name>
 // dashboard …`, which deterministically pins HERMES_HOME (see
-// _apply_profile_override in hermes_cli/main.py) and bypasses the sticky
+// _apply_profile_override in agent_cli/main.py) and bypasses the sticky
 // ~/.hermes/active_profile file. Unset (null) preserves the legacy behavior:
 // no --profile flag, so the backend honors active_profile / default.
 
-// Mirrors hermes_cli.profiles._PROFILE_ID_RE so we never hand the backend a
+// Mirrors agent_cli.profiles._PROFILE_ID_RE so we never hand the backend a
 // value its profile resolver would reject and exit on.
 const PROFILE_NAME_RE = DESKTOP_PROFILE_NAME_RE
 // Branch we track for self-update. The GUI work has merged to main, so this
@@ -1347,7 +1350,7 @@ const PROFILE_NAME_RE = DESKTOP_PROFILE_NAME_RE
 // hermesDesktop.updates.setBranch().
 const DEFAULT_UPDATE_BRANCH = 'main'
 // desktop.log lives under HERMES_HOME/logs/ so it sits next to agent.log,
-// errors.log, gateway.log produced by hermes_logging.setup_logging — one log
+// errors.log, gateway.log produced by agent_logging.setup_logging — one log
 // directory per user, regardless of which UI surface produced the line.
 const DESKTOP_LOG_PATH = path.join(HERMES_HOME, 'logs', 'desktop.log')
 const DESKTOP_LOG_FLUSH_MS = 120
@@ -1395,8 +1398,7 @@ const BOOT_FAKE_STEP_MS = (() => {
   return Math.max(120, raw)
 })()
 
-const APP_NAME: string = IDENTITY_APP_NAME || process.env.HERMES_DESKTOP_APP_NAME || 'Hermes'
-const HUD_WINDOW_TITLE = `${APP_NAME} HUD`
+initialApplicationName()
 const TITLEBAR_HEIGHT = 34
 const MACOS_TRAFFIC_LIGHTS_HEIGHT = 14
 
@@ -1761,7 +1763,7 @@ function previewFileMetadata(filePath, mimeType) {
   }
 }
 
-app.setName(APP_NAME)
+registerApplicationIdentity(() => mainWindow?.webContents, () => hudWindow, buildApplicationMenu)
 
 // No application menu until the first window exists. Electron would otherwise
 // install its default menu at `will-finish-launching` (before `ready`), and a
@@ -1784,14 +1786,14 @@ if (IS_WINDOWS) {
 
 // Seed the native About panel with the best-known Hermes version. This is
 // refreshed on every open via showAboutPanelFresh, so an in-place
-// `hermes update` mid-session is reflected without an app restart; the seed
+// `noone update` mid-session is reflected without an app restart; the seed
 // covers the first open and any non-menu invocation path. Never seed empty:
 // an empty applicationVersion falls back to the bundle version, which is the
 // 0.0.0 placeholder on local builds (#124581).
 app.setAboutPanelOptions({
-  applicationName: APP_NAME,
+  applicationName: app.getName(),
   applicationVersion: nativeAboutVersion(appVersionInfo(INSTALL_STAMP, '', app.getVersion())),
-  copyright: 'Copyright © 2026 Nous Research'
+  copyright: 'Copyright © 2026 Garudex Labs'
 })
 
 // Custom scheme for streaming audio/video into the renderer. Local paths read
@@ -1898,7 +1900,7 @@ const backendDialClaims = new BackendDialClaims()
 let softRehomeInProgress = false
 // Cached connection DESCRIPTORS for every non-primary (connectionId, profile)
 // scope the app has dialed: canonical local gateways reached through
-// `hermes gateway ensure`, registry remotes, per-profile remote overrides.
+// `noone gateway ensure`, registry remotes, per-profile remote overrides.
 // Never a process — the gateway owns its own lifetime; forgetting an entry only
 // forces the next ensure*() to re-dial. A user with no named profiles never
 // populates this map.
@@ -1918,7 +1920,7 @@ let desktopLogFlushPromise = Promise.resolve()
 // Land a spawn failure in desktop.log.
 function logPoolSpawnFailure(label: string, error: unknown): void {
   rememberLog(
-    `Hermes backend for profile ${label} failed to start: ${error instanceof Error ? error.message : String(error)}`
+    appText(`{app_name} backend for profile ${label} failed to start: ${error instanceof Error ? error.message : String(error)}`)
   )
 }
 
@@ -1939,7 +1941,7 @@ const rendererReloadTimesRef: { current: number[] } = { current: [] }
 // the renderer's "Reload and retry" path or by quitting the app.
 let bootstrapFailure = null
 // Latched non-bootstrap backend spawn failure — stops getConnection() from
-// respawning hermes serve backend children in a tight loop while boot is broken.
+// respawning noone serve backend children in a tight loop while boot is broken.
 let backendStartFailure = null
 // Latched CONFIRMED remote reauth failure. Remote failures deliberately do not
 // latch via backendStartFailure (they're usually transient and must stay
@@ -2795,7 +2797,7 @@ async function waitForUpdateToFinish() {
 
         await advanceBootProgress(
           'backend.update-wait',
-          'An update is still running — Hermes will start automatically when it finishes. Its progress is in logs/update.log.',
+          appText('An update is still running — {app_name} will start automatically when it finishes. Its progress is in logs/update.log.'),
           12
         )
 
@@ -2804,7 +2806,7 @@ async function waitForUpdateToFinish() {
 
       await advanceBootProgress(
         'backend.update-wait',
-        'An update is finishing — Hermes will start automatically when it completes…',
+        appText('An update is finishing — {app_name} will start automatically when it completes…'),
         12
       )
     },
@@ -2849,7 +2851,7 @@ async function waitForUpdateToFinish() {
       log: rememberLog
     })
   ) {
-    await advanceBootProgress('backend.update-restart', 'Restarting Hermes to load the updated app…', 14)
+    await advanceBootProgress('backend.update-restart', appText('Restarting {app_name} to load the updated app…'), 14)
     // Park while the scheduled exit lands so this stale build never starts a
     // backend; the failsafe below only runs if the exit somehow does not.
     await new Promise(resolve => setTimeout(resolve, BUNDLE_SWAP_RELAUNCH_FAILSAFE_MS))
@@ -2975,7 +2977,7 @@ function looksLikeDesktopAppBinary(commandPath) {
 }
 
 function isHermesSourceRoot(root) {
-  return directoryExists(root) && fileExists(path.join(root, 'hermes_cli', 'main.py'))
+  return directoryExists(root) && fileExists(path.join(root, 'agent_cli', 'main.py'))
 }
 
 async function findPythonForRoot(root: string): Promise<string | null> {
@@ -3503,7 +3505,7 @@ function createNativePackagedStrategy(
     const deps: ConstructorParameters<typeof AppInstallerStrategy>[0] = {
       python: payload.storePython,
       // The checker is bundled core code, run with the payload python.
-      module: 'hermes_cli.windows_appinstaller_update',
+      module: 'agent_cli.windows_appinstaller_update',
       run: (python, module) =>
         runAppInstallerChecker(python, module, {
           env: { ...process.env, PYTHONPATH: payloadPythonPath(payload) },
@@ -3546,7 +3548,7 @@ function createNativePackagedStrategy(
 
     return createStoreStrategy({
       python: payload.storePython,
-      module: 'hermes_cli.windows_store_update',
+      module: 'agent_cli.windows_store_update',
       pythonPath: payloadPythonPath(payload),
       env: process.env,
       windowHandle: () => (BrowserWindow.getFocusedWindow() ?? mainWindow)?.getNativeWindowHandle() ?? null,
@@ -3643,7 +3645,7 @@ function resolveCheckoutUpdateStrategy(): CheckoutStrategy {
       await preflightStateDb({
         python: managed ? null : await findPythonForRoot(root),
         launcher,
-        script: path.join(root, 'hermes_cli', 'backup_sqlite.py'),
+        script: path.join(root, 'agent_cli', 'backup_sqlite.py'),
         home,
         log
       })
@@ -3723,7 +3725,7 @@ let quitPromptOpen = false
 let quitConfirmedWithActiveWork = false
 
 // Resolve the staged updater binary the desktop may hand an update to. On
-// Windows that binary owns ALL repo mutation — running `hermes update` +
+// Windows that binary owns ALL repo mutation — running `noone update` +
 // rebuilding the desktop — so the desktop never touches its own bits while
 // running. macOS/Linux stage the same binary but deliberately do not use it;
 // see resolveStagedUpdaterBinary for the policy and for #74836. Returns null
@@ -3732,7 +3734,7 @@ function resolveUpdaterBinary() {
   return resolveStagedUpdaterBinary(HERMES_HOME, { fileExists, isWindows: IS_WINDOWS })
 }
 
-// Path to the venv shim whose lock decides whether `hermes update` can write
+// Path to the venv shim whose lock decides whether `noone update` can write
 // fresh entry points. On Windows this is the file the running backend
 // `hermes.exe` holds open; on POSIX it's never mandatory-locked.
 function venvHermesShimPath(updateRoot) {
@@ -3860,7 +3862,7 @@ function killExternalVenvHolders(updateRoot) {
 
     if (Number.isInteger(pid) && pid > 0) {
       rememberLog(
-        `[updates] stopping external Hermes venv holder (autostart gateway/dashboard) PID ${pid} before hand-off`
+        appText(`[updates] stopping external {app_name} venv holder (autostart gateway/dashboard) PID ${pid} before hand-off`)
       )
 
       try {
@@ -4209,7 +4211,7 @@ function reapOrphanedBackendsOnce() {
 
 // Stop app-owned Windows backends before replacing application outputs.
 // PM generations can retain live readers. Gateway draining/restart belongs to
-// `hermes update`; neither venv scans nor a second fleet stop belong here.
+// `noone update`; neither venv scans nor a second fleet stop belong here.
 async function stopBackendsForUpdate(): Promise<void> {
   closeGatewayTicketBridges()
 
@@ -4233,7 +4235,7 @@ async function releaseBackendLock(updateRoot: string, tag: string): Promise<{ un
   // supervised primary backend, when one exists). The gate waits for these to
   // actually LEAVE the process table, not just for the shim to unlock — the
   // shim probe only covers venv\Scripts\hermes.exe, but the backend is
-  // `python.exe -m hermes_cli.main serve`, which need not hold the shim at all
+  // `python.exe -m agent_cli.main serve`, which need not hold the shim at all
   // (#74805 first-attempt race).
   const initialPids = []
 
@@ -4318,8 +4320,8 @@ async function releaseBackendLock(updateRoot: string, tag: string): Promise<{ un
 //
 // The desktop is a pure consumer: it does NOT git pull / pip install / rebuild
 // itself (the old open-coded git dance lived here and drifted from
-// `hermes update`). Instead we spawn the staged Hermes-Setup binary with
-// --update and quit, so it can run `hermes update` (which refuses while we
+// `noone update`). Instead we spawn the staged NoOne-Setup binary with
+// --update and quit, so it can run `noone update` (which refuses while we
 // hold the venv shim) and rebuild the desktop with our exe already gone.
 //
 // Detection (checkUpdates / commit changelog / "N behind") stays in the UI;
@@ -4486,7 +4488,7 @@ function runningAppBundle() {
 
 // macOS/Linux update hand-off: spawn the repo-owned posix orchestrator
 // (scripts/desktop-update/posix.sh) detached and QUIT. The script waits us
-// out, runs `hermes update`, swaps/relaunches the app bundle, and writes
+// out, runs `noone update`, swaps/relaunches the app bundle, and writes
 // .hermes-update-result.json for the relaunched Desktop to surface. It shows
 // its own tiny shim window (or nothing, headless) — this process only needs
 // to leave. Checkouts that predate the script get the manual card once.
@@ -4577,7 +4579,7 @@ function writeBootstrapMarker(payload) {
   writeFileAtomic(BOOTSTRAP_COMPLETE_MARKER, JSON.stringify(merged, null, 2) + '\n', 'utf8')
 
   // The checkout's own install stamp is written by the Python completion tail
-  // (hermes_cli/source_completion.py) during the products stage, from the
+  // (agent_cli/source_completion.py) during the products stage, from the
   // checkout itself. The desktop never synthesizes it: the checkout is the
   // authority for its runtime identity, and a desktop-written copy would
   // clobber the completion tail's richer provenance.
@@ -4889,12 +4891,12 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
     } else if (!isWindowsBinaryPathInWsl(hermesOverride, { isWsl: IS_WSL })) {
       hermesCommand = hermesOverride
     } else {
-      rememberLog(`Ignoring Windows Hermes override under WSL: ${hermesOverride}`)
+      rememberLog(appText(`Ignoring Windows {app_name} override under WSL: ${hermesOverride}`))
     }
 
     if (hermesCommand) {
       if (looksLikeDesktopAppBinary(hermesCommand)) {
-        rememberLog(`Ignoring desktop app executable on PATH while resolving Hermes CLI: ${hermesCommand}`)
+        rememberLog(appText(`Ignoring desktop app executable on PATH while resolving {app_name} CLI: ${hermesCommand}`))
         hermesCommand = null
       } else {
         const unwrapped: Awaited<ReturnType<typeof unwrapWindowsVenvHermesCommand>> =
@@ -4911,7 +4913,7 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
           (await verifyHermesCli(hermesCommand, { shell: shellForProbe }))
         ) {
           return {
-            label: `existing Hermes CLI at ${hermesCommand}`,
+            label: appText(`existing {app_name} CLI at ${hermesCommand}`),
             command: hermesCommand,
             args: backendArgs,
             bootstrap: false,
@@ -4923,7 +4925,7 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
         }
 
         rememberLog(
-          `Ignoring existing Hermes CLI at ${hermesCommand}: --version probe failed; falling through to bootstrap.`
+          appText(`Ignoring existing {app_name} CLI at ${hermesCommand}: --version probe failed; falling through to bootstrap.`)
         )
       }
     }
@@ -4947,7 +4949,7 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
   if (activeBackend && !bootstrapRepairRequested) {
     if (!activeRuntime.hasValidMarker) {
       rememberLog(
-        `[bootstrap] Active Hermes runtime at ${ACTIVE_HERMES_ROOT} is usable but the bootstrap marker is missing or stale; skipping first-run bootstrap.`
+        appText(`[bootstrap] Active {app_name} runtime at ${ACTIVE_HERMES_ROOT} is usable but the bootstrap marker is missing or stale; skipping first-run bootstrap.`)
       )
     }
 
@@ -4958,7 +4960,7 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
     rememberLog('[bootstrap] repair requested; bypassing the usable active runtime to re-run the installer')
   } else {
     // 5. A source install outside ACTIVE_HERMES_ROOT (install.sh --dir, a
-    //    setup-hermes.sh clone), found through the launcher it published at a
+    //    setup-agent.sh clone), found through the launcher it published at a
     //    fixed user-bin location: a Finder/Dock launch inherits a PATH without
     //    ~/.local/bin. The reported root is then resolved and probed like any
     //    installed runtime; HERMES_DESKTOP_IGNORE_EXISTING=1 skips it too.
@@ -4970,14 +4972,14 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
       )
 
       if (userBackend) {
-        rememberLog(`[boot] Using Hermes install at ${userInstall.root} (published launcher ${userInstall.launcher})`)
+        rememberLog(appText(`[boot] Using {app_name} install at ${userInstall.root} (published launcher ${userInstall.launcher})`))
 
         return userBackend
       }
 
-      rememberLog(`[bootstrap] Hermes install at ${userInstall.root} (from ${userInstall.launcher}) is not usable`)
+      rememberLog(appText(`[bootstrap] {app_name} install at ${userInstall.root} (from ${userInstall.launcher}) is not usable`))
     } else {
-      rememberLog(`[bootstrap] no usable Hermes install at ${ACTIVE_HERMES_ROOT} and no published user-bin launcher`)
+      rememberLog(appText(`[bootstrap] no usable {app_name} install at ${ACTIVE_HERMES_ROOT} and no published user-bin launcher`))
     }
   }
 
@@ -4993,7 +4995,7 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
   //    is a recoverable state the GUI can drive through.
   return {
     kind: 'bootstrap-needed',
-    label: 'Hermes Agent not installed yet; bootstrap required',
+    label: appText('{app_name} not installed yet; bootstrap required'),
     command: null,
     args: backendArgs,
     bootstrap: true,
@@ -5056,7 +5058,7 @@ async function ensureRuntime(
     rememberLog('[bootstrap] REFUSING installer on a bundled install; payload missing or damaged — reinstall the app')
 
     const bundledError: Error & { isBootstrapFailure?: boolean } = new Error(
-      'This app bundles its own Hermes runtime, but the runtime files are missing or damaged. Reinstall Hermes Desktop to restore it.'
+      appText('This app bundles its own {app_name} runtime, but the runtime files are missing or damaged. Reinstall {app_name} Desktop to restore it.')
     )
 
     bundledError.isBootstrapFailure = true
@@ -5065,11 +5067,11 @@ async function ensureRuntime(
   }
 
   if (backend.kind === 'bootstrap-needed') {
-    rememberLog('[bootstrap] no Hermes install found; starting first-launch bootstrap')
+    rememberLog(appText('[bootstrap] no {app_name} install found; starting first-launch bootstrap'))
 
     if (await handOffWindowsBootstrapRecovery('bootstrap-needed')) {
       const handoffError: Error & { isBootstrapFailure?: boolean; bootstrapHandedOff?: boolean } = new Error(
-        'Hermes recovery was handed off to Hermes Setup. The desktop will restart when recovery completes.'
+        appText('{app_name} recovery was handed off to {app_name} Setup. The desktop will restart when recovery completes.')
       )
 
       handoffError.isBootstrapFailure = true
@@ -5133,7 +5135,7 @@ async function ensureRuntime(
     bootstrapAbortController = null
 
     if (bootstrapResult.cancelled) {
-      const cancelledError = new Error('Hermes install was cancelled.') as any
+      const cancelledError = new Error(appText('{app_name} install was cancelled.')) as any
       cancelledError.isBootstrapFailure = true
       cancelledError.bootstrapCancelled = true
       bootstrapFailure = cancelledError
@@ -5213,7 +5215,7 @@ function fetchJson(url, token, options: any = {}) {
         const timeoutMs = resolveTimeoutMs(options.timeoutMs, DEFAULT_FETCH_TIMEOUT_MS)
 
         if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-          reject(new Error(`Unsupported Hermes backend URL protocol: ${parsed.protocol}`))
+          reject(new Error(appText(`Unsupported {app_name} backend URL protocol: ${parsed.protocol}`)))
 
           return
         }
@@ -5289,7 +5291,7 @@ function fetchJson(url, token, options: any = {}) {
 
         req.on('error', reject)
         req.setTimeout(timeoutMs, () => {
-          req.destroy(new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`))
+          req.destroy(new Error(appText(`Timed out connecting to {app_name} backend after ${timeoutMs}ms`)))
         })
 
         // From here the request goes on the wire: a later transport error can no
@@ -5333,7 +5335,7 @@ function fetchPublicJson(url, options: any = {}) {
         const timeoutMs = resolveTimeoutMs(options.timeoutMs, DEFAULT_FETCH_TIMEOUT_MS)
 
         if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-          reject(new Error(`Unsupported Hermes backend URL protocol: ${parsed.protocol}`))
+          reject(new Error(appText(`Unsupported {app_name} backend URL protocol: ${parsed.protocol}`)))
 
           return
         }
@@ -5394,7 +5396,7 @@ function fetchPublicJson(url, options: any = {}) {
 
         req.on('error', reject)
         req.setTimeout(timeoutMs, () => {
-          req.destroy(new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`))
+          req.destroy(new Error(appText(`Timed out connecting to {app_name} backend after ${timeoutMs}ms`)))
         })
 
         // Past this point the request is on the wire — see fetchJson.
@@ -6304,9 +6306,9 @@ function buildApplicationMenu() {
 
   if (IS_MAC) {
     template.push({
-      label: APP_NAME,
+      label: app.getName(),
       submenu: [
-        { label: `About ${APP_NAME}`, click: () => showAboutPanelFresh() },
+        { label: `About ${app.getName()}`, click: () => showAboutPanelFresh() },
         checkForUpdatesItem,
         { type: 'separator' },
         { role: 'services' },
@@ -7221,7 +7223,7 @@ function fetchJsonViaOauthSession(url, options: any = {}) {
       }
 
       if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-        reject(new Error(`Unsupported Hermes backend URL protocol: ${parsed.protocol}`))
+        reject(new Error(appText(`Unsupported {app_name} backend URL protocol: ${parsed.protocol}`)))
 
         return
       }
@@ -7264,7 +7266,7 @@ function fetchJsonViaOauthSession(url, options: any = {}) {
           // already finished
         }
 
-        reject(new Error(`Timed out connecting to Hermes backend after ${timeoutMs}ms`))
+        reject(new Error(appText(`Timed out connecting to {app_name} backend after ${timeoutMs}ms`)))
       }, timeoutMs)
 
       request.on('response', (res: Electron.IncomingMessage): void => {
@@ -7332,7 +7334,7 @@ function fetchJsonViaOauthSession(url, options: any = {}) {
 // involved. Tokens are persisted encrypted at rest via Electron ``safeStorage``
 // (OS keychain) keyed by gateway base URL, and refreshed via
 // ``/auth/native/refresh`` before expiry. This is the desktop half of the
-// feature; the server half lives in hermes_cli/dashboard_auth/native_flow.py.
+// feature; the server half lives in agent_cli/dashboard_auth/native_flow.py.
 // ---------------------------------------------------------------------------
 
 // In-memory cache of decrypted native tokens, keyed by normalized base URL.
@@ -8626,7 +8628,7 @@ function writeActiveDesktopProfile(name: string | null): string | null {
 
 // Seed active-profile.json from the best available signal when the file does
 // not yet exist.  Runs exactly once (no-op once the file exists).  Priority:
-//   1. Legacy ~/.hermes/active_profile (explicit CLI choice via hermes profile use)
+//   1. Legacy ~/.hermes/active_profile (explicit CLI choice via noone profile use)
 //   2. Running gateway (gateway.pid with verified liveness + hermes identity)
 //   3. state.db heuristics (hybrid recency×size score picks the primary workspace)
 // The stored JSON includes _migrated:true so the renderer can optionally surface
@@ -8936,7 +8938,7 @@ async function buildRemoteConnection(
 
   if (!token) {
     throw new Error(
-      'Remote Hermes gateway is selected, but no session token is saved. ' +
+      appText('Remote {app_name} gateway is selected, but no session token is saved. ') +
         'Open Settings → Gateway and save a token, or switch back to Local.'
     )
   }
@@ -10513,7 +10515,7 @@ async function ensureRegistryBackend(
   const key = backendScopeKey(id, profile)
   const existing = backendPool.get(key)
 
-  // One remote `hermes serve` per SSH host: a named profile rides the default backend when it can.
+  // One remote `noone serve` per SSH host: a named profile rides the default backend when it can.
   const shared = existing ? null : await resolveSharedSshProfileBackend(source, profile, {
     ensureDefault: (): Promise<any> => ensureRegistryBackend(id, 'default', managedUpdateCorrelation, { passive }),
     listProfiles: descriptor => getJsonForBackend(descriptor, '/api/profiles', { timeoutMs: 8_000 })
@@ -11186,7 +11188,7 @@ function assertPoolEntryStillOwned(poolKey: string, entry: any) {
 
 // Resolve the connection descriptor for a named profile that is not the
 // primary: attach to (or start) its canonical local gateway via
-// `hermes gateway ensure`, or verify and describe its remote. Mirrors the local
+// `noone gateway ensure`, or verify and describe its remote. Mirrors the local
 // portion of startHermes() without the boot-progress UI, bootstrap, or
 // first-run handling (those belong to the primary only). `opts.forceLocal`
 // skips remote resolution entirely (the registry 'local' entry means THIS
@@ -11266,7 +11268,7 @@ async function dialPoolBackend(profile, entry, opts: { forceLocal?: boolean; poo
   return { ...connection, profile, logs: hermesLog.slice(-80), ...getWindowState() }
 }
 
-// `hermes gateway restart` drains in-flight turns before the owner exits; the CLI client is
+// `noone gateway restart` drains in-flight turns before the owner exits; the CLI client is
 // bounded so a wedged drain cannot hang Restart. The gateway's own drain is unaffected by the kill.
 const GATEWAY_RESTART_CLIENT_TIMEOUT_MS = 120_000
 
@@ -11283,15 +11285,15 @@ async function restartLocalGatewayOwner(ownerProfile: string): Promise<void> {
       resolveHermesCwd(),
       HERMES_HOME,
       profileBackendParentEnv({ hermesHome: HERMES_HOME, profile: ownerProfile }),
-      { timeoutMs: GATEWAY_RESTART_CLIENT_TIMEOUT_MS, label: 'hermes gateway restart' }
+      { timeoutMs: GATEWAY_RESTART_CLIENT_TIMEOUT_MS, label: 'noone gateway restart' }
     )
   }, ownerProfile)
 
   const reason = `${result.stdout}\n${result.stderr}`.trim().split(/\r?\n/).filter(Boolean).pop()
-  rememberLog(`[gateway] hermes --profile ${ownerProfile} gateway restart exited ${result.code}${reason ? `: ${reason}` : ''}`)
+  rememberLog(`[gateway] noone --profile ${ownerProfile} gateway restart exited ${result.code}${reason ? `: ${reason}` : ''}`)
 }
 
-// A ready gateway whose boot commit differs from this Hermes (it outlived `hermes update`) is
+// A ready gateway whose boot commit differs from this Hermes (it outlived `noone update`) is
 // restarted once before attaching instead of being re-attached on every dial.
 const restartStaleLocalGateway = createStaleGatewayRestarter(restartLocalGatewayOwner, rememberLog)
 
@@ -11311,7 +11313,7 @@ async function restartAttachedLocalGateway(profile: string): Promise<void> {
 }
 
 // Forget a cached descriptor. Nothing is killed: the gateway behind it owns its
-// own lifetime (`hermes gateway ensure` attach semantics), so the next
+// own lifetime (`noone gateway ensure` attach semantics), so the next
 // ensure*() for this key simply re-dials. Every retire path — dispatch probe
 // failure, resume revalidation, registry removal, profile delete/rename, quit —
 // funnels through here so the verb stays in one place.
@@ -11515,7 +11517,7 @@ async function startHermes(requestedProfile?: string, inheritsPrimary = false) {
   // otherwise SIGTERMs the running instance's live backend (#87295).
   if (!isPrimaryInstance) {
     rememberLog('[boot] non-primary instance: skipping backend machinery')
-    throw new Error('Hermes Desktop is already running in another window.')
+    throw new Error(appText('{app_name} Desktop is already running in another window.'))
   }
 
   await reapOrphanedBackendsOnce()
@@ -11545,7 +11547,7 @@ async function startHermes(requestedProfile?: string, inheritsPrimary = false) {
   // E2E: simulate a boot failure without breaking the real backend. The boot
   // progresses a few steps, then fails with the given error message.
   if (BOOT_FAKE_ERROR) {
-    await advanceBootProgress('backend.resolve', 'Resolving Hermes backend', 8)
+    await advanceBootProgress('backend.resolve', appText('Resolving {app_name} backend'), 8)
     const error = new Error(BOOT_FAKE_ERROR) as any
     error.isBootstrapFailure = true
     bootstrapFailure = error
@@ -11614,7 +11616,7 @@ async function startHermes(requestedProfile?: string, inheritsPrimary = false) {
         windowState: getWindowState
       })
 
-    await advanceBootProgress('backend.resolve', 'Resolving Hermes backend', 8)
+    await advanceBootProgress('backend.resolve', appText('Resolving {app_name} backend'), 8)
     // Resolve for the desktop's primary profile so a per-profile remote
     // override on the active profile is honored (falls back to env / global).
 
@@ -11654,7 +11656,7 @@ async function startHermes(requestedProfile?: string, inheritsPrimary = false) {
       ensureLocalRuntime: backend =>
         ensureRuntime(backend, () => backendConnectionState.assertCurrentAttempt(connectionAttempt)),
       prepareLocalBackend: async () => {
-        await advanceBootProgress('backend.runtime', 'Resolving Hermes runtime', 28)
+        await advanceBootProgress('backend.runtime', appText('Resolving {app_name} runtime'), 28)
 
         return resolveHermesBackend(backendArgs)
       },
@@ -11692,7 +11694,7 @@ async function startHermes(requestedProfile?: string, inheritsPrimary = false) {
       return setup.connection
     }
 
-    // No `attachHostBackend` is wired: `hermes gateway ensure` below IS the
+    // No `attachHostBackend` is wired: `noone gateway ensure` below IS the
     // attach-or-start step for the canonical local gateway.
     if (setup.kind === 'attached') {
       throw new Error('Unexpected attached backend outcome without a host attach step.')
@@ -11711,8 +11713,8 @@ async function startHermes(requestedProfile?: string, inheritsPrimary = false) {
     backendConnectionState.assertCurrentAttempt(connectionAttempt)
 
     backendStartFailure = null
-    rememberLog('[backend] Hermes gateway is ready')
-    updateBootProgress({ phase: 'backend.ready', message: 'Hermes gateway is ready', progress: 94, running: true, error: null })
+    rememberLog(appText('[backend] {app_name} gateway is ready'))
+    updateBootProgress({ phase: 'backend.ready', message: appText('{app_name} gateway is ready'), progress: 94, running: true, error: null })
     bootstrapRepairAttempt = 0
 
     // The primary descriptor names its own profile: a profile-less descriptor
@@ -12056,7 +12058,7 @@ function spawnSecondaryWindow({
     height: SESSION_WINDOW_MIN_HEIGHT,
     minWidth: SESSION_WINDOW_MIN_WIDTH,
     minHeight: SESSION_WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: appText('{app_name}'),
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12161,7 +12163,7 @@ function spawnBrowserWindow(tabId) {
     height: BROWSER_WINDOW_HEIGHT,
     minWidth: BROWSER_WINDOW_MIN_WIDTH,
     minHeight: BROWSER_WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: appText('{app_name}'),
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12273,7 +12275,7 @@ function createInstanceWindow(
     ...nextInstanceBounds(source),
     minWidth: WINDOW_MIN_WIDTH,
     minHeight: WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: appText('{app_name}'),
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12908,7 +12910,7 @@ function spawnHudWindow(sessionId, profile) {
     ...hudBounds(),
     minWidth: 380,
     minHeight: 160,
-    title: HUD_WINDOW_TITLE,
+    title: `${app.getName()} HUD`,
     frame: false,
     transparent: true,
     // NOT resizable. A transparent frameless window on Windows keeps a
@@ -12985,7 +12987,7 @@ function spawnHudWindow(sessionId, profile) {
 
       // Compositor overlay adapters (Hyprland float+pin today). Electron
       // alwaysOnTop is already set; this is the dialect some WMs actually hear.
-      void promoteHudOverlay({ title: HUD_WINDOW_TITLE })
+      void promoteHudOverlay({ title: `${app.getName()} HUD` })
     },
     // #108230: the HUD is born `show: false` + transparent, and its renderer
     // lifecycle is deliberately log-only (#81290 — a dead renderer should be
@@ -13358,7 +13360,7 @@ function createWindow() {
     ),
     minWidth: WINDOW_MIN_WIDTH,
     minHeight: WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: appText('{app_name}'),
     // Frameless title bar on every platform so the renderer can paint the
     // "hide sidebar" button (and other left-side titlebar tools) flush with
     // the top edge — matching the macOS layout where the traffic lights sit
@@ -13723,7 +13725,7 @@ function createWindow() {
         const exit = details?.exitCode === undefined ? '' : `, exit code ${String(details.exitCode)}`
         rememberLog(`[renderer:main] renderer terminated while live (reason=${reason}${exit}); surfacing recovery page`)
         void loadRendererLoadErrorPage(mainWindow, {
-          title: 'Hermes desktop UI was terminated',
+          title: appText('{app_name} desktop UI was terminated'),
           errorDescription:
             `The desktop UI process was terminated unexpectedly (reason: ${reason}${exit}). ` +
             'Your sessions and the background gateway are unaffected — reload to continue.',
@@ -14034,11 +14036,11 @@ ipcMain.on('hermes:window:relay', (event, payload) => {
 })
 
 // Hand a session to the user's OWN terminal emulator, running the TUI against
-// it (`hermes --tui --resume <id>`). Not the in-app terminal pane: the point is
+// it (`noone --cli --resume <id>`). Not the in-app terminal pane: the point is
 // to continue the chat in the terminal they already live in.
 //
 // The desktop's runtime is usually a venv Python invoked as
-// `python -m hermes_cli.main`, so we resolve the SAME backend the app itself
+// `python -m agent_cli.main`, so we resolve the SAME backend the app itself
 // launches and carry its argv + PYTHONPATH into a launcher script rather than
 // hoping a `hermes` exists on the user's interactive PATH. Resolution only —
 // never ensureRuntime(), which would kick off a first-run install from a menu
@@ -14050,7 +14052,7 @@ ipcMain.handle('hermes:window:openInTerminal', async (_event, sessionId, opts) =
 
   try {
     const profile = typeof opts?.profile === 'string' ? opts.profile.trim() : ''
-    const backend = await resolveHermesBackend(tuiResumeArgs(sessionId.trim(), profile || undefined))
+    const backend = await resolveHermesBackend(cliResumeArgs(sessionId.trim(), profile || undefined))
 
     if (!backend.command) {
       return { ok: false, error: 'Hermes is not installed yet' }
@@ -14877,7 +14879,7 @@ async function requestManagedSshUpdate(rawId) {
 
 ipcMain.handle('hermes:connections:update-managed', async (_event, rawId) => requestManagedSshUpdate(rawId))
 
-// Fan out `hermes update` to every eligible registered connection at once.
+// Fan out `noone update` to every eligible registered connection at once.
 // Cloud entries are excluded (platform-managed); each dispatch reports
 // independently so one dead LAN box can't wedge the batch. Local reuses the
 // app's own update pipeline; Desktop-managed SSH uses the transactional
@@ -16606,7 +16608,7 @@ ipcMain.handle('hermes:quick-entry:submit', (event, payload) => {
   }
 
   if (!mainWindow || mainWindow.isDestroyed()) {
-    return { code: 'no-primary', message: 'The primary Hermes window is unavailable.', ok: false, retryable: true }
+    return { code: 'no-primary', message: appText('The primary {app_name} window is unavailable.'), ok: false, retryable: true }
   }
 
   const target =
@@ -16928,7 +16930,7 @@ function resolveHermesVersion(scope: { connectionId?: string; profile?: string }
   return resolveGatewayVersion(path => handleHermesApiRequest({ ...scope, path, timeoutMs: 5000 }))
 }
 
-// Renderer-bundle skew: `hermes update` moves the SOURCE TREE, but the UI
+// Renderer-bundle skew: `noone update` moves the SOURCE TREE, but the UI
 // (including bundled plugins like Bot Mode) is compiled into this binary at
 // build time. A terminal-side update — or an in-app update whose bundle-swap
 // leg failed — leaves the new runtime running under an old renderer, so About
@@ -16950,7 +16952,7 @@ async function detectRendererSkew() {
 }
 
 // Re-resolve the focused window's live Hermes version just before showing the native About
-// panel, so an in-place `hermes update` shows without a restart. macOS only (no-op elsewhere).
+// panel, so an in-place `noone update` shows without a restart. macOS only (no-op elsewhere).
 function showAboutPanelFresh(): void {
   const scope = windowConnectionRoutes.versionScopeFor(BrowserWindow.getFocusedWindow() ?? mainWindow)
   void Promise.all([detectRendererSkew(), resolveHermesVersion(scope)]).then(([skew, version]) => {
@@ -16959,9 +16961,9 @@ function showAboutPanelFresh(): void {
     // through empty/placeholder: the panel would render the bundle's 0.0.0 (#124581).
     const display: string = nativeAboutVersion(info)
     app.setAboutPanelOptions({
-      applicationName: APP_NAME,
+      applicationName: app.getName(),
       applicationVersion: skew.outOfSync ? `${display} — app build out of date, update the desktop app` : display,
-      copyright: 'Copyright © 2026 Nous Research'
+      copyright: 'Copyright © 2026 Garudex Labs'
     })
     app.showAboutPanel()
   })
@@ -16988,7 +16990,7 @@ ipcMain.handle('hermes:version', async (_event, scope?: { connectionId?: string;
     bundleCommitsBehind: skew.desktopCommitsBehind,
     // The install id: sha16 of the canonical install-root path — the key of
     // this install's per-install channel record and its installs/<sha16>/
-    // state folder. Same value `hermes update --install-id` prints; About
+    // state folder. Same value `noone update --install-id` prints; About
     // renders it as `sha16 (path)`.
     installId: installIdForRoot(resolveUpdateRoot(), canonicalizeInstallPath),
     // The artifact kind of THIS app plus whether the runtime checkout came
@@ -17020,7 +17022,7 @@ ipcMain.handle('hermes:app:relaunch', async () => {
 })
 
 /** The latest pm/venv/plugin-operation receipt — the machine-readable
- *  surface every medium reads (CLI: `hermes pm status`). Returned as one
+ *  surface every medium reads (CLI: `noone pm status`). Returned as one
  *  parsed JSON object: { kind, outcome, venv_rebuild, plugin_bisect,
  *  plugin_checks, ... } or null when no operation has run yet. The file
  *  lives at <HERMES_HOME>/logs/update_receipts/latest.json — written by
@@ -17056,8 +17058,8 @@ function canonicalizeInstallPath(p: string): string {
 
 /** True when the runtime checkout was created by a bootstrap installer
  *  (install.sh / install.ps1 / the desktop first-launch bootstrap): those all
- *  finish by writing `.hermes-bootstrap-complete` into the checkout root, and
- *  `hermes update` preserves the file, so a manual clone never grows one. A
+ *  finish by writing `.agent-bootstrap-complete` into the checkout root, and
+ *  `noone update` preserves the file, so a manual clone never grows one. A
  *  missing checkout (sealed bundled payloads, remote backends) is not
  *  installer-created. */
 export function isInstallerCreatedCheckout(root: string | null = ACTIVE_HERMES_ROOT): boolean {
@@ -17123,7 +17125,7 @@ function resolveHermesRuntime() {
 // CLI exactly: GUI only, Lite (keep user data), Full. We ask the agent to do
 // the actual removal via `hermes uninstall …` so the cross-platform PATH /
 // registry / service / node-symlink cleanup all lives in one place
-// (hermes_cli/uninstall.py + hermes_cli/gui_uninstall.py).
+// (agent_cli/uninstall.py + agent_cli/gui_uninstall.py).
 //
 // The IPC boundary applies the baked install policy before either callback.
 // Only self-managed installs use the Python summary or the cleanup script.
@@ -17170,7 +17172,7 @@ async function probeUninstallSummary(): Promise<UninstallSummaryDetails> {
     try {
       const child: ChildProcess = spawn(
         py,
-        ['-m', 'hermes_cli.main', 'uninstall', '--gui-summary'],
+        ['-m', 'agent_cli.main', 'uninstall', '--gui-summary'],
         hiddenWindowsChildOptions({
           cwd: agentRoot,
           env: { ...process.env, HERMES_HOME, NO_COLOR: '1' },
@@ -17221,14 +17223,14 @@ async function runDesktopUninstall(mode: string): Promise<DesktopUninstallResult
     return {
       ok: false,
       error: 'agent-missing',
-      message: `Can't run the uninstaller: no Hermes agent venv at ${VENV_ROOT}.`
+      message: appText(`Can't run the uninstaller: no {app_name} agent venv at ${VENV_ROOT}.`)
     }
   }
 
   // Interpreter choice (Finding 3): lite/full rmtree the venv that holds the
   // running python.exe. On Windows a running .exe is mandatory-locked, so the
   // rmtree must NOT be driven by the venv's own interpreter — use a system
-  // Python with PYTHONPATH=<agentRoot> so `import hermes_cli` resolves from
+  // Python with PYTHONPATH=<agentRoot> so `import agent_cli` resolves from
   // source while the venv is torn down. gui-only doesn't touch the venv, so the
   // venv python is fine there. If no system Python exists (the Windows edge
   // case), fall back to the venv python — gui-only is unaffected; lite/full may

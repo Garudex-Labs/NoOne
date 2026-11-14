@@ -3,6 +3,7 @@ include/exclude filtering, trust-tier metadata capture, utility-tool selection, 
 resolution and the schema-cache write-through. Both entry points (``_register_server_tools``
 live, ``_register_from_cache_sync`` lazy) build ``_Candidate`` records for ``_register_candidates``."""
 
+from agent_cli.application_identity import app_text
 import hashlib
 import json
 import logging
@@ -21,7 +22,6 @@ from tools.mcp_tool_handlers import (
 from tools.mcp_tool_schema import (
     _UTILITY_CAPABILITY_ATTRS, _build_utility_schemas, _normalize_name_filter, matches_name_filter)
 from tools.mcp_tool_scope import _key_name, _key_scope, _resolve_server_key, _server_key
-
 if TYPE_CHECKING:  # pragma: no cover
     from tools.mcp_tool import MCPServerTask
 
@@ -92,9 +92,9 @@ def _warn_unknown_cost_keys(server_name: str, key, tool_names: list[str]) -> Non
     cost for a filtered tool would read as unknown there."""
     from tools.mcp_tool_costs import unknown_cost_keys
     if unknown := unknown_cost_keys(_core._server_cost_policies.get(key), tool_names):
-        logger.warning("MCP server '%s': tool_costs names %s, which the server does not offer, so those calls "
-                       "carry no cost and no spend limit. Use the server's own tool names (without Hermes' "
-                       "'mcp_%s_' prefix).", server_name, unknown, server_name)
+        logger.warning(app_text("MCP server '%s': tool_costs names %s, which the server does not offer, so those calls "
+                       "carry no cost and no spend limit. Use the server's own tool names (without {app_name}' "
+                       "'mcp_%s_' prefix).", percent_format=True), server_name, unknown, server_name)
 
 
 def _record_scope_trust(server_name: str, config: dict, scope: str) -> None:
@@ -443,7 +443,7 @@ def _register_server_tools(name: str, server: "MCPServerTask", config: dict) -> 
     # publishes into), never by the bare name resolved in the caller's context.
     if (_core._server_registry_scope(key) or '').startswith('editor-session:'):
         import json
-        from hermes_state_runtime import RuntimeStoreError
+        from agent_state_runtime import RuntimeStoreError
         manifest = json.dumps({c.registry_name: c.schema for c in candidates}, sort_keys=True)
         frozen = getattr(server, '_editor_frozen_manifest', manifest)
         if manifest != frozen:

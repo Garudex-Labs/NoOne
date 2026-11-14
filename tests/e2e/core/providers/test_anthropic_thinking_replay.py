@@ -1,7 +1,7 @@
 """Anthropic Messages wire conformance: thinking signatures + tool pairing.
 
 Real ``hermes`` processes (``-z``, ``chat -q``, ``chat --resume``, the stdio
-``tui_gateway``) talk to the SDK-oracle fake on the production native route.
+``agent_backend``) talk to the SDK-oracle fake on the production native route.
 Each test asserts the NEXT wire request Hermes sends: signed thinking blocks
 come back byte-exact (text AND signature), parallel ``tool_use`` ids are each
 answered in the very next user message, and every request body validates
@@ -138,7 +138,7 @@ def _unsigned(messages: list[dict]) -> list[dict]:
 def _tui_gateway_two_turns(rig: Rig, prompts: list[str]) -> list[str]:
     from tests.e2e.core.parity._drive_rpc import RpcClient, StreamCapture
 
-    proc = subprocess.Popen([sys.executable, "-m", "tui_gateway.entry"], cwd=rig.project, env=rig.env(),
+    proc = subprocess.Popen([sys.executable, "-m", "agent_backend.entry"], cwd=rig.project, env=rig.env(),
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             text=True, bufsize=1)
     cap = StreamCapture().start(proc)

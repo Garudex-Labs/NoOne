@@ -18,10 +18,10 @@
  * keeps the chat context focused on switching conversations quickly.
  */
 
+import { AlertCircle, MessageSquarePlus, RefreshCw } from "@noone/ui/icons";
 import { Button } from "@nous-research/ui/ui/components/button";
 import { ListItem } from "@nous-research/ui/ui/components/list-item";
 import { Spinner } from "@nous-research/ui/ui/components/spinner";
-import { AlertCircle, MessageSquarePlus, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 
@@ -121,7 +121,7 @@ export function ChatSessionList({
     // Dashboard data surfaces fetch from an effect on mount + scope change;
     // keep this local and explicit until the shared lint profile is updated
     // for async loaders (matches FilesPage).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     load();
     // `reloadNonce` is a manual refetch trigger (Refresh button / row pick).
   }, [isActive, load, reloadNonce]);

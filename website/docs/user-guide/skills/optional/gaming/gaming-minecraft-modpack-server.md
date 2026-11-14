@@ -1,40 +1,48 @@
 ---
 title: "Minecraft Modpack Server — Host modded Minecraft servers (CurseForge, Modrinth)"
-sidebar_label: "Minecraft Modpack Server"
+sidebarTitle: "Minecraft Modpack Server"
 description: "Host modded Minecraft servers (CurseForge, Modrinth)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Minecraft Modpack Server
+# Minecraft Modpack Server {#minecraft-modpack-server}
 
 Host modded Minecraft servers (CurseForge, Modrinth).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/gaming/minecraft-modpack-server` |
+| Source | Optional — install with `noone skills install official/gaming/minecraft-modpack-server` |
 | Path | `optional-skills/gaming/minecraft-modpack-server` |
 | Version | `1.0.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Minecraft Modpack Server Setup
+<div className="doc-callout-title">
 
-## When to use
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Minecraft Modpack Server Setup {#minecraft-modpack-server-setup}
+
+## When to use {#when-to-use}
 - User wants to set up a modded Minecraft server from a server pack zip
 - User needs help with NeoForge/Forge server configuration
 - User asks about Minecraft server performance tuning or backups
 
-## Gather User Preferences First
+## Gather User Preferences First {#gather-user-preferences-first}
 Before starting setup, ask the user for:
 - **Server name / MOTD** — what should it say in the server list?
 - **Seed** — specific seed or random?
@@ -50,9 +58,9 @@ Before starting setup, ask the user for:
 
 Use sensible defaults if the user doesn't care, but always ask before generating the config.
 
-## Steps
+## Steps {#steps}
 
-### 1. Download & Inspect the Pack
+### 1. Download & Inspect the Pack {#1-download--inspect-the-pack}
 ```bash
 mkdir -p ~/minecraft-server
 cd ~/minecraft-server
@@ -63,13 +71,13 @@ ls server/
 Look for: `startserver.sh`, installer jar (neoforge/forge), `user_jvm_args.txt`, `mods/` folder.
 Check the script to determine: mod loader type, version, and required Java version.
 
-### 2. Install Java
+### 2. Install Java {#2-install-java}
 - Minecraft 1.21+ → Java 21: `sudo apt install openjdk-21-jre-headless`
 - Minecraft 1.18-1.20 → Java 17: `sudo apt install openjdk-17-jre-headless`
 - Minecraft 1.16 and below → Java 8: `sudo apt install openjdk-8-jre-headless`
 - Verify: `java -version`
 
-### 3. Install the Mod Loader
+### 3. Install the Mod Loader {#3-install-the-mod-loader}
 Most server packs include an install script. Use the INSTALL_ONLY env var to install without launching:
 ```bash
 cd ~/minecraft-server/server
@@ -79,12 +87,12 @@ ATM10_INSTALL_ONLY=true bash startserver.sh
 ```
 This downloads libraries, patches the server jar, etc.
 
-### 4. Accept EULA
+### 4. Accept EULA {#4-accept-eula}
 ```bash
 echo "eula=true" > ~/minecraft-server/server/eula.txt
 ```
 
-### 5. Configure server.properties
+### 5. Configure server.properties {#5-configure-serverproperties}
 Key settings for modded/LAN:
 ```properties
 motd=\u00a7b\u00a7lServer Name \u00a7r\u00a78| \u00a7aModpack Name
@@ -113,7 +121,7 @@ view-distance=8
 simulation-distance=4
 ```
 
-### 6. Tune JVM Args (user_jvm_args.txt)
+### 6. Tune JVM Args (user_jvm_args.txt) {#6-tune-jvm-args-user_jvm_argstxt}
 Scale RAM to player count and mod count. Rule of thumb for modded:
 - 100-200 mods: 6-12GB
 - 200-350+ mods: 12-24GB
@@ -142,13 +150,13 @@ Scale RAM to player count and mod count. Rule of thumb for modded:
 -XX:MaxTenuringThreshold=1
 ```
 
-### 7. Open Firewall
+### 7. Open Firewall {#7-open-firewall}
 ```bash
 sudo ufw allow 25565/tcp comment "Minecraft Server"
 ```
 Check with: `sudo ufw status | grep 25565`
 
-### 8. Create Launch Script
+### 8. Create Launch Script {#8-create-launch-script}
 ```bash
 cat > ~/start-minecraft.sh << 'EOF'
 #!/usr/bin/env bash
@@ -159,7 +167,7 @@ chmod +x ~/start-minecraft.sh
 ```
 Note: For Forge (not NeoForge), the args file path differs. Check `startserver.sh` for the exact path.
 
-### 9. Set Up Automated Backups
+### 9. Set Up Automated Backups {#9-set-up-automated-backups}
 Create backup script:
 ```bash
 cat > ~/minecraft-server/backup.sh << 'SCRIPT'
@@ -192,7 +200,7 @@ Add hourly cron:
 (crontab -l 2>/dev/null | grep -v "minecraft/backup.sh"; echo "0 * * * * $HOME/minecraft-server/backup.sh >> $HOME/minecraft-server/backups/backup.log 2>&1") | crontab -
 ```
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 - ALWAYS set `allow-flight=true` for modded — mods with jetpacks/flight will kick players otherwise
 - `max-tick-time=180000` or higher — modded servers often have long ticks during worldgen
 - First startup is SLOW (several minutes for big packs) — don't panic
@@ -202,7 +210,7 @@ Add hourly cron:
 - Delete the world/ folder to regenerate with a new seed
 - Some packs have env vars to control behavior (e.g., ATM10 uses ATM10_JAVA, ATM10_RESTART, ATM10_INSTALL_ONLY)
 
-## Verification
+## Verification {#verification}
 - `pgrep -fa neoforge` or `pgrep -fa minecraft` to check if running
 - Check logs: `tail -f ~/minecraft-server/server/logs/latest.log`
 - Look for "Done (Xs)!" in the log = server is ready

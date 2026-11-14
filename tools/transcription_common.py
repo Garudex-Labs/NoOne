@@ -19,7 +19,7 @@ DEFAULT_STT_MODEL = os.getenv("STT_OPENAI_MODEL", "whisper-1")
 DEFAULT_GROQ_STT_MODEL = os.getenv("STT_GROQ_MODEL", "whisper-large-v3-turbo")
 DEFAULT_MISTRAL_STT_MODEL = os.getenv("STT_MISTRAL_MODEL", "voxtral-mini-latest")
 DEFAULT_ELEVENLABS_STT_MODEL = os.getenv("STT_ELEVENLABS_MODEL", "scribe_v2")
-# Seconds for one STT HTTP request; shared by the OpenAI-SDK path and the QQ adapter so a
+# Seconds for one STT HTTP request; used by the OpenAI-SDK path so a
 # self-hosted model's cold start is not cut off at the old fixed 30s (#112939).
 DEFAULT_STT_TIMEOUT = 60.0
 # /v1/stt's server default moved from grok-voice-transcribe-1.0 to 2.0 between Sep 17 and
@@ -35,14 +35,14 @@ GROQ_BASE_URL = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
 OPENAI_BASE_URL = os.getenv("STT_OPENAI_BASE_URL", "https://api.openai.com/v1")
 XAI_STT_BASE_URL = os.getenv("XAI_STT_BASE_URL", "https://api.x.ai/v1")
 ELEVENLABS_STT_BASE_URL = os.getenv("ELEVENLABS_STT_BASE_URL", "https://api.elevenlabs.io/v1")
-# DeepInfra STT base URL is resolved via hermes_cli.models.deepinfra_base_url (shared).
+# DeepInfra STT base URL is resolved via agent_cli.models.deepinfra_base_url (shared).
 
 SUPPORTED_FORMATS = {".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".wav", ".webm", ".ogg", ".oga", ".opus", ".aac", ".flac", ".caf"}
 LOCAL_NATIVE_AUDIO_FORMATS = {".wav", ".aiff", ".aif"}
 MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
 
 # Per-provider model catalogs keyed by ``stt.<provider>`` section, default first. This one table
-# feeds the `hermes tools` picker, the dashboard selects and the auto-correction sets below.
+# feeds the `noone tools` picker, the dashboard selects and the auto-correction sets below.
 # DeepInfra has no static list: its picker reads the live catalog.
 STT_MODEL_CATALOG = {
     "local": ["base", "tiny", "small", "medium", "large-v3", "turbo"],

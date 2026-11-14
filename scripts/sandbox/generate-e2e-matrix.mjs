@@ -36,7 +36,7 @@ import { fileURLToPath } from 'node:url';
  * strings, so they are types, not conventions.
  *
  * @typedef {'latest'} InstallerVersion
- *   The artifact published on the website right now -- Hermes-Setup.exe has
+ *   The artifact published on the website right now -- NoOne-Setup.exe has
  *   no versioned archive yet. Widen this union when one exists.
  * @typedef {'installer-script' | 'installer-script+desktop' | 'desktop-installer' | 'packaged-app'} InstallMethod
  *   installer-script is the platform's one-liner (curl | bash on
@@ -147,7 +147,7 @@ export const SPEC = {
       // registers Start Menu / Desktop shortcuts, so it is a second real
       // path to a hand-launchable app.
       { method: 'installer-script+desktop' },
-      // Website Hermes-Setup.exe, clicked through the GUI.
+      // Website NoOne-Setup.exe, clicked through the GUI.
       { method: 'desktop-installer', versions: ['latest'] },
     ],
     update: [
@@ -167,7 +167,7 @@ export const SPEC = {
     install: [
       { method: 'installer-script' },
       { method: 'installer-script+desktop' },
-      // The published Hermes-Setup.dmg from the website, mounted and run.
+      // The published NoOne-Setup.dmg from the website, mounted and run.
       { method: 'desktop-installer', versions: ['latest'] },
     ],
     update: [
@@ -282,7 +282,7 @@ const ROUTE_OSES = /** @type {Record<string, Os[]>} */ ({
 });
 
 /**
- * The pull_request subset: the script install updated by `hermes update`, on every OS,
+ * The pull_request subset: the script install updated by `noone update`, on every OS,
  * from the two starts that catch a regression before it ships -- the newest release
  * updating to the PR (the jump every user makes next) and the PR updating to a synthetic
  * NEXT (the updater the PR itself ships). One leg per {os, start} worth its runner:

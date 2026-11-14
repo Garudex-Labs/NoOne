@@ -1,7 +1,7 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { type ReactNode, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Input } from '@/components/ui/input'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 import { Textarea } from '@/components/ui/textarea'
@@ -219,7 +219,7 @@ function TrashButton({ label, onClick }: { label: string; onClick: () => void })
       size="icon-xs"
       variant="ghost"
     >
-      <Codicon name="trash" size="0.8125rem" />
+      <AppIcon name="trash" size="0.8125rem" />
     </Button>
   )
 }

@@ -23,8 +23,8 @@ from gateway.hosted_room_peer import (
     verify_room_grant,
 )
 from tools import approval_context
-from tui_gateway.hosted_room_peer_http import PeerRunsHTTPError
-from tui_gateway.hosted_room_service import _RouteStatusPeerClient
+from agent_backend.hosted_room_peer_http import PeerRunsHTTPError
+from agent_backend.hosted_room_service import _RouteStatusPeerClient
 
 
 def _policy(*, approval_mode: str = "manual", max_turns: int = 12) -> dict:
@@ -177,7 +177,7 @@ def test_room_agent_uses_target_policy_toolsets_and_turn_limit(monkeypatch):
     )
     monkeypatch.setattr("gateway.run._current_max_iterations", lambda: 999)
     monkeypatch.setattr(
-        "hermes_cli.tools_config._get_platform_tools",
+        "agent_cli.tools_config._get_platform_tools",
         lambda *_: {"terminal", "file", "web"},
     )
     adapter = APIServerAdapter(PlatformConfig(enabled=True))
@@ -243,10 +243,10 @@ def _two_profile_homes(tmp_path, monkeypatch) -> None:
             f"agent:\n  max_turns: {turns}\napprovals:\n  mode: manual\n"
             "platform_toolsets:\n  api_server: [hermes-api-server, web]\n")
         (home / ".env").write_text("")
-    from hermes_cli import profiles
+    from agent_cli import profiles
     import gateway.run as gateway_run
     alpha = root / "profiles" / "alpha"
-    monkeypatch.setattr(profiles, "_get_default_hermes_home", lambda: root)
+    monkeypatch.setattr(profiles, "_get_default_agent_home", lambda: root)
     monkeypatch.setattr(gateway_run, "_hermes_home", alpha)
     monkeypatch.setenv("HERMES_HOME", str(alpha))
     monkeypatch.setenv("HERMES_PROFILE", "alpha")

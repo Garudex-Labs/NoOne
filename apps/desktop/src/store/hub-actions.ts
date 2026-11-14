@@ -1,8 +1,5 @@
 import { atom, map } from 'nanostores'
 
-// The Capabilities Skills-list query key, imported rather than re-spelled so a
-// hub (un)install updates the Skills tab, not just the hub.
-import { SKILLS_QUERY_KEY } from '@/app/capabilities/skills/skills-data'
 import {
   getActionStatus,
   installSkillFromHub,
@@ -10,7 +7,10 @@ import {
   scanSkillHub,
   uninstallSkillFromHub,
   updateSkillsFromHub
-} from '@/hermes'
+} from '@/agent-client'
+// The Capabilities Skills-list query key, imported rather than re-spelled so a
+// hub (un)install updates the Skills tab, not just the hub.
+import { SKILLS_QUERY_KEY } from '@/app/capabilities/skills/skills-data'
 import { translateNow } from '@/i18n'
 import { queryClient } from '@/lib/query-client'
 import { invalidateSlashCompletions } from '@/lib/slash-completion-cache'
@@ -185,11 +185,11 @@ export function closeHubLog(): void {
   $hubActiveLog.set(null)
 }
 
-// `hermes skills install` exits non-zero when the security scan gate refuses,
+// `noone skills install` exits non-zero when the security scan gate refuses,
 // and its printed tail is the only signal the Desktop gets, so parse it into a
 // structured failure the toast can explain (tools-runtime-21). `--force` has
 // no Desktop route, so the remedy offered is reading the scan, not overriding
-// it. Two CLI shapes exist (`hermes_cli/skills_hub.py::_scan_block_message`):
+// it. Two CLI shapes exist (`agent_cli/skills_hub.py::_scan_block_message`):
 //   current: "Not installed: the security scan found 2 high-risk pattern(s) in
 //            'org/skill' (listed above). Hermes never installs unverified
 //            skills with high-risk findings, even with --force. ..."

@@ -16,7 +16,7 @@
  * itself here as the delegate so tile UI stays dependency-light.
  */
 
-import { backendScopeKey, type GatewayEvent, LOCAL_CONNECTION_ID, registryBackendScopeKey } from '@hermes/shared'
+import { backendScopeKey, type GatewayEvent, LOCAL_CONNECTION_ID, registryBackendScopeKey } from '@noone/shared'
 import { atom, computed } from 'nanostores'
 
 import { setSessionOwnerResolver } from '@/api/client'
@@ -38,7 +38,7 @@ import { finalizeInterruptedMessages, sealOpenToolParts } from '@/lib/chat-messa
 import { tileFocusStampOnFocusChange } from '@/lib/session-timer-since'
 import { stableArray } from '@/lib/stable-array'
 import { readJson, writeJson } from '@/lib/storage'
-import type { SessionInfo } from '@/types/hermes'
+import type { SessionInfo } from '@/types/agent-client'
 
 import { dropQueuedLaunchPicksForProfile, migrateQueuedLaunchPicksForProfile } from './composer-queued-pick'
 import { dropStatusDrawersForProfile, migrateStatusDrawersForProfile } from './composer-status-drawer'

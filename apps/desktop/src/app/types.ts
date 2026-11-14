@@ -2,7 +2,7 @@ import type * as React from 'react'
 
 import type { ChatMessage } from '@/lib/chat-messages'
 import type { Tiered } from '@/store/interface-mode'
-import type { SessionMessage, UsageStats } from '@/types/hermes'
+import type { SessionMessage, UsageStats } from '@/types/agent-client'
 
 export interface ContextSuggestion {
   text: string
@@ -100,7 +100,7 @@ export interface SessionRedirectResponse {
 export interface SessionTitleResponse {
   title?: string
   // True when the session row isn't persisted yet and the title was queued
-  // to be applied on the first turn (see tui_gateway session.title handler).
+  // to be applied on the first turn (see agent_backend session.title handler).
   pending?: boolean
   session_key?: string
 }
@@ -188,7 +188,7 @@ export interface ClientSessionState {
    *  heartbeat (#119569); when it lands it settles onto this bubble instead of
    *  appending a duplicate. Cleared by the next message.start or complete. */
   heartbeatSettledStreamId?: null | string
-  /** `turn_id` of the newest message.start (tui_gateway/stream_segments.py): a
+  /** `turn_id` of the newest message.start (agent_backend/stream_segments.py): a
    *  re-sent start of the same turn is not a new occurrence. */
   streamTurnId?: null | string
   /** The owner admission the live turn executes, from its frames' execution stamp (`admission_id`). The in-flight

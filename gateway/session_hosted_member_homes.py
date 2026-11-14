@@ -124,12 +124,12 @@ def _recorded_homes(db, room_id, member_id):
 
 
 def _served_here(home):
-    from hermes_constants import named_profile_home, named_profile_is_deleted
+    from agent_constants import named_profile_home, named_profile_is_deleted
     return home.is_dir() and not (named_profile_home(home) is not None and named_profile_is_deleted(home))
 
 
 def _home_unknown(service, room_id, task, served):
-    from tui_gateway.hosted_room_service import task_member_id
+    from agent_backend.hosted_room_service import task_member_id
     member = task_member_id(task)
     return (served is None and not _recorded_homes(service.authority.db, room_id, member)
             and stopping_attempt_home(service.authority.db, room_id, member, task) is None)
@@ -147,8 +147,8 @@ def unknown_home_refusal(service, room_id, deferred):
 def moved_attempt_gone(service, room_id, task):
     """True when *task*'s profile moved and the home that admitted its attempt has no gateway, so
     nothing can still run it and Retry may start a new generation at the current home."""
-    from hermes_cli.gateway_runtime import discover_gateway_endpoint
-    from tui_gateway.hosted_room_service import task_member_id
+    from agent_cli.gateway_runtime import discover_gateway_endpoint
+    from agent_backend.hosted_room_service import task_member_id
     served = service.profile_homes().get(task['payload']['target_profile'])
     admitted = stopping_attempt_home(service.authority.db, room_id, task_member_id(task), task)
     return (admitted is not None and served is not None and Path(served) != admitted
@@ -160,7 +160,7 @@ def legacy_stop_homes(db, room_id, member_id, task_id=None):
     admitted before attempt homes were recorded (``task_id``, when the read names one, must be
     such a turn): any home the member was served from may hold it."""
     from gateway.hosted_room_driver import list_tasks
-    from tui_gateway.hosted_room_service import task_member_id
+    from agent_backend.hosted_room_service import task_member_id
     if not any(task_member_id(t) == member_id and task_id in (None, t['identity'].task_id)
                and stopping_attempt_home(db, room_id, member_id, t) is None
                for t in list_tasks(db.db_path, room_id=room_id) if t['status'] in _STOPPING):
@@ -172,7 +172,7 @@ def _legacy_home_released(service, room_id, member, home, task):
     """Ask one older home whether its room session holds nothing; one that holds this turn is sent
     its Stop, and the turn is kept until a later read finds it gone. Unreachable keeps it."""
     from gateway.session_hosted_transport import HostedRoomOwnerRPC
-    from tui_gateway.hosted_room_driver import room_session_title
+    from agent_backend.hosted_room_driver import room_session_title
     profile = task['payload']['target_profile']
     rpc = HostedRoomOwnerRPC(home=home, source_home=service.authority.profile_id, room_id=room_id,
                              member_id=member, profile=profile)
@@ -198,8 +198,8 @@ def unsettled_legacy_homes(service, room_id, task):
     """For a turn admitted before attempt homes were recorded, every other home its member was
     served from whose gateway is up and has not answered that it holds nothing for the room: the
     current home's answer says nothing about those. Empty when the turn has an attempt home."""
-    from hermes_cli.gateway_runtime import discover_gateway_endpoint
-    from tui_gateway.hosted_room_service import task_member_id
+    from agent_cli.gateway_runtime import discover_gateway_endpoint
+    from agent_backend.hosted_room_service import task_member_id
     member, db = task_member_id(task), service.authority.db
     if stopping_attempt_home(db, room_id, member, task) is not None:
         return []
@@ -213,9 +213,9 @@ def unsettled_legacy_homes(service, room_id, task):
 def unserved_member_stopped(service, room_id, task):
     """True when *task*'s member profile is no longer served on this host and no gateway owns any
     home it was served from (its conventional home, each recorded one, and the roster's)."""
-    from hermes_cli.gateway_runtime import discover_gateway_endpoint
-    from hermes_cli.gateway_runtime_multiplex import multiplexer_root_for
-    from tui_gateway.hosted_room_service import task_member_id
+    from agent_cli.gateway_runtime import discover_gateway_endpoint
+    from agent_cli.gateway_runtime_multiplex import multiplexer_root_for
+    from agent_backend.hosted_room_service import task_member_id
     profile = task['payload']['target_profile']
     served = service.profile_homes().get(profile)
     admitted = stopping_attempt_home(service.authority.db, room_id, task_member_id(task), task)

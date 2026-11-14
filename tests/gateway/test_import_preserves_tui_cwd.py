@@ -25,7 +25,7 @@ def test_gateway_import_preserves_cwdless_tui_workspace(tmp_path, configured):
     result = subprocess.run(
         [sys.executable, "-c", """
 from pathlib import Path
-import tui_gateway.server as server
+import agent_backend.server as server
 launch = Path.cwd()
 assert Path(server._completion_cwd({})) == launch
 import gateway.run
@@ -57,7 +57,7 @@ def test_gateway_start_keeps_messaging_cwd_defaults(
 ):
     import asyncio
     from gateway.run import start_gateway
-    from hermes_cli import resource_limits
+    from agent_cli import resource_limits
 
     class StopBeforeStartup(Exception):
         pass

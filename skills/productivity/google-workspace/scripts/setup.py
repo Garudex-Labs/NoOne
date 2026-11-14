@@ -35,14 +35,14 @@ except ImportError:
     # A copied skill must not install into an unrelated Python environment.
     pm = None
 
-# Ensure sibling modules (_hermes_home) are importable when run standalone.
+# Ensure sibling modules (_agent_home) are importable when run standalone.
 _SCRIPTS_DIR = str(Path(__file__).resolve().parent)
 if _SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, _SCRIPTS_DIR)
 
-from _hermes_home import display_hermes_home, get_hermes_home
+from _agent_home import display_agent_home, get_agent_home
 
-HERMES_HOME = get_hermes_home()
+HERMES_HOME = get_agent_home()
 TOKEN_PATH = HERMES_HOME / "google_token.json"
 CLIENT_SECRET_PATH = HERMES_HOME / "google_client_secret.json"
 PENDING_AUTH_PATH = HERMES_HOME / "google_oauth_pending.json"
@@ -98,7 +98,7 @@ def _format_missing_scopes(missing_scopes: list[str]) -> str:
 def install_deps():
     """Sync Hermes' declared Google extra, ready for the next process."""
     if pm is None:
-        print("ERROR: Run this script in the Hermes environment; use hermes setup first.")
+        print("ERROR: Run this script in the Hermes environment; use noone setup first.")
         return False
     try:
         pm.sync_venv(["google"], explicit=True)
@@ -112,7 +112,7 @@ def install_deps():
 def _ensure_deps():
     """Let PM check imports and stop if activation needs a new process."""
     if pm is None:
-        print("ERROR: Run this script in the Hermes environment; use hermes setup first.")
+        print("ERROR: Run this script in the Hermes environment; use noone setup first.")
         sys.exit(1)
     try:
         pm.ensure_import("google")
@@ -378,7 +378,7 @@ def exchange_auth_code(code: str):
     TOKEN_PATH.write_text(json.dumps(token_payload, indent=2), encoding="utf-8")
     PENDING_AUTH_PATH.unlink(missing_ok=True)
     print(f"OK: Authenticated. Token saved to {TOKEN_PATH}")
-    print(f"Profile-scoped token location: {display_hermes_home()}/google_token.json")
+    print(f"Profile-scoped token location: {display_agent_home()}/google_token.json")
 
 
 def revoke():

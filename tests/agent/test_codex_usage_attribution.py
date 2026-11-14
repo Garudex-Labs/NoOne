@@ -10,10 +10,10 @@ from types import SimpleNamespace
 
 import httpx
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
-from hermes_cli.version_info import get_version_info
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_cli.version_info import get_version_info
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 
 CODEX_URL = "https://chatgpt.com/backend-api/codex"
@@ -34,11 +34,11 @@ def profile(tmp_path, monkeypatch):
     home.mkdir()
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
     monkeypatch.setenv("HERMES_HOME", str(home))
-    token = set_hermes_home_override(home)
+    token = set_agent_home_override(home)
     try:
         yield home
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def _set_legacy_attribution(profile, enabled):

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_state import SessionDB
+from agent_state import SessionDB
 from tests.gateway.test_session_busy_controls import owner, settled
 from tests.gateway.fixtures.local_recovery_probe import rpc, websocket
 
@@ -163,13 +163,13 @@ def test_session_export_json_restores_with_its_title_through_import_sessions(tmp
 
 def _checkpoint(home, cwd, reason):
     """A checkpoint in the owner profile's shared store (what the agent takes before a write)."""
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
     from tools.checkpoint_manager import CheckpointManager
-    token = set_hermes_home_override(str(home))
+    token = set_agent_home_override(str(home))
     try:
         assert CheckpointManager(enabled=True).ensure_checkpoint(str(cwd), reason)
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 @pytest.mark.platforms("linux")
@@ -237,14 +237,14 @@ def test_rollback_lists_diffs_and_restores_the_session_cwd_and_rewinds_the_last_
 
 def _agent_write(home, path, text):
     """A file write Hermes made (and recorded in the agent-write ledger that safe restore reads)."""
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
     from tools.checkpoint_manager import CheckpointManager
     path.write_text(text)
-    token = set_hermes_home_override(str(home))
+    token = set_agent_home_override(str(home))
     try:
         CheckpointManager(enabled=True).record_agent_write(str(path))
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 @pytest.mark.platforms("linux")
@@ -355,9 +355,9 @@ def test_cli_only_commands_refuse_with_what_to_use_instead(tmp_path):
         async def probe():
             async with websocket(home, desc) as ws:
                 sid = (await rpc(ws, 'session.create', request_id='refuse', source='tui', toolsets=[]))['result']['session_id']
-                for command, hint in [('export', 'hermes profile export'), ('import x.tar.gz', 'hermes profile import'),
-                                      ('snapshot', 'hermes backup'), ('snap list', 'hermes backup'),
-                                      ('handoff telegram', 'hermes --cli'), ('hatch a cat', 'hermes --cli'),
+                for command, hint in [('export', 'noone profile export'), ('import x.tar.gz', 'noone profile import'),
+                                      ('snapshot', 'noone backup'), ('snap list', 'noone backup'),
+                                      ('handoff telegram', 'noone --cli'), ('hatch a cat', 'noone --cli'),
                                       ('worktree new', 'hermes -w'), ('palette', 'Type /')]:
                     refused = (await rpc(ws, 'slash.exec', command=command, session_id=sid))['error']
                     assert refused['message'] == 'unsupported_command', (command, refused)

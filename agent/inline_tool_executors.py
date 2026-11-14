@@ -127,7 +127,7 @@ def _callback_tool(module: str, func: str, callback_attr: str, *arg_specs: _ArgS
 def _session_search(agent, args: dict, ctx: InlineToolContext) -> Any:
     session_db = agent._get_session_db_for_recall()
     if not session_db:
-        from hermes_state import format_session_db_unavailable
+        from agent_state import format_session_db_unavailable
 
         return json.dumps({"success": False, "error": format_session_db_unavailable()})
     return _call_tool(
@@ -221,14 +221,10 @@ def _browser_vault(agent, args: dict, ctx: InlineToolContext) -> Any:
 def _manage_connections(agent, args: dict, ctx: InlineToolContext) -> Any:
     # The GUI callback lives on the agent; registry dispatch never forwards it.
     from tools.connectors import manage_connections
-    from tools.connectors.gateway import config as gateway_config
 
     result = manage_connections(
         args, session_id=getattr(agent, "session_id", None), tool_call_id=ctx.tool_call_id,
-        turn_id=getattr(agent, "_current_turn_id", None) or None,
         connection_callback=getattr(agent, "connection_callback", None),
-        connectors_available=gateway_config.connectors_available,
-        card_surface=getattr(agent, "platform", None) == "desktop",
     )
     _scope_in_connected_mcp_servers(agent, result)
     return result

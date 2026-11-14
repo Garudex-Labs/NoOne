@@ -1,35 +1,43 @@
 ---
 title: "Rss Feeds — Read RSS, Atom, JSON feeds; discover feeds behind a page"
-sidebar_label: "Rss Feeds"
+sidebarTitle: "Rss Feeds"
 description: "Read RSS, Atom, JSON feeds; discover feeds behind a page"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Rss Feeds
+# Rss Feeds {#rss-feeds}
 
 Read RSS, Atom, JSON feeds; discover feeds behind a page.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/research/rss-feeds` |
+| Source | Optional — install with `noone skills install official/research/rss-feeds` |
 | Path | `optional-skills/research/rss-feeds` |
 | Version | `1.0.0` |
-| Author | Teknium (teknium1), Hermes Agent |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `RSS`, `Atom`, `Feeds`, `Monitoring`, `Research`, `Blogs`, `Releases` |
 | Related skills | [`reddit-reading`](../../optional/social-media/social-media-reddit-reading.md), [`competitor-news-monitor`](../../bundled/research/research-competitor-news-monitor.md), [`grounded-citations`](../../bundled/research/research-grounded-citations.md), [`youtube-content`](../../bundled/media/media-youtube-content.md), [`blogwatcher`](../../optional/research/research-blogwatcher.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# RSS Feeds Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# RSS Feeds Skill {#rss-feeds-skill}
 
 Reads any RSS 2.0, RSS 1.0/RDF, Atom, or JSON Feed URL into a clean, date-sorted list of
 entries, and discovers the feed behind an ordinary page URL (`<link rel="alternate">` or
@@ -37,7 +45,7 @@ the usual `/feed`, `/rss.xml`, `/atom.xml` paths). Standard library only, nothin
 install. It does not fetch full article bodies — pass an entry's link to `web_extract` for
 that.
 
-## When to Use
+## When to Use {#when-to-use}
 
 - "What's new on &lt;blog/site>", "latest releases of &lt;GitHub repo>", "recent posts in
   &lt;subreddit>", "read this feed", "does this site have an RSS feed".
@@ -47,11 +55,11 @@ that.
 - Anything where a structured list of `title / link / date / author / summary` beats a
   rendered page: podcasts, changelogs, YouTube channels, newsrooms, forum categories.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 None. Python 3.10+, network access to the feed host.
 
-## How to Run
+## How to Run {#how-to-run}
 
 Run through `terminal` with the skill-relative script path:
 
@@ -62,7 +70,7 @@ python3 scripts/feed.py read URL --since 2026-09-01 --json          # only newer
 python3 scripts/feed.py discover https://example.com/               # list candidate feed URLs
 ```
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Source | Feed URL pattern |
 |---|---|
@@ -77,7 +85,7 @@ python3 scripts/feed.py discover https://example.com/               # list candi
 Output fields per entry: `title`, `link`, `published` (UTC ISO 8601), `author`, `summary`
 (HTML stripped, ≤ 2000 chars). Entries are sorted newest-first.
 
-## Procedure
+## Procedure {#procedure}
 
 ① If you only have a site URL, run `read` on it directly; the script discovers the feed
 and reports which URL it used (`discovered_from`). Use `discover` when you want to choose
@@ -93,7 +101,7 @@ truncated or the first paragraph only.
 ④ Cite the entry `link`, not the feed URL, when the result feeds a report
 (`grounded-citations`).
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - A 200 response with HTML means the URL is a page, not a feed; the script falls through
   to discovery automatically, but a site with no `<link rel="alternate">` and none of the
@@ -107,8 +115,8 @@ truncated or the first paragraph only.
 - Some feeds are Cloudflare-fronted and 403 non-browser clients; `blocked-page-recovery`
   handles that class.
 
-## Verification
+## Verification {#verification}
 
-`python3 scripts/feed.py read https://github.com/NousResearch/hermes-agent/releases.atom
+`python3 scripts/feed.py read https://github.com/Garudex-Labs/NoOne/releases.atom
 --limit 1` prints one entry with a `releases/tag/` link and a `[atom]` format tag;
 `discover https://simonwillison.net/` prints an `/atom/` URL.

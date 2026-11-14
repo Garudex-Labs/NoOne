@@ -6,7 +6,7 @@ start with the same commands, and an ``AR`` under its deleted ``/tools/llvm``
 build directory; on macOS only that archiver is foreign. setuptools compiles
 every extension with those values unless the environment overrides them, so a
 Debian/Ubuntu/WSL host with only gcc/g++ failed any sdist build with
-``No such file or directory: 'clang++'`` (python-olm, via the matrix extra).
+``No such file or directory: 'clang++'``.
 
 Stdlib only: ``pm.environment.classify_uv_failure`` imports this on the
 bootstrap runner's pre-3.11 system python.

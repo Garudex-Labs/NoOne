@@ -26,12 +26,12 @@ def probe_with_rollback(
 
     ``on_commit`` runs right after the configuration is saved: a card install persists its setup
     values there, so they land with the authorization and never before it."""
-    from hermes_cli.mcp_config import _oauth_tokens_present, _probe_single_server
+    from agent_cli.mcp_config import _oauth_tokens_present, _probe_single_server
     from tools.mcp_dashboard_oauth import exception_message
-    from tools.mcp_oauth import HermesTokenStorage, login_connect_timeout
+    from tools.mcp_oauth import AgentTokenStorage, login_connect_timeout
     from tools.mcp_oauth_manager import get_manager
     manager = get_manager()
-    storage = HermesTokenStorage(server_name)
+    storage = AgentTokenStorage(server_name)
     # An attempt that replaced a still-running one starts from that one's half-written files, so
     # it carries the older attempt's snapshot: the state from before either of them.
     backup = getattr(flow, "inherited_backup", None) or storage.snapshot()
@@ -108,7 +108,7 @@ def cancel_attempt(flow) -> bool:
 
 
 def _commit(server_name: str, cfg: dict, on_commit: Optional[Callable[[], None]], flow=None) -> None:
-    from hermes_cli.mcp_config import _save_mcp_server
+    from agent_cli.mcp_config import _save_mcp_server
 
     with _COMMIT_GUARD:
         if flow is not None and getattr(flow, "cancelled", False):
@@ -128,7 +128,7 @@ def _reuse_saved_authorization(
     Retrying discovery for a server that is authorized must not ask the user to sign in again, and
     must not delete the working grant first. Any failure here falls through to the interactive
     flow, which replaces the grant."""
-    from hermes_cli.mcp_config import _oauth_tokens_present, _probe_single_server
+    from agent_cli.mcp_config import _oauth_tokens_present, _probe_single_server
     from tools.mcp_oauth import suppress_interactive_oauth
 
     if not _oauth_tokens_present(server_name):
@@ -158,7 +158,7 @@ def run_worker(
     so the configuration can reference them before anything is saved. ``reuse_saved`` is the
     card's rule: a server whose saved tokens still work connects with no consent step. The RPC
     session surface keeps it off, because its caller waits for an authorization URL."""
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
     try:
         from agent.secret_scope import (
             build_profile_secret_scope, reset_secret_scope, set_secret_scope)
@@ -166,7 +166,7 @@ def run_worker(
         from tools.mcp_oauth import force_interactive_oauth
         home_token = secret_token = None
         try:
-            home_token = set_hermes_home_override(hermes_home)
+            home_token = set_agent_home_override(hermes_home)
             secret_token = set_secret_scope(
                 {**build_profile_secret_scope(Path(hermes_home)), **(env or {})}, profile_home=hermes_home)
             if not (reuse_saved and flow is not None
@@ -178,9 +178,9 @@ def run_worker(
             if secret_token is not None:
                 reset_secret_scope(secret_token)
             if home_token is not None:
-                reset_hermes_home_override(home_token)
+                reset_agent_home_override(home_token)
     except Exception as exc:
-        from hermes_cli.mcp_config import probe_failure_class
+        from agent_cli.mcp_config import probe_failure_class
         from tools.mcp_dashboard_oauth import exception_message
         msg = exception_message(exc)
         with suppress(Exception):
@@ -309,10 +309,10 @@ def start(
     """Start a card OAuth flow and wait until its authorization URL is published.
 
     ``cfg`` is an install's in-memory configuration; without it the saved one is authorized."""
-    from hermes_cli.mcp_config import _get_mcp_servers
-    from hermes_constants import get_hermes_home
+    from agent_cli.mcp_config import _get_mcp_servers
+    from agent_constants import get_agent_home
     from tools.mcp_dashboard_oauth import DashboardOAuthFlow
-    from tui_gateway import mcp_oauth_sessions
+    from agent_backend import mcp_oauth_sessions
 
     cfg = dict(cfg if cfg is not None else _get_mcp_servers().get(server_name) or {})
     if not cfg:
@@ -320,7 +320,7 @@ def start(
     if not cfg.get("url"):
         raise RuntimeError(f"'{server_name}' is a stdio server: it takes env keys, not OAuth")
     cfg["auth"] = "oauth"
-    hermes_home = str(get_hermes_home().expanduser().resolve(strict=False))
+    hermes_home = str(get_agent_home().expanduser().resolve(strict=False))
     flow = DashboardOAuthFlow(
         flow_id=secrets.token_urlsafe(24), server_name=server_name, profile=None,
         hermes_home=hermes_home, redirect_uri="", reconnect_live=False)

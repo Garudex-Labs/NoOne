@@ -35,26 +35,26 @@ _claims_lock = threading.RLock()  # reentrant: a weakref callback can fire from 
 
 def refused_tool_message(tool_name: str) -> str:
     """What the model/chat sees for a refused memory tool call: no check name, no home paths."""
-    return f"Memory tool '{tool_name}' refused. Ask the operator to check `hermes logs errors`."
+    return f"Memory tool '{tool_name}' refused. Ask the operator to check `noone logs errors`."
 
 
 def _home_key(home: Any) -> Optional[str]:
     if not home:
         return None
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     try:
-        return hermes_home_key(home)
+        return agent_home_key(home)
     except (OSError, RuntimeError, ValueError):  # unresolvable path: no key, so the call is refused
         return None
 
 
 def _explicit_caller_home() -> Optional[str]:
     """The profile the caller's context names: its HERMES_HOME override, else the home its secret
-    scope was built for. None when the context names no profile (``get_hermes_home()`` would only fall
+    scope was built for. None when the context names no profile (``get_agent_home()`` would only fall
     back to the process home, which proves nothing on a multiplexed process)."""
     from agent.secret_scope import current_secret_scope_home
-    from hermes_constants import get_hermes_home_override
-    return get_hermes_home_override() or current_secret_scope_home()
+    from agent_constants import get_agent_home_override
+    return get_agent_home_override() or current_secret_scope_home()
 
 
 def _refuse(label: str, reason: str, caller_home: Any, bound_home: Any, multiplexed: bool) -> None:
@@ -82,8 +82,8 @@ def caller_scope(bound: Optional[dict[str, Any]], label: str) -> Optional[dict[s
         if multiplexed:
             _refuse(label, "the caller names no profile on a process serving several", None, bound_home, multiplexed)
             return None
-        from hermes_constants import get_hermes_home
-        caller_home = str(get_hermes_home())  # single-profile process: its own home is the only one
+        from agent_constants import get_agent_home
+        caller_home = str(get_agent_home())  # single-profile process: its own home is the only one
     if not bound_home:
         if multiplexed:
             _refuse(label, "the memory manager recorded no profile", caller_home, None, multiplexed)
@@ -149,13 +149,13 @@ def serves_caller(provider: Any, label: str) -> bool:
     if owner is None:
         return True
     from agent.secret_scope import is_multiplex_active
-    from hermes_constants import get_hermes_home
+    from agent_constants import get_agent_home
     multiplexed = is_multiplex_active()
     caller_home = _explicit_caller_home()
     if caller_home is None and multiplexed:
         _refuse(label, "the caller names no profile on a process serving several", None, owner, multiplexed)
         return False
-    caller_home = caller_home or str(get_hermes_home())
+    caller_home = caller_home or str(get_agent_home())
     if _home_key(caller_home) == owner:
         return True
     _refuse(label, "the provider instance is bound to another profile", caller_home, owner, multiplexed)
@@ -170,10 +170,10 @@ def in_owner_home(bound: Optional[dict[str, Any]], fn: Callable[[], Any]) -> Cal
         return fn
 
     def _run() -> Any:
-        from hermes_constants import reset_hermes_home_override, set_hermes_home_override
-        token = set_hermes_home_override(str(home))
+        from agent_constants import reset_agent_home_override, set_agent_home_override
+        token = set_agent_home_override(str(home))
         try:
             return fn()
         finally:
-            reset_hermes_home_override(token)
+            reset_agent_home_override(token)
     return _run

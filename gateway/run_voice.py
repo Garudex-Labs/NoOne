@@ -40,8 +40,8 @@ def _is_platform_name(segment: str) -> bool:
 
 
 def _is_legacy_voice_key(key: str) -> bool:
-    """True for a pre-#12542 bare ``chat_id`` key. Chat ids may contain ``:`` themselves (Matrix
-    ``!room:server``, Signal and SimpleX ``group:<id>``), so a key is prefixed only when it starts
+    """True for a pre-#12542 bare ``chat_id`` key. Chat ids may contain ``:`` themselves (Signal
+    ``group:<id>``), so a key is prefixed only when it starts
     with ``<platform>:`` or ``<profile>:<platform>:``, never merely because it has a colon."""
     parts = key.split(":", 2)
     return not (_is_platform_name(parts[0]) or (len(parts) == 3 and _is_platform_name(parts[1])))
@@ -82,7 +82,7 @@ class GatewayVoiceMixin:
         items = {str(k): m for k, m in data.items() if m in _VOICE_MODES}
         # Only a colon-free key is certainly legacy here: a plugin platform that only a named profile
         # installs is not registered yet at load time, so its ``<profile>:<platform>:`` key must stay.
-        # A colon-bearing legacy key (Matrix ``!room:server``) is kept as is and read in the sync.
+        # A colon-bearing legacy key (Signal ``group:<id>``) is kept as is and read in the sync.
         for key, mode in [(k, m) for k, m in items.items() if ":" not in k]:
             # Legacy pre-#12542 key (no platform). Keep ``off``, so a saved ``/voice off`` still
             # suppresses auto-TTS after the upgrade (#14025); drop voice_only/all, which would
@@ -146,7 +146,7 @@ class GatewayVoiceMixin:
         if not chat_sets:
             return
         try:
-            from hermes_cli.config import load_config  # lazy: no gateway -> hermes_cli module dep
+            from agent_cli.config import load_config  # lazy: no gateway -> agent_cli module dep
             auto_tts_default = bool((load_config().get("voice") or {}).get("auto_tts", False))
         except Exception:
             auto_tts_default = False

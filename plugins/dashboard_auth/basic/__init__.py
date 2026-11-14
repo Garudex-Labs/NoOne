@@ -25,8 +25,8 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from hermes_cli.dashboard_auth import DashboardAuthProvider, InvalidCredentialsError, RefreshExpiredError, Session
-from hermes_constants import get_hermes_home
+from agent_cli.dashboard_auth import DashboardAuthProvider, InvalidCredentialsError, RefreshExpiredError, Session
+from agent_constants import get_agent_home
 from plugins.dashboard_auth._shared import (
     NonInteractiveMixin, SkipRegistration, load_config_section, register_provider, resolve_env_or_cfg)
 from utils import atomic_json_write, read_json_or_empty
@@ -151,7 +151,7 @@ class BasicAuthProvider(NonInteractiveMixin, DashboardAuthProvider):
         binding = b"\0".join((b"hermes-dashboard-basic-session", username.encode(), (credential_id or password_hash).encode()))
         self._secret = hmac.new(secret, binding, hashlib.sha256).digest()
         self._ttl = max(60, int(ttl_seconds))
-        self._revoked_path = get_hermes_home() / _REVOKED_PATH
+        self._revoked_path = get_agent_home() / _REVOKED_PATH
         self._revoked: dict[str, int] = {}
 
     # ---- password login ----------------------------------------------------
@@ -255,8 +255,8 @@ def _load_config_basic_auth_section() -> dict:
 # these (nor a space), and everyone who copied the same line would share the same key.
 _UNEXPANDED_SHELL_MARKERS = ("$(", "`", "openssl rand")
 
-# The error above only reaches the log files, not the console of ``hermes serve`` /
-# ``hermes dashboard``; one stderr line per process makes it visible there too.
+# The error above only reaches the log files, not the console of ``noone serve`` /
+# ``noone dashboard``; one stderr line per process makes it visible there too.
 _shell_text_secret_reported = False
 
 

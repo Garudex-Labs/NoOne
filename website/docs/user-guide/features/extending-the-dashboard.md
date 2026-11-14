@@ -1,12 +1,12 @@
 ---
-sidebar_position: 17
 title: "Extending the Dashboard"
-description: "Build themes and plugins for the Hermes web dashboard — palettes, typography, layouts, custom tabs, shell slots, page-scoped slots, and backend API routes"
+description: "Build themes and plugins for the the agent web dashboard — palettes, typography, layouts, custom tabs, shell slots, page-scoped slots, and backend API routes"
 ---
 
-# Extending the Dashboard
 
-The Hermes web dashboard (`hermes dashboard`) is built to be reskinned and extended without forking the codebase. Three layers are exposed:
+# Extending the Dashboard {#extending-the-dashboard}
+
+The {{app-name}} web dashboard (`noone dashboard`) is built to be reskinned and extended without forking the codebase. Three layers are exposed:
 
 1. **Themes** — YAML files that repaint the dashboard's palette, typography, layout, and per-component chrome. Drop a file in `~/.hermes/dashboard-themes/`; it appears in the theme switcher.
 2. **UI plugins** — a directory with `manifest.json` + a JavaScript bundle that registers a tab, replaces a built-in page, augments one via page-scoped slots, or injects components into named shell slots.
@@ -16,17 +16,33 @@ All three are **drop-in at runtime**: no repo clone, no `pnpm run build`, no pat
 
 If you just want to use the dashboard, see [Web Dashboard](./web-dashboard). If you want to reskin the terminal CLI (not the web dashboard), see [Skins & Themes](./skins) — the CLI skin system is unrelated to dashboard themes.
 
-:::note Not the desktop app
-This page covers the **web dashboard** (`hermes dashboard`) plugin system — `window.__HERMES_PLUGIN_SDK__`, a `manifest.json`, and a pre-built JS bundle. The **native desktop app** (`hermes desktop`) has its own, unrelated SDK — `@hermes/plugin-sdk`, a single ESM file, no build step — documented at [Desktop Plugin SDK](../../developer-guide/desktop-plugin-sdk.md). Only the backend `plugin_api.py` namespace (`/api/plugins/<name>`) is shared between them.
-:::
+<Note>
 
-:::note How the pieces compose
+<div className="doc-callout-title">
+
+Not the desktop app
+
+</div>
+
+This page covers the **web dashboard** (`noone dashboard`) plugin system — `window.__HERMES_PLUGIN_SDK__`, a `manifest.json`, and a pre-built JS bundle. The **native desktop app** (`noone desktop`) has its own, unrelated SDK — `@noone/plugin-sdk`, a single ESM file, no build step — documented at [Desktop Plugin SDK](../../developer-guide/desktop-plugin-sdk.md). Only the backend `plugin_api.py` namespace (`/api/plugins/<name>`) is shared between them.
+
+</Note>
+
+<Note>
+
+<div className="doc-callout-title">
+
+How the pieces compose
+
+</div>
+
 Themes and plugins are independent but synergistic. A theme can stand alone (just a YAML file). A plugin can stand alone (just a tab). Together they let you build a complete visual reskin with custom HUDs — the example `strike-freedom-cockpit` demo (lives in the `hermes-example-plugins` companion repo — see [Combined theme + plugin demo](#combined-theme--plugin-demo) for install steps) does exactly that.
-:::
+
+</Note>
 
 ---
 
-## Table of contents
+## Table of contents {#table-of-contents}
 
 - [Themes](#themes)
   - [Quick start — your first theme](#quick-start--your-first-theme)
@@ -56,11 +72,11 @@ Themes and plugins are independent but synergistic. A theme can stand alone (jus
 
 ---
 
-## Themes
+## Themes {#themes}
 
 Themes are YAML files stored in `~/.hermes/dashboard-themes/`. The file name doesn't matter (the theme's `name:` field is what the system uses), but convention is `<name>.yaml`. Every field is optional — missing keys fall back to the built-in `default` theme, so a theme can be as small as one color.
 
-### Quick start — your first theme
+### Quick start — your first theme {#quick-start--your-first-theme}
 
 ```bash
 mkdir -p ~/.hermes/dashboard-themes
@@ -81,11 +97,11 @@ Refresh the dashboard. Click the palette icon in the header and pick **Neon**. T
 
 That's the whole onboarding: one file, two colors. Everything below is optional refinement.
 
-### Palette, typography, layout
+### Palette, typography, layout {#palette-typography-layout}
 
 These three blocks are the heart of a theme. Each is independent — override one, leave the others.
 
-#### Palette (3-layer)
+#### Palette (3-layer) {#palette-3-layer}
 
 The palette is a triplet of color layers plus a warm-glow vignette color and a noise-grain multiplier. The dashboard's design-system cascade derives every shadcn-compatible token (card, popover, muted, border, primary, destructive, ring, etc.) from this triplet via CSS `color-mix()`. Overriding three colors cascades into the whole UI.
 
@@ -112,7 +128,7 @@ palette:
   noiseOpacity: 0.7
 ```
 
-#### Typography
+#### Typography {#typography}
 
 | Key | Type | Description |
 |-----|------|-------------|
@@ -135,7 +151,7 @@ typography:
   letterSpacing: "0.04em"
 ```
 
-##### Changing the font from the UI (no YAML)
+##### Changing the font from the UI (no YAML) {#changing-the-font-from-the-ui-no-yaml}
 
 The theme picker in the dashboard header has a **Font** section below the
 theme list. Pick any font there and it overrides the body font of whatever
@@ -151,7 +167,7 @@ catalog keeps the injected origins fixed. For a fully custom face, set
 `fontSans` + `fontUrl` in a theme YAML as shown above. The theme's `fontMono`
 (code blocks, terminal) is always left untouched by the UI override.
 
-#### Layout
+#### Layout {#layout}
 
 | Key | Values | Description |
 |-----|--------|-------------|
@@ -164,7 +180,7 @@ layout:
   density: compact
 ```
 
-### Layout variants
+### Layout variants {#layout-variants}
 
 `layoutVariant` picks the overall shell layout. Defaults to `"standard"` when absent.
 
@@ -180,7 +196,7 @@ layoutVariant: cockpit
 
 The current variant is exposed as `document.documentElement.dataset.layoutVariant`, so raw CSS in `customCSS` can target it via `:root[data-layout-variant="cockpit"] ...`.
 
-### Theme assets (images as CSS vars)
+### Theme assets (images as CSS vars) {#theme-assets-images-as-css-vars}
 
 Ship artwork URLs with a theme. Each named slot becomes a CSS var (`--theme-asset-<name>`) that the built-in shell and any plugin can read. The `bg` slot is automatically wired into the backdrop; other slots are plugin-facing.
 
@@ -212,7 +228,7 @@ const hero = getComputedStyle(document.documentElement)
   .getPropertyValue("--theme-asset-hero").trim();
 ```
 
-### Component chrome overrides
+### Component chrome overrides {#component-chrome-overrides}
 
 `componentStyles` restyles individual shell components without writing CSS selectors. Each bucket's entries become CSS vars (`--component-<bucket>-<kebab-property>`) that the shell's shared components read. So `card:` overrides apply to every `<Card>`, `header:` to the app bar, etc.
 
@@ -238,7 +254,7 @@ Supported buckets: `card`, `header`, `footer`, `sidebar`, `tab`, `progress`, `ba
 
 Property names use camelCase (`clipPath`) and are emitted as kebab (`clip-path`). Values are plain CSS strings — anything CSS accepts (`clip-path`, `border-image`, `background`, `box-shadow`, `animation`, ...).
 
-### Color overrides
+### Color overrides {#color-overrides}
 
 Most themes won't need this — the 3-layer palette derives every shadcn token. Use `colorOverrides` when you want a specific accent the derivation won't produce (a softer destructive red for a pastel theme, a specific success green for a brand).
 
@@ -256,7 +272,7 @@ Supported keys: `card`, `cardForeground`, `popover`, `popoverForeground`, `prima
 
 Each key maps 1:1 to the `--color-<kebab>` CSS var (e.g. `primaryForeground` → `--color-primary-foreground`). Any key set here wins over the palette cascade for the active theme only — switching to another theme clears the overrides.
 
-### Raw `customCSS`
+### Raw `customCSS` {#raw-customcss}
 
 For selector-level chrome that `componentStyles` can't express — pseudo-elements, animations, media queries, theme-scoped overrides — drop raw CSS into `customCSS`:
 
@@ -278,23 +294,23 @@ customCSS: |
 
 The CSS is injected as a single scoped `<style data-hermes-theme-css>` tag on theme apply and cleaned up on theme switch. **Capped at 32 KiB per theme.**
 
-### Built-in themes
+### Built-in themes {#built-in-themes}
 
 Each built-in ships its own palette, typography, and layout — switching produces visible changes beyond color alone.
 
 | Theme | Palette | Typography | Layout |
 |-------|---------|------------|--------|
-| **Hermes Teal** (`default`) | Dark teal + cream | System stack, 15px | 0.5rem radius, comfortable |
-| **Hermes Teal (Large)** (`default-large`) | Same as default | System stack, 18px, line-height 1.65 | 0.5rem radius, spacious |
+| **{{app-name}} Teal** (`default`) | Dark teal + cream | System stack, 15px | 0.5rem radius, comfortable |
+| **{{app-name}} Teal (Large)** (`default-large`) | Same as default | System stack, 18px, line-height 1.65 | 0.5rem radius, spacious |
 | **Midnight** (`midnight`) | Deep blue-violet | Inter + JetBrains Mono, 14px | 0.75rem radius, comfortable |
 | **Ember** (`ember`) | Warm crimson + bronze | Spectral (serif) + IBM Plex Mono, 15px | 0.25rem radius, comfortable |
 | **Mono** (`mono`) | Grayscale | IBM Plex Sans + IBM Plex Mono, 13px | 0 radius, compact |
 | **Cyberpunk** (`cyberpunk`) | Neon green on black | Share Tech Mono everywhere, 14px | 0 radius, compact |
 | **Rosé** (`rose`) | Pink + ivory | Fraunces (serif) + DM Mono, 16px | 1rem radius, spacious |
 
-Themes that reference Google Fonts (all except Hermes Teal) load the stylesheet on demand — the first time you switch to them a `<link>` tag is injected into `<head>`.
+Themes that reference Google Fonts (all except {{app-name}} Teal) load the stylesheet on demand — the first time you switch to them a `<link>` tag is injected into `<head>`.
 
-### Full theme YAML reference
+### Full theme YAML reference {#full-theme-yaml-reference}
 
 Every knob in one file — copy and trim what you don't need:
 
@@ -359,13 +375,13 @@ Refresh the dashboard after creating the file. Switch themes live from the heade
 
 ---
 
-## Plugins
+## Plugins {#plugins}
 
-A dashboard plugin is a directory with a `manifest.json`, a pre-built JS bundle, and optionally a CSS file and a Python file with FastAPI routes. Plugins live next to other Hermes plugins in `~/.hermes/plugins/<name>/` — the dashboard extension is a `dashboard/` subfolder inside that plugin directory, so one plugin can extend both the CLI/gateway and the dashboard from a single install.
+A dashboard plugin is a directory with a `manifest.json`, a pre-built JS bundle, and optionally a CSS file and a Python file with FastAPI routes. Plugins live next to other {{app-name}} plugins in `~/.hermes/plugins/<name>/` — the dashboard extension is a `dashboard/` subfolder inside that plugin directory, so one plugin can extend both the CLI/gateway and the dashboard from a single install.
 
 Plugins don't bundle React or UI components. They use the **Plugin SDK** exposed on `window.__HERMES_PLUGIN_SDK__`. This keeps plugin bundles tiny (typically a few KB) and avoids version conflicts.
 
-### Quick start — your first plugin
+### Quick start — your first plugin {#quick-start--your-first-plugin}
 
 Create the directory structure:
 
@@ -420,11 +436,19 @@ Write the JS bundle (a plain IIFE — no build step needed):
 
 Refresh the dashboard — your tab appears in the nav bar, after **Skills**.
 
-:::tip Skip React.createElement
-If you prefer JSX, use any bundler (esbuild, Vite, rollup) with React as an external and IIFE output. The only hard requirement is that the final file is a single JS file loadable via `<script>`. React is never bundled; it comes from `SDK.React`.
-:::
+<Tip>
 
-### Directory layout
+<div className="doc-callout-title">
+
+Skip React.createElement
+
+</div>
+
+If you prefer JSX, use any bundler (esbuild, Vite, rollup) with React as an external and IIFE output. The only hard requirement is that the final file is a single JS file loadable via `<script>`. React is never bundled; it comes from `SDK.React`.
+
+</Tip>
+
+### Directory layout {#directory-layout}
 
 ```
 ~/.hermes/plugins/my-plugin/
@@ -446,7 +470,7 @@ A single plugin directory can carry three orthogonal extensions:
 
 None of them are required; include only the layers you need.
 
-### Manifest reference
+### Manifest reference {#manifest-reference}
 
 ```json
 {
@@ -484,7 +508,7 @@ None of them are required; include only the layers you need.
 | `css` | No | Path to a CSS file to inject as a `<link>` tag. |
 | `api` | No | Path to a Python file with FastAPI routes. Mounted at `/api/plugins/<name>/`. |
 
-#### Available icons
+#### Available icons {#available-icons}
 
 Plugins use Lucide icon names. The dashboard maps these by name — unknown names silently fall back to `Puzzle`.
 
@@ -492,7 +516,7 @@ Currently mapped: `Activity`, `BarChart3`, `Clock`, `Code`, `Database`, `Eye`, `
 
 Need a different icon? Open a PR to `web/src/App.tsx`'s `ICON_MAP` — pure additive change.
 
-### The Plugin SDK
+### The Plugin SDK {#the-plugin-sdk}
 
 Everything a plugin needs is on `window.__HERMES_PLUGIN_SDK__`. Plugins should never import React directly.
 
@@ -539,7 +563,7 @@ SDK.utils.isoTimeAgo         // "5m ago" from ISO string
 SDK.useI18n                  // i18n hook for multi-language plugins
 ```
 
-#### Calling your plugin's backend
+#### Calling your plugin's backend {#calling-your-plugins-backend}
 
 ```javascript
 SDK.fetchJSON("/api/plugins/my-plugin/data")
@@ -549,7 +573,7 @@ SDK.fetchJSON("/api/plugins/my-plugin/data")
 
 `fetchJSON` injects the session auth token, surfaces errors as thrown exceptions, and parses JSON automatically. `fetchJSON` and `authedFetch` only call this dashboard's own origin: an absolute URL to another host is rejected rather than sent the session token, so fetch third-party URLs (CDN assets, a game server) with plain `fetch`.
 
-#### Calling built-in Hermes endpoints
+#### Calling built-in {{app-name}} endpoints {#calling-built-in-hermes-endpoints}
 
 ```javascript
 // Agent status
@@ -561,7 +585,7 @@ SDK.api.getSessions(10).then((resp) => console.log(resp.sessions.length));
 
 See [Web Dashboard → REST API](./web-dashboard#rest-api) for the full list.
 
-### Shell slots
+### Shell slots {#shell-slots}
 
 Slots let a plugin inject components into named locations of the app shell — the cockpit sidebar, the header, the footer, an overlay layer — without claiming a whole tab. Multiple plugins can populate the same slot; they render stacked in registration order.
 
@@ -572,14 +596,14 @@ window.__HERMES_PLUGINS__.registerSlot("my-plugin", "sidebar", MySidebar);
 window.__HERMES_PLUGINS__.registerSlot("my-plugin", "header-left", MyCrest);
 ```
 
-#### Slot catalogue
+#### Slot catalogue {#slot-catalogue}
 
 **Shell-wide slots** (render anywhere in the app chrome):
 
 | Slot | Location |
 |------|----------|
 | `backdrop` | Inside the `<Backdrop />` layer stack, above the noise layer. |
-| `header-left` | Before the Hermes brand in the top bar. |
+| `header-left` | Before the {{app-name}} brand in the top bar. |
 | `header-right` | Before the theme/language switchers in the top bar. |
 | `header-banner` | Full-width strip below the nav. |
 | `sidebar` | Cockpit sidebar rail — **only rendered when `layoutVariant === "cockpit"`**. |
@@ -620,11 +644,11 @@ Combine page-scoped slots with `tab.hidden: true` if your plugin only augments e
 
 The shell only renders `<PluginSlot name="..." />` for the slots above. Additional names are accepted by the registry for nested plugin UIs — a plugin can expose its own slots via `SDK.components.PluginSlot`.
 
-#### Re-registration and HMR
+#### Re-registration and HMR {#re-registration-and-hmr}
 
 If the same `(plugin, slot)` pair is registered twice, the later call replaces the earlier one — this matches how React HMR expects plugin re-mounts to behave.
 
-### Replacing built-in pages (`tab.override`)
+### Replacing built-in pages (`tab.override`) {#replacing-built-in-pages-taboverride}
 
 Setting `tab.override` to a built-in route path makes the plugin's component replace that page instead of adding a new tab. Useful when a theme wants a custom home page (`/`) but wants to keep the rest of the dashboard intact.
 
@@ -651,7 +675,7 @@ Only one plugin can override a given path. If two plugins claim the same overrid
 
 If you only need to add a card or toolbar to an existing page without taking it over, use [page-scoped slots](#augmenting-built-in-pages-page-scoped-slots) instead.
 
-### Augmenting built-in pages (page-scoped slots)
+### Augmenting built-in pages (page-scoped slots) {#augmenting-built-in-pages-page-scoped-slots}
 
 Full replacement via `tab.override` is heavy — your plugin now owns the entire page, including any future updates we ship to it. Most of the time you just want to add a banner, card, or toolbar to an existing page. That's what **page-scoped slots** are for.
 
@@ -703,7 +727,7 @@ Key points:
 
 A reference plugin (`example-dashboard` in [`hermes-example-plugins`](https://github.com/NousResearch/hermes-example-plugins/tree/main/example-dashboard)) ships a live demo that injects a banner into `sessions:top` — install it to see the pattern end-to-end.
 
-### Slot-only plugins (`tab.hidden`)
+### Slot-only plugins (`tab.hidden`) {#slot-only-plugins-tabhidden}
 
 When `tab.hidden: true`, the plugin registers its component (for direct URL visits) and any slots, but never adds a tab to the navigation. Used by plugins that only exist to inject into slots — a header crest, a sidebar HUD, an overlay.
 
@@ -723,7 +747,7 @@ When `tab.hidden: true`, the plugin registers its component (for direct URL visi
 
 The bundle still calls `register()` with a placeholder component (good practice in case someone hits the URL directly) and then `registerSlot()` to do the real work.
 
-### Backend API routes
+### Backend API routes {#backend-api-routes}
 
 Plugins can register FastAPI routes by setting `api` in the manifest. Create the file and export a `router`:
 
@@ -749,7 +773,7 @@ Routes are mounted under `/api/plugins/<name>/`, so the above becomes:
 
 Plugin API routes sit behind the dashboard's normal auth gate — unauthenticated requests get a `401` before the plugin route runs, and requests to a disabled plugin's routes are rejected at request time. Still, **don't expose the dashboard on a public interface with `--host 0.0.0.0` if you run untrusted plugins** — an authenticated session can reach their routes too.
 
-#### Don't block the event loop
+#### Don't block the event loop {#dont-block-the-event-loop}
 
 With the default `plugins.isolation: in_process`, API handlers run on the gateway's event loop, the same
 loop that answers every other dashboard, Desktop and chat request. A handler that blocks (`time.sleep`, a
@@ -760,14 +784,14 @@ also runs in a worker thread). `plugins.isolation: host` runs the handlers in a 
 ([plugin host](plugins.md#running-plugins-out-of-process-pluginsisolation)): a slow handler there
 delays only that profile's hosted plugin requests, and one with no answer after 60 s gets HTTP 504.
 
-#### Accessing Hermes internals
+#### Accessing {{app-name}} internals {#accessing-hermes-internals}
 
 Backend routes run inside the dashboard process, so they can import from the hermes-agent codebase directly:
 
 ```python
 from fastapi import APIRouter
-from hermes_state import SessionDB
-from hermes_cli.config import load_config
+from agent_state import SessionDB
+from agent_cli.config import load_config
 
 router = APIRouter()
 
@@ -786,7 +810,7 @@ async def config_snapshot():
     return {"model": cfg.get("model", {})}
 ```
 
-### Custom CSS per plugin
+### Custom CSS per plugin {#custom-css-per-plugin}
 
 If your plugin needs styles beyond Tailwind classes and inline `style=`, add a CSS file and reference it in the manifest:
 
@@ -813,7 +837,7 @@ The file is injected as a `<link>` tag on plugin load. Use specific class names 
 
 The dashboard exposes every shadcn token as `--color-*` plus theme extras (`--theme-asset-*`, `--component-<bucket>-*`, `--radius`, `--spacing-mul`). Reference those and your plugin automatically reskins with the active theme.
 
-### Plugin discovery & reload
+### Plugin discovery & reload {#plugin-discovery--reload}
 
 The dashboard scans three directories for `dashboard/manifest.json`:
 
@@ -826,7 +850,7 @@ The dashboard scans three directories for `dashboard/manifest.json`:
 
 On a gateway serving several profiles, a request for a profile other than the one the gateway started
 with sees that profile's own `plugins/<name>/dashboard/`, then the root `~/.hermes/plugins/<name>/dashboard/`
-(as a standalone `hermes --profile <name> dashboard` did; the profile's own copy wins a same-name
+(as a standalone `noone --profile <name> dashboard` did; the profile's own copy wins a same-name
 conflict), then the bundled ones, gated by that profile's `plugins.enabled` / `plugins.disabled`. Its
 plugin API, a root plugin's included, runs in that profile's [plugin host](plugins.md#running-plugins-out-of-process-pluginsisolation),
 never inside the gateway.
@@ -838,9 +862,9 @@ Discovery results are cached per dashboard process. After adding a new plugin, e
 curl http://127.0.0.1:9119/api/dashboard/plugins/rescan
 ```
 
-…or restart `hermes dashboard`.
+…or restart `noone dashboard`.
 
-#### Plugin load lifecycle
+#### Plugin load lifecycle {#plugin-load-lifecycle}
 
 1. Dashboard loads. `main.tsx` exposes the SDK on `window.__HERMES_PLUGIN_SDK__` and the registry on `window.__HERMES_PLUGINS__`.
 2. `App.tsx` calls `usePlugins()` → fetches `GET /api/dashboard/plugins`.
@@ -854,7 +878,7 @@ If a plugin's script fails to load (404, syntax error, exception during IIFE), t
 
 ---
 
-## Combined theme + plugin demo
+## Combined theme + plugin demo {#combined-theme--plugin-demo}
 
 The [`strike-freedom-cockpit`](https://github.com/NousResearch/hermes-example-plugins/tree/main/strike-freedom-cockpit) plugin (companion repo `hermes-example-plugins`) is a complete reskin demo. It pairs a theme YAML with a slot-only plugin to produce a cockpit-style HUD without forking the dashboard.
 
@@ -880,22 +904,22 @@ cp hermes-example-plugins/strike-freedom-cockpit/theme/strike-freedom.yaml \
 cp -r hermes-example-plugins/strike-freedom-cockpit ~/.hermes/plugins/
 ```
 
-Open the dashboard, pick **Strike Freedom** from the theme switcher. The cockpit sidebar appears, the crest shows in the header, the tagline replaces the footer. Switch back to **Hermes Teal** and the plugin remains installed but invisible (the `sidebar` slot only renders under the `cockpit` layout variant).
+Open the dashboard, pick **Strike Freedom** from the theme switcher. The cockpit sidebar appears, the crest shows in the header, the tagline replaces the footer. Switch back to **{{app-name}} Teal** and the plugin remains installed but invisible (the `sidebar` slot only renders under the `cockpit` layout variant).
 
 Read the plugin source (`strike-freedom-cockpit/dashboard/dist/index.js` in the companion repo) to see how it reads CSS vars, guards against older dashboards without slot support, and registers three slots from one bundle.
 
 ---
 
-## API reference
+## API reference {#api-reference}
 
-### Theme endpoints
+### Theme endpoints {#theme-endpoints}
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/dashboard/themes` | GET | List available themes + active name. Built-ins return `{name, label, description}`; user themes also include a `definition` field with the full normalised theme object. |
 | `/api/dashboard/theme` | PUT | Set active theme. Body: `{"name": "midnight"}`. Persists to `config.yaml` under `dashboard.theme`. |
 
-### Plugin endpoints
+### Plugin endpoints {#plugin-endpoints}
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -904,7 +928,7 @@ Read the plugin source (`strike-freedom-cockpit/dashboard/dist/index.js` in the 
 | `/dashboard-plugins/<name>/<path>` | GET | Serve static assets from a plugin's `dashboard/` directory. Path traversal is blocked. |
 | `/api/plugins/<name>/*` | * | Plugin-registered backend routes. |
 
-### SDK on `window`
+### SDK on `window` {#sdk-on-window}
 
 | Global | Type | Provider |
 |--------|------|----------|
@@ -914,7 +938,7 @@ Read the plugin source (`strike-freedom-cockpit/dashboard/dist/index.js` in the 
 
 ---
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 **My theme doesn't appear in the picker.**
 Check that the file is in `~/.hermes/dashboard-themes/` and ends in `.yaml` or `.yml`. Refresh the page. Run `curl http://127.0.0.1:9119/api/dashboard/themes` — your theme should be in the response. If the YAML has a parse error, the dashboard logs to `errors.log` under `~/.hermes/logs/`.
@@ -931,7 +955,7 @@ The `sidebar` slot only renders when the active theme has `layoutVariant: cockpi
 
 **Plugin backend routes return 404.**
 1. Confirm the manifest has `"api": "plugin_api.py"` pointing to an existing file inside `dashboard/`.
-2. Restart `hermes dashboard` — plugin API routes are mounted once at startup, **not** on rescan.
+2. Restart `noone dashboard` — plugin API routes are mounted once at startup, **not** on rescan.
 3. Check that `plugin_api.py` exports a module-level `router = APIRouter()`. Other export names are not picked up.
 4. Tail `~/.hermes/logs/errors.log` for `Failed to load plugin <name> API routes` — import errors are logged there.
 

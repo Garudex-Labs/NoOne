@@ -1,4 +1,4 @@
-import { JsonRpcGatewayError } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@noone/shared'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { LIVENESS_REPROBE_DELAY_MS } from '@/lib/gateway-liveness-policy'
@@ -35,9 +35,9 @@ const reconnectStateMocks = vi.hoisted(() => ({
   resetTileRuntimeBindings: vi.fn()
 }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   setApiRequestConnection: vi.fn(),
-  HermesGateway: class {
+  AgentGateway: class {
     connectionState = 'closed'
     close = vi.fn(() => {
       this.connectionState = 'closed'
@@ -779,10 +779,10 @@ describe('secondary stalled-dial budget', () => {
     vi.useFakeTimers()
 
     // What main's ensureLocalGateway / parseGatewayEnsureOutput / assertLocalGatewayEndpoint throw,
-    // as they cross the IPC boundary. Each re-dial spawns another `hermes gateway ensure`.
+    // as they cross the IPC boundary. Each re-dial spawns another `noone gateway ensure`.
     for (const permanent of [
-      "Error invoking remote method 'hermes:connection:get-for': Error: Gateway incompatible (runtime_protocol). Use hermes gateway status for recovery.",
-      'hermes gateway ensure produced no result (exit 2): invalid choice. Update Hermes or check the profile, then retry.',
+      "Error invoking remote method 'hermes:connection:get-for': Error: Gateway incompatible (runtime_protocol). Use noone gateway status for recovery.",
+      'noone gateway ensure produced no result (exit 2): invalid choice. Update Hermes or check the profile, then retry.',
       'Invalid local gateway endpoint'
     ]) {
       closeSecondaryGateways()

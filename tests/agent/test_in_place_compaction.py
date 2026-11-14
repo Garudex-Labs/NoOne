@@ -60,7 +60,7 @@ def _seed(db, sid, title, n=8):
 class TestInPlaceCompaction:
     def test_in_place_keeps_same_session_id(self):
         """In-place mode: id unchanged, no child row, no rename, history kept."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         from agent.conversation_compression import compress_context
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -87,7 +87,7 @@ class TestInPlaceCompaction:
             assert row["end_reason"] is None
             assert row["title"] == "my-research"
             # DURABLE, NON-DESTRUCTIVE compaction (the core invariant, per
-            # Teknium's review): the LIVE context is the compacted set, but the
+            # The review): the LIVE context is the compacted set, but the
             # pre-compaction turns are PRESERVED on disk (active=0), not deleted
             # — searchable + recoverable under the SAME id. A resume reloads the
             # compacted set so compaction actually shrinks the live session and
@@ -125,7 +125,7 @@ class TestInPlaceCompaction:
 
     def test_in_place_alternation_preserved(self):
         """The compacted list must not introduce consecutive same-role messages."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         from agent.conversation_compression import compress_context
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -144,7 +144,7 @@ class TestInPlaceCompaction:
     def test_rotation_still_preflushes(self):
         """Rotation MUST pre-flush so current-turn messages survive in the
         preserved old (parent) session before it is ended (#47202)."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         from agent.conversation_compression import compress_context
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -167,7 +167,7 @@ class TestRotationFallbackWhenFlagOff:
         """Rotation is now the OPT-OUT fallback (default flipped to in-place in
         #38763). With in_place=False explicitly set, legacy rotation is
         unchanged — forks a renamed continuation session."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         from agent.conversation_compression import compress_context
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -216,7 +216,7 @@ class TestInPlaceAntiGrowthGuard:
     durably persisted the growth."""
 
     def test_in_place_refuses_growing_compression(self):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         from agent.conversation_compression import compress_context
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -256,7 +256,7 @@ class TestInPlaceAntiGrowthGuard:
 
     def test_in_place_salvages_near_break_even_growth(self):
         """Fat retained tool output + todo state should be salvaged and committed."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
         from agent.conversation_compression import compress_context
         from agent.model_metadata import estimate_messages_tokens_rough
 
@@ -312,14 +312,14 @@ class TestInPlaceAntiGrowthGuard:
 
 
 class TestCompactedTurnsStaySearchable:
-    """Teknium's review hinges on the pre-compaction transcript staying
+    """The review hinges on the pre-compaction transcript staying
     DISCOVERABLE after in-place compaction. Compaction-archived rows
     (active=0, compacted=1) must surface in session_search by default, while
     rewind/undo rows (active=0, compacted=0) must stay hidden. The two share
     the active flag but are distinguished by the compacted flag."""
 
     def test_compacted_turns_found_by_default_search(self):
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         with tempfile.TemporaryDirectory() as tmp:
             db = SessionDB(db_path=Path(tmp) / "t.db")
@@ -356,7 +356,7 @@ class TestCompactedTurnsStaySearchable:
     def test_rewound_turns_stay_hidden(self):
         """Rewind/undo (active=0, compacted=0) must NOT leak into default
         search — the distinction the compacted flag preserves."""
-        from hermes_state import SessionDB
+        from agent_state import SessionDB
 
         with tempfile.TemporaryDirectory() as tmp:
             db = SessionDB(db_path=Path(tmp) / "t.db")

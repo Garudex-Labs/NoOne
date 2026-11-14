@@ -1,7 +1,7 @@
 import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HermesConnection } from '@/global'
+import type { AgentConnection } from '@/global'
 import { installBrowserDesktopBridge } from '@/lib/browser-desktop-bridge'
 import { createClientSessionState } from '@/lib/chat-runtime'
 import { $sidebarShowArchived } from '@/store/layout'
@@ -156,9 +156,9 @@ describe('useBackgroundSync live-status poll with no session open', () => {
   // A profile picked on top of the shared primary socket (a Webapp tab's live pick, a global remote)
   // is a view of that socket: a request that names no profile is answered for the socket's own
   // profile, so the sidebar dot would show that profile's turns instead of the selected one's.
-  const sharedResearch = { profile: 'research', sharedPrimary: true } as HermesConnection
+  const sharedResearch = { profile: 'research', sharedPrimary: true } as AgentConnection
 
-  async function polledParams(connection: HermesConnection | null) {
+  async function polledParams(connection: AgentConnection | null) {
     $connection.set(connection)
     const request = vi.fn(async (_method: string, _params?: Record<string, unknown>) => ({ sessions: [] }))
     render('research', 'local', async () => undefined, request as typeof requestGateway)
@@ -193,7 +193,7 @@ describe('useBackgroundSync live-status poll with no session open', () => {
   })
 
   it('names no profile on a socket of the selected profile’s own', async () => {
-    expect(await polledParams({ profile: 'research' } as HermesConnection)).toEqual([{}])
+    expect(await polledParams({ profile: 'research' } as AgentConnection)).toEqual([{}])
     cleanup()
     expect(await polledParams(null)).toEqual([{}])
   })
@@ -239,8 +239,8 @@ describe('useBackgroundSync live-status poll with no session open', () => {
     // descriptor to an unflagged local one.
     const getConnection = vi.fn(async (profile?: string) =>
       profile === 'research'
-        ? ({ mode: 'local', profile: 'research', sharedPrimary: true } as HermesConnection)
-        : ({ mode: 'local', profile: 'default' } as HermesConnection)
+        ? ({ mode: 'local', profile: 'research', sharedPrimary: true } as AgentConnection)
+        : ({ mode: 'local', profile: 'default' } as AgentConnection)
     )
 
     beforeEach(() => {
@@ -270,7 +270,7 @@ describe('useBackgroundSync live-status poll with no session open', () => {
     })
 
     it('names no profile and asks main nothing on the selected profile’s own local descriptor', async () => {
-      expect(await polledParams({ mode: 'local', profile: 'research' } as HermesConnection)).toEqual([{}])
+      expect(await polledParams({ mode: 'local', profile: 'research' } as AgentConnection)).toEqual([{}])
       expect(getConnection).not.toHaveBeenCalled()
     })
   })

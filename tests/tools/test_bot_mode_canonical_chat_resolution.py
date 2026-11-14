@@ -24,7 +24,7 @@ mint on ambiguity. Post-#92129 the contract is name-as-identity:
 What is pinned here is the Python layer the desktop relies on. The desktop
 click/create flow itself (plugin.js), and group ROOM member-session lifecycle
 (#90005's original surface), live in Electron JS and are covered by
-apps/desktop/src/plugins/hermes-bots/canonical-chat-registry.test.ts; here we pin the DB/RPC algebra
+apps/desktop/src/plugins/bot-mode/canonical-chat-registry.test.ts; here we pin the DB/RPC algebra
 those flows depend on, including a Python re-enactment of the #90005 and
 #92692 shapes at the registry layer.
 """
@@ -35,13 +35,13 @@ import threading
 
 import pytest
 
-import tui_gateway.server as srv
+import agent_backend.server as srv
 
 CANON = "Bot Chat"
 
 
 # ---------------------------------------------------------------------------
-# Fixtures (style shared with tests/tui_gateway/test_profiles_list_canonical_session.py)
+# Fixtures (style shared with tests/agent_backend/test_profiles_list_canonical_session.py)
 # ---------------------------------------------------------------------------
 
 
@@ -51,7 +51,7 @@ def home(tmp_path, monkeypatch):
 
     ``session.list`` reaches the DB through the gateway's shared launch
     handle (``srv._get_db``), which is bound at process launch — so, like
-    tests/tui_gateway/test_session_hidden_rpc.py, we point it at the temp
+    tests/agent_backend/test_session_hidden_rpc.py, we point it at the temp
     DB directly. ``profiles.list`` reads each profile dir's state.db itself
     and only needs the env override.
     """
@@ -59,7 +59,7 @@ def home(tmp_path, monkeypatch):
     h.mkdir(parents=True)
     monkeypatch.setenv("HERMES_HOME", str(h))
 
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
 
     handles = []
 
@@ -78,7 +78,7 @@ def home(tmp_path, monkeypatch):
 
 
 def _db(home):
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
 
     return SessionDB(db_path=home / "state.db")
 
@@ -277,7 +277,7 @@ def _adopt_or_mint(home, sid, results, idx):
     """The adopt-before-mint creation algebra plugin.js runs, re-enacted in
     Python against the real SessionDB: lookup → create+claim → on conflict
     re-lookup and ADOPT. This is the #92692 racing-resolvers shape."""
-    from hermes_state import SessionDB
+    from agent_state import SessionDB
 
     db = SessionDB(db_path=home / "state.db")
     try:

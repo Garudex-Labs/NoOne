@@ -1,7 +1,6 @@
+import { Settings2 } from '@noone/ui/icons'
 import { cleanup, fireEvent, render, within } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
-
-import { Settings2 } from '@/lib/icons'
 
 import { OverlayNav, type OverlayNavGroup } from './overlay-split-layout'
 

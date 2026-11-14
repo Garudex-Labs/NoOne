@@ -2,7 +2,7 @@
 name: archify
 description: Validated interactive HTML diagrams, upstream-maintained.
 version: 2.17.0
-author: tt-a1i
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
@@ -20,7 +20,7 @@ metadata:
 > **Catalog stub.** This entry is maintained upstream at
 > [tt-a1i/archify](https://github.com/tt-a1i/archify): the project ships a
 > self-contained skill directory (`archify/`) with the Node CLI, schemas,
-> renderers, examples and references. `hermes skills install
+> renderers, examples and references. `noone skills install
 > official/creative/archify` pulls the current tree live from that repo
 > (quarantined and scanned like any hub install) — this directory holds only
 > the catalog metadata, so the vendored copy can never go stale.

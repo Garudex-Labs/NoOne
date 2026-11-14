@@ -48,14 +48,14 @@ def two_profiles(tmp_path, monkeypatch):
 
 
 def _session_in(home: Path) -> dict:
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
     from tools.browser_session import get_session_info
     from tools.browser_use_cli import _backend_cache_key
-    token = set_hermes_home_override(str(home))
+    token = set_agent_home_override(str(home))
     try:
         return get_session_info(_backend_cache_key("same-task"))
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def _pid(session: dict) -> int:
@@ -78,13 +78,13 @@ def test_profile_a_then_b_then_a_each_get_their_own_browser(two_profiles):
 
 
 def test_cleaning_up_one_profile_leaves_the_other_profiles_browser_running(two_profiles):
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     from tools.browser_launcher import get_browser
     from tools.browser_session_lifecycle import cleanup_profile_browsers
     a = _session_in(two_profiles["a"])
     b = _session_in(two_profiles["b"])
 
-    cleanup_profile_browsers(hermes_home_key(two_profiles["b"]))
+    cleanup_profile_browsers(agent_home_key(two_profiles["b"]))
 
     assert get_browser(b["launcher_key"]) is None
     assert get_browser(a["launcher_key"]) is not None

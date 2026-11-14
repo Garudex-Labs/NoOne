@@ -7,7 +7,7 @@ import { $sidebarAgentsGrouped, setSidebarAgentsGrouped } from '@/store/layout'
 import { $activeGatewayProfile, $profiles, $profileScope, ALL_PROFILES, setShowAllProfiles } from '@/store/profile'
 import { $currentCwd, $selectedStoredSessionId, $sessions, applyConfiguredDefaultProjectDir } from '@/store/session'
 import { deferred } from '@/test/deferred'
-import type { ProjectInfo } from '@/types/hermes'
+import type { ProjectInfo } from '@/types/agent-client'
 
 import { $projectScope, ALL_PROJECTS, exitProjectScope } from './project-scope'
 import {
@@ -70,7 +70,7 @@ vi.mock('@/lib/desktop-git', async importOriginal => ({
   desktopGit: vi.fn()
 }))
 
-vi.mock('@/hermes', () => ({
+vi.mock('@/agent-client', () => ({
   getHermesConfig: vi.fn(),
   getProfiles: vi.fn(),
   hermesApi: vi.fn(),
@@ -90,7 +90,7 @@ const gatewayAtom = gw.$gateway
 const git = await import('@/lib/desktop-git')
 const desktopGit = vi.mocked(git.desktopGit)
 
-const hermes = await import('@/hermes')
+const hermes = await import('@/agent-client')
 const getHermesConfig = vi.mocked(hermes.getHermesConfig)
 const notifications = await import('@/store/notifications')
 const notify = vi.mocked(notifications.notify)

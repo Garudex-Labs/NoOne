@@ -15,7 +15,7 @@ category: desktop
 docs_url: https://github.com/irfansofyana/hermes-blogwatcher/blob/1b6f32afc1a509437a9bc57a078bea99b3d69dab/README.md
 version: "0.2.0"
 screenshots:
-  - https://raw.githubusercontent.com/irfansofyana/hermes-blogwatcher/1b6f32afc1a509437a9bc57a078bea99b3d69dab/docs/screenshots/follow-hermes.png
+  - https://raw.githubusercontent.com/irfansofyana/hermes-blogwatcher/1b6f32afc1a509437a9bc57a078bea99b3d69dab/docs/screenshots/follow-agent.png
   - https://raw.githubusercontent.com/irfansofyana/hermes-blogwatcher/1b6f32afc1a509437a9bc57a078bea99b3d69dab/docs/screenshots/light.png
   - https://raw.githubusercontent.com/irfansofyana/hermes-blogwatcher/1b6f32afc1a509437a9bc57a078bea99b3d69dab/docs/screenshots/dark.png
 readme: true

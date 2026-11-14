@@ -3,7 +3,7 @@ import { expect, test } from 'vitest'
 
 import { type FixtureFrame, type FixtureSocket, listen, publicUrl, readyFrame, reply, shut } from '../test/ws-gateway-fixture'
 
-import { HermesGateway } from './client'
+import { AgentGateway } from './client'
 
 const controls = [
   { method: 'session.redirect', status: 'redirected' },
@@ -46,7 +46,7 @@ test.each(controls)('$method attaches to the current owner before fencing a busy
     })
     socket.send(readyFrame())
   })
-  const client = new HermesGateway()
+  const client = new AgentGateway()
   const url = publicUrl(server)
   const text = 'Keep the valid work; check café 🧭\nthen continue.'
 
@@ -114,7 +114,7 @@ test.each(controls.flatMap(control => [
     })
     socket.send(readyFrame({ session_authority: wire === 'canonical' }))
   })
-  const client = new HermesGateway()
+  const client = new AgentGateway()
 
   const params = { session_id: 'same', profile: 'alpha', text: 'Preserve this correction',
     ...(wire === 'canonical' ? { execution_generation: 7 } : {}) }

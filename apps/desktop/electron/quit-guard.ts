@@ -1,3 +1,4 @@
+import { appText } from '@noone/shared/application-identity'
 // Quitting with a turn in flight kills the backend mid-tool-call: the work is
 // lost, and anything the agent had half-written to disk stays half-written.
 // Renderers publish what they're running; the main process asks before it lets
@@ -125,7 +126,7 @@ export function quitPromptFor(
       .filter(line => line !== null)
       .join('\n')
       .trim(),
-    message: work.count === 1 ? 'Hermes is still working on 1 chat.' : `Hermes is still working on ${work.count} chats.`
+    message: work.count === 1 ? appText('{app_name} is still working on 1 chat.') : appText(`{app_name} is still working on ${work.count} chats.`)
   }
 }
 

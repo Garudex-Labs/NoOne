@@ -1,4 +1,5 @@
-import { isRecord } from '@hermes/shared/i18n'
+import { appText, withAppIdentity } from '@noone/shared/application-identity'
+import { isRecord } from '@noone/shared/i18n'
 import { atom } from 'nanostores'
 
 import { DEFAULT_LOCALE } from './languages'
@@ -22,7 +23,7 @@ function resolvePath(source: unknown, key: string): unknown {
 /** A string is returned as-is, a function is called with `args`, else `null`. */
 function render(value: unknown, args: unknown[]): null | string {
   if (typeof value === 'string') {
-    return value
+    return appText(value)
   }
 
   if (typeof value === 'function') {
@@ -74,7 +75,7 @@ export function getRuntimeI18nLocale(): Locale {
  *  packs) — for module-level code that reads whole copy blocks rather than
  *  one key. React should keep using `useI18n().t`. */
 export function runtimeTranslations(): Translations {
-  return resolveTranslations($runtimeLocale.get())
+  return withAppIdentity(resolveTranslations($runtimeLocale.get()))
 }
 
 export function translateNow(key: string, ...args: unknown[]): string {

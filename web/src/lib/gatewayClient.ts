@@ -1,9 +1,10 @@
+import { appText } from '@noone/shared/application-identity';
 /**
- * Browser WebSocket client for the tui_gateway JSON-RPC protocol.
+ * Browser WebSocket client for the agent_backend JSON-RPC protocol.
  *
  * Speaks the exact same newline-delimited JSON-RPC dialect that the Ink TUI
  * drives over stdio. The server-side transport abstraction
- * (tui_gateway/transport.py + ws.py) routes the same dispatcher's writes
+ * (agent_backend/transport.py + ws.py) routes the same dispatcher's writes
  * onto either stdout or a WebSocket depending on how the client connected.
  *
  *   const gw = new GatewayClient()
@@ -19,7 +20,7 @@ import {
   type ConnectionState,
   type GatewayEvent,
   type GatewayEventName,
-} from "@hermes/shared";
+} from "@noone/shared";
 
 import { HERMES_BASE_PATH, buildWsAuthParam } from "@/lib/api";
 import { maybeReloadForLoopbackWsAuthFailure } from "@/lib/dashboard-auth-reload";
@@ -48,7 +49,7 @@ export class GatewayClient extends JsonRpcGatewayClient {
     const authParam = token ? (["token", token] as const) : await buildWsAuthParam();
     if (!authParam[1]) {
       throw new Error(
-        "Session token not available — page must be served by the Hermes dashboard server",
+        appText("Session token not available — page must be served by the {app_name} dashboard server"),
       );
     }
 

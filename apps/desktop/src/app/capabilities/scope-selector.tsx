@@ -1,10 +1,12 @@
 import { useStore } from '@nanostores/react'
+import { appText } from '@noone/shared/application-identity'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 
+import { getProfiles, type ProfileScope, profileScopeKey } from '@/agent-client'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { DesktopRosterAgent } from '@/global'
-import { getProfiles, type ProfileScope, profileScopeKey } from '@/hermes'
+import { useAppName } from '@/hooks/use-app-name'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { activeGatewayConnectionId } from '@/store/gateway'
@@ -51,6 +53,7 @@ export function useCapabilityScope({
   fixedConnection?: string
   fixedProfile?: string
 }): CapabilityScope {
+  const appName = useAppName()
   const activeProfile = useStore($activeGatewayProfile)
   const [scopeOverride, setScopeOverride] = useState<null | string | { connectionId: string; profile: string }>(null)
 
@@ -126,10 +129,10 @@ export function useCapabilityScope({
 
     return (profilesData?.profiles ?? []).map(p => ({
       key: p.name,
-      label: p.is_default ? 'Hermes (default)' : p.name,
+      label: p.is_default ? appText('{app_name} (default)', appName) : p.name,
       value: p.name
     }))
-  }, [multiConnection, profilesData, rosterData])
+  }, [appName, multiConnection, profilesData, rosterData])
 
   // The selector's current value must match one option's value exactly. On the
   // roster path an ambient (non-override) scope is the active gateway's

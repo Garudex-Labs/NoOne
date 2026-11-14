@@ -18,7 +18,7 @@ from datetime import UTC
 def temp_home(tmp_path, monkeypatch):
     """Isolated HERMES_HOME so jobs.json doesn't touch the real store."""
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    # cron.jobs caches no home at import; get_hermes_home() reads the env live.
+    # cron.jobs caches no home at import; get_agent_home() reads the env live.
     yield tmp_path
 
 
@@ -346,7 +346,7 @@ def test_manual_claim_still_refuses_a_paused_job(temp_home):
 
 def test_fresh_claim_from_a_dead_same_host_owner_is_reclaimable(temp_home):
     """A claim younger than the TTL whose owner pid (same host) has exited is stale at once: a
-    ``hermes cron run`` killed mid-flight must not block the next manual run for the whole TTL
+    ``noone cron run`` killed mid-flight must not block the next manual run for the whole TTL
     with "already being fired". A live owner's fresh claim still blocks."""
     import os
     import socket

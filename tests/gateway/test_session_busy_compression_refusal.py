@@ -1,7 +1,7 @@
 """A rewind refused because another writer holds the conversation's compression lock says so.
 
 Main's busy text told the user to wait for a running ``/compress`` instead of pressing Stop
-(``tui_gateway/user_messages.py::busy_message``); the shared owner's refusal keeps its ``session_busy``
+(``agent_backend/user_messages.py::busy_message``); the shared owner's refusal keeps its ``session_busy``
 reason and names the lock in ``field`` so a client can pick that wording.
 """
 import pytest
@@ -44,7 +44,7 @@ async def test_rewind_under_a_held_compression_lock_names_the_lock(tmp_path, mon
 
 @pytest.mark.asyncio
 async def test_rewind_with_an_admitted_turn_stays_a_plain_busy_refusal(tmp_path, monkeypatch):
-    import hermes_state_runtime as rt
+    import agent_state_runtime as rt
 
     async def handle(event):
         return 'ok'
@@ -65,7 +65,7 @@ async def test_rewind_with_an_admitted_turn_stays_a_plain_busy_refusal(tmp_path,
 def test_authorize_reads_a_null_profile_as_this_owner():
     from types import SimpleNamespace
     from gateway.session_busy_controls import authorize
-    from hermes_state_runtime import RuntimeStoreError
+    from agent_state_runtime import RuntimeStoreError
 
     seen = []
     authority = SimpleNamespace(profile_id='/nonexistent/owner-home', authorize=lambda *a: seen.append(a))

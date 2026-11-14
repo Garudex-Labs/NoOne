@@ -31,11 +31,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-import hermes_cli.plugins as plugins_mod
+import agent_cli.plugins as plugins_mod
 from tools import transcription_tools
 
 
-PROMPT = "Hermes, Teknium, Nous Research, kanban"
+PROMPT = "Hermes, RAWx18, Garudex Labs, kanban"
 
 
 # ---------------------------------------------------------------------------
@@ -58,8 +58,8 @@ def _fake_hooks(monkeypatch, results):
         captured["kwargs"] = kw
         return list(results)
 
-    monkeypatch.setattr("hermes_cli.plugins.has_hook", lambda name: True)
-    monkeypatch.setattr("hermes_cli.plugins.invoke_hook", _invoke)
+    monkeypatch.setattr("agent_cli.plugins.has_hook", lambda name: True)
+    monkeypatch.setattr("agent_cli.plugins.invoke_hook", _invoke)
     return captured
 
 
@@ -70,8 +70,8 @@ def _no_hooks(monkeypatch):
             "invoke_hook must not be called when has_hook() is False"
         )
 
-    monkeypatch.setattr("hermes_cli.plugins.has_hook", lambda name: False)
-    monkeypatch.setattr("hermes_cli.plugins.invoke_hook", _boom)
+    monkeypatch.setattr("agent_cli.plugins.has_hook", lambda name: False)
+    monkeypatch.setattr("agent_cli.plugins.invoke_hook", _boom)
 
 
 def _dispatch_ctx(stt_config, provider):
@@ -527,7 +527,7 @@ def test_real_fixture_plugins_thread_prompt_in_registration_order(
     import os
     from pathlib import Path
 
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
 
     hermes_home = Path(os.environ["HERMES_HOME"])
     plugin_dir = hermes_home / "plugins" / "stt_vocab"

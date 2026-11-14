@@ -1,10 +1,10 @@
 """Hand the standalone backend's Group Chats to the gateway that owns the profile (WA-19).
 
-A native Desktop on a standalone ``hermes serve``/``hermes dashboard`` (no session authority) keeps
-its rooms in the root ``shared-state.db`` and drives them in that process (``tui_gateway``
+A native Desktop on a standalone ``noone serve``/``noone dashboard`` (no session authority) keeps
+its rooms in the root ``shared-state.db`` and drives them in that process (``agent_backend``
 route), while the gateway keeps its own in the profile's ``state.db`` (owner claim and epoch fence
 in the room insert's transaction). Once a gateway serves the profile, the standalone backend
-forwards ``groups.*`` to it (``tui_gateway/methods_groups_forward.py``); this module moves the rooms
+forwards ``groups.*`` to it (``agent_backend/methods_groups_forward.py``); this module moves the rooms
 that backend already hosts into the gateway's store so the one list shows them.
 
 Each room moves in two crash-safe steps, so it is driven by exactly one process:
@@ -26,7 +26,7 @@ never reads again. A crash between the steps is finished by the next start.
 ``shared-state.db`` is one root file with no profile column, so only the root home's gateway (the
 default profile, whose ``state.db`` sits beside it) imports. A standalone room that was not imported
 stays listed and driven by the standalone backend from every profile's view, and a named profile's
-view reaches the imported ones on the root gateway (``tui_gateway/methods_groups_forward.py``), so
+view reaches the imported ones on the root gateway (``agent_backend/methods_groups_forward.py``), so
 no view loses a room it showed before.
 
 The import runs when the gateway builds its room service (before ``ready``) and once more right
@@ -86,7 +86,8 @@ def _fenced_ids(source: Path, handoff_id: str) -> set[str]:
 
 
 def _ensure_handoff_table(conn) -> None:
-    conn.execute(f"CREATE TABLE IF NOT EXISTS {HANDOFF_TABLE} (room_id TEXT PRIMARY KEY, handed_at REAL NOT NULL)")
+    from agent_cli.database_migrations import initialize_database
+    initialize_database(conn, "hosted_room_handoff")
 
 
 def _record_handoff(source: Path, room_ids: set[str], now: float) -> None:
@@ -127,9 +128,10 @@ def import_standalone_rooms(target_db: Path, *, runtime_epoch: int | None = None
     import sqlite3
     from gateway.hosted_rooms import HostedRoomError, _transaction, local_authority_gateway_id
     from gateway.hosted_rooms_common import clock
-    from gateway.hosted_rooms_legacy_import import _copy_rows
+    from gateway.hosted_room_copy import copy_room_rows
     from gateway.owner_identity import host_owner_subject
-    from hermes_state_runtime import RuntimeStoreError, _epoch
+    from agent_state_runtime import RuntimeStoreError, _epoch
+    from agent_cli.database_migrations import UnsupportedDatabaseSchema
 
     source = source_for(target_db)
     if source is None:
@@ -148,11 +150,11 @@ def import_standalone_rooms(target_db: Path, *, runtime_epoch: int | None = None
             known = {str(row[0]) for row in conn.execute(
                 "SELECT room_id FROM hosted_rooms UNION SELECT room_id FROM hosted_room_retired_ids")}
             missing = frozenset(fenced - known)
-            copied = _copy_rows(conn, source, only=missing) if missing else 0
+            copied = copy_room_rows(conn, source, only=missing) if missing else 0
             for room_id in sorted(missing):
                 _claim(conn, room_id, local_id, handoff_id, owner, now)
         _record_handoff(source, fenced, now)
-    except (OSError, sqlite3.Error, HostedRoomError, RuntimeStoreError) as exc:
+    except (OSError, sqlite3.Error, HostedRoomError, RuntimeStoreError, UnsupportedDatabaseSchema) as exc:
         logger.warning("hosted rooms: could not import the standalone Group Chats from %s (%s); "
                        "will retry on the next start", source, exc)
         return 0

@@ -1,9 +1,9 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 
 import { MarkdownTextContent } from '@/components/assistant-ui/markdown-text'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { Loader } from '@/components/ui/loader'
@@ -128,7 +128,7 @@ export function SessionImportView({ owner, onClose, onOpenSession }: SessionImpo
           size="icon-titlebar"
           variant="ghost"
         >
-          <Codicon name="refresh" />
+          <AppIcon name="refresh" />
         </Button>
       }
     >
@@ -138,11 +138,11 @@ export function SessionImportView({ owner, onClose, onOpenSession }: SessionImpo
           <p className="mt-2 text-sm text-(--ui-text-secondary)">{copy.subtitle}</p>
           <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-(--ui-text-secondary)">
             <span className="inline-flex items-center gap-2">
-              <Codicon name="device-desktop" />
+              <AppIcon name="device-desktop" />
               {copy.readingFrom} {host ?? copy.connectedComputer}
             </span>
             <span className="inline-flex items-center gap-2">
-              <Codicon name="account" />
+              <AppIcon name="account" />
               {copy.destination} {owner.targetProfile ?? owner.profile}
             </span>
           </div>
@@ -223,7 +223,7 @@ export function SessionImportView({ owner, onClose, onOpenSession }: SessionImpo
                       type="button"
                     >
                       <span className="mb-2 flex items-center gap-2 text-xs text-(--ui-text-secondary)">
-                        <Codicon name="comment-discussion" />
+                        <AppIcon name="comment-discussion" />
                         {row.label}
                         <span className="ms-auto tabular-nums">
                           {row.turn_count} {copy.messages}
@@ -302,7 +302,7 @@ export function SessionImportView({ owner, onClose, onOpenSession }: SessionImpo
                   </p>
                   <Button disabled={pending || !preview.data || preview.isError} onClick={() => void continueSession()}>
                     {pending ? copy.importing : preview.data?.already_imported ? copy.open : copy.continue}
-                    <Codicon name="arrow-right" />
+                    <AppIcon name="arrow-right" />
                   </Button>
                   {error && (
                     <div className="w-full text-sm text-destructive" role="alert">

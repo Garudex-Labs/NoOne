@@ -1,15 +1,15 @@
-import { compactNumber } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { compactNumber } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
+import { AlertCircle, CheckCircle2 } from '@noone/ui/icons'
 import { Fragment, type ReactNode, useEffect, useMemo, useState } from 'react'
 
 import { useElapsedSeconds } from '@/components/chat/activity-timer'
 import { ActivityTimerText } from '@/components/chat/activity-timer-text'
 import { usePaneVisible } from '@/components/pane-shell/pane-visibility'
-import { Codicon } from '@/components/ui/codicon'
 import { FadeText } from '@/components/ui/fade-text'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { type Translations, useI18n } from '@/i18n'
-import { AlertCircle, CheckCircle2 } from '@/lib/icons'
 import { useEnterAnimation } from '@/lib/use-enter-animation'
 import { cn } from '@/lib/utils'
 import { $activeSessionId } from '@/store/session'
@@ -240,7 +240,7 @@ function SubagentTree({ tree }: { tree: SubagentNode[] }) {
   if (tree.length === 0) {
     return (
       <div className="grid place-items-center gap-3 py-12 text-center">
-        <Codicon className="text-muted-foreground/60" name="hubot" size="1.5rem" />
+        <AppIcon className="text-muted-foreground/60" name="hubot" size="1.5rem" />
         <p className="text-sm font-medium text-foreground/90">{t.agents.emptyTitle}</p>
         <p className="max-w-md text-xs leading-relaxed text-muted-foreground/75">{t.agents.emptyDesc}</p>
       </div>

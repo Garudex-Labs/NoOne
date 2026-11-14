@@ -40,14 +40,14 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    from hermes_cli.observability.shared_metrics import SharedMetricsStore
-    from hermes_cli.observability.shared_metrics_send_config import (
+    from agent_cli.observability.shared_metrics import SharedMetricsStore
+    from agent_cli.observability.shared_metrics_send_config import (
         resolve_send_config,
     )
-    from hermes_cli.observability.shared_metrics_sender import SharedMetricsSender
+    from agent_cli.observability.shared_metrics_sender import SharedMetricsSender
 
     # Resolve through the real config path so this exercises what a user gets.
-    import hermes_yaml as yaml
+    import agent_yaml as yaml
 
     resolved = resolve_send_config(
         yaml.safe_load((scratch / "config.yaml").read_text(encoding="utf-8-sig"))
@@ -73,10 +73,10 @@ def main() -> int:
 
     # Open the consent window before the period, confirm it after — exactly
     # what the runtime reconciler does across two days of hook fires.
-    from hermes_cli.observability.shared_metrics_sender import (
+    from agent_cli.observability.shared_metrics_sender import (
         reconcile_send_consent,
     )
-    from hermes_cli.sqlite_util import write_txn
+    from agent_cli.sqlite_util import write_txn
 
     with store._connection() as connection:
         with write_txn(connection):

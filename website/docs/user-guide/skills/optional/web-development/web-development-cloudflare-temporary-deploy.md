@@ -1,40 +1,48 @@
 ---
 title: "Cloudflare Temporary Deploy — Deploy a Worker live, no account, via wrangler --temporary"
-sidebar_label: "Cloudflare Temporary Deploy"
+sidebarTitle: "Cloudflare Temporary Deploy"
 description: "Deploy a Worker live, no account, via wrangler --temporary"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Cloudflare Temporary Deploy
+# Cloudflare Temporary Deploy {#cloudflare-temporary-deploy}
 
 Deploy a Worker live, no account, via wrangler --temporary.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/web-development/cloudflare-temporary-deploy` |
+| Source | Optional — install with `noone skills install official/web-development/cloudflare-temporary-deploy` |
 | Path | `optional-skills/web-development/cloudflare-temporary-deploy` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `cloudflare`, `workers`, `wrangler`, `deploy`, `temporary`, `agent`, `serverless`, `web-development` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Cloudflare Temporary Deploy Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Cloudflare Temporary Deploy Skill {#cloudflare-temporary-deploy-skill}
 
 Deploy a Cloudflare Worker to a live `workers.dev` URL with zero account setup, using `wrangler deploy --temporary`. Cloudflare provisions a throwaway account, deploys, and prints a claim URL valid for 60 minutes; unclaimed accounts auto-delete. This gives an agent a tight write → deploy → verify loop without any OAuth, signup, or token copy-paste.
 
 This skill does NOT cover production deploys (use `wrangler login` + a permanent account for those), nor non-Worker Cloudflare products beyond the temporary-account limits below.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Load this skill when the user wants to:
 
@@ -43,13 +51,13 @@ Load this skill when the user wants to:
 - **Prototype or evaluate Workers** quickly with a throwaway, claimable target
 - **Build a self-verifying deploy loop** — deploy, `curl` the live URL, confirm output matches the code, redeploy
 
-## When NOT to Use
+## When NOT to Use {#when-not-to-use}
 
 - **Production or CI/CD** → use a permanent account (`wrangler login` or `CLOUDFLARE_API_TOKEN`). `--temporary` errors out if any credential is present.
 - **Wrangler is already authenticated** → `--temporary` returns an error by design. Run `wrangler logout` first only if the user explicitly wants a throwaway deploy.
 - **Long-lived hosting** → temporary deployments are deleted after 60 minutes unless claimed.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - **Wrangler 4.102.0 or later.** This is the version that introduced `--temporary`. Earlier versions do not have it. Verify with `npx wrangler@latest --version`.
 - **Node 18+ / npm** (or `npx`, `yarn`, `pnpm`). No global install needed — `npx wrangler@latest` works.
@@ -57,7 +65,7 @@ Load this skill when the user wants to:
 - Network egress to `cloudflare.com` and `workers.dev`.
 - Using `--temporary` accepts Cloudflare's Terms of Service and Privacy Policy.
 
-## How to Run
+## How to Run {#how-to-run}
 
 Use the `terminal` tool for every step. Always pin the version (`wrangler@latest` or `wrangler@4.102.0` or newer) so you don't accidentally run an old global wrangler that lacks the flag.
 
@@ -102,7 +110,7 @@ Use the `terminal` tool for every step. Always pin the version (`wrangler@latest
 
 6. **Hand the claim URL to the user.** Tell them: open it within 60 minutes to keep the deployment and any resources; if they don't claim it, everything auto-deletes. Treat the claim URL as a secret — it grants ownership of the account.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | Step | Command |
 |---|---|
@@ -112,7 +120,7 @@ Use the `terminal` tool for every step. Always pin the version (`wrangler@latest
 | Verify live | `curl -sS <live_url>` |
 | Clear cached temp account | `npx wrangler@latest logout` |
 
-### Temporary account product limits
+### Temporary account product limits {#temporary-account-product-limits}
 
 | Product | Limit on a temporary account |
 |---|---|
@@ -125,7 +133,7 @@ Use the `terminal` tool for every step. Always pin the version (`wrangler@latest
 | Queues | Up to 10 |
 | SSL/TLS certs | Allowed |
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - **`--temporary` is not in `wrangler deploy --help` and is not a global flag.** It is intentionally hidden and surfaced dynamically: when an unauthenticated `wrangler deploy` fails, Wrangler prints "rerun with `--temporary`". Don't conclude the flag is missing just because `--help` omits it — check the version instead.
 - **Old global wrangler.** A stale globally-installed `wrangler` (`< 4.102.0`) silently lacks the flag. Always invoke `npx wrangler@latest` (or a pinned `>=4.102.0`) so you control the version.
@@ -135,7 +143,7 @@ Use the `terminal` tool for every step. Always pin the version (`wrangler@latest
 - **`curl` may briefly serve the old body after a redeploy.** `workers.dev` has a short edge cache; the `(reused)` line plus a new `Current Version ID` confirm the deploy succeeded even if `curl` shows stale content for a few seconds. Re-curl, or add a cache-busting query string, before concluding a redeploy failed.
 - **Don't log the claim URL into shared transcripts as "just a link."** It is credential-equivalent.
 
-## Verification
+## Verification {#verification}
 
 - `npx wrangler@latest --version` returns `>= 4.102.0`.
 - `npx wrangler@latest deploy --temporary` prints a `workers.dev` live URL and a `claim-preview?claimToken=` claim URL.

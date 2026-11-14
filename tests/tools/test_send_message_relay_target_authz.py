@@ -594,30 +594,30 @@ def test_nameless_importerror_refuses(monkeypatch):
     assert smt._authorize_relay_target("discord", "999") is not None
 
 
-def test_session_attestation_does_not_invent_a_matrix_room_prefix(monkeypatch):
+def test_session_attestation_does_not_invent_a_colon_address_prefix(monkeypatch):
     """Round 4, blocker 2 — the attestation set must not FABRICATE ids.
 
     `_session_ids` split every id on the first colon to recover "chat" from
-    "chat:thread". Matrix room ids contain a colon natively
-    (`!room:server.org`), so the split attested a bare `!room` that no session
+    "chat:thread". Opaque channel ids contain a colon natively
+    (`room:tenant`), so the split attested a bare `room` that no session
     ever used — the guard vouching for a destination on its own invention.
     """
     import gateway.channel_directory as cd
     import gateway.relay as gr
     import gateway.relay.egress as eg
 
-    monkeypatch.setattr(gr, "relay_fronted_platforms", lambda: {"matrix"})
-    # A Matrix room with NO thread: the colon is part of the address itself.
+    monkeypatch.setattr(gr, "relay_fronted_platforms", lambda: {"custom_chat"})
+    # An opaque channel address with NO thread: the colon is part of the address itself.
     monkeypatch.setattr(
         cd,
         "_build_from_sessions",
-        lambda p: [{"id": "!owned:server.org", "thread_id": None}],
+        lambda p: [{"id": "owned:tenant", "thread_id": None}],
     )
 
     # The real session id is still attested...
-    assert eg.authorize_relay_target("matrix", "!owned:server.org") is None
+    assert eg.authorize_relay_target("custom_chat", "owned:tenant") is None
     # ...but the invented prefix is not.
-    assert eg.authorize_relay_target("matrix", "!owned") is not None
+    assert eg.authorize_relay_target("custom_chat", "owned") is not None
 
 
 def test_session_attestation_still_recovers_a_slack_thread_parent(monkeypatch):
@@ -664,26 +664,26 @@ def test_egress_module_own_import_boundary_fails_closed(monkeypatch):
         eg._relay_fronted()
 
 
-def test_matrix_thread_parent_is_recovered_without_splitting_the_room_id(monkeypatch):
+def test_colon_address_thread_parent_is_recovered_without_splitting_the_address(monkeypatch):
     """The case the allow-list could never have handled correctly.
 
-    A Matrix room id contains a colon AND the session can be thread-qualified:
-    `!room:server.org:$thread`. Splitting on the FIRST colon yields `!room`
+    An opaque channel id contains a colon AND the session can be thread-qualified:
+    `room:tenant:thread`. Splitting on the FIRST colon yields `room`
     (invented); using the structured `thread_id` yields the real room.
     """
     import gateway.channel_directory as cd
     import gateway.relay as gr
     import gateway.relay.egress as eg
 
-    monkeypatch.setattr(gr, "relay_fronted_platforms", lambda: {"matrix"})
+    monkeypatch.setattr(gr, "relay_fronted_platforms", lambda: {"custom_chat"})
     monkeypatch.setattr(
         cd,
         "_build_from_sessions",
-        lambda p: [{"id": "!room:server.org:$thr", "thread_id": "$thr"}],
+        lambda p: [{"id": "room:tenant:thread", "thread_id": "thread"}],
     )
 
-    assert eg.authorize_relay_target("matrix", "!room:server.org") is None
-    assert eg.authorize_relay_target("matrix", "!room") is not None
+    assert eg.authorize_relay_target("custom_chat", "room:tenant") is None
+    assert eg.authorize_relay_target("custom_chat", "room") is not None
 
 
 # ── round 5 ────────────────────────────────────────────────────────────────

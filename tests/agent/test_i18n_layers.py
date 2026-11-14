@@ -4,11 +4,11 @@ manifest loaded through the real discovery path — no loader mocks."""
 
 from __future__ import annotations
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 import pytest
 
 from agent import i18n, i18n_layers
-from hermes_cli.plugins import PluginManager
+from agent_cli.plugins import PluginManager
 
 # A bundled key every test can lean on (approval prompts ship in every locale).
 _KEY = "approval.denied"
@@ -30,7 +30,7 @@ def clean_layers():
 @pytest.fixture
 def home(tmp_path, monkeypatch, clean_layers):
     """A temp HERMES_HOME with no plugins and an empty bundled plugin dir."""
-    from hermes_cli import plugins as plugins_mod
+    from agent_cli import plugins as plugins_mod
 
     home = tmp_path / "home"
     (home / "locales").mkdir(parents=True)
@@ -94,7 +94,7 @@ def test_overlay_only_language_is_supported_and_falls_back_to_english(home):
 
 def test_overlay_is_profile_scoped_across_two_homes(tmp_path, monkeypatch, clean_layers):
     """Home A overlays de; home B does not. A → B → A must never serve A's overlay to B or B's miss to A."""
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from agent_constants import reset_agent_home_override, set_agent_home_override
 
     home_a, home_b = tmp_path / "a", tmp_path / "b"
     (home_a / "locales").mkdir(parents=True)
@@ -105,12 +105,12 @@ def test_overlay_is_profile_scoped_across_two_homes(tmp_path, monkeypatch, clean
     bundled_de = i18n_layers.parse_locale_file(i18n._locales_dir() / "de.yaml")[_KEY]
 
     assert i18n.t(_KEY, lang="de") == "Nur A"
-    token = set_hermes_home_override(home_b)
+    token = set_agent_home_override(home_b)
     try:
         assert i18n.t(_KEY, lang="de") == bundled_de
         assert "eo" not in i18n.supported_languages()
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
     assert i18n.t(_KEY, lang="de") == "Nur A"
 
 
@@ -191,14 +191,14 @@ def test_later_pack_wins_over_earlier_pack(home):
 
 
 def test_register_locale_accepts_dicts_and_rejects_bad_ids(home):
-    from hermes_cli.plugins import PluginContext
-    from hermes_cli.plugins_manifest import PluginManifest
+    from agent_cli.plugins import PluginContext
+    from agent_cli.plugins_manifest import PluginManifest
 
     manager = PluginManager()
     ctx = PluginContext(PluginManifest(name="inline-pack", source="user", path=str(home)), manager)
-    handle = ctx.register_locale("PT_BR", {"approval": {"denied": "Título"}}, endonym="Português (Brasil)")
-    assert handle.key == "pt-br.core"
-    assert i18n.t(_KEY, lang="pt-BR") == "Título"  # the supplied id beats the pt-br → pt alias
+    handle = ctx.register_locale("HI_IN", {"approval": {"denied": "क्षेत्रीय पाठ"}}, endonym="हिन्दी (भारत)")
+    assert handle.key == "hi-in.core"
+    assert i18n.t(_KEY, lang="hi-IN") == "क्षेत्रीय पाठ"  # the supplied id beats the hi-in → hi alias
     with pytest.raises(ValueError):
         ctx.register_locale("not a lang", {"a": "b"})
     with pytest.raises(ValueError):

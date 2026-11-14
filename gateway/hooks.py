@@ -14,25 +14,25 @@ import threading
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
-from hermes_cli.config import get_hermes_home
-from hermes_cli.plugin_isolation import import_user_code
-from hermes_constants import hermes_home_key
+from agent_cli.config import get_agent_home
+from agent_cli.plugin_isolation import import_user_code
+from agent_constants import agent_home_key
 
 
-HOOKS_DIR = get_hermes_home() / "hooks"
+HOOKS_DIR = get_agent_home() / "hooks"
 _HOOKS_DIR_AT_IMPORT = HOOKS_DIR
 
 
 def _resolve_hooks_dir() -> Path:
     """Active profile's hooks dir at call time: the patched ``HOOKS_DIR`` when a test changed it,
-    else ``get_hermes_home()/hooks``. The import-time constant is the LAUNCH profile's; under
+    else ``get_agent_home()/hooks``. The import-time constant is the LAUNCH profile's; under
     ``gateway.multiplex_profiles`` every served profile has its own ``hooks/``, and a registry
     loaded from the launch home would run the default profile's handlers (arbitrary Python) on
     every other profile's messages, responses and user ids."""
     configured = Path(HOOKS_DIR)
-    return configured if configured != _HOOKS_DIR_AT_IMPORT else get_hermes_home() / "hooks"
+    return configured if configured != _HOOKS_DIR_AT_IMPORT else get_agent_home() / "hooks"
 
 
 def _skip(name: str, reason: str) -> None:
@@ -131,7 +131,7 @@ class ProfileHookRegistries:
 
     The gateway holds ONE of these. Every hook emit already runs inside the routed profile's
     ``_profile_runtime_scope`` (message handlers, /new, turn wiring), so resolving the registry by
-    ``get_hermes_home()`` there gives each profile its own ``hooks/`` and keeps the default
+    ``get_agent_home()`` there gives each profile its own ``hooks/`` and keeps the default
     profile's handlers from seeing other profiles' messages. Each home's registry is loaded on its
     first emit, i.e. inside that profile's scope (handler imports see its HERMES_HOME); multiplexing off
     means a single entry for the launch home, i.e. exactly the old behaviour.
@@ -142,7 +142,7 @@ class ProfileHookRegistries:
         self._lock = threading.Lock()
 
     def _active(self) -> HookRegistry:
-        key = hermes_home_key(get_hermes_home())
+        key = agent_home_key(get_agent_home())
         registry = self._by_home.get(key)
         if registry is None:
             with self._lock:

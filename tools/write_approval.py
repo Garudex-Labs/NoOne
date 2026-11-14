@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from utils import atomic_json_write
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ def write_approval_enabled(subsystem: str) -> bool:
     if subsystem not in _SUBSYSTEMS:
         return False
     try:
-        from hermes_cli.config import load_config, cfg_get
+        from agent_cli.config import load_config, cfg_get
         return _normalize_enabled(cfg_get(load_config(), subsystem, CONFIG_KEY, default=False))
     except Exception:
         return False
@@ -63,7 +63,7 @@ def _normalize_enabled(value: Any) -> bool:
 # --- Pending store (file-backed) ---
 
 def _pending_path(subsystem: str, pending_id: str) -> Path:
-    return get_hermes_home() / "pending" / subsystem / f"{pending_id}.json"
+    return get_agent_home() / "pending" / subsystem / f"{pending_id}.json"
 
 
 def _pending_files(subsystem: str) -> list:
@@ -223,7 +223,7 @@ def _prompt_inline_memory_approval(summary: str, detail: str) -> Optional[bool]:
     prompt_toolkit; silent deny in gateway sessions) and turns callback errors into a deny, whereas
     here a missing channel or failed prompt must stage instead.
 
-    ``hermes chat -q`` (and so every kanban worker), cron and unattended platforms can register a callback too,
+    ``noone chat -q`` (and so every kanban worker), cron and unattended platforms can register a callback too,
     but nobody answers it: stage at once instead of waiting the approval timeout. See #15216.
     """
     from tools.approval_context import _no_user_can_answer

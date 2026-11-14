@@ -33,7 +33,7 @@ def _discovery_connect_concurrency() -> int:
     """``mcp.discovery_concurrency`` from config (0 = unlimited); a non-integer or negative value
     warns and falls back to the default rather than silently running unbounded."""
     try:
-        from hermes_cli.config import load_config
+        from agent_cli.config import load_config
         raw = (load_config().get("mcp") or {}).get("discovery_concurrency", _DISCOVERY_CONNECT_CONCURRENCY)
     except Exception:
         return _DISCOVERY_CONNECT_CONCURRENCY
@@ -112,14 +112,14 @@ def _owner_secret_mapping(home: Path) -> dict[str, str]:
     + external sources only. A source that did not fully hydrate is retried at most once per
     interval per home: every retry is a helper subprocess, and connect/reconnect loops are tight."""
     from agent.secret_scope import _is_process_home, build_profile_secret_scope
-    from hermes_cli import env_loader
+    from agent_cli import env_loader
     key = str(home.resolve())
     if time.monotonic() >= _hydrate_retry_after.get(key, 0.0):
         env_loader.hydrate_profile_secret_sources(home)
         if key not in env_loader._APPLIED_HOMES:
             _hydrate_retry_after[key] = time.monotonic() + _HYDRATE_RETRY_INTERVAL_SEC
     if _is_process_home(home):
-        from tui_gateway.launch_profile_policy import launch_secret_scope
+        from agent_backend.launch_profile_policy import launch_secret_scope
         return launch_secret_scope(home)
     return build_profile_secret_scope(home)
 

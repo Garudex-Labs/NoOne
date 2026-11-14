@@ -1,43 +1,51 @@
 ---
 title: "Anatomy — Explain an idea as an interactive isometric machine figure"
-sidebar_label: "Anatomy"
+sidebarTitle: "Anatomy"
 description: "Explain an idea as an interactive isometric machine figure"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Anatomy
+# Anatomy {#anatomy}
 
 Explain an idea as an interactive isometric machine figure.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/anatomy` |
+| Source | Optional — install with `noone skills install official/creative/anatomy` |
 | Path | `optional-skills/creative/anatomy` |
 | Version | `1.0.0` |
-| Author | Ryan (wheresryan22), ported to Hermes by Nous Research |
+| Author | Ryan (wheresryan22), ported to Hermes by Garudex Labs |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `isometric`, `svg`, `webgl`, `3d`, `diagram`, `explainer`, `illustration`, `docs`, `html`, `react` |
 | Related skills | [`concept-diagrams`](../../optional/creative/creative-concept-diagrams.md), [`system-atlas`](../../optional/creative/creative-system-atlas.md), [`architecture-diagram`](../../bundled/creative/creative-architecture-diagram.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Anatomy
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Anatomy {#anatomy-1}
 
 This skill builds figures that work like a small instrument on a bench: a heavy base on feet, rails with tick rulers, a carriage on bushings, knurled knobs, coil springs, a dial gauge whose needle moves, and screws drawn as tiny dots. The reader understands the idea because they recognise the machine. Every number the figure shows comes from the same model that moves its parts.
 
 Output is a standalone HTML page (SVG plus optional WebGL layers), a lone `.svg`, or React/Next.js components. The kit uses only Node built-ins, so there is nothing to `npm install`.
 
-## Running it in Hermes
+## Running it in {{app-name}} {#running-it-in-hermes}
 
-**Skill directory.** Hermes expands `${HERMES_SKILL_DIR}` to this skill's installed directory. Shell variables don't carry over between terminal calls, so repeat the assignment in every call that uses it:
+**Skill directory.** {{app-name}} expands `${HERMES_SKILL_DIR}` to this skill's installed directory. Shell variables don't carry over between terminal calls, so repeat the assignment in every call that uses it:
 
 ```bash
 SKILL_DIR="${HERMES_SKILL_DIR}"
@@ -54,13 +62,13 @@ cp -r "$SKILL_DIR/examples/dial-indicator" "$WORK/figures/"
 cd "$WORK/figures/dial-indicator" && node build.mjs && node build.mjs --light
 ```
 
-Start a new figure by copying the closest example into `$WORK/figures/<name>/` and renaming it. Leaving the installed skill untouched keeps `hermes skills update` from flagging it as locally modified.
+Start a new figure by copying the closest example into `$WORK/figures/<name>/` and renaming it. Leaving the installed skill untouched keeps `noone skills update` from flagging it as locally modified.
 
 **The examples ship as source only.** Upstream's built pages are 9 MB of generated HTML. Build an example (as above) to open or capture it, since it takes a few seconds.
 
 **Looking at your work.** The upstream workflow says "read every PNG". In Hermes that means `vision_analyze` on each capture, and the 4× close-ups use its `region` crop on a high-DPR capture or a `--zoom` capture. Ask specific questions ("does the pipe at the flange end on the flange face?"), not "does this look good".
 
-**Browser.** The capture, drive, line-end and 3D checks start a headless Chrome over a loopback DevTools port. They use `CHROME_PATH` if set, then a Playwright headless shell if one is installed (`chromium_headless_shell-*` in the Playwright cache, e.g. from `npx playwright install chromium`), then a system Chrome or Chromium. Prefer the headless shell: it renders the WebGL layers through SwiftShader and makes no outbound connections. A full desktop Chrome opens background connections to Google services even with a throwaway profile, and it fails to start ("Socket path too long", then "Chrome did not start") when `TMPDIR` is a long path, as Hermes' per-profile scratch dir can be. If you must use one, set `TMPDIR` to a short directory for that command. Building a figure needs no browser at all.
+**Browser.** The capture, drive, line-end and 3D checks start a headless Chrome over a loopback DevTools port. They use `CHROME_PATH` if set, then a Playwright headless shell if one is installed (`chromium_headless_shell-*` in the Playwright cache, e.g. from `npx playwright install chromium`), then a system Chrome or Chromium. Prefer the headless shell: it renders the WebGL layers through SwiftShader and makes no outbound connections. A full desktop Chrome opens background connections to Google services even with a throwaway profile, and it fails to start ("Socket path too long", then "Chrome did not start") when `TMPDIR` is a long path, as {{app-name}}' per-profile scratch dir can be. If you must use one, set `TMPDIR` to a short directory for that command. Building a figure needs no browser at all.
 
 **Long runs.** `node build.mjs --audit` takes about two minutes on a dense Hero, and a full 3D orbit audit takes 15 to 20 minutes for 30 parts. Run those with `terminal(background=true, notify=true)` and keep working on something else.
 
@@ -68,7 +76,7 @@ Start a new figure by copying the closest example into `$WORK/figures/<name>/` a
 
 **Delivering.** Hand over the absolute path of the built HTML (both themes) plus the PNG captures you verified. On a messaging platform, attach the desktop and phone PNGs, since a chat can't run the page.
 
-## The examples
+## The examples {#the-examples}
 
 Open the closest one before you start. Each framework-free example builds with `node build.mjs` in its directory; add `--light` for the light theme.
 
@@ -83,7 +91,7 @@ Open the closest one before you start. Each framework-free example builds with `
 
 The test rig sets the quality bar for the drawing itself. The Raptor sets the bar for shader work: a WebGL effect has to match its world-space, no-pop, seamless rendering.
 
-## The one idea that matters
+## The one idea that matters {#the-one-idea-that-matters}
 
 **The object is the explanation.** Don't draw boxes, arrows and labels. Invent a real, well-made physical thing whose working *is* the concept. Here is how earlier figures mapped:
 
@@ -110,7 +118,7 @@ The fix for both is the same: a recognisable machine, built from many small, pre
 - **Purposeful, never noise.** Detail comes from parts that belong to the mechanism. Each one sits on another part, ends on an edge, and fades rather than stops.
 - **Check it last.** Before you finish, zoom to 4× (over the subject and mechanism for a Figure, the whole drawing for a Hero or an Epic) and add the real parts that are missing wherever a region is plain.
 
-## Workflow
+## Workflow {#workflow}
 
 Work in this order. Write the concept and the parts list before any geometry. Most of the quality is decided there.
 
@@ -135,7 +143,7 @@ Work in this order. Write the concept and the parts list before any geometry. Mo
    - **Shaders:** a contact sheet slowed with `["slow", 0.05]` across every transition; nothing pops, no colour switch, edges read 0. In light, also log ink per frame through each transition (it must follow the light monotonically) and crop where the ink meets strokes at 8–16× (`references/verify.md`, "Light-theme shaders").
    - Put your PNG next to the examples and ask: is it instantly a real object, rich in small parts with volume, with every line ending on something? Is it highly detailed at 1× and still rewarding at 4×, with no bare face or empty corner? Iterate until yes. Checklist: `references/verify.md`.
 
-## Setup
+## Setup {#setup}
 
 The kit is in `kit/`:
 
@@ -159,10 +167,10 @@ The kit is in `kit/`:
 
 Pick the path that fits the project:
 
-- **Standalone HTML, a static SVG, a blog post or any non-React site.** Write a Node build script like `examples/dial-indicator/build.mjs` in the workspace laid out under "Running it in Hermes". It imports `kit/iso-kit.mjs`, assembles strings with `solidSvg`, `lineSvg`, `dotsSvg`, `wireSvg` and `faceTextSvg`, wraps them with `figureSvg` and `plateHtml`, and writes the page with `pageHtml({ script: kitScript() + live })`, or `kitScript() + glScript() + live` when it has a shader. For a lone `.svg` file use `figureSvg({ standalone: "dark" | "light" })`, which embeds the styles.
+- **Standalone HTML, a static SVG, a blog post or any non-React site.** Write a Node build script like `examples/dial-indicator/build.mjs` in the workspace laid out under "Running it in {{app-name}}". It imports `kit/iso-kit.mjs`, assembles strings with `solidSvg`, `lineSvg`, `dotsSvg`, `wireSvg` and `faceTextSvg`, wraps them with `figureSvg` and `plateHtml`, and writes the page with `pageHtml({ script: kitScript() + live })`, or `kitScript() + glScript() + live` when it has a shader. For a lone `.svg` file use `figureSvg({ standalone: "dark" | "light" })`, which embeds the styles.
 - **React or Next.js.** Copy `kit/` into the project (for example `components/iso/`). Keep geometry in plain `.ts` modules, build the static art in a server component with the `draw.tsx` components, and pass it as element props to one `"use client"` live component that moves things. `references/react.md` explains the split and a trap with large pages.
 
-## Craft rules (short form)
+## Craft rules (short form) {#craft-rules-short-form}
 
 These are the rules that separate a crafted figure from a diagram. `references/craft.md` gives the full reasoning and recipes.
 
@@ -180,7 +188,7 @@ These are the rules that separate a crafted figure from a diagram. `references/c
 - **Volume.** Give things real thickness, make them stand on other things, and put a soft halo under the base and under anything lifted.
 - **Composition.** Centre the figure and let it fill about 55–65% of the card. Keep a consistent scale across a set of figures, and make sure it still reads at 390 px wide.
 
-## WebGL inside the drawing
+## WebGL inside the drawing {#webgl-inside-the-drawing}
 
 Use a shader only for what lines can't draw: fire and exhaust, water and caustics, real lamp light, glow, steam. The parts stay SVG. The core rules come from the first shader figure, whose colour change between phases looked cut rather than crossfaded:
 
@@ -200,7 +208,7 @@ Use a shader only for what lines can't draw: fire and exhaust, water and caustic
 
 Read `references/webgl.md` before writing any shader.
 
-## 3D: figures that turn (beta)
+## 3D: figures that turn (beta) {#3d-figures-that-turn-beta}
 
 3D is an option like WebGL. Use it when a part moving in depth is the idea: a dial or turntable that turns, fingers that flex, a piece that breaks off and falls. The rest of the figure stays static kit art.
 
@@ -217,7 +225,7 @@ It is in beta: the engine is proved on its example and one test figure, not yet 
 
 Read `references/3d.md` first.
 
-## References
+## References {#references}
 
 Read these as you need them:
 

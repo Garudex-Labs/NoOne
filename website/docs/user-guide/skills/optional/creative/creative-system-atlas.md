@@ -1,51 +1,59 @@
 ---
 title: "System Atlas — Build explorable isometric architecture atlases as HTML"
-sidebar_label: "System Atlas"
+sidebarTitle: "System Atlas"
 description: "Build explorable isometric architecture atlases as HTML"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# System Atlas
+# System Atlas {#system-atlas}
 
 Build explorable isometric architecture atlases as HTML.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/system-atlas` |
+| Source | Optional — install with `noone skills install official/creative/system-atlas` |
 | Path | `optional-skills/creative/system-atlas` |
 | Version | `1.0.0` |
-| Author | Harshyt Goel (adapted by Nous Research) |
+| Author | Harshyt Goel (adapted by Garudex Labs) |
 | License | MIT |
 | Platforms | linux, macos |
 | Tags | `architecture`, `diagrams`, `isometric`, `documentation` |
 | Related skills | [`architecture-diagram`](../../bundled/creative/creative-architecture-diagram.md), [`excalidraw`](../../optional/creative/creative-excalidraw.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# System Atlas Skill
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# System Atlas Skill {#system-atlas-skill}
 
 An atlas is one data file (`data.mjs`) that renders two views: an **interactive isometric map** (a single self-contained `atlas.html` — hover to read, click to pin, go inside for steps, moving data packets you can inspect, chapters that reveal the system a few structures at a time), and a **generated text twin** (`SYSTEM.md`) with the decisions table, every structure, the flows, and the open questions by ID. The data file is the only thing anyone edits; both views rebuild from it. It sits beside a hand-written glossary (`CONTEXT.md`) and ADRs.
 
 **Does:** interactive architecture maps with progressive disclosure, question tracking across feedback rounds, a generated text twin, and a repeatable update loop.
 **Doesn't:** static one-off diagrams (use the architecture-diagram or excalidraw skill), finished systems that only need a README, or a single diagram for a PR.
 
-## When to Use
+## When to Use {#when-to-use}
 
 Use whenever someone wants to discuss, design, review, or explain an architecture visually — "make an atlas", "map the system", "make the architecture explorable", "visualize the codebase/agent/pipeline so we can talk about it", "a diagram I can click around", "walk me through how it fits together" — or when an architecture discussion is producing a pile of open questions that need tracking across feedback rounds. Also use it to update an existing atlas after decisions change. Best when the system is new enough that vocabulary, decisions, and questions are still moving and there will be more than one feedback round.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - Node.js (any recent version; the build uses only `node:fs`, `node:path`, `node:url` — no npm install needed).
 - A static server for verification (`npx serve` or `python3 -m http.server`).
 
-## How to Run
+## How to Run {#how-to-run}
 
 ```bash
 mkdir -p <atlas home>/atlas
@@ -56,7 +64,7 @@ node <atlas home>/atlas/build.mjs   # writes ../SYSTEM.md and ../atlas.html
 
 Every field of the data file is documented in `assets/data.example.mjs`.
 
-## Quick Reference
+## Quick Reference {#quick-reference}
 
 | File | Role | Edit it? |
 |---|---|---|
@@ -68,7 +76,7 @@ Every field of the data file is documented in `assets/data.example.mjs`.
 | `adr/` | Hard-to-reverse decisions | By hand |
 | `research/` | Deep-dive evidence | Append-only |
 
-## Procedure
+## Procedure {#procedure}
 
 Follow the order — each step was earned by a correction the first time round.
 
@@ -82,11 +90,11 @@ Follow the order — each step was earned by a correction the first time round.
 8. **Deep dives feed back.** Research with subagents (`delegate_task`) against one shared brief (the interface we own, the requirements that separate candidates, a usage model for cost, a fixed deliverable shape). Write a synthesis with a normalized cost/fit grid. Fold resolutions into the data as `{q, r: '… (from the deep dive, date)'}`. If the user rejects a proposal, sweep *every* file and rewrite — a banner on top of a stale section is not enough.
 9. **Keep it current.** One source, rebuild and republish after every change, never hand-edit generated files, and leave a `README.md` in the docs folder explaining the set (table in `references/process-and-lessons.md`).
 
-## Publishing
+## Publishing {#publishing}
 
 `atlas.html` is one self-contained file — no build step, no external assets beyond a Google Fonts stylesheet. Serve the folder with any static server (`npx serve`, `python3 -m http.server`) and hand over the URL, or let the repo's pages host serve the committed file. One URL, republished after every data change, never a second copy. If you keep a stable published URL, put it in `META.artifactUrl` so `SYSTEM.md` links to it.
 
-## Pitfalls
+## Pitfalls {#pitfalls}
 
 - Keep `<!doctype html>` first and `<meta charset="utf-8">` immediately after — otherwise quirks mode and mojibake arrows.
 - The renderer rebuilds its whole scene on every draw: a stray `render()` in a hover handler detaches the element under the cursor and the browser stops synthesising clicks — the map looks perfect in a screenshot while nothing responds.
@@ -95,7 +103,7 @@ Follow the order — each step was earned by a correction the first time round.
 - After every decision, grep the outputs for stale words (`pending`, the old model name, the rejected design) — the person reads everything.
 - Large HTML/JS via shell heredocs is brittle; use `write_file` and keep the data block JSON-serializable.
 
-## Verification
+## Verification {#verification}
 
 - `node <atlas home>/atlas/build.mjs` exits 0 and writes both `SYSTEM.md` and `atlas.html`.
 - Syntax-check the built script (`new Function(js)`), then open the served page in a real browser at ~1280×800; check a first chapter, a middle chapter, the last chapter, an inside view, and the light theme.

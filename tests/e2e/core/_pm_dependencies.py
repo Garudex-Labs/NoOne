@@ -26,14 +26,14 @@ def _prepare_test_tools() -> tuple[Path, dict] | None:
     if not (source / "facts.json").is_file():
         return None  # A system/Nix test interpreter has no selected PM tool store.
     facts = Facts(source / "facts.json", strict=True)
-    # node runs the TUI behind the dashboard's /api/pty; carry it when the
-    # runner's store has it, or PM in the sandbox reports it not installed.
+    # Browser build/packaging checks consume locked Node tools; carry them
+    # when the runner's store has them, not an unrelated PATH install.
     names = ("uv", "python") + (("node",) if facts.get("node") else ())
-    if "node" not in names and os.environ.get("HERMES_E2E_REQUIRE_TUI") == "1":
+    if "node" not in names and os.environ.get("AGENT_E2E_REQUIRE_TOOLS") == "1":
         # A node on PATH alone (actions/setup-node) is invisible to PM, so
-        # every /api/pty chat would fail later with an opaque close 1011.
+        # frontend build helpers would fail later against an incomplete store.
         raise AssertionError(
-            f"HERMES_E2E_REQUIRE_TUI=1 but the PM store has no node: {source} "
+            f"AGENT_E2E_REQUIRE_TOOLS=1 but the PM store has no node: {source} "
             "(install it with setup-pm `toolchain: all`)"
         )
     records = {name: facts.get(name) for name in names}

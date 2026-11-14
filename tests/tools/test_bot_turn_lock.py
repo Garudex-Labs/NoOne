@@ -128,13 +128,13 @@ def test_turn_wait_seconds_falls_back_to_module_constant(monkeypatch):
     def _boom():
         raise RuntimeError("no config")
 
-    monkeypatch.setattr("hermes_cli.config.load_config", _boom)
+    monkeypatch.setattr("agent_cli.config.load_config", _boom)
     assert bot_relay.turn_wait_seconds() == float(bot_relay.TURN_WAIT_SECONDS_FALLBACK)
 
 
 def test_turn_wait_seconds_reads_config(monkeypatch):
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "agent_cli.config.load_config",
         lambda: {"bot_mode": {"turn_wait_seconds": 7}},
     )
     assert bot_relay.turn_wait_seconds() == 7.0
@@ -178,4 +178,4 @@ def test_peer_stdin_delivery_skips_local_lock(root, tmp_path, monkeypatch):
         t.join(timeout=5)
 
 
-# ── wiring: relay deliver RPC (tui_gateway/methods_bot_relay.py) ─────────────
+# ── wiring: relay deliver RPC (agent_backend/methods_bot_relay.py) ─────────────

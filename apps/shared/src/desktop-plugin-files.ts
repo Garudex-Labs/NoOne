@@ -7,5 +7,5 @@ export const PACKAGE_MARKER = '.hermes-package.json'
 /** Inside a STANDALONE desktop plugin installed from the catalog: which entry it is (`catalogName`, `repo`,
  *  `sha`, and `pin` when a tag pin names a tag object), so the catalog card shows it installed. Unlike the
  *  package marker it pairs the folder with no agent half and leaves it removable. Only an installer writes it
- *  (`hermes_cli/desktop_plugin_halves.py` `INSTALL_ORIGIN` on the Webapp host). */
+ *  (`agent_cli/desktop_plugin_halves.py` `INSTALL_ORIGIN` on the Webapp host). */
 export const INSTALL_ORIGIN = '.hermes-origin.json'

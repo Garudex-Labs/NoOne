@@ -1,6 +1,7 @@
+import { PawPrint, Settings2 } from '@noone/ui/icons'
+
 import { Button } from '@/components/ui/button'
 import { ExternalLink } from '@/lib/external-link'
-import { PawPrint, Settings2 } from '@/lib/icons'
 
 interface GenerateUnavailableProps {
   onSetup: () => void

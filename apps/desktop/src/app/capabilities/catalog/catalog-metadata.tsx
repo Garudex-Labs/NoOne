@@ -1,12 +1,12 @@
-import { compactNumber } from '@hermes/shared'
+import { compactNumber } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
+import { CheckCircle2 } from '@noone/ui/icons'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { CheckCircle2 } from '@/lib/icons'
 import { fmtDateTime, relativeTime } from '@/lib/time'
 
 import { type CatalogEntry, catalogLabel } from './catalog-data'
@@ -70,7 +70,7 @@ export function CatalogRating({ entry }: { entry: CatalogEntry }) {
   if ((entry.usage ?? 0) > 0) {
     return (
       <span className="flex shrink-0 items-center gap-0.5 text-[0.65rem] text-(--ui-text-tertiary)" title={t.skills.usageCount(entry.usage!)}>
-        <Codicon name="pulse" size="0.65rem" />
+        <AppIcon name="pulse" size="0.65rem" />
         {compactNumber(entry.usage!)}
       </span>
     )
@@ -80,7 +80,7 @@ export function CatalogRating({ entry }: { entry: CatalogEntry }) {
 
   return (
     <span className="flex shrink-0 items-center gap-0.5 text-[0.65rem] text-(--ui-text-tertiary)">
-      <Codicon name="star-full" size="0.65rem" />
+      <AppIcon name="star-full" size="0.65rem" />
       {compactNumber(entry.stars)}
     </span>
   )

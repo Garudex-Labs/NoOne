@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from agent.deadline import poll_until
-from hermes_constants import get_hermes_home
+from agent_constants import get_agent_home
 from tools.environments import streams
 
 logger = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ def plugin_image_advice(backend: Optional[str]) -> Optional[str]:
 
 
 def _marker() -> Path:
-    return get_hermes_home() / "bot-desktop" / "sandbox.json"
+    return get_agent_home() / "bot-desktop" / "sandbox.json"
 
 
 def _read_marker() -> dict[str, Any]:

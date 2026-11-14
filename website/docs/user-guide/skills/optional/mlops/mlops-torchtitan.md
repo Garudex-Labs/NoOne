@@ -1,20 +1,20 @@
 ---
 title: "Torchtitan — Pretrain LLMs at scale with PyTorch 4D parallelism"
-sidebar_label: "Torchtitan"
+sidebarTitle: "Torchtitan"
 description: "Pretrain LLMs at scale with PyTorch 4D parallelism"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Torchtitan
+# Torchtitan {#torchtitan}
 
 Pretrain LLMs at scale with PyTorch 4D parallelism.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/torchtitan` |
+| Source | Optional — install with `noone skills install official/mlops/torchtitan` |
 | Path | `optional-skills/mlops/torchtitan` |
 | Version | `1.0.1` |
 | Author | Orchestra Research |
@@ -23,15 +23,23 @@ Pretrain LLMs at scale with PyTorch 4D parallelism.
 | Platforms | linux, macos |
 | Tags | `Model Architecture`, `Distributed Training`, `TorchTitan`, `FSDP2`, `Tensor Parallel`, `Pipeline Parallel`, `Context Parallel`, `Float8`, `Llama`, `Pretraining` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# TorchTitan - PyTorch Native Distributed LLM Pretraining
+<div className="doc-callout-title">
 
-## Quick start
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# TorchTitan - PyTorch Native Distributed LLM Pretraining {#torchtitan---pytorch-native-distributed-llm-pretraining}
+
+## Quick start {#quick-start}
 
 TorchTitan is PyTorch's official platform for large-scale LLM pretraining with composable 4D parallelism (FSDP2, TP, PP, CP), achieving 65%+ speedups over baselines on H100 GPUs.
 
@@ -59,9 +67,9 @@ python scripts/download_hf_assets.py --repo_id meta-llama/Llama-3.1-8B --assets 
 MODULE=llama3 CONFIG=llama3_8b ./run_train.sh
 ```
 
-## Common workflows
+## Common workflows {#common-workflows}
 
-### Workflow 1: Pretrain Llama 3.1 8B on single node
+### Workflow 1: Pretrain Llama 3.1 8B on single node {#workflow-1-pretrain-llama-31-8b-on-single-node}
 
 Copy this checklist:
 
@@ -152,7 +160,7 @@ TensorBoard logs are saved to `./outputs/tb/`:
 tensorboard --logdir ./outputs/tb
 ```
 
-### Workflow 2: Multi-node training with SLURM
+### Workflow 2: Multi-node training with SLURM {#workflow-2-multi-node-training-with-slurm}
 
 ```
 Multi-Node Training:
@@ -201,7 +209,7 @@ sbatch multinode_trainer.slurm
 
 Training auto-resumes if checkpoint exists in configured folder.
 
-### Workflow 3: Enable Float8 training for H100s
+### Workflow 3: Enable Float8 training for H100s {#workflow-3-enable-float8-training-for-h100s}
 
 Float8 provides 30-50% speedup on H100 GPUs.
 
@@ -254,7 +262,7 @@ components = ["model", "loss"]
 MODULE=llama3 CONFIG=llama3_8b ./run_train.sh --compile.enable
 ```
 
-### Workflow 4: 4D parallelism for 405B models
+### Workflow 4: 4D parallelism for 405B models {#workflow-4-4d-parallelism-for-405b-models}
 
 ```
 4D Parallelism (FSDP + TP + PP + CP):
@@ -298,7 +306,7 @@ srun torchrun --nnodes=64 --nproc_per_node=8 \
   --module llama3 --config llama3_405b
 ```
 
-## When to use vs alternatives
+## When to use vs alternatives {#when-to-use-vs-alternatives}
 
 **Use TorchTitan when:**
 - Pretraining LLMs from scratch (8B to 405B+)
@@ -313,7 +321,7 @@ srun torchrun --nnodes=64 --nproc_per_node=8 \
 - **Axolotl/TRL**: Fine-tuning rather than pretraining
 - **LitGPT**: Educational, smaller-scale training
 
-## Common issues
+## Common issues {#common-issues}
 
 **Issue: Out of memory on large models**
 
@@ -366,7 +374,7 @@ python -m torch.distributed.checkpoint.format_utils \
 
 Create seed checkpoint first (see Workflow 4, Step 1).
 
-## Supported models
+## Supported models {#supported-models}
 
 | Model | Sizes | Status |
 |-------|-------|--------|
@@ -377,7 +385,7 @@ Create seed checkpoint first (see Workflow 4, Step 1).
 | Qwen 3 | Various | Experimental |
 | Flux | Diffusion | Experimental |
 
-## Performance benchmarks (H100)
+## Performance benchmarks (H100) {#performance-benchmarks-h100}
 
 | Model | GPUs | Parallelism | TPS/GPU | Techniques |
 |-------|------|-------------|---------|------------|
@@ -386,17 +394,17 @@ Create seed checkpoint first (see Workflow 4, Step 1).
 | Llama 70B | 256 | FSDP+TP+AsyncTP | 876 | 2D parallel |
 | Llama 405B | 512 | FSDP+TP+PP | 128 | 3D parallel |
 
-## Advanced topics
+## Advanced topics {#advanced-topics}
 
-**FSDP2 configuration**: See [references/fsdp.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/torchtitan/references/fsdp.md) for detailed FSDP2 vs FSDP1 comparison and ZeRO equivalents.
+**FSDP2 configuration**: See [references/fsdp.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/torchtitan/references/fsdp.md) for detailed FSDP2 vs FSDP1 comparison and ZeRO equivalents.
 
-**Float8 training**: See [references/float8.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/torchtitan/references/float8.md) for tensorwise vs rowwise scaling recipes.
+**Float8 training**: See [references/float8.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/torchtitan/references/float8.md) for tensorwise vs rowwise scaling recipes.
 
-**Checkpointing**: See [references/checkpoint.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/torchtitan/references/checkpoint.md) for HuggingFace conversion and async checkpointing.
+**Checkpointing**: See [references/checkpoint.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/torchtitan/references/checkpoint.md) for HuggingFace conversion and async checkpointing.
 
-**Adding custom models**: See [references/custom-models.md](https://github.com/NousResearch/hermes-agent/blob/main/optional-skills/mlops/torchtitan/references/custom-models.md) for TrainSpec protocol.
+**Adding custom models**: See [references/custom-models.md](https://github.com/Garudex-Labs/NoOne/blob/main/optional-skills/mlops/torchtitan/references/custom-models.md) for TrainSpec protocol.
 
-## Resources
+## Resources {#resources}
 
 - GitHub: https://github.com/pytorch/torchtitan
 - Paper: https://arxiv.org/abs/2410.06511

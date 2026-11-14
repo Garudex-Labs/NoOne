@@ -1,7 +1,7 @@
 """Shared harness for the OpenAI-dialect provider wire-conformance suite.
 
 Every test drives REAL Hermes processes (``hermes -z`` oneshot, ``--resume``, the
-``tui_gateway`` stdio server) against a loopback fake of the vendor HTTP API
+``agent_backend`` stdio server) against a loopback fake of the vendor HTTP API
 (``tests/fakes/providers``) and asserts on the next wire request Hermes sends, the
 user-visible answer, and persisted ``state.db`` rows. Homes are hermetic: a fake HOME
 whose ``.hermes`` is the HERMES_HOME, an allowlisted env with no credentials.
@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
 
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
 from tests.e2e.core._pending_fixes import known_gate
 
@@ -204,7 +204,7 @@ class Run:
 
 
 def hermes_argv(*args: str) -> list[str]:
-    return [sys.executable, "-m", "hermes_cli.main", *args]
+    return [sys.executable, "-m", "agent_cli.main", *args]
 
 
 def oneshot(h: Home, prompt: str, *args: str, resume: str | None = None, timeout: float = TURN_TIMEOUT,

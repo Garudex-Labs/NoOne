@@ -11,8 +11,8 @@ import uuid
 from gateway.config import Platform
 from gateway.session_contract import CANONICAL_GATEWAY_PROTOCOL, SessionActor, SessionRef, Submission
 from gateway.session_llm_oneshot import DeferredReply
-from hermes_constants import profile_name_for_home
-from hermes_state_runtime import RuntimeStoreError
+from agent_constants import profile_name_for_home
+from agent_state_runtime import RuntimeStoreError
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,7 @@ def display_projection(history, profile_home, image_urls=True):
     ``_history_to_messages`` (compaction handoffs stripped, ``/steer`` unwrapped, tool rows
     labelled from the paired assistant ``tool_calls``), never a re-implementation. ``image_urls=False``:
     image parts read ``[image]``."""
-    from tui_gateway import server
+    from agent_backend import server
     rows = [{**row, '_row_id': row['row_id']} if 'row_id' in row else row for row in history]
     return server._history_to_messages(rows, profile_home=profile_home, image_urls=image_urls)
 
@@ -123,8 +123,8 @@ async def _resume_transcript(authority, ref, snapshot, history, omit):
     """A resume reply's transcript fields. *omit* (``omit_messages``): no rows and ``messages_omitted``, the
     stored count and the todo plan of the physical target the attach resolved, as the stdio resume answers
     it; the display-row lineage read is skipped (the todo lookup still walks the lineage's todo rows)."""
-    # Its home module, not tui_gateway.server: importing the stdio sidecar points sys.stdout at stderr.
-    from tui_gateway.tool_progress import _todo_state_from_history
+    # Its home module, not agent_backend.server: importing the stdio sidecar points sys.stdout at stderr.
+    from agent_backend.tool_progress import _todo_state_from_history
     if not omit:
         # The newest todo result in the transcript, the snapshot the session's agent hydrates
         # from and its ``todo.updated`` frames carried: a viewer attaching shows the plan now.
@@ -181,7 +181,7 @@ class AuthorityConnection:
         home. Only a host-scoped grant (the Desktop's shared-primary socket, the dashboard gate)
         reaches a sibling; a profile-bound ticket naming any other profile is a mismatch, exactly
         like a profile nobody here serves. Never a fallback, never a rewritten profile_id."""
-        from hermes_cli.profiles import profile_matches_home
+        from agent_cli.profiles import profile_matches_home
         if profile_matches_home(profile, Path(self.authority.profile_id)):
             return None
         if not self.host_scoped:
@@ -214,13 +214,13 @@ class AuthorityConnection:
         registry = getattr(getattr(self.authority, 'runner', None), 'session_authorities', None)
         if not (self.host_scoped and isinstance(profile, str) and profile and registry is not None):
             return None
-        from hermes_cli.profiles import profile_matches_home
+        from agent_cli.profiles import profile_matches_home
         key = next((key for key in held if profile_matches_home(profile, Path(key))), None)
         return (key, None) if key is not None else registry.starting(profile)
 
     def handlers(self):
         """Method → handler for every verb ``dispatch`` serves outside the group controls; each
-        name is declared in ``tui_gateway/contracts`` (``METHODS`` or ``CANONICAL_METHODS``)."""
+        name is declared in ``agent_backend/contracts`` (``METHODS`` or ``CANONICAL_METHODS``)."""
         handlers = {'session.create': self.create, 'ping': self.ping, 'runtime.describe': self.describe,
                     'commands.catalog': self.command_catalog, 'complete.slash': self.slash_completions,
                     'plugins.list': self.plugins_list, 'command.observe': self.command_observe,
@@ -248,13 +248,13 @@ class AuthorityConnection:
         handlers.update(queued_handlers(self))
         from gateway.session_config import handlers as config_handlers
         handlers.update(config_handlers(self))
-        from gateway.session_tui_config import handlers as tui_config_handlers
+        from gateway.session_display_config import handlers as tui_config_handlers
         handlers.update(tui_config_handlers(self))
         from gateway.session_ancillary import handlers as ancillary_handlers
         handlers.update(ancillary_handlers(self))
         from gateway.session_shell import handlers as shell_handlers
         handlers.update(shell_handlers(self))
-        from gateway.session_tui_ops import handlers as tui_ops_handlers
+        from gateway.session_display_ops import handlers as tui_ops_handlers
         handlers.update(tui_ops_handlers(self))
         from gateway.session_tui_side import handlers as side_handlers
         handlers.update(side_handlers(self))
@@ -327,13 +327,13 @@ class AuthorityConnection:
             if method in _PROFILE_IMPLICIT:
                 params = {key: value for key, value in params.items() if key != 'profile'}
         ref = SessionRef(self.actor.profile_id, params.get('session_id', ''))
-        from tui_gateway.contracts.registry import (
+        from agent_backend.contracts.registry import (
             CANONICAL_METHODS, METHODS, canonical_param_problems, check_params_accepted, check_result,
             unknown_method_message,
         )
         contract = CANONICAL_METHODS.get(method)
         if contract is not None and (problems := canonical_param_problems(contract, params)):
-            # The declared wire contract (``tui_gateway/contracts/canonical.py``) is the closed
+            # The declared wire contract (``agent_backend/contracts/canonical.py``) is the closed
             # key set: an unknown or missing key never reaches the handler.
             return {'jsonrpc': '2.0', 'id': rid, 'error': {
                 'code': 4001, 'message': 'invalid_params', 'data': {'reason': 'invalid_params', 'fields': problems}}}
@@ -351,7 +351,7 @@ class AuthorityConnection:
         try:
             from gateway.session_group_controls import GROUP_METHODS, dispatch_group_control
             # Every handler reads config/jobs/policy for the OWNING profile: enter its home so
-            # ``_load_gateway_config`` / ``build_policy(get_hermes_home())`` never snapshot the
+            # ``_load_gateway_config`` / ``build_policy(get_agent_home())`` never snapshot the
             # launch profile's config into a served secondary's session. Under a single profile
             # the scope is that profile's own home, so behaviour is unchanged.
             from gateway.session_authorities import async_owner_scope
@@ -500,7 +500,7 @@ class AuthorityConnection:
         from gateway.session_local_title import resolve_titled_session, title_new_session
         from gateway.session_policy import BYPASS_FIELDS
         from gateway.session_runtime_workers import tracked_write
-        from hermes_state_local import commit_local_session
+        from agent_state_local import commit_local_session
         # Bot Mode's forever-chat mint: born hidden from the sidebar. `follow_profile_config` stays in
         # the frozen request: the policy re-reads the profile's current route every turn.
         hidden = params.pop('hidden', False)
@@ -539,7 +539,7 @@ class AuthorityConnection:
             # `--accept-hooks`: record this launch's consent; ``resume`` below registers the hooks.
             if params.get('accept_hooks') is True:
                 from gateway.session_policy import accept_launch_hooks, restore_policy
-                from hermes_state_local import local_receipt
+                from agent_state_local import local_receipt
                 policy = restore_policy(local_receipt(self.authority.db, ref.session_id)['policy'])
                 await asyncio.to_thread(accept_launch_hooks, policy)
             if title:
@@ -610,7 +610,7 @@ class AuthorityConnection:
                                   'message_count': row.get('message_count', 0),
                                   'running': found.session_id in self.authority.sessions}],
                     'scope': 'stored'}
-        from hermes_state_sessions import INTERNAL_LISTING_SOURCES
+        from agent_state_sessions import INTERNAL_LISTING_SOURCES
         from gateway.session_live_listing import live_entries
         sessions = []
         for entry in await live_entries(self.authority, self.actor):
@@ -655,7 +655,7 @@ class AuthorityConnection:
                     ref = SessionRef(ref.profile_id, resolved_id)
             from gateway.session_local_migration import adopts_client_history, resolve_local_target
             from gateway.session_policy_refresh import refresh_settled
-            from hermes_state_local_migration import LEGACY_LOCAL_SOURCES
+            from agent_state_local_migration import LEGACY_LOCAL_SOURCES
             # Another viewer's refresh mid-cleanup has committed a policy it has not published yet.
             await refresh_settled(self.authority, ref.session_id)
             row = self.authority.db.get_session(ref.session_id)
@@ -852,7 +852,7 @@ class AuthorityConnection:
         from gateway.session_config import local_voice_enabled
         if not local_voice_enabled(ref.session_id):
             return False
-        from tui_gateway import server
+        from agent_backend import server
         return await asyncio.to_thread(server._consume_typed_stop_phrase, text, ref.session_id, emit=False)
 
     def submission(self, ref, params):
@@ -879,7 +879,7 @@ class AuthorityConnection:
 
     async def mutate(self, ref, params):
         from gateway.session_mutations import mutate_session
-        from hermes_state_mutation_guards import MUTATION_GUARD_REFUSALS, busy_refusal
+        from agent_state_mutation_guards import MUTATION_GUARD_REFUSALS, busy_refusal
         try:
             result = await mutate_session(self.authority, self.actor, ref, params)
         except MUTATION_GUARD_REFUSALS as exc:
@@ -917,7 +917,7 @@ class AuthorityConnection:
     async def cancel(self, ref, params):
         admission_id = params.get('admission_id')
         receipt = await self.authority.receipt(self.actor, ref, admission_id)
-        from hermes_state_runtime import get_session_admission
+        from agent_state_runtime import get_session_admission
         # A transferred steer also reads started (as its receiving claim): only its own claim is stopped here;
         # the transfer is refused below and settles with that claim.
         if receipt.status == 'started' and get_session_admission(

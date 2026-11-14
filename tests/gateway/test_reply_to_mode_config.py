@@ -1,6 +1,6 @@
 """``reply_to_mode: off`` reaches the adapter as ``off`` however it was written.
 
-YAML 1.1 reads a bare ``off`` as ``False`` and ``hermes config set ... off`` writes ``false``. The
+YAML 1.1 reads a bare ``off`` as ``False`` and ``noone config set ... off`` writes ``false``. The
 single-profile env bridge maps that back to ``off``, but a multiplexed secondary profile skips the
 bridge and reads ``PlatformConfig.reply_to_mode`` directly, so ``False`` fell to the adapters'
 ``or 'first'`` default and every reply kept quoting the user's message.
@@ -12,8 +12,8 @@ import pytest
 
 from agent.secret_scope import set_multiplex_active
 from gateway.config import Platform, PlatformConfig, load_gateway_config
-from hermes_cli import config as cli_config
-from hermes_cli.plugins import discover_plugins
+from agent_cli import config as cli_config
+from agent_cli.plugins import discover_plugins
 
 
 @pytest.fixture

@@ -1,3 +1,4 @@
+import { Check, Copy, X } from '@noone/ui/icons'
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -7,7 +8,6 @@ import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { writeClipboardText } from '@/lib/clipboard'
 import { triggerHaptic } from '@/lib/haptics'
-import { Check, Copy, X } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 type CopyPayload = string | (() => Promise<string> | string)

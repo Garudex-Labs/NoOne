@@ -1,5 +1,19 @@
-import { gaugeTitle } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
+import { gaugeTitle } from '@noone/shared'
+import { AppIcon } from '@noone/ui/app-icon'
+import {
+  Activity,
+  AlertCircle,
+  Clock,
+  Command,
+  FolderOpen,
+  Globe,
+  Hash,
+  Layers3,
+  Loader2,
+  Terminal,
+  Zap
+} from '@noone/ui/icons'
 import { useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
@@ -17,24 +31,10 @@ import { useFocusedSessionRow } from '@/app/shell/hooks/use-focused-session-row'
 import { useSystemResourcesStatusbarItem } from '@/app/shell/system-resources-statusbar'
 import { $paneVisible } from '@/components/pane-shell/tree/store'
 import { Badge } from '@/components/ui/badge'
-import { Codicon } from '@/components/ui/codicon'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { useI18n } from '@/i18n'
 import { displayPath, pathLeaf } from '@/lib/display-path'
 import { statusBarGatewayHealth } from '@/lib/gateway-health-pill'
-import {
-  Activity,
-  AlertCircle,
-  Clock,
-  Command,
-  FolderOpen,
-  Globe,
-  Hash,
-  Layers3,
-  Loader2,
-  Terminal,
-  Zap
-} from '@/lib/icons'
 import { type RuntimeReadinessResult } from '@/lib/runtime-readiness'
 import { resolveSessionTimerSince } from '@/lib/session-timer-since'
 import { cacheHitLabel, contextBarLabel, LiveDuration, tokensPerSecondLabel, usageContextLabel } from '@/lib/statusbar'
@@ -80,7 +80,7 @@ import {
   $updateStatus,
   openUpdateOverlayFor
 } from '@/store/updates'
-import type { FreeTierStatus, StatusResponse, UsageStats } from '@/types/hermes'
+import type { FreeTierStatus, StatusResponse, UsageStats } from '@/types/agent-client'
 
 import { CRON_ROUTE, SETTINGS_ROUTE, WEBHOOKS_ROUTE } from '../../routes'
 import type { StatusbarItem } from '../statusbar-controls'
@@ -571,7 +571,7 @@ export function useStatusbarItems({
         // Shown while a guest identity exists (the trial, or apps without it): the
         // identity carrying the connectors, and the persistent way in to the sign-in.
         hidden: !freeTierSignInOpen,
-        icon: <Codicon name="account" size="0.75rem" />,
+        icon: <AppIcon name="account" size="0.75rem" />,
         id: 'free-tier',
         label: freeTierCopy.providerName,
         onSelect: () => openFreeTierSignIn(),
@@ -639,7 +639,7 @@ export function useStatusbarItems({
           ) : subagentsRunning > 0 ? (
             <Loader2 className="size-3 animate-spin" />
           ) : (
-            <Codicon name="hubot" size="0.75rem" />
+            <AppIcon name="hubot" size="0.75rem" />
           ),
         id: 'agents',
         label: copy.agents,

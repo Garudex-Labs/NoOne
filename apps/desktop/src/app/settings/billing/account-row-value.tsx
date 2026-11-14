@@ -1,5 +1,6 @@
+import { ExternalLink } from '@noone/ui/icons'
+
 import { Button } from '@/components/ui/button'
-import { ExternalLink } from '@/lib/icons'
 
 import { Pill } from '../primitives'
 

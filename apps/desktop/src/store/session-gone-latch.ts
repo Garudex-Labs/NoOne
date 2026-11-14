@@ -1,4 +1,4 @@
-import { JsonRpcGatewayError } from '@hermes/shared'
+import { JsonRpcGatewayError } from '@noone/shared'
 
 /** Session ids the gateway has told us are gone. A session-scoped RPC against a
  *  runtime the gateway no longer holds fails 4001 "session not found" — terminal
@@ -14,7 +14,7 @@ import { JsonRpcGatewayError } from '@hermes/shared'
  *  import the leaf directly. */
 const goneSessions = new Set<string>()
 
-/** Gateway JSON-RPC code for "session not found" (tui_gateway `_sess_nowait`). */
+/** Gateway JSON-RPC code for "session not found" (agent_backend `_sess_nowait`). */
 const GATEWAY_SESSION_NOT_FOUND_CODE = 4001
 
 /** Consecutive heals per stored session id (see `runtime-gone.ts`

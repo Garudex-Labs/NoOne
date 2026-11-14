@@ -89,6 +89,9 @@ jobs:
     # gates; only the acceptance join waits for CI.
     if: >-
       !cancelled() && needs.admit.result == 'success' && fromJSON(needs.admit.outputs.jobs)['docker']
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/docker.yml
     secrets: inherit
     with:
@@ -159,8 +162,8 @@ jobs:
       !cancelled() && needs.admit.result == 'success' && fromJSON(needs.admit.outputs.jobs)['candidates-darwin-arm64']
     permissions:
       contents: write
-      actions: read
       packages: write
+      actions: read
       id-token: write
     uses: ./.github/workflows/desktop-bundled-release.yml
     secrets: inherit
@@ -180,8 +183,8 @@ jobs:
       !cancelled() && needs.admit.result == 'success' && fromJSON(needs.admit.outputs.jobs)['candidates-win32-arm64']
     permissions:
       contents: write
-      actions: read
       packages: write
+      actions: read
       id-token: write
     uses: ./.github/workflows/desktop-bundled-release.yml
     secrets: inherit
@@ -204,8 +207,8 @@ jobs:
       !cancelled() && needs.admit.result == 'success' && fromJSON(needs.admit.outputs.jobs)['candidates-win32-x64']
     permissions:
       contents: write
-      actions: read
       packages: write
+      actions: read
       id-token: write
     uses: ./.github/workflows/desktop-bundled-release.yml
     secrets: inherit
@@ -230,8 +233,8 @@ jobs:
       && needs.candidates-win32-x64.result == 'success'
     permissions:
       contents: write
-      actions: read
       packages: write
+      actions: read
       id-token: write
     uses: ./.github/workflows/desktop-bundled-release.yml
     secrets: inherit
@@ -255,8 +258,8 @@ jobs:
       !cancelled() && needs.admit.result == 'success' && fromJSON(needs.admit.outputs.jobs)['candidates-termux']
     permissions:
       contents: write
-      actions: read
       packages: write
+      actions: read
       id-token: write
     uses: ./.github/workflows/desktop-bundled-release.yml
     secrets: inherit
@@ -438,7 +441,7 @@ jobs:
             --version "$RELEASE_VERSION"
           actual="$(cargo metadata --no-deps --format-version 1 \
             --manifest-path "$tree/apps/bootstrap-installer/src-tauri/Cargo.toml" \
-            | jq -r '.packages[] | select(.name == "hermes-bootstrap") | .version')"
+            | jq -r '.packages[] | select(.name == "agent-bootstrap") | .version')"
           test "$actual" = "$RELEASE_VERSION" || {
             echo "::error::Bootstrap Cargo version $actual != $RELEASE_VERSION"
             exit 1
@@ -478,6 +481,9 @@ jobs:
     # stable/latest aliases move in the ordered publication pass.
     needs: [admit, docker]
     if: fromJSON(needs.admit.outputs.jobs)['publish-docker']
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/docker.yml
     secrets: inherit
     with:
@@ -497,8 +503,8 @@ jobs:
       && needs.acceptance.result == 'success' && needs.candidate-manifest.result == 'success'
     permissions:
       contents: write
-      actions: read
       packages: write
+      actions: read
       id-token: write
     uses: ./.github/workflows/desktop-bundled-release.yml
     secrets: inherit
@@ -539,6 +545,7 @@ jobs:
     environment: release-signing
     permissions:
       contents: write
+      packages: write
       actions: read
     steps:
       - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # v7.0.1
@@ -600,13 +607,14 @@ jobs:
             "${args[@]}"
       - name: Set up Docker Buildx for ordered alias promotion
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - name: Log in to Docker Hub for ordered alias promotion
+      - name: Log in to GitHub Container Registry for ordered alias promotion
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Reconcile ordered stable publication
-        # The macOS feed merge parses YAML (hermes_yaml -> ruamel); the node toolchain has none.
+        # The macOS feed merge parses YAML (agent_yaml -> ruamel); the node toolchain has none.
         run: python -m scripts.ci.python_packages ruamel.yaml==0.18.17 -- -m scripts.releases.sequencer
         env:
           GH_TOKEN: ${{ github.token }}

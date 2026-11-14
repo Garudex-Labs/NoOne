@@ -1,0 +1,14 @@
+{
+  "index": {
+    "title": "{{app-name}} Docs (Official) | Garudex Labs",
+    "metatags": {
+      "og:title": "{{app-name}} Docs (Official) | Garudex Labs"
+    }
+  },
+  "getting-started/installation": {
+    "title": "Install {{app-name}}: Official Guide | Garudex Labs",
+    "metatags": {
+      "og:title": "Install {{app-name}}: Official Guide | Garudex Labs"
+    }
+  }
+}

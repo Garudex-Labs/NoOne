@@ -48,8 +48,8 @@ _VAULT_REDACTION_LOCK = threading.Lock()
 
 
 def _vault_scope() -> str:
-    from hermes_constants import get_hermes_home
-    return str(get_hermes_home())
+    from agent_constants import get_agent_home
+    return str(get_agent_home())
 
 
 def register_vault_redaction_value(value) -> None:
@@ -106,14 +106,14 @@ _SENSITIVE_QUERY_PARAMS = frozenset({
 # ON by default; `security.redact_secrets: false` bridges to this env var.
 # ON by default — secure default per issue #17691. Users who need raw credential values in tool output (e.g.
 # working on the redactor itself) can opt out via `security.redact_secrets: false` in config.yaml (bridged
-# to this env var in hermes_cli/main.py, gateway/run.py, and cli.py) or `HERMES_REDACT_SECRETS=false` in
+# to this env var in agent_cli/main.py, gateway/run.py, and cli.py) or `HERMES_REDACT_SECRETS=false` in
 # ~/.hermes/.env. An opt-out warning is logged at gateway and CLI startup so operators see the downgrade —
 # see `_log_redaction_status()` in gateway/run.py and cli.py.
 _REDACT_ENABLED = os.getenv("HERMES_REDACT_SECRETS", "true").lower() in {"1", "true", "yes", "on"}
 
 # Routed multiplex profiles: the import-time snapshot above is the LAUNCH profile's policy. A profile
 # served under a HERMES_HOME override follows its own ``security.redact_secrets`` (its ``.env`` value
-# first, like the standalone bridge in hermes_cli/main.py). The formatter never reads config or files
+# first, like the standalone bridge in agent_cli/main.py). The formatter never reads config or files
 # for it (it runs under the logging handler's lock, per record): the values are recorded when that
 # profile's .env / config is loaded (``note_env_policy`` / ``note_config_policy``) or when log routing
 # is set up for it (``resolve_profile_policy``). Until then the profile redacts (the secure default).
@@ -132,11 +132,11 @@ def note_config_policy(home_key: str, raw) -> None:
 def resolve_profile_policy(home) -> None:
     """Record ``home``'s redaction policy now (log-routing setup), so its records never wait for it."""
     from agent.runtime_scope import bind_profile_scope
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     try:
         with bind_profile_scope(home, hydrate_secrets=False):
-            key = hermes_home_key()
-            from hermes_cli.config import load_config_readonly, load_env
+            key = agent_home_key()
+            from agent_cli.config import load_config_readonly, load_env
             note_env_policy(key, load_env().get("HERMES_REDACT_SECRETS"))
             note_config_policy(key, (load_config_readonly().get("security") or {}).get("redact_secrets"))
     except (Exception, SystemExit) as exc:  # health: allow BLE001 -- unreadable now: stays unknown, which redacts
@@ -146,10 +146,10 @@ def resolve_profile_policy(home) -> None:
 def _redact_enabled() -> bool:
     """Effective redaction switch for the active profile (launch snapshot when no override). Reads
     only in-memory state: the live secret scope and the recorded per-profile policy."""
-    from hermes_constants import get_hermes_home_override, hermes_home_key
-    if get_hermes_home_override() is None:
+    from agent_constants import get_agent_home_override, agent_home_key
+    if get_agent_home_override() is None:
         return _REDACT_ENABLED
-    home_key = hermes_home_key()
+    home_key = agent_home_key()
     from agent.secret_scope import current_secret_scope
     scope = current_secret_scope()
     raw = scope.get("HERMES_REDACT_SECRETS") if scope else None
@@ -217,7 +217,6 @@ _PREFIX_PATTERNS = [
     r"tvly-[A-Za-z0-9]{10,}",           # Tavily search API key
     r"exa_[A-Za-z0-9]{10,}",            # Exa search API key
     r"gsk_[A-Za-z0-9]{10,}",            # Groq Cloud API key
-    r"syt_[A-Za-z0-9]{10,}",            # Matrix access token
     r"retaindb_[A-Za-z0-9]{10,}",       # RetainDB API key
     r"hsk-[A-Za-z0-9]{10,}",            # Hindsight API key
     r"mem0_[A-Za-z0-9]{10,}",           # Mem0 Platform API key
@@ -737,7 +736,7 @@ _URL_BARE_TOKEN_RE = re.compile(
 # JWTs always start with "eyJ" (base64 "{"); 1-, 2- and 3-part forms.
 _JWT_RE = re.compile(r"eyJ[A-Za-z0-9_-]{10,}(?:\.[A-Za-z0-9_=-]{4,}){0,2}")
 
-# Links ``hermes webapp`` prints that sign a browser in as the user: the gateway's browser credential
+# Links ``noone webapp`` prints that sign a browser in as the user: the gateway's browser credential
 # after ``hermes-session=`` and the one-use ticket of a ``/webapp/launch`` link. Both values are
 # URL-safe base64 (43 characters); the 20-character floor leaves placeholders and code (``${token}``).
 _WEBAPP_LINK_CREDENTIAL_RE = re.compile(
@@ -927,7 +926,7 @@ _DISPLAY_CONTROL_RE = re.compile(r"[\x00-\x1f\x7f\x80-\x9f\u200b-\u200f\u202a-\u
 
 def mask_secret(value: str, *, head: int = 4, tail: int = 4, floor: int = 12,
                 placeholder: str = "***", empty: str = "") -> str:
-    """Mask a secret for display (``hermes config`` / ``status`` / ``dump``):
+    """Mask a secret for display (``noone config`` / ``status`` / ``dump``):
     ``sk-p...7890``; shorter than ``floor`` (after control-byte stripping) →
     ``placeholder``; falsy → ``empty``."""
     value = _DISPLAY_CONTROL_RE.sub("", value) if value else value

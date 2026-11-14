@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
 
+import { type ProfileScope, saveHermesConfigRecord } from '@/agent-client'
 import type { PreviewSigninsResult } from '@/global'
-import { type ProfileScope, saveHermesConfigRecord } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { claimPreviewSigninsSync, syncPreviewSignins } from '@/lib/preview-signins'
 import { notify, notifyError } from '@/store/notifications'
 
-import { hermesConfigCacheWriter, useHermesConfigRecord } from '../hooks/use-config-record'
+import { hermesConfigCacheWriter, useAgentConfigRecord } from '../hooks/use-config-record'
 
 import { RowFootnoteAction, ToggleRow } from './primitives'
 
@@ -46,7 +46,7 @@ export function readUseRealProfile(record: Record<string, unknown> | undefined):
 export function BrowserRealProfilePanel({ profile }: BrowserRealProfilePanelProps) {
   const { t } = useI18n()
   const copy = t.settings.toolsets.browserRealProfile
-  const { data: config, writeScope } = useHermesConfigRecord(profile)
+  const { data: config, writeScope } = useAgentConfigRecord(profile)
   const setConfig = hermesConfigCacheWriter(profile)
   const [busy, setBusy] = useState(false)
 

@@ -1,5 +1,5 @@
 /**
- * Wire identity of a turn's streamed reply (tui_gateway/stream_segments.py).
+ * Wire identity of a turn's streamed reply (agent_backend/stream_segments.py).
  *
  * A prompt turn stamps its message.start with `turn_id`, every message.delta
  * with `turn_id` + `segment` + `offset`, and every message.interim with the

@@ -10,8 +10,8 @@ import pytest
 from gateway.config import GatewayConfig, Platform, PlatformConfig
 from gateway.run import GatewayRunner
 from gateway.session import AsyncSessionStore, SessionSource, SessionStore
-from hermes_cli import anon_auth
-from hermes_cli.commands import resolve_command
+from agent_cli import anon_auth
+from agent_cli.commands import resolve_command
 
 
 def _source(*, chat_type="dm", chat_id="chat-1", user_id="user-1", platform=Platform.TELEGRAM):
@@ -72,7 +72,7 @@ async def test_a_dm_without_a_chat_id_is_refused(monkeypatch):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("platform", ["ntfy", "raft", "a2a"])
+@pytest.mark.parametrize("platform", [  "a2a"])
 async def test_broadcast_shaped_platforms_are_refused(monkeypatch, platform):
     runner = _runner(monkeypatch)
     flow = MagicMock()
@@ -320,12 +320,12 @@ async def test_a_completion_evicts_welcome_and_clears_its_override(monkeypatch):
 
 
 def _durable_sweep_runner(monkeypatch, tmp_path):
-    import hermes_state
+    import agent_state
 
     def no_sqlite(**_kwargs):
         raise RuntimeError("Exercise sessions.json persistence")
 
-    monkeypatch.setattr(hermes_state, "SessionDB", no_sqlite)
+    monkeypatch.setattr(agent_state, "SessionDB", no_sqlite)
     runner = _runner(monkeypatch)
     store = SessionStore(sessions_dir=tmp_path, config=runner.config)
     key = store.get_or_create_session(_source()).session_key

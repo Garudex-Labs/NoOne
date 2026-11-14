@@ -1,35 +1,43 @@
 ---
 title: "Brag Slim — Launch video from a project or URL, upstream-maintained"
-sidebar_label: "Brag Slim"
+sidebarTitle: "Brag Slim"
 description: "Launch video from a project or URL, upstream-maintained"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Brag Slim
+# Brag Slim {#brag-slim}
 
 Launch video from a project or URL, upstream-maintained.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/creative/brag-slim` |
+| Source | Optional — install with `noone skills install official/creative/brag-slim` |
 | Path | `optional-skills/creative/brag-slim` |
 | Version | `0.4.0` |
-| Author | Shunit Haviv Hakimi (shunithaviv) |
+| Author | RAWx18 |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `video`, `launch-video`, `marketing`, `motion-graphics`, `share-copy` |
 | Related skills | [`brag`](../../optional/creative/creative-brag.md), [`hyperframes`](../../optional/creative/creative-hyperframes.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Brag Slim (upstream-maintained)
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Brag Slim (upstream-maintained) {#brag-slim-upstream-maintained}
 
 > **Catalog stub.** This entry is maintained upstream at
 > [latent-spaces/brag](https://github.com/latent-spaces/brag): the project
@@ -50,7 +58,7 @@ source's real UI, fonts and assets instead of redrawing them, and writes
 and `--voice` narration (see its prerequisites). It includes this skill and
 hands off to it on Opus 5.5.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 - No fixed toolchain: the model builds with whatever is installed. In practice
   that means FFmpeg for the audio mix and encode, plus a headless browser

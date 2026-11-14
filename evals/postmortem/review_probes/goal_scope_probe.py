@@ -12,11 +12,11 @@ sys.path.insert(0,os.getcwd())
 home=tempfile.TemporaryDirectory(prefix='goals-probe-')
 os.environ['HERMES_HOME']=home.name
 os.environ['HERMES_TEST_MODE']='1'
-from hermes_cli import goals
+from agent_cli import goals
 from tools import process_registry as pr,async_delegation as ad
-from hermes_cli.cli_loops_mixin import CLILoopsMixin
+from agent_cli.cli_loops_mixin import CLILoopsMixin
 from gateway.run_goals import GatewayGoalsMixin
-from tui_gateway import server as pt
+from agent_backend import server as pt
 out={'module':goals.__file__,'sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True, encoding='utf-8', errors='replace').strip()}
 proc=subprocess.Popen([sys.executable,'-c','import time; time.sleep(300)'],stdin=subprocess.DEVNULL)
 try:

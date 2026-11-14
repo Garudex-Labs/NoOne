@@ -32,7 +32,7 @@
 #   --install-method installer-script          the plain one-liner (default)
 #                    installer-script+desktop  the one-liner with its desktop
 #                                              stage opted in (--include-desktop)
-#   --update-method  hermes-update      `hermes update`
+#   --update-method  hermes-update      `noone update`
 #                    installer-script   re-run install.sh (HEAD's copy)
 #                    installer-script+desktop  re-run with --include-desktop
 #                    hermes-desktop-app-update  launch the app via `hermes
@@ -232,8 +232,8 @@ assert_checkout() {
     --root "$INSTALL_DIR" --launcher "$hermes" --desktop "$EXPECT_DESKTOP" \
     || fail "read-only verification failed at $2; no repair was attempted"
   HERMES_DISABLE_LAZY_INSTALLS=1 PYTHONDONTWRITEBYTECODE=1 source_build_env "$hermes" --version 2>&1 | ts_prefix > "$LOG_DIR/version-$2.log" \
-    || fail "hermes --version failed after $2; log in $LOG_DIR/version-$2.log"
-  ok "hermes --version works: $(head -c 120 "$LOG_DIR/version-$2.log" | tr -d '\n')"
+    || fail "noone --version failed after $2; log in $LOG_DIR/version-$2.log"
+  ok "noone --version works: $(head -c 120 "$LOG_DIR/version-$2.log" | tr -d '\n')"
 }
 
 desktop_checkpoint() { # phase, expected commit, selected method
@@ -275,7 +275,7 @@ close_running_desktop() {
     "$HERMES_DESKTOP_USER_DATA_DIR/SingletonCookie"
 }
 
-# The redirect must stay at TRANSPORT level. `hermes update` resolves its
+# The redirect must stay at TRANSPORT level. `noone update` resolves its
 # update channel from the release archive and validates the record against
 # `git config --get remote.origin.url`; if the configured URL ever looked like
 # the rehearsal source, channel resolution would fail outright and the leg
@@ -284,8 +284,8 @@ assert_redirect_is_transport_only() {
   # Either official form is valid: the installer clones over SSH or HTTPS
   # depending on the environment, and both are "the official URL" as far as
   # channel resolution is concerned.
-  local official_https='https://github.com/NousResearch/hermes-agent.git'
-  local official_ssh='git@github.com:NousResearch/hermes-agent.git'
+  local official_https='https://github.com/Garudex-Labs/NoOne.git'
+  local official_ssh='git@github.com:Garudex-Labs/NoOne.git'
   local configured observed
   configured="$(git -C "$INSTALL_DIR" config --get remote.origin.url)"
   case "$configured" in
@@ -431,8 +431,8 @@ case "$UPDATE_METHOD" in
     build_source_update_command "$HERMES" "$help"
     rc=0
     (cd "$INSTALL_DIR" && source_build_env "${update_cmd[@]}" < /dev/null 2>&1 | ts_prefix > "$LOG_DIR/update.log") || rc=$?
-    log_group "hermes update transcript" "$LOG_DIR/update.log"
-    [ "$rc" -eq 0 ] || fail "hermes update exited $rc; transcript above, log at $LOG_DIR/update.log"
+    log_group "noone update transcript" "$LOG_DIR/update.log"
+    [ "$rc" -eq 0 ] || fail "noone update exited $rc; transcript above, log at $LOG_DIR/update.log"
     ;;
   installer-script)
     # A user re-running the one-liner today gets the CURRENT script.

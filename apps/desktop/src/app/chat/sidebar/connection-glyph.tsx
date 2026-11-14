@@ -1,5 +1,6 @@
+import { Cloud, Monitor, Network, Terminal } from '@noone/ui/icons'
+
 import type { DesktopRegistryConnection } from '@/global'
-import { Cloud, Monitor, Network, Terminal } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 import { SIDEBAR_ROW_LEAD } from './row-geometry'

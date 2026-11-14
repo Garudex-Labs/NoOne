@@ -15,8 +15,8 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from hermes_constants import (
-    get_hermes_home, get_scratch_dir, get_skills_dir, is_wsl, reset_hermes_home_override, set_hermes_home_override,
+from agent_constants import (
+    get_agent_home, get_scratch_dir, get_skills_dir, is_wsl, reset_agent_home_override, set_agent_home_override,
 )
 
 from agent.model_metadata import CHARS_PER_TOKEN
@@ -93,7 +93,7 @@ def _scan_context_content(content: str, filename: str, *, user_authored: bool = 
     supply it — so a user who *documents* "ignore previous instructions" in their security guidance
     must not lose their whole identity file to a one-line log entry (#112570). Project-dir files
     (repo AGENTS.md / .cursorrules / .hermes.md) arrive with the checkout and keep blocking, and so does
-    a SOUL.md owned by a profile distribution (``hermes profile install <git-url>`` copies it in unscanned;
+    a SOUL.md owned by a profile distribution (``noone profile install <git-url>`` copies it in unscanned;
     ``load_soul_md`` passes ``user_authored=False`` when ``distribution.yaml`` owns the file).
     """
     # A leading UTF-8 BOM is a Windows-editor artifact, not an injection.
@@ -160,7 +160,7 @@ def _strip_yaml_frontmatter(content: str) -> str:
 DEFAULT_AGENT_IDENTITY = (
     # A behavior spec (sizing rule, named prohibitions, earned-depth escape hatch), not a trait list — trait
     # lists change nothing. Maintainer rule: models UNDER-explore by default; never re-add an exploration-thrift line.
-    "You are Hermes Agent, built by Nous Research. Be direct: match the length of your reply to the weight of the ask "
+    "You are {app_name}. Be direct: match the length of your reply to the weight of the ask "
     "— a one-line question gets a one-line answer, and finished work gets a short report of what changed, what's "
     "verified, and what's left, never a replay of the process. No filler (\"Great question,\" \"I'd be happy to\"), no "
     "restating the request back, no re-summarizing what you already said, no narrating tool calls the user can see. "
@@ -173,19 +173,19 @@ HERMES_AGENT_HELP_GUIDANCE = (
     # resolution). No "when the two differ" clause: docs-are-authoritative already carries the precedence.
     # Names Hermes Agent without restating identity: SOUL.md line 1 already says who you are, while a custom
     # persona (no Hermes identity line) still learns from "Hermes Agent itself" + "your own features" what it runs on.
-    "For help with Hermes Agent itself — configuring, setting up, using, extending, or troubleshooting it — "
+    "For help with {app_name} itself — configuring, setting up, using, extending, or troubleshooting it — "
     "or to understand your own features, tools, or capabilities, the documentation at "
-    "https://hermes-agent.nousresearch.com/docs is your "
+    "https://github.com/Garudex-Labs/NoOne/tree/main/website/docs is your "
     "authoritative reference and always holds the latest, most up-to-date information. The `hermes-agent` "
     "skill has the actual commands and proven workflows — load it with skill_view(name='hermes-agent') "
-    "before configuring, modifying, or troubleshooting Hermes so you don't guess or invent workarounds."
+    "before configuring, modifying, or troubleshooting {app_name} so you don't guess or invent workarounds."
 )
 
 # Variant for sessions without the skills toolset (e.g. Blank Slate): naming skill_view() there would dangle.
 HERMES_AGENT_HELP_GUIDANCE_NO_SKILLS = (
-    "For help with Hermes Agent itself — configuring, setting up, using, extending, or troubleshooting it — "
+    "For help with {app_name} itself — configuring, setting up, using, extending, or troubleshooting it — "
     "or to understand your own features, tools, or capabilities, the documentation at "
-    "https://hermes-agent.nousresearch.com/docs is the "
+    "https://github.com/Garudex-Labs/NoOne/tree/main/website/docs is the "
     "authoritative reference and always holds the latest, most up-to-date information. Point the user there "
     "(or read it yourself if you have a way to fetch web content)."
 )
@@ -325,11 +325,11 @@ KANBAN_GUIDANCE = (
     "- **Created cards.** List ids in `kanban_complete(created_cards=[...])` ONLY when captured from a successful "
     "`kanban_create` return — never invent or paste ids; the kernel rejects the completion on any phantom id.\n"
     "- **Orchestrating: discover profiles first.** The dispatcher SILENTLY drops a card with an unknown assignee (it "
-    "sits in `ready` forever). Ground every assignee in a real profile (`hermes profile list`, or ask the user), and "
+    "sits in `ready` forever). Ground every assignee in a real profile (`noone profile list`, or ask the user), and "
     "express dependencies via `parents=[...]` on `kanban_create`, not prose.\n"
     "\n"
     "## Do NOT\n\n"
-    "- Do not shell out to `hermes kanban <verb>` for board operations. Use the `kanban_*` tools — they work across "
+    "- Do not shell out to `noone kanban <verb>` for board operations. Use the `kanban_*` tools — they work across "
     "all terminal backends.\n"
     "- Do not complete a task you didn't actually finish. Block it.\n"
     "- Do not call `clarify` to ask questions. You are running headless — there is no live user to answer. The call "
@@ -568,7 +568,7 @@ STEER_MARKER_CLOSE = "[/OUT-OF-BAND USER MESSAGE]"
 # handoff and its fallbacks, runtime/system notes, agent.context_compressor._SYNTHETIC_USER_ROW_PREFIXES,
 # agent.title_generator._MACHINE_PREFIXES). Consumers that republish model output as role=user text
 # (hosted rooms) relabel these so a reply cannot reproduce the exact trusted shape. Keep the regex literal in
-# apps/desktop/src/plugins/hermes-bots/group-round-prompt.ts byte-equivalent to this list.
+# apps/desktop/src/plugins/bot-mode/group-round-prompt.ts byte-equivalent to this list.
 CONTROL_FRAME_OPENERS = (
     "/?OUT-OF-BAND USER MESSAGE", "CONTEXT COMPACTION", "CONTEXT SUMMARY]", "PRIOR CONTEXT", "Runtime note:",
     "System note:", "System:", "SYSTEM]", "IMPORTANT:", "Planning state preserved", "ASYNC DELEGATION",
@@ -719,7 +719,7 @@ PLATFORM_HINTS = {
 # ``platforms.telegram.extra.rich_messages: true`` (gateway.* or top-level).
 # NOTE: a "webui" hint lived here until 2026-08-29. It was a ghost (verified in the all-platform hint audit,
 # PR #97873): no code path constructs platform="webui" — the dashboard chat resolves to 'desktop' or 'tui'
-# (tui_gateway/server.py:_resolve_session_platform), and the browser chat tab is an xterm.js PTY hosting the
+# (agent_backend/server.py:_resolve_session_platform), and the browser chat tab is an xterm.js PTY hosting the
 # TUI, not an HTML chat renderer. Its content (tables/LaTeX/Mermaid, MEDIA: rich previews incl. Excalidraw)
 # described a renderer that does not exist anywhere in web/. If a real WebUI chat surface ships, write a
 # hint from its actual renderer — do not resurrect this text.
@@ -883,11 +883,11 @@ def _probe_remote_backend(env_type: str) -> str | None:
     """Describe the active non-local backend via a live probe; None if it failed (cached, failures included).
     None in a hosted scope: the probe builds and tears down a throwaway environment, and a hosted agent's
     only environment is its own sandbox."""
-    from hermes_constants import hermes_home_key
+    from agent_constants import agent_home_key
     from tools.hosted_tool_policy import host_feature_enabled
     if not host_feature_enabled("backend_probe"):
         return None
-    cache_key = (hermes_home_key(), env_type, _tenv_read("TERMINAL_CWD", ""))
+    cache_key = (agent_home_key(), env_type, _tenv_read("TERMINAL_CWD", ""))
     formatted = _BACKEND_PROBE_CACHE.get(cache_key)
     if formatted is None:
         formatted = ""
@@ -1004,7 +1004,7 @@ def _remote_backend_hint(backend: str) -> str:
 def _config_readonly(what: str) -> dict:
     """config.yaml as a dict, or {} when unreadable (logged at debug with *what* for context)."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from agent_cli.config import load_config_readonly
         return load_config_readonly()
     except Exception as e:
         logger.debug("Could not read %s from config: %s", what, e)
@@ -1090,7 +1090,7 @@ _SKILLS_SNAPSHOT_VERSION = 5
 
 
 def _skills_prompt_snapshot_path() -> Path:
-    return get_hermes_home() / ".skills_prompt_snapshot.json"
+    return get_agent_home() / ".skills_prompt_snapshot.json"
 
 
 def clear_skills_system_prompt_cache(*, clear_snapshot: bool = False) -> None:
@@ -1205,7 +1205,7 @@ def _plugin_skill_prompt_rows(
     or unloading a plugin removes its registry entries, so enablement gating is inherent."""
     rows: list[tuple[str, str]] = []
     try:
-        from hermes_cli.plugins import discover_plugins, get_plugin_manager
+        from agent_cli.plugins import discover_plugins, get_plugin_manager
         discover_plugins()  # idempotent; joins an in-flight discovery (same call skills_list makes)
         for meta in get_plugin_manager().list_plugin_skill_metadata():
             name = str(meta.get("name") or "")
@@ -1257,7 +1257,7 @@ def build_skills_system_prompt(
     _home_token = None
     if skills_dir_override is not None:
         skills_dir = Path(skills_dir_override)
-        _home_token = set_hermes_home_override(str(skills_dir.parent))
+        _home_token = set_agent_home_override(str(skills_dir.parent))
     else:
         skills_dir = get_skills_dir()
     try:
@@ -1270,7 +1270,7 @@ def build_skills_system_prompt(
             skills_dir, extra_roots, available_tools, available_toolsets, compact_categories)
     finally:
         if _home_token is not None:
-            reset_hermes_home_override(_home_token)
+            reset_agent_home_override(_home_token)
 
 
 def _entry_name(entry: dict) -> str:
@@ -1534,11 +1534,11 @@ def load_soul_md(context_length: Optional[int] = None, home_override: Path | Non
     if safe_worker_enabled() or not host_feature_enabled("context_files"):
         return None
     try:
-        from hermes_cli.config import ensure_hermes_home
+        from agent_cli.config import ensure_hermes_home
         ensure_hermes_home()
     except Exception as e:
         logger.debug("Could not ensure HERMES_HOME before loading SOUL.md: %s", e)
-    soul_path = (Path(home_override) if home_override is not None else get_hermes_home()) / "SOUL.md"
+    soul_path = (Path(home_override) if home_override is not None else get_agent_home()) / "SOUL.md"
     if not soul_path.exists():
         return None
     try:
@@ -1550,11 +1550,11 @@ def load_soul_md(context_length: Optional[int] = None, home_override: Path | Non
             content = strip_legacy_protocol(content).strip()
         if not content:
             return None
-        # `hermes profile install <git-url>` / `profile update` plant a third-party SOUL.md into a
-        # distribution profile (hermes_cli/profile_distribution.py, DEFAULT_DIST_OWNED) with no scan and no
+        # `noone profile install <git-url>` / `profile update` plant a third-party SOUL.md into a
+        # distribution profile (agent_cli/profile_distribution.py, DEFAULT_DIST_OWNED) with no scan and no
         # approval gate, so it is NOT the user's own file: when distribution.yaml owns SOUL.md (a manifest
         # with no `distribution_owned` list owns the whole payload) a scanner hit keeps BLOCKING.
-        from hermes_cli.profile_distribution import read_manifest
+        from agent_cli.profile_distribution import read_manifest
         try:
             manifest = read_manifest(soul_path.parent)
             user_authored = manifest is None or (bool(manifest.distribution_owned)
@@ -1744,7 +1744,7 @@ def build_context_files_prompt(
     cwd_path = Path(cwd if cwd is not None else os.getcwd()).resolve()
     if _project_context_suppressed(cwd, cwd_path, allow_install_tree_fallback):
         logger.warning(
-            "skipping project-context discovery: working-directory resolution fell back to the Hermes "
+            "skipping project-context discovery: working-directory resolution fell back to the agent "
             "install tree (%s) — set terminal.cwd to your project directory", cwd_path,
         )
         sections = []

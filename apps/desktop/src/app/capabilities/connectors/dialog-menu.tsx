@@ -1,5 +1,6 @@
+import { AppIcon } from '@noone/ui/app-icon'
+
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +28,7 @@ export function ConnectorDialogMenu({ onDisconnect, onReconnect, onRefreshTools 
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button aria-label={copy.dialog.moreActions} size="icon-xs" variant="ghost">
-          <Codicon name="ellipsis" size="0.8125rem" />
+          <AppIcon name="ellipsis" size="0.8125rem" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

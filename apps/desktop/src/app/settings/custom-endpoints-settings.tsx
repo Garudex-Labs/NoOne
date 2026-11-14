@@ -1,20 +1,20 @@
 import { useStore } from '@nanostores/react'
+import { Check, Globe, Loader2, Plus, Save, Trash2, Zap } from '@noone/ui/icons'
 import { useEffect, useRef, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { SegmentedControl } from '@/components/ui/segmented-control'
 import {
   activateCustomEndpoint,
   deleteCustomEndpoint,
   getCustomEndpoints,
   saveCustomEndpoint,
   validateCustomEndpoint
-} from '@/hermes'
+} from '@/agent-client'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { SegmentedControl } from '@/components/ui/segmented-control'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { Check, Globe, Loader2, Plus, Save, Trash2, Zap } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { confirm } from '@/store/confirm'
 import { notify, notifyError } from '@/store/notifications'
@@ -24,7 +24,7 @@ import type {
   CustomEndpointApiMode,
   CustomEndpointModelDetail,
   CustomEndpointUpdate
-} from '@/types/hermes'
+} from '@/types/agent-client'
 
 import { ComboboxInput } from './combobox-input'
 import { EmptyState, Pill, SectionHeading, SettingsContent, SettingsSkeleton } from './primitives'
@@ -47,7 +47,7 @@ interface EndpointForm {
   name: string
 }
 
-// Same choices as `hermes model`'s custom-provider setup; '' = runtime auto-detect.
+// Same choices as `noone model`'s custom-provider setup; '' = runtime auto-detect.
 const API_MODE_OPTIONS: readonly { id: CustomEndpointApiMode; label: string }[] = [
   { id: '', label: 'Auto-detect' },
   { id: 'chat_completions', label: 'Chat Completions' },

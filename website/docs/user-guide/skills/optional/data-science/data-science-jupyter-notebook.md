@@ -1,40 +1,48 @@
 ---
 title: "Jupyter Notebook — Iterative Python via live Jupyter kernel (hamelnb)"
-sidebar_label: "Jupyter Notebook"
+sidebarTitle: "Jupyter Notebook"
 description: "Iterative Python via live Jupyter kernel (hamelnb)"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Jupyter Notebook
+# Jupyter Notebook {#jupyter-notebook}
 
 Iterative Python via live Jupyter kernel (hamelnb).
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/data-science/jupyter-notebook` |
+| Source | Optional — install with `noone skills install official/data-science/jupyter-notebook` |
 | Path | `optional-skills/data-science/jupyter-notebook` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | {{app-name}} |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `jupyter`, `notebook`, `repl`, `data-science`, `exploration`, `iterative` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# Jupyter Notebook (hamelnb live kernel)
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# Jupyter Notebook (hamelnb live kernel) {#jupyter-notebook-hamelnb-live-kernel}
 
 Gives you a **stateful Python REPL** via a live Jupyter kernel. Variables persist
 across executions. Use this instead of `execute_code` when you need to build up
 state incrementally, explore APIs, inspect DataFrames, or iterate on complex code.
 
-## When to Use This vs Other Tools
+## When to Use This vs Other Tools {#when-to-use-this-vs-other-tools}
 
 | Tool | Use When |
 |------|----------|
@@ -44,13 +52,13 @@ state incrementally, explore APIs, inspect DataFrames, or iterate on complex cod
 
 **Rule of thumb:** If you'd want a Jupyter notebook for the task, use this skill.
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 1. **uv** must be installed (check: `which uv`)
 2. **JupyterLab** must be installed: `uv tool install jupyterlab`
 3. A Jupyter server must be running (see Setup below)
 
-## Setup
+## Setup {#setup}
 
 The hamelnb script location:
 ```
@@ -62,7 +70,7 @@ If not cloned yet:
 git clone https://github.com/hamelsmu/hamelnb.git ~/.agent-skills/hamelnb
 ```
 
-### Starting JupyterLab
+### Starting JupyterLab {#starting-jupyterlab}
 
 Check if a server is already running:
 ```
@@ -78,7 +86,7 @@ sleep 3
 
 Note: Token/password disabled for local agent access. The server runs headless.
 
-### Creating a Notebook for REPL Use
+### Creating a Notebook for REPL Use {#creating-a-notebook-for-repl-use}
 
 If you just need a REPL (no existing notebook), create a minimal notebook file:
 ```
@@ -92,18 +100,18 @@ curl -s -X POST http://127.0.0.1:8888/api/sessions \
   -d '{"path":"scratch.ipynb","type":"notebook","name":"scratch.ipynb","kernel":{"name":"python"}}'
 ```
 
-## Core Workflow
+## Core Workflow {#core-workflow}
 
 All commands return structured JSON. Always use `--compact` to save tokens.
 
-### 1. Discover servers and notebooks
+### 1. Discover servers and notebooks {#1-discover-servers-and-notebooks}
 
 ```
 uv run "$SCRIPT" servers --compact
 uv run "$SCRIPT" notebooks --compact
 ```
 
-### 2. Execute code (primary operation)
+### 2. Execute code (primary operation) {#2-execute-code-primary-operation}
 
 ```
 uv run "$SCRIPT" execute --path <notebook.ipynb> --code '<python code>' --compact
@@ -116,14 +124,14 @@ Multi-line code works with $'...' quoting:
 uv run "$SCRIPT" execute --path scratch.ipynb --code $'import os\nfiles = os.listdir(".")\nprint(f"Found {len(files)} files")' --compact
 ```
 
-### 3. Inspect live variables
+### 3. Inspect live variables {#3-inspect-live-variables}
 
 ```
 uv run "$SCRIPT" variables --path <notebook.ipynb> list --compact
 uv run "$SCRIPT" variables --path <notebook.ipynb> preview --name <varname> --compact
 ```
 
-### 4. Edit notebook cells
+### 4. Edit notebook cells {#4-edit-notebook-cells}
 
 ```
 # View current cells
@@ -141,7 +149,7 @@ uv run "$SCRIPT" edit --path <notebook.ipynb> replace-source \
 uv run "$SCRIPT" edit --path <notebook.ipynb> delete --cell-id <id> --compact
 ```
 
-### 5. Verification (restart + run all)
+### 5. Verification (restart + run all) {#5-verification-restart--run-all}
 
 Only use when the user asks for a clean verification or you need to confirm
 the notebook runs top-to-bottom:
@@ -150,7 +158,7 @@ the notebook runs top-to-bottom:
 uv run "$SCRIPT" restart-run-all --path <notebook.ipynb> --save-outputs --compact
 ```
 
-## Practical Tips from Experience
+## Practical Tips from Experience {#practical-tips-from-experience}
 
 1. **First execution after server start may timeout** — the kernel needs a moment
    to initialize. If you get a timeout, just retry.
@@ -188,7 +196,7 @@ uv run "$SCRIPT" restart-run-all --path <notebook.ipynb> --save-outputs --compac
     `--ServerApp.disable_check_xsrf=True` — otherwise POST /api/sessions returns
     `"'_xsrf' argument missing from POST"` and kernel session creation fails.
 
-## Timeout Defaults
+## Timeout Defaults {#timeout-defaults}
 
 The script has a 30-second default timeout per execution. For long-running
 operations, pass `--timeout 120`. Use generous timeouts (60+) for initial

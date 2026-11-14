@@ -11,7 +11,7 @@
 #   * Env vars blanked (conftest.py also does this, but this
 #     is belt-and-suspenders for anyone running pytest outside our
 #     conftest path — e.g. on a single file)
-#   * The checkout's test environment (via scripts/run-in-hermes-env when needed)
+#   * The checkout's test environment (via scripts/run-in-agent-env when needed)
 #
 # Usage:
 #   scripts/run_tests.sh                            # full suite
@@ -40,7 +40,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # ── Locate python ───────────────────────────────────────────────────────────
 # The suite runs under the checkout's isolated test environment (pm.testenv),
 # and only there: unless the inherited environment is current for this
-# checkout, this script re-executes itself under scripts/run-in-hermes-env,
+# checkout, this script re-executes itself under scripts/run-in-agent-env,
 # which syncs and applies it. That holds however the script is launched
 # (`scripts/run_tests.sh`, `bash scripts/run_tests.sh`, from CI or a shell), so
 # a branch switch or lock edit never runs the suite against the previous
@@ -60,7 +60,7 @@ _has_pytest() { [ -n "$1" ] && [ -x "$1" ] && "$1" -c 'import pytest' 2>/dev/nul
 # records this checkout's pins (_store_has_pins). The check runs unlocked
 # before `pm install` takes the store's install lock, so it keeps runs that
 # START on different pins apart; it does not cover the window in between, where
-# the account's own `hermes update` (or a run on other pins) can re-point
+# the account's own `noone update` (or a run on other pins) can re-point
 # facts.json and this run's `pm install` then re-stages its pins over them.
 # Only this runner's own provisioning gets HERMES_RUNTIME_DIR: the pytest
 # children below start from `env -i` without it, so tests that exercise setup,
@@ -92,7 +92,7 @@ _store_has_pins() {
 if _shared="$(_account_tool_store)"; then
   _account="${_shared%%$'\n'*}"
   export HERMES_RUNTIME_DIR="$_account/.hermes/tools"
-  # setup-hermes.sh's uv-managed bootstrap interpreter is the same kind of
+  # setup-agent.sh's uv-managed bootstrap interpreter is the same kind of
   # cache, but only reused: a missing pinned minor would download into it.
   if [ -z "${UV_PYTHON_INSTALL_DIR:-}" ] && [ -w "$_account/.local/share/uv/python" ] \
       && compgen -G "$_account/.local/share/uv/python/cpython-${_shared#*$'\n'}[.-]*" >/dev/null; then
@@ -107,12 +107,12 @@ if [ -z "${__HERMES_ACTIVATED:-}" ] && _has_pytest "${HERMES_PYTHON:-}"; then
 else
   if ! hermes_activation_current "$REPO_ROOT"; then
     if [ -n "${__HERMES_TESTS_REEXEC:-}" ]; then
-      echo "error: run-in-hermes-env did not produce a current environment for $REPO_ROOT" >&2
+      echo "error: run-in-agent-env did not produce a current environment for $REPO_ROOT" >&2
       exit 1
     fi
-    echo "▶ environment missing or stale for $REPO_ROOT — re-running under run-in-hermes-env" >&2
+    echo "▶ environment missing or stale for $REPO_ROOT — re-running under run-in-agent-env" >&2
     export __HERMES_TESTS_REEXEC=1
-    exec "$SCRIPT_DIR/run-in-hermes-env" "$BASH" "${BASH_SOURCE[0]}" "$@"
+    exec "$SCRIPT_DIR/run-in-agent-env" "$BASH" "${BASH_SOURCE[0]}" "$@"
   fi
   PYTHON="${__HERMES_TEST_PYTHON:-}"
   if ! _has_pytest "$PYTHON"; then
@@ -186,8 +186,8 @@ _pf86="$(env | sed -n 's/^ProgramFiles(x86)=//p' | head -n1)"
 #     subprocess rebuild the 5GB image from a cold builder cache instead
 #     (~4 min per worker per run, and the rebuilt image lacked the
 #     HERMES_GIT_SHA build-arg the workflow bakes in).
-#   * HERMES_E2E_REQUIRE_TUI turns a missing Ink TUI build into a failure in
-#     tests/e2e/core/terminal instead of a skip (set by the e2e CI job).
+#   * AGENT_E2E_REQUIRE_TOOLS enforces retained tmux/locked Node prerequisites
+#     in the Linux E2E lane, never silently skipping absent required tools.
 #   * CI / GITHUB_ACTIONS tell suites they run on a disposable runner (e.g.
 #     tests/e2e/core/upgrade runs the real updater unsandboxed only there).
 #   * HERMES_E2E_WINDOWS_INSTALL opts tests/e2e/core/windows_update into running
@@ -219,7 +219,7 @@ _pf86="$(env | sed -n 's/^ProgramFiles(x86)=//p' | head -n1)"
 TEST_ENV=()
 for _test_var in HERMES_TEST_IMAGE HERMES_TEST_WORKERS HERMES_TEST_PATHS \
   HERMES_TEST_FILE_TIMEOUT HERMES_TEST_FILE_RETRIES HERMES_TEST_SLICE HERMES_TEST_FORKSERVER \
-  SSL_CERT_FILE SSL_CERT_DIR HERMES_GATEWAY_LOCK_DIR HERMES_E2E_REQUIRE_TUI CI GITHUB_ACTIONS \
+  SSL_CERT_FILE SSL_CERT_DIR HERMES_GATEWAY_LOCK_DIR AGENT_E2E_REQUIRE_TOOLS CI GITHUB_ACTIONS \
   HERMES_E2E_WINDOWS_INSTALL HERMES_E2E_MACHINE_ROOT HERMES_E2E_PROFILES_ROOT HERMES_E2E_ARTIFACTS \
   HERMES_E2E_STRICT_ACCEPTANCE HERMES_E2E_UPGRADE_BASE HERMES_E2E_N1_REF \
   HERMES_E2E_INSTALL_REF HERMES_E2E_GIT_OBJECTS HERMES_E2E_KEEP_ROOT \

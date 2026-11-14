@@ -21,10 +21,10 @@ function Get-SourceHermes([string]$Root) {
 # Hand out a command to DRIVE the next ordinary startup, even when the
 # published launcher is not there yet.
 #
-# A pre-handoff release cannot flip during `hermes update` -- there is no
+# A pre-handoff release cannot flip during `noone update` -- there is no
 # retired-hook seam on its update path to reach, so the update ends with the
 # tree at HEAD and no `.hermes/bin/*`. The NEXT ordinary startup is what
-# completes it: hermes_bootstrap calls prepare_launch() before importing
+# completes it: agent_bootstrap calls prepare_launch() before importing
 # anything, which syncs PM, publishes the launchers and re-execs.
 #
 # Deliberately NOT used for `--version` probes: those stay under

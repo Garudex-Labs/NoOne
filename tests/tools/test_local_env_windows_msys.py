@@ -46,7 +46,7 @@ from tools.environments.local import (
     _resolve_safe_cwd,
     _sanitize_subprocess_env,
     _windows_to_msys_path,
-    hermes_subprocess_env,
+    agent_subprocess_env,
 )
 
 
@@ -60,7 +60,7 @@ class TestMsysToWindowsPath:
         # On a non-Windows host the function must never rewrite the path
         # — POSIX-style paths are real paths there.
         assert _msys_to_windows_path("/c/Users/NVIDIA") == "/c/Users/NVIDIA"
-        assert _msys_to_windows_path("/home/teknium") == "/home/teknium"
+        assert _msys_to_windows_path("/home/RAWx18") == "/home/RAWx18"
 
     @pytest.mark.platforms("windows")
     def test_translates_drive_path(self):
@@ -228,7 +228,7 @@ class TestWindowsMsysPathconvDefaults:
         assert env.get("MSYS_NO_PATHCONV") == "1"
 
     def test_hermes_subprocess_env_sets_msys_no_pathconv_on_windows(self):
-        env = hermes_subprocess_env()
+        env = agent_subprocess_env()
         assert env.get("MSYS_NO_PATHCONV") == "1"
 
     def test_msys2_arg_conv_excl_respects_user_override(self):

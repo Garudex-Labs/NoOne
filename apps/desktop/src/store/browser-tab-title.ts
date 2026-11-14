@@ -16,6 +16,7 @@
  * tab lists.
  */
 
+import { $appName } from '@noone/shared/application-identity'
 import { computed } from 'nanostores'
 
 import { $workspaceOwnerLabels, workspaceOwnerTitle } from '@/components/pane-shell/workspace-scope'
@@ -27,8 +28,6 @@ import { $sessions, sessionMatchesStoredId } from './session'
 import { $unreadSessionCount } from './session-dot-state'
 import { $focusedStoredSessionId } from './session-focus'
 import { $attentionSessionIds, $sessionTiles, $workingSessionIds } from './session-states'
-
-const APP_NAME = 'Hermes'
 
 export interface BrowserTabStatus {
   /** The focused session's name, or empty when it has none yet. */
@@ -45,7 +44,8 @@ export function browserTabTitle({ caption, needsInput, unread, working }: Browse
   // A blocking prompt is the only state that needs the user, so it speaks over
   // a running turn rather than beside it.
   const mark = needsInput ? '⚠' : working ? '●' : ''
-  const name = caption ? `${caption} · ${APP_NAME}` : APP_NAME
+  const applicationName = $appName.get()
+  const name = caption ? `${caption} · ${applicationName}` : applicationName
 
   return [unread > 0 ? `(${unread})` : '', mark, name].filter(Boolean).join(' ')
 }
@@ -76,7 +76,7 @@ const $focusedCaption = computed(
 )
 
 const $browserTabTitle = computed(
-  [$focusedCaption, $attentionSessionIds, $workingSessionIds, $unreadSessionCount],
+  [$focusedCaption, $attentionSessionIds, $workingSessionIds, $unreadSessionCount, $appName],
   (caption, attention, working, unread) =>
     browserTabTitle({ caption, needsInput: attention.length > 0, unread, working: working.length > 0 })
 )

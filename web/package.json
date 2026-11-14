@@ -4,7 +4,7 @@
   "engines": {
     "npm": "npm is refused here: run pnpm install --frozen-lockfile at the repository root"
   },
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,7 +18,8 @@
     "check": "pnpm run typecheck && pnpm run test && pnpm run lint"
   },
   "dependencies": {
-    "@hermes/shared": "workspace:*",
+    "@noone/ui": "workspace:*",
+    "@noone/shared": "workspace:*",
     "@nous-research/ui": "0.19.1",
     "@observablehq/plot": "0.6.17",
     "@react-three/fiber": "9.8.1",
@@ -32,7 +33,6 @@
     "clsx": "2.1.1",
     "gsap": "3.15.0",
     "leva": "0.10.1",
-    "lucide-react": "0.577.0",
     "motion": "12.43.0",
     "qrcode": "1.5.4",
     "react": "19.3.0",

@@ -3,7 +3,7 @@ import { atom } from 'nanostores'
 import type { ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { setApiRequestConnection, setApiRequestProfile } from '@/hermes'
+import { setApiRequestConnection, setApiRequestProfile } from '@/agent-client'
 import { clearVoiceClientConfigCache } from '@/lib/voice-client-direct'
 import { $autoSpeakReplies } from '@/store/voice-prefs'
 

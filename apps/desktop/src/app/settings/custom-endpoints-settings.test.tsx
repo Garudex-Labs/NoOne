@@ -4,7 +4,7 @@ import { atom } from 'nanostores'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { type I18nContextValue, I18nProvider, useI18n } from '@/i18n'
-import type { CustomEndpointsResponse } from '@/types/hermes'
+import type { CustomEndpointsResponse } from '@/types/agent-client'
 
 const getCustomEndpoints = vi.fn()
 const saveCustomEndpoint = vi.fn()
@@ -21,7 +21,7 @@ vi.mock('@/store/profile', () => ({
   profileLabel: (p: { display_name?: string; name: string }) => p.display_name || p.name
 }))
 
-vi.mock('@/hermes', async importOriginal => ({
+vi.mock('@/agent-client', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   activateCustomEndpoint: vi.fn(),
   deleteCustomEndpoint: vi.fn(),
@@ -100,12 +100,12 @@ describe('CustomEndpointsSettings', () => {
     fireEvent.change(screen.getByRole('textbox', { name: '端点 URL' }), { target: { value: 'http://fixture.test/v1' } })
     fireEvent.change(screen.getByRole('combobox', { name: '默认模型' }), { target: { value: 'fixture-model' } })
     fireEvent.click(screen.getByRole('button', { name: 'Responses API' }))
-    await act(() => language.setLocale('zh-hant'))
-    expect((screen.getByRole('textbox', { name: '名稱' }) as HTMLInputElement).value).toBe('Fixture Ω')
-    expect(screen.getByText('API 模式')).toBeTruthy()
-    expect(screen.getByRole('button', { name: '自動偵測' })).toBeTruthy()
+    await act(() => language.setLocale('hi'))
+    expect((screen.getByRole('textbox', { name: language.t.settings.customEndpoints.fields.name }) as HTMLInputElement).value).toBe('Fixture Ω')
+    expect(screen.getByText(language.t.settings.customEndpoints.apiMode)).toBeTruthy()
+    expect(screen.getByRole('button', { name: language.t.settings.customEndpoints.autoDetect })).toBeTruthy()
     expect(saveCustomEndpoint).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: '儲存' }))
+    fireEvent.click(screen.getByRole('button', { name: language.t.settings.customEndpoints.save }))
     expect(saveCustomEndpoint).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Fixture Ω',

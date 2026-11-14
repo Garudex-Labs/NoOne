@@ -8,8 +8,8 @@ import inspect
 import os
 from pathlib import Path
 
-from tui_gateway import server
-import hermes_state_registry as registry
+from agent_backend import server
+import agent_state_registry as registry
 
 
 original_target = server._config_model_target
@@ -40,5 +40,5 @@ def ownership(rid, params):
 server._methods["probe.ownership"] = ownership
 
 if __name__ == "__main__":
-    from hermes_cli.main import main
+    from agent_cli.main import main
     main()

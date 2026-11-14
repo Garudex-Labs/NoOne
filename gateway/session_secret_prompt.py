@@ -5,7 +5,7 @@ Main's classic CLI registered ``set_secret_capture_callback`` in process: a skil
 value was saved to the profile ``.env`` (``save_env_value_secure``) without ever reaching the model.
 On the session authority the skill runs in the gateway, where a gateway surface only got the
 "secret entry is not available" hint. For a local viewer's turn the owner now sends main's ``secret``
-server→client request (``tui_gateway/contracts/server_requests.py``: ``SecretRequestParams`` →
+server→client request (``agent_backend/contracts/server_requests.py``: ``SecretRequestParams`` →
 ``ValueResult``) to the attached viewers, saves a non-empty answer in this profile's ``.env`` here,
 and returns main's callback result. The value travels only in the viewer's response frame.
 """
@@ -16,7 +16,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-SECRET_TIMEOUT_S = 120  # main's CLI secret panel deadline (hermes_cli/callbacks.py)
+SECRET_TIMEOUT_S = 120  # main's CLI secret panel deadline (agent_cli/callbacks.py)
 
 
 def _skipped(var_name, reason, message):
@@ -44,7 +44,7 @@ def secret_prompt_scope(turn, agent):
                            cancelled=lambda: bool(getattr(agent, "_interrupt_requested", False)))
         if not value:
             return _skipped(var_name, "cancelled", "Secret setup was skipped.")
-        from hermes_cli.config import save_env_value_secure
+        from agent_cli.config import save_env_value_secure
         return {**save_env_value_secure(var_name, value), "skipped": False,
                 "message": "Secret stored securely. The secret value was not exposed to the model."}
 

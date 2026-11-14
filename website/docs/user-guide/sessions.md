@@ -1,18 +1,17 @@
 ---
-sidebar_position: 7
 title: "Sessions"
 description: "Session persistence, resume, search, management, and per-platform session tracking"
 ---
 
-import useBaseUrl from '@docusaurus/useBaseUrl';
+import { docUrl as useBaseUrl } from "/snippets/doc-link.jsx";
 
-# Sessions
+# Sessions {#sessions}
 
-Hermes Agent automatically saves every conversation as a session. Sessions enable conversation resume, cross-session search, and full conversation history management.
+{{app-name}} automatically saves every conversation as a session. Sessions enable conversation resume, cross-session search, and full conversation history management.
 
-## How Sessions Work
+## How Sessions Work {#how-sessions-work}
 
-Every conversation — whether from the CLI, Telegram, Discord, Slack, WhatsApp, Signal, Matrix, Teams, or any other messaging platform — is stored as a session with full message history. Sessions are tracked in:
+Every conversation — whether from the CLI, Telegram, Discord, Slack, WhatsApp, Signal, Teams, or any other messaging platform — is stored as a session with full message history. Sessions are tracked in:
 
 1. **SQLite database** (`~/.hermes/state.db`) — structured session metadata with FTS5 full-text search, plus full message history
 
@@ -26,10 +25,10 @@ The SQLite database stores:
 - Timestamps (started_at, ended_at)
 - Parent session ID (for compression-triggered session splitting)
 
-### Authenticated gateway session access and attribution
+### Authenticated gateway session access and attribution {#authenticated-gateway-session-access-and-attribution}
 
 The gateway owns execution; a client does not own the running agent. Verified
-operators of the same gateway profile can attach to canonical local CLI, TUI, or
+operators of the same gateway profile can attach to canonical local CLI, or
 Desktop sessions created through another operator authentication method. For
 example, a native local operator and an authenticated dashboard operator can
 access the same conversation without creating another runtime. Closing a client
@@ -62,12 +61,12 @@ OpenAI-compatible API continuation of local sessions. A gateway crash is differe
 from a client disconnect: interrupted work becomes `unknown` rather than being
 automatically replayed, and may need resolution before queued followers proceed.
 
-### What Counts Toward Context
+### What Counts Toward Context {#what-counts-toward-context}
 
-Hermes stores session history so it can resume conversations, but it does not
+{{app-name}} stores session history so it can resume conversations, but it does not
 keep re-sending every byte it has ever handled. On each turn, the model sees
 the selected system prompt, the current conversation window, and any content
-Hermes explicitly injects for that turn.
+{{app-name}} explicitly injects for that turn.
 
 Media attachments are handled as turn-scoped inputs:
 
@@ -80,8 +79,8 @@ Media attachments are handled as turn-scoped inputs:
   the raw image, audio, or binary file bytes are not repeatedly copied into
   future prompts.
 
-For example, if a user sends an image and asks Hermes to make a meme from it,
-Hermes may inspect that image once with vision and run an image-processing
+For example, if a user sends an image and asks {{app-name}} to make a meme from it,
+{{app-name}} may inspect that image once with vision and run an image-processing
 script. Future turns do not automatically carry the original JPEG in context.
 They carry only whatever was written into the conversation, such as the user's
 request, a short image description, a local cache path, or the final assistant
@@ -93,44 +92,46 @@ repeated status reports, and detailed proof dumps. Prefer summaries, file
 paths, focused excerpts, and tool-backed lookups over copying large artifacts
 into chat.
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 Use `/compress` when a session gets long, `/new` for a fresh thread, and
-`hermes sessions prune` only when you want to delete old ended sessions from
+`noone sessions prune` only when you want to delete old ended sessions from
 storage. If `state.db` has simply grown large, start with the non-destructive
-option first: `hermes sessions optimize` merges FTS5 index segments and
+option first: `noone sessions optimize` merges FTS5 index segments and
 VACUUMs the database without touching any session data. With the gateway running, `prune`
 asks the gateway to delete the sessions it selected. `optimize`, and `prune` with no gateway
-running, refuse while another Hermes process (Desktop, dashboard, cron) holds `state.db`. Stop
+running, refuse while another {{app-name}} process (Desktop, dashboard, cron) holds `state.db`. Stop
 it first, or pass `--force`; see [Session storage recovery](session-storage-recovery.md).
 Compression reduces the active context; it is not a privacy delete.
 Pass a name to `/new` (e.g. `/new payments-refactor`) to set the new session's
 initial title up front — useful for finding it later with `/resume <name>` or
 in the `/sessions` picker.
-:::
 
-### Session Sources
+</Tip>
+
+### Session Sources {#session-sources}
 
 Each session is tagged with its source platform:
 
 | Source | Description |
 |--------|-------------|
-| `cli` | Interactive CLI (`hermes` or `hermes chat`) |
-| `oneshot` | Finite non-interactive runs: `hermes chat --oneshot -q`, `-Q`, `hermes -z`, and `-q` on non-TTY stdio. Hidden from the TUI, Desktop and dashboard session pickers (like `kanban` and `tool`), even when launched from inside a TUI or Desktop session — the run inherits that transport's environment but is not that conversation. Still counts as CLI history: `hermes -c` / `--resume latest` continue the last one-shot, and `hermes sessions list` shows it. An explicit `--source <tag>` always wins (`hermes chat -q --source tui` is stored as `tui`). |
+| `cli` | Interactive CLI (`hermes` or `noone chat`) |
+| `oneshot` | Finite non-interactive runs: `noone chat --oneshot -q`, `-Q`, `noone -z`, and `-q` on non-TTY stdio. Hidden from the TUI, Desktop and dashboard session pickers (like `kanban` and `tool`), even when launched from inside a TUI or Desktop session — the run inherits that transport's environment but is not that conversation. Still counts as CLI history: `noone -c` / `--resume latest` continue the last one-shot, and `noone sessions list` shows it. An explicit `--source <tag>` always wins (`noone chat -q --source tui` is stored as `tui`). |
 | `telegram` | Telegram messenger |
 | `discord` | Discord server/DM |
 | `slack` | Slack workspace |
 | `whatsapp` | WhatsApp messenger |
 | `signal` | Signal messenger |
-| `matrix` | Matrix rooms and DMs |
 | `mattermost` | Mattermost channels |
 | `email` | Email (IMAP/SMTP) |
 | `sms` | SMS via Twilio |
-| `dingtalk` | DingTalk messenger |
-| `feishu` | Feishu/Lark messenger |
-| `wecom` | WeCom (WeChat Work) |
 | `weixin` | Weixin (personal WeChat) |
-| `bluebubbles` | Apple iMessage via BlueBubbles macOS server |
-| `qqbot` | QQ Bot (Tencent QQ) via Official API v2 |
 | `homeassistant` | Home Assistant events (plugin) |
 | `webhook` | Incoming webhooks |
 | `api-server` | API server requests |
@@ -142,29 +143,29 @@ Each session is tagged with its source platform:
 
 A session compressed mid-conversation continues under the same source: the compression child of a `--source tool` or `oneshot` run is tagged the same way, so it inherits the same picker visibility.
 
-## CLI Session Resume
+## CLI Session Resume {#cli-session-resume}
 
 Resume previous conversations from the CLI using `--continue` or `--resume`:
 
-### Continue Last Session
+### Continue Last Session {#continue-last-session}
 
 ```bash
 # Resume the most recent CLI session
-hermes --continue
+noone --continue
 hermes -c
 
 # Or with the chat subcommand
-hermes chat --continue
-hermes chat -c
+noone chat --continue
+noone chat -c
 ```
 
 This looks up the most recent `cli` session from the SQLite database and loads its full conversation history.
 
-#### Per-Terminal Continue
+#### Per-Terminal Continue {#per-terminal-continue}
 
-A bare `-c` is terminal-aware: each CLI session drops a small breadcrumb file under `~/.hermes/terminal-sessions/` keyed by the terminal it runs in (tty device, tmux pane, kitty window, wezterm pane, Zellij pane, Windows Terminal session, ...). When you run `hermes -c` again in the *same* terminal, Hermes resumes that terminal's own session — so two panes side by side each continue their own conversation instead of both grabbing the globally most-recent one. If there's no breadcrumb for the terminal (first use, deleted session, or a stale breadcrumb older than 30 days), `-c` falls back to the most-recent-session behavior. `-c "name"` and `--resume` are unaffected. Disable with `session.terminal_continue: false` in `config.yaml`.
+A bare `-c` is terminal-aware: each CLI session drops a small breadcrumb file under `~/.hermes/terminal-sessions/` keyed by the terminal it runs in (tty device, tmux pane, kitty window, wezterm pane, Zellij pane, Windows Terminal session, ...). When you run `noone -c` again in the *same* terminal, {{app-name}} resumes that terminal's own session — so two panes side by side each continue their own conversation instead of both grabbing the globally most-recent one. If there's no breadcrumb for the terminal (first use, deleted session, or a stale breadcrumb older than 30 days), `-c` falls back to the most-recent-session behavior. `-c "name"` and `--resume` are unaffected. Disable with `session.terminal_continue: false` in `config.yaml`.
 
-### Resume by Name
+### Resume by Name {#resume-by-name}
 
 If you've given a session a title (see [Session Naming](#session-naming) below), you can resume it by name:
 
@@ -177,69 +178,77 @@ hermes -c "my project"
 hermes -c "my project"   # → resumes "my project #3"
 ```
 
-### Resume Specific Session
+### Resume Specific Session {#resume-specific-session}
 
 ```bash
 # Resume a specific session by ID
-hermes --resume 20250305_091523_a1b2c3d4
+noone --resume 20250305_091523_a1b2c3d4
 hermes -r 20250305_091523_a1b2c3d4
 
 # Resume by title
-hermes --resume "refactoring auth"
+noone --resume "refactoring auth"
 
 # Resume the most recent session — same lookup as -c
-hermes --resume latest
+noone --resume latest
 
 # Or with the chat subcommand
-hermes chat --resume 20250305_091523_a1b2c3d4
+noone chat --resume 20250305_091523_a1b2c3d4
 ```
 
-Session IDs are shown when you exit a CLI session, and can be found with `hermes sessions list`.
+Session IDs are shown when you exit a CLI session, and can be found with `noone sessions list`.
 
-:::note
+<Note>
+
+<div className="doc-callout-title">
+
+NOTE
+
+</div>
+
 `latest` is a reserved keyword for `--resume`. A session literally titled "latest" is still reachable by its ID or via `-c latest` (title match).
-:::
 
-### Resume in a Specific Directory
+</Note>
+
+### Resume in a Specific Directory {#resume-in-a-specific-directory}
 
 Pass `--in <dir>` to change into a directory before starting or resuming. Combined with `--resume latest` (or `-c`), the most recent session for that directory's workspace is picked — no need to `cd` first or remember session IDs:
 
 ```bash
 # Resume the latest session that belongs to ./my-project
-hermes --resume latest --in ./my-project
+noone --resume latest --in ./my-project
 
 # Works with the TUI too
-hermes --tui --resume latest --in ./my-project
+noone --cli --resume latest --in ./my-project
 ```
 
 `--in` also pins the session to that directory: the resumed session's recorded working directory is not restored (as if `--no-restore-cwd` were passed).
 
-### Resume Restores the Working Directory
+### Resume Restores the Working Directory {#resume-restores-the-working-directory}
 
 Resuming a CLI session also `cd`s back into the session's recorded working directory (its git repo root or project dir), so the conversation picks up in the workspace it belonged to. If you'd rather stay where you are, pass `--no-restore-cwd`:
 
 ```bash
-hermes --resume 20250305_091523_a1b2c3 --no-restore-cwd
+noone --resume 20250305_091523_a1b2c3 --no-restore-cwd
 ```
 
 A `↪ restored workspace dir: …` line confirms the switch. Restore failures never break the resume itself.
 
 Resuming an idle session picks up the profile's current config: toolsets, MCP servers, `terminal` settings, `max_turns`, checkpoints and the default reasoning effort. The session keeps its model, its launch flags and any `/reasoning` or workspace change you made. Side-task models (the `auxiliary:` section: compression, vision, title generation and the other helper calls) always come from the profile's current `config.yaml`, with their keys and the `providers:` entries they name, so an edit reaches existing sessions from their next side-task call. A session started with `--ignore-user-config` or `--safe-mode` never reads them. Any difference starts a new prompt-cache prefix, so the first turn after the resume costs more. A change to the `terminal` settings, even an unrelated one like `terminal.timeout`, also resets an earlier `cd` to the session's directory.
 
-### Filtering Sessions by Workspace
+### Filtering Sessions by Workspace {#filtering-sessions-by-workspace}
 
-`hermes sessions list` accepts `--workspace <needle>` to show only sessions whose workspace key (git repo root, else cwd) matches — by path substring or exact directory basename:
+`noone sessions list` accepts `--workspace <needle>` to show only sessions whose workspace key (git repo root, else cwd) matches — by path substring or exact directory basename:
 
 ```bash
 hermes sessions list --workspace my-project
 hermes sessions list --workspace ~/code/hermes-agent
 ```
 
-### Conversation Recap on Resume
+### Conversation Recap on Resume {#conversation-recap-on-resume}
 
-When you resume a session, Hermes displays a compact recap of the previous conversation in a styled panel before the input prompt:
+When you resume a session, {{app-name}} displays a compact recap of the previous conversation in a styled panel before the input prompt:
 
-<img className="docs-terminal-figure" src={useBaseUrl('/img/docs/session-recap.svg')} alt="Stylized preview of the Previous Conversation recap panel shown when resuming a Hermes session." />
+<img className="docs-terminal-figure" src={useBaseUrl('/img/docs/session-recap.svg')} alt="Stylized preview of the Previous Conversation recap panel shown when resuming a {{app-name}} session." />
 <p className="docs-figure-caption">Resume mode shows a compact recap panel with recent user and assistant turns before returning you to the live prompt.</p>
 
 The recap:
@@ -257,11 +266,19 @@ display:
   resume_display: minimal   # default: full
 ```
 
-:::tip
-Session IDs follow the format `YYYYMMDD_HHMMSS_<hex>` — CLI/TUI sessions use a 6-char hex suffix (e.g. `20250305_091523_a1b2c3`), gateway sessions use an 8-char suffix (e.g. `20250305_091523_a1b2c3d4`). You can resume by ID (full or unique prefix) or by title — both work with `-c` and `-r`.
-:::
+<Tip>
 
-## Cross-Platform Handoff
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+Session IDs follow the format `YYYYMMDD_HHMMSS_<hex>` — CLI sessions use a 6-char hex suffix (e.g. `20250305_091523_a1b2c3`), gateway sessions use an 8-char suffix (e.g. `20250305_091523_a1b2c3d4`). You can resume by ID (full or unique prefix) or by title — both work with `-c` and `-r`.
+
+</Tip>
+
+## Cross-Platform Handoff {#cross-platform-handoff}
 
 Use `/handoff <platform>` from a CLI session to transfer the live conversation to a messaging platform's home channel. The agent picks up exactly where the CLI left off — same session id, full role-aware transcript, tool calls and all.
 
@@ -301,17 +318,17 @@ What happens:
 
 **Limitation worth knowing:** for non-thread-capable platforms with multi-user group home channels, the synthetic turn keys as a DM-style session. This works for self-DM home channels (the typical setup) but isn't ideal for genuinely shared group chats. Threading covers Telegram / Discord / Slack / Matrix — by far the common case — so most setups never hit this.
 
-## Session Naming
+## Session Naming {#session-naming}
 
 Give sessions human-readable titles so you can find and resume them easily.
 
-### Auto-Generated Titles
+### Auto-Generated Titles {#auto-generated-titles}
 
-Hermes automatically generates a short descriptive title (3–7 words) for each session after the first exchange. This runs in a background thread using a fast auxiliary model, so it adds no latency. You'll see auto-generated titles when browsing sessions with `hermes sessions list` or `hermes sessions browse`.
+{{app-name}} automatically generates a short descriptive title (3–7 words) for each session after the first exchange. This runs in a background thread using a fast auxiliary model, so it adds no latency. You'll see auto-generated titles when browsing sessions with `noone sessions list` or `noone sessions browse`.
 
 Auto-titling only fires once per session and is skipped if you've already set a title manually.
 
-### Setting a Title Manually
+### Setting a Title Manually {#setting-a-title-manually}
 
 Use the `/title` slash command inside any chat session (CLI or gateway):
 
@@ -327,35 +344,35 @@ You can also rename existing sessions from the command line:
 hermes sessions rename 20250305_091523_a1b2c3d4 "refactoring auth module"
 ```
 
-### Title Rules
+### Title Rules {#title-rules}
 
 - **Unique** — no two sessions can share the same title
 - **Max 100 characters** — keeps listing output clean
 - **Sanitized** — control characters, zero-width chars, and RTL overrides are stripped automatically
 - **Normal Unicode is fine** — emoji, CJK, accented characters all work
 
-### Auto-Lineage on Compression
+### Auto-Lineage on Compression {#auto-lineage-on-compression}
 
-When a session's context is compressed (manually via `/compress` or automatically), Hermes creates a new continuation session. If the original had a title, the new session automatically gets a numbered title:
+When a session's context is compressed (manually via `/compress` or automatically), {{app-name}} creates a new continuation session. If the original had a title, the new session automatically gets a numbered title:
 
 ```
 "my project" → "my project #2" → "my project #3"
 ```
 
-When you resume by name (`hermes -c "my project"`), it automatically picks the most recent session in the lineage.
+When you resume by name (`noone -c "my project"`), it automatically picks the most recent session in the lineage.
 
-### /title in Messaging Platforms
+### /title in Messaging Platforms {#title-in-messaging-platforms}
 
 The `/title` command works in all gateway platforms (Telegram, Discord, Slack, WhatsApp):
 
 - `/title My Research` — set the session title
 - `/title` — show the current title
 
-## Session Management Commands
+## Session Management Commands {#session-management-commands}
 
-Hermes provides a full set of session management commands via `hermes sessions`:
+{{app-name}} provides a full set of session management commands via `noone sessions`:
 
-### List Sessions
+### List Sessions {#list-sessions}
 
 ```bash
 # List recent sessions (default: last 20)
@@ -389,9 +406,9 @@ Help me refactor the auth module please             2h ago        cli    2025030
 What's the weather in Las Vegas?                    3d ago        tele   20250303_101500_f
 ```
 
-### Export Sessions
+### Export Sessions {#export-sessions}
 
-`hermes sessions export` is one surface for every export format, selected with `--format`:
+`noone sessions export` is one surface for every export format, selected with `--format`:
 
 | Format | Output | Use it for |
 |--------|--------|------------|
@@ -404,7 +421,7 @@ Plus `--only user-prompts` for a prompts-only view (jsonl or md).
 
 All formats share the same selection knobs: `--session-id` for one session, or the full `prune`/`archive` filter set for bulk — `--older-than` / `--newer-than` / `--before` / `--after` (durations like `5h`/`2d`/`1w`, bare days, or ISO timestamps), `--source`, `--title`, `--model`, `--provider`, `--cwd`, `--min/--max-messages`, `--min/--max-tokens`, `--min/--max-cost`, `--min/--max-tool-calls`, `--user`, `--chat-id`, `--chat-type`, `--branch`, `--end-reason`. `--dry-run` previews the match set without writing. `--redact` scrubs secrets (API keys, tokens, credentials) from exported content on any format — recommended for anything you plan to share. Note: bulk filters match *ended* sessions; unfiltered `export` dumps everything, including active ones.
 
-#### JSONL (default)
+#### JSONL (default) {#jsonl-default}
 
 ```bash
 # Export all sessions to a JSONL file
@@ -428,9 +445,9 @@ Exported files contain one JSON object per line with full session metadata and e
 
 Filtered exports include matching pinned and archived sessions. Pinning protects a session from pruning, rather than excluding it from a backup. If an explicit `--session-id` cannot be resolved, export exits with a non-zero status and creates no output file.
 
-Each record also carries a `timings` block derived from the message timestamps, so a reader of an export attached to a bug report can tell a single long model gap from many small tool round-trips without reconstructing it by hand. It holds only ids, roles, counts and durations — `wall_clock_ms`, `largest_gap_ms`, `role_counts`, `tool_calls_emitted` and per-message `intervals` — never prompt text, tool arguments or results, so it survives `--redact` unchanged. Hermes does not persist a model/tool stopwatch, so `complete` is always `false`; when a session has no timestamped messages, `available` is `false` and `unavailable_reason` says why. The block is rebuilt on every export and ignored (and not counted toward size limits) on import.
+Each record also carries a `timings` block derived from the message timestamps, so a reader of an export attached to a bug report can tell a single long model gap from many small tool round-trips without reconstructing it by hand. It holds only ids, roles, counts and durations — `wall_clock_ms`, `largest_gap_ms`, `role_counts`, `tool_calls_emitted` and per-message `intervals` — never prompt text, tool arguments or results, so it survives `--redact` unchanged. {{app-name}} does not persist a model/tool stopwatch, so `complete` is always `false`; when a session has no timestamped messages, `available` is `false` and `unavailable_reason` says why. The block is rebuilt on every export and ignored (and not counted toward size limits) on import.
 
-#### HTML
+#### HTML {#html}
 
 `--format html` writes a single self-contained HTML file — no remote dependencies — with styled message bubbles, collapsible tool output, and (for multi-session exports) a sidebar to switch between sessions:
 
@@ -442,7 +459,7 @@ hermes sessions export --format html --session-id 20250305_091523_a1b2c3d4 trans
 hermes sessions export --format html --newer-than 1w --source telegram --redact archive.html
 ```
 
-#### Prompts Only
+#### Prompts Only {#prompts-only}
 
 `--only user-prompts` exports just the prompts you wrote — no assistant replies, tool output, or system context. Useful for building prompt libraries or reviewing what you asked:
 
@@ -456,7 +473,7 @@ hermes sessions export - --session-id 20250305_091523_a1b2c3d4 --only user-promp
 
 Works with `--format jsonl` (default) or `md`, honors the same filters for bulk export, and combines with `--redact`.
 
-#### Traces (HF Agent Trace Viewer)
+#### Traces (HF Agent Trace Viewer) {#traces-hf-agent-trace-viewer}
 
 `--format trace` emits Claude Code JSONL — the transcript shape the Hugging Face Hub auto-detects for its [Agent Trace Viewer](https://huggingface.co/docs/hub/agent-traces). Write it locally, or add `--upload` to push it to your own private `hermes-traces` dataset (reads `HF_TOKEN`):
 
@@ -473,7 +490,7 @@ hermes sessions export --format trace --session-id 20250305_091523_a1b2c3d4 --up
 
 Trace exports are secret-redacted by default (they're meant to leave the machine); `--no-redact` opts out after manual review. `--upload` is private unless `--public`. Bulk trace export with filters writes one `<id>.trace.jsonl` per session.
 
-#### Markdown / QMD
+#### Markdown / QMD {#markdown--qmd}
 
 Pass `--format md` or `--format qmd` when you want a readable, file-based archive before hiding or deleting old sessions. Markdown/QMD exports write one file per session into a directory (default: `~/.hermes/session-exports`).
 
@@ -497,9 +514,9 @@ hermes sessions export --format md --model sonnet --min-messages 50 --redact
 hermes sessions export --format md --session-id 20250305_091523_a1b2c3d4 --delete-after-verified --yes
 ```
 
-Markdown/QMD export writes one `.md` or `.qmd` file per exported session plus a `manifest.jsonl` with the file path, message count, lineage ids, and SHA-256. Bulk export requires at least one filter; a bare bulk export is refused. `--delete-after-verified` is intentionally limited to `--session-id` and requires `--yes`. Because deleting a parent session also removes its delegate/subagent sessions, this mode exports and verifies each delegate in a separate file before deleting anything. Markdown/QMD files hold the full history shown by the session, including turns archived by in-place compaction. Deletion compares that exact display transcript and the delegate set again inside the same database transaction that performs the delete; any intervening append, rewrite, rewind, compaction, or delegate change refuses deletion. The same display-history rule applies to `--format html`, `--only user-prompts` (with either Markdown or JSONL output), and `/save md|html`. Full-session JSON/JSONL exports (`hermes sessions export` without `--only`) and `/save json` (CLI, messaging, TUI, Desktop) are backups of every stored row, archived rows included (see [Export Sessions](#export-sessions)). `--redact` scrubs secrets (API keys, tokens, credentials) from message content and tool output before writing — recommended for any export you plan to share.
+Markdown/QMD export writes one `.md` or `.qmd` file per exported session plus a `manifest.jsonl` with the file path, message count, lineage ids, and SHA-256. Bulk export requires at least one filter; a bare bulk export is refused. `--delete-after-verified` is intentionally limited to `--session-id` and requires `--yes`. Because deleting a parent session also removes its delegate/subagent sessions, this mode exports and verifies each delegate in a separate file before deleting anything. Markdown/QMD files hold the full history shown by the session, including turns archived by in-place compaction. Deletion compares that exact display transcript and the delegate set again inside the same database transaction that performs the delete; any intervening append, rewrite, rewind, compaction, or delegate change refuses deletion. The same display-history rule applies to `--format html`, `--only user-prompts` (with either Markdown or JSONL output), and `/save md|html`. Full-session JSON/JSONL exports (`noone sessions export` without `--only`) and `/save json` (CLI, messaging, TUI, Desktop) are backups of every stored row, archived rows included (see [Export Sessions](#export-sessions)). `--redact` scrubs secrets (API keys, tokens, credentials) from message content and tool output before writing — recommended for any export you plan to share.
 
-### Delete a Session
+### Delete a Session {#delete-a-session}
 
 ```bash
 # Delete a specific session (with confirmation)
@@ -513,7 +530,7 @@ Deleting a session that is still open in a running chat does not stop that chat:
 
 Deleting a session while a turn is actively executing or compressing is refused (exits with code 1) to prevent transcript loss under the live agent. Wait for the active turn or compression to complete before deleting.
 
-### Rename a Session
+### Rename a Session {#rename-a-session}
 
 ```bash
 # Set or change a session's title
@@ -525,17 +542,17 @@ hermes sessions rename 20250305_091523_a1b2c3d4 debugging auth flow
 
 If the title is already in use by another session, an error is shown.
 
-### Discard a Turn Lost in a Gateway Crash
+### Discard a Turn Lost in a Gateway Crash {#discard-a-turn-lost-in-a-gateway-crash}
 
 If the gateway stops in the middle of a turn, that turn's outcome is unknown and it is never replayed. It blocks
-the session until you acknowledge it. Interactive `hermes chat --resume <id>` lists it and accepts
-`/discard <admission_id>`. A scripted `hermes chat --resume <id> -q` refuses with exit code 3 and submits nothing.
+the session until you acknowledge it. Interactive `noone chat --resume <id>` lists it and accepts
+`/discard <admission_id>`. A scripted `noone chat --resume <id> -q` refuses with exit code 3 and submits nothing.
 To clear it from a script:
 
 ```bash
 # Acknowledge every unknown (lost) turn on the session, then continue it
 hermes sessions discard 20250305_091523_a1b2c3d4 --yes
-hermes chat --resume 20250305_091523_a1b2c3d4 -q "next question"
+noone chat --resume 20250305_091523_a1b2c3d4 -q "next question"
 
 # Only one specific admission (repeatable); the session may also be named by title
 hermes sessions discard "debugging auth flow" --admission a9b59ad3ee914d75967def2a33435c88 --yes
@@ -545,7 +562,7 @@ Without `--yes` the command asks for confirmation, and it refuses (exit code 2) 
 The lost input stays in the transcript. Some of its actions may already have run, so check their effects before
 you resend it. Inputs queued behind it run once it is discarded.
 
-### Pin a Session
+### Pin a Session {#pin-a-session}
 
 Pinning sets a durable "keep" flag: pinned sessions are exempt from the
 `sessions.auto_archive` stale sweep and always appear in listings. It is the
@@ -574,7 +591,7 @@ hermes sessions pinned
 hermes sessions pinned --json > pinned-sessions.json
 ```
 
-### Prune Old Sessions
+### Prune Old Sessions {#prune-old-sessions}
 
 ```bash
 # Delete ended sessions inactive for 90 days (default)
@@ -630,24 +647,32 @@ exact), `--end-reason`, `--user`, `--chat-id`, `--chat-type` (exact),
 `--cwd` (path prefix), plus numeric bounds `--min/--max-messages`,
 `--min/--max-tokens` (input+output), `--min/--max-cost` (USD, actual falling
 back to estimated), and `--min/--max-tool-calls`. Using any filter disables
-the implicit 90-day default, so `hermes sessions prune --source cron` or
+the implicit 90-day default, so `noone sessions prune --source cron` or
 `--model gpt-4o` matches all ages — add a time flag to narrow it. Only a
-completely bare `hermes sessions prune` keeps the 90-day cutoff. Every
+completely bare `noone sessions prune` keeps the 90-day cutoff. Every
 non-`--yes` run shows the match count plus the oldest and newest matching
 session before asking for confirmation.
 
 Archived sessions are skipped by default; pass `--include-archived` to
 delete them too.
 
-:::info
+<Info>
+
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
 Pruning only deletes **ended** sessions (sessions that have been explicitly ended or auto-reset). Active sessions are never pruned.
 A conversation that compression split into several sessions is pruned as a unit: its older segments stay while any later segment does.
-:::
 
-### Bulk-Archive Sessions
+</Info>
+
+### Bulk-Archive Sessions {#bulk-archive-sessions}
 
 If you want sessions out of your listings without deleting anything,
-`hermes sessions archive` takes the same filters as `prune` but soft-hides
+`noone sessions archive` takes the same filters as `prune` but soft-hides
 matching sessions instead (sets the same archived flag as archiving a single
 session from the Desktop/Dashboard UI — messages and search stay intact):
 
@@ -669,20 +694,20 @@ sessions it skipped as still open; add `--include-open` to archive them too
 hermes sessions archive --title "Review Hermes" --include-open --yes
 ```
 
-At least one filter is required — a bare `hermes sessions archive` refuses to
+At least one filter is required — a bare `noone sessions archive` refuses to
 archive your entire history. A compacted conversation is archived as a unit
 through its live tip: an old compression segment never matches on its own age,
 so a chat that is still active is never hidden because its history is long.
 Archived sessions are hidden from
-`hermes sessions list` and `/resume` but remain in the database and can be
+`noone sessions list` and `/resume` but remain in the database and can be
 unarchived from the Desktop/Dashboard session list.
 
 A chat hidden by the `sessions.auto_archive` idle sweep comes back on its own
 once it is live again — when it is resumed, or when new activity compresses it
 into a fresh continuation. A chat you archived yourself (sidebar, API, or
-`hermes sessions archive`) stays archived until you unarchive it.
+`noone sessions archive`) stays archived until you unarchive it.
 
-### Session Statistics
+### Session Statistics {#session-statistics}
 
 ```bash
 hermes sessions stats
@@ -701,7 +726,7 @@ Database size: 12.4 MB
 
 For deeper analytics — token usage, cost estimates, tool breakdown, and activity patterns — use [`hermes insights`](../reference/cli-commands.md#hermes-insights).
 
-### Refresh Prompts After a Profile Update
+### Refresh Prompts After a Profile Update {#refresh-prompts-after-a-profile-update}
 
 A continuing session sends the same system prompt on every turn, the bytes it
 built on its first turn. Keeping those bytes fixed is what lets the provider
@@ -723,7 +748,7 @@ hermes sessions refresh-prompts --session SESSION_ID
 ```
 
 The command records a refresh request in the profile's `state.db` and prints
-how many sessions hold a stored prompt. On each session's next turn, Hermes
+how many sessions hold a stored prompt. On each session's next turn, {{app-name}}
 rebuilds the system prompt from the current sources and then sends the
 message. The conversation history, the session id and the session's tool list
 stay as they were. The rebuilt prompt is saved, so every later turn reuses it
@@ -742,7 +767,7 @@ byte for byte.
 - **Without the command** nothing changes: sessions keep replaying their
   stored prompt as before.
 
-### Repair Stranded Gateway Sessions
+### Repair Stranded Gateway Sessions {#repair-stranded-gateway-sessions}
 
 If a gateway conversation ever "jumps back in time" after a restart — resuming
 a days-old topic as though recent messages never happened — the live
@@ -750,7 +775,7 @@ conversation may be stranded in a session row that lost its routing identity
 (the damage class fixed in the v0.21 session-continuity work; current versions
 prevent it by construction and self-heal at runtime).
 
-`hermes sessions repair-routing` finds message-bearing session rows with no
+`noone sessions repair-routing` finds message-bearing session rows with no
 routing identity and re-attaches each one to the conversation it continues —
 but only when the evidence is unambiguous:
 
@@ -784,12 +809,12 @@ conversation stays readable via `/resume` and session search either way —
 routing is the only thing the repair changes. Back up first
 (`cp ~/.hermes/state.db ~/.hermes/state.db.bak`).
 
-### Repair Degraded Stored Prompts
+### Repair Degraded Stored Prompts {#repair-degraded-stored-prompts}
 
 Older builds affected by #122822 could let gateway hygiene or gateway `/compress`
 persist a detached maintenance agent's reduced-toolset system prompt over the
 live session. After the root fix in PR #122825 is installed, use
-`hermes sessions repair-prompts` to find rows that were already degraded.
+`noone sessions repair-prompts` to find rows that were already degraded.
 
 The scan is conservative: it only proposes a repair when the stored prompt is
 missing the `skill_manage` guidance line **and** the persisted `tools[]` pin
@@ -829,10 +854,10 @@ Run the repair only after the #122822 root fix is present; otherwise a later
 maintenance compaction can degrade the row again.
 
 A running gateway keeps each cached session's old prompt in memory, so restart
-the gateway after `--apply` (`hermes gateway restart`) for repaired rows to
+the gateway after `--apply` (`noone gateway restart`) for repaired rows to
 take effect.
 
-### Repair State Crossed Between Profiles
+### Repair State Crossed Between Profiles {#repair-state-crossed-between-profiles}
 
 Every profile owns one `state.db`, and every gateway session key names the
 profile that owns the conversation (`agent:main:…` for the default profile,
@@ -840,7 +865,7 @@ profile that owns the conversation (`agent:main:…` for the default profile,
 disagreeing — a named profile's rows written into the default store, a child
 session inheriting from another profile's row, a routing row copied into the
 wrong store, a Telegram topic or `/voice` setting saved without the bot's
-profile. Current versions put new state in the right place; `hermes sessions
+profile. Current versions put new state in the right place; `noone sessions
 repair-profiles` settles what is already crossed.
 
 ```bash
@@ -867,7 +892,7 @@ What it finds and does:
 
 Two cases are reported but never repaired without being told what they are:
 rows keyed to a profile that does not exist (create the profile, or
-`hermes profile migrate-identity <old> <new>`), and `agent:main:…` rows inside
+`noone profile migrate-identity <old> <new>`), and `agent:main:…` rows inside
 a named profile's store. The latter are either the history of a gateway that
 used to run standalone for that profile (`--legacy-main rekey` gives them the
 profile's namespace) or default-profile chats that leaked in under a scoped
@@ -879,12 +904,12 @@ index in memory and would write it back), and is safe to re-run: a second run
 finds nothing.
 
 
-### Convert the Store Between WAL and DELETE Journal Mode
+### Convert the Store Between WAL and DELETE Journal Mode {#convert-the-store-between-wal-and-delete-journal-mode}
 
-`database.journal_mode: delete` only applies to databases Hermes creates. An
+`database.journal_mode: delete` only applies to databases {{app-name}} creates. An
 existing `state.db` that is already in WAL mode is **never** live-downgraded at
 open — other gateway, dashboard or cron processes may hold uncheckpointed WAL
-commits, and a downgrade underneath them destroys those commits — so Hermes
+commits, and a downgrade underneath them destroys those commits — so {{app-name}}
 keeps WAL and logs one `ERROR` per process telling you the configured `delete`
 did not apply. The self-service conversion is:
 
@@ -904,16 +929,16 @@ because the next open re-applies the configured mode. The holder scan is local
 (open-file tables on Linux/macOS, the Restart Manager on Windows), so it
 cannot see a process in another container or VM sharing the volume. If the
 scan itself fails the command refuses because it cannot prove the store is
-quiet; `--force` waives only that case after you have stopped every Hermes
+quiet; `--force` waives only that case after you have stopped every {{app-name}}
 process yourself — a process the scan does find is always refused. Enabling
 WAL is also refused when the store sits on a cross-VM filesystem (virtiofs/9p),
 where WAL shared memory corrupts silently.
 
 
-## Importing Sessions from Claude Code and Codex CLI
+## Importing Sessions from Claude Code and Codex CLI {#importing-sessions-from-claude-code-and-codex-cli}
 
-Started a conversation in another agent CLI? You can pull it into Hermes and
-continue it here. Hermes reads Claude Code's session logs
+Started a conversation in another agent CLI? You can pull it into {{app-name}} and
+continue it here. {{app-name}} reads Claude Code's session logs
 (`~/.claude/projects/`, or `$CLAUDE_CONFIG_DIR/projects/` when Claude Code's
 config dir is relocated) and Codex CLI's rollouts (`~/.codex/sessions/`, or
 `$CODEX_HOME/sessions/`) — the foreign files are only read, never modified.
@@ -927,20 +952,20 @@ hermes sessions import --from claude
 hermes sessions import --from codex ~/.codex/sessions/2026/08/15/rollout-....jsonl
 
 # Import-and-resume in one step
-hermes --resume @claude
-hermes --resume @codex
+noone --resume @claude
+noone --resume @codex
 ```
 
-`hermes sessions import` creates a new Hermes session titled
+`noone sessions import` creates a new {{app-name}} session titled
 `Imported from Claude Code: <first user message>` (or Codex CLI) and prints
-the id plus a ready-to-paste `hermes --resume <id>` command.
+the id plus a ready-to-paste `noone --resume <id>` command.
 `--resume @claude` / `--resume @codex` show the same picker and drop you
 straight into the imported conversation.
 
-**Hermes Desktop** has the same importer in the command palette (**Import
+**{{app-name}} Desktop** has the same importer in the command palette (**Import
 session**). It lists the logs on the machine the
 connected backend runs on — not the computer running the app — shows a
-read-only preview, and **Continue in Hermes** copies the conversation into the
+read-only preview, and **Continue in {{app-name}}** copies the conversation into the
 selected profile. Browsing never writes to your session store, importing never
 touches the source file, and importing the same log twice opens the existing
 copy instead of making another.
@@ -951,11 +976,11 @@ System prompts, injected context, reasoning traces, and raw tool output are
 left behind — the import is a clean transcript, not a byte-for-byte replay.
 
 
-## Session Search Tool
+## Session Search Tool {#session-search-tool}
 
 The agent has a built-in `session_search` tool that performs full-text search across all past conversations using SQLite's FTS5 engine — and lets the agent scroll through any session it finds. It makes no LLM calls and returns views of actual messages from the DB rather than generating summaries.
 
-### Four calling shapes
+### Four calling shapes {#four-calling-shapes}
 
 The tool infers what you want from which arguments you set. There's no `mode` parameter.
 
@@ -1009,7 +1034,7 @@ session_search()
 
 Returns recent sessions chronologically (titles, previews, timestamps). Useful when the user asks "what was I working on" without naming a topic.
 
-### FTS5 query syntax
+### FTS5 query syntax {#fts5-query-syntax}
 
 The keyword mode supports standard FTS5 query syntax:
 
@@ -1018,13 +1043,13 @@ The keyword mode supports standard FTS5 query syntax:
 - Boolean: `docker OR kubernetes`, `python NOT java`
 - Prefix: `deploy*`
 
-### Optional parameters
+### Optional parameters {#optional-parameters}
 
 - `sort` — `newest` or `oldest`, on top of FTS5 ranking. Omit for relevance-only ordering (the default; suitable for exploratory recall). Use `newest` for "where did we leave X" questions, `oldest` for "how did X start" questions.
 - `detail` — `adaptive` (default) fully hydrates only the top discovery result; `full` hydrates every discovery result.
 - `role_filter` — comma-separated roles to include. Discovery defaults to `user,assistant` (tool output is usually noise). Pass `user,assistant,tool` to include tool output (debugging tool behaviour) or `tool` to search tool output only.
 
-### When It's Used
+### When It's Used {#when-its-used}
 
 The agent is prompted to use session search automatically:
 
@@ -1032,9 +1057,9 @@ The agent is prompted to use session search automatically:
 
 Typical triggers: "we did this before", "remember when", "last time", "as I mentioned", or any reference to a project/person/concept that isn't in the current window.
 
-## Per-Platform Session Tracking
+## Per-Platform Session Tracking {#per-platform-session-tracking}
 
-### Gateway Sessions
+### Gateway Sessions {#gateway-sessions}
 
 On messaging platforms, sessions are keyed by a deterministic session key built from the message source:
 
@@ -1047,13 +1072,13 @@ On messaging platforms, sessions are keyed by a deterministic session key built 
 | Group thread/topic | `agent:main:<platform>:group:<chat_id>:<thread_id>` | Shared session for all thread participants (default). Per-user with `thread_sessions_per_user: true`. |
 | Channel | `agent:main:<platform>:channel:<chat_id>:<user_id>` | Per-user inside the channel when the platform exposes a user ID |
 
-When Hermes cannot get a participant identifier for a shared chat, it falls back to one shared session for that room.
+When {{app-name}} cannot get a participant identifier for a shared chat, it falls back to one shared session for that room.
 
-### Shared vs Isolated Group Sessions
+### Shared vs Isolated Group Sessions {#shared-vs-isolated-group-sessions}
 
-By default, Hermes uses `group_sessions_per_user: true` in `config.yaml`. That means:
+By default, {{app-name}} uses `group_sessions_per_user: true` in `config.yaml`. That means:
 
-- Alice and Bob can both talk to Hermes in the same Discord channel without sharing transcript history
+- Alice and Bob can both talk to {{app-name}} in the same Discord channel without sharing transcript history
 - one user's long tool-heavy task does not pollute another user's context window
 - a running turn is keyed to the sender that started it, but `/stop` still reaches it — see below
 
@@ -1073,20 +1098,20 @@ group_sessions_per_user: false
 
 That reverts groups/channels to a single shared session per room, which preserves shared conversational context but also shares token costs, interrupt state, and context growth.
 
-### Session continuity
+### Session continuity {#session-continuity}
 
 Gateway conversations do not reset after inactivity or at a daily boundary. Use `/new`
 or `/reset` for an explicit new conversation; context compression remains automatic.
 Core ignores legacy `session_reset` settings, reset-policy overrides and reset-timer
 environment variables. If your config still sets `session_reset.mode` to `idle`, `daily`
-or `both`, gateway startup and `hermes doctor` warn about it. To keep time-based resets,
+or `both`, gateway startup and `noone doctor` warn about it. To keep time-based resets,
 install the catalog plugin that reads the same block unchanged:
-`hermes plugins install hermes-session-reset-policy`. Cached agents may be released to reclaim resources without
+`noone plugins install hermes-session-reset-policy`. Cached agents may be released to reclaim resources without
 replacing the durable conversation. Restart-recovery freshness limits automatic
 continuation, not the history loaded when you send a message.
 
 **`/new` moves only the view that ran it.** One session can be open in several
-places at once — a Desktop window, the TUI, a `hermes chat --resume` terminal, an
+places at once — a Desktop window, the TUI, a `noone chat --resume` terminal, an
 ACP editor, a Telegram topic — all attached to the same live conversation on the
 gateway. Running `/new` (or `/reset`) in one of them creates a fresh session and
 rebinds *that* window or chat route to it. The other viewers stay on the original
@@ -1094,7 +1119,7 @@ session, its history is untouched, and a turn already running there keeps runnin
 Ending or clearing the shared conversation is a separate, explicit action (Stop, then
 `/new`; or a delete, which is refused while a turn is live).
 
-### Session hygiene: why you should still run `/new`
+### Session hygiene: why you should still run `/new` {#session-hygiene-why-you-should-still-run-new}
 
 Because gateway conversations never expire on their own, it is easy to run one
 session for weeks. That works, but it quietly defeats the learning loop and
@@ -1121,7 +1146,7 @@ gateway is **not** a boundary — the same session resumes.
 See [Memory](features/memory.md) for what gets carried across boundaries.
 
 
-### Continuity After Crashes and Restarts
+### Continuity After Crashes and Restarts {#continuity-after-crashes-and-restarts}
 
 A gateway chat is designed to be **one continuous session** — compacted
 repeatedly as it grows — until you explicitly run `/new` (or `/reset`). This
@@ -1140,7 +1165,7 @@ holds across gateway crashes, restarts, and updates:
   recovery of a durable conversation.
 
 
-## Storage Locations
+## Storage Locations {#storage-locations}
 
 | What | Path | Description |
 |------|------|-------------|
@@ -1151,7 +1176,14 @@ holds across gateway crashes, restarts, and updates:
 
 The SQLite database uses WAL mode for concurrent readers and a single writer, which suits the gateway's multi-platform architecture well.
 
-:::warning `sessions.json` is not the session list
+<Warning>
+
+<div className="doc-callout-title">
+
+`sessions.json` is not the session list
+
+</div>
+
 The gateway routing index lives in the `gateway_routing` table inside
 `state.db`; `~/.hermes/sessions/sessions.json` is a **legacy mirror** of it,
 kept for backward compatibility (disable with
@@ -1161,24 +1193,33 @@ It only ever contains gateway/messaging entries, so if you run a messaging
 platform you'll see only those (e.g. `agent:main:whatsapp:dm:...`).
 
 This is **expected** and does **not** mean your CLI sessions are missing.
-`hermes sessions list`, `/sessions`, and the dashboard all read `state.db`,
-which holds **every** session (CLI, TUI, and gateway). The `/save` snapshots
+`noone sessions list`, `/sessions`, and the dashboard all read `state.db`,
+which holds **every** session (CLI, and gateway). The `/save` snapshots
 under `~/.hermes/sessions/saved/*.json` are convenience exports, not the index.
 
-If CLI sessions genuinely don't appear in `hermes sessions list`, the cause is
-`state.db` not receiving them — run `hermes sessions repair` and watch for a
+If CLI sessions genuinely don't appear in `noone sessions list`, the cause is
+`state.db` not receiving them — run `noone sessions repair` and watch for a
 `⚠ Session store unavailable` warning at CLI startup, which means SQLite
 persistence failed for that run.
-:::
 
-:::note Legacy JSONL transcripts
+</Warning>
+
+<Note>
+
+<div className="doc-callout-title">
+
+Legacy JSONL transcripts
+
+</div>
+
 Sessions created before state.db became canonical may have leftover
 `*.jsonl` files in `~/.hermes/sessions/`. They are no longer written or
-read by Hermes. Safe to delete after verifying the corresponding session
+read by {{app-name}}. Safe to delete after verifying the corresponding session
 exists in state.db.
-:::
 
-### Database Schema
+</Note>
+
+### Database Schema {#database-schema}
 
 Key tables in `state.db`:
 
@@ -1186,17 +1227,17 @@ Key tables in `state.db`:
 - **messages** — full message history (role, content, tool_calls, tool_name, token_count)
 - **messages_fts** — FTS5 virtual table for full-text search across message content
 
-## Session Expiry and Cleanup
+## Session Expiry and Cleanup {#session-expiry-and-cleanup}
 
-### Automatic Cleanup
+### Automatic Cleanup {#automatic-cleanup}
 
 - Gateway conversations persist across inactivity; use `/new` or `/reset` for an explicit boundary
 - Before reset, the agent saves memories and skills from the expiring session
 - Auto-pruning (**off by default**; opt in): when `sessions.auto_prune` is `true`, ended sessions inactive for `sessions.retention_days` (default 90) are pruned at CLI/gateway/cron startup
-- **Low-disk prompt.** While your `config.yaml` has no `sessions.auto_prune` key, Hermes checks the disk holding `state.db` at session start (two filesystem calls, no measurable cost). When that disk is low (under 2 GB free, or under 10% free with less than 20 GB left) it asks once: the classic CLI asks at startup (the first low-disk launch only measures, in the background, and the question appears from the next launch on, so startup never waits on the database), the TUI and Desktop show a notice, and a gateway posts the question to its home channel. The prompt estimates how much history a prune would delete (weighted by stored bytes, so many small old messages don't overstate it) and says plainly when pruning will *not* fix the disk (no session older than `retention_days`, or the history is a small share of the full disk). Deleted history frees space inside `state.db`; the automatic `VACUUM` below rarely triggers after a single prune, so run `hermes sessions optimize` to give the space back to the disk. Answer with `/autoprune on`, `/autoprune off` (keep everything; never asked again) or `/autoprune later` (reminded in a week); `/autoprune` alone shows the current state
+- **Low-disk prompt.** While your `config.yaml` has no `sessions.auto_prune` key, {{app-name}} checks the disk holding `state.db` at session start (two filesystem calls, no measurable cost). When that disk is low (under 2 GB free, or under 10% free with less than 20 GB left) it asks once: the classic CLI asks at startup (the first low-disk launch only measures, in the background, and the question appears from the next launch on, so startup never waits on the database), the TUI and Desktop show a notice, and a gateway posts the question to its home channel. The prompt estimates how much history a prune would delete (weighted by stored bytes, so many small old messages don't overstate it) and says plainly when pruning will *not* fix the disk (no session older than `retention_days`, or the history is a small share of the full disk). Deleted history frees space inside `state.db`; the automatic `VACUUM` below rarely triggers after a single prune, so run `noone sessions optimize` to give the space back to the disk. Answer with `/autoprune on`, `/autoprune off` (keep everything; never asked again) or `/autoprune later` (reminded in a week); `/autoprune` alone shows the current state
 - `sessions.retention_days` must be a whole number of days `>= 0`. A negative value (or a missing one) is rejected: startup maintenance logs a warning naming the allowed range and skips the sweep instead of treating the future cutoff as "everything" — `sessions.auto_prune: false` is the switch that disables pruning
 - After a prune that actually removed rows, `state.db` is `VACUUM`ed to reclaim disk space only when **both** gates pass: at least `sessions.min_vacuum_interval_days` (default 30) have elapsed since the last successful `VACUUM`, **and** more than 25% of the file's pages are reclaimable (`PRAGMA freelist_count / page_count`). A dense database never pays for a full rewrite to reclaim a few MB (SQLite does not shrink the file on plain DELETE)
-- Pruning runs at most once per `sessions.min_interval_hours` (default 24); the last-run timestamp is tracked inside `state.db` itself so it's shared across every Hermes process in the same `HERMES_HOME`
+- Pruning runs at most once per `sessions.min_interval_hours` (default 24); the last-run timestamp is tracked inside `state.db` itself so it's shared across every {{app-name}} process in the same `HERMES_HOME`
 
 Without pruning, `state.db` grows without bound — multi-GB files within weeks were reported on gateway + cron installs. To bound it, turn it on in `~/.hermes/config.yaml` (or answer `/autoprune on`):
 
@@ -1226,7 +1267,7 @@ session ended, and pruning only deletes *ended* rows. To keep those from
 accumulating forever, each auto-prune pass also *closes* open sessions from
 those state-owned sources (`cli`, `cron`, `kanban`, `acp`, `api_server`,
 `subagent`, `tool`, plus the `recovered` placeholders that
-`hermes sessions recover` synthesizes for orphaned messages) whose last
+`noone sessions recover` synthesizes for orphaned messages) whose last
 activity is older than `retention_days`
 (`end_reason: startup_orphan_reap`). Closing is non-destructive — the
 session stays resumable — and the row is aged from its close, so it is only
@@ -1249,19 +1290,19 @@ an interrupted turn stays open until you Discard it. A viewer that reconnects
 within the grace keeps the session open. Ending is non-destructive: the session
 stays resumable, and its next message reopens it on the same id.
 
-### Oversized-Transcript Guards
+### Oversized-Transcript Guards {#oversized-transcript-guards}
 
 Two limits stop a runaway transcript from being loaded into memory all at once
 (both default to `20000` messages; `0` disables the guard):
 
 ```yaml
 sessions:
-  max_resume_messages: 20000   # interactive resume (CLI / TUI / Desktop)
+  max_resume_messages: 20000   # interactive resume (CLI / Desktop)
   max_export_messages: 20000   # one-shot in-memory export of a single session
 ```
 
-`max_export_messages` applies per session to the JSON/JSONL backup (`hermes sessions export`,
-`sessions export` in `hermes console`, and `/save json` in the CLI, messaging, TUI and Desktop). It counts every stored row, archived included, because
+`max_export_messages` applies per session to the JSON/JSONL backup (`noone sessions export`,
+`sessions export` in `noone console`, and `/save json` in the CLI, messaging, TUI and Desktop). It counts every stored row, archived included, because
 the backup holds all of them. A heavily compacted session with a small live tail can still exceed it.
 The dashboard Sessions page's Export action streams the rows instead and is not capped.
 
@@ -1280,11 +1321,11 @@ history of the conversation:
 
 When a resume is refused the client receives error code `4130` with the count
 and the scope it was measured against (`across its lineage` or
-`in its tip segment`). A TUI/Desktop `/save` refused by `max_export_messages` returns error code `4131`.
-`hermes sessions export` still works for such sessions; its JSON/JSONL
+`in its tip segment`). A Desktop `/save` refused by `max_export_messages` returns error code `4131`.
+`noone sessions export` still works for such sessions; its JSON/JSONL
 backup needs each session to stay under `max_export_messages`.
 
-### Manual Cleanup
+### Manual Cleanup {#manual-cleanup}
 
 ```bash
 # Prune sessions older than 90 days
@@ -1298,6 +1339,14 @@ hermes sessions export backup.jsonl
 hermes sessions prune --older-than 30 --yes
 ```
 
-:::tip
-Auto-prune is **off by default**, and Hermes asks you once when the disk holding `state.db` runs low (see [Automatic Cleanup](#automatic-cleanup) above). When on, ended sessions inactive for `sessions.retention_days` (default 90) are removed at startup and active sessions are never touched. Session history powers `session_search` recall across past conversations, so the choice is yours: `/autoprune on|off`, or `sessions.auto_prune` in `config.yaml`. With auto-prune off, `hermes sessions prune` remains available for one-off cleanup (observed failure mode without any pruning: a 384 MB `state.db` with ~1000 sessions slowing down FTS5 inserts and `/resume` listing).
-:::
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+Auto-prune is **off by default**, and {{app-name}} asks you once when the disk holding `state.db` runs low (see [Automatic Cleanup](#automatic-cleanup) above). When on, ended sessions inactive for `sessions.retention_days` (default 90) are removed at startup and active sessions are never touched. Session history powers `session_search` recall across past conversations, so the choice is yours: `/autoprune on|off`, or `sessions.auto_prune` in `config.yaml`. With auto-prune off, `noone sessions prune` remains available for one-off cleanup (observed failure mode without any pruning: a 384 MB `state.db` with ~1000 sessions slowing down FTS5 inserts and `/resume` listing).
+
+</Tip>

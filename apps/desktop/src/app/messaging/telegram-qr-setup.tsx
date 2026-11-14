@@ -1,9 +1,6 @@
+import { Check, ExternalLink, QrCode, Save, X } from '@noone/ui/icons'
 import { useEffect, useMemo, useState } from 'react'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ErrorBanner } from '@/components/ui/error-state'
-import { Input } from '@/components/ui/input'
 import {
   applyTelegramOnboarding,
   cancelTelegramOnboarding,
@@ -12,10 +9,13 @@ import {
   startTelegramOnboarding,
   type TelegramOnboardingApplyResponse,
   type TelegramOnboardingStartResponse
-} from '@/hermes'
+} from '@/agent-client'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ErrorBanner } from '@/components/ui/error-state'
+import { Input } from '@/components/ui/input'
 import { useI18n } from '@/i18n'
 import { openExternalLink } from '@/lib/external-link'
-import { Check, ExternalLink, QrCode, Save, X } from '@/lib/icons'
 import { isSubmitEnter } from '@/lib/ime'
 import { cn } from '@/lib/utils'
 
@@ -171,7 +171,7 @@ export function TelegramQrSetup({ onApplied, platform, scopeProfile }: TelegramQ
   const expiresIn = useMemo(
     () => (setup ? formatExpiry(setup.expires_at) : null),
     // tick refreshes the memo each second without recomputing on every render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [setup, tick]
   )
 

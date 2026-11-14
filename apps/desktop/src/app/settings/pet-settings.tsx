@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react'
+import { Download, Loader2, PawPrint, Pencil, Trash2 } from '@noone/ui/icons'
 import { type ReactNode, useEffect, useState } from 'react'
 
 import { useGatewayRequest } from '@/app/gateway/hooks/use-gateway-request'
@@ -13,7 +14,6 @@ import { Slider } from '@/components/ui/slider'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
-import { Download, Loader2, PawPrint, Pencil, Trash2 } from '@/lib/icons'
 import { isSubmitEnter } from '@/lib/ime'
 import { selectableCardClass } from '@/lib/selectable-card'
 import { cn } from '@/lib/utils'

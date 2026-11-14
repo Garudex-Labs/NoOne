@@ -1,6 +1,6 @@
-import { isGatewayReauthRequired, isStableOpen, LOCAL_CONNECTION_ID, reconnectBackoffDelayMs } from '@hermes/shared'
+import { isGatewayReauthRequired, isStableOpen, LOCAL_CONNECTION_ID, reconnectBackoffDelayMs } from '@noone/shared'
 
-import type { HermesTerminalExit, HermesTerminalSession, HermesTerminalState } from '@/global'
+import type { AgentTerminalExit, AgentTerminalSession, AgentTerminalState } from '@/global'
 
 import { readJson, writeJson } from './storage'
 
@@ -38,17 +38,17 @@ interface TerminalState {
   socket: WebSocket | null
   generation: number
   stopped: boolean
-  status: HermesTerminalState
+  status: AgentTerminalState
   retry: number
   retryTimer: number
   openedAt: number | null
   cancelDial?: () => void
-  started?: Promise<HermesTerminalSession>
+  started?: Promise<AgentTerminalSession>
   pendingData: Array<{ data: string; replay: boolean }>
   dataListeners: Set<DataListener>
-  exit: HermesTerminalExit | null
-  exitListeners: Set<(exit: HermesTerminalExit) => void>
-  stateListeners: Set<(state: HermesTerminalState) => void>
+  exit: AgentTerminalExit | null
+  exitListeners: Set<(exit: AgentTerminalExit) => void>
+  stateListeners: Set<(state: AgentTerminalState) => void>
 }
 
 const META = '\u0000HERMES_TERMINAL_META:'
@@ -132,13 +132,13 @@ interface DialContext {
   isPaused: () => boolean
   stopSocket: (state: TerminalState) => void
   emitData: (state: TerminalState, data: string, replay?: boolean) => void
-  setStatus: (state: TerminalState, status: HermesTerminalState) => void
+  setStatus: (state: TerminalState, status: AgentTerminalState) => void
   forget: (state: TerminalState) => void
   finish: (state: TerminalState, signal: string | null) => void
   reconnect: (state: TerminalState) => void
 }
 
-async function dialTerminal(state: TerminalState, context: DialContext): Promise<HermesTerminalSession> {
+async function dialTerminal(state: TerminalState, context: DialContext): Promise<AgentTerminalSession> {
   const { stopSocket, emitData, setStatus, forget, finish, reconnect } = context
   stopSocket(state)
   const generation = ++state.generation
@@ -316,7 +316,7 @@ export function createBrowserTerminal(options: BrowserTerminalOptions): Terminal
     }
   }
 
-  const setStatus = (state: TerminalState, status: HermesTerminalState) => {
+  const setStatus = (state: TerminalState, status: AgentTerminalState) => {
     if (state.status === status) {return}
     state.status = status
     state.stateListeners.forEach(listener => listener(status))

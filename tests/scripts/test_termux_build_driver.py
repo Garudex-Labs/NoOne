@@ -25,7 +25,7 @@ def build_fixture(tmp_path):
     tools = tmp_path / "tools"
     tools.mkdir()
     payload.mkdir()
-    for name in ("scripts/build/node-deps.mjs", "scripts/build/tui.mjs", "scripts/termux/build_deb.sh"):
+    for name in ("scripts/termux/build_deb.sh",):
         script = repo / name
         script.parent.mkdir(parents=True, exist_ok=True)
         script.touch()
@@ -44,14 +44,8 @@ with Path(os.environ['CALL_LOG']).open('a') as stream:
         'cwd': os.getcwd(), 'image': os.environ.get('TERMUX_BUILDER_IMAGE')}}) + '\\n')
 if stage == os.environ.get('FAIL_STAGE'):
     sys.exit(37)
-if stage == 'tui.mjs':
-    product = Path(args[args.index('--out') + 1])
-    (product / 'dist').mkdir(parents=True, exist_ok=True)
-    (product / 'dist/entry.js').write_text('fixture TUI product')
-    (product / 'package.json').write_text('{{"type":"module"}}')
 if stage == 'build_deb.sh':
-    product = Path(args[args.index('--tui-product') + 1])
-    assert (product / 'dist/entry.js').read_text() == 'fixture TUI product'
+    product = Path(args[args.index('--payload') + 1])
     destination = Path(args[args.index('--out') + 1])
     destination.mkdir(parents=True)
     (destination / 'assembly-received-product').write_text(str(product))
@@ -80,21 +74,15 @@ def recorded_calls(log):
 
 
 @pytest.mark.parametrize("identity", [("--tag", "v1.2.3"), ("--commit", "a" * 40)])
-def test_driver_prepares_only_tui_then_passes_product_to_deb(build_fixture, identity):
+def test_driver_passes_prepared_payload_to_deb(build_fixture, identity):
     repo, payload, out, log, _ = build_fixture
     result = invoke(build_fixture, *identity)
     assert result.returncode == 0, result.stdout + result.stderr
-    product = repo / ".build/termux/tui"
+    product = payload
     assert recorded_calls(log) == [
-        {"tool": "node", "args": [str(repo / "scripts/build/node-deps.mjs"),
-          "--source", str(repo), "--workspace", "ui-tui"],
-         "cwd": str(repo), "image": "fixture-pinned-image"},
-        {"tool": "node", "args": [str(repo / "scripts/build/tui.mjs"),
-          "--source", str(repo), "--out", str(product)],
-         "cwd": str(repo), "image": "fixture-pinned-image"},
         {"tool": "bash", "args": [str(repo / "scripts/termux/build_deb.sh"),
           "--repo", str(repo), "--payload", str(payload), "--out", str(out),
-          "--tui-product", str(product), *identity],
+          *identity],
          "cwd": str(repo), "image": "fixture-pinned-image"},
     ]
     assert (out / "assembly-received-product").read_text() == str(product)
@@ -141,13 +129,11 @@ def test_missing_prepared_payload_is_rejected_before_frontend_work(build_fixture
 
 
 @pytest.mark.parametrize("stage, reached", [
-    ("node-deps.mjs", ["node-deps.mjs"]),
-    ("tui.mjs", ["node-deps.mjs", "tui.mjs"]),
-    ("build_deb.sh", ["node-deps.mjs", "tui.mjs", "build_deb.sh"]),
+    ("build_deb.sh", ["build_deb.sh"]),
 ])
 def test_child_failure_stops_sequence_even_with_stale_product(build_fixture, stage, reached):
     repo, _payload, out, log, env = build_fixture
-    stale = repo / ".build/termux/tui/dist/entry.js"
+    stale = repo / ".build/old-product.txt"
     stale.parent.mkdir(parents=True)
     stale.write_text("stale product")
     env["FAIL_STAGE"] = stage
@@ -177,11 +163,11 @@ def test_release_workflow_runs_the_shared_sequence(build_fixture, identity):
     assert result.returncode == 0, result.stdout + result.stderr
     calls = recorded_calls(log)
     assert [Path(call["args"][0]).name for call in calls] == [
-        "node-deps.mjs", "tui.mjs", "build_deb.sh",
+        "build_deb.sh",
     ]
     assert calls[-1]["args"][-2:] == list(identity)
     assert (repo / "termux-build/deb/assembly-received-product").read_text() == str(
-        repo / ".build/termux/tui")
+        build_fixture[1])
 
 
 @pytest.mark.parametrize("changed_input", ["Dockerfile", "base"])

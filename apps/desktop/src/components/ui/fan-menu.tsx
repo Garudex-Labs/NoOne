@@ -1,3 +1,4 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import {
   type CSSProperties,
   memo,
@@ -11,7 +12,6 @@ import {
 import { createPortal } from 'react-dom'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
@@ -269,7 +269,7 @@ export function FanMenu({ direction = 'vertical', gap = 4, hint = true, hub, ite
           </Button>
         </Tip>
         {hint ? (
-          <Codicon
+          <AppIcon
             className={cn(
               'pointer-events-none absolute -top-px right-0 text-(--ui-text-quaternary) transition-opacity duration-100',
               open && 'opacity-0'

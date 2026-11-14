@@ -1,10 +1,10 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { useState } from 'react'
 
 import { SubagentRow } from '@/app/agents'
 import { ActivityTimerText } from '@/components/chat/activity-timer-text'
 import { StatusRow } from '@/components/chat/status-row'
 import { StatusSection } from '@/components/chat/status-section'
-import { Codicon } from '@/components/ui/codicon'
 import { GlyphSpinner } from '@/components/ui/glyph-spinner'
 import { useViewedInterval } from '@/hooks/use-viewed-interval'
 import { useI18n } from '@/i18n'
@@ -75,7 +75,7 @@ export function SubagentSection({ sessionId }: SubagentSectionProps) {
             spinner="braille"
           />
         }
-        icon={<Codicon className="text-(--ui-purple)" name="agent" size="0.8rem" />}
+        icon={<AppIcon className="text-(--ui-purple)" name="agent" size="0.8rem" />}
         label={t.statusStack.subagents(live.length)}
       >
         <div className="max-h-[25vh] overflow-y-auto overscroll-y-auto">{live.map(row)}</div>

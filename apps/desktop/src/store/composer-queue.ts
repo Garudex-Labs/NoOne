@@ -1,4 +1,4 @@
-import { randomUuid, SLASH_COMMAND_RE } from '@hermes/shared'
+import { randomUuid, SLASH_COMMAND_RE } from '@noone/shared'
 import { atom } from 'nanostores'
 
 import {

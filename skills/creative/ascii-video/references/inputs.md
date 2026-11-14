@@ -380,20 +380,20 @@ def assign_voices(n_quotes, voice_pool, seed=42):
 TTS text must be separate from display text. The display text has line breaks for visual layout; the TTS text is a flat sentence with phonetic fixes.
 
 Common fixes:
-- Brand names: spell phonetically ("Nous" -> "Noose", "nginx" -> "engine-x")
+- Brand names: spell phonetically ("nginx" -> "engine-x")
 - Abbreviations: expand ("API" -> "A P I", "CLI" -> "C L I")
 - Technical terms: add phonetic hints
 - Punctuation for pacing: periods create pauses, commas create slight pauses
 
 ```python
-# Display text: line breaks control visual layout
+# Illustrative sample, not a testimonial; line breaks control visual layout
 QUOTES = [
-    ("It can do far more than the Claws,\nand you don't need to buy a Mac Mini.\nNous Research has a winner here.", "Brian Roemmele"),
+    ("Start with a clear plan.\nBuild it carefully.\nVerify the result.", "RAWx18"),
 ]
 
 # TTS text: flat, phonetically corrected for speech
 QUOTES_TTS = [
-    "It can do far more than the Claws, and you don't need to buy a Mac Mini. Noose Research has a winner here.",
+    "Start with a clear plan. Build it carefully. Verify the result.",
 ]
 # Keep both arrays in sync -- same indices
 ```

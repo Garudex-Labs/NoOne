@@ -280,7 +280,7 @@ function fromClaudeAdd(tokens: string[]): McpImportEntry | null {
   return { config, name }
 }
 
-interface HermesAddFlags {
+interface AgentAddFlags {
   args: string[]
   auth: null | string
   command: null | string
@@ -291,7 +291,7 @@ interface HermesAddFlags {
 
 const ARGS_END = -1
 
-const emptyHermesFlags = (): HermesAddFlags => ({
+const emptyHermesFlags = (): AgentAddFlags => ({
   args: [],
   auth: null,
   command: null,
@@ -315,7 +315,7 @@ function readEnvPairs(env: Record<string, string>, tokens: string[], index: numb
   return i
 }
 
-function readHermesToken(flags: HermesAddFlags, tokens: string[], index: number): number {
+function readHermesToken(flags: AgentAddFlags, tokens: string[], index: number): number {
   const token = tokens[index]
 
   if (token === '--args') {
@@ -354,7 +354,7 @@ function readHermesToken(flags: HermesAddFlags, tokens: string[], index: number)
   return index
 }
 
-function hermesEntry(flags: HermesAddFlags): McpImportEntry | null {
+function hermesEntry(flags: AgentAddFlags): McpImportEntry | null {
   const { args, auth, command, env, name, url } = flags
 
   if (!name || (!url && !command)) {

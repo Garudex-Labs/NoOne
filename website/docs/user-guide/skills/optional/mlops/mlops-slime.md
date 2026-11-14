@@ -1,20 +1,20 @@
 ---
 title: "Slime — RL post-training for LLMs with Megatron and SGLang"
-sidebar_label: "Slime"
+sidebarTitle: "Slime"
 description: "RL post-training for LLMs with Megatron and SGLang"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Slime
+# Slime {#slime}
 
 RL post-training for LLMs with Megatron and SGLang.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/mlops/slime` |
+| Source | Optional — install with `noone skills install official/mlops/slime` |
 | Path | `optional-skills/mlops/slime` |
 | Version | `1.0.0` |
 | Author | Orchestra Research |
@@ -23,17 +23,25 @@ RL post-training for LLMs with Megatron and SGLang.
 | Platforms | linux, macos |
 | Tags | `Reinforcement Learning`, `Megatron-LM`, `SGLang`, `GRPO`, `Post-Training`, `GLM` |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# slime: LLM Post-Training Framework for RL Scaling
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# slime: LLM Post-Training Framework for RL Scaling {#slime-llm-post-training-framework-for-rl-scaling}
 
 slime is an LLM post-training framework from Tsinghua's THUDM team, powering GLM-4.5, GLM-4.6, and GLM-4.7. It connects Megatron-LM for training with SGLang for high-throughput rollout generation.
 
-## When to Use slime
+## When to Use slime {#when-to-use-slime}
 
 **Choose slime when you need:**
 - Megatron-LM native training with SGLang inference
@@ -46,16 +54,16 @@ slime is an LLM post-training framework from Tsinghua's THUDM team, powering GLM
 - You want flexible backend swapping → use **verl**
 - You need PyTorch-native abstractions → use **torchforge**
 
-## Key Features
+## Key Features {#key-features}
 
 - **Training**: Megatron-LM with full parallelism support (TP, PP, DP, SP)
 - **Rollout**: SGLang-based high-throughput generation with router
 - **Data Buffer**: Flexible prompt management and sample storage
 - **Models**: GLM-4.x, Qwen3, DeepSeek V3/R1, Llama 3
 
-## Architecture Overview
+## Architecture Overview {#architecture-overview}
 
-<!-- ascii-guard-ignore -->
+{/* ascii-guard-ignore */}
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Data Buffer                          │
@@ -71,9 +79,9 @@ slime is an LLM post-training framework from Tsinghua's THUDM team, powering GLM
 │ - Weight sync to rollout│ │ - Multi-turn support        │
 └─────────────────────────┘ └─────────────────────────────┘
 ```
-<!-- ascii-guard-ignore-end -->
+{/* ascii-guard-ignore-end */}
 
-## Installation
+## Installation {#installation}
 
 ```bash
 # Recommended: Docker
@@ -85,7 +93,7 @@ docker run --rm --gpus all --ipc=host --shm-size=16g \
 cd /root/slime && pip install -e . --no-deps
 ```
 
-### From Source
+### From Source {#from-source}
 
 ```bash
 git clone https://github.com/THUDM/slime.git
@@ -94,7 +102,7 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-## Quick Start: GRPO Training
+## Quick Start: GRPO Training {#quick-start-grpo-training}
 
 ```bash
 # Source model configuration
@@ -117,16 +125,16 @@ python train.py \
 
 ---
 
-## Workflow 1: Standard GRPO Training
+## Workflow 1: Standard GRPO Training {#workflow-1-standard-grpo-training}
 
 Use this workflow for training reasoning models with group-relative advantages.
 
-### Prerequisites Checklist
+### Prerequisites Checklist {#prerequisites-checklist}
 - [ ] Docker environment or Megatron-LM + SGLang installed
 - [ ] Model checkpoint (HuggingFace or Megatron format)
 - [ ] Training data in JSONL format
 
-### Step 1: Prepare Data
+### Step 1: Prepare Data {#step-1-prepare-data}
 
 ```python
 # data.jsonl format
@@ -145,7 +153,7 @@ Or with chat format:
 }
 ```
 
-### Step 2: Configure Model
+### Step 2: Configure Model {#step-2-configure-model}
 
 Choose a pre-configured model script:
 
@@ -158,7 +166,7 @@ ls scripts/models/
 source scripts/models/qwen3-4B.sh
 ```
 
-### Step 3: Launch Training
+### Step 3: Launch Training {#step-3-launch-training}
 
 ```bash
 python train.py \
@@ -181,23 +189,23 @@ python train.py \
     ${MODEL_ARGS[@]}
 ```
 
-### Step 4: Monitor Training
+### Step 4: Monitor Training {#step-4-monitor-training}
 - [ ] Check TensorBoard: `tensorboard --logdir outputs/`
 - [ ] Verify reward curves are increasing
 - [ ] Monitor GPU utilization across nodes
 
 ---
 
-## Workflow 2: Asynchronous Training
+## Workflow 2: Asynchronous Training {#workflow-2-asynchronous-training}
 
 Use async mode for higher throughput by overlapping rollout and training.
 
-### When to Use Async
+### When to Use Async {#when-to-use-async}
 - Large models with long generation times
 - High GPU idle time in synchronous mode
 - Sufficient memory for buffering
 
-### Launch Async Training
+### Launch Async Training {#launch-async-training}
 
 ```bash
 python train_async.py \
@@ -210,7 +218,7 @@ python train_async.py \
     ${MODEL_ARGS[@]}
 ```
 
-### Async-Specific Parameters
+### Async-Specific Parameters {#async-specific-parameters}
 
 ```bash
 --async-buffer-size 4        # Number of rollouts to buffer
@@ -219,15 +227,15 @@ python train_async.py \
 
 ---
 
-## Workflow 3: Multi-Turn Agentic Training
+## Workflow 3: Multi-Turn Agentic Training {#workflow-3-multi-turn-agentic-training}
 
 Use this workflow for training agents with tool use or multi-step reasoning.
 
-### Prerequisites
+### Prerequisites {#prerequisites}
 - [ ] Custom generate function for multi-turn logic
 - [ ] Tool/environment interface
 
-### Step 1: Define Custom Generate Function
+### Step 1: Define Custom Generate Function {#step-1-define-custom-generate-function}
 
 ```python
 # custom_generate.py
@@ -255,7 +263,7 @@ async def custom_generate(args, samples, evaluation=False):
     return samples
 ```
 
-### Step 2: Launch with Custom Function
+### Step 2: Launch with Custom Function {#step-2-launch-with-custom-function}
 
 ```bash
 python train.py \
@@ -269,9 +277,9 @@ See `examples/search-r1/` for a complete multi-turn search example.
 
 ---
 
-## Configuration Reference
+## Configuration Reference {#configuration-reference}
 
-### Three Argument Categories
+### Three Argument Categories {#three-argument-categories}
 
 slime uses three types of arguments:
 
@@ -315,7 +323,7 @@ slime uses three types of arguments:
 --kl-loss-coef 0.001
 ```
 
-### Key Constraints
+### Key Constraints {#key-constraints}
 
 ```
 rollout_batch_size × n_samples_per_prompt = global_batch_size × num_steps_per_rollout
@@ -325,11 +333,11 @@ Example: 32 × 8 = 256 × 1
 
 ---
 
-## Data Buffer System
+## Data Buffer System {#data-buffer-system}
 
 slime's data buffer enables flexible data management:
 
-### Basic Data Source
+### Basic Data Source {#basic-data-source}
 
 ```python
 class RolloutDataSource:
@@ -342,7 +350,7 @@ class RolloutDataSource:
         pass
 ```
 
-### Buffered Data Source (Off-Policy)
+### Buffered Data Source (Off-Policy) {#buffered-data-source-off-policy}
 
 ```python
 class RolloutDataSourceWithBuffer(RolloutDataSource):
@@ -360,9 +368,9 @@ class RolloutDataSourceWithBuffer(RolloutDataSource):
 
 ---
 
-## Common Issues and Solutions
+## Common Issues and Solutions {#common-issues-and-solutions}
 
-### Issue: SGLang Engine Crash
+### Issue: SGLang Engine Crash {#issue-sglang-engine-crash}
 
 **Symptoms**: Inference engine dies mid-training
 
@@ -378,7 +386,7 @@ class RolloutDataSourceWithBuffer(RolloutDataSource):
 --rollout-batch-size 16
 ```
 
-### Issue: Weight Sync Timeout
+### Issue: Weight Sync Timeout {#issue-weight-sync-timeout}
 
 **Symptoms**: Training hangs after rollout
 
@@ -391,7 +399,7 @@ class RolloutDataSourceWithBuffer(RolloutDataSource):
 --colocate
 ```
 
-### Issue: OOM During Training
+### Issue: OOM During Training {#issue-oom-during-training}
 
 **Symptoms**: CUDA OOM in backward pass
 
@@ -407,7 +415,7 @@ class RolloutDataSourceWithBuffer(RolloutDataSource):
 --sequence-parallel
 ```
 
-### Issue: Slow Data Loading
+### Issue: Slow Data Loading {#issue-slow-data-loading}
 
 **Symptoms**: GPU idle during data fetch
 
@@ -422,7 +430,7 @@ class RolloutDataSourceWithBuffer(RolloutDataSource):
 
 ---
 
-## Supported Models
+## Supported Models {#supported-models}
 
 | Model Family | Configurations |
 |--------------|----------------|
@@ -436,9 +444,9 @@ Each model has pre-configured scripts in `scripts/models/`.
 
 ---
 
-## Advanced Topics
+## Advanced Topics {#advanced-topics}
 
-### Co-location Mode
+### Co-location Mode {#co-location-mode}
 
 Share GPUs between training and inference to reduce memory:
 
@@ -450,7 +458,7 @@ python train.py \
     ${MODEL_ARGS[@]}
 ```
 
-### Custom Reward Model
+### Custom Reward Model {#custom-reward-model}
 
 ```python
 # custom_rm.py
@@ -468,7 +476,7 @@ class CustomRewardModel:
 --custom-rm-path custom_rm.py
 ```
 
-### Evaluation Multi-Task
+### Evaluation Multi-Task {#evaluation-multi-task}
 
 ```bash
 --eval-prompt-data aime /path/to/aime.jsonl \
@@ -478,7 +486,7 @@ class CustomRewardModel:
 
 ---
 
-## Resources
+## Resources {#resources}
 
 - **Documentation**: https://thudm.github.io/slime/
 - **GitHub**: https://github.com/THUDM/slime

@@ -19,7 +19,7 @@ export interface AppVersionInfo {
    *  artifact is the old-style installer shell over a managed checkout. */
   payload?: InstallStamp['payload']
   /** True when the runtime checkout carries the bootstrap installers'
-   *  `.hermes-bootstrap-complete` receipt — install.sh / install.ps1 (or the
+   *  `.agent-bootstrap-complete` receipt — install.sh / install.ps1 (or the
    *  desktop bootstrap) created it, as opposed to a manual git clone. */
   installedByScript?: boolean
   dirty?: boolean
@@ -83,17 +83,17 @@ export function appVersionInfo(
   packageVersion: string
 ): AppVersionInfo {
   if (!stamp) {
-    return { appVersion: firstRealVersion([runtimeVersion, packageVersion]), baseVersion: packageVersion }
+    return { appVersion: firstRealVersion([packageVersion, runtimeVersion]), baseVersion: packageVersion }
   }
 
   const build = stamp.channelBuild
 
   return {
-    appVersion: build
+    appVersion: stamp.releaseVersion ?? (build
       ? `${build.sourceVersion} (${build.channel} #${build.sequence}, ${build.commit.slice(0, 8)})`
       : stamp.payload === 'bootstrap'
         ? firstRealVersion([runtimeVersion, stamp.displayVersion, stamp.baseVersion, packageVersion])
-        : firstRealVersion([stamp.displayVersion, stamp.baseVersion, packageVersion, runtimeVersion]),
+        : firstRealVersion([stamp.displayVersion, stamp.baseVersion, packageVersion, runtimeVersion])),
     baseVersion: build?.sourceVersion ?? stamp.baseVersion ?? undefined,
     sequence: build?.sequence,
     buildId: build?.buildId,

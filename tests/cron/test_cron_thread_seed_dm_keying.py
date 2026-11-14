@@ -5,7 +5,7 @@ cron thread seed created its session row with chat_type="thread", but a
 Slack DM thread reply arrives with chat_type="dm" — build_session_key puts
 them in different rows (agent:main:slack:thread:D...:<ts> vs
 agent:main:slack:dm:D...:<ts>), so the user's reply hit a session that had
-never seen the brief. Slack channel and Matrix room thread replies key on the
+never seen the brief. Slack channel thread replies key on the
 PARENT chat's type (``group``), Discord on ``thread`` — the seed mirrors the
 adapter (``_THREAD_REPLY_CHAT_TYPE``); the DM lane is the unswept sibling of
 the flat-seed is_dm fix (dcca9d8cfe).
@@ -83,28 +83,6 @@ def test_channel_thread_seed_key_matches_thread_reply_key():
     )
 
 
-def test_matrix_room_thread_seed_key_matches_room_reply_key():
-    """The Matrix adapter keys an in-thread reply on the ROOM's type (``group``), so a
-    cron ``attach_to_session`` seed typed ``thread`` is a row no reply ever hits (#112918)."""
-    store = MagicMock()
-    adapter = MagicMock()
-    adapter._session_store = store
-
-    with patch("gateway.mirror.mirror_to_session", return_value=True):
-        _seed_cron_thread_session(
-            {"id": "j7", "name": "alert"}, adapter, "matrix",
-            "!ops:example.org", "$seed_event", "Three bullets",
-            chat_name="ops", is_dm=False,
-        )
-
-    reply_source = SessionSource(
-        platform=Platform.MATRIX,
-        chat_id="!ops:example.org",
-        chat_type="group",
-        user_id="@alice:example.org",
-        thread_id="$seed_event",
-    )
-    assert build_session_key(_seeded_source(store)) == build_session_key(reply_source)
 
 
 def test_dm_seed_default_is_backward_compatible():
@@ -126,7 +104,7 @@ def test_dm_seed_default_is_backward_compatible():
 def test_telegram_forum_topic_seed_key_matches_topic_reply_key():
     """The Telegram adapter types every supergroup message ``group`` (forum topics included), so a
     forum-topic cron seed typed ``thread`` is a row no topic reply ever resolves to — the same
-    shape as the Matrix bug, on the sibling platform."""
+    shape as the stale seed-key bug."""
     store = MagicMock()
     adapter = MagicMock()
     adapter._session_store = store

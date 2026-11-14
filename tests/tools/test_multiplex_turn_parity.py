@@ -12,9 +12,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-import hermes_yaml as yaml
+import agent_yaml as yaml
 
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from agent_constants import reset_agent_home_override, set_agent_home_override
 
 
 @pytest.fixture
@@ -39,18 +39,18 @@ def two_homes(tmp_path, monkeypatch):
 
 
 def _under(home: Path, fn):
-    token = set_hermes_home_override(str(home))
+    token = set_agent_home_override(str(home))
     try:
         return fn()
     finally:
-        reset_hermes_home_override(token)
+        reset_agent_home_override(token)
 
 
 def test_routed_local_profile_cwd_matches_standalone_gateway(tmp_path, two_homes):
     """A standalone gateway resolves an unset ``terminal.cwd`` on a local backend to ``$HOME`` at
     import; the routed profile's terminal scope must yield the same cwd, not the multiplexer's
     process cwd — otherwise the system prompt, context files and the terminal all start in
-    wherever ``hermes gateway`` happened to be launched from."""
+    wherever ``noone gateway`` happened to be launched from."""
     from tools.terminal_scope import build_profile_terminal_scope, install_and_reset_profile_terminal_scope
     from agent.runtime_cwd import resolve_agent_cwd
 

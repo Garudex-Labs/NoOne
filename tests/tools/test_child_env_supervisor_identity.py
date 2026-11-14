@@ -36,8 +36,8 @@ def _reads_as_unsupervised(env):
 @pytest.mark.parametrize("build", [
     lambda base: local.build_subprocess_env(base),
     lambda base: local.build_subprocess_env(base, scrub_secrets=False),
-    lambda base: local.hermes_subprocess_env(base_env=base),
-], ids=["scrubbed", "unscrubbed", "hermes_subprocess_env"])
+    lambda base: local.agent_subprocess_env(base_env=base),
+], ids=["scrubbed", "unscrubbed", "agent_subprocess_env"])
 @pytest.mark.usefixtures("child_env")
 def test_child_env_factories_drop_the_supervised_gateways_identity(build):
     parent = {**os.environ, **SUPERVISED_GATEWAY_ENV}
@@ -48,7 +48,7 @@ def test_child_env_factories_drop_the_supervised_gateways_identity(build):
 
     assert _reads_as_unsupervised(child)
     assert not set(OWNER_ONLY) & set(child)
-    # XPC_SERVICE_NAME is launchd's own per-process stamp ("0" below the wrapper); `hermes update`
+    # XPC_SERVICE_NAME is launchd's own per-process stamp ("0" below the wrapper); `noone update`
     # compares it to decide whether it runs inside a job, so it passes through untouched.
     assert child["XPC_SERVICE_NAME"] == "0"
 
@@ -70,7 +70,7 @@ def test_agent_terminal_child_sees_no_supervisor_identity(tmp_path, monkeypatch)
 @pytest.mark.usefixtures("child_env")
 def test_external_supervisor_gateways_tool_child_cli_stays_on_the_gateways_profile(tmp_path, monkeypatch):
     """Losing the supervisor claim must not unpin the agent's own `hermes ...` commands (#74872)."""
-    from hermes_cli import main as cli_main
+    from agent_cli import main as cli_main
 
     root = tmp_path / ".hermes"
     (root / "profiles" / "work").mkdir(parents=True)

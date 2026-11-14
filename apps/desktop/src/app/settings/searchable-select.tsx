@@ -1,6 +1,6 @@
+import { AppIcon } from '@noone/ui/app-icon'
 import { useCallback, useRef, useState } from 'react'
 
-import { Codicon } from '@/components/ui/codicon'
 import {
   Command,
   CommandEmpty,
@@ -99,7 +99,7 @@ export function SearchableSelect({
           type="button"
         >
           <span className="truncate">{displayValue}</span>
-          <Codicon className="shrink-0 opacity-60" name={open ? 'chevron-up' : 'chevron-down'} size="1rem" />
+          <AppIcon className="shrink-0 opacity-60" name={open ? 'chevron-up' : 'chevron-down'} size="1rem" />
         </button>
       </PopoverTrigger>
       {/* min-w, not w: the trigger shrink-wraps to its current value inside the

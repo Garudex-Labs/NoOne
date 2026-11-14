@@ -17,7 +17,7 @@ import pytest
 from _pytest.mark.expression import Expression
 
 import tests.e2e.core.windows_update.test_crash_cells as crash
-from hermes_cli import update_lock
+from agent_cli import update_lock
 
 _REPO = Path(__file__).resolve().parents[2]
 _SUITE = "tests/e2e/core/windows_update"
@@ -25,7 +25,7 @@ _SUITE = "tests/e2e/core/windows_update"
 
 def _workflow_selection() -> str:
     """The ``-m`` expression the Windows install + update E2E workflow runs its suite with."""
-    yaml = pytest.importorskip("hermes_yaml")
+    yaml = pytest.importorskip("agent_yaml")
     wf = yaml.safe_load((_REPO / ".github/workflows/windows-install-update-e2e.yml").read_text(encoding="utf-8-sig"))
     step = next(s for s in wf["jobs"]["install-update"]["steps"] if s.get("name") == "Run Windows install + update E2E")
     argv = shlex.split(step["run"].replace("\\\n", " "))
@@ -193,7 +193,7 @@ def test_orphan_marker_wrapper_expires_once_its_fix_is_in_the_tree():
     # The halves already on this branch must still carry their footprint: a renamed judge would
     # otherwise read as "not landed" forever and keep the excuse alive.
     landed = {rel for rel, _ in crash.ORPHAN_MARKER_FIX} - {m.split(":")[0] for m in missing}
-    assert "hermes_cli/update_lock.py" in landed, f"the Python delegate judge lost its footprint: {missing}"
+    assert "agent_cli/update_lock.py" in landed, f"the Python delegate judge lost its footprint: {missing}"
 
 
 def test_orphan_marker_fix_footprint_is_read_from_the_tree(tmp_path):
@@ -230,7 +230,7 @@ def test_orphan_marker_guard_fires_once_the_fix_lands(monkeypatch):
 def test_workflow_requires_the_crash_journey_manifest(tmp_path, monkeypatch):
     from tests.ci import workflow_steps
 
-    yaml = pytest.importorskip("hermes_yaml")
+    yaml = pytest.importorskip("agent_yaml")
     wf = yaml.safe_load((_REPO / ".github/workflows/windows-install-update-e2e.yml").read_text(encoding="utf-8-sig"))
     steps = wf["jobs"]["install-update"]["steps"]
     names = [s.get("name") for s in steps]

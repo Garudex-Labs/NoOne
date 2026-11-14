@@ -1,12 +1,12 @@
+import { ChevronDown, ExternalLink, Loader2, Save, Trash2 } from '@noone/ui/icons'
 import { type ChangeEvent, type KeyboardEvent } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { translateNow, useI18n } from '@/i18n'
-import { ChevronDown, ExternalLink, Loader2, Save, Trash2 } from '@/lib/icons'
 import { isSubmitEnter } from '@/lib/ime'
 import { cn } from '@/lib/utils'
-import type { EnvVarInfo } from '@/types/hermes'
+import type { EnvVarInfo } from '@/types/agent-client'
 
 import { CONTROL_TEXT } from './constants'
 import { credentialPreview, prettyName, withoutKey } from './helpers'

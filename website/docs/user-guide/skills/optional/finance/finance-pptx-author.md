@@ -1,35 +1,43 @@
 ---
 title: "Pptx Author — Build PowerPoint decks headless with python-pptx"
-sidebar_label: "Pptx Author"
+sidebarTitle: "Pptx Author"
 description: "Build PowerPoint decks headless with python-pptx"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Pptx Author
+# Pptx Author {#pptx-author}
 
 Build PowerPoint decks headless with python-pptx.
 
-## Skill metadata
+## Skill metadata {#skill-metadata}
 
 | | |
 |---|---|
-| Source | Optional — install with `hermes skills install official/finance/pptx-author` |
+| Source | Optional — install with `noone skills install official/finance/pptx-author` |
 | Path | `optional-skills/finance/pptx-author` |
 | Version | `1.0.0` |
-| Author | Anthropic (adapted by Nous Research) |
+| Author | Anthropic (adapted by Garudex Labs) |
 | License | Apache-2.0 |
 | Platforms | linux, macos, windows |
 | Tags | `powerpoint`, `pptx`, `python-pptx`, `presentation`, `finance` |
 | Related skills | [`excel-author`](../../optional/finance/finance-excel-author.md), [`microsoft-office`](../../bundled/productivity/productivity-microsoft-office.md) |
 
-## Reference: full SKILL.md
+## Reference: full SKILL.md {#reference-full-skillmd}
 
-:::info
-The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
-:::
+<Info>
 
-# pptx-author
+<div className="doc-callout-title">
+
+INFO
+
+</div>
+
+The following is the complete skill definition that {{app-name}} loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
+
+</Info>
+
+# pptx-author {#pptx-author-1}
 
 Produce a .pptx file on disk using `python-pptx`. Use when you need to deliver a deck as a file artifact, not drive a live PowerPoint session.
 
@@ -37,24 +45,24 @@ Adapted from Anthropic's `pptx-author` and `pitch-deck` skills in [anthropics/fi
 
 For the broader, already-shipped PowerPoint authoring skill (slides, speaker notes, embeds, media), see the built-in `microsoft-office` skill. This skill is a lighter-weight pattern tuned for model-backed decks (pitch decks, IC memos, earnings notes) where every number must trace to a source workbook.
 
-## Output contract
+## Output contract {#output-contract}
 
 - Write to `./out/<name>.pptx`. Create `./out/` if it does not exist.
 - Return the relative path in your final message.
 
-## Setup
+## Setup {#setup}
 
-Use `python` when it already imports `pptx` (the Hermes Docker image ships
-it). Otherwise, when `hermes` is on PATH, let Hermes build its shared, pinned
-documents environment under the Hermes home (safe to run from several agents
-at once); in a Docker sandbox without Hermes the block builds a venv in the
+Use `python` when it already imports `pptx` (the {{app-name}} Docker image ships
+it). Otherwise, when `hermes` is on PATH, let {{app-name}} build its shared, pinned
+documents environment under the {{app-name}} home (safe to run from several agents
+at once); in a Docker sandbox without {{app-name}} the block builds a venv in the
 sandbox home with the same pinned versions. It is the same block as the
 microsoft-office/pdf skills. Never `pip install` into the interpreter that
-runs Hermes:
+runs {{app-name}}:
 
 ```bash
 python -c "import pptx" 2>/dev/null && PY=python || if command -v hermes >/dev/null 2>&1; then
-  PY="$(hermes pm environment documents --extra documents --extra documents-pdf)"
+  PY="$(noone pm environment documents --extra documents --extra documents-pdf)"
 else
   PY="$HOME/.cache/hermes-docs-venv/bin/python"
   "$PY" -c "import docx, openpyxl, pptx, reportlab, pypdf, pdfplumber, pypdfium2" 2>/dev/null || (
@@ -79,12 +87,12 @@ export PY
 
 Run the deck-building Python with `"$PY"`.
 
-## Core conventions
+## Core conventions {#core-conventions}
 
-### One idea per slide
+### One idea per slide {#one-idea-per-slide}
 Title states the takeaway; body supports it. A slide titled "Q3 Revenue" is weak; "Revenue growth accelerated to 14% Y/Y in Q3" is strong.
 
-### Every number traces to the model
+### Every number traces to the model {#every-number-traces-to-the-model}
 If a figure on a slide came from `./out/model.xlsx`, footnote the sheet and cell.
 
 ```
@@ -93,7 +101,7 @@ Revenue: $1,250M  (Source: model.xlsx, Inputs!C3)
 
 Never transcribe numbers from memory or from a summary — open the workbook, read the named range, and bind the deck value to it programmatically when you can.
 
-### Use the firm template when one is mounted
+### Use the firm template when one is mounted {#use-the-firm-template-when-one-is-mounted}
 If `./templates/firm-template.pptx` exists, load it so the deck inherits branded colors, fonts, and master layouts.
 
 ```python
@@ -104,7 +112,7 @@ template = Path("./templates/firm-template.pptx")
 prs = Presentation(str(template)) if template.exists() else Presentation()
 ```
 
-### Charts: PNG-from-model beats native pptx charts
+### Charts: PNG-from-model beats native pptx charts {#charts-png-from-model-beats-native-pptx-charts}
 When fidelity matters (the model's chart styling must match the deck exactly), render the chart to PNG from the source workbook and embed the image. Native `pptx.chart` charts are fragile and often don't match firm conventions.
 
 ```python
@@ -114,10 +122,10 @@ slide.shapes.add_picture("./out/charts/football_field.png",
                          width=Inches(8))
 ```
 
-### No external sends
+### No external sends {#no-external-sends}
 This skill writes a file. It never emails, uploads, or posts. Orchestration layers handle delivery.
 
-## Skeleton
+## Skeleton {#skeleton}
 
 ```python
 from pptx import Presentation
@@ -168,7 +176,7 @@ Path("./out").mkdir(exist_ok=True)
 prs.save("./out/pitch-aurora.pptx")
 ```
 
-## Binding deck numbers to the source workbook
+## Binding deck numbers to the source workbook {#binding-deck-numbers-to-the-source-workbook}
 
 Read named ranges or specific cells from your Excel model so deck numbers never drift.
 
@@ -193,7 +201,7 @@ slide.shapes.title.text = f"Implied share price of ${implied_mid:.2f} (base case
 
 Remember to recalculate the workbook before reading it — openpyxl only sees computed values if something has already calculated the sheet. Run the recalc helper in the `excel-author` skill first, or open/save through a real Excel session.
 
-## Slide-type checklist for pitch decks
+## Slide-type checklist for pitch decks {#slide-type-checklist-for-pitch-decks}
 
 A typical banking pitch deck follows this structure. Not prescriptive, but useful as a starting skeleton:
 
@@ -211,12 +219,12 @@ A typical banking pitch deck follows this structure. Not prescriptive, but usefu
 12. Process considerations
 13. Appendix
 
-## When NOT to use this skill
+## When NOT to use this skill {#when-not-to-use-this-skill}
 
 - Users in a live PowerPoint session with an Office MCP available — drive their live doc instead.
 - Non-financial slideware (quarterly all-hands, marketing decks) — use the broader `microsoft-office` skill.
 - Decks with heavy animation, transitions, or speaker notes — use the broader `microsoft-office` skill.
 
-## Attribution
+## Attribution {#attribution}
 
 Conventions adapted from Anthropic's Claude for Financial Services plugin suite, Apache-2.0 licensed. Original: https://github.com/anthropics/financial-services/tree/main/plugins/agent-plugins/pitch-agent/skills/pptx-author

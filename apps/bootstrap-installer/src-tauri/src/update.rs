@@ -1,6 +1,6 @@
 //! Update orchestration.
 //!
-//! Driven when the installer is launched as `Hermes-Setup.exe --update` (see
+//! Driven when the installer is launched as `NoOne-Setup.exe --update` (see
 //! `AppMode` in lib.rs). The desktop app hands off to us — it exits, then we:
 //!
 //! Application output locks protect replacement. Python owns dependency
@@ -26,9 +26,9 @@ use crate::marker::{
 };
 use crate::powershell::{pump_child, DRAIN_GRACE};
 
-/// `hermes update` exit code meaning "another hermes process is holding the
+/// `noone update` exit code meaning "another hermes process is holding the
 /// venv shim open / dirty precondition" — see _cmd_update_impl in
-/// hermes_cli/main.py (sys.exit(2)). We surface a targeted message for this.
+/// agent_cli/main.py (sys.exit(2)). We surface a targeted message for this.
 pub(crate) const UPDATE_EXIT_CONCURRENT: i32 = 2;
 
 /// How long to wait for the old desktop process to release files under the
@@ -127,9 +127,9 @@ async fn run_update(app: AppHandle) -> Result<()> {
     // straggler-cleanup kills it, and the relaunch/kill cycle loops. The guard
     // removes the marker on every exit path (incl. early returns / panics).
     //
-    // The same marker is the cross-process update lock (hermes_cli/
+    // The same marker is the cross-process update lock (agent_cli/
     // update_lock.py claims it too), so a live foreign owner means another
-    // updater — most often a dashboard-spawned `hermes update` — is already
+    // updater — most often a dashboard-spawned `noone update` — is already
     // mutating this checkout. Refuse instead of running a second one over it.
     let _update_marker = match UpdateMarkerGuard::acquire(
         crate::paths::update_in_progress_marker(),
@@ -199,9 +199,9 @@ async fn run_update(app: AppHandle) -> Result<()> {
         None,
     );
 
-    // ---- stage 2: hermes update -----------------------------------------
+    // ---- stage 2: noone update -----------------------------------------
     // Update against exactly what the desktop checked against (see
-    // update_target_from_args), never `hermes update`'s own default.
+    // update_target_from_args), never `noone update`'s own default.
     emit_log(
         &app,
         Some("update"),
@@ -227,7 +227,7 @@ async fn run_update(app: AppHandle) -> Result<()> {
     )
     .await?;
 
-    // Retry-once for the update-boundary crash. `hermes update` lazily imports
+    // Retry-once for the update-boundary crash. `noone update` lazily imports
     // the FRESHLY PULLED modules, but the dependency-install step still runs the
     // already-in-memory pre-pull code for one invocation. A release that changed
     // an updater-path contract across that boundary (e.g. #39780's `_UvResult`,
@@ -235,7 +235,7 @@ async fn run_update(app: AppHandle) -> Result<()> {
     // `list2cmdline` with `TypeError: sequence item 1: expected str instance,
     // bool found`, fixed in #39820) therefore kills the FIRST update on the
     // parked population — even though the fix is already on disk by then. A
-    // second `hermes update` runs clean because the now-current module is loaded
+    // second `noone update` runs clean because the now-current module is loaded
     // from the start. Rather than make the parked user click Update twice (and
     // stare at a scary crash first), retry once automatically. Skip the retry
     // for the concurrent-instance guard (exit 2) — that's a "close Hermes" state
@@ -320,7 +320,7 @@ async fn run_update(app: AppHandle) -> Result<()> {
         }
         other => {
             let msg = format!(
-                "hermes update failed (exit {:?}). See {} for details.",
+                "noone update failed (exit {:?}). See {} for details.",
                 other,
                 crate::paths::hermes_home()
                     .join("logs")
@@ -359,7 +359,7 @@ async fn run_update(app: AppHandle) -> Result<()> {
         // (the content-hash stamp makes it a near-no-op when the first actually
         // succeeded). Without this the updater bails here and never reaches the
         // relaunch below — the app updates but doesn't restart. Matches the
-        // retry-once `hermes update` already does above, and `hermes update`'s own
+        // retry-once `noone update` already does above, and `noone update`'s own
         // desktop rebuild in cmd_update.
         if rebuild_needs_retry(rebuild.exit_code) {
             emit_log(
@@ -582,7 +582,7 @@ fn rebuild_needs_retry(exit_code: Option<i32>) -> bool {
 /// is a handful of lines printed right before `sys.exit(2)`.
 const STDOUT_TAIL_LINES: usize = 40;
 
-/// User-facing message for an exit-2 refusal from `hermes update`.
+/// User-facing message for an exit-2 refusal from `noone update`.
 ///
 /// Exit 2 has several causes (another update holds the marker, a live
 /// hermes.exe or venv holder, a self-mapped `.pyd` after the code swap), and
@@ -648,7 +648,7 @@ async fn run_streamed(
         .map_err(|e| anyhow!("spawning {} {:?}: {e}", program.display(), args))?;
 
     // Same non-UTF-8-safe decode path as powershell::run_script (#67193), and
-    // the same rule about pipe EOF: `hermes update` is precisely the shape that
+    // the same rule about pipe EOF: `noone update` is precisely the shape that
     // leaves resident descendants holding an inherited stdout handle, and every
     // stage this drives sits downstream of the read.
     let stage_owned = stage.map(|s| s.to_string());
@@ -700,7 +700,7 @@ async fn resolve_hermes(install_root: &Path) -> Option<PathBuf> {
     }
     // Earlier PM publication lived in user-bin only. The CLI's existing
     // version surface proves which source tree that command belongs to.
-    if install_root.join("hermes_cli/_launchers.py").is_file() {
+    if install_root.join("agent_cli/_launchers.py").is_file() {
         let mut directories = vec![crate::paths::hermes_home().join("bin")];
         if let Some(home) = dirs::home_dir() { directories.push(home.join(".local/bin")); }
         if let Some(parent) = install_root.parent() { directories.push(parent.join("bin")); }
@@ -746,7 +746,7 @@ fn update_child_env(install_root: &Path) -> Vec<(String, OsString)> {
         "HERMES_HOME".to_string(),
         hermes_home.as_os_str().to_os_string(),
     )];
-    // `hermes update` is a Python CLI writing to a pipe here, so CPython
+    // `noone update` is a Python CLI writing to a pipe here, so CPython
     // block-buffers its stdout: nothing reaches run_streamed (and the live
     // log UI) until 8 KB accumulate or the process exits. Long quiet steps —
     // the pre-update backup can zip multi-GB archives for minutes — render as
@@ -754,12 +754,12 @@ fn update_child_env(install_root: &Path) -> Vec<(String, OsString)> {
     // output instead.
     envs.push(("PYTHONUNBUFFERED".to_string(), OsString::from("1")));
     // We hold the update-in-progress marker for this whole run, and the
-    // `hermes update` child claims that SAME lock (hermes_cli/update_lock.py).
+    // `noone update` child claims that SAME lock (agent_cli/update_lock.py).
     // Name our pid so the child recognizes the live holder as its own
     // orchestrator and runs under our claim — without this every GUI update
     // refuses its parent's marker with exit 2 ("Hermes is still running")
     // and no number of retries can ever succeed. Keep the variable name in
-    // sync with HANDOFF_PID_ENV in hermes_cli/update_lock.py.
+    // sync with HANDOFF_PID_ENV in agent_cli/update_lock.py.
     envs.push((
         "HERMES_UPDATE_HANDOFF_PID".to_string(),
         OsString::from(std::process::id().to_string()),
@@ -768,7 +768,7 @@ fn update_child_env(install_root: &Path) -> Vec<(String, OsString)> {
     envs
 }
 
-/// `hermes update`'s target flags: the channel the desktop checked against
+/// `noone update`'s target flags: the channel the desktop checked against
 /// (`--channel`), else a branch (`--branch`, then the build pin
 /// BUILD_PIN_BRANCH, then `main`). A stable install the desktop checked
 /// against its release must not be updated onto the pinned branch: it would
@@ -1099,7 +1099,7 @@ mod tests {
         assert!(
             envs.iter().any(|(k, v)| k == "HERMES_UPDATE_HANDOFF_PID"
                 && v.to_str() == Some(std::process::id().to_string().as_str())),
-            "the hermes update child claims the same marker we hold; without our pid \
+            "the noone update child claims the same marker we hold; without our pid \
              it refuses its own parent's lock and every GUI update dead-ends on exit 2"
         );
     }
@@ -1154,12 +1154,12 @@ mod tests {
             "→ Fetching updates...\n\
              ✓ Updated to 6b2c23ae42\n\
              ✗ Another Hermes update is already running (started 3m 42s ago, process 65285).\n\
-             \n  Wait for it to finish, then run `hermes update` again.\n",
+             \n  Wait for it to finish, then run `noone update` again.\n",
         );
         assert_eq!(
             concurrent_update_message(&tail),
             "✗ Another Hermes update is already running (started 3m 42s ago, process 65285).\n\
-             \n  Wait for it to finish, then run `hermes update` again."
+             \n  Wait for it to finish, then run `noone update` again."
         );
     }
 

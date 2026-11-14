@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 /**
  * The update gate's marker probe (R6, SPEC section 6 "Electron gate").
  *
@@ -42,10 +43,10 @@
  * marker is never touched. A helper `live <pid>` names a live identity and is
  * waited out like any live marker (C1 rule 3).
  */
-
-import { createHash } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
+
+import { appText } from '@noone/shared/application-identity'
 
 import { type CreateTimeProbe, inspectUpdateMarker, type MarkerInspection, markerPath } from './update-marker'
 import type { UpdateMarker } from './update-marker-judge'
@@ -489,16 +490,16 @@ export function liveMarkerProbe({
 /** Boot-progress text while a dead marker's checkout is still held. */
 export function heldWaitMessage(state: HeldState): string {
   if (state.verdict === 'busy' || state.verdict === 'error') {
-    return 'Hermes could not verify update ownership yet — startup is paused while it retries. Details are in logs/update.log.'
+    return appText('{app_name} could not verify update ownership yet — startup is paused while it retries. Details are in logs/update.log.')
   }
 
   if (state.livePid !== null) {
-    return `An update is still finishing (process ${state.livePid}) — Hermes will start automatically when it completes…`
+    return appText(`An update is still finishing (process ${state.livePid}) — {app_name} will start automatically when it completes…`)
   }
 
   const who = state.ownerPid ? `the update (process ${state.ownerPid}) exited, but a process` : 'a process'
 
-  return `An update is still finishing: ${who} it started still holds the Hermes install. Hermes will start when it lets go.`
+  return appText(`An update is still finishing: ${who} it started still holds the {app_name} install. {app_name} will start when it lets go.`)
 }
 
 /** The log line for a confirmed "Start anyway" (R8 D3). */

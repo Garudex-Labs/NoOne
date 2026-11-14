@@ -1,6 +1,6 @@
 """Map commit authors to GitHub logins for release notes and attribution checks.
 
-``AUTHOR_MAP`` merges the frozen ``LEGACY_AUTHOR_MAP`` (authors_legacy.py) with
+``AUTHOR_MAP`` merges the compatibility ``LEGACY_AUTHOR_MAP`` (authors_legacy.py) with
 the one-file-per-email entries under ``contributors/emails/``; the directory
 wins on duplicates.
 """
@@ -24,7 +24,7 @@ def _load_contributor_dir(directory: Path | None = None) -> dict:
 
     Filename = commit-author email, first non-comment line = GitHub login.
     Additions never merge-conflict (each mapping is a distinct file), which
-    is why new entries go here instead of the frozen LEGACY_AUTHOR_MAP.
+    is why new entries go here instead of the compatibility LEGACY_AUTHOR_MAP.
     """
     directory = directory or CONTRIBUTORS_EMAILS_DIR
     mapping = {}
@@ -44,8 +44,13 @@ def _load_contributor_dir(directory: Path | None = None) -> dict:
     return mapping
 
 
-# Effective map: frozen legacy dict + directory entries (directory wins).
+# Effective map: compatibility identity + declared directory entries (directory wins).
 AUTHOR_MAP = {**LEGACY_AUTHOR_MAP, **_load_contributor_dir()}
+
+
+def declared_contributors() -> dict[str, str]:
+    """Current project roster, separate from authors discovered in Git history."""
+    return {**LEGACY_AUTHOR_MAP, **_load_contributor_dir()}
 
 
 def resolve_author(name: str, email: str) -> str:

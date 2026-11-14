@@ -2,7 +2,7 @@
 """Hard A/B evaluation for core-toolset changes: baseline vs fixes.
 
 Runs a battery of error-inducing tasks (each derived from a waste class
-measured in the production session DB) through `hermes chat` twice — once per
+measured in the production session DB) through `noone chat` twice — once per
 arm — and scores every run from its NeMo Relay ATOF trace plus wall clock:
 
   - llm_calls (turns), tool_calls, tool_errors, retry_after_error
@@ -26,7 +26,7 @@ Results append to $ABEVAL_ROOT/results/<model>/<arm>/meta.jsonl (resume-safe:
 completed run_ids are skipped). ATOF traces land beside the meta file.
 
 This is the harness used for the August 2026 core-toolset performance batch
-(tracker: NousResearch/hermes-agent#77056).
+(tracker: Garudex-Labs/NoOne#77056).
 """
 import json
 import os
@@ -198,7 +198,7 @@ mode = "overwrite"
             t0 = time.time()
             try:
                 p = subprocess.run(
-                    [sys.executable, "-m", "hermes_cli.main", "chat", "--query", q,
+                    [sys.executable, "-m", "agent_cli.main", "chat", "--query", q,
                      "--quiet", "--max-turns", "30", "--accept-hooks", "--model", model],
                     cwd=work, env=env, capture_output=True, text=True,
                     encoding="utf-8", errors="replace", timeout=600, check=False)

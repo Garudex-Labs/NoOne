@@ -1,10 +1,10 @@
+import { AppIcon } from '@noone/ui/app-icon'
+import { Loader2, Search } from '@noone/ui/icons'
 import { type KeyboardEventHandler, type ReactNode, type RefObject, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Codicon } from '@/components/ui/codicon'
 import { Tip } from '@/components/ui/tooltip'
 import { useI18n } from '@/i18n'
-import { Loader2, Search } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 interface SearchFieldProps {
@@ -122,7 +122,7 @@ export function SearchField({
             size="icon-xs"
             variant="ghost"
           >
-            <Codicon name="close" size="0.875rem" />
+            <AppIcon name="close" size="0.875rem" />
           </Button>
         </Tip>
       ) : null}

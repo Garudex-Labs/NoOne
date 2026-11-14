@@ -1,42 +1,57 @@
 ---
-sidebar_position: 3
 title: 'Learning Path'
-description: 'Choose your learning path through the Hermes Agent documentation based on your experience level and goals.'
+description: 'Choose your learning path through the the agent documentation based on your experience level and goals.'
 ---
 
-# Learning Path
+# Learning Path {#learning-path}
 
-Hermes Agent can do a lot — CLI assistant, Telegram/Discord bot, task automation, RL training, and more. This page helps you figure out where to start and what to read based on your experience level and what you're trying to accomplish.
+{{app-name}} can do a lot — CLI assistant, Telegram/Discord bot, task automation, RL training, and more. This page helps you figure out where to start and what to read based on your experience level and what you're trying to accomplish.
 
-:::tip Start Here
-If you haven't installed Hermes Agent yet, begin with the [Installation guide](./installation.md) and then run through the [Quickstart](./quickstart.md). Everything below assumes you have a working installation.
-:::
+<Tip>
 
-:::tip First-time provider setup
-First-time users almost always want `hermes setup --portal` — one OAuth covers a model plus the four Tool Gateway tools (search/image/TTS/browser). See [Nous Portal](../integrations/nous-portal.md).
-:::
+<div className="doc-callout-title">
 
-## How to Use This Page
+Start Here
+
+</div>
+
+If you haven't installed {{app-name}} yet, begin with the [Installation guide](./installation.md) and then run through the [Quickstart](./quickstart.md). Everything below assumes you have a working installation.
+
+</Tip>
+
+<Tip>
+
+<div className="doc-callout-title">
+
+First-time provider setup
+
+</div>
+
+First-time users almost always want `noone setup --portal` — one OAuth covers a model plus the four Tool Gateway tools (search/image/TTS/browser). See [Nous Portal](../integrations/nous-portal.md).
+
+</Tip>
+
+## How to Use This Page {#how-to-use-this-page}
 
 - **Know your level?** Jump to the [experience-level table](#by-experience-level) and follow the reading order for your tier.
 - **Have a specific goal?** Skip to [By Use Case](#by-use-case) and find the scenario that matches.
-- **Just browsing?** Check the [Key Features](#key-features-at-a-glance) table for a quick overview of everything Hermes Agent can do.
+- **Just browsing?** Check the [Key Features](#key-features-at-a-glance) table for a quick overview of everything {{app-name}} can do.
 
-## By Experience Level
+## By Experience Level {#by-experience-level}
 
 | Level | Goal | Recommended Reading | Time Estimate |
 |---|---|---|---|
 | **Beginner** | Get up and running, have basic conversations, use built-in tools | [Installation](./installation.md) → [Quickstart](./quickstart.md) → [CLI Usage](../user-guide/cli.md) → [Configuration](../user-guide/configuration.md) | ~1 hour |
 | **Intermediate** | Set up messaging bots, use advanced features like memory, cron jobs, and skills | [Sessions](../user-guide/sessions.md) → [Messaging](../user-guide/messaging/index.md) → [Tools](../user-guide/features/tools.md) → [Skills](../user-guide/features/skills.md) → [Memory](../user-guide/features/memory.md) → [Cron](../user-guide/features/cron.md) | ~2–3 hours |
-| **Advanced** | Build custom tools, create skills, train models with RL, contribute to the project | [Architecture](../developer-guide/architecture.md) → [Adding Tools](../developer-guide/adding-tools.md) → [Creating Skills](../developer-guide/creating-skills.md) → [Contributing](../developer-guide/contributing.md) | ~4–6 hours |
+| **Advanced** | Build custom tools, create skills, train models with RL, contribute to the project | [Architecture](../developer-guide/architecture.md) → [Adding Tools](../developer-guide/adding-tools.md) → [Creating Skills](../developer-guide/creating-skills.md) → [Contributing](../developer-guide/contribution-guide.md) | ~4–6 hours |
 
-## By Use Case
+## By Use Case {#by-use-case}
 
 Pick the scenario that matches what you want to do. Each one links you to the relevant docs in the order you should read them.
 
-### "I want a CLI coding assistant"
+### "I want a CLI coding assistant" {#i-want-a-cli-coding-assistant}
 
-Use Hermes Agent as an interactive terminal assistant for writing, reviewing, and running code.
+Use {{app-name}} as an interactive terminal assistant for writing, reviewing, and running code.
 
 1. [Installation](./installation.md)
 2. [Quickstart](./quickstart.md)
@@ -45,13 +60,21 @@ Use Hermes Agent as an interactive terminal assistant for writing, reviewing, an
 5. [Context Files](../user-guide/features/context-files.md)
 6. [Tips & Tricks](../guides/tips.md)
 
-:::tip
-Pass files directly into your conversation with context files. Hermes Agent can read, edit, and run code in your projects.
-:::
+<Tip>
 
-### "I want a Telegram/Discord bot"
+<div className="doc-callout-title">
 
-Deploy Hermes Agent as a bot on your favorite messaging platform.
+TIP
+
+</div>
+
+Pass files directly into your conversation with context files. {{app-name}} can read, edit, and run code in your projects.
+
+</Tip>
+
+### "I want a Telegram/Discord bot" {#i-want-a-telegramdiscord-bot}
+
+Deploy {{app-name}} as a bot on your favorite messaging platform.
 
 1. [Installation](./installation.md)
 2. [Configuration](../user-guide/configuration.md)
@@ -59,14 +82,14 @@ Deploy Hermes Agent as a bot on your favorite messaging platform.
 4. [Telegram Setup](../user-guide/messaging/telegram.md)
 5. [Discord Setup](../user-guide/messaging/discord.md)
 6. [Voice Mode](../user-guide/features/voice-mode.md)
-7. [Use Voice Mode with Hermes](../guides/use-voice-mode-with-hermes.md)
+7. [Use Voice Mode with {{app-name}}](../guides/use-voice-mode-with-agent.md)
 8. [Security](../user-guide/security.md)
 
 For full project examples, see:
 - [Daily Briefing Bot](../guides/daily-briefing-bot.md)
 - [Team Telegram Assistant](../guides/team-telegram-assistant.md)
 
-### "I want to automate tasks"
+### "I want to automate tasks" {#i-want-to-automate-tasks}
 
 Schedule recurring tasks, run batch jobs, or chain agent actions together.
 
@@ -76,11 +99,19 @@ Schedule recurring tasks, run batch jobs, or chain agent actions together.
 4. [Delegation](../user-guide/features/delegation.md)
 5. [Hooks](../user-guide/features/hooks.md)
 
-:::tip
-Cron jobs let Hermes Agent run tasks on a schedule — daily summaries, periodic checks, automated reports — without you being present.
-:::
+<Tip>
 
-### "I want a team of specialist Bots"
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
+Cron jobs let {{app-name}} run tasks on a schedule — daily summaries, periodic checks, automated reports — without you being present.
+
+</Tip>
+
+### "I want a team of specialist Bots" {#i-want-a-team-of-specialist-bots}
 
 Create named Bots with their own model, memory, skills, routines, and chats, then bring them together in group chats or through `@mentions`.
 
@@ -90,12 +121,12 @@ Create named Bots with their own model, memory, skills, routines, and chats, the
 4. [Cron Scheduling](../user-guide/features/cron.md)
 5. [Multi-connection Desktop](../user-guide/multi-connection-desktop.md)
 
-### "I want to build custom tools/skills"
+### "I want to build custom tools/skills" {#i-want-to-build-custom-toolsskills}
 
-Extend Hermes Agent with your own tools and reusable skill packages.
+Extend {{app-name}} with your own tools and reusable skill packages.
 
 1. [Plugins](../user-guide/features/plugins.md)
-2. [Build a Hermes Plugin](../developer-guide/plugins/index.md)
+2. [Build a {{app-name}} Plugin](../developer-guide/plugins/index.md)
 3. [Tools Overview](../user-guide/features/tools.md)
 4. [Skills Overview](../user-guide/features/skills.md)
 5. [MCP (Model Context Protocol)](../user-guide/features/mcp.md)
@@ -103,14 +134,22 @@ Extend Hermes Agent with your own tools and reusable skill packages.
 7. [Adding Tools](../developer-guide/adding-tools.md)
 8. [Creating Skills](../developer-guide/creating-skills.md)
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 For most custom tool creation, start with plugins. The [Adding Tools](../developer-guide/adding-tools.md)
-page is for built-in Hermes core development, not the usual user/custom-tool path.
-:::
+page is for built-in {{app-name}} core development, not the usual user/custom-tool path.
 
-### "I want to train models"
+</Tip>
 
-Use reinforcement learning to fine-tune model behavior with Hermes Agent's RL training pipeline (powered by [Atropos](https://github.com/NousResearch/atropos)).
+### "I want to train models" {#i-want-to-train-models}
+
+Use reinforcement learning to fine-tune model behavior with {{app-name}}'s RL training pipeline (powered by [Atropos](https://github.com/NousResearch/atropos)).
 
 1. [Quickstart](./quickstart.md)
 2. [Configuration](../user-guide/configuration.md)
@@ -118,13 +157,21 @@ Use reinforcement learning to fine-tune model behavior with Hermes Agent's RL tr
 4. [Provider Routing](../user-guide/features/provider-routing.md)
 5. [Architecture](../developer-guide/architecture.md)
 
-:::tip
-RL training works best when you already understand the basics of how Hermes Agent handles conversations and tool calls. Run through the Beginner path first if you're new.
-:::
+<Tip>
 
-### "I want to use it as a Python library"
+<div className="doc-callout-title">
 
-Integrate Hermes Agent into your own Python applications programmatically.
+TIP
+
+</div>
+
+RL training works best when you already understand the basics of how {{app-name}} handles conversations and tool calls. Run through the Beginner path first if you're new.
+
+</Tip>
+
+### "I want to use it as a Python library" {#i-want-to-use-it-as-a-python-library}
+
+Integrate {{app-name}} into your own Python applications programmatically.
 
 1. [Installation](./installation.md)
 2. [Quickstart](./quickstart.md)
@@ -133,7 +180,7 @@ Integrate Hermes Agent into your own Python applications programmatically.
 5. [Tools](../user-guide/features/tools.md)
 6. [Sessions](../user-guide/sessions.md)
 
-## Key Features at a Glance
+## Key Features at a Glance {#key-features-at-a-glance}
 
 Not sure what's available? Here's a quick directory of major features:
 
@@ -147,13 +194,13 @@ Not sure what's available? Here's a quick directory of major features:
 | **MCP** | Connect to external tool servers via Model Context Protocol | [MCP](../user-guide/features/mcp.md) |
 | **Cron** | Schedule recurring agent tasks | [Cron](../user-guide/features/cron.md) |
 | **Delegation** | Spawn sub-agents for parallel work | [Delegation](../user-guide/features/delegation.md) |
-| **Code Execution** | Run Python scripts that call Hermes tools programmatically | [Code Execution](../user-guide/features/code-execution.md) |
+| **Code Execution** | Run Python scripts that call {{app-name}} tools programmatically | [Code Execution](../user-guide/features/code-execution.md) |
 | **Browser** | Web browsing and scraping | [Browser](../user-guide/features/browser.md) |
 | **Hooks** | Event-driven callbacks and middleware | [Hooks](../user-guide/features/hooks.md) |
 | **Batch Processing** | Process multiple inputs in bulk | [Batch Processing](../user-guide/features/batch-processing.md) |
 | **Provider Routing** | Route requests across multiple LLM providers | [Provider Routing](../user-guide/features/provider-routing.md) |
 
-## What to Read Next
+## What to Read Next {#what-to-read-next}
 
 Based on where you are right now:
 
@@ -164,6 +211,14 @@ Based on where you are right now:
 - **Ready to build?** → Jump into the [Developer Guide](../developer-guide/architecture.md) to understand the internals and start contributing.
 - **Want practical examples?** → Check out the [Guides](../guides/tips.md) section for real-world projects and tips.
 
-:::tip
+<Tip>
+
+<div className="doc-callout-title">
+
+TIP
+
+</div>
+
 You don't need to read everything. Pick the path that matches your goal, follow the links in order, and you'll be productive quickly. You can always come back to this page to find your next step.
-:::
+
+</Tip>

@@ -85,7 +85,7 @@ def sleeper():
 def _install(tmp_path: Path, *, legacy: bool = False) -> tuple[Path, Path]:
     home = tmp_path / "home"
     install = home / "hermes-agent"
-    package = install / "hermes_cli"
+    package = install / "agent_cli"
     package.mkdir(parents=True)
     (package / "__init__.py").touch()
     (package / "main.py").write_text(FAKE_CLI, encoding="utf-8")
@@ -94,7 +94,7 @@ def _install(tmp_path: Path, *, legacy: bool = False) -> tuple[Path, Path]:
         bin_dir.mkdir(parents=True)
         (bin_dir / "python3").symlink_to(sys.executable)
         hermes = bin_dir / "hermes"
-        hermes.write_text(f'#!/usr/bin/env bash\nexec {shlex.quote(sys.executable)} -m hermes_cli.main "$@"\n', encoding="utf-8")
+        hermes.write_text(f'#!/usr/bin/env bash\nexec {shlex.quote(sys.executable)} -m agent_cli.main "$@"\n', encoding="utf-8")
         hermes.chmod(0o755)
     else:
         (install / "pm").mkdir()
@@ -123,7 +123,7 @@ def test_live_marker_is_never_reclaimed_and_refuses_the_handoff(tmp_path, sleepe
     home, install = _install(tmp_path)
     live = sleeper()
     if delegate:
-        # The orchestrator died (pid 1 is never ours) while `hermes update` still runs as the
+        # The orchestrator died (pid 1 is never ours) while `noone update` still runs as the
         # delegate: the marker stays LIVE through line 4.
         body = f"999999\n{int(time.time()) - 60}\nct:1.000\ndelegate:{live.pid} ct:{_ct(live.pid)}\n"
     else:
@@ -244,7 +244,7 @@ def test_committed_update_with_failed_followup_is_ok_with_warnings(tmp_path):
 
 @pytest.mark.parametrize(("outcome", "code"), [("interrupted", "130"), ("partial", "1"), ("success", "1")])
 def test_nonzero_exit_after_the_commit_point_is_installed_with_a_followup(tmp_path, outcome, code):
-    """Contract C3: `hermes update` exits 130 (Ctrl-C after the code moved) or 1 (a parked
+    """Contract C3: `noone update` exits 130 (Ctrl-C after the code moved) or 1 (a parked
     autostash) AFTER its commit point. Its own receipt says so; the result must report the
     update installed with an owed follow-up, never ok:false / "still on the previous version"."""
     home, install = _install(tmp_path)
@@ -315,7 +315,7 @@ def test_failed_update_carries_the_updaters_own_output(tmp_path, output):
     assert result.returncode == 1, result.stdout + result.stderr
     outcome = json.loads((home / ".hermes-update-result.json").read_text(encoding="utf-8-sig"))
     assert (outcome["ok"], outcome["exit_code"]) == (False, 1), outcome
-    assert outcome["message"].startswith("Update failed (exit 1). Run hermes debug share"), outcome
+    assert outcome["message"].startswith("Update failed (exit 1). Run noone debug share"), outcome
     if output:
         assert "Last output: sweeping the venv ERROR: the autostash cannot be re-applied" in outcome["message"], outcome
     else:
@@ -354,7 +354,7 @@ def _ancestry(pid: int) -> list[int]:
 
 
 def test_script_killed_right_after_spawning_the_update_leaves_a_live_marker(tmp_path):
-    """C1 rule 6, written by the script itself: posix.sh dies (SIGKILL) while its `hermes update`
+    """C1 rule 6, written by the script itself: posix.sh dies (SIGKILL) while its `noone update`
     child is only starting up and has not taken the update lock. The marker must still read LIVE
     through the child named on line 4, and turn dead once that child is gone."""
     home, install = _install(tmp_path)

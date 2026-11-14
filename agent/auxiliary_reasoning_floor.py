@@ -79,7 +79,6 @@ def remember_reasoning_floor(
     _FLOORED_ROUTES.add((_route_key(provider, base_url), str(rejected_kwargs.get("model") or "")))
 
 
-_NOUS_PROVIDERS = {"nous", "nous-portal", "nousresearch"}
 
 
 def _catalog_marks_mandatory(provider: Optional[str], base_url: Optional[str], model: Optional[str]) -> bool:
@@ -90,11 +89,9 @@ def _catalog_marks_mandatory(provider: Optional[str], base_url: Optional[str], m
     process."""
     provider_norm = str(provider or "").strip().lower()
     host = (urlparse(base_url or "").hostname or "").lower()
-    from hermes_cli import models_reasoning_caps as caps_mod
+    from agent_cli import models_reasoning_caps as caps_mod
     if provider_norm == "openrouter" or host == "openrouter.ai" or host.endswith(".openrouter.ai"):
         lookup, warm = caps_mod.openrouter_model_reasoning_capabilities, caps_mod.warm_openrouter_reasoning_caps_async
-    elif provider_norm in _NOUS_PROVIDERS:
-        lookup, warm = caps_mod.nous_model_reasoning_capabilities, caps_mod.warm_nous_reasoning_caps_async
     else:
         return False
     try:

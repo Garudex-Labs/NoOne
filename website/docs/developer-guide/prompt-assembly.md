@@ -1,12 +1,11 @@
 ---
-sidebar_position: 5
 title: "Prompt Assembly"
-description: "How Hermes builds the system prompt, preserves cache stability, and injects ephemeral layers"
+description: "How the agent builds the system prompt, preserves cache stability, and injects ephemeral layers"
 ---
 
-# Prompt Assembly
+# Prompt Assembly {#prompt-assembly}
 
-Hermes deliberately separates:
+{{app-name}} deliberately separates:
 
 - **cached system prompt state**
 - **ephemeral API-call-time additions**
@@ -24,7 +23,7 @@ Primary files:
 - `agent/prompt_builder.py`
 - `tools/memory_tool.py`
 
-## Cached system prompt layers
+## Cached system prompt layers {#cached-system-prompt-layers}
 
 The cached system prompt is assembled as three ordered tiers (see `agent/system_prompt.py`):
 
@@ -54,7 +53,7 @@ excluding embedder descriptions. `Platform:` is deliberately not an identity fie
 (desktop ↔ TUI) keeps the stored bytes and delivers the current surface's guidance as a one-shot note on
 the per-turn user-message channel (`agent/surface_switch.py`), so the cached prefix survives (#104414). The
 `<available_skills>` index is kept the same way: every turn compares it with the index the session would
-build now (`agent/skills_index_delta.py`, called from `build_turn_context` so long-lived CLI/TUI/Desktop
+build now (`agent/skills_index_delta.py`, called from `build_turn_context` so long-lived CLI/Desktop
 agents are covered, not only prompt restores), and a difference (new index rows, removed names) rides
 the same one-shot note channel, sent only when the difference changes. The in-process index cache is
 keyed on the skill files' signatures, so a change written by another process is seen too. The index
@@ -63,7 +62,7 @@ host-before-context anchor, so prompts persisted before the reorder still valida
 
 When `skip_context_files` is set (e.g., subagent delegation), SOUL.md is not loaded and the hardcoded `DEFAULT_AGENT_IDENTITY` is used instead.
 
-### Concrete example: assembled system prompt
+### Concrete example: assembled system prompt {#concrete-example-assembled-system-prompt}
 
 Here is a simplified view of what the final system prompt looks like when all layers are present (comments show the source of each section):
 
@@ -138,9 +137,9 @@ You are a CLI AI Agent. Try not to use markdown but simple text
 renderable inside a terminal.
 ```
 
-## Customizing platform hints
+## Customizing platform hints {#customizing-platform-hints}
 
-The platform hint (Layer 10 above) is the per-surface guidance Hermes
+The platform hint (Layer 10 above) is the per-surface guidance {{app-name}}
 injects for Telegram, WhatsApp, Slack, CLI, and other platforms — for
 example "you are on a terminal, avoid Markdown." The built-in defaults
 live in `PLATFORM_HINTS` (`agent/system_prompt.py`); plugin-provided
@@ -183,14 +182,14 @@ byte-stable hint for a fixed config, so it lives in the **stable** tier
 alongside the built-in hint and does not break prompt caching — it is
 not a live mid-session mutation of a frozen prompt.
 
-## How SOUL.md appears in the prompt
+## How SOUL.md appears in the prompt {#how-soulmd-appears-in-the-prompt}
 
 `SOUL.md` lives at `~/.hermes/SOUL.md` and serves as the agent's identity — the very first section of the system prompt. The loading logic in `prompt_builder.py` works as follows:
 
 ```python
 # From agent/prompt_builder.py (simplified)
 def load_soul_md() -> Optional[str]:
-    soul_path = get_hermes_home() / "SOUL.md"
+    soul_path = get_agent_home() / "SOUL.md"
     if not soul_path.exists():
         return None
     content = soul_path.read_text(encoding="utf-8").strip()
@@ -204,7 +203,7 @@ When `load_soul_md()` returns content, it replaces the hardcoded `DEFAULT_AGENT_
 If `SOUL.md` doesn't exist, the system falls back to:
 
 ```
-You are Hermes Agent, built by Nous Research. Be direct: match the length
+You are NoOne, built by Nous Research. Be direct: match the length
 of your reply to the weight of the ask — a one-line question gets a
 one-line answer, and finished work gets a short report of what changed,
 what's verified, and what's left, never a replay of the process. No
@@ -216,7 +215,7 @@ is earned — give it when the user asks for detail, teaches, or the
 stakes demand it, not by default.
 ```
 
-## How context files are injected
+## How context files are injected {#how-context-files-are-injected}
 
 `build_context_files_prompt()` uses a **priority system** — only one project context type is loaded (first match wins):
 
@@ -254,11 +253,11 @@ def build_context_files_prompt(cwd=None, skip_soul=False):
     )
 ```
 
-### Context file discovery details
+### Context file discovery details {#context-file-discovery-details}
 
 | Priority | Files | Search scope | Notes |
 |----------|-------|-------------|-------|
-| 1 | `.hermes.md`, `HERMES.md` | CWD up to git root | Hermes-native project config |
+| 1 | `.hermes.md`, `HERMES.md` | CWD up to git root | {{app-name}}-native project config |
 | 2 | `AGENTS.md` | CWD only | Common agent instruction file |
 | 3 | `CLAUDE.md` | CWD only | Claude Code compatibility |
 | 4 | `.cursorrules`, `.cursor/rules/*.mdc` | CWD only | Cursor compatibility |
@@ -268,7 +267,7 @@ All context files are:
 - **Truncated** — capped at `context_file_max_chars` characters using a 70/20 head/tail split with a truncation marker. The cap scales with the model's context window (20,000-char floor, 500K ceiling); an explicit `context_file_max_chars` in `config.yaml` always wins.
 - **YAML frontmatter stripped** — `.hermes.md` frontmatter is removed (reserved for future config overrides)
 
-## API-call-time-only layers
+## API-call-time-only layers {#api-call-time-only-layers}
 
 These are intentionally *not* persisted as part of the cached system prompt:
 
@@ -277,15 +276,15 @@ These are intentionally *not* persisted as part of the cached system prompt:
 - gateway-derived session context overlays
 - later-turn Honcho/external recall injected into the current-turn user message
 
-`pre_llm_call` plugin context also lands in this API-call-time path: it is appended to the current turn's **user message**, not written into the cached system prompt. When multiple plugins return context, Hermes concatenates those context blocks (see [Hooks → `pre_llm_call`](../user-guide/features/hooks.md#pre_llm_call)).
+`pre_llm_call` plugin context also lands in this API-call-time path: it is appended to the current turn's **user message**, not written into the cached system prompt. When multiple plugins return context, {{app-name}} concatenates those context blocks (see [Hooks → `pre_llm_call`](../user-guide/features/hooks.md#pre_llm_call)).
 
 This separation keeps the stable prefix stable for caching.
 
-## Memory snapshots
+## Memory snapshots {#memory-snapshots}
 
 Local memory and user profile data are captured in the system prompt's **volatile tier**. Mid-session writes update disk state but do not mutate the already-built cached system prompt until a rebuild path runs (new session, or explicit invalidation/rebuild flow such as compression-triggered rebuild).
 
-## Context files
+## Context files {#context-files}
 
 `agent/prompt_builder.py` scans and sanitizes project context files using a **priority system** — only one type is loaded (first match wins):
 
@@ -298,24 +297,24 @@ Local memory and user profile data are captured in the system prompt's **volatil
 
 Long files are truncated before injection.
 
-## Skills index
+## Skills index {#skills-index}
 
 The skills system contributes a compact skills index to the prompt when skills tooling is available.
 
-## Supported prompt customization surfaces
+## Supported prompt customization surfaces {#supported-prompt-customization-surfaces}
 
-Most users should treat `agent/prompt_builder.py` as implementation code, not a configuration surface. The supported customization path is to change the prompt inputs Hermes already loads, rather than editing Python templates in place.
+Most users should treat `agent/prompt_builder.py` as implementation code, not a configuration surface. The supported customization path is to change the prompt inputs {{app-name}} already loads, rather than editing Python templates in place.
 
-### Use these surfaces first
+### Use these surfaces first {#use-these-surfaces-first}
 
 - `~/.hermes/SOUL.md` — replace the built-in default identity block with your own agent persona and standing behavior.
 - `~/.hermes/MEMORY.md` and `~/.hermes/USER.md` — provide durable cross-session facts and user profile data that should be snapshotted into new sessions.
 - Project context files such as `.hermes.md`, `HERMES.md`, `AGENTS.md`, `CLAUDE.md`, or `.cursorrules` — inject repo-specific working rules.
 - Skills — package reusable workflows and references without editing core prompt code.
-- Optional system prompt config / API overrides — add deployment-specific instruction text without forking Hermes.
+- Optional system prompt config / API overrides — add deployment-specific instruction text without forking {{app-name}}.
 - Ephemeral overlays such as `HERMES_EPHEMERAL_SYSTEM_PROMPT` or prefill messages — add turn-scoped guidance that should not become part of the cached prompt prefix.
 
-### When to edit code instead
+### When to edit code instead {#when-to-edit-code-instead}
 
 Edit `agent/prompt_builder.py` only if you are intentionally maintaining a fork or contributing upstream behavior changes. That file assembles the prompt plumbing, cache boundaries, and injection order for every session. Direct edits there are global product changes, not per-user prompt customization.
 
@@ -324,9 +323,9 @@ In other words:
 - if you want a different assistant identity, edit `SOUL.md`
 - if you want different repo rules, edit project context files
 - if you want reusable operating procedures, add or modify skills
-- if you want to change how Hermes assembles prompts for everyone, change Python and treat it as a code contribution
+- if you want to change how {{app-name}} assembles prompts for everyone, change Python and treat it as a code contribution
 
-## Reviewing changes to the prompt surface
+## Reviewing changes to the prompt surface {#reviewing-changes-to-the-prompt-surface}
 
 The **prompt surface** is what a stock install sends before the first user message: the system prompt and the `tools[]` array. A one-line code change can rewrite either without the diff showing it. A guidance constant can move tiers, a toolset can gain a tool, or a schema rewriter can edit a description. So the rendered surface is committed and reviewed like code:
 
@@ -338,12 +337,12 @@ The **prompt surface** is what a stock install sends before the first user messa
 Regenerate after any change that moves the surface:
 
 ```bash
-scripts/run-in-hermes-env python scripts/ci/prompt_surface.py render
+scripts/run-in-agent-env python scripts/ci/prompt_surface.py render
 ```
 
 User-side customization (`SOUL.md`, context files, skills you install, `platform_hints`, `agent.*` guidance toggles) never touches the snapshot. The render uses stock defaults and only bundled skills.
 
-## Why prompt assembly is split this way
+## Why prompt assembly is split this way {#why-prompt-assembly-is-split-this-way}
 
 The architecture is intentionally optimized to:
 
@@ -352,7 +351,7 @@ The architecture is intentionally optimized to:
 - keep memory semantics understandable
 - let gateway/ACP/CLI add context without poisoning persistent prompt state
 
-## Related docs
+## Related docs {#related-docs}
 
 - [Context Compression & Prompt Caching](./context-compression-and-caching.md)
 - [Session Storage](./session-storage.md)

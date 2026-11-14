@@ -7,7 +7,7 @@ after an upgrade, is the user's *own* state still there?
 Standalone and stdlib-only. Both modes are read-only against the home; nothing
 is ever created, deleted or written under it. There is deliberately NO `seed`
 mode: the state this verifies must be produced by the product through the
-ordinary user path (a real chat turn, `hermes auth add`, `hermes profile
+ordinary user path (a real chat turn, `noone auth add`, `noone profile
 create`), never hand-written by the harness. Assertions over fixtures we wrote
 ourselves would only prove the harness can write files.
 
@@ -75,7 +75,7 @@ ADVISORY_ROOTS = (SKILLS_ROOT,)
 # is reported, not failed. Derived from the migration source so a newly retired
 # var cannot drift out of this set; unreadable source retires nothing, which
 # keeps every .env change fatal.
-MIGRATION_SOURCE = Path(__file__).resolve().parents[3] / "hermes_cli" / "config_migrations.py"
+MIGRATION_SOURCE = Path(__file__).resolve().parents[3] / "agent_cli" / "config_migrations.py"
 EMPTY_VALUE_DIGEST = hashlib.sha256(b"").hexdigest()[:12]
 # state.db tables whose row counts stand in for "the user's data is still here".
 # Counting rows rather than hashing bytes: a live SQLite file changes for

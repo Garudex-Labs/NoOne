@@ -1,11 +1,11 @@
+import { Info } from '@noone/ui/icons'
 import type { ReactNode } from 'react'
 
+import type { ProfileScope } from '@/agent-client'
 import type { DelegationRouting } from '@/api/delegation'
 import { Button } from '@/components/ui/button'
-import type { ProfileScope } from '@/hermes'
 import { useI18n } from '@/i18n'
 import type { DelegationRoutingTranslations } from '@/i18n/types_delegation_routing'
-import { Info } from '@/lib/icons'
 
 import { chooseDelegationMode, routesOwnSubagentModel, useDelegationRouting } from './routing-data'
 

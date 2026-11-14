@@ -2,7 +2,7 @@
 name: brag
 description: Project launch video via Hyperframes, upstream-maintained.
 version: 0.4.0
-author: Shunit Haviv Hakimi (shunithaviv)
+author: RAWx18
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
@@ -43,7 +43,7 @@ invocation asks for `--full` or `--voice`.
 - The Hyperframes path (`--full`, `--voice`, or any model other than Opus 5.5)
   loads HeyGen's domain skills by name: `hyperframes-core`,
   `hyperframes-animation`, `hyperframes-creative`, `hyperframes-keyframes` and
-  `hyperframes-cli`, installed with `hermes skills install
+  `hyperframes-cli`, installed with `noone skills install
   heygen-com/hyperframes/skills/<name>`. The skills guard currently blocks four
   of the five on HTML comments and credential docs in their examples
   (`hyperframes-creative` scores dangerous, which `--force` cannot override),

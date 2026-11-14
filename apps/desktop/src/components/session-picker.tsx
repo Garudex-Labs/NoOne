@@ -1,12 +1,12 @@
+import { Check, MessageCircle } from '@noone/ui/icons'
 import { useQuery } from '@tanstack/react-query'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import { useEffect, useMemo, useState } from 'react'
 
+import { listAllProfileSessions } from '@/agent-client'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { listAllProfileSessions } from '@/hermes'
 import { useI18n } from '@/i18n'
 import { sessionTitle } from '@/lib/chat-runtime'
-import { Check, MessageCircle } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 
 interface SessionPickerDialogProps {

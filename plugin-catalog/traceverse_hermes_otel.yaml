@@ -10,7 +10,7 @@ docs_url: https://github.com/Mandark-droid/hermes-otel-plugin/blob/main/README.m
 version: "2.0.1"
 screenshots:
   - https://raw.githubusercontent.com/Mandark-droid/hermes-otel-plugin/69b744cd27da2c82c5a058b9985aa1289b45ba73/docs/img/hermes-jaeger-waterfall.png
-  - https://raw.githubusercontent.com/Mandark-droid/hermes-otel-plugin/69b744cd27da2c82c5a058b9985aa1289b45ba73/docs/img/genai-otel-hermes.png
+  - https://raw.githubusercontent.com/Mandark-droid/hermes-otel-plugin/69b744cd27da2c82c5a058b9985aa1289b45ba73/docs/img/genai-otel-agent.png
 readme: true
 platforms: []
 title: "Hermes OTel + Eval Metrics"
