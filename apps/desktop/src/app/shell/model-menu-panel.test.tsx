@@ -104,9 +104,9 @@ describe('ModelMenuPanel MoA presets', () => {
     const { content } = renderPanel()
 
     const row = await content.findByText('MoA: BeastMode')
-    // The check codicon renders as a sibling within the same row item.
+    // The shared check SVG renders as a sibling within the same row item.
     const item = row.closest('[role="menuitem"]') ?? row.parentElement
-    expect(item?.querySelector('.codicon-check')).not.toBeNull()
+    expect(item?.querySelector('.tabler-icon-check')).not.toBeNull()
   })
 
   it('keeps the virtual moa provider out of the main model groups (presets section only)', async () => {
@@ -153,8 +153,8 @@ describe('ModelMenuPanel current selection', () => {
     const currentRow = (await content.findByText(/Gemini 3\.1 Pro/i)).closest('[role="menuitem"]')
     const staleRow = content.getByText('DeepSeek Chat').closest('[role="menuitem"]')
 
-    expect(currentRow?.querySelector('.codicon-check')).not.toBeNull()
-    expect(staleRow?.querySelector('.codicon-check')).toBeNull()
+    expect(currentRow?.querySelector('.tabler-icon-check')).not.toBeNull()
+    expect(staleRow?.querySelector('.tabler-icon-check')).toBeNull()
   })
 })
 
@@ -563,11 +563,11 @@ describe('ModelMenuPanel provider collapse', () => {
 
     expect(items).toHaveLength(2)
 
-    const checked = items.filter(item => item?.querySelector('.codicon-check'))
+    const checked = items.filter(item => item?.querySelector('.tabler-icon-check'))
     expect(checked).toHaveLength(1)
     expect(checked[0]?.closest('[role="group"]')?.textContent).toContain('智谱2')
     expect(
-      items.find(item => !item?.querySelector('.codicon-check'))?.closest('[role="group"]')?.textContent
+      items.find(item => !item?.querySelector('.tabler-icon-check'))?.closest('[role="group"]')?.textContent
     ).toContain('OpenRouter')
 
     const input = screen.getByRole('textbox', { name: 'Search models' })

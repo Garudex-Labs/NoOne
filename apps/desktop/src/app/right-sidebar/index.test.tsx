@@ -146,9 +146,9 @@ describe('RightSidebarPane', () => {
     render(<RightSidebarPane onActivateFile={vi.fn()} onActivateFolder={vi.fn()} />)
 
     const collapse = await screen.findByRole('button', { name: 'Collapse all folders' })
-    const glyph = collapse.querySelector('.codicon')
+    const glyph = collapse.querySelector('svg.tabler-icon-menu-2')
     expect(glyph).not.toBeNull()
-    expect(glyph?.classList.contains('codicon-three-bars')).toBe(true)
-    expect(collapse.querySelector('svg')).toBeNull()
+    expect(glyph?.classList.contains('tabler-icon-menu-2')).toBe(true)
+    expect(glyph?.getAttribute('aria-hidden')).toBe('true')
   })
 })

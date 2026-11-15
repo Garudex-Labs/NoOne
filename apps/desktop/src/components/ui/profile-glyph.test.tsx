@@ -38,6 +38,6 @@ describe('ProfileGlyph', () => {
     const { container } = render(<ProfileGlyph color={null} isDefault name="研究助手" />)
 
     expect(container.textContent).toBe('')
-    expect(container.querySelector('.codicon-home')).not.toBeNull()
+    expect(container.querySelector('.tabler-icon-home')).not.toBeNull()
   })
 })

@@ -63,10 +63,7 @@ import {
 } from "@/lib/pty-close-copy";
 import { createPtyCompositionForwarder } from "@/lib/pty-composition";
 import { shouldRestoreTerminalFocus } from "@/lib/pty-focus";
-import {
-  resolvePtyKeyboardShortcut,
-  sendPtyShortcutSequence,
-} from "@/lib/pty-keyboard-shortcuts";
+import { resolvePtyKeyboardShortcut, sendPtyShortcutSequence } from "@/lib/pty-keyboard-shortcuts";
 import {
   MOBILE_REPLACEMENT_WINDOW_MS,
   normalizePtyMobileInput,

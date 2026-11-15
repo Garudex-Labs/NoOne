@@ -1,5 +1,5 @@
 // Regenerate shared font CSS from the typography contract. No network or runtime build is needed.
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { isMain } from './frontend-common.mjs'
 
@@ -41,6 +41,10 @@ ${weights}
 }
 if (isMain(import.meta.url)) {
   const data = JSON.parse(readFileSync(new URL('typography.json', root), 'utf8'))
+  const iconDir = new URL('icons/', root)
+  const icons = Object.fromEntries(readdirSync(iconDir).filter(name => name.endsWith('.svg')).sort()
+    .map(name => [name.slice(0, -4), readFileSync(new URL(name, iconDir), 'utf8').trim()]))
+  writeFileSync(new URL('icons.json', root), `${JSON.stringify(icons, null, 2)}\n`)
   const css = typographyCss(data)
   writeFileSync(fileURLToPath(new URL('typography.css', root)), css)
   const handoff = new URL('../desktop-update/ui.html', import.meta.url)

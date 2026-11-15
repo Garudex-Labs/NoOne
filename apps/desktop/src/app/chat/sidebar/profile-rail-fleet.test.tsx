@@ -467,15 +467,15 @@ describe('ProfileRail fleet mode', () => {
 
     // This device is a backend switch that may install (#102826), so its
     // default pill must not share the home glyph other gateways' defaults use.
-    expect(localDevice.querySelector('.codicon-device-desktop')).toBeTruthy()
-    expect(localDevice.querySelector('.codicon-home')).toBeNull()
+    expect(localDevice.querySelector('.tabler-icon-device-desktop')).toBeTruthy()
+    expect(localDevice.querySelector('.tabler-icon-home')).toBeNull()
 
     const gatewayB = container.querySelector(
       '[data-slot="profile-rail-gateway"][data-connection-id="gateway-b"]'
     ) as HTMLElement
 
     const gatewayBHome = within(gatewayB).getByRole('button', { name: 'default · Gateway B' })
-    expect(gatewayBHome.querySelector('.codicon-home')).toBeTruthy()
+    expect(gatewayBHome.querySelector('.tabler-icon-home')).toBeTruthy()
 
     // The active gateway's own squares are unchanged and unqualified.
     expect(screen.getByRole('button', { name: 'scout' })).toBeTruthy()
@@ -625,11 +625,11 @@ describe('ProfileRail fleet mode', () => {
       name: 'This device (local backend — installs Hermes if missing, otherwise opens a fresh session)'
     })
 
-    expect(localDevice.querySelector('.codicon-device-desktop')).toBeTruthy()
-    expect(localDevice.querySelector('.codicon-home')).toBeNull()
+    expect(localDevice.querySelector('.tabler-icon-device-desktop')).toBeTruthy()
+    expect(localDevice.querySelector('.tabler-icon-home')).toBeNull()
 
     const gatewayBHome = screen.getByRole('menuitem', { name: 'default · Gateway B' })
-    expect(gatewayBHome.querySelector('.codicon-home')).toBeTruthy()
+    expect(gatewayBHome.querySelector('.tabler-icon-home')).toBeTruthy()
   })
 
   // Regression for #106017 / #131632: the condensed menu listed every at-rest gateway's
@@ -652,7 +652,7 @@ describe('ProfileRail fleet mode', () => {
       fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false })
 
       const home = await screen.findByRole('menuitemradio', { name: 'Arya' })
-      expect(home.querySelector('.codicon-home')).toBeTruthy()
+      expect(home.querySelector('.tabler-icon-home')).toBeTruthy()
       expect(home.getAttribute('aria-checked')).toBe('true')
 
       fireEvent.click(home)

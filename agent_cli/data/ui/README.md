@@ -1,6 +1,6 @@
 # NoOne presentation assets
 
-`typography.json` is the family/size/weight contract. Run `node scripts/build/ui-assets.mjs` after editing it to regenerate `typography.css`. Frontends import it through `@noone/ui`; Python pages embed the same packaged faces with `visual_assets.inline_typography_css`. Documentation copies these assets during its existing component build.
+`typography.json` is the family/size/weight contract. Run `node scripts/build/ui-assets.mjs` after editing it to regenerate `typography.css`, `icons.json` (from the canonical SVG files) and the offline update font block. Frontends import it through `@noone/ui`; Python pages embed the same packaged faces with `visual_assets.inline_typography_css`. Documentation copies these assets during its existing component build.
 
 - Inter Variable normal/italic: Inter v4.1, source commit `e3a3d4c57d5ecc01453a575621882a384c1995a3`, SIL OFL 1.1 (`Inter-OFL.txt`).
 - JetBrains Mono: existing NoOne normal/bold/italic WOFF2 assets consolidated here; font license retained in `JetBrainsMono-OFL.txt` (font license is not the upstream Apache source-code license).

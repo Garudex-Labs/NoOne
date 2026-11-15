@@ -651,7 +651,7 @@ describe('the per-row options submenu is discoverable', () => {
     const trigger = row.closest('[data-slot="dropdown-menu-sub-trigger"]')
 
     expect(trigger).not.toBeNull()
-    expect(trigger?.querySelector('.codicon-chevron-right')).not.toBeNull()
+    expect(trigger?.querySelector('.tabler-icon-chevron-right')).not.toBeNull()
   })
 
   it('opens the highlighted row with ArrowRight, so effort is reachable without a mouse', async () => {
